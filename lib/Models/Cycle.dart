@@ -11,3 +11,16 @@ class Cycle {
         "fecFinCiclo": fecFinCiclo
       };
 }
+
+dynamic cycleFromJSON(List<dynamic> jsonList) {
+  if (jsonList.isEmpty) {
+    return null; // Return null if the list is empty
+  } else {
+    var item = jsonList[0];
+    String claCiclo = item['claCiclo'];
+    String fecIniCiclo = item['FecIniCiclo'];
+    String fecFinCiclo = item['FecFinCiclo'];
+
+    return Cycle(claCiclo, fecIniCiclo, fecFinCiclo);
+  }
+}

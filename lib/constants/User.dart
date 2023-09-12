@@ -5,3 +5,5 @@ late final User currentUser;
 late final Cycle currentCycle;
 
 late final List<String> _grades = [];
+
+late List<dynamic> userPermissions = [];

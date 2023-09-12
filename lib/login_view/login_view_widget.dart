@@ -229,7 +229,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                   onPressed: () async {
                                     // Log In user
                                     _model.apiResultxgr =
-                                        await LoginVerifyCall.call(
+                                        await LoginUserCall.call(
                                       nip: _model.textController2.text,
                                     );
                                     if ((_model.apiResultxgr?.succeeded ??
@@ -250,6 +250,18 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                         currentCycle = getcurrentCycle(
                                             jsonList); //parse from JSON
                                       }
+                                      //GET User Permissions
+                                      _model.apiResultxgr =
+                                          await UserPermissionsCall.call(
+                                              idLogin: currentUser.idLogin
+                                                  .toString());
+                                      if ((_model.apiResultxgr?.succeeded ??
+                                          true)) {
+                                        jsonList = json.decode(_model
+                                            .apiResultxgr!.response!.body);
+                                        userPermissions = jsonList;
+                                      }
+
                                       context.goNamed(
                                         'MainWindow',
                                         extra: <String, dynamic>{
@@ -364,10 +376,10 @@ User userLogedIn(List<dynamic> jsonList) {
     int isWorker = item['EsTrabajador'];
     String claUn = item['ClaUn'];
     String claLogin = item['ClaLogin'];
-    int notActive = item['Bajalogicasino'];
+    // int notActive = item['Bajalogicasino'];
 
     currentUser = User(claLogin, claUn, employeeName, employeeNumber, idLogin,
-        isWorker, isTeacher, notActive);
+        isWorker, isTeacher);
   }
   return currentUser;
 }

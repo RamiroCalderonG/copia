@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
+import 'package:oxschool/constants/connection.dart';
 
 import '../../flutter_flow/flutter_flow_util.dart';
 
@@ -11,13 +12,13 @@ export 'api_manager.dart' show ApiCallResponse;
 
 const _kPrivateApiFunctionName = 'ffPrivateApiCall';
 
-class LoginVerifyCall {
+class LoginUserCall {
   static Future<ApiCallResponse> call({
-    String? nip = '',
+    required String nip,
   }) {
     return ApiManager.instance.makeApiCall(
       callName: 'LoginVerify',
-      apiUrl: 'http://10.0.0.36:8080/login/loginverify?nip=$nip',
+      apiUrl: hostUrl + port + '/api/userlogin?nip=$nip',
       callType: ApiCallType.GET,
       headers: {},
       params: {
@@ -31,11 +32,29 @@ class LoginVerifyCall {
   }
 }
 
+class UserPermissionsCall {
+  static Future<ApiCallResponse> call({
+    required String idLogin,
+  }) {
+    return ApiManager.instance.makeApiCall(
+      callName: 'permissions',
+      apiUrl: hostUrl + port + '/api/user/permissions?idLogin=$idLogin',
+      callType: ApiCallType.GET,
+      headers: {},
+      params: {'idLogin': idLogin},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+    );
+  }
+}
+
 class CurrentCicleCall {
   static Future<ApiCallResponse> call() {
     return ApiManager.instance.makeApiCall(
       callName: 'cicles',
-      apiUrl: "http://10.0.0.36:8080/api/cicles/1",
+      apiUrl: hostUrl + port + '/api/cicles/1',
       callType: ApiCallType.GET,
       headers: {},
       params: {},
@@ -48,10 +67,11 @@ class CurrentCicleCall {
 }
 
 class FamilyCall {
+  //Call to get family details by family number
   static Future<ApiCallResponse> call({String? claFam}) {
     return ApiManager.instance.makeApiCall(
         callName: 'family',
-        apiUrl: "http://192.168.45.7:8080/api/family/$claFam/",
+        apiUrl: hostUrl + port + '/api/family/$claFam/',
         callType: ApiCallType.GET,
         headers: {},
         params: {},
@@ -63,19 +83,51 @@ class FamilyCall {
 }
 
 class NurseryStudentCall {
+  //To get Student info used by Nursery dept.
   static Future<ApiCallResponse> call(
-      {String? apPaterno, apMaterno, claUn, claCiclo}) {
+      {required String apPaterno, apMaterno, nombre, claUn, claCiclo}) {
     return ApiManager.instance.makeApiCall(
       callName: 'NursingStudent',
-      apiUrl: "http://10.0.0.36:8080/api/nursing/student",
+      apiUrl: hostUrl + port + '/api/nursery/student',
       callType: ApiCallType.GET,
       headers: {},
       params: {
         'ClaCiclo': claCiclo,
         'ClaUn': claUn,
         'ApPaterno': apPaterno,
-        'ApMaterno': apMaterno
+        'ApMaterno': apMaterno,
+        'Nombre': nombre
       },
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: true,
+    );
+  }
+}
+
+class NurseryStudentMedication {
+  static Future<ApiCallResponse> call({required String matricula}) {
+    return ApiManager.instance.makeApiCall(
+      callName: 'NurseryMedication',
+      apiUrl: hostUrl + port + '/api/nursery/medication',
+      callType: ApiCallType.GET,
+      headers: {},
+      params: {"matricula": matricula},
+      returnBody: true,
+      cache: true,
+    );
+  }
+}
+
+class NurseryHistoryCall {
+  static Future<ApiCallResponse> call({required String matricula}) {
+    return ApiManager.instance.makeApiCall(
+      callName: 'NurseryHistory',
+      apiUrl: hostUrl + port + '/api/nursery/history',
+      callType: ApiCallType.GET,
+      headers: {},
+      params: {"matricula": matricula},
       returnBody: true,
       encodeBodyUtf8: false,
       decodeUtf8: false,
