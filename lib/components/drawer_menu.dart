@@ -1,9 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/enfermeria/enfermeria_widget.dart';
 import 'package:oxschool/enfermeria/ficha_de_salud.dart';
 import 'package:oxschool/flutter_flow/flutter_flow_util.dart';
 import 'package:oxschool/login_view/login_view_widget.dart';
+import 'package:oxschool/main.dart';
+import '../constants/Student.dart';
 import '../grades/grades_view.dart';
 import '../models/user.dart';
 
@@ -24,9 +28,14 @@ class _DrawerClassState extends State<DrawerClass> {
           child: Column(
         children: [
           Container(
+              padding: EdgeInsets.all(10),
               height: 200,
               color: Colors.transparent,
-              child: const Center(child: Image(image: AssetImage('')))),
+              child: const Center(
+                  child: Image(
+                image: AssetImage('assets/images/LogoOxschool.jpg'),
+                fit: BoxFit.fill,
+              ))),
           ExpansionTile(
             title: const Text('Enfermeria'),
             leading: const Icon(Icons.supervised_user_circle_outlined),
@@ -37,7 +46,7 @@ class _DrawerClassState extends State<DrawerClass> {
                   'Ficha medica de alumnos',
                   style: TextStyle(fontFamily: 'Roboto'),
                 ),
-                leading: const Icon(Icons.add),
+                leading: const Icon(Icons.folder),
                 //const Image(image: AssetImage('assets/images/user-add.png')),
                 onTap: () {
                   Navigator.pop(context);
@@ -159,20 +168,33 @@ class _DrawerClassState extends State<DrawerClass> {
           ListTile(
             title: const Text('Cerrar Sesion'),
             leading: const Icon(Icons.exit_to_app),
-            onTap: () async => (value) {
-              Navigator.pop(context);
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (context) => LoginViewWidget()));
+            onTap: () {
+              // clearStudentData();
+              clearUserData();
+
+              context.goNamed(
+                '_initialize',
+                extra: <String, dynamic>{
+                  kTransitionInfoKey: TransitionInfo(
+                    hasTransition: true,
+                    transitionType: PageTransitionType.leftToRight,
+                  ),
+                },
+              );
+              // Navigator.pop(context);
+              // Navigator.pushReplacement(context,
+              //     MaterialPageRoute(builder: (context) => LoginViewWidget()));
             },
           ),
           const Divider(
-            height: 200,
+            height: 180,
             color: Colors.transparent,
           ),
           Container(
+            padding: EdgeInsets.only(bottom: 10.4),
             alignment: Alignment.topCenter,
             child: Text(
-              'Hola ${currentUser.employeeName}',
+              'Hola: ${currentUser?.employeeName}',
               style: const TextStyle(
                   fontFamily: 'Roboto',
                   fontWeight: FontWeight.bold,

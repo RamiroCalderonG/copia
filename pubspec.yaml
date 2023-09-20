@@ -43,7 +43,7 @@ dependencies:
   path_provider_android: 2.0.25
   path_provider_foundation: 2.2.2
   path_provider_platform_interface: 2.0.6
-  provider: 6.0.4
+  provider: ^6.0.5
   shared_preferences: 2.0.15
   shared_preferences_android: 2.1.0
   shared_preferences_ios: 2.1.1
@@ -51,7 +51,7 @@ dependencies:
   shared_preferences_web: 2.1.0
   sqflite: 2.2.6
   timeago: 3.2.2
-  url_launcher: 6.1.10
+  url_launcher: ^6.1.14
   url_launcher_android: 6.0.27
   url_launcher_ios: 6.1.4
   url_launcher_platform_interface: 2.1.2
@@ -65,6 +65,7 @@ dependencies:
   pluto_grid: ^7.0.2
   device_info_plus: ^9.0.3
   flutter_expandable_fab: ^2.0.0
+  carousel_slider: ^4.2.1
 
 dev_dependencies:
 
@@ -91,6 +92,11 @@ flutter:
     - assets/lottie_animations/
     - assets/rive_animations/
     - assets/pdfs/
+    - assets\images\LogoOxschool.jpg
+    - assets/images/aulaVirtual.png
+    - assets/images/calendario.png
+    - assets/images/instalaciones.png
+    - assets/images/oxSchoolLogo.png
 
 
 
@@ -106,9 +112,9 @@ flutter:
   # list giving the asset and other descriptors for the font. For
   # example:
   # fonts:
-  #   - family: Schyler
+  #   - family: Roboto
   #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
+  #       - asset: fonts/Roboto-Regular.ttf
   #       - asset: fonts/Schyler-Italic.ttf
   #         style: italic
   #   - family: Trajan Pro

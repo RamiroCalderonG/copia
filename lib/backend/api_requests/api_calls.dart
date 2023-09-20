@@ -54,7 +54,7 @@ class CurrentCicleCall {
   static Future<ApiCallResponse> call() {
     return ApiManager.instance.makeApiCall(
       callName: 'cicles',
-      apiUrl: hostUrl + port + '/api/cicles/1',
+      apiUrl: hostUrl + port + '/api/cycles/1',
       callType: ApiCallType.GET,
       headers: {},
       params: {},
