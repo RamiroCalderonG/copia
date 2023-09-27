@@ -14,7 +14,6 @@ class _MainCarouselState extends State<MainCarousel> {
     'assets/images/aulaVirtual.png',
     'assets/images/calendario.png',
     'assets/images/instalaciones.png',
-    'assets/images/oxSchoolLogo.png',
     'assets/images/hsLogo.png'
   ];
 

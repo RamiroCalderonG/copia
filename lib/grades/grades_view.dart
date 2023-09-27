@@ -56,19 +56,6 @@ class _GradesViewScreenState extends State<GradesViewScreen>
           child: Center(
             child: Text('Calificaciones'),
           ),
-        )
-        // Column(
-        //   children: <Widget>[
-        //     var apiResponse =
-
-        //     if (  studentsList != 0  ){   /*REST RESPONSE SUCCES*/
-        //       setState(() {
-        //       showGrid = true;
-        //       // gridData = // Parse the response data
-        //     });
-        //     }
-        //   ],
-        // ),
-        );
+        ));
   }
 }

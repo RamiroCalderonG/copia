@@ -18,7 +18,7 @@ class LoginUserCall {
   }) {
     return ApiManager.instance.makeApiCall(
       callName: 'LoginVerify',
-      apiUrl: hostUrl + port + '/api/userlogin?nip=$nip',
+      apiUrl: hostUrl + port + '/login/userlogin?nip=$nip',
       callType: ApiCallType.GET,
       headers: {},
       params: {
