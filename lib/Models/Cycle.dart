@@ -1,7 +1,7 @@
 class Cycle {
-  late String claCiclo;
-  late String fecIniCiclo;
-  late String fecFinCiclo;
+  late String? claCiclo;
+  late String? fecIniCiclo;
+  late String? fecFinCiclo;
 
   Cycle(this.claCiclo, this.fecIniCiclo, this.fecFinCiclo);
 
@@ -10,6 +10,11 @@ class Cycle {
         "fecIniCiclo": fecIniCiclo,
         "fecFinCiclo": fecFinCiclo
       };
+  void clear() {
+    claCiclo = null;
+    fecIniCiclo = null;
+    fecFinCiclo = null;
+  }
 }
 
 dynamic cycleFromJSON(List<dynamic> jsonList) {

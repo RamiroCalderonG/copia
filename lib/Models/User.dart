@@ -1,11 +1,11 @@
 class User {
-  late final int employeeNumber;
-  late final String employeeName;
-  late int idLogin;
-  late final isTeacher;
-  late final int isWorker;
-  late String claUn;
-  late String claLogin;
+  int? employeeNumber;
+  String? employeeName;
+  int? idLogin;
+  int? isTeacher;
+  int? isWorker;
+  String? claUn;
+  String? claLogin;
   // late final notActive;
 
   User(this.claLogin, this.claUn, this.employeeName, this.employeeNumber,
@@ -21,4 +21,14 @@ class User {
         "claLogin": claLogin
         // "notActive": notActive
       };
+
+  void clear() {
+    employeeName = null;
+    employeeNumber = null;
+    idLogin = null;
+    isTeacher = null;
+    isWorker = null;
+    claUn = null;
+    claLogin = null;
+  }
 }

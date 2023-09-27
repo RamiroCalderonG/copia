@@ -18,7 +18,7 @@ class LoginUserCall {
   }) {
     return ApiManager.instance.makeApiCall(
       callName: 'LoginVerify',
-      apiUrl: hostUrl + port + '/api/userlogin?nip=$nip',
+      apiUrl: hostUrl + port + '/login/userlogin?nip=$nip',
       callType: ApiCallType.GET,
       headers: {},
       params: {
@@ -54,7 +54,7 @@ class CurrentCicleCall {
   static Future<ApiCallResponse> call() {
     return ApiManager.instance.makeApiCall(
       callName: 'cicles',
-      apiUrl: hostUrl + port + '/api/cicles/1',
+      apiUrl: hostUrl + port + '/api/cycles/1',
       callType: ApiCallType.GET,
       headers: {},
       params: {},
