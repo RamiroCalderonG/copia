@@ -118,7 +118,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(8.0),
                         child: Image.asset(
-                          'assets/images/LogoOxschool.jpg',
+                          'assets/images/logoRedondoOx.png',
                           width: 300.0,
                           height: 284.0,
                           fit: BoxFit.contain,

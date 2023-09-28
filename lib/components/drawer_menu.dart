@@ -32,8 +32,8 @@ class _DrawerClassState extends State<DrawerClass> {
               height: 200,
               color: Colors.transparent,
               child: const Center(
-                  child: Image(
-                image: AssetImage('assets/images/LogoOxschool.jpg'),
+                  child: const Image(
+                image: AssetImage('assets/images/logoRedondoOx.jpg'),
                 fit: BoxFit.fill,
               ))),
           ExpansionTile(
