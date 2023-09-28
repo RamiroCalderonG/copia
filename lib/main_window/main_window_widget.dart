@@ -54,67 +54,99 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
       backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
       automaticallyImplyLeading: false,
       toolbarHeight: 95.0,
-      title: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Padding(padding: EdgeInsets.only(left: 10.5)),
-          Image.asset(
-            'assets/images/1_OS_color.png',
-            fit: BoxFit.fill,
-            height: 50,
-          ),
-          Spacer(
-            flex: 1,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Padding(
-                padding: EdgeInsets.all(20),
-                child: Row(
-                  children: [
-                    IconButton(
-                        onPressed: () {},
-                        icon: const Icon(Icons.person),
-                        color: Color.fromRGBO(235, 48, 69, 0.988)),
-                    Text(
-                      'Ing. Sanchez',
-                      style: TextStyle(
-                          fontFamily: 'Sora',
-                          fontStyle: FontStyle.normal,
-                          fontSize: 20),
-                    ),
-                    //       Text('${currentUser?.employeeName?.toLowerCase().trimRight()}',
-                    // textAlign: TextAlign.center,
-                    // style: TextStyle(
-                    //     fontFamily: 'Roboto',
-                    //     fontSize: 20,
-                    //     color: Colors
-                    //         .black87) // FlutterFlowTheme.of(context).bodyMedium,
-                    // ),
-                    Padding(padding: EdgeInsets.only(left: 15, right: 15)),
-                    IconButton(
-                        onPressed: () {},
-                        icon: FaIcon(FontAwesomeIcons.facebookF),
-                        color: Color.fromRGBO(235, 48, 69, 0.988)),
-                    Padding(padding: EdgeInsets.only(left: 15, right: 15)),
-                    IconButton(
-                        onPressed: () {},
-                        icon: FaIcon(FontAwesomeIcons.instagram),
-                        color: Color.fromRGBO(235, 48, 69, 0.988)),
-                    Padding(padding: EdgeInsets.only(left: 15, right: 15)),
-                    IconButton(
-                        onPressed: () {},
-                        icon: FaIcon(FontAwesomeIcons.youtube),
-                        color: Color.fromRGBO(235, 48, 69, 0.988)),
-
-                    Padding(padding: EdgeInsets.only(left: 15, right: 5)),
-                  ],
+      title: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          if (constraints.maxWidth < 600) {
+            // For smaller screens, display a simplified AppBar
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Padding(padding: EdgeInsets.only(left: 10.5)),
+                Image.asset(
+                  Theme.of(context).brightness == Brightness.light
+                      ? 'assets/images/1_OS_color.png' //igth theme image
+                      : 'assets/images/logoBlancoOx.png', //Dark theme image
+                  fit: BoxFit.fill,
+                  height: 50,
+                  filterQuality: FilterQuality.high,
                 ),
-              ),
-            ],
-          )
-        ],
+                Spacer(
+                  flex: 1,
+                ),
+              ],
+            );
+          } else {
+            // For larger screens, display the original AppBar
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Padding(padding: EdgeInsets.only(left: 10.5)),
+                Image.asset(
+                  Theme.of(context).brightness == Brightness.light
+                      ? 'assets/images/1_OS_color.png' //igth theme image
+                      : 'assets/images/logoBlancoOx.png', //Dark theme image
+                  fit: BoxFit.fill,
+                  height: 50,
+                  filterQuality: FilterQuality.high,
+                ),
+                Spacer(
+                  flex: 1,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.all(20),
+                      child: Row(
+                        children: [
+                          IconButton(
+                              onPressed: () {},
+                              icon: const Icon(Icons.person),
+                              color: Color.fromRGBO(235, 48, 69, 0.988)),
+                          Text(
+                            'Ing. Sanchez',
+                            style: TextStyle(
+                                fontFamily: 'Sora',
+                                fontStyle: FontStyle.normal,
+                                fontSize: 20),
+                          ),
+                          //       Text('${currentUser?.employeeName?.toLowerCase().trimRight()}',
+                          // textAlign: TextAlign.center,
+                          // style: TextStyle(
+                          //     fontFamily: 'Roboto',
+                          //     fontSize: 20,
+                          //     color: Colors
+                          //         .black87) // FlutterFlowTheme.of(context).bodyMedium,
+                          // ),
+                          Padding(
+                              padding: EdgeInsets.only(left: 15, right: 15)),
+                          IconButton(
+                              onPressed: () {},
+                              icon: FaIcon(FontAwesomeIcons.facebookF),
+                              color: Color.fromRGBO(235, 48, 69, 0.988)),
+                          Padding(
+                              padding: EdgeInsets.only(left: 15, right: 15)),
+                          IconButton(
+                              onPressed: () {},
+                              icon: FaIcon(FontAwesomeIcons.instagram),
+                              color: Color.fromRGBO(235, 48, 69, 0.988)),
+                          Padding(
+                              padding: EdgeInsets.only(left: 15, right: 15)),
+                          IconButton(
+                              onPressed: () {},
+                              icon: FaIcon(FontAwesomeIcons.youtube),
+                              color: Color.fromRGBO(235, 48, 69, 0.988)),
+
+                          Padding(padding: EdgeInsets.only(left: 15, right: 5)),
+                        ],
+                      ),
+                    ),
+                  ],
+                )
+              ],
+            );
+          }
+        },
       ),
       bottom: AppBar(
           backgroundColor: FlutterFlowTheme.of(context).primary,
@@ -153,7 +185,11 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                   },
                   child: HoverCard(
                     imagePath: gridMainWindowIcons[index],
-                    backgroundColor: gridMainWindowColors[index],
+                    backgroundColor: Theme.of(context).brightness ==
+                            Brightness.light
+                        ? gridMainWindowColors[index] //igth theme image
+                        : gridDarkColorsMainWindow[index], //Dark theme image
+
                     title: mainWindowGridTitles[index],
                   ),
                 );
@@ -362,79 +398,205 @@ class _HoverCardState extends State<HoverCard> {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
-      builder: (context, constraints) {
-        return MouseRegion(
-          onEnter: (_) {
-            setState(() {
-              isHovered = true;
-            });
-          },
-          onExit: (_) {
-            setState(() {
-              isHovered = false;
-            });
-          },
-          child: Container(
-            width: 100,
-            height: 100,
-            // width: constraints.maxWidth, // Use max width available
-            // height: constraints.maxHeight, // Use max height available
-            child: Card(
-              margin: EdgeInsets.all(2.0),
-              elevation: isHovered ? 10 : 0,
-              shadowColor: Colors.black,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.0),
-                side: BorderSide(
-                  color: Theme.of(context).colorScheme.outline,
+      builder: (BuildContext context, BoxConstraints constraints) {
+        if (constraints.maxWidth < 215) {
+          return MouseRegion(
+            onEnter: (_) {
+              setState(() {
+                isHovered = true;
+              });
+            },
+            onExit: (_) {
+              setState(() {
+                isHovered = false;
+              });
+            },
+            child: Container(
+              width: 100,
+              height: 100,
+              child: Card(
+                margin: EdgeInsets.all(2.0),
+                elevation: isHovered ? 10 : 0,
+                shadowColor: Colors.black,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                  side: BorderSide(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
                 ),
-              ),
-              color: widget.backgroundColor,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                curve: Curves.ease,
-                padding: EdgeInsets.all(isHovered ? 20 : 10),
-                decoration: BoxDecoration(
-                  color: isHovered
-                      ? Color.fromRGBO(73, 73, 73, 1)
-                      : widget.backgroundColor,
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: GestureDetector(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Container(
-                        child: Image.asset(
-                          widget.imagePath,
-                          fit: BoxFit.fill,
-                          scale: 15,
-                          // width: constraints.maxWidth * 0.5, // Adjust image width
-                          // height:
-                          // constraints.maxHeight * 0.5, // Adjust image height
-                          alignment: Alignment.center,
+                color: widget.backgroundColor,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.ease,
+                  padding: EdgeInsets.all(isHovered ? 20 : 10),
+                  decoration: BoxDecoration(
+                    color: isHovered
+                        ? Color.fromRGBO(73, 73, 73, 1)
+                        : widget.backgroundColor,
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: GestureDetector(
+                    child: Center(
+                      child: Text(
+                        widget.title,
+                        textScaleFactor: 0.8,
+                        softWrap: true,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Sora',
                         ),
                       ),
-                      SizedBox(height: 7), // Add spacing
-                      Align(
-                        alignment: Alignment.bottomCenter,
-                        child: Text(
-                          widget.title,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Sora',
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        );
+          );
+        } else {
+          return MouseRegion(
+            onEnter: (_) {
+              setState(() {
+                isHovered = true;
+              });
+            },
+            onExit: (_) {
+              setState(() {
+                isHovered = false;
+              });
+            },
+            child: Container(
+              width: 100,
+              height: 100,
+              child: Card(
+                margin: EdgeInsets.all(2.0),
+                elevation: isHovered ? 10 : 0,
+                shadowColor: Colors.black,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                  side: BorderSide(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
+                ),
+                color: widget.backgroundColor,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.ease,
+                  padding: EdgeInsets.all(isHovered ? 20 : 10),
+                  decoration: BoxDecoration(
+                    color: isHovered
+                        ? Color.fromRGBO(73, 73, 73, 1)
+                        : widget.backgroundColor,
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: GestureDetector(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Container(
+                          child: Image.asset(
+                            widget.imagePath,
+                            fit: BoxFit.fill,
+                            scale: 15,
+                            // width: constraints.maxWidth * 0.5, // Adjust image width
+                            // height:
+                            // constraints.maxHeight * 0.5, // Adjust image height
+                            alignment: Alignment.center,
+                          ),
+                        ),
+                        SizedBox(height: 7), // Add spacing
+                        Align(
+                          alignment: Alignment.bottomCenter,
+                          child: Text(
+                            widget.title,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Sora',
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+        // return MouseRegion(
+        //   onEnter: (_) {
+        //     setState(() {
+        //       isHovered = true;
+        //     });
+        //   },
+        //   onExit: (_) {
+        //     setState(() {
+        //       isHovered = false;
+        //     });
+        //   },
+        //   child: Container(
+        //     width: 100,
+        //     height: 100,
+        //     // width: constraints.maxWidth, // Use max width available
+        //     // height: constraints.maxHeight, // Use max height available
+        //     child: Card(
+        //       margin: EdgeInsets.all(2.0),
+        //       elevation: isHovered ? 10 : 0,
+        //       shadowColor: Colors.black,
+        //       shape: RoundedRectangleBorder(
+        //         borderRadius: BorderRadius.circular(12.0),
+        //         side: BorderSide(
+        //           color: Theme.of(context).colorScheme.outline,
+        //         ),
+        //       ),
+        //       color: widget.backgroundColor,
+        //       child: AnimatedContainer(
+        //         duration: const Duration(milliseconds: 200),
+        //         curve: Curves.ease,
+        //         padding: EdgeInsets.all(isHovered ? 20 : 10),
+        //         decoration: BoxDecoration(
+        //           color: isHovered
+        //               ? Color.fromRGBO(73, 73, 73, 1)
+        //               : widget.backgroundColor,
+        //           borderRadius: BorderRadius.circular(15),
+        //         ),
+        //         child: GestureDetector(
+        //           child: Column(
+        //             crossAxisAlignment: CrossAxisAlignment.center,
+        //             mainAxisAlignment: MainAxisAlignment.center,
+        //             children: <Widget>[
+        //               Container(
+        //                 child: Image.asset(
+        //                   widget.imagePath,
+        //                   fit: BoxFit.fill,
+        //                   scale: 15,
+        //                   // width: constraints.maxWidth * 0.5, // Adjust image width
+        //                   // height:
+        //                   // constraints.maxHeight * 0.5, // Adjust image height
+        //                   alignment: Alignment.center,
+        //                 ),
+        //               ),
+        //               SizedBox(height: 7), // Add spacing
+        //               Align(
+        //                 alignment: Alignment.bottomCenter,
+        //                 child: Text(
+        //                   widget.title,
+        //                   style: TextStyle(
+        //                     color: Colors.white,
+        //                     fontWeight: FontWeight.bold,
+        //                     fontFamily: 'Sora',
+        //                   ),
+        //                 ),
+        //               ),
+        //             ],
+        //           ),
+        //         ),
+        //       ),
+        //     ),
+        //   ),
+        // );
       },
     );
   }
