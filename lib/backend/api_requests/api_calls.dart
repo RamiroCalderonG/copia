@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:oxschool/constants/connection.dart';
+import 'package:oxschool/utils/device_information.dart';
 
 import '../../flutter_flow/flutter_flow_util.dart';
 
@@ -13,16 +14,16 @@ export 'api_manager.dart' show ApiCallResponse;
 const _kPrivateApiFunctionName = 'ffPrivateApiCall';
 
 class LoginUserCall {
-  static Future<ApiCallResponse> call({
-    required String nip,
-  }) {
+  static Future<ApiCallResponse> call(
+      {required String nip, required String device}) {
     return ApiManager.instance.makeApiCall(
       callName: 'LoginVerify',
-      apiUrl: hostUrl + port + '/login/userlogin?nip=$nip',
+      apiUrl: hostUrl + port + '/login/userlogin?nip=$nip&device=$device',
       callType: ApiCallType.GET,
       headers: {},
       params: {
         'nip': nip,
+        'device': device,
       },
       returnBody: true,
       encodeBodyUtf8: false,
