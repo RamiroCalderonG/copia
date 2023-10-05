@@ -1,8 +1,9 @@
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:oxschool/components/create_service_ticket.dart';
 import 'package:oxschool/components/drawer_menu.dart';
-import 'package:oxschool/components/main_window_carousel.dart';
 import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/constants/url_links.dart';
+import 'package:oxschool/enfermeria/new_student_visit.dart';
 import 'package:oxschool/flutter_flow/flutter_flow_icon_button.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -103,6 +104,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                               onPressed: () {},
                               icon: const Icon(Icons.person),
                               color: Color.fromRGBO(235, 48, 69, 0.988)),
+
                           Text(
                             'Ing. Sanchez',
                             style: TextStyle(
@@ -322,7 +324,35 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                                   Column(
                                     children: [
                                       TextButton(
-                                          onPressed: () {},
+                                          onPressed: () {
+                                            showDialog(
+                                                context: context,
+                                                builder:
+                                                    (BuildContext context) {
+                                                  return AlertDialog(
+                                                    title: const Text(
+                                                        'Crear Ticket de servicio'),
+                                                    content:
+                                                        CreateServiceTicket(),
+                                                    actions: <Widget>[
+                                                      TextButton(
+                                                        style: TextButton
+                                                            .styleFrom(
+                                                          textStyle:
+                                                              Theme.of(context)
+                                                                  .textTheme
+                                                                  .labelLarge,
+                                                        ),
+                                                        child: const Text('Ok'),
+                                                        onPressed: () {
+                                                          Navigator.of(context)
+                                                              .pop();
+                                                        },
+                                                      ),
+                                                    ],
+                                                  );
+                                                });
+                                          },
                                           child: Text(
                                             'Crear Ticket de Servicio',
                                             style: FlutterFlowTheme.of(context)
@@ -344,7 +374,35 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                                   Column(
                                     children: [
                                       TextButton(
-                                          onPressed: () {},
+                                          onPressed: () {
+                                            showDialog(
+                                                context: context,
+                                                builder:
+                                                    (BuildContext context) {
+                                                  return AlertDialog(
+                                                    title: const Text('text'),
+                                                    content:
+                                                        NewStudentNurseryVisit(),
+                                                    actions: <Widget>[
+                                                      TextButton(
+                                                        style: TextButton
+                                                            .styleFrom(
+                                                          textStyle:
+                                                              Theme.of(context)
+                                                                  .textTheme
+                                                                  .labelLarge,
+                                                        ),
+                                                        child: const Text(
+                                                            'Cerrar'),
+                                                        onPressed: () {
+                                                          Navigator.of(context)
+                                                              .pop();
+                                                        },
+                                                      ),
+                                                    ],
+                                                  );
+                                                });
+                                          },
                                           child: Text(
                                             'Otra opcion',
                                             style: FlutterFlowTheme.of(context)

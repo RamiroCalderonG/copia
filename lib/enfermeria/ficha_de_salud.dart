@@ -589,7 +589,7 @@ class _FichaDeSaludState extends State<FichaDeSalud>
                   if (studentAllowedMedicines == null) NoDataAvailble()
                 ],
               ),
-              floatingActionButton: expandableFABWidget,
+              floatingActionButton: ExpandableFABNursery(),
               floatingActionButtonLocation: ExpandableFab.location)),
     );
   }

@@ -24,6 +24,7 @@ class LoginViewWidget extends StatefulWidget {
 
 class _LoginViewWidgetState extends State<LoginViewWidget> {
   late LoginViewModel _model;
+  String currentDeviceData = '';
   // late User currentUser;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -32,7 +33,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
   @override
   void initState() {
     super.initState();
-    // initPlatformState();
+    initPlatformState();
     _model = createModel(context, () => LoginViewModel());
 
     _model.textController1 ??= TextEditingController();
@@ -73,6 +74,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
               'Error:': 'Fuchsia platform isn\'t supported'
             },
         };
+        currentDeviceData = deviceData.toString();
       }
     } on PlatformException {
       deviceData = <String, dynamic>{
@@ -82,9 +84,10 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
 
     if (!mounted) return;
     print(deviceData.toString());
-
+    currentDeviceData = deviceData.toString();
     setState(() {
       deviceData = deviceData;
+      currentDeviceData = deviceData.toString();
     });
   }
 
@@ -212,13 +215,12 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                   onFieldSubmitted: (value) async {
                                     var value =
                                         trimSpaces(_model.textController2.text);
-
                                     if (value.isNotEmpty) {
                                       // Log In user
                                       _model.apiResultxgr =
                                           await LoginUserCall.call(
-                                        nip: _model.textController2.text,
-                                      );
+                                              nip: _model.textController2.text,
+                                              device: currentDeviceData);
                                       if ((_model.apiResultxgr?.succeeded ??
                                           true)) {
                                         // Decode the JSON string into a Dart list
@@ -372,30 +374,30 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                     0.0, 0.0, 0.0, 16.0),
                                 child: FFButtonWidget(
                                   onPressed: () async {
-                                    context.goNamed(
-                                      'MainWindow',
-                                      extra: <String, dynamic>{
-                                        kTransitionInfoKey: TransitionInfo(
-                                          hasTransition: true,
-                                          transitionType:
-                                              PageTransitionType.fade,
-                                        ),
-                                      },
-                                    );
+                                    // context.goNamed(
+                                    //   'MainWindow',
+                                    //   extra: <String, dynamic>{
+                                    //     kTransitionInfoKey: TransitionInfo(
+                                    //       hasTransition: true,
+                                    //       transitionType:
+                                    //           PageTransitionType.fade,
+                                    //     ),
+                                    //   },
+                                    // );
 
                                     var value =
                                         trimSpaces(_model.textController2.text);
 
                                     if (value.isNotEmpty || value.length >= 6) {
-                                      // initPlatformState();
+                                      initPlatformState();
                                       if (currentUser?.employeeNumber != null) {
                                         currentUser?.clear();
                                       }
                                       // Log In user
                                       _model.apiResultxgr =
                                           await LoginUserCall.call(
-                                        nip: _model.textController2.text,
-                                      );
+                                              nip: _model.textController2.text,
+                                              device: currentDeviceData);
                                       if ((_model.apiResultxgr?.succeeded ??
                                           true)) {
                                         // Decode the JSON string into a Dart list

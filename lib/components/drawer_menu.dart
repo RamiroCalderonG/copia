@@ -33,7 +33,7 @@ class _DrawerClassState extends State<DrawerClass> {
               color: Colors.transparent,
               child: const Center(
                   child: const Image(
-                image: AssetImage('assets/images/logoRedondoOx.jpg'),
+                image: AssetImage('assets/images/logoRedondoOx.png'),
                 fit: BoxFit.fill,
               ))),
           ExpansionTile(
