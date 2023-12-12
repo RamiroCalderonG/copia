@@ -374,16 +374,16 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                     0.0, 0.0, 0.0, 16.0),
                                 child: FFButtonWidget(
                                   onPressed: () async {
-                                    // context.goNamed(
-                                    //   'MainWindow',
-                                    //   extra: <String, dynamic>{
-                                    //     kTransitionInfoKey: TransitionInfo(
-                                    //       hasTransition: true,
-                                    //       transitionType:
-                                    //           PageTransitionType.fade,
-                                    //     ),
-                                    //   },
-                                    // );
+                                    context.goNamed(
+                                      'MainWindow',
+                                      extra: <String, dynamic>{
+                                        kTransitionInfoKey: TransitionInfo(
+                                          hasTransition: true,
+                                          transitionType:
+                                              PageTransitionType.fade,
+                                        ),
+                                      },
+                                    );
 
                                     var value =
                                         trimSpaces(_model.textController2.text);

@@ -5,6 +5,7 @@ import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/constants/url_links.dart';
 import 'package:oxschool/enfermeria/new_student_visit.dart';
 import 'package:oxschool/flutter_flow/flutter_flow_icon_button.dart';
+import 'package:oxschool/user/user_view_view.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../components/quality_dialogs.dart';
@@ -101,10 +102,15 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                       child: Row(
                         children: [
                           IconButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                Navigator.pop(context);
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => UserWindow()));
+                              },
                               icon: const Icon(Icons.person),
                               color: Color.fromRGBO(235, 48, 69, 0.988)),
-
                           Text(
                             'Ing. Sanchez',
                             style: TextStyle(
@@ -112,14 +118,15 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                                 fontStyle: FontStyle.normal,
                                 fontSize: 20),
                           ),
-                          //       Text('${currentUser?.employeeName?.toLowerCase().trimRight()}',
-                          // textAlign: TextAlign.center,
-                          // style: TextStyle(
-                          //     fontFamily: 'Roboto',
-                          //     fontSize: 20,
-                          //     color: Colors
-                          //         .black87) // FlutterFlowTheme.of(context).bodyMedium,
-                          // ),
+                          // Text(
+                          //     '${currentUser?.employeeName?.toLowerCase().trimRight()}',
+                          //     textAlign: TextAlign.center,
+                          //     style: TextStyle(
+                          //         fontFamily: 'Roboto',
+                          //         fontSize: 20,
+                          //         color: Colors
+                          //             .black87) // FlutterFlowTheme.of(context).bodyMedium,
+                          //     ),
                           Padding(
                               padding: EdgeInsets.only(left: 15, right: 15)),
                           IconButton(
@@ -138,7 +145,6 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                               onPressed: () {},
                               icon: FaIcon(FontAwesomeIcons.youtube),
                               color: Color.fromRGBO(235, 48, 69, 0.988)),
-
                           Padding(padding: EdgeInsets.only(left: 15, right: 5)),
                         ],
                       ),
@@ -258,171 +264,243 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                         ),
                         Align(
                           alignment: Alignment.bottomCenter,
-                          child: Container(
-                            padding: EdgeInsets.only(top: 10, bottom: 10),
-                            width: MediaQuery.of(context).size.width,
-                            height: 120,
-                            color: Color.fromRGBO(23, 76, 147, 1),
-                            child: Row(children: <Widget>[
-                              Expanded(
-                                  child: Column(
-                                children: [
-                                  Column(
-                                    children: [
+                          child: LayoutBuilder(builder: (BuildContext context,
+                              BoxConstraints constraints) {
+                            //For smaller screens
+                            if (constraints.maxWidth < 600 ||
+                                constraints.maxHeight < 90) {
+                              return Container(
+                                  padding: EdgeInsets.only(top: 10, bottom: 10),
+                                  width: MediaQuery.of(context).size.width,
+                                  height: 100,
+                                  color: Color.fromRGBO(23, 76, 147, 1),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
                                       TextButton(
                                           onPressed: () {
                                             showMision(context);
                                           },
-                                          child: Text(
-                                            'Misión',
-                                            style: FlutterFlowTheme.of(context)
-                                                .titleSmall
-                                                .override(
-                                                  fontFamily: 'Sora',
-                                                  color: FlutterFlowTheme.of(
-                                                          context)
-                                                      .info,
-                                                ),
-                                          )),
+                                          child: Text('Misión',
+                                              style:
+                                                  FlutterFlowTheme.of(context)
+                                                      .titleSmall
+                                                      .override(
+                                                        fontFamily: 'Sora',
+                                                        color:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .info,
+                                                      ))),
                                       TextButton(
                                           onPressed: () {
                                             showVision(context);
                                           },
-                                          child: Text(
-                                            'Visión',
-                                            style: FlutterFlowTheme.of(context)
-                                                .titleSmall
-                                                .override(
-                                                  fontFamily: 'Sora',
-                                                  color: FlutterFlowTheme.of(
-                                                          context)
-                                                      .info,
-                                                ),
-                                          )),
+                                          child: Text('Visión',
+                                              style:
+                                                  FlutterFlowTheme.of(context)
+                                                      .titleSmall
+                                                      .override(
+                                                        fontFamily: 'Sora',
+                                                        color:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .info,
+                                                      ))),
                                       TextButton(
                                           onPressed: () {
                                             qualityPolitic(context);
                                           },
-                                          child: Text(
-                                            'Politica de calidad',
-                                            style: FlutterFlowTheme.of(context)
-                                                .titleSmall
-                                                .override(
-                                                  fontFamily: 'Sora',
-                                                  color: FlutterFlowTheme.of(
-                                                          context)
-                                                      .info,
-                                                ),
-                                          )),
+                                          child: Text('Politica de calidad',
+                                              style:
+                                                  FlutterFlowTheme.of(context)
+                                                      .titleSmall
+                                                      .override(
+                                                        fontFamily: 'Sora',
+                                                        color:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .info,
+                                                      )))
                                     ],
-                                  ),
-                                ],
-                              )),
-                              Expanded(
-                                  child: Column(
-                                children: [
-                                  Column(
+                                  ));
+                            } else {
+                              return Container(
+                                padding: EdgeInsets.only(top: 10, bottom: 10),
+                                width: MediaQuery.of(context).size.width,
+                                height: MediaQuery.of(context).size.height / 8,
+                                color: Color.fromRGBO(23, 76, 147, 1),
+                                child: Row(children: <Widget>[
+                                  Expanded(
+                                      child: Column(
                                     children: [
-                                      TextButton(
-                                          onPressed: () {
-                                            showDialog(
-                                                context: context,
-                                                builder:
-                                                    (BuildContext context) {
-                                                  return AlertDialog(
-                                                    title: const Text(
-                                                        'Crear Ticket de servicio'),
-                                                    content:
-                                                        CreateServiceTicket(),
-                                                    actions: <Widget>[
-                                                      TextButton(
-                                                        style: TextButton
-                                                            .styleFrom(
-                                                          textStyle:
-                                                              Theme.of(context)
+                                      Column(
+                                        children: [
+                                          TextButton(
+                                              onPressed: () {
+                                                showMision(context);
+                                              },
+                                              child: Text(
+                                                'Misión',
+                                                style:
+                                                    FlutterFlowTheme.of(context)
+                                                        .titleSmall
+                                                        .override(
+                                                          fontFamily: 'Sora',
+                                                          color: FlutterFlowTheme
+                                                                  .of(context)
+                                                              .info,
+                                                        ),
+                                              )),
+                                          TextButton(
+                                              onPressed: () {
+                                                showVision(context);
+                                              },
+                                              child: Text(
+                                                'Visión',
+                                                style:
+                                                    FlutterFlowTheme.of(context)
+                                                        .titleSmall
+                                                        .override(
+                                                          fontFamily: 'Sora',
+                                                          color: FlutterFlowTheme
+                                                                  .of(context)
+                                                              .info,
+                                                        ),
+                                              )),
+                                          TextButton(
+                                              onPressed: () {
+                                                qualityPolitic(context);
+                                              },
+                                              child: Text(
+                                                'Politica de calidad',
+                                                style:
+                                                    FlutterFlowTheme.of(context)
+                                                        .titleSmall
+                                                        .override(
+                                                          fontFamily: 'Sora',
+                                                          color: FlutterFlowTheme
+                                                                  .of(context)
+                                                              .info,
+                                                        ),
+                                              )),
+                                        ],
+                                      ),
+                                    ],
+                                  )),
+                                  Expanded(
+                                      child: Column(
+                                    children: [
+                                      Column(
+                                        children: [
+                                          TextButton(
+                                              onPressed: () {
+                                                showDialog(
+                                                    context: context,
+                                                    builder:
+                                                        (BuildContext context) {
+                                                      return AlertDialog(
+                                                        title: const Text(
+                                                            'Crear Ticket de servicio'),
+                                                        content:
+                                                            CreateServiceTicket(),
+                                                        actions: <Widget>[
+                                                          TextButton(
+                                                            style: TextButton
+                                                                .styleFrom(
+                                                              textStyle: Theme.of(
+                                                                      context)
                                                                   .textTheme
                                                                   .labelLarge,
+                                                            ),
+                                                            child: const Text(
+                                                                'Ok'),
+                                                            onPressed: () {
+                                                              Navigator.of(
+                                                                      context)
+                                                                  .pop();
+                                                            },
+                                                          ),
+                                                        ],
+                                                      );
+                                                    });
+                                              },
+                                              child: Text(
+                                                'Crear Ticket de Servicio',
+                                                style:
+                                                    FlutterFlowTheme.of(context)
+                                                        .titleSmall
+                                                        .override(
+                                                          fontFamily: 'Sora',
+                                                          color: FlutterFlowTheme
+                                                                  .of(context)
+                                                              .info,
                                                         ),
-                                                        child: const Text('Ok'),
-                                                        onPressed: () {
-                                                          Navigator.of(context)
-                                                              .pop();
-                                                        },
-                                                      ),
-                                                    ],
-                                                  );
-                                                });
-                                          },
-                                          child: Text(
-                                            'Crear Ticket de Servicio',
-                                            style: FlutterFlowTheme.of(context)
-                                                .titleSmall
-                                                .override(
-                                                  fontFamily: 'Sora',
-                                                  color: FlutterFlowTheme.of(
-                                                          context)
-                                                      .info,
-                                                ),
-                                          ))
+                                              ))
+                                        ],
+                                      ),
                                     ],
-                                  ),
-                                ],
-                              )),
-                              Expanded(
-                                  child: Column(
-                                children: [
-                                  Column(
+                                  )),
+                                  Expanded(
+                                      child: Column(
                                     children: [
-                                      TextButton(
-                                          onPressed: () {
-                                            showDialog(
-                                                context: context,
-                                                builder:
-                                                    (BuildContext context) {
-                                                  return AlertDialog(
-                                                    title: const Text('text'),
-                                                    content:
-                                                        NewStudentNurseryVisit(),
-                                                    actions: <Widget>[
-                                                      TextButton(
-                                                        style: TextButton
-                                                            .styleFrom(
-                                                          textStyle:
-                                                              Theme.of(context)
+                                      Column(
+                                        children: [
+                                          TextButton(
+                                              onPressed: () {
+                                                showDialog(
+                                                    context: context,
+                                                    builder:
+                                                        (BuildContext context) {
+                                                      return AlertDialog(
+                                                        title:
+                                                            const Text('text'),
+                                                        content:
+                                                            NewStudentNurseryVisit(),
+                                                        actions: <Widget>[
+                                                          TextButton(
+                                                            style: TextButton
+                                                                .styleFrom(
+                                                              textStyle: Theme.of(
+                                                                      context)
                                                                   .textTheme
                                                                   .labelLarge,
+                                                            ),
+                                                            child: const Text(
+                                                                'Cerrar'),
+                                                            onPressed: () {
+                                                              Navigator.of(
+                                                                      context)
+                                                                  .pop();
+                                                            },
+                                                          ),
+                                                        ],
+                                                      );
+                                                    });
+                                              },
+                                              child: Text(
+                                                'Otra opcion',
+                                                style:
+                                                    FlutterFlowTheme.of(context)
+                                                        .titleSmall
+                                                        .override(
+                                                          fontFamily: 'Sora',
+                                                          color: FlutterFlowTheme
+                                                                  .of(context)
+                                                              .info,
                                                         ),
-                                                        child: const Text(
-                                                            'Cerrar'),
-                                                        onPressed: () {
-                                                          Navigator.of(context)
-                                                              .pop();
-                                                        },
-                                                      ),
-                                                    ],
-                                                  );
-                                                });
-                                          },
-                                          child: Text(
-                                            'Otra opcion',
-                                            style: FlutterFlowTheme.of(context)
-                                                .titleSmall
-                                                .override(
-                                                  fontFamily: 'Sora',
-                                                  color: FlutterFlowTheme.of(
-                                                          context)
-                                                      .info,
-                                                ),
-                                          ))
+                                              ))
+                                        ],
+                                      ),
                                     ],
-                                  ),
-                                ],
-                              )),
-                              // Column(
-                              //   children: [Text('Hola'), Text('Hola2')],
-                              // ),
-                            ]),
-                          ),
+                                  )),
+                                  // Column(
+                                  //   children: [Text('Hola'), Text('Hola2')],
+                                  // ),
+                                ]),
+                              );
+                            }
+                          }),
                         )
                       ],
                     )),
@@ -457,7 +535,65 @@ class _HoverCardState extends State<HoverCard> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        if (constraints.maxWidth < 215) {
+        if (constraints.maxWidth < 200) {
+          //IF SCREEN IS SMALLER THAN THIS, WILL SHOW ANOTHER THING, FOR SMALLER SCREENS
+          return MouseRegion(
+              onEnter: (_) {
+                setState(() {
+                  isHovered = true;
+                });
+              },
+              onExit: (_) {
+                setState(() {
+                  isHovered = false;
+                });
+              },
+              child: Container(
+                width: MediaQuery.of(context).size.width / 9,
+                height: MediaQuery.of(context).size.height / 9,
+                child: Card(
+                  margin: EdgeInsets.all(2.0),
+                  elevation: isHovered ? 10 : 0,
+                  shadowColor: Colors.black,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                    side: BorderSide(
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
+                  ),
+                  color: widget.backgroundColor,
+                  child: Container(
+                    //    <-----------SHOW RED CONTAINERS
+                    color: Colors.red,
+                  ),
+                  // child: AnimatedContainer(
+                  //   duration: const Duration(milliseconds: 200),
+                  //   curve: Curves.ease,
+                  //   padding: EdgeInsets.all(isHovered ? 20 : 10),
+                  //   decoration: BoxDecoration(
+                  //     color: isHovered
+                  //         ? Color.fromRGBO(73, 73, 73, 1)
+                  //         : widget.backgroundColor,
+                  //     borderRadius: BorderRadius.circular(15),
+                  //   ),
+                  //   child: GestureDetector(
+                  //     child: Center(
+                  //       child: Text(
+                  //         widget.title,
+                  //         textScaleFactor: 0.8,
+                  //         softWrap: true,
+                  //         style: TextStyle(
+                  //           color: Colors.white,
+                  //           fontWeight: FontWeight.bold,
+                  //           fontFamily: 'Sora',
+                  //         ),
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
+                ),
+              ));
+          /*
           return MouseRegion(
             onEnter: (_) {
               setState(() {
@@ -511,6 +647,7 @@ class _HoverCardState extends State<HoverCard> {
               ),
             ),
           );
+        */
         } else {
           return MouseRegion(
             onEnter: (_) {
