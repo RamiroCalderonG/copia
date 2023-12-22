@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:oxschool/user/user_view_view.dart';
 import 'package:page_transition/page_transition.dart';
 
 import '/index.dart';
@@ -56,7 +57,11 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           name: 'Enfermeria',
           path: '/enfermeria',
           builder: (context, params) => EnfermeriaWidget(),
-        )
+        ),
+        FFRoute(
+            name: 'UserView',
+            path: '/userView',
+            builder: (context, params) => UserWindow())
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
     );
 

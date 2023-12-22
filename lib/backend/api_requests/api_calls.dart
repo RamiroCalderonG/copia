@@ -20,7 +20,7 @@ class LoginUserCall {
       callName: 'LoginVerify',
       apiUrl: hostUrl + port + '/login/userlogin?nip=$nip&device=$device',
       callType: ApiCallType.GET,
-      headers: {},
+      headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},
       params: {
         'nip': nip,
         'device': device,

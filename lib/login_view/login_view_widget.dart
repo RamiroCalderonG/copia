@@ -213,63 +213,95 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                     0.0, 0.0, 0.0, 16.0),
                                 child: TextFormField(
                                   onFieldSubmitted: (value) async {
-                                    var value =
-                                        trimSpaces(_model.textController2.text);
-                                    if (value.isNotEmpty) {
-                                      // Log In user
-                                      _model.apiResultxgr =
-                                          await LoginUserCall.call(
-                                              nip: _model.textController2.text,
-                                              device: currentDeviceData);
-                                      if ((_model.apiResultxgr?.succeeded ??
-                                          true)) {
-                                        // Decode the JSON string into a Dart list
-                                        List<dynamic> jsonList = json.decode(
-                                            _model
+                                    try {
+                                      var value = trimSpaces(
+                                          _model.textController2.text);
+                                      if (value.isNotEmpty) {
+                                        // Log In user
+                                        _model.apiResultxgr =
+                                            await LoginUserCall.call(
+                                                nip:
+                                                    _model.textController2.text,
+                                                device: currentDeviceData);
+                                        if ((_model.apiResultxgr?.succeeded ??
+                                            true)) {
+                                          // Decode the JSON string into a Dart list
+                                          List<dynamic> jsonList = json.decode(
+                                              _model.apiResultxgr!.response!
+                                                  .body);
+                                          currentUser = userLogedIn(
+                                              jsonList); //Store values into a const
+
+                                          // Get currentCycle
+                                          _model.apiResultxgr =
+                                              await CurrentCicleCall.call();
+                                          if ((_model.apiResultxgr?.succeeded ??
+                                              true)) {
+                                            jsonList = json.decode(_model
                                                 .apiResultxgr!.response!.body);
-                                        currentUser = userLogedIn(
-                                            jsonList); //Store values into a const
+                                            currentCycle = getcurrentCycle(
+                                                jsonList); //parse from JSON
+                                          }
+                                          //GET User Permissions
+                                          _model.apiResultxgr =
+                                              await UserPermissionsCall.call(
+                                                  idLogin: currentUser!.idLogin
+                                                      .toString());
+                                          if ((_model.apiResultxgr?.succeeded ??
+                                              true)) {
+                                            jsonList = json.decode(_model
+                                                .apiResultxgr!.response!.body);
+                                            userPermissions = jsonList;
+                                          }
 
-                                        // Get currentCycle
-                                        _model.apiResultxgr =
-                                            await CurrentCicleCall.call();
-                                        if ((_model.apiResultxgr?.succeeded ??
-                                            true)) {
-                                          jsonList = json.decode(_model
-                                              .apiResultxgr!.response!.body);
-                                          currentCycle = getcurrentCycle(
-                                              jsonList); //parse from JSON
-                                        }
-                                        //GET User Permissions
-                                        _model.apiResultxgr =
-                                            await UserPermissionsCall.call(
-                                                idLogin: currentUser!.idLogin
-                                                    .toString());
-                                        if ((_model.apiResultxgr?.succeeded ??
-                                            true)) {
-                                          jsonList = json.decode(_model
-                                              .apiResultxgr!.response!.body);
-                                          userPermissions = jsonList;
-                                        }
-
-                                        context.goNamed(
-                                          'MainWindow',
-                                          extra: <String, dynamic>{
-                                            kTransitionInfoKey: TransitionInfo(
-                                              hasTransition: true,
-                                              transitionType:
-                                                  PageTransitionType.fade,
+                                          context.goNamed(
+                                            'MainWindow',
+                                            extra: <String, dynamic>{
+                                              kTransitionInfoKey:
+                                                  TransitionInfo(
+                                                hasTransition: true,
+                                                transitionType:
+                                                    PageTransitionType.fade,
+                                              ),
+                                            },
+                                          );
+                                        } else {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                (_model.apiResultxgr
+                                                            ?.jsonBody ??
+                                                        '')
+                                                    .toString(),
+                                                style:
+                                                    FlutterFlowTheme.of(context)
+                                                        .labelMedium
+                                                        .override(
+                                                          fontFamily: 'Roboto',
+                                                          color:
+                                                              Color(0xFF130C0D),
+                                                          fontWeight:
+                                                              FontWeight.w500,
+                                                        ),
+                                              ),
+                                              duration:
+                                                  Duration(milliseconds: 3000),
+                                              backgroundColor:
+                                                  FlutterFlowTheme.of(context)
+                                                      .secondary,
                                             ),
-                                          },
-                                        );
+                                          );
+                                        }
+
+                                        setState(() {});
                                       } else {
+                                        _model.textController2.text = '';
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(
                                           SnackBar(
                                             content: Text(
-                                              (_model.apiResultxgr?.jsonBody ??
-                                                      '')
-                                                  .toString(),
+                                              'Favor de verificar su contraseña',
                                               style: FlutterFlowTheme.of(
                                                       context)
                                                   .labelMedium
@@ -287,15 +319,13 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                           ),
                                         );
                                       }
-
-                                      setState(() {});
-                                    } else {
-                                      _model.textController2.text = '';
+                                    } catch (e) {
+                                      // _model.textController2.text = '';
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(
                                         SnackBar(
                                           content: Text(
-                                            'Favor de verificar su contraseña',
+                                            e.toString(),
                                             style: FlutterFlowTheme.of(context)
                                                 .labelMedium
                                                 .override(

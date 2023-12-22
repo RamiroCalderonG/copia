@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:oxschool/Models/User.dart';
 import 'package:oxschool/constants/User.dart';
+import 'package:oxschool/flutter_flow/flutter_flow_theme.dart';
 
 class UserWindow extends StatefulWidget {
   const UserWindow({super.key});
@@ -36,34 +38,39 @@ class _UserWindowState extends State<UserWindow> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<User>(
-      future: userFuture,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          final user = snapshot.data!;
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircleAvatar(
-                  radius: 50,
-                  backgroundImage:
-                      NetworkImage('https://oxschool.edu.mx/index.aspx'),
-                ),
-                Text(
-                  '${currentUser?.employeeName}',
-                  style: Theme.of(context).textTheme.headline6,
-                ),
-                Text('${currentUser?.idLogin}'),
-              ],
-            ),
-          );
-        } else if (snapshot.hasError) {
-          return Text('Error fetching user data: ${snapshot.error}');
-        } else {
-          return const CircularProgressIndicator();
-        }
-      },
-    );
+    return Scaffold(
+        appBar: AppBar(
+          backgroundColor: FlutterFlowTheme.of(context).primary,
+        ),
+        body: Placeholder());
+    // return FutureBuilder<User>(
+    //   future: userFuture,
+    //   builder: (context, snapshot) {
+    //     if (snapshot.hasData) {
+    //       final user = snapshot.data!;
+    //       return Center(
+    //         child: Column(
+    //           mainAxisAlignment: MainAxisAlignment.center,
+    //           children: [
+    //             CircleAvatar(
+    //               radius: 50,
+    //               backgroundImage:
+    //                   NetworkImage('https://oxschool.edu.mx/index.aspx'),
+    //             ),
+    //             Text(
+    //               '${currentUser?.employeeName}',
+    //               style: Theme.of(context).textTheme.headline6,
+    //             ),
+    //             Text('${currentUser?.idLogin}'),
+    //           ],
+    //         ),
+    //       );
+    //     } else if (snapshot.hasError) {
+    //       return Text('Error fetching user data: ${snapshot.error}');
+    //     } else {
+    //       return const CircularProgressIndicator();
+    //     }
+    //   },
+    // );
   }
 }

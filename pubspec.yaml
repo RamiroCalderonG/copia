@@ -66,6 +66,7 @@ dependencies:
   device_info_plus: ^9.0.3
   flutter_expandable_fab: ^2.0.0
   carousel_slider: ^4.2.1
+  loading_indicator: ^3.1.1
 
 dev_dependencies:
 
