@@ -8,7 +8,9 @@ import 'package:oxschool/flutter_flow/flutter_flow_util.dart';
 import 'package:oxschool/login_view/login_view_widget.dart';
 import 'package:oxschool/main.dart';
 import '../constants/Student.dart';
-import '../grades/grades_view.dart';
+import 'package:oxschool/main.dart';
+import '../constants/Student.dart';
+import '../grades/grades_view_capture.dart';
 import '../models/user.dart';
 
 class DrawerClass extends StatefulWidget {
