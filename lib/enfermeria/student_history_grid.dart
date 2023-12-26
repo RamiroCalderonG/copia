@@ -19,6 +19,7 @@ class _StudentHistoryGridState extends State<StudentHistoryGrid> {
   @override
   void initState() {
     super.initState();
+
     nurseryHistoryColumns = <PlutoColumn>[
       PlutoColumn(
         title: 'idReporteEnfermeria',
@@ -242,7 +243,12 @@ class _StudentHistoryGridState extends State<StudentHistoryGrid> {
                     )),
               ),
             ),
-          )
+          ),
+        Expanded(
+            child: ElevatedButton.icon(
+                onPressed: () {},
+                icon: Icon(Icons.add),
+                label: Text('Agregar visita'))) // Placeholder or message
       ],
     );
   }

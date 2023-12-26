@@ -1,16 +1,17 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:oxschool/Models/Cycle.dart';
 import 'package:oxschool/Models/User.dart';
 import 'package:oxschool/constants/User.dart';
 
+import '../utils/device_information.dart';
 import '/backend/api_requests/api_calls.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'login_view_model.dart';
 export 'login_view_model.dart';
 
@@ -23,13 +24,16 @@ class LoginViewWidget extends StatefulWidget {
 
 class _LoginViewWidgetState extends State<LoginViewWidget> {
   late LoginViewModel _model;
+  String currentDeviceData = '';
   // late User currentUser;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
     super.initState();
+    initPlatformState();
     _model = createModel(context, () => LoginViewModel());
 
     _model.textController1 ??= TextEditingController();
@@ -40,12 +44,56 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
   @override
   void dispose() {
     _model.dispose();
-
     super.dispose();
+  }
+
+  // Custom function to trim spaces
+  String trimSpaces(String input) {
+    return input.replaceAll(RegExp(r'\s+'), ''); // This removes all spaces
+  }
+
+  Future<void> initPlatformState() async {
+    var deviceData = <String, dynamic>{};
+
+    try {
+      if (kIsWeb) {
+        deviceData = readWebBrowserInfo(await deviceInfoPlugin.webBrowserInfo);
+      } else {
+        deviceData = switch (defaultTargetPlatform) {
+          TargetPlatform.android =>
+            readAndroidBuildData(await deviceInfoPlugin.androidInfo),
+          TargetPlatform.iOS =>
+            readIosDeviceInfo(await deviceInfoPlugin.iosInfo),
+          TargetPlatform.linux =>
+            readLinuxDeviceInfo(await deviceInfoPlugin.linuxInfo),
+          TargetPlatform.windows =>
+            readWindowsDeviceInfo(await deviceInfoPlugin.windowsInfo),
+          TargetPlatform.macOS =>
+            readMacOsDeviceInfo(await deviceInfoPlugin.macOsInfo),
+          TargetPlatform.fuchsia => <String, dynamic>{
+              'Error:': 'Fuchsia platform isn\'t supported'
+            },
+        };
+        currentDeviceData = deviceData.toString();
+      }
+    } on PlatformException {
+      deviceData = <String, dynamic>{
+        'Error:': 'Failed to get platform version.'
+      };
+    }
+
+    if (!mounted) return;
+    print(deviceData.toString());
+    currentDeviceData = deviceData.toString();
+    setState(() {
+      deviceData = deviceData;
+      currentDeviceData = deviceData.toString();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    String? _text;
     return GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(_model.unfocusNode),
       child: Scaffold(
@@ -73,7 +121,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(8.0),
                         child: Image.asset(
-                          'assets/images/LogoOxschool.jpg',
+                          'assets/images/logoRedondoOx.png',
                           width: 300.0,
                           height: 284.0,
                           fit: BoxFit.contain,
@@ -104,7 +152,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Bienvenido',
+                                'Ox School',
                                 style:
                                     FlutterFlowTheme.of(context).displaySmall,
                               ),
@@ -158,18 +206,180 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                     ),
                                   ),
                                   style: FlutterFlowTheme.of(context).bodyLarge,
-                                  validator: _model.textController1Validator
-                                      .asValidator(context),
                                 ),
                               ),
                               Padding(
                                 padding: EdgeInsetsDirectional.fromSTEB(
                                     0.0, 0.0, 0.0, 16.0),
                                 child: TextFormField(
+                                  onFieldSubmitted: (value) async {
+                                    try {
+                                      var value = trimSpaces(
+                                          _model.textController2.text);
+                                      if (value.isNotEmpty) {
+                                        // Log In user
+                                        _model.apiResultxgr =
+                                            await LoginUserCall.call(
+                                                nip:
+                                                    _model.textController2.text,
+                                                device: currentDeviceData);
+                                        if ((_model.apiResultxgr?.succeeded ??
+                                            true)) {
+                                          // Decode the JSON string into a Dart list
+                                          List<dynamic> jsonList = json.decode(
+                                              _model.apiResultxgr!.response!
+                                                  .body);
+                                          currentUser = userLogedIn(
+                                              jsonList); //Store values into a const
+
+                                          // Get currentCycle
+                                          _model.apiResultxgr =
+                                              await CurrentCicleCall.call();
+                                          if ((_model.apiResultxgr?.succeeded ??
+                                              true)) {
+                                            jsonList = json.decode(_model
+                                                .apiResultxgr!.response!.body);
+                                            currentCycle = getcurrentCycle(
+                                                jsonList); //parse from JSON
+                                          }
+                                          //GET User Permissions
+                                          _model.apiResultxgr =
+                                              await UserPermissionsCall.call(
+                                                  idLogin: currentUser!.idLogin
+                                                      .toString());
+                                          if ((_model.apiResultxgr?.succeeded ??
+                                              true)) {
+                                            jsonList = json.decode(_model
+                                                .apiResultxgr!.response!.body);
+                                            userPermissions = jsonList;
+                                          }
+
+                                          context.goNamed(
+                                            'MainWindow',
+                                            extra: <String, dynamic>{
+                                              kTransitionInfoKey:
+                                                  TransitionInfo(
+                                                hasTransition: true,
+                                                transitionType:
+                                                    PageTransitionType.fade,
+                                              ),
+                                            },
+                                          );
+                                        } else {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                (_model.apiResultxgr
+                                                            ?.jsonBody ??
+                                                        '')
+                                                    .toString(),
+                                                style:
+                                                    FlutterFlowTheme.of(context)
+                                                        .labelMedium
+                                                        .override(
+                                                          fontFamily: 'Roboto',
+                                                          color:
+                                                              Color(0xFF130C0D),
+                                                          fontWeight:
+                                                              FontWeight.w500,
+                                                        ),
+                                              ),
+                                              action: SnackBarAction(
+                                                  label: 'Cerrar mensaje',
+                                                  textColor:
+                                                      FlutterFlowTheme.of(
+                                                              context)
+                                                          .info,
+                                                  backgroundColor:
+                                                      Colors.black12,
+                                                  onPressed: () {
+                                                    ScaffoldMessenger.of(
+                                                            context)
+                                                        .hideCurrentSnackBar();
+                                                  }),
+                                              duration:
+                                                  Duration(milliseconds: 9000),
+                                              backgroundColor:
+                                                  FlutterFlowTheme.of(context)
+                                                      .secondary,
+                                            ),
+                                          );
+                                        }
+
+                                        setState(() {});
+                                      } else {
+                                        _model.textController2.text = '';
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              'Favor de verificar su contraseña',
+                                              style: FlutterFlowTheme.of(
+                                                      context)
+                                                  .labelMedium
+                                                  .override(
+                                                    fontFamily: 'Roboto',
+                                                    color: Color(0xFF130C0D),
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                            ),
+                                            action: SnackBarAction(
+                                                label: 'Cerrar mensaje',
+                                                textColor:
+                                                    FlutterFlowTheme.of(context)
+                                                        .info,
+                                                backgroundColor: Colors.black12,
+                                                onPressed: () {
+                                                  ScaffoldMessenger.of(context)
+                                                      .hideCurrentSnackBar();
+                                                }),
+                                            duration:
+                                                Duration(milliseconds: 9000),
+                                            backgroundColor:
+                                                FlutterFlowTheme.of(context)
+                                                    .secondary,
+                                          ),
+                                        );
+                                      }
+                                    } catch (e) {
+                                      // _model.textController2.text = '';
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            e.toString(),
+                                            style: FlutterFlowTheme.of(context)
+                                                .labelMedium
+                                                .override(
+                                                  fontFamily: 'Roboto',
+                                                  color: Color(0xFF130C0D),
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                          ),
+                                          action: SnackBarAction(
+                                              label: 'Cerrar mensaje',
+                                              textColor:
+                                                  FlutterFlowTheme.of(context)
+                                                      .info,
+                                              backgroundColor: Colors.black12,
+                                              onPressed: () {
+                                                ScaffoldMessenger.of(context)
+                                                    .hideCurrentSnackBar();
+                                              }),
+                                          duration:
+                                              Duration(milliseconds: 9000),
+                                          backgroundColor:
+                                              FlutterFlowTheme.of(context)
+                                                  .secondary,
+                                        ),
+                                      );
+                                    }
+                                  },
                                   controller: _model.textController2,
                                   obscureText: !_model.passwordVisibility,
                                   decoration: InputDecoration(
-                                    labelText: 'Password',
+                                    labelText: 'Contraseña',
                                     hintStyle:
                                         FlutterFlowTheme.of(context).bodyLarge,
                                     enabledBorder: OutlineInputBorder(
@@ -227,59 +437,119 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                     0.0, 0.0, 0.0, 16.0),
                                 child: FFButtonWidget(
                                   onPressed: () async {
-                                    // Log In user
-                                    _model.apiResultxgr =
-                                        await LoginUserCall.call(
-                                      nip: _model.textController2.text,
+                                    context.goNamed(
+                                      'MainWindow',
+                                      extra: <String, dynamic>{
+                                        kTransitionInfoKey: TransitionInfo(
+                                          hasTransition: true,
+                                          transitionType:
+                                              PageTransitionType.fade,
+                                        ),
+                                      },
                                     );
-                                    if ((_model.apiResultxgr?.succeeded ??
-                                        true)) {
-                                      // Decode the JSON string into a Dart list
-                                      List<dynamic> jsonList = json.decode(
-                                          _model.apiResultxgr!.response!.body);
-                                      currentUser = userLogedIn(
-                                          jsonList); //Store values into a const
 
-                                      // Get currentCycle
+                                    var value =
+                                        trimSpaces(_model.textController2.text);
+
+                                    if (value.isNotEmpty || value.length >= 6) {
+                                      initPlatformState();
+                                      if (currentUser?.employeeNumber != null) {
+                                        currentUser?.clear();
+                                      }
+                                      // Log In user
                                       _model.apiResultxgr =
-                                          await CurrentCicleCall.call();
+                                          await LoginUserCall.call(
+                                              nip: _model.textController2.text,
+                                              device: currentDeviceData);
                                       if ((_model.apiResultxgr?.succeeded ??
                                           true)) {
-                                        jsonList = json.decode(_model
-                                            .apiResultxgr!.response!.body);
-                                        currentCycle = getcurrentCycle(
-                                            jsonList); //parse from JSON
-                                      }
-                                      //GET User Permissions
-                                      _model.apiResultxgr =
-                                          await UserPermissionsCall.call(
-                                              idLogin: currentUser.idLogin
-                                                  .toString());
-                                      if ((_model.apiResultxgr?.succeeded ??
-                                          true)) {
-                                        jsonList = json.decode(_model
-                                            .apiResultxgr!.response!.body);
-                                        userPermissions = jsonList;
-                                      }
+                                        // Decode the JSON string into a Dart list
+                                        List<dynamic> jsonList = json.decode(
+                                            _model
+                                                .apiResultxgr!.response!.body);
+                                        currentUser = userLogedIn(
+                                            jsonList); //Store values into a const
 
-                                      context.goNamed(
-                                        'MainWindow',
-                                        extra: <String, dynamic>{
-                                          kTransitionInfoKey: TransitionInfo(
-                                            hasTransition: true,
-                                            transitionType:
-                                                PageTransitionType.fade,
+                                        if (currentCycle?.claCiclo != null) {
+                                          currentCycle?.clear();
+                                        }
+
+                                        // Get currentCycle
+                                        _model.apiResultxgr =
+                                            await CurrentCicleCall.call();
+                                        if ((_model.apiResultxgr?.succeeded ??
+                                            true)) {
+                                          jsonList = json.decode(_model
+                                              .apiResultxgr!.response!.body);
+                                          currentCycle = getcurrentCycle(
+                                              jsonList); //parse from JSON
+                                        }
+                                        //GET User Permissions
+                                        _model.apiResultxgr =
+                                            await UserPermissionsCall.call(
+                                                idLogin: currentUser!.idLogin
+                                                    .toString());
+                                        if ((_model.apiResultxgr?.succeeded ??
+                                            true)) {
+                                          jsonList = json.decode(_model
+                                              .apiResultxgr!.response!.body);
+                                          userPermissions = jsonList;
+                                        }
+
+                                        context.goNamed(
+                                          'MainWindow',
+                                          extra: <String, dynamic>{
+                                            kTransitionInfoKey: TransitionInfo(
+                                              hasTransition: true,
+                                              transitionType:
+                                                  PageTransitionType.fade,
+                                            ),
+                                          },
+                                        );
+                                      } else {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              (_model.apiResultxgr?.jsonBody ??
+                                                      '')
+                                                  .toString(),
+                                              style: FlutterFlowTheme.of(
+                                                      context)
+                                                  .labelMedium
+                                                  .override(
+                                                    fontFamily: 'Roboto',
+                                                    color: Color(0xFF130C0D),
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                            ),
+                                            action: SnackBarAction(
+                                                label: 'Cerrar mensaje',
+                                                textColor:
+                                                    FlutterFlowTheme.of(context)
+                                                        .info,
+                                                backgroundColor: Colors.black12,
+                                                onPressed: () {
+                                                  ScaffoldMessenger.of(context)
+                                                      .hideCurrentSnackBar();
+                                                }),
+                                            duration:
+                                                Duration(milliseconds: 9000),
+                                            backgroundColor:
+                                                FlutterFlowTheme.of(context)
+                                                    .secondary,
                                           ),
-                                        },
-                                      );
+                                        );
+                                      }
+
+                                      setState(() {});
                                     } else {
+                                      _model.textController2.text = '';
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(
                                         SnackBar(
                                           content: Text(
-                                            (_model.apiResultxgr?.jsonBody ??
-                                                    '')
-                                                .toString(),
+                                            'Favor de verificar su contraseña',
                                             style: FlutterFlowTheme.of(context)
                                                 .labelMedium
                                                 .override(
@@ -288,16 +558,24 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                   fontWeight: FontWeight.w500,
                                                 ),
                                           ),
+                                          action: SnackBarAction(
+                                              label: 'Cerrar mensaje',
+                                              textColor:
+                                                  FlutterFlowTheme.of(context)
+                                                      .info,
+                                              backgroundColor: Colors.black12,
+                                              onPressed: () {
+                                                ScaffoldMessenger.of(context)
+                                                    .hideCurrentSnackBar();
+                                              }),
                                           duration:
-                                              Duration(milliseconds: 8000),
+                                              Duration(milliseconds: 9000),
                                           backgroundColor:
                                               FlutterFlowTheme.of(context)
                                                   .secondary,
                                         ),
                                       );
                                     }
-
-                                    setState(() {});
                                   },
                                   text: 'Ingresar',
                                   options: FFButtonOptions(

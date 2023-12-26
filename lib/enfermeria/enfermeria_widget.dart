@@ -54,14 +54,13 @@ class _EnfermeriaWidgetState extends State<EnfermeriaWidget>
         appBar: AppBar(
           backgroundColor: FlutterFlowTheme.of(context).primary,
           automaticallyImplyLeading: true,
-          title: Text(
-            'Enfermeria',
-            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                  fontFamily: 'Roboto',
-                  color: Color(0xFFF1F4F8),
-                  fontSize: 25.0,
-                ),
-          ),
+          title: Text('Enfermeria', style: TextStyle(color: Colors.white)
+              // FlutterFlowTheme.of(context).bodyMedium.override(
+              //       fontFamily: 'Roboto',
+              //       color: Color(0xFFF1F4F8),
+              //       fontSize: 25.0,
+              //     ),
+              ),
           actions: [],
           centerTitle: true,
           elevation: 4.0,

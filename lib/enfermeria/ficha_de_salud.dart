@@ -11,6 +11,7 @@ import 'package:oxschool/Models/Student.dart';
 import 'package:oxschool/backend/api_requests/api_calls.dart';
 import 'package:oxschool/constants/Student.dart';
 import 'package:oxschool/constants/User.dart';
+import 'package:oxschool/enfermeria/no_data_avalibre.dart';
 import 'package:oxschool/enfermeria/student_history_grid.dart';
 import 'package:oxschool/flutter_flow/flutter_flow_theme.dart';
 import 'package:pluto_grid/pluto_grid.dart';
@@ -42,7 +43,7 @@ class _FichaDeSaludState extends State<FichaDeSalud>
   late List<PlutoRow> nurseryHRows;
 
   onTap() {
-    isSearching = true;
+    isSearching = false;
     // if (_isDisabled[_tabController.index]) {
     //   int index = _tabController.previousIndex;
     //   setState(() {
@@ -158,36 +159,44 @@ class _FichaDeSaludState extends State<FichaDeSalud>
           SafeArea(
               child: Column(
             children: [
-              ListView.builder(
-                shrinkWrap: true,
-                padding: const EdgeInsets.symmetric(horizontal: 40),
-                itemCount: studentAllowedMedicines.length,
-                itemBuilder: (BuildContext context, int index) {
-                  for (var item in studentAllowedMedicines) {
-                    return ListTile(
-                      key: Key('$index'),
-                      tileColor:
-                          index.isOdd ? Colors.blue[50] : Colors.blue[100],
-                      leading: const Icon(
-                        Icons.medication,
-                        color: Colors.black38,
-                      ),
-                      trailing: IconButton(
-                        onPressed: () {
-                          print(studentAllowedMedicines[index].nomMedicamento);
-                        },
-                        icon: Icon(Icons.delete_forever),
-                        color: Colors.black,
-                      ),
-                      title: Text(
-                        studentAllowedMedicines[index].nomMedicamento,
-                        style: TextStyle(color: Colors.black),
-                      ),
-                    );
-                  }
-                  return null;
-                },
-              ),
+              if (studentAllowedMedicines != null)
+                ListView.builder(
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.symmetric(horizontal: 40),
+                  itemCount: studentAllowedMedicines.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    for (var item in studentAllowedMedicines) {
+                      return ListTile(
+                        key: Key('$index'),
+                        tileColor:
+                            index.isOdd ? Colors.blue[50] : Colors.blue[100],
+                        leading: const Icon(
+                          Icons.medication,
+                          color: Colors.black38,
+                        ),
+                        trailing: IconButton(
+                          onPressed: () {
+                            print(
+                                studentAllowedMedicines[index].nomMedicamento);
+                          },
+                          icon: Icon(Icons.delete_forever),
+                          color: Colors.black,
+                        ),
+                        title: Text(
+                          studentAllowedMedicines[index].nomMedicamento,
+                          style: TextStyle(color: Colors.black),
+                        ),
+                      );
+                    }
+                    return null;
+                  },
+                ),
+              if (studentAllowedMedicines == null ||
+                  studentAllowedMedicines.isEmpty)
+                Placeholder(
+                  child: Text('Sin informacion disponible'),
+                )
+              // Placeholder or message
             ],
           ))
       ],
@@ -268,6 +277,11 @@ class _FichaDeSaludState extends State<FichaDeSalud>
                   border: OutlineInputBorder(),
                 ),
                 onSubmitted: (query) async {
+                  apiResultxgr = null;
+                  selectedStudent = null;
+                  selectedFamily = null;
+                  nurseryHistoryStudent = null;
+
                   List<String> substrings =
                       searchController.text.split(RegExp(' '));
 
@@ -276,7 +290,7 @@ class _FichaDeSaludState extends State<FichaDeSalud>
                           apPaterno: substrings[0],
                           apMaterno: substrings[1],
                           nombre: substrings[2],
-                          claUn: currentUser.claUn,
+                          claUn: currentUser!.claUn,
                           claCiclo: '2022-2023')
                       .timeout(Duration(milliseconds: 9000));
                   if ((apiResultxgr?.succeeded ?? true)) {
@@ -535,10 +549,11 @@ class _FichaDeSaludState extends State<FichaDeSalud>
           child: Scaffold(
               appBar: AppBar(
                 bottom: TabBar(
+                  labelColor: Colors.white,
                   controller: _tabController,
                   tabs: const <Widget>[
                     Tab(
-                      icon: Icon(Icons.person),
+                      icon: Icon(Icons.person, color: Colors.white),
                       text: 'Informacion del alumno',
                     ),
                     Tab(
@@ -557,10 +572,9 @@ class _FichaDeSaludState extends State<FichaDeSalud>
                   indicatorColor: Colors.blueAccent,
                 ),
                 backgroundColor: FlutterFlowTheme.of(context).primary,
-                title: Text(
-                  'Enfermeria',
-                  style: FlutterFlowTheme.of(context).headlineSmall,
-                ),
+                title: Text('Enfermeria', style: TextStyle(color: Colors.white)
+                    // FlutterFlowTheme.of(context).headlineSmall,
+                    ),
               ),
               backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
               body: TabBarView(
@@ -568,12 +582,14 @@ class _FichaDeSaludState extends State<FichaDeSalud>
                 children: <Widget>[
                   studentDataTab,
                   emergencyContacts,
-                  StudentHistoryGrid(),
+                  if (nurseryHistoryStudent != null) StudentHistoryGrid(),
+                  if (nurseryHistoryStudent == null) NoDataAvailble(),
                   // nurseryHistoryGrid,
-                  nurseryStudentMedicines,
+                  if (studentAllowedMedicines != null) nurseryStudentMedicines,
+                  if (studentAllowedMedicines == null) NoDataAvailble()
                 ],
               ),
-              floatingActionButton: expandableFABWidget,
+              floatingActionButton: ExpandableFABNursery(),
               floatingActionButtonLocation: ExpandableFab.location)),
     );
   }

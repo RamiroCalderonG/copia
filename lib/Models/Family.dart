@@ -1,36 +1,36 @@
 class Family {
-  late String relationship;
-  late String familyName;
-  late String firstLastName;
-  late String secondLastName;
-  late String name;
-  late int liveTogether;
-  late int isParent;
-  late int alive;
-  late String adress;
-  late String colony;
-  late String betweenStreets;
-  late int zipCode;
-  late String city;
-  late int cityCode;
-  late String phoneNumber;
-  late String cellPhoneNumber;
-  late String email;
-  late String workplaceName;
-  late String workPhoneNumber;
-  late String registrationDate;
-  late int canPickUp;
-  late int idFamilyDet;
-  late String taxRegistrationName;
+  late String? relationship;
+  late String? familyName;
+  late String? firstLastName;
+  late String? secondLastName;
+  late String? name;
+  late int? liveTogether;
+  late int? isParent;
+  late int? alive;
+  late String? adress;
+  late String? colony;
+  late String? betweenStreets;
+  late int? zipCode;
+  late String? city;
+  late int? cityCode;
+  late String? phoneNumber;
+  late String? cellPhoneNumber;
+  late String? email;
+  late String? workplaceName;
+  late String? workPhoneNumber;
+  late String? registrationDate;
+  late int? canPickUp;
+  late int? idFamilyDet;
+  late String? taxRegistrationName;
   late String? taxAddress;
   late String? taxColony;
   late int? taxCityCode;
   late String? taxPhoneNumber;
   late String? taxRegistrationRFC;
-  late int notActive;
-  late int academicGrade;
+  late int? notActive;
+  late int? academicGrade;
   late String? workPosition;
-  late int isRestricted;
+  late int? isRestricted;
   late String? restrictionMotive;
 
   Family(
@@ -103,6 +103,39 @@ class Family {
         "isRestricted": isRestricted,
         "restrictionMotive": restrictionMotive
       };
+  void clear() {
+    relationship = null;
+    familyName = null;
+    firstLastName = null;
+    secondLastName = null;
+    name = null;
+    liveTogether = null;
+    isParent = null;
+    alive = null;
+    adress = null;
+    colony = null;
+    betweenStreets = null;
+    zipCode = null;
+    city = null;
+    cityCode = null;
+    phoneNumber = null;
+    cellPhoneNumber = null;
+    email = null;
+    workplaceName = null;
+    workPhoneNumber = null;
+    registrationDate = null;
+    canPickUp = null;
+    idFamilyDet = null;
+    taxRegistrationName = null;
+    taxAddress = null;
+    taxColony = null;
+    taxCityCode = null;
+    taxPhoneNumber = null;
+    taxRegistrationRFC = null;
+    notActive = null;
+    academicGrade = null;
+    workPosition = null;
+  }
 }
 
 dynamic familyFromJSON(List<dynamic> jsonList) {

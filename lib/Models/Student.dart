@@ -1,10 +1,10 @@
 class Student {
-  late String matricula;
-  late int claFamilia;
-  late String nombre;
-  late String claUn;
-  late String grupo;
-  late String grado;
+  late String? matricula;
+  late int? claFamilia;
+  late String? nombre;
+  late String? claUn;
+  late String? grupo;
+  late String? grado;
 
   Student(this.matricula, this.claFamilia, this.nombre, this.claUn, this.grupo,
       this.grado);
@@ -17,4 +17,12 @@ class Student {
         'grupo': grupo,
         'grado': grado
       };
+  void clear() {
+    matricula = null;
+    claFamilia = null;
+    nombre = null;
+    claUn = null;
+    grupo = null;
+    grado = null;
+  }
 }

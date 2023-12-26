@@ -120,7 +120,8 @@ class _HistoryNurseryState extends State<HistoryNursery> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              Text('Nombre del estudiante', style: TextStyle(fontSize: 22.0)),
+              if (nurseryHistoryStudent != null)
+                Text('Nombre del estudiante', style: TextStyle(fontSize: 22.0)),
               Text(
                 selectedStudent.nombre,
                 style: TextStyle(fontSize: 18.0),
@@ -138,7 +139,10 @@ class _HistoryNurseryState extends State<HistoryNursery> {
                   stateManager = event.stateManager;
                   stateManager.setShowColumnFilter(true);
                 },
-              ))
+              )),
+              if (nurseryHistoryStudent == null ||
+                  nurseryHistoryStudent.isEmpty)
+                Text('Sin informacion disponible'), // Placeholder or message
             ],
           )),
     );

@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:oxschool/constants/connection.dart';
+import 'package:oxschool/utils/device_information.dart';
 
 import '../../flutter_flow/flutter_flow_util.dart';
 
@@ -13,16 +14,16 @@ export 'api_manager.dart' show ApiCallResponse;
 const _kPrivateApiFunctionName = 'ffPrivateApiCall';
 
 class LoginUserCall {
-  static Future<ApiCallResponse> call({
-    required String nip,
-  }) {
+  static Future<ApiCallResponse> call(
+      {required String nip, required String device}) {
     return ApiManager.instance.makeApiCall(
       callName: 'LoginVerify',
-      apiUrl: hostUrl + port + '/api/userlogin?nip=$nip',
+      apiUrl: hostUrl + port + '/login/userlogin?nip=$nip&device=$device',
       callType: ApiCallType.GET,
-      headers: {},
+      headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},
       params: {
         'nip': nip,
+        'device': device,
       },
       returnBody: true,
       encodeBodyUtf8: false,
@@ -40,7 +41,7 @@ class UserPermissionsCall {
       callName: 'permissions',
       apiUrl: hostUrl + port + '/api/user/permissions?idLogin=$idLogin',
       callType: ApiCallType.GET,
-      headers: {},
+      headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},
       params: {'idLogin': idLogin},
       returnBody: true,
       encodeBodyUtf8: false,
@@ -54,9 +55,9 @@ class CurrentCicleCall {
   static Future<ApiCallResponse> call() {
     return ApiManager.instance.makeApiCall(
       callName: 'cicles',
-      apiUrl: hostUrl + port + '/api/cicles/1',
+      apiUrl: hostUrl + port + '/api/cycles/1',
       callType: ApiCallType.GET,
-      headers: {},
+      headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},
       params: {},
       returnBody: true,
       encodeBodyUtf8: false,
@@ -73,7 +74,7 @@ class FamilyCall {
         callName: 'family',
         apiUrl: hostUrl + port + '/api/family/$claFam/',
         callType: ApiCallType.GET,
-        headers: {},
+        headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},
         params: {},
         returnBody: true,
         encodeBodyUtf8: false,
@@ -90,7 +91,7 @@ class NurseryStudentCall {
       callName: 'NursingStudent',
       apiUrl: hostUrl + port + '/api/nursery/student',
       callType: ApiCallType.GET,
-      headers: {},
+      headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},
       params: {
         'ClaCiclo': claCiclo,
         'ClaUn': claUn,
@@ -112,7 +113,7 @@ class NurseryStudentMedication {
       callName: 'NurseryMedication',
       apiUrl: hostUrl + port + '/api/nursery/medication',
       callType: ApiCallType.GET,
-      headers: {},
+      headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},
       params: {"matricula": matricula},
       returnBody: true,
       cache: true,
@@ -126,7 +127,7 @@ class NurseryHistoryCall {
       callName: 'NurseryHistory',
       apiUrl: hostUrl + port + '/api/nursery/history',
       callType: ApiCallType.GET,
-      headers: {},
+      headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},
       params: {"matricula": matricula},
       returnBody: true,
       encodeBodyUtf8: false,
