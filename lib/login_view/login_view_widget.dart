@@ -285,8 +285,21 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                               FontWeight.w500,
                                                         ),
                                               ),
+                                              action: SnackBarAction(
+                                                  label: 'Cerrar mensaje',
+                                                  textColor:
+                                                      FlutterFlowTheme.of(
+                                                              context)
+                                                          .info,
+                                                  backgroundColor:
+                                                      Colors.black12,
+                                                  onPressed: () {
+                                                    ScaffoldMessenger.of(
+                                                            context)
+                                                        .hideCurrentSnackBar();
+                                                  }),
                                               duration:
-                                                  Duration(milliseconds: 3000),
+                                                  Duration(milliseconds: 9000),
                                               backgroundColor:
                                                   FlutterFlowTheme.of(context)
                                                       .secondary,
@@ -311,8 +324,18 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                     fontWeight: FontWeight.w500,
                                                   ),
                                             ),
+                                            action: SnackBarAction(
+                                                label: 'Cerrar mensaje',
+                                                textColor:
+                                                    FlutterFlowTheme.of(context)
+                                                        .info,
+                                                backgroundColor: Colors.black12,
+                                                onPressed: () {
+                                                  ScaffoldMessenger.of(context)
+                                                      .hideCurrentSnackBar();
+                                                }),
                                             duration:
-                                                Duration(milliseconds: 3000),
+                                                Duration(milliseconds: 9000),
                                             backgroundColor:
                                                 FlutterFlowTheme.of(context)
                                                     .secondary,
@@ -334,8 +357,18 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                   fontWeight: FontWeight.w500,
                                                 ),
                                           ),
+                                          action: SnackBarAction(
+                                              label: 'Cerrar mensaje',
+                                              textColor:
+                                                  FlutterFlowTheme.of(context)
+                                                      .info,
+                                              backgroundColor: Colors.black12,
+                                              onPressed: () {
+                                                ScaffoldMessenger.of(context)
+                                                    .hideCurrentSnackBar();
+                                              }),
                                           duration:
-                                              Duration(milliseconds: 3000),
+                                              Duration(milliseconds: 9000),
                                           backgroundColor:
                                               FlutterFlowTheme.of(context)
                                                   .secondary,
@@ -490,8 +523,18 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                     fontWeight: FontWeight.w500,
                                                   ),
                                             ),
+                                            action: SnackBarAction(
+                                                label: 'Cerrar mensaje',
+                                                textColor:
+                                                    FlutterFlowTheme.of(context)
+                                                        .info,
+                                                backgroundColor: Colors.black12,
+                                                onPressed: () {
+                                                  ScaffoldMessenger.of(context)
+                                                      .hideCurrentSnackBar();
+                                                }),
                                             duration:
-                                                Duration(milliseconds: 3000),
+                                                Duration(milliseconds: 9000),
                                             backgroundColor:
                                                 FlutterFlowTheme.of(context)
                                                     .secondary,
@@ -515,8 +558,18 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                   fontWeight: FontWeight.w500,
                                                 ),
                                           ),
+                                          action: SnackBarAction(
+                                              label: 'Cerrar mensaje',
+                                              textColor:
+                                                  FlutterFlowTheme.of(context)
+                                                      .info,
+                                              backgroundColor: Colors.black12,
+                                              onPressed: () {
+                                                ScaffoldMessenger.of(context)
+                                                    .hideCurrentSnackBar();
+                                              }),
                                           duration:
-                                              Duration(milliseconds: 3000),
+                                              Duration(milliseconds: 9000),
                                           backgroundColor:
                                               FlutterFlowTheme.of(context)
                                                   .secondary,
