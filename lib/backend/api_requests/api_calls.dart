@@ -27,7 +27,8 @@ class LoginUserCall {
       },
       returnBody: true,
       encodeBodyUtf8: false,
-      decodeUtf8: false,
+      decodeUtf8: true,
+      bodyType: BodyType.JSON,
       cache: false,
     );
   }
