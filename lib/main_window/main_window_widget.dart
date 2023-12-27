@@ -1,22 +1,15 @@
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:oxschool/components/create_service_ticket.dart';
 import 'package:oxschool/components/drawer_menu.dart';
+import 'package:oxschool/components/mobile_main_items_list.dart';
 import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/constants/url_links.dart';
-import 'package:oxschool/enfermeria/new_student_visit.dart';
-import 'package:oxschool/flutter_flow/flutter_flow_icon_button.dart';
-import 'package:oxschool/grades/grades_view.dart';
 import 'package:oxschool/user/user_view_view.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../components/quality_dialogs.dart';
-import '/components/side_nav04_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'main_window_model.dart';
 export 'main_window_model.dart';
 
@@ -113,21 +106,22 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                               icon: const Icon(Icons.person),
                               color: Color.fromRGBO(235, 48, 69, 0.988)),
 
-                          Text(
-                            'Ing. Sanchez',
-                            style: TextStyle(
-                                fontFamily: 'Sora',
-                                fontStyle: FontStyle.normal,
-                                fontSize: 20),
-                          ),
-                          //       Text('${currentUser?.employeeName?.toLowerCase().trimRight()}',
-                          // textAlign: TextAlign.center,
-                          // style: TextStyle(
-                          //     fontFamily: 'Roboto',
-                          //     fontSize: 20,
-                          //     color: Colors
-                          //         .black87) // FlutterFlowTheme.of(context).bodyMedium,
+                          // Text(
+                          //   'Ing. Sanchez',
+                          //   style: TextStyle(
+                          //       fontFamily: 'Sora',
+                          //       fontStyle: FontStyle.normal,
+                          //       fontSize: 20),
                           // ),
+                          Text(
+                              '${currentUser?.employeeName?.toLowerCase().trimRight()}',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  fontFamily: 'Roboto',
+                                  fontSize: 20,
+                                  color: Colors
+                                      .black87) // FlutterFlowTheme.of(context).bodyMedium,
+                              ),
                           Padding(
                               padding: EdgeInsets.only(left: 15, right: 15)),
                           IconButton(
@@ -221,7 +215,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                     Uri _url = Uri.parse(oxlinks[index]);
                     launchUrlDirection(_url);
                   },
-                  child: HoverCard(
+                  child: MainViewItemList(
                     imagePath: gridMainWindowIcons[index],
                     backgroundColor: Theme.of(context).brightness ==
                             Brightness.light
