@@ -256,7 +256,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                 .apiResultxgr!.response!.body);
                                             userPermissions = jsonList;
                                           }
-                                          if (Platform.isAndroid) {
+                                          if (Platform.isAndroid ||
+                                              Platform.isIOS) {
                                             context.goNamed(
                                               'MobileMainView',
                                               extra: <String, dynamic>{
@@ -505,7 +506,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                             userPermissions = jsonList;
                                           }
 
-                                          if (Platform.isAndroid) {
+                                          if (Platform.isAndroid ||
+                                              Platform.isIOS) {
                                             context.goNamed(
                                               'MobileMainView',
                                               extra: <String, dynamic>{
