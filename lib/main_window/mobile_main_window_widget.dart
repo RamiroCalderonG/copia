@@ -92,8 +92,8 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
                               style: TextStyle(
                                   fontFamily: 'Sora',
                                   fontSize: 18,
-                                  color: Colors
-                                      .black87) // FlutterFlowTheme.of(context).bodyMedium,
+                                  color: FlutterFlowTheme.of(context)
+                                      .primaryText) // FlutterFlowTheme.of(context).bodyMedium,
                               ),
                           // Padding(padding: EdgeInsets.only(left: 5, right: 5)),
                         ],
@@ -154,30 +154,63 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
     );
 
     return Scaffold(
-        key: scaffoldKey,
-        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        drawer: Opacity(opacity: 1, child: DrawerClass()),
-        body: NestedScrollView(
-            headerSliverBuilder: (context, _) => [
-                  appBar,
-                ],
-            floatHeaderSlivers: true,
-            body: Placeholder(
-              strokeWidth: 0.0,
-              child: menuListItems,
-            )
-            // body: Builder(
-            //   builder: (context) {
-            //     return SafeArea(
-            //         top: false,
-            //         child: Align(
-            //           alignment: AlignmentDirectional(0.0, 0.0),
-            //           child: Column(
-            //             children: [],
-            //           ),
-            //         ));
-            //   },
-            // ),
-            ));
+      key: scaffoldKey,
+      backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+      drawer: Opacity(opacity: 1, child: DrawerClass()),
+      body: NestedScrollView(
+        headerSliverBuilder: (context, _) => [
+          appBar,
+        ],
+        floatHeaderSlivers: true,
+        body: Placeholder(
+          strokeWidth: 0.0,
+          child: menuListItems,
+        ),
+
+        // body: Builder(
+        //   builder: (context) {
+        //     return SafeArea(
+        //         top: false,
+        //         child: Align(
+        //           alignment: AlignmentDirectional(0.0, 0.0),
+        //           child: Column(
+        //             children: [],
+        //           ),
+        //         ));
+        //   },
+        // ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: const Color.fromRGBO(82, 170, 94, 1.0),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+        tooltip: 'Increment',
+        onPressed: () {},
+        child: const Icon(Icons.add, size: 28),
+      ),
+      bottomNavigationBar: BottomAppBar(
+        color: const Color(0xFF0299FF),
+        shape: const CircularNotchedRectangle(),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            IconButton(
+                onPressed: () {},
+                icon: const Icon(
+                  Icons.home,
+                  color: Color.fromRGBO(43, 217, 254, 1.0),
+                  size: 35.5,
+                )),
+            IconButton(
+                onPressed: () {},
+                icon: const Icon(
+                  Icons.favorite,
+                  color: Colors.red,
+                  size: 35.5,
+                )),
+          ],
+        ),
+      ),
+    );
   }
 }
