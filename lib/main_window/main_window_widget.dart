@@ -116,12 +116,13 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                           Text(
                               '${currentUser?.employeeName?.toLowerCase().trimRight()}',
                               textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  fontFamily: 'Roboto',
-                                  fontSize: 20,
-                                  color: Colors
-                                      .black87) // FlutterFlowTheme.of(context).bodyMedium,
-                              ),
+                              style: FlutterFlowTheme.of(context)
+                                  .bodyMedium
+                                  .override(
+                                    fontFamily: 'Sora',
+                                    color: FlutterFlowTheme.of(context)
+                                        .primaryText, // FlutterFlowTheme.of(context).bodyMedium,
+                                  )),
                           Padding(
                               padding: EdgeInsets.only(left: 15, right: 15)),
                           IconButton(
@@ -206,8 +207,8 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                   crossAxisSpacing: 50.0,
                   mainAxisSpacing: 50.0,
                   childAspectRatio: 1.9),
-              // padding: EdgeInsets.only(left: 10, right: 10),
-              shrinkWrap: true,
+              padding: EdgeInsets.only(left: 10, right: 10),
+              // shrinkWrap: true,
               itemCount: oxlinks.length,
               itemBuilder: (BuildContext context, int index) {
                 return GestureDetector(
@@ -215,7 +216,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                     Uri _url = Uri.parse(oxlinks[index]);
                     launchUrlDirection(_url);
                   },
-                  child: MainViewItemList(
+                  child: HoverCard(
                     imagePath: gridMainWindowIcons[index],
                     backgroundColor: Theme.of(context).brightness ==
                             Brightness.light
@@ -235,7 +236,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         drawer: Opacity(opacity: 1, child: DrawerClass()),
         body: NestedScrollView(
-          physics: NeverScrollableScrollPhysics(),
+          // physics: NeverScrollableScrollPhysics(),
           floatHeaderSlivers: true,
           headerSliverBuilder: (context, _) => [
             appHeader,
@@ -249,41 +250,58 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                     child: Column(
                       children: [
                         Expanded(
+                          flex: 3,
                           child: Padding(
                               padding: EdgeInsetsDirectional.fromSTEB(
-                                  16.0, 5.0, 16.0, 30.0),
-                              child: Row(
+                                  28.0, 5.0, 16.0, 10.0),
+                              child: Column(
                                 children: [
+                                  // Align(
+                                  //   alignment: AlignmentDirectional.topStart,
+                                  //   child: Column(
+                                  //     // mainAxisSize: MainAxisSize.max,
+                                  //     mainAxisAlignment:
+                                  //         MainAxisAlignment.start,
+                                  //     crossAxisAlignment:
+                                  //         CrossAxisAlignment.center,
+                                  //     children: [
+                                  //       Padding(
+                                  //         padding:
+                                  //             EdgeInsetsDirectional.fromSTEB(
+                                  //                 20.0, 40.0, 10.0, 0.0),
+                                  //         child: Text(
+                                  //           'Disciplina, Moralidad, \n Trabajo y Eficiencia',
+                                  //           style: FlutterFlowTheme.of(context)
+                                  //               .bodyMedium
+                                  //               .override(
+                                  //                 fontFamily: 'Inter',
+                                  //                 color: FlutterFlowTheme.of(
+                                  //                         context)
+                                  //                     .secondaryText,
+                                  //               ),
+                                  //         ),
+                                  //       ),
+                                  //     ],
+                                  //   ),
+                                  // ),
+                                  iconsLinksGrid,
                                   Align(
-                                    alignment: AlignmentDirectional.topStart,
-                                    child: Column(
-                                      // mainAxisSize: MainAxisSize.max,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  20.0, 40.0, 10.0, 0.0),
-                                          child: Text(
-                                            'Disciplina, Moralidad, \n Trabajo y Eficiencia',
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                                  fontFamily: 'Inter',
-                                                  color: FlutterFlowTheme.of(
-                                                          context)
-                                                      .secondaryText,
-                                                ),
-                                          ),
+                                      alignment:
+                                          AlignmentDirectional.bottomCenter,
+                                      child: Container(
+                                        margin: EdgeInsets.all(9),
+                                        child: Text(
+                                          'Disciplina, Moralidad, Trabajo y Eficiencia',
+                                          style: FlutterFlowTheme.of(context)
+                                              .bodyMedium
+                                              .override(
+                                                fontFamily: 'Sora',
+                                                color:
+                                                    FlutterFlowTheme.of(context)
+                                                        .primaryText,
+                                              ),
                                         ),
-                                      ],
-                                    ),
-                                  ),
-                                  iconsLinksGrid
-                                  //---------HERE--------
+                                      ))
                                 ],
                               )),
                         ),

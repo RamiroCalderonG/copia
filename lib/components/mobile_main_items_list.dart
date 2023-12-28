@@ -23,8 +23,8 @@ class _MainViewItemList extends State<MainViewItemList> {
         builder: (BuildContext context, BoxConstraints constraints) {
       return SingleChildScrollView(
         child: Container(
-          // height: constraints.maxHeight * 0.9,
-          // width: constraints.maxWidth,
+          height: constraints.maxHeight * 0.9,
+          width: constraints.maxWidth,
           child: Card(
             margin: EdgeInsets.all(2.0),
             elevation: isHovered ? 10 : 0,
