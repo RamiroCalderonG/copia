@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
+import 'package:oxschool/constants/Student.dart';
 import 'package:oxschool/enfermeria/new_student_visit.dart';
 
 class ExpandableFABNursery extends StatefulWidget {
@@ -64,18 +65,41 @@ class ExpandableFABNurseryState extends State<ExpandableFABNursery> {
       children: [
         FloatingActionButton.extended(
           label: Text(
-            'Agregar visita de alumno',
+            'Registrar visita de alumno',
             style: TextStyle(color: Colors.black),
           ),
           icon: Icon(Icons.people),
           shape: ContinuousRectangleBorder(
             borderRadius: BorderRadius.circular(20.0),
           ),
-          tooltip: 'Agregar visita de alumno',
+          tooltip: 'Registrar visita de alumno',
           heroTag: null,
           // child: const Icon(Icons.edit),
           onPressed: () {
-            showFormDialog(context);
+            if (selectedStudent != null) {
+              showFormDialog(context);
+            } else {
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('Error'),
+                      content: Text('Primero se debe buscar al alumno'),
+                      actions: <Widget>[
+                        TextButton(
+                          style: TextButton.styleFrom(
+                            textStyle: Theme.of(context).textTheme.labelLarge,
+                          ),
+                          child: const Text('Ok'),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ],
+                    );
+                  });
+            }
+
             // scaffoldKey.currentState?.showSnackBar(snackBar);
           },
           backgroundColor: Colors.blueAccent,
@@ -122,7 +146,7 @@ void showFormDialog(BuildContext context) {
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: const Text('text'),
+        title: const Text('Nueva visita a enfermeria'),
         content: NewStudentNurseryVisit(),
         actions: <Widget>[
           TextButton(
