@@ -290,8 +290,8 @@ class _FichaDeSaludState extends State<FichaDeSalud>
                           apMaterno: substrings[1],
                           nombre: substrings[2],
                           claUn: currentUser!.claUn,
-                          claCiclo: '2022-2023')
-                      .timeout(Duration(milliseconds: 9000));
+                          claCiclo: currentCycle!.claCiclo)
+                      .timeout(Duration(milliseconds: 5000));
                   if ((apiResultxgr?.succeeded ?? true)) {
                     List<dynamic> jsonList =
                         json.decode(apiResultxgr!.response!.body);
@@ -339,7 +339,7 @@ class _FichaDeSaludState extends State<FichaDeSalud>
                       //Get student Nursery History
                       apiResultxgr = await NurseryHistoryCall.call(
                               matricula: selectedStudent.matricula.toString())
-                          .timeout(Duration(milliseconds: 9000));
+                          .timeout(Duration(milliseconds: 7000));
                       if ((apiResultxgr?.succeeded ?? true)) {
                         List<dynamic> jsonList =
                             json.decode(apiResultxgr!.response!.body);

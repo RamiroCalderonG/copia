@@ -55,7 +55,7 @@ class UserPermissionsCall {
 class CurrentCicleCall {
   static Future<ApiCallResponse> call() {
     return ApiManager.instance.makeApiCall(
-      callName: 'cicles',
+      callName: 'cycles',
       apiUrl: hostUrl + port + '/api/cycles/1',
       callType: ApiCallType.GET,
       headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},

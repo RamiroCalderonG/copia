@@ -114,7 +114,8 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                           //       fontSize: 20),
                           // ),
                           Text(
-                              '${currentUser?.employeeName?.toLowerCase().trimRight()}',
+                              '${currentUser?.employeeName?.toLowerCase().trimRight()}' +
+                                  '${currentUser!.claUn}',
                               textAlign: TextAlign.center,
                               style: FlutterFlowTheme.of(context)
                                   .bodyMedium
