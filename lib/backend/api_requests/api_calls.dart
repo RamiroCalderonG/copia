@@ -63,7 +63,7 @@ class CurrentCicleCall {
       returnBody: true,
       encodeBodyUtf8: false,
       decodeUtf8: false,
-      cache: true,
+      cache: false,
     );
   }
 }
@@ -80,7 +80,7 @@ class FamilyCall {
         returnBody: true,
         encodeBodyUtf8: false,
         decodeUtf8: false,
-        cache: true);
+        cache: false);
   }
 }
 
@@ -103,7 +103,7 @@ class NurseryStudentCall {
       returnBody: true,
       encodeBodyUtf8: false,
       decodeUtf8: false,
-      cache: true,
+      cache: false,
     );
   }
 }
@@ -117,7 +117,7 @@ class NurseryStudentMedication {
       headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},
       params: {"matricula": matricula},
       returnBody: true,
-      cache: true,
+      cache: false,
     );
   }
 }
@@ -133,7 +133,23 @@ class NurseryHistoryCall {
       returnBody: true,
       encodeBodyUtf8: false,
       decodeUtf8: false,
-      cache: true,
+      cache: false,
+    );
+  }
+}
+
+class CausesCall {
+  static Future<ApiCallResponse> call({required String claCausa}) {
+    return ApiManager.instance.makeApiCall(
+      callName: 'Causes',
+      apiUrl: hostUrl + port + '/api/causes',
+      callType: ApiCallType.GET,
+      headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},
+      params: {"ClaCausa": claCausa},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
     );
   }
 }

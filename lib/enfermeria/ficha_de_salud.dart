@@ -286,9 +286,9 @@ class _FichaDeSaludState extends State<FichaDeSalud>
 
                   // Look for student -------------------------------
                   apiResultxgr = await NurseryStudentCall.call(
-                          apPaterno: substrings[0],
-                          apMaterno: substrings[1],
-                          nombre: substrings[2],
+                          apPaterno: substrings[0].capitalize(),
+                          apMaterno: substrings[1].capitalize(),
+                          nombre: substrings[2].capitalize(),
                           claUn: currentUser!.claUn,
                           claCiclo: currentCycle!.claCiclo)
                       .timeout(Duration(milliseconds: 5000));
@@ -623,5 +623,11 @@ dynamic studentNursery(List<dynamic> jsonList) {
           Student(matricula, clafam, alumno, claUn, grupo, nomGradoEscolar));
     }
     return studentsList;
+  }
+}
+
+extension StringExtension on String {
+  String capitalize() {
+    return "${this[0].toUpperCase()}${this.substring(1).toLowerCase()}";
   }
 }

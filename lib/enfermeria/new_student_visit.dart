@@ -1,9 +1,15 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:multi_select_flutter/dialog/multi_select_dialog_field.dart';
 import 'package:multi_select_flutter/util/multi_select_item.dart';
 import 'package:oxschool/constants/Student.dart';
+import 'package:oxschool/flutter_flow/flutter_flow_theme.dart';
+
+import '../backend/api_requests/api_calls.dart';
+import '../backend/api_requests/api_manager.dart';
 
 class NewStudentNurseryVisit extends StatefulWidget {
   const NewStudentNurseryVisit({super.key});
@@ -12,6 +18,8 @@ class NewStudentNurseryVisit extends StatefulWidget {
   State<NewStudentNurseryVisit> createState() => _NewStudentNurseryVisitState();
 }
 
+late List<String> causess = [];
+
 class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
   late var _date = TextEditingController();
   late var _studentId = TextEditingController();
@@ -19,17 +27,18 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
   late var _visitMotive = TextEditingController();
   late var _tx = TextEditingController();
   late var _valoration = TextEditingController();
+  ApiCallResponse? apiResultxgr;
 
   List<String> painsList = ['Dolor', 'Dolor2', 'Dolor3', 'Dolor4'];
   String? selectedPain;
   List<String> lesionList = ['Caída', 'Golpe' 'Zape', 'Zape2'];
   String? selectedLesion;
-  List<String> causesList = ['Corria', 'Brincaba', 'etc'];
+
   String? selectedCause;
 
   @override
   Widget build(BuildContext context) {
-    _studentId.text = selectedStudent!.matricula!;
+    List<dynamic> causesList = _studentId.text = selectedStudent!.matricula!;
     _studentname.text = selectedStudent!.nombre!;
 
     MultiSelectDialogField painsSelector = MultiSelectDialogField(
@@ -49,13 +58,11 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
       //   Icons.health_and_safety,
       //   color: Colors.blue,
       // ),
-      buttonText: Text(
-        "Tipo de dolor",
-        style: TextStyle(
-          color: Colors.blue[800],
-          fontSize: 16,
-        ),
-      ),
+      buttonText: Text("Tipo de dolor",
+          style: FlutterFlowTheme.of(context).bodyMedium.override(
+                fontFamily: 'Sora',
+                color: FlutterFlowTheme.of(context).primaryText,
+              )),
       onConfirm: (results) {
         //_selectedAnimals = results;
       },
@@ -79,22 +86,19 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
       //   Icons.health_and_safety,
       //   color: Colors.blue,
       // ),
-      buttonText: Text(
-        "Tipo de herida",
-        style: TextStyle(
-          color: Colors.blue[800],
-          fontSize: 16,
-        ),
-      ),
+      buttonText: Text("Tipo de herida",
+          style: FlutterFlowTheme.of(context).bodyMedium.override(
+                fontFamily: 'Sora',
+                color: FlutterFlowTheme.of(context).primaryText,
+              )),
       onConfirm: (results) {
         //_selectedAnimals = results;
       },
     );
 
     MultiSelectDialogField causes = MultiSelectDialogField(
-      items: causesList
-          .map((pain) => MultiSelectItem<String>(pain, pain))
-          .toList(),
+      items:
+          causess.map((pain) => MultiSelectItem<String>(pain, pain)).toList(),
       title: Text("Otras Causas"),
       selectedColor: Colors.blue,
       decoration: BoxDecoration(
@@ -109,13 +113,11 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
       //   Icons.health_and_safety,
       //   color: Colors.blue,
       // ),
-      buttonText: Text(
-        "Otras Causas",
-        style: TextStyle(
-          color: Colors.blue[800],
-          fontSize: 16,
-        ),
-      ),
+      buttonText: Text("Otras Causas",
+          style: FlutterFlowTheme.of(context).bodyMedium.override(
+                fontFamily: 'Sora',
+                color: FlutterFlowTheme.of(context).primaryText,
+              )),
       onConfirm: (results) {
         //_selectedAnimals = results;
       },
@@ -277,9 +279,44 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
                 ),
               )
             ],
+          ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Padding(
+                padding: EdgeInsets.all(8),
+                child: ElevatedButton.icon(
+                    onPressed: () {},
+                    icon: Icon(Icons.save_outlined),
+                    label: Text('Guardar')),
+              )
+            ],
           )
         ],
       ),
     ));
+  }
+
+  Future<dynamic> getCauses() async {
+    List<dynamic> jsonList;
+    apiResultxgr =
+        await CausesCall.call(claCausa: '12').timeout(Duration(seconds: 7));
+    if (apiResultxgr?.succeeded ?? true) {
+      jsonList = json.decode(apiResultxgr!.response!.body);
+
+      return jsonList;
+    } else {
+      print("Error en llamada a causas");
+    }
+  }
+
+  void convertToList(List<dynamic> jsonObject) {
+    for (int i = 0; i < jsonObject.length; i++) {
+      dynamic data = jsonObject[i];
+      String claCausa = data['claCausa'];
+      String nomCausa = data['nomCausa'];
+      causess.add(nomCausa);
+    }
   }
 }
