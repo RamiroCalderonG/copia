@@ -5,8 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:multi_select_flutter/dialog/multi_select_dialog_field.dart';
 import 'package:multi_select_flutter/util/multi_select_item.dart';
+import 'package:oxschool/Models/Cause.dart';
 import 'package:oxschool/constants/Student.dart';
 import 'package:oxschool/flutter_flow/flutter_flow_theme.dart';
+import 'package:oxschool/reusable_methods/causes_methods.dart';
 
 import '../backend/api_requests/api_calls.dart';
 import '../backend/api_requests/api_manager.dart';
@@ -18,7 +20,8 @@ class NewStudentNurseryVisit extends StatefulWidget {
   State<NewStudentNurseryVisit> createState() => _NewStudentNurseryVisitState();
 }
 
-late List<String> causess = [];
+List<String> causesLst = [];
+List<String> painsList = [];
 
 class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
   late var _date = TextEditingController();
@@ -28,8 +31,10 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
   late var _tx = TextEditingController();
   late var _valoration = TextEditingController();
   ApiCallResponse? apiResultxgr;
+  late List<Cause> model;
+  bool causesFetched = false; // Track whether causes are fetched
 
-  List<String> painsList = ['Dolor', 'Dolor2', 'Dolor3', 'Dolor4'];
+  
   String? selectedPain;
   List<String> lesionList = ['Caída', 'Golpe' 'Zape', 'Zape2'];
   String? selectedLesion;
@@ -37,13 +42,35 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
   String? selectedCause;
 
   @override
+  void initState() {
+    super.initState();
+    // Call getCauses only if causes are not fetched yet
+    if (!causesFetched) {
+      fetchData();
+      if (causesLst.isNotEmpty) {
+        causesFetched = true;
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    List<dynamic> causesList = _studentId.text = selectedStudent!.matricula!;
+    // getCauses();
+    // List<dynamic> causesList = studentNewVisit(causess);
+    _studentId.text = selectedStudent!.matricula!;
     _studentname.text = selectedStudent!.nombre!;
 
     MultiSelectDialogField painsSelector = MultiSelectDialogField(
       items:
           painsList.map((pain) => MultiSelectItem<String>(pain, pain)).toList(),
+      itemsTextStyle: FlutterFlowTheme.of(context).bodyMedium.override(
+            fontFamily: 'Sora',
+            color: FlutterFlowTheme.of(context).primaryText,
+          ),
+      selectedItemsTextStyle: FlutterFlowTheme.of(context).bodyMedium.override(
+            fontFamily: 'Sora',
+            color: FlutterFlowTheme.of(context).tertiary,
+          ),
       title: Text("Tipo dolor"),
       selectedColor: Colors.blue,
       decoration: BoxDecoration(
@@ -72,6 +99,14 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
       items: lesionList
           .map((pain) => MultiSelectItem<String>(pain, pain))
           .toList(),
+      itemsTextStyle: FlutterFlowTheme.of(context).bodyMedium.override(
+            fontFamily: 'Sora',
+            color: FlutterFlowTheme.of(context).primaryText,
+          ),
+      selectedItemsTextStyle: FlutterFlowTheme.of(context).bodyMedium.override(
+            fontFamily: 'Sora',
+            color: FlutterFlowTheme.of(context).tertiary,
+          ),
       title: Text("Tipo de herida"),
       selectedColor: Colors.blue,
       decoration: BoxDecoration(
@@ -97,10 +132,21 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
     );
 
     MultiSelectDialogField causes = MultiSelectDialogField(
-      items:
-          causess.map((pain) => MultiSelectItem<String>(pain, pain)).toList(),
+      items: causesLst!
+          .map((pain) => MultiSelectItem<String>(pain, pain))
+          .toList(),
+      itemsTextStyle: FlutterFlowTheme.of(context).bodyMedium.override(
+            fontFamily: 'Sora',
+            color: FlutterFlowTheme.of(context).primaryText,
+          ),
+      selectedItemsTextStyle: FlutterFlowTheme.of(context).bodyMedium.override(
+            fontFamily: 'Sora',
+            color: FlutterFlowTheme.of(context).tertiary,
+          ),
+      //causess.map((pain) => MultiSelectItem<String>(pain, pain)).toList(),
       title: Text("Otras Causas"),
       selectedColor: Colors.blue,
+      searchable: true,
       decoration: BoxDecoration(
         color: Colors.blue.withOpacity(0.1),
         borderRadius: BorderRadius.all(Radius.circular(40)),
@@ -122,30 +168,6 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
         //_selectedAnimals = results;
       },
     );
-
-    // final DropdownMenu kindOfLesion = DropdownMenu<String>(
-    //     initialSelection: lesionList.first,
-    //     label: Text('Tipo de Herida'),
-    //     onSelected: (String? value) {
-    //       setState(() {
-    //         selectedLesion = value;
-    //       });
-    //     },
-    //     dropdownMenuEntries:
-    //         lesionList.map<DropdownMenuEntry<String>>((String value) {
-    //       return DropdownMenuEntry<String>(value: value, label: value);
-    //     }).toList());
-
-    // final DropdownMenu causes = DropdownMenu<String>(
-    //     initialSelection: causesList.first,
-    //     label: Text("Otras Causas"),
-    //     onSelected: (value) {
-    //       setState(() => selectedCause = value);
-    //     },
-    //     dropdownMenuEntries:
-    //         causesList.map<DropdownMenuEntry<String>>((String value) {
-    //       return DropdownMenuEntry<String>(value: value, label: value);
-    //     }).toList());
 
     return SingleChildScrollView(
         child: Container(
@@ -298,25 +320,40 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
     ));
   }
 
-  Future<dynamic> getCauses() async {
-    List<dynamic> jsonList;
-    apiResultxgr =
-        await CausesCall.call(claCausa: '12').timeout(Duration(seconds: 7));
-    if (apiResultxgr?.succeeded ?? true) {
-      jsonList = json.decode(apiResultxgr!.response!.body);
-
-      return jsonList;
-    } else {
-      print("Error en llamada a causas");
-    }
+  fetchData() async {
+    causesLst = await getCauses(15);
+    painsList = await getPainList()
   }
+}
 
-  void convertToList(List<dynamic> jsonObject) {
-    for (int i = 0; i < jsonObject.length; i++) {
-      dynamic data = jsonObject[i];
-      String claCausa = data['claCausa'];
-      String nomCausa = data['nomCausa'];
-      causess.add(nomCausa);
+dynamic studentNewVisit(List<dynamic> jsonList) {
+  if (jsonList.isEmpty) {
+    return null; // Return null if the list is empty
+  } else if (jsonList.length == 1) {
+    // If there's only one item in the list, return a single Student object
+    var item = jsonList[0];
+    String claCause = item['claCausa'];
+    String nomCause = item['nomCausa'];
+    int area = item['ClaArea'];
+    int isactive = item['Bajalogicasino'];
+    return Cause(
+      claCause, nomCause,
+      //  area, isactive
+    );
+  } else {
+    // If there are multiple items in the list, return a List<Student>
+    List<Cause> causeList = [];
+    for (var item in jsonList) {
+      String claCause = item['claCausa'];
+      String nomCause = item['nomCausa'];
+      int area = item['ClaArea'];
+      int isactive = item['Bajalogicasino'];
+
+      causeList.add(Cause(
+        claCause, nomCause,
+        //  area, isactive
+      ));
     }
+    return causeList;
   }
 }

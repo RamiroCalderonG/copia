@@ -155,6 +155,7 @@ void showFormDialog(BuildContext context) {
             ),
             child: const Text('Cerrar'),
             onPressed: () {
+              causesLst.clear();
               Navigator.of(context).pop();
             },
           ),

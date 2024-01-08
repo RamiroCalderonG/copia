@@ -395,8 +395,13 @@ class _FichaDeSaludState extends State<FichaDeSalud>
                       apiResultxgr = await NurseryStudentMedication.call(
                               matricula: selectedStudent.matricula.toString())
                           .timeout(Duration(milliseconds: 9000));
-                      if ((apiResultxgr?.succeeded ?? true)) {
-                        jsonList = json.decode(apiResultxgr!.response!.body);
+                      if (apiResultxgr!.response!.body.length > 0) {
+                        if ((apiResultxgr?.succeeded ?? true)) {
+                          jsonList = json.decode(apiResultxgr!.response!.body);
+                        }
+                      } else {
+                        print('No se encontraron medicación para el alumno' +
+                            selectedStudent.matricula.toString());
                       }
                       studentAllowedMedicines = getMedicinesFromJSON(jsonList);
                     }

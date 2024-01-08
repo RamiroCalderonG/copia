@@ -11,6 +11,8 @@ late Family? studentFamily; //Selected family from /family
 var studentAllowedMedicines; //Medicines allowed from the current student
 var studentsList; //Students to update grades
 
+late var nurseryCauses; //causes fetched from nursery call
+
 void clearStudentData() {
   if (nurseryStudent?.claFamilia != null) {
     nurseryStudent?.clear();

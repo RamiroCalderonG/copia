@@ -154,6 +154,21 @@ class CausesCall {
   }
 }
 
+class NurseryPainListCall {
+  static Future<ApiCallResponse> call({required String claCausa}) {
+    return ApiManager.instance.makeApiCall(
+        callName: 'Nursery-Pain-List',
+        apiUrl: hostUrl + port + '/api/nursery-pain-list',
+        callType: ApiCallType.GET,
+        headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},
+        params: {"ClaCausa": claCausa},
+        returnBody: true,
+        encodeBodyUtf8: false,
+        decodeUtf8: false,
+        cache: false);
+  }
+}
+
 class ApiPagingParams {
   int nextPageNumber = 0;
   int numItems = 0;
