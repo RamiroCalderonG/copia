@@ -157,6 +157,7 @@ void showFormDialog(BuildContext context) {
             onPressed: () {
               causesLst.clear();
               Navigator.of(context).pop();
+              // selectedStudent = null;
             },
           ),
         ],

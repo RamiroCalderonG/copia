@@ -16,8 +16,8 @@ class Cause {
   }
 
   Map<dynamic, dynamic> toJson() => {
-        "claCause": claCause,
-        "nomCause": nomCause,
+        "Clacausa": claCause,
+        "nomCausa": nomCause,
         // "ClaArea": area,
         // 'Bajalogicasino': isactive
       };
@@ -28,8 +28,8 @@ dynamic causeFromJSON(List<dynamic> jsonList) {
     return null; // Return null if the list is empty
   } else {
     var item = jsonList[0];
-    String claCause = item['claCause'];
-    String nomCause = item['nomCause'];
+    String claCause = item['claCausa'];
+    String nomCause = item['nomCausa'];
     // int area = item['ClaArea'];
     // int isactive = item['Bajalogicasino'];
 

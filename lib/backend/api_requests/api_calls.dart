@@ -154,18 +154,35 @@ class CausesCall {
   }
 }
 
+//Pending to add Log data to store at
 class NurseryPainListCall {
-  static Future<ApiCallResponse> call({required String claCausa}) {
+  static Future<ApiCallResponse> call({required String dataLog}) {
     return ApiManager.instance.makeApiCall(
         callName: 'Nursery-Pain-List',
         apiUrl: hostUrl + port + '/api/nursery-pain-list',
         callType: ApiCallType.GET,
         headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},
-        params: {"ClaCausa": claCausa},
+        params: {},
         returnBody: true,
         encodeBodyUtf8: false,
         decodeUtf8: false,
-        cache: false);
+        cache: true);
+  }
+}
+
+class NurseryWoundsCall {
+  static Future<ApiCallResponse> call({required String dataLog}) {
+    return ApiManager.instance.makeApiCall(
+      callName: 'Nursery-Wounds-Call',
+      apiUrl: hostUrl + port + '/api/nursery-wounds',
+      callType: ApiCallType.GET,
+      headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: true,
+    );
   }
 }
 

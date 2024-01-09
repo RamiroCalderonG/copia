@@ -9,6 +9,7 @@ import 'package:oxschool/Models/Cause.dart';
 import 'package:oxschool/constants/Student.dart';
 import 'package:oxschool/flutter_flow/flutter_flow_theme.dart';
 import 'package:oxschool/reusable_methods/causes_methods.dart';
+import 'package:oxschool/reusable_methods/nursery_methods.dart';
 
 import '../backend/api_requests/api_calls.dart';
 import '../backend/api_requests/api_manager.dart';
@@ -22,6 +23,8 @@ class NewStudentNurseryVisit extends StatefulWidget {
 
 List<String> causesLst = [];
 List<String> painsList = [];
+List<String> woundsList = [];
+List<String> accidentType = [];
 
 class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
   late var _date = TextEditingController();
@@ -30,16 +33,15 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
   late var _visitMotive = TextEditingController();
   late var _tx = TextEditingController();
   late var _valoration = TextEditingController();
+  late var _accidentType = TextEditingController();
+
   ApiCallResponse? apiResultxgr;
-  late List<Cause> model;
   bool causesFetched = false; // Track whether causes are fetched
 
-  
   String? selectedPain;
-  List<String> lesionList = ['Caída', 'Golpe' 'Zape', 'Zape2'];
   String? selectedLesion;
-
   String? selectedCause;
+  String? selectedAccidentType;
 
   @override
   void initState() {
@@ -96,7 +98,7 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
     );
 
     MultiSelectDialogField kindOfLesion = MultiSelectDialogField(
-      items: lesionList
+      items: woundsList
           .map((pain) => MultiSelectItem<String>(pain, pain))
           .toList(),
       itemsTextStyle: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -169,12 +171,56 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
       },
     );
 
+    MultiSelectDialogField accidentTypes = MultiSelectDialogField(
+      items: accidentType!
+          .map((pain) => MultiSelectItem<String>(pain, pain))
+          .toList(),
+      itemsTextStyle: FlutterFlowTheme.of(context).bodyMedium.override(
+            fontFamily: 'Sora',
+            color: FlutterFlowTheme.of(context).primaryText,
+          ),
+      selectedItemsTextStyle: FlutterFlowTheme.of(context).bodyMedium.override(
+            fontFamily: 'Sora',
+            color: FlutterFlowTheme.of(context).tertiary,
+          ),
+      //causess.map((pain) => MultiSelectItem<String>(pain, pain)).toList(),
+      title: Text("Tipo de Accidente"),
+      selectedColor: Colors.blue,
+      searchable: true,
+      decoration: BoxDecoration(
+        color: Colors.blue.withOpacity(0.1),
+        borderRadius: BorderRadius.all(Radius.circular(40)),
+        border: Border.all(
+          color: Colors.blue,
+          width: 2,
+        ),
+      ),
+      buttonText: Text("Tipo de Accidente",
+          style: FlutterFlowTheme.of(context).bodyMedium.override(
+                fontFamily: 'Sora',
+                color: FlutterFlowTheme.of(context).primaryText,
+              )),
+      onConfirm: (results) {
+        //_selectedAnimals = results;
+      },
+    );
+
     return SingleChildScrollView(
         child: Container(
       width: MediaQuery.of(context).size.width * 2 / 2,
       // height: MediaQuery.of(context).size.height,
       child: Column(
         children: [
+          Row(
+            children: [
+              Expanded(child: painsSelector),
+              SizedBox(width: 6),
+              Expanded(child: kindOfLesion),
+              SizedBox(width: 6),
+              Expanded(child: causes)
+            ],
+          ),
+          Divider(thickness: 3),
           TextFormField(
             controller: _studentId,
             enableSuggestions: false,
@@ -234,16 +280,9 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
                     : null),
             // textInputAction: TextInputAction.next,
             autofocus: true,
-            maxLines: 4,
+            maxLines: 3,
           ),
           SizedBox(height: 18),
-          Row(
-            children: [
-              Expanded(child: painsSelector),
-              Expanded(child: kindOfLesion),
-              Expanded(child: causes)
-            ],
-          ),
           Row(
             children: [
               Expanded(
@@ -282,6 +321,13 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
               )
             ],
           ),
+          SizedBox(height: 15),
+          Row(
+            children: [
+              Expanded(child: accidentTypes),
+            ],
+          ),
+          SizedBox(height: 10),
           Row(
             children: [
               Expanded(
@@ -299,7 +345,7 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
                   // textInputAction: TextInputAction.next,
                   maxLines: 2,
                 ),
-              )
+              ),
             ],
           ),
           Row(
@@ -322,7 +368,8 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
 
   fetchData() async {
     causesLst = await getCauses(15);
-    painsList = await getPainList()
+    painsList = await getPainList('none');
+    woundsList = await getWoundsList('none');
   }
 }
 
