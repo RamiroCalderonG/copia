@@ -8,7 +8,7 @@ Future<List<String>> getCauses(int causeCla) async {
   List<String> causesLst = [];
 
   var apiResultxgr = await CausesCall.call(claCausa: causeCla.toString())
-      .timeout(Duration(seconds: 12));
+      .timeout(Duration(seconds: 15));
 
   if (apiResultxgr.succeeded) {
     // Parse the JSON response
@@ -19,7 +19,7 @@ Future<List<String>> getCauses(int causeCla) async {
 
     return causesLst;
   } else {
-    print("Error en llamada a causas");
+    print("Error en llamada a causas" + apiResultxgr.response!.body.toString());
     // Throw an exception or return an empty list based on your error handling strategy
     throw Exception("Failed to fetch causes");
   }

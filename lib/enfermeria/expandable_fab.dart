@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:oxschool/constants/Student.dart';
 import 'package:oxschool/enfermeria/new_student_visit.dart';
+import 'package:oxschool/reusable_methods/causes_methods.dart';
+import 'package:oxschool/reusable_methods/nursery_methods.dart';
 
 class ExpandableFABNursery extends StatefulWidget {
   const ExpandableFABNursery({super.key});
@@ -75,8 +77,9 @@ class ExpandableFABNurseryState extends State<ExpandableFABNursery> {
           tooltip: 'Registrar visita de alumno',
           heroTag: null,
           // child: const Icon(Icons.edit),
-          onPressed: () {
+          onPressed: () async {
             if (selectedStudent != null) {
+              await fetchData();
               showFormDialog(context);
             } else {
               showDialog(
@@ -141,6 +144,13 @@ class ExpandableFABNurseryState extends State<ExpandableFABNursery> {
   }
 }
 
+Future fetchData() async {
+  causesLst = await getCauses(15);
+  painsList = await getPainList('none');
+  woundsList = await getWoundsList('none');
+  accidentType = await getCauses(14);
+}
+
 void showFormDialog(BuildContext context) {
   showDialog(
     context: context,
@@ -153,10 +163,12 @@ void showFormDialog(BuildContext context) {
             style: TextButton.styleFrom(
               textStyle: Theme.of(context).textTheme.labelLarge,
             ),
-            child: const Text('Cerrar'),
+            child: const Text('Cancelar'),
             onPressed: () {
-              causesLst.clear();
+              //causesLst.clear();
+
               Navigator.of(context).pop();
+
               // selectedStudent = null;
             },
           ),

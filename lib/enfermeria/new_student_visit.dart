@@ -1,6 +1,3 @@
-import 'dart:convert';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:multi_select_flutter/dialog/multi_select_dialog_field.dart';
@@ -8,11 +5,10 @@ import 'package:multi_select_flutter/util/multi_select_item.dart';
 import 'package:oxschool/Models/Cause.dart';
 import 'package:oxschool/constants/Student.dart';
 import 'package:oxschool/flutter_flow/flutter_flow_theme.dart';
-import 'package:oxschool/reusable_methods/causes_methods.dart';
-import 'package:oxschool/reusable_methods/nursery_methods.dart';
 
 import '../backend/api_requests/api_calls.dart';
 import '../backend/api_requests/api_manager.dart';
+import '../flutter_flow/flutter_flow_util.dart';
 
 class NewStudentNurseryVisit extends StatefulWidget {
   const NewStudentNurseryVisit({super.key});
@@ -34,33 +30,54 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
   late var _tx = TextEditingController();
   late var _valoration = TextEditingController();
   late var _accidentType = TextEditingController();
+  late var _observations = TextEditingController();
+  bool? _isClinicChecked = false;
+  bool? _isDoctorConsultChecked = false;
+  bool? _isPhoneNotChecked = false;
+  bool? _isPersonalNotifChecked = false;
+  bool? _isReportNotifChecked = false;
 
   ApiCallResponse? apiResultxgr;
-  bool causesFetched = false; // Track whether causes are fetched
+  // bool causesFetched = false; // Track whether causes are fetched
 
   String? selectedPain;
   String? selectedLesion;
   String? selectedCause;
   String? selectedAccidentType;
 
-  @override
-  void initState() {
-    super.initState();
-    // Call getCauses only if causes are not fetched yet
-    if (!causesFetched) {
-      fetchData();
-      if (causesLst.isNotEmpty) {
-        causesFetched = true;
-      }
-    }
-  }
+  List<String> teachersList = ['Fulano', 'Mengano', 'Sutano'];
+
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   // Call getCauses only if causes are not fetched yet
+  //   if (!causesFetched) {
+  //     fetchData();
+  //     if (causesLst.isNotEmpty) {
+  //       causesFetched = true;
+  //     }
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
+    Color getColor(Set<MaterialState> states) {
+      const Set<MaterialState> interactiveStates = <MaterialState>{
+        MaterialState.pressed,
+        MaterialState.hovered,
+        MaterialState.focused,
+      };
+      if (states.any(interactiveStates.contains)) {
+        return Colors.blue;
+      }
+      return Colors.red;
+    }
+
     // getCauses();
     // List<dynamic> causesList = studentNewVisit(causess);
     _studentId.text = selectedStudent!.matricula!;
     _studentname.text = selectedStudent!.nombre!;
+    String teacherDropDownValue = teachersList.first;
 
     MultiSelectDialogField painsSelector = MultiSelectDialogField(
       items:
@@ -205,6 +222,67 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
       },
     );
 
+    DropdownButton<String> responsableTeacher = DropdownButton<String>(
+        value: teacherDropDownValue,
+        icon: Icon(Icons.person),
+        elevation: 16,
+        style: FlutterFlowTheme.of(context).bodyMedium.override(
+              fontFamily: 'Sora',
+              color: FlutterFlowTheme.of(context).primaryText,
+            ),
+        underline: Container(
+          height: 2,
+          color: Colors.deepPurpleAccent,
+        ),
+        items: teachersList.map<DropdownMenuItem<String>>((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(value),
+          );
+        }).toList(),
+        onChanged: (String? value) {
+          setState(() {
+            // teacherDropDownValue = value!;
+          });
+        });
+
+    // MultiSelectDialogField responsableTeacher = MultiSelectDialogField(
+    //   items: teachersList!
+    //       .map((pain) => MultiSelectItem<String>(pain, pain))
+    //       .toList(),
+    //   itemsTextStyle: FlutterFlowTheme.of(context).bodyMedium.override(
+    //         fontFamily: 'Sora',
+    //         color: FlutterFlowTheme.of(context).primaryText,
+    //       ),
+    //   selectedItemsTextStyle: FlutterFlowTheme.of(context).bodyMedium.override(
+    //         fontFamily: 'Sora',
+    //         color: FlutterFlowTheme.of(context).tertiary,
+    //       ),
+    //   buttonIcon: Icon(Icons.person),
+    //   autovalidateMode: AutovalidateMode.onUserInteraction,
+    //   //causess.map((pain) => MultiSelectItem<String>(pain, pain)).toList(),
+    //   title: Text("Maestro responsable"),
+    //   selectedColor: Colors.blue,
+    //   searchable: true,
+    //   decoration: BoxDecoration(
+    //     color: Colors.blue.withOpacity(0.1),
+    //     borderRadius: BorderRadius.all(Radius.circular(40)),
+    //     border: Border.all(
+    //       color: Colors.blue,
+    //       width: 2,
+    //     ),
+    //   ),
+    //   buttonText: Text("Maestro responsable",
+    //       style: FlutterFlowTheme.of(context).bodyMedium.override(
+    //             fontFamily: 'Sora',
+    //             color: FlutterFlowTheme.of(context).primaryText,
+    //           )),
+    //   onConfirm: (results) {
+    //     //_selectedAnimals = results;
+    //   },
+
+    // );
+
     return SingleChildScrollView(
         child: Container(
       width: MediaQuery.of(context).size.width * 2 / 2,
@@ -292,9 +370,9 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
                   decoration: InputDecoration(
                       label: Text('Valoracion'),
                       prefixIcon: const Icon(Icons.abc),
-                      suffixIcon: _visitMotive.text.length > 0
+                      suffixIcon: _valoration.text.length > 0
                           ? IconButton(
-                              onPressed: _visitMotive.clear,
+                              onPressed: _valoration.clear,
                               icon: Icon(Icons.clear_rounded))
                           : null),
                   // textInputAction: TextInputAction.next,
@@ -310,9 +388,9 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
                   decoration: InputDecoration(
                       label: Text('Tratamiento'),
                       prefixIcon: const Icon(Icons.abc),
-                      suffixIcon: _visitMotive.text.length > 0
+                      suffixIcon: _tx.text.length > 0
                           ? IconButton(
-                              onPressed: _visitMotive.clear,
+                              onPressed: _tx.clear,
                               icon: Icon(Icons.clear_rounded))
                           : null),
                   // textInputAction: TextInputAction.next,
@@ -325,6 +403,8 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
           Row(
             children: [
               Expanded(child: accidentTypes),
+              SizedBox(width: 20),
+              Expanded(child: responsableTeacher)
             ],
           ),
           SizedBox(height: 10),
@@ -332,14 +412,14 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
             children: [
               Expanded(
                 child: TextFormField(
-                  controller: _tx,
+                  controller: _observations,
                   enableSuggestions: true,
                   decoration: InputDecoration(
                       label: Text('Observaciones Generales'),
                       prefixIcon: const Icon(Icons.abc),
-                      suffixIcon: _visitMotive.text.length > 0
+                      suffixIcon: _observations.text.length > 0
                           ? IconButton(
-                              onPressed: _visitMotive.clear,
+                              onPressed: _observations.clear,
                               icon: Icon(Icons.clear_rounded))
                           : null),
                   // textInputAction: TextInputAction.next,
@@ -348,16 +428,163 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
               ),
             ],
           ),
+          SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Checkbox(
+                          checkColor: Colors.white,
+                          fillColor:
+                              MaterialStateProperty.resolveWith(getColor),
+                          value: _isClinicChecked,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              _isClinicChecked = value!;
+                            });
+                          },
+                        ),
+                        Text('Se envió a clinica')
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Checkbox(
+                          checkColor: Colors.white,
+                          fillColor:
+                              MaterialStateProperty.resolveWith(getColor),
+                          value: _isDoctorConsultChecked,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              _isDoctorConsultChecked = value!;
+                            });
+                          },
+                        ),
+                        Text('Molestias consulte a su Médico')
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                  child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Tipo de notificación'),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Checkbox(
+                          checkColor: Colors.white,
+                          fillColor:
+                              MaterialStateProperty.resolveWith(getColor),
+                          value: _isPhoneNotChecked,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              _isPhoneNotChecked = value!;
+                            });
+                          }),
+                      Text('Telefono')
+                    ],
+                  ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Checkbox(
+                          checkColor: Colors.white,
+                          fillColor:
+                              MaterialStateProperty.resolveWith(getColor),
+                          value: _isPersonalNotifChecked,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              _isPersonalNotifChecked = value!;
+                            });
+                          }),
+                      Text('En persona')
+                    ],
+                  ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Checkbox(
+                          checkColor: Colors.white,
+                          fillColor:
+                              MaterialStateProperty.resolveWith(getColor),
+                          value: _isReportNotifChecked,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              _isReportNotifChecked = value!;
+                            });
+                          }),
+                      Text('Reporte')
+                    ],
+                  )
+                ],
+              )),
+              Expanded(
+                  child: Column(
+                children: [
+                  TextField(
+                    controller: _date,
+                    decoration: const InputDecoration(
+                      icon: Icon(Icons.calendar_today),
+                      labelText: "Fecha y hora",
+                    ),
+                    readOnly: true,
+                    onTap: () async {
+                      DateTime? pickedDate = await showDatePicker(
+                              context: context,
+                              initialDate: DateTime.now(),
+                              firstDate: DateTime(2000),
+                              lastDate: DateTime(2101))
+                          .then((pickedDate) {
+                        if (pickedDate != null) {
+                          DateTime selectedDateTime = DateTime.now();
+                          showTimePicker(
+                                  context: context,
+                                  initialTime: TimeOfDay.now())
+                              .then((selectedTime) {
+                            // Handle the selected date and time here.
+                            if (selectedTime != null) {
+                              selectedDateTime = DateTime(
+                                pickedDate.year,
+                                pickedDate.month,
+                                pickedDate.day,
+                                selectedTime.hour,
+                                selectedTime.minute,
+                              );
+                            }
+                            setState(() {
+                              _date.text = selectedDateTime.toString();
+                            });
+                          });
+                        }
+                      });
+                    },
+                  )
+                ],
+              ))
+
+              // Expanded(
+              //     child: ),
+            ],
+          ),
+          SizedBox(height: 20),
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Padding(
-                padding: EdgeInsets.all(8),
-                child: ElevatedButton.icon(
-                    onPressed: () {},
-                    icon: Icon(Icons.save_outlined),
-                    label: Text('Guardar')),
+              Center(
+                child: Padding(
+                  padding: EdgeInsets.all(8),
+                  child: ElevatedButton.icon(
+                      onPressed: () {},
+                      icon: Icon(Icons.save_outlined),
+                      label: Text('Guardar visita')),
+                ),
               )
             ],
           )
@@ -366,11 +593,11 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
     ));
   }
 
-  fetchData() async {
-    causesLst = await getCauses(15);
-    painsList = await getPainList('none');
-    woundsList = await getWoundsList('none');
-  }
+  // fetchData() async {
+  //   causesLst = await getCauses(15);
+  //   painsList = await getPainList('none');
+  //   woundsList = await getWoundsList('none');
+  // }
 }
 
 dynamic studentNewVisit(List<dynamic> jsonList) {

@@ -173,7 +173,7 @@ class NurseryPainListCall {
 class NurseryWoundsCall {
   static Future<ApiCallResponse> call({required String dataLog}) {
     return ApiManager.instance.makeApiCall(
-      callName: 'Nursery-Wounds-Call',
+      callName: 'Nursery-Wounds',
       apiUrl: hostUrl + port + '/api/nursery-wounds',
       callType: ApiCallType.GET,
       headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},
@@ -183,6 +183,33 @@ class NurseryWoundsCall {
       decodeUtf8: false,
       cache: true,
     );
+  }
+}
+
+class EmployeeCall {
+  static Future<ApiCallResponse> call(
+      {required String campus,
+      required String EmployeeID,
+      required String logData,
+      required String param}) {
+    return ApiManager.instance.makeApiCall(
+        callName: 'Employees',
+        apiUrl: hostUrl + port + '/api/employee',
+        callType: ApiCallType.GET,
+        headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},
+        params: {"Required": param},
+        body: 'campus: ' +
+            campus +
+            '|' +
+            'EmployeeID' +
+            EmployeeID +
+            '|' +
+            'log:' +
+            logData,
+        returnBody: true,
+        encodeBodyUtf8: true,
+        decodeUtf8: false,
+        cache: false);
   }
 }
 
