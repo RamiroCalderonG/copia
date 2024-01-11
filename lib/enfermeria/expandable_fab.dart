@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:oxschool/constants/Student.dart';
+import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/enfermeria/new_student_visit.dart';
 import 'package:oxschool/reusable_methods/causes_methods.dart';
+import 'package:oxschool/reusable_methods/employees_methods.dart';
 import 'package:oxschool/reusable_methods/nursery_methods.dart';
+import 'package:oxschool/utils/device_information.dart';
 
 class ExpandableFABNursery extends StatefulWidget {
   const ExpandableFABNursery({super.key});
@@ -149,6 +152,7 @@ Future fetchData() async {
   painsList = await getPainList('none');
   woundsList = await getWoundsList('none');
   accidentType = await getCauses(14);
+  teachersList = await getEmployee('ALL', '0', deviceInformation.toString(), 0);
 }
 
 void showFormDialog(BuildContext context) {

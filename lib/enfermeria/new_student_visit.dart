@@ -21,6 +21,7 @@ List<String> causesLst = [];
 List<String> painsList = [];
 List<String> woundsList = [];
 List<String> accidentType = [];
+List<String> teachersList = [];
 
 class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
   late var _date = TextEditingController();
@@ -44,8 +45,6 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
   String? selectedLesion;
   String? selectedCause;
   String? selectedAccidentType;
-
-  List<String> teachersList = ['Fulano', 'Mengano', 'Sutano'];
 
   // @override
   // void initState() {

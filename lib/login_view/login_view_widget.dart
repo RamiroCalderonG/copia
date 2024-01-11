@@ -24,9 +24,12 @@ class LoginViewWidget extends StatefulWidget {
   _LoginViewWidgetState createState() => _LoginViewWidgetState();
 }
 
+var deviceIP;
+
 class _LoginViewWidgetState extends State<LoginViewWidget> {
   late LoginViewModel _model;
   String currentDeviceData = '';
+
   // late User currentUser;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -83,6 +86,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
         'Error:': 'Failed to get platform version.'
       };
     }
+    FetchDeviceIp();
 
     if (!mounted) return;
     print(deviceData.toString());
@@ -90,6 +94,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
     setState(() {
       deviceData = deviceData;
       currentDeviceData = deviceData.toString();
+      deviceInformation = deviceData;
     });
   }
 
@@ -103,7 +108,9 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
         if (value.isNotEmpty) {
           // Log In user
           _model.apiResultxgr = await LoginUserCall.call(
-                  nip: _model.textController2.text, device: currentDeviceData)
+                  nip: _model.textController2.text,
+                  device: currentDeviceData,
+                  ip_address: deviceIP)
               .timeout(Duration(seconds: 7));
           if ((_model.apiResultxgr?.succeeded ?? true)) {
             // Decode the JSON string into a Dart list
@@ -126,6 +133,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
               jsonList = json.decode(_model.apiResultxgr!.response!.body);
               userPermissions = jsonList;
             }
+
             if (Platform.isAndroid || Platform.isIOS) {
               context.goNamed(
                 'MobileMainView',
@@ -299,6 +307,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                 padding: EdgeInsetsDirectional.fromSTEB(
                                     0.0, 0.0, 0.0, 16.0),
                                 child: TextFormField(
+                                  enableSuggestions: true,
                                   controller: _model.textController1,
                                   obscureText: false,
                                   decoration: InputDecoration(
@@ -342,6 +351,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                 padding: EdgeInsetsDirectional.fromSTEB(
                                     0.0, 0.0, 0.0, 16.0),
                                 child: TextFormField(
+                                  autofocus: true,
                                   // When the user press enter or send key
                                   onFieldSubmitted: (value) async {
                                     loginButtonFunction();
@@ -555,4 +565,8 @@ Cycle getcurrentCycle(List<dynamic> jsonList) {
   }
 
   return currentCycle;
+}
+
+Future FetchDeviceIp() async {
+  deviceIP = await getDeviceIP();
 }
