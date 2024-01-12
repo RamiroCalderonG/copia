@@ -7,7 +7,6 @@ import 'package:oxschool/enfermeria/new_student_visit.dart';
 import 'package:oxschool/reusable_methods/causes_methods.dart';
 import 'package:oxschool/reusable_methods/employees_methods.dart';
 import 'package:oxschool/reusable_methods/nursery_methods.dart';
-import 'package:oxschool/utils/device_information.dart';
 
 class ExpandableFABNursery extends StatefulWidget {
   const ExpandableFABNursery({super.key});
@@ -152,7 +151,13 @@ Future fetchData() async {
   painsList = await getPainList('none');
   woundsList = await getWoundsList('none');
   accidentType = await getCauses(14);
-  teachersList = await getEmployee('ALL', '0', deviceInformation.toString(), 0);
+  teachersList = await getTeacherByGradeAndGroup(
+      selectedStudent.gradoSecuencia,
+      selectedStudent.grupo,
+      selectedStudent.claUn,
+      currentCycle!.claCiclo!,
+      currentUser!.employeeNumber!.toString(),
+      deviceIp!);
 }
 
 void showFormDialog(BuildContext context) {

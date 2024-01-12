@@ -1,7 +1,6 @@
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:oxschool/components/create_service_ticket.dart';
 import 'package:oxschool/components/drawer_menu.dart';
-import 'package:oxschool/components/mobile_main_items_list.dart';
 import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/constants/url_links.dart';
 import 'package:oxschool/user/user_view_view.dart';
@@ -114,8 +113,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                           //       fontSize: 20),
                           // ),
                           Text(
-                              '${currentUser?.employeeName?.toLowerCase().trimRight()}' +
-                                  '${currentUser!.claUn}',
+                              '${currentUser?.employeeName?.toLowerCase().trimRight()}',
                               textAlign: TextAlign.center,
                               style: FlutterFlowTheme.of(context)
                                   .bodyMedium

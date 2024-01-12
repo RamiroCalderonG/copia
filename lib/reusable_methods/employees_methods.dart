@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:oxschool/Models/Employee.dart';
 import 'package:oxschool/backend/api_requests/api_calls.dart';
+import 'package:oxschool/constants/User.dart';
 
 //selectedcampus:  can be 'A' to get all campuses or the initial letter of each campus
 //employeeID: if you want to get a single employee
@@ -17,7 +18,8 @@ getEmployee(
           campus: selectedCampus,
           employeeID: employeeID,
           logData: logData,
-          param: param.toString())
+          param: param.toString(),
+          ip: deviceIp!)
       .timeout(Duration(seconds: 15));
 
   if (apiResultxgr.succeeded) {
@@ -44,6 +46,34 @@ getEmployee(
       }
     } else {
       debugPrint('No se ecuentran registros');
+    }
+  }
+}
+
+getTeacherByGradeAndGroup(int grade, String group, String campus, String cycle,
+    String employeID, String deviceIP) async {
+  List<dynamic> jsonList;
+  List<dynamic> teacherList;
+  var apiResultxgr = await TeacherCall.call(
+          ipData: deviceIP,
+          campus: campus,
+          grade: grade,
+          group: group,
+          param:
+              '11', //Number 11 means to the backend that it has to fetch all the teachers from the selected groupAndGrade
+          cycle: cycle)
+      .timeout(Duration(seconds: 15));
+
+  if (apiResultxgr.succeeded) {
+    try {
+      // Parse the JSON response
+      jsonList = json.decode(apiResultxgr.response!.body);
+
+      // Extract nombre into causesLst
+      teacherList = List<String>.from(jsonList.map((json) => json['Nombre']));
+      return teacherList;
+    } catch (e) {
+      print(e.toString());
     }
   }
 }

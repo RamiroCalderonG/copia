@@ -8,7 +8,6 @@ import 'package:oxschool/flutter_flow/flutter_flow_theme.dart';
 
 import '../backend/api_requests/api_calls.dart';
 import '../backend/api_requests/api_manager.dart';
-import '../flutter_flow/flutter_flow_util.dart';
 
 class NewStudentNurseryVisit extends StatefulWidget {
   const NewStudentNurseryVisit({super.key});
@@ -32,6 +31,9 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
   late var _valoration = TextEditingController();
   late var _accidentType = TextEditingController();
   late var _observations = TextEditingController();
+
+  String teacherDropDownValue = teachersList.first;
+
   bool? _isClinicChecked = false;
   bool? _isDoctorConsultChecked = false;
   bool? _isPhoneNotChecked = false;
@@ -76,7 +78,6 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
     // List<dynamic> causesList = studentNewVisit(causess);
     _studentId.text = selectedStudent!.matricula!;
     _studentname.text = selectedStudent!.nombre!;
-    String teacherDropDownValue = teachersList.first;
 
     MultiSelectDialogField painsSelector = MultiSelectDialogField(
       items:
@@ -223,15 +224,17 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
 
     DropdownButton<String> responsableTeacher = DropdownButton<String>(
         value: teacherDropDownValue,
+        hint: Text('Maestro responsable'),
+        borderRadius: BorderRadius.circular(15),
         icon: Icon(Icons.person),
-        elevation: 16,
+        elevation: 6,
         style: FlutterFlowTheme.of(context).bodyMedium.override(
               fontFamily: 'Sora',
               color: FlutterFlowTheme.of(context).primaryText,
             ),
         underline: Container(
           height: 2,
-          color: Colors.deepPurpleAccent,
+          color: Colors.white,
         ),
         items: teachersList.map<DropdownMenuItem<String>>((String value) {
           return DropdownMenuItem<String>(
@@ -241,7 +244,7 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
         }).toList(),
         onChanged: (String? value) {
           setState(() {
-            // teacherDropDownValue = value!;
+            teacherDropDownValue = value!;
           });
         });
 

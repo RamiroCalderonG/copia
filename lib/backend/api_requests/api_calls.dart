@@ -1,11 +1,6 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
-import 'package:flutter/foundation.dart';
 import 'package:oxschool/constants/connection.dart';
-import 'package:oxschool/utils/device_information.dart';
-
-import '../../flutter_flow/flutter_flow_util.dart';
 
 import 'api_manager.dart';
 
@@ -23,11 +18,7 @@ class LoginUserCall {
       apiUrl: hostUrl + port + '/login/userlogin?nip=$nip&device=$device',
       callType: ApiCallType.GET,
       headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},
-      params: {
-        'nip': nip,
-        'device': device,
-      },
-      body: ip_address,
+      params: {'nip': nip, 'device': device, 'l1': ip_address},
       returnBody: true,
       encodeBodyUtf8: false,
       decodeUtf8: true,
@@ -194,16 +185,49 @@ class EmployeeCall {
       {required String campus,
       required String employeeID,
       required String logData,
-      required String param}) {
-    var bodyContent = campus + employeeID + logData + param;
+      required String param,
+      required String ip}) {
     return ApiManager.instance.makeApiCall(
         callName: 'Employees',
         apiUrl: hostUrl + port + '/api/employee',
         callType: ApiCallType.GET,
         headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},
-        params: {"Required": param},
-        body: bodyContent,
-        returnBody: false,
+        params: {
+          "Required": param,
+          "campus": campus,
+          "employeeID": employeeID,
+          "l1": ip
+        },
+        returnBody: true,
+        encodeBodyUtf8: false,
+        decodeUtf8: false,
+        cache: false);
+  }
+}
+
+class TeacherCall {
+  static Future<ApiCallResponse> call({
+    required String ipData,
+    required String campus,
+    required int grade,
+    required String group,
+    required String param,
+    required String cycle,
+  }) {
+    return ApiManager.instance.makeApiCall(
+        callName: 'Teacher',
+        apiUrl: hostUrl + port + '/api/Employee/Teacher',
+        callType: ApiCallType.GET,
+        headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},
+        params: {
+          "ClaUn": campus,
+          "ClaCiclo": cycle,
+          "Grado": grade,
+          "Grupo": group,
+          "deviceInfo": ipData,
+          "param": param,
+        },
+        returnBody: true,
         encodeBodyUtf8: false,
         decodeUtf8: false,
         cache: false);

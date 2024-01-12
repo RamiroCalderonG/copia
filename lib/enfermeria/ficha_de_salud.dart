@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
-import 'package:oxschool/Models/Cycle.dart';
 import 'package:oxschool/Models/Family.dart';
 import 'package:oxschool/Models/Medicines.dart';
 import 'package:oxschool/Models/NurseryHistory.dart';
@@ -611,8 +610,10 @@ dynamic studentNursery(List<dynamic> jsonList) {
     String nomGradoEscolar = item['NomGradoEscolar'];
     String grupo = item['Grupo'];
     String claUn = item['ClaUn'];
+    int gradoSecuencia = item['GradoSecuencia'];
 
-    return Student(matricula, clafam, alumno, claUn, grupo, nomGradoEscolar);
+    return Student(matricula, clafam, alumno, claUn, grupo, nomGradoEscolar,
+        gradoSecuencia);
   } else {
     // If there are multiple items in the list, return a List<Student>
     List<Student> studentsList = [];
@@ -623,9 +624,10 @@ dynamic studentNursery(List<dynamic> jsonList) {
       String nomGradoEscolar = item['NomGradoEscolar'];
       String grupo = item['Grupo'];
       String claUn = item['ClaUn'];
+      int gradoSecuencia = item['gradoSecuencia'];
 
-      studentsList.add(
-          Student(matricula, clafam, alumno, claUn, grupo, nomGradoEscolar));
+      studentsList.add(Student(matricula, clafam, alumno, claUn, grupo,
+          nomGradoEscolar, gradoSecuencia));
     }
     return studentsList;
   }

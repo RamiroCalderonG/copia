@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:oxschool/components/create_service_ticket.dart';
 import 'package:oxschool/components/drawer_menu.dart';
 import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/flutter_flow/flutter_flow_theme.dart';

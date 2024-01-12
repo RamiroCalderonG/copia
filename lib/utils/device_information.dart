@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:developer' as developer;
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
+import 'package:oxschool/constants/User.dart';
 
 // DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
 final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
@@ -164,7 +164,7 @@ String _getAppBarTitle() => kIsWeb
 Future getDeviceIP() async {
   var interface;
   String responseData = '';
-  String deviceIP;
+  String ipFromDevice;
   var addr;
   for (interface in await NetworkInterface.list()) {
     for (addr in interface.addresses) {
@@ -201,9 +201,10 @@ Future getDeviceIP() async {
   };
 
   // Convert the Dart object to JSON
-  deviceIP = jsonEncode(requestBody);
+  ipFromDevice = jsonEncode(requestBody);
+  deviceIp = ipFromDevice;
 
-  return deviceIP;
+  return ipFromDevice;
 }
 
 //  Future<void> _initNetworkInfo() async {
