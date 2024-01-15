@@ -48,3 +48,98 @@ Future<List<String>> getWoundsList(String logger) async {
     throw Exception("Failed to fetch");
   }
 }
+
+Future<String> postNurseryStudent(
+    int employeeID,
+    String? kindOfPain,
+    String kindOfWound,
+    String otherCauses,
+    String studentId,
+// String studentName,
+    String reasonForVisit,
+    String valoration,
+    String treatment,
+    String kindOfAccident,
+    String? responsableTeacher,
+    String? observations,
+    bool sentToClinic,
+    bool sentToDoctor,
+    bool phoneNotif,
+    bool personalNotif,
+    bool reportNotif,
+    DateTime dateAndTime) async {
+  var responseID;
+
+  //Parse params to manage as JSON
+  var body = nurseryToJSON(
+      employeeID,
+      kindOfPain,
+      kindOfWound,
+      otherCauses,
+      studentId,
+      reasonForVisit,
+      valoration,
+      treatment,
+      kindOfAccident,
+      responsableTeacher,
+      observations,
+      sentToClinic,
+      sentToDoctor,
+      phoneNotif,
+      personalNotif,
+      reportNotif,
+      dateAndTime);
+
+  try {
+    var apiResultxgr = await POSTNurseryStudentVisit.call(requiredBody: body)
+        .timeout(Duration(seconds: 15));
+
+    if (apiResultxgr.succeeded) {
+      // Parse the JSON response ID
+      responseID = json.decode(apiResultxgr.response!.body);
+    }
+    return responseID;
+  } catch (e) {
+    print("Error in API Call" + e.toString());
+    throw Exception(e.toString());
+  }
+}
+
+Map<String, dynamic> nurseryToJSON(
+    int employeeID,
+    String? kindOfPain,
+    String kindOfWound,
+    String otherCauses,
+    String studentId,
+// String studentName,
+    String reasonForVisit,
+    String valoration,
+    String treatment,
+    String kindOfAccident,
+    String? responsableTeacher,
+    String? observations,
+    bool sentToClinic,
+    bool sentToDoctor,
+    bool phoneNotif,
+    bool personalNotif,
+    bool reportNotif,
+    DateTime dateAndTime) {
+  return {
+    'NoEmpleado': employeeID,
+    'TipoDolor': kindOfPain,
+    'TipoHerida': kindOfWound,
+    'Matricula': studentId,
+    'MotivoVisita': reasonForVisit,
+    'Valoracion': valoration,
+    'Tratamiento': treatment,
+    'TipoAccidente': kindOfAccident,
+    'Responsable': responsableTeacher,
+    'Observaciones': observations,
+    'Clinica': sentToClinic.toString(),
+    'Doctor': sentToDoctor.toString(),
+    'Telefono': phoneNotif.toString(),
+    'Personal': personalNotif.toString(),
+    'Reporte': reportNotif.toString(),
+    'Fecha': dateAndTime.toString()
+  };
+}

@@ -5,9 +5,12 @@ import 'package:multi_select_flutter/util/multi_select_item.dart';
 import 'package:oxschool/Models/Cause.dart';
 import 'package:oxschool/constants/Student.dart';
 import 'package:oxschool/flutter_flow/flutter_flow_theme.dart';
+import 'package:oxschool/reusable_methods/nursery_methods.dart';
+import 'package:oxschool/utils/loader_indicator.dart';
 
 import '../backend/api_requests/api_calls.dart';
 import '../backend/api_requests/api_manager.dart';
+import '../constants/User.dart';
 
 class NewStudentNurseryVisit extends StatefulWidget {
   const NewStudentNurseryVisit({super.key});
@@ -29,10 +32,17 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
   late var _visitMotive = TextEditingController();
   late var _tx = TextEditingController();
   late var _valoration = TextEditingController();
-  late var _accidentType = TextEditingController();
+  late var _kindOfPain = TextEditingController();
+  late var _kindOfWound = TextEditingController();
+  late var _otherCauses = TextEditingController();
   late var _observations = TextEditingController();
+  late String _teacherResponsable;
+  late DateTime selectedDateTime;
+
+  bool isNoAplicaSelected = false;
 
   String teacherDropDownValue = teachersList.first;
+  String? _accidentTypes;
 
   bool? _isClinicChecked = false;
   bool? _isDoctorConsultChecked = false;
@@ -41,24 +51,12 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
   bool? _isReportNotifChecked = false;
 
   ApiCallResponse? apiResultxgr;
-  // bool causesFetched = false; // Track whether causes are fetched
+  var resultID;
 
   String? selectedPain;
   String? selectedLesion;
   String? selectedCause;
   String? selectedAccidentType;
-
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   // Call getCauses only if causes are not fetched yet
-  //   if (!causesFetched) {
-  //     fetchData();
-  //     if (causesLst.isNotEmpty) {
-  //       causesFetched = true;
-  //     }
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -110,6 +108,7 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
                 color: FlutterFlowTheme.of(context).primaryText,
               )),
       onConfirm: (results) {
+        _kindOfPain.text = results.toString();
         //_selectedAnimals = results;
       },
     );
@@ -146,6 +145,7 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
                 color: FlutterFlowTheme.of(context).primaryText,
               )),
       onConfirm: (results) {
+        _kindOfWound.text = results.toString();
         //_selectedAnimals = results;
       },
     );
@@ -184,6 +184,7 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
                 color: FlutterFlowTheme.of(context).primaryText,
               )),
       onConfirm: (results) {
+        _otherCauses.text = results.toString();
         //_selectedAnimals = results;
       },
     );
@@ -218,9 +219,48 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
                 color: FlutterFlowTheme.of(context).primaryText,
               )),
       onConfirm: (results) {
+        setState(() {
+          isNoAplicaSelected = results.contains(' NO APLICA');
+          _accidentTypes = results.join(', ');
+        });
+
         //_selectedAnimals = results;
       },
     );
+
+    Widget responsableTeacherWidget() {
+      if (isNoAplicaSelected) {
+        return DropdownButton<String>(
+          value: teacherDropDownValue,
+          hint: Text('Maestro responsable'),
+          borderRadius: BorderRadius.circular(15),
+          icon: Icon(Icons.person),
+          elevation: 6,
+          style: FlutterFlowTheme.of(context).bodyMedium.override(
+                fontFamily: 'Sora',
+                color: FlutterFlowTheme.of(context).primaryText,
+              ),
+          underline: Container(
+            height: 2,
+            color: Colors.white,
+          ),
+          items: teachersList.map<DropdownMenuItem<String>>((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(value),
+            );
+          }).toList(),
+          onChanged: (String? value) {
+            setState(() {
+              teacherDropDownValue = value!;
+              _teacherResponsable = value!;
+            });
+          },
+        );
+      } else {
+        return Container();
+      }
+    }
 
     DropdownButton<String> responsableTeacher = DropdownButton<String>(
         value: teacherDropDownValue,
@@ -406,7 +446,8 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
             children: [
               Expanded(child: accidentTypes),
               SizedBox(width: 20),
-              Expanded(child: responsableTeacher)
+              Expanded(child: responsableTeacherWidget()),
+              // Expanded(child: responsableTeacher)
             ],
           ),
           SizedBox(height: 10),
@@ -544,7 +585,7 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
                               lastDate: DateTime(2101))
                           .then((pickedDate) {
                         if (pickedDate != null) {
-                          DateTime selectedDateTime = DateTime.now();
+                          selectedDateTime = DateTime.now();
                           showTimePicker(
                                   context: context,
                                   initialTime: TimeOfDay.now())
@@ -583,9 +624,86 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
                 child: Padding(
                   padding: EdgeInsets.all(8),
                   child: ElevatedButton.icon(
-                      onPressed: () {},
+                      onPressed: () {
+                        // Navigator.of(context).push(MaterialPageRoute(
+                        //   builder: (context) => LoadingIndicator(),
+                        // )
+                        // );
+
+                        //Function to post a new student visit
+                        resultID = postNurseryStudent(
+                                currentUser!.employeeNumber!.toInt(),
+                                _kindOfPain.text,
+                                _kindOfWound.text,
+                                _otherCauses.text,
+                                _studentId.text,
+                                _visitMotive.text,
+                                _valoration.text,
+                                _tx.text,
+                                _accidentTypes!,
+                                _teacherResponsable,
+                                _observations.text,
+                                _isClinicChecked!,
+                                _isDoctorConsultChecked!,
+                                _isPhoneNotChecked!,
+                                _isPersonalNotifChecked!,
+                                _isReportNotifChecked!,
+                                selectedDateTime)
+                            .then((value) {
+                          // Navigate back to your main screen or handle the result as needed
+                          Navigator.of(context).pop();
+                          AlertDialog(
+                            title: Text(
+                              'Éxito',
+                              style: FlutterFlowTheme.of(context)
+                                  .bodyMedium
+                                  .override(
+                                    fontFamily: 'Sora',
+                                    color: FlutterFlowTheme.of(context)
+                                        .primaryText,
+                                  ),
+                            ),
+                            content: Text(
+                              'Se registro con exito: ' + resultID!.toString(),
+                              style: FlutterFlowTheme.of(context)
+                                  .bodyMedium
+                                  .override(
+                                    fontFamily: 'Sora',
+                                    color: FlutterFlowTheme.of(context)
+                                        .primaryText,
+                                  ),
+                            ),
+                          );
+                        }).catchError((error) {
+                          Navigator.of(context).pop();
+                          //AlertDialog to display Error;
+                          AlertDialog alert = AlertDialog(
+                            title: Text(
+                              'Error',
+                              style: FlutterFlowTheme.of(context)
+                                  .bodyMedium
+                                  .override(
+                                    fontFamily: 'Sora',
+                                    color: FlutterFlowTheme.of(context)
+                                        .primaryText,
+                                  ),
+                            ),
+                            content: Text(
+                              error.toString(),
+                              style: FlutterFlowTheme.of(context)
+                                  .bodyMedium
+                                  .override(
+                                    fontFamily: 'Sora',
+                                    color: FlutterFlowTheme.of(context)
+                                        .primaryText,
+                                  ),
+                            ),
+                            actions: [okButton],
+                          );
+                        });
+                      },
                       icon: Icon(Icons.save_outlined),
-                      label: Text('Guardar visita')),
+                      label: Text('Registrar visita')),
                 ),
               )
             ],
@@ -595,11 +713,55 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
     ));
   }
 
-  // fetchData() async {
-  //   causesLst = await getCauses(15);
-  //   painsList = await getPainList('none');
-  //   woundsList = await getWoundsList('none');
-  // }
+  postNewStudentVisit(
+      int employeeID,
+      String? kindOfPain,
+      String kindOfWound,
+      String otherCauses,
+      String studentId,
+// String studentName,
+      String reasonForVisit,
+      String valoration,
+      String treatment,
+      String kindOfAccident,
+      String? responsableTeacher,
+      String? observations,
+      bool sentToClinic,
+      bool sentToDoctor,
+      bool phoneNotif,
+      bool personalNotif,
+      bool reportNotif,
+      DateTime dateAndTime) async {
+    try {
+      String result = await postNurseryStudent(
+          employeeID,
+          kindOfPain,
+          kindOfWound,
+          otherCauses,
+          studentId,
+// String studentName,
+          reasonForVisit,
+          valoration,
+          treatment,
+          kindOfAccident,
+          responsableTeacher,
+          observations,
+          sentToClinic,
+          sentToDoctor,
+          phoneNotif,
+          personalNotif,
+          reportNotif,
+          dateAndTime);
+    } catch (e) {
+      print(e.toString());
+      throw Exception(e.toString());
+    }
+  }
+
+  Widget okButton = TextButton(
+    child: Text("OK"),
+    onPressed: () {},
+  );
 }
 
 dynamic studentNewVisit(List<dynamic> jsonList) {
