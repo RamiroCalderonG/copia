@@ -236,7 +236,7 @@ class TeacherCall {
 
 class POSTNurseryStudentVisit {
   static Future<ApiCallResponse> call(
-      {required Map<String?, dynamic> requiredBody}) {
+      {required Map<String, dynamic>? requiredBody}) {
     return ApiManager.instance.makeApiCall(
       callName: 'POST Student Nursery Visit',
       apiUrl: hostUrl + port + '/api/nursery-visit/',

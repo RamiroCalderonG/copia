@@ -651,7 +651,7 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
                                 selectedDateTime)
                             .then((value) {
                           // Navigate back to your main screen or handle the result as needed
-                          Navigator.of(context).pop();
+                          // Navigator.of(context).pop();
                           AlertDialog(
                             title: Text(
                               'Éxito',

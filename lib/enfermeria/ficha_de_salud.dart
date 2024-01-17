@@ -290,7 +290,7 @@ class _FichaDeSaludState extends State<FichaDeSalud>
                           nombre: substrings[2].capitalize(),
                           claUn: currentUser!.claUn,
                           claCiclo: currentCycle!.claCiclo)
-                      .timeout(Duration(milliseconds: 5000));
+                      .timeout(Duration(seconds: 15));
                   if ((apiResultxgr?.succeeded ?? true)) {
                     List<dynamic> jsonList =
                         json.decode(apiResultxgr!.response!.body);
