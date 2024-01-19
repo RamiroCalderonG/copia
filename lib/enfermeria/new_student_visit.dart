@@ -11,6 +11,8 @@ import 'package:oxschool/utils/loader_indicator.dart';
 import '../backend/api_requests/api_calls.dart';
 import '../backend/api_requests/api_manager.dart';
 import '../constants/User.dart';
+import '../reusable_methods/employees_methods.dart';
+import '../utils/temp_data.dart';
 
 class NewStudentNurseryVisit extends StatefulWidget {
   const NewStudentNurseryVisit({super.key});
@@ -630,6 +632,25 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
                         // )
                         // );
 
+                        //Get the type of notification
+                        // TODO: No real need to get the type of notification
+                        var notifType = 0;
+                        if (_isPhoneNotChecked = true) {
+                          notifType = 1;
+                        } else if (_isPersonalNotifChecked = true) {
+                          notifType = 2;
+                        } else if (_isReportNotifChecked = true) {
+                          notifType = 3;
+                        }
+                        var responsableTeacherID;
+
+                        if (_teacherResponsable.isNotEmpty) {
+                          responsableTeacherID = obtainEmployeeNumberbyName(
+                              tempTeachersList, _teacherResponsable);
+                        }
+
+                        //Get responable teacher ID
+
                         //Function to post a new student visit
                         resultID = postNurseryStudent(
                                 currentUser!.employeeNumber!.toInt(),
@@ -648,7 +669,10 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
                                 _isPhoneNotChecked!,
                                 _isPersonalNotifChecked!,
                                 _isReportNotifChecked!,
-                                selectedDateTime)
+                                selectedDateTime,
+                                notifType,
+                                deviceInformation.toString(),
+                                responsableTeacherID!)
                             .then((value) {
                           // Navigate back to your main screen or handle the result as needed
                           // Navigator.of(context).pop();
@@ -731,7 +755,10 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
       bool phoneNotif,
       bool personalNotif,
       bool reportNotif,
-      DateTime dateAndTime) async {
+      DateTime dateAndTime,
+      int notifType,
+      String deviceInformation,
+      String responsableTeacherID) async {
     try {
       String result = await postNurseryStudent(
           employeeID,
@@ -751,7 +778,10 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
           phoneNotif,
           personalNotif,
           reportNotif,
-          dateAndTime);
+          dateAndTime,
+          notifType,
+          deviceInformation,
+          responsableTeacherID);
     } catch (e) {
       print(e.toString());
       throw Exception(e.toString());

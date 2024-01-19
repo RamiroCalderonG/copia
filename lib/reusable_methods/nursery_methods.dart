@@ -2,6 +2,7 @@
 import 'dart:convert';
 
 import 'package:oxschool/backend/api_requests/api_calls.dart';
+import 'package:oxschool/constants/User.dart';
 
 Future<List<String>> getPainList(String logger) async {
   List<dynamic> jsonList;
@@ -67,7 +68,10 @@ Future<String> postNurseryStudent(
     bool phoneNotif,
     bool personalNotif,
     bool reportNotif,
-    DateTime dateAndTime) async {
+    DateTime dateAndTime,
+    int notifType,
+    String deviceInformation,
+    String responsableTeacherID) async {
   var responseID;
 
   //Parse params to manage as JSON
@@ -77,6 +81,7 @@ Future<String> postNurseryStudent(
       kindOfWound,
       otherCauses,
       studentId,
+      currentCycle!.claCiclo.toString(),
       reasonForVisit,
       valoration,
       treatment,
@@ -88,14 +93,17 @@ Future<String> postNurseryStudent(
       phoneNotif,
       personalNotif,
       reportNotif,
-      dateAndTime);
+      dateAndTime,
+      notifType,
+      deviceInformation,
+      responsableTeacherID);
 
   try {
     var apiResultxgr = await POSTNurseryStudentVisit.call(requiredBody: body)
         .timeout(Duration(seconds: 15));
 
     if (apiResultxgr.succeeded) {
-      // Parse the JSON response ID
+      // Parse the JSON response ID from DB
       responseID = json.decode(apiResultxgr.response!.body);
     }
     return responseID;
@@ -111,6 +119,7 @@ Map<String, dynamic> nurseryToJSON(
     String kindOfWound,
     String otherCauses,
     String studentId,
+    String currentCycle,
 // String studentName,
     String reasonForVisit,
     String valoration,
@@ -123,12 +132,17 @@ Map<String, dynamic> nurseryToJSON(
     bool phoneNotif,
     bool personalNotif,
     bool reportNotif,
-    DateTime dateAndTime) {
+    DateTime dateAndTime,
+    int notifType,
+    String deviceInformation,
+    String responsableTeacherID) {
   return {
     'NoEmpleado': employeeID,
     'TipoDolor': kindOfPain,
     'TipoHerida': kindOfWound,
+    'OtraCausa': otherCauses,
     'Matricula': studentId,
+    'ClaCiclo': currentCycle,
     'MotivoVisita': reasonForVisit,
     'Valoracion': valoration,
     'Tratamiento': treatment,
@@ -140,6 +154,9 @@ Map<String, dynamic> nurseryToJSON(
     'Telefono': phoneNotif.toString(),
     'Personal': personalNotif.toString(),
     'Reporte': reportNotif.toString(),
-    'Fecha': dateAndTime.toString()
+    'Fecha': dateAndTime.toString(),
+    'TipoNotificacion': notifType.toString(),
+    'Computadora': deviceInformation.toString(),
+    'MtroResponsableID': responsableTeacherID
   };
 }

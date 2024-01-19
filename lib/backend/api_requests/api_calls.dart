@@ -243,7 +243,7 @@ class POSTNurseryStudentVisit {
       callType: ApiCallType.POST,
       headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},
       bodyType: BodyType.JSON,
-      body: requiredBody.toString(),
+      body: requiredBody,
       returnBody: true,
     );
   }
