@@ -237,13 +237,14 @@ class TeacherCall {
 class POSTNurseryStudentVisit {
   static Future<ApiCallResponse> call(
       {required Map<String, dynamic>? requiredBody}) {
+    var contentBody = requiredBody.toString();
     return ApiManager.instance.makeApiCall(
       callName: 'POST Student Nursery Visit',
       apiUrl: hostUrl + port + '/api/nursery-visit/',
       callType: ApiCallType.POST,
       headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},
       bodyType: BodyType.JSON,
-      body: requiredBody,
+      body: contentBody,
       returnBody: true,
     );
   }

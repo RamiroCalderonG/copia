@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:multi_select_flutter/dialog/multi_select_dialog_field.dart';
 import 'package:multi_select_flutter/util/multi_select_item.dart';
 import 'package:oxschool/Models/Cause.dart';
+import 'package:oxschool/backend/api_requests/api_calls_list.dart';
 import 'package:oxschool/constants/Student.dart';
 import 'package:oxschool/flutter_flow/flutter_flow_theme.dart';
 import 'package:oxschool/reusable_methods/nursery_methods.dart';
@@ -38,12 +39,14 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
   late var _kindOfWound = TextEditingController();
   late var _otherCauses = TextEditingController();
   late var _observations = TextEditingController();
-  late String _teacherResponsable;
+  late String _teacherResponsable = '';
   late DateTime selectedDateTime;
+  var apiCallResponseResult;
 
   bool isNoAplicaSelected = false;
+  bool isLoading = false;
 
-  String teacherDropDownValue = teachersList.first;
+  String? teacherDropDownValue = teachersList.first;
   String? _accidentTypes;
 
   bool? _isClinicChecked = false;
@@ -148,6 +151,7 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
               )),
       onConfirm: (results) {
         _kindOfWound.text = results.toString();
+
         //_selectedAnimals = results;
       },
     );
@@ -204,6 +208,7 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
             color: FlutterFlowTheme.of(context).tertiary,
           ),
       //causess.map((pain) => MultiSelectItem<String>(pain, pain)).toList(),
+      initialValue: [accidentType.first],
       title: Text("Tipo de Accidente"),
       selectedColor: Colors.blue,
       searchable: true,
@@ -223,7 +228,8 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
       onConfirm: (results) {
         setState(() {
           isNoAplicaSelected = results.contains(' NO APLICA');
-          _accidentTypes = results.join(', ');
+          _accidentTypes =
+              results.isEmpty ? accidentType[0] : results.join(', ');
         });
 
         //_selectedAnimals = results;
@@ -233,7 +239,8 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
     Widget responsableTeacherWidget() {
       if (isNoAplicaSelected) {
         return DropdownButton<String>(
-          value: teacherDropDownValue,
+          value: teacherDropDownValue ??
+              teachersList.first, // Set default value to the first item,
           hint: Text('Maestro responsable'),
           borderRadius: BorderRadius.circular(15),
           icon: Icon(Icons.person),
@@ -255,7 +262,7 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
           onChanged: (String? value) {
             setState(() {
               teacherDropDownValue = value!;
-              _teacherResponsable = value!;
+              _teacherResponsable = value;
             });
           },
         );
@@ -290,451 +297,456 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
           });
         });
 
-    // MultiSelectDialogField responsableTeacher = MultiSelectDialogField(
-    //   items: teachersList!
-    //       .map((pain) => MultiSelectItem<String>(pain, pain))
-    //       .toList(),
-    //   itemsTextStyle: FlutterFlowTheme.of(context).bodyMedium.override(
-    //         fontFamily: 'Sora',
-    //         color: FlutterFlowTheme.of(context).primaryText,
-    //       ),
-    //   selectedItemsTextStyle: FlutterFlowTheme.of(context).bodyMedium.override(
-    //         fontFamily: 'Sora',
-    //         color: FlutterFlowTheme.of(context).tertiary,
-    //       ),
-    //   buttonIcon: Icon(Icons.person),
-    //   autovalidateMode: AutovalidateMode.onUserInteraction,
-    //   //causess.map((pain) => MultiSelectItem<String>(pain, pain)).toList(),
-    //   title: Text("Maestro responsable"),
-    //   selectedColor: Colors.blue,
-    //   searchable: true,
-    //   decoration: BoxDecoration(
-    //     color: Colors.blue.withOpacity(0.1),
-    //     borderRadius: BorderRadius.all(Radius.circular(40)),
-    //     border: Border.all(
-    //       color: Colors.blue,
-    //       width: 2,
-    //     ),
-    //   ),
-    //   buttonText: Text("Maestro responsable",
-    //       style: FlutterFlowTheme.of(context).bodyMedium.override(
-    //             fontFamily: 'Sora',
-    //             color: FlutterFlowTheme.of(context).primaryText,
-    //           )),
-    //   onConfirm: (results) {
-    //     //_selectedAnimals = results;
-    //   },
-
-    // );
-
-    return SingleChildScrollView(
-        child: Container(
-      width: MediaQuery.of(context).size.width * 2 / 2,
-      // height: MediaQuery.of(context).size.height,
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(child: painsSelector),
-              SizedBox(width: 6),
-              Expanded(child: kindOfLesion),
-              SizedBox(width: 6),
-              Expanded(child: causes)
-            ],
-          ),
-          Divider(thickness: 3),
-          TextFormField(
-            controller: _studentId,
-            enableSuggestions: false,
-            decoration: InputDecoration(
-              label: Text('Matricula'),
-              prefixIcon: const Icon(Icons.numbers),
-              suffixIcon: _studentId.text.isNotEmpty
-                  ? IconButton(
-                      onPressed: () {
-                        setState(() {
-                          _studentId.clear();
-                        });
-                      },
-                      icon: Icon(Icons.clear_rounded),
-                    )
-                  : null,
-            ),
-            onChanged: (value) {
-              setState(() {});
-            },
-            textInputAction: TextInputAction.next,
-            inputFormatters: <TextInputFormatter>[
-              FilteringTextInputFormatter.digitsOnly
-            ],
-          ),
-          TextFormField(
-            controller: _studentname,
-            enableSuggestions: false,
-            decoration: InputDecoration(
-                label: Text('Nombre del alumno'),
-                prefixIcon: const Icon(Icons.person_pin_rounded),
-                suffixIcon: _studentname.text.isNotEmpty
-                    ? IconButton(
-                        onPressed: () {
-                          setState(() {
-                            _studentname.clear();
-                          });
-                        },
-                        icon: Icon(Icons.clear_rounded))
-                    : null),
-            onChanged: (value) {
-              setState(() {});
-            },
-            textInputAction: TextInputAction.next,
-          ),
-          SizedBox(height: 5),
-          TextFormField(
-            controller: _visitMotive,
-            enableSuggestions: true,
-            decoration: InputDecoration(
-                label: Text('Motivo de visita'),
-                prefixIcon: const Icon(Icons.abc),
-                suffixIcon: _visitMotive.text.length > 0
-                    ? IconButton(
-                        onPressed: _visitMotive.clear,
-                        icon: Icon(Icons.clear_rounded))
-                    : null),
-            // textInputAction: TextInputAction.next,
-            autofocus: true,
-            maxLines: 3,
-          ),
-          SizedBox(height: 18),
-          Row(
-            children: [
-              Expanded(
-                child: TextFormField(
-                  controller: _valoration,
-                  enableSuggestions: true,
-                  decoration: InputDecoration(
-                      label: Text('Valoracion'),
-                      prefixIcon: const Icon(Icons.abc),
-                      suffixIcon: _valoration.text.length > 0
-                          ? IconButton(
-                              onPressed: _valoration.clear,
-                              icon: Icon(Icons.clear_rounded))
-                          : null),
-                  // textInputAction: TextInputAction.next,
-                  maxLines: 2,
-                ),
-              ),
-              SizedBox(
-                width: 10,
-              ),
-              Expanded(
-                child: TextFormField(
-                  controller: _tx,
-                  decoration: InputDecoration(
-                      label: Text('Tratamiento'),
-                      prefixIcon: const Icon(Icons.abc),
-                      suffixIcon: _tx.text.length > 0
-                          ? IconButton(
-                              onPressed: _tx.clear,
-                              icon: Icon(Icons.clear_rounded))
-                          : null),
-                  // textInputAction: TextInputAction.next,
-                  maxLines: 2,
-                ),
-              )
-            ],
-          ),
-          SizedBox(height: 15),
-          Row(
-            children: [
-              Expanded(child: accidentTypes),
-              SizedBox(width: 20),
-              Expanded(child: responsableTeacherWidget()),
-              // Expanded(child: responsableTeacher)
-            ],
-          ),
-          SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: TextFormField(
-                  controller: _observations,
-                  enableSuggestions: true,
-                  decoration: InputDecoration(
-                      label: Text('Observaciones Generales'),
-                      prefixIcon: const Icon(Icons.abc),
-                      suffixIcon: _observations.text.length > 0
-                          ? IconButton(
-                              onPressed: _observations.clear,
-                              icon: Icon(Icons.clear_rounded))
-                          : null),
-                  // textInputAction: TextInputAction.next,
-                  maxLines: 2,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 20),
-          Row(
-            children: [
-              Expanded(
-                child: Column(
+    return Stack(
+      children: [
+        SingleChildScrollView(
+          child: Container(
+            width: MediaQuery.of(context).size.width * 2 / 2,
+            // height: MediaQuery.of(context).size.height,
+            child: Column(
+              children: [
+                Row(
                   children: [
-                    Row(
-                      children: [
-                        Checkbox(
-                          checkColor: Colors.white,
-                          fillColor:
-                              MaterialStateProperty.resolveWith(getColor),
-                          value: _isClinicChecked,
-                          onChanged: (bool? value) {
-                            setState(() {
-                              _isClinicChecked = value!;
-                            });
-                          },
-                        ),
-                        Text('Se envió a clinica')
-                      ],
+                    Expanded(child: painsSelector),
+                    SizedBox(width: 6),
+                    Expanded(child: kindOfLesion),
+                    SizedBox(width: 6),
+                    Expanded(child: causes)
+                  ],
+                ),
+                Divider(thickness: 3),
+                TextFormField(
+                  controller: _studentId,
+                  enableSuggestions: false,
+                  decoration: InputDecoration(
+                    label: Text('Matricula'),
+                    prefixIcon: const Icon(Icons.numbers),
+                    suffixIcon: _studentId.text.isNotEmpty
+                        ? IconButton(
+                            onPressed: () {
+                              setState(() {
+                                _studentId.clear();
+                              });
+                            },
+                            icon: Icon(Icons.clear_rounded),
+                          )
+                        : null,
+                  ),
+                  onChanged: (value) {
+                    setState(() {});
+                  },
+                  textInputAction: TextInputAction.next,
+                  inputFormatters: <TextInputFormatter>[
+                    FilteringTextInputFormatter.digitsOnly
+                  ],
+                ),
+                TextFormField(
+                  controller: _studentname,
+                  enableSuggestions: false,
+                  decoration: InputDecoration(
+                      label: Text('Nombre del alumno'),
+                      prefixIcon: const Icon(Icons.person_pin_rounded),
+                      suffixIcon: _studentname.text.isNotEmpty
+                          ? IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  _studentname.clear();
+                                });
+                              },
+                              icon: Icon(Icons.clear_rounded))
+                          : null),
+                  onChanged: (value) {
+                    setState(() {});
+                  },
+                  textInputAction: TextInputAction.next,
+                ),
+                SizedBox(height: 5),
+                TextFormField(
+                  controller: _visitMotive,
+                  enableSuggestions: true,
+                  decoration: InputDecoration(
+                      label: Text('Motivo de visita'),
+                      prefixIcon: const Icon(Icons.abc),
+                      suffixIcon: _visitMotive.text.length > 0
+                          ? IconButton(
+                              onPressed: _visitMotive.clear,
+                              icon: Icon(Icons.clear_rounded))
+                          : null),
+                  // textInputAction: TextInputAction.next,
+                  autofocus: true,
+                  maxLines: 3,
+                ),
+                SizedBox(height: 18),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: _valoration,
+                        enableSuggestions: true,
+                        decoration: InputDecoration(
+                            label: Text('Valoracion'),
+                            prefixIcon: const Icon(Icons.abc),
+                            suffixIcon: _valoration.text.length > 0
+                                ? IconButton(
+                                    onPressed: _valoration.clear,
+                                    icon: Icon(Icons.clear_rounded))
+                                : null),
+                        // textInputAction: TextInputAction.next,
+                        maxLines: 2,
+                      ),
                     ),
-                    Row(
-                      children: [
-                        Checkbox(
-                          checkColor: Colors.white,
-                          fillColor:
-                              MaterialStateProperty.resolveWith(getColor),
-                          value: _isDoctorConsultChecked,
-                          onChanged: (bool? value) {
-                            setState(() {
-                              _isDoctorConsultChecked = value!;
-                            });
-                          },
-                        ),
-                        Text('Molestias consulte a su Médico')
-                      ],
+                    SizedBox(
+                      width: 10,
+                    ),
+                    Expanded(
+                      child: TextFormField(
+                        controller: _tx,
+                        decoration: InputDecoration(
+                            label: Text('Tratamiento'),
+                            prefixIcon: const Icon(Icons.abc),
+                            suffixIcon: _tx.text.length > 0
+                                ? IconButton(
+                                    onPressed: _tx.clear,
+                                    icon: Icon(Icons.clear_rounded))
+                                : null),
+                        // textInputAction: TextInputAction.next,
+                        maxLines: 2,
+                      ),
+                    )
+                  ],
+                ),
+                SizedBox(height: 15),
+                Row(
+                  children: [
+                    Expanded(child: accidentTypes),
+                    SizedBox(width: 20),
+                    Expanded(child: responsableTeacherWidget()),
+                    // Expanded(child: responsableTeacher)
+                  ],
+                ),
+                SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: _observations,
+                        enableSuggestions: true,
+                        decoration: InputDecoration(
+                            label: Text('Observaciones Generales'),
+                            prefixIcon: const Icon(Icons.abc),
+                            suffixIcon: _observations.text.length > 0
+                                ? IconButton(
+                                    onPressed: _observations.clear,
+                                    icon: Icon(Icons.clear_rounded))
+                                : null),
+                        // textInputAction: TextInputAction.next,
+                        maxLines: 2,
+                      ),
                     ),
                   ],
                 ),
-              ),
-              Expanded(
-                  child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Tipo de notificación'),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Checkbox(
-                          checkColor: Colors.white,
-                          fillColor:
-                              MaterialStateProperty.resolveWith(getColor),
-                          value: _isPhoneNotChecked,
-                          onChanged: (bool? value) {
-                            setState(() {
-                              _isPhoneNotChecked = value!;
-                            });
-                          }),
-                      Text('Telefono')
-                    ],
-                  ),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Checkbox(
-                          checkColor: Colors.white,
-                          fillColor:
-                              MaterialStateProperty.resolveWith(getColor),
-                          value: _isPersonalNotifChecked,
-                          onChanged: (bool? value) {
-                            setState(() {
-                              _isPersonalNotifChecked = value!;
-                            });
-                          }),
-                      Text('En persona')
-                    ],
-                  ),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Checkbox(
-                          checkColor: Colors.white,
-                          fillColor:
-                              MaterialStateProperty.resolveWith(getColor),
-                          value: _isReportNotifChecked,
-                          onChanged: (bool? value) {
-                            setState(() {
-                              _isReportNotifChecked = value!;
-                            });
-                          }),
-                      Text('Reporte')
-                    ],
-                  )
-                ],
-              )),
-              Expanded(
-                  child: Column(
-                children: [
-                  TextField(
-                    controller: _date,
-                    decoration: const InputDecoration(
-                      icon: Icon(Icons.calendar_today),
-                      labelText: "Fecha y hora",
+                SizedBox(height: 20),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              Checkbox(
+                                checkColor: Colors.white,
+                                fillColor:
+                                    MaterialStateProperty.resolveWith(getColor),
+                                value: _isClinicChecked,
+                                onChanged: (bool? value) {
+                                  setState(() {
+                                    _isClinicChecked = value!;
+                                  });
+                                },
+                              ),
+                              Text('Se envió a clinica')
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Checkbox(
+                                checkColor: Colors.white,
+                                fillColor:
+                                    MaterialStateProperty.resolveWith(getColor),
+                                value: _isDoctorConsultChecked,
+                                onChanged: (bool? value) {
+                                  setState(() {
+                                    _isDoctorConsultChecked = value!;
+                                  });
+                                },
+                              ),
+                              Text('Molestias consulte a su Médico')
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                    readOnly: true,
-                    onTap: () async {
-                      DateTime? pickedDate = await showDatePicker(
-                              context: context,
-                              initialDate: DateTime.now(),
-                              firstDate: DateTime(2000),
-                              lastDate: DateTime(2101))
-                          .then((pickedDate) {
-                        if (pickedDate != null) {
-                          selectedDateTime = DateTime.now();
-                          showTimePicker(
-                                  context: context,
-                                  initialTime: TimeOfDay.now())
-                              .then((selectedTime) {
-                            // Handle the selected date and time here.
-                            if (selectedTime != null) {
-                              selectedDateTime = DateTime(
-                                pickedDate.year,
-                                pickedDate.month,
-                                pickedDate.day,
-                                selectedTime.hour,
-                                selectedTime.minute,
-                              );
-                            }
-                            setState(() {
-                              _date.text = selectedDateTime.toString();
+                    Expanded(
+                        child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Tipo de notificación'),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Checkbox(
+                                checkColor: Colors.white,
+                                fillColor:
+                                    MaterialStateProperty.resolveWith(getColor),
+                                value: _isPhoneNotChecked,
+                                onChanged: (bool? value) {
+                                  setState(() {
+                                    _isPhoneNotChecked = value!;
+                                  });
+                                }),
+                            Text('Telefono')
+                          ],
+                        ),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Checkbox(
+                                checkColor: Colors.white,
+                                fillColor:
+                                    MaterialStateProperty.resolveWith(getColor),
+                                value: _isPersonalNotifChecked,
+                                onChanged: (bool? value) {
+                                  setState(() {
+                                    _isPersonalNotifChecked = value!;
+                                  });
+                                }),
+                            Text('En persona')
+                          ],
+                        ),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Checkbox(
+                                checkColor: Colors.white,
+                                fillColor:
+                                    MaterialStateProperty.resolveWith(getColor),
+                                value: _isReportNotifChecked,
+                                onChanged: (bool? value) {
+                                  setState(() {
+                                    _isReportNotifChecked = value!;
+                                  });
+                                }),
+                            Text('Reporte')
+                          ],
+                        )
+                      ],
+                    )),
+                    Expanded(
+                        child: Column(
+                      children: [
+                        TextField(
+                          controller: _date,
+                          decoration: const InputDecoration(
+                            icon: Icon(Icons.calendar_today),
+                            labelText: "Fecha y hora",
+                          ),
+                          readOnly: true,
+                          onTap: () async {
+                            DateTime? pickedDate = await showDatePicker(
+                                    context: context,
+                                    initialDate: DateTime.now(),
+                                    firstDate: DateTime(2000),
+                                    lastDate: DateTime(2101))
+                                .then((pickedDate) {
+                              if (pickedDate != null) {
+                                selectedDateTime = DateTime.now();
+                                showTimePicker(
+                                        context: context,
+                                        initialTime: TimeOfDay.now())
+                                    .then((selectedTime) {
+                                  // Handle the selected date and time here.
+                                  if (selectedTime != null) {
+                                    selectedDateTime = DateTime(
+                                      pickedDate.year,
+                                      pickedDate.month,
+                                      pickedDate.day,
+                                      selectedTime.hour,
+                                      selectedTime.minute,
+                                    );
+                                  }
+                                  setState(() {
+                                    _date.text = selectedDateTime.toString();
+                                  });
+                                });
+                              }
                             });
-                          });
-                        }
-                      });
-                    },
-                  )
-                ],
-              ))
+                          },
+                        )
+                      ],
+                    ))
 
-              // Expanded(
-              //     child: ),
-            ],
-          ),
-          SizedBox(height: 20),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Center(
-                child: Padding(
-                  padding: EdgeInsets.all(8),
-                  child: ElevatedButton.icon(
-                      onPressed: () {
-                        // Navigator.of(context).push(MaterialPageRoute(
-                        //   builder: (context) => LoadingIndicator(),
-                        // )
-                        // );
-
-                        //Get the type of notification
-                        // TODO: No real need to get the type of notification
-                        var notifType = 0;
-                        if (_isPhoneNotChecked = true) {
-                          notifType = 1;
-                        } else if (_isPersonalNotifChecked = true) {
-                          notifType = 2;
-                        } else if (_isReportNotifChecked = true) {
-                          notifType = 3;
-                        }
-                        var responsableTeacherID;
-
-                        if (_teacherResponsable.isNotEmpty) {
-                          responsableTeacherID = obtainEmployeeNumberbyName(
-                              tempTeachersList, _teacherResponsable);
-                        }
-
-                        //Get responable teacher ID
-
-                        //Function to post a new student visit
-                        resultID = postNurseryStudent(
-                                currentUser!.employeeNumber!.toInt(),
-                                _kindOfPain.text,
-                                _kindOfWound.text,
-                                _otherCauses.text,
-                                _studentId.text,
-                                _visitMotive.text,
-                                _valoration.text,
-                                _tx.text,
-                                _accidentTypes!,
-                                _teacherResponsable,
-                                _observations.text,
-                                _isClinicChecked!,
-                                _isDoctorConsultChecked!,
-                                _isPhoneNotChecked!,
-                                _isPersonalNotifChecked!,
-                                _isReportNotifChecked!,
-                                selectedDateTime,
-                                notifType,
-                                deviceInformation.toString(),
-                                responsableTeacherID!)
-                            .then((value) {
-                          // Navigate back to your main screen or handle the result as needed
-                          // Navigator.of(context).pop();
-                          AlertDialog(
-                            title: Text(
-                              'Éxito',
-                              style: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .override(
-                                    fontFamily: 'Sora',
-                                    color: FlutterFlowTheme.of(context)
-                                        .primaryText,
-                                  ),
-                            ),
-                            content: Text(
-                              'Se registro con exito: ' + resultID!.toString(),
-                              style: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .override(
-                                    fontFamily: 'Sora',
-                                    color: FlutterFlowTheme.of(context)
-                                        .primaryText,
-                                  ),
-                            ),
-                          );
-                        }).catchError((error) {
-                          Navigator.of(context).pop();
-                          //AlertDialog to display Error;
-                          AlertDialog alert = AlertDialog(
-                            title: Text(
-                              'Error',
-                              style: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .override(
-                                    fontFamily: 'Sora',
-                                    color: FlutterFlowTheme.of(context)
-                                        .primaryText,
-                                  ),
-                            ),
-                            content: Text(
-                              error.toString(),
-                              style: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .override(
-                                    fontFamily: 'Sora',
-                                    color: FlutterFlowTheme.of(context)
-                                        .primaryText,
-                                  ),
-                            ),
-                            actions: [okButton],
-                          );
-                        });
-                      },
-                      icon: Icon(Icons.save_outlined),
-                      label: Text('Registrar visita')),
+                    // Expanded(
+                    //     child: ),
+                  ],
                 ),
-              )
-            ],
-          )
-        ],
-      ),
-    ));
+                SizedBox(height: 20),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(8),
+                        child: ElevatedButton.icon(
+                            onPressed: () {
+                              setState(() {
+                                isLoading = true;
+                              });
+
+                              //Get the type of notification
+                              // TODO: No real need to get the type of notification
+                              var notifType = 0;
+                              if (_isPhoneNotChecked = true) {
+                                notifType = 1;
+                              } else if (_isPersonalNotifChecked = true) {
+                                notifType = 2;
+                              } else if (_isReportNotifChecked = true) {
+                                notifType = 3;
+                              }
+
+                              //Validate if there is a teacher selected
+                              var responsableTeacherID;
+
+                              if (_teacherResponsable != '') {
+                                responsableTeacherID =
+                                    obtainEmployeeNumberbyName(
+                                        tempTeachersList, _teacherResponsable);
+                              } else {
+                                responsableTeacherID = '0';
+                              }
+
+                              //Validate empty fields
+                              if (_date.text.isEmpty) {
+                                setState(() {
+                                  _date.text = DateTime.now().toString();
+                                });
+                              }
+
+                              //Get responable teacher ID
+
+                              var nurseryapiBody = nurseryToJSON(
+                                  currentUser!.employeeNumber!.toInt(),
+                                  _kindOfPain.text,
+                                  _kindOfWound.text,
+                                  _otherCauses.text,
+                                  _studentId.text,
+                                  currentCycle!.claCiclo.toString(),
+                                  _visitMotive.text,
+                                  _valoration.text,
+                                  _tx.text,
+                                  _accidentTypes!,
+                                  _teacherResponsable,
+                                  _observations.text,
+                                  _isClinicChecked!,
+                                  _isDoctorConsultChecked!,
+                                  _isPhoneNotChecked!,
+                                  _isPersonalNotifChecked!,
+                                  _isReportNotifChecked!,
+                                  selectedDateTime,
+                                  notifType,
+                                  deviceInformation.toString(),
+                                  responsableTeacherID!);
+
+                              apiCallResponseResult =
+                                  postNurseryVisit(nurseryapiBody)
+                                      .then((apiCallResponseResult) {
+                                AlertDialog(
+                                  title: Text(
+                                    'El registro se completó con exito: ' +
+                                        apiCallResponseResult.toString(),
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .override(
+                                          fontFamily: 'Sora',
+                                          color: FlutterFlowTheme.of(context)
+                                              .primaryText,
+                                        ),
+                                  ),
+                                  content: Text(
+                                    'Se registro con exito: ' +
+                                        resultID!.toString(),
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .override(
+                                          fontFamily: 'Sora',
+                                          color: FlutterFlowTheme.of(context)
+                                              .primaryText,
+                                        ),
+                                  ),
+                                );
+                              }).catchError((error) {
+                                // Navigator.of(context).pop();
+                                //AlertDialog to display Error;
+                                AlertDialog(
+                                  title: Text(
+                                    'Error',
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .override(
+                                          fontFamily: 'Sora',
+                                          color: FlutterFlowTheme.of(context)
+                                              .primaryText,
+                                        ),
+                                  ),
+                                  content: Text(
+                                    error.toString(),
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .override(
+                                          fontFamily: 'Sora',
+                                          color: FlutterFlowTheme.of(context)
+                                              .primaryText,
+                                        ),
+                                  ),
+                                  actions: [okButton],
+                                );
+                              }).whenComplete(() {
+                                // Hide loading indicator when API call is complete
+                                setState(() {
+                                  isLoading = false;
+                                });
+                                // Navigate back to your main screen or handle the result as needed
+                                Navigator.of(context).pop();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                      content: Text(
+                                        apiCallResponseResult.toString(),
+                                        style: FlutterFlowTheme.of(context)
+                                            .labelMedium
+                                            .override(
+                                              fontFamily: 'Roboto',
+                                              color: Color(0xFF130C0D),
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                      ),
+                                      duration: Duration(milliseconds: 12000),
+                                      backgroundColor: Colors.green[200]),
+                                );
+                              });
+                            },
+                            icon: Icon(Icons.save_outlined),
+                            label: Text('Registrar visita')),
+                      ),
+                    ),
+                  ],
+                )
+              ],
+            ),
+          ),
+        ),
+        if (isLoading) CustomLoadingIndicator()
+      ],
+    );
   }
 
   postNewStudentVisit(

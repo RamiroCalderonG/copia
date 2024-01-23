@@ -34,7 +34,7 @@ class ApiCallRecord extends Equatable {
   final String apiUrl;
   final Map<String, dynamic> headers;
   final Map<String, dynamic> params;
-  Map<String, dynamic>? body;
+  String? body;
   final BodyType? bodyType;
 
   @override
@@ -142,7 +142,7 @@ class ApiManager {
     String apiUrl,
     Map<String, dynamic> headers,
     Map<String, dynamic> params,
-    Map<String, dynamic>? body,
+    String? body,
     BodyType? bodyType,
     bool returnBody,
     bool encodeBodyUtf8,
@@ -231,7 +231,7 @@ class ApiManager {
   static dynamic createBody(
     Map<String, dynamic> headers,
     Map<String, dynamic>? params,
-    Map<String, dynamic>? body,
+    String? body,
     BodyType? bodyType,
     bool encodeBodyUtf8,
   ) {
@@ -274,7 +274,7 @@ class ApiManager {
     required ApiCallType callType,
     Map<String, dynamic> headers = const {},
     Map<String, dynamic> params = const {},
-    Map<String, dynamic>? body,
+    String? body,
     BodyType? bodyType,
     bool returnBody = true,
     bool encodeBodyUtf8 = false,
