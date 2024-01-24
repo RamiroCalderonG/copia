@@ -244,11 +244,7 @@ class _StudentHistoryGridState extends State<StudentHistoryGrid> {
               ),
             ),
           ),
-        Expanded(
-            child: ElevatedButton.icon(
-                onPressed: () {},
-                icon: Icon(Icons.add),
-                label: Text('Agregar visita'))) // Placeholder or message
+        // Placeholder or message
       ],
     );
   }
