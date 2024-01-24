@@ -5,9 +5,10 @@ class Student {
   late String? claUn;
   late String? grupo;
   late String? grado;
+  late int? gradoSecuencia;
 
   Student(this.matricula, this.claFamilia, this.nombre, this.claUn, this.grupo,
-      this.grado);
+      this.grado, this.gradoSecuencia);
 
   Map<dynamic, dynamic> toJson() => {
         'matricula': matricula,
@@ -15,7 +16,8 @@ class Student {
         'nombre': nombre,
         'claUn': claUn,
         'grupo': grupo,
-        'grado': grado
+        'grado': grado,
+        'gradoSecuencia': gradoSecuencia
       };
   void clear() {
     matricula = null;
@@ -24,5 +26,6 @@ class Student {
     claUn = null;
     grupo = null;
     grado = null;
+    gradoSecuencia = null;
   }
 }

@@ -1,11 +1,9 @@
+import 'dart:convert';
 import 'dart:io';
-import 'dart:developer' as developer;
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
-
-import 'package:device_info_plus/device_info_plus.dart';
-import 'package:flutter/services.dart';
+import 'package:oxschool/constants/User.dart';
 
 // DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
 final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
@@ -162,6 +160,52 @@ String _getAppBarTitle() => kIsWeb
         TargetPlatform.macOS => 'MacOS Device Info',
         TargetPlatform.fuchsia => 'Fuchsia Device Info',
       };
+
+Future getDeviceIP() async {
+  var interface;
+  String responseData = '';
+  String ipFromDevice;
+  var addr;
+  for (interface in await NetworkInterface.list()) {
+    for (addr in interface.addresses) {
+      if (responseData.length <= 0) {
+        responseData = 'ip:' +
+            addr.address.toString() +
+            ' | ' +
+            'host:' +
+            addr.host.toString() +
+            ' | ' +
+            'isLoopback:' +
+            addr.isLoopback.toString() +
+            ' | ' +
+            'rawAddress:' +
+            addr.rawAddress.toString() +
+            ' | ' +
+            'ipType: ' +
+            addr.type.name.toString() +
+            ' | ' +
+            'isLinkLocal:' +
+            addr.isLinkLocal.toString();
+      }
+    }
+  }
+  // Convert the result to a Dart object or Map
+  Map<String, dynamic> requestBody = {
+    'ip': addr.address.toString(),
+    'host': addr.host.toString(),
+    'isLoopback': addr.isLoopback.toString(),
+    'rawAddress': addr.rawAddress.toString(),
+    'ipType': addr.type.name.toString(),
+    'isLinkLocal': addr.isLinkLocal.toString()
+    // Add more fields as needed
+  };
+
+  // Convert the Dart object to JSON
+  ipFromDevice = jsonEncode(requestBody);
+  deviceIp = ipFromDevice;
+
+  return ipFromDevice;
+}
 
 //  Future<void> _initNetworkInfo() async {
 //     String? wifiName,

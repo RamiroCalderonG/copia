@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
-import 'package:oxschool/Models/Cycle.dart';
 import 'package:oxschool/Models/Family.dart';
 import 'package:oxschool/Models/Medicines.dart';
 import 'package:oxschool/Models/NurseryHistory.dart';
@@ -286,12 +285,12 @@ class _FichaDeSaludState extends State<FichaDeSalud>
 
                   // Look for student -------------------------------
                   apiResultxgr = await NurseryStudentCall.call(
-                          apPaterno: substrings[0],
-                          apMaterno: substrings[1],
-                          nombre: substrings[2],
+                          apPaterno: substrings[0].capitalize(),
+                          apMaterno: substrings[1].capitalize(),
+                          nombre: substrings[2].capitalize(),
                           claUn: currentUser!.claUn,
-                          claCiclo: '2022-2023')
-                      .timeout(Duration(milliseconds: 9000));
+                          claCiclo: currentCycle!.claCiclo)
+                      .timeout(Duration(seconds: 15));
                   if ((apiResultxgr?.succeeded ?? true)) {
                     List<dynamic> jsonList =
                         json.decode(apiResultxgr!.response!.body);
@@ -339,7 +338,7 @@ class _FichaDeSaludState extends State<FichaDeSalud>
                       //Get student Nursery History
                       apiResultxgr = await NurseryHistoryCall.call(
                               matricula: selectedStudent.matricula.toString())
-                          .timeout(Duration(milliseconds: 9000));
+                          .timeout(Duration(milliseconds: 7000));
                       if ((apiResultxgr?.succeeded ?? true)) {
                         List<dynamic> jsonList =
                             json.decode(apiResultxgr!.response!.body);
@@ -395,8 +394,13 @@ class _FichaDeSaludState extends State<FichaDeSalud>
                       apiResultxgr = await NurseryStudentMedication.call(
                               matricula: selectedStudent.matricula.toString())
                           .timeout(Duration(milliseconds: 9000));
-                      if ((apiResultxgr?.succeeded ?? true)) {
-                        jsonList = json.decode(apiResultxgr!.response!.body);
+                      if (apiResultxgr!.response!.body.length > 0) {
+                        if ((apiResultxgr?.succeeded ?? true)) {
+                          jsonList = json.decode(apiResultxgr!.response!.body);
+                        }
+                      } else {
+                        print('No se encontraron medicación para el alumno' +
+                            selectedStudent.matricula.toString());
                       }
                       studentAllowedMedicines = getMedicinesFromJSON(jsonList);
                     }
@@ -606,8 +610,10 @@ dynamic studentNursery(List<dynamic> jsonList) {
     String nomGradoEscolar = item['NomGradoEscolar'];
     String grupo = item['Grupo'];
     String claUn = item['ClaUn'];
+    int gradoSecuencia = item['GradoSecuencia'];
 
-    return Student(matricula, clafam, alumno, claUn, grupo, nomGradoEscolar);
+    return Student(matricula, clafam, alumno, claUn, grupo, nomGradoEscolar,
+        gradoSecuencia);
   } else {
     // If there are multiple items in the list, return a List<Student>
     List<Student> studentsList = [];
@@ -618,10 +624,17 @@ dynamic studentNursery(List<dynamic> jsonList) {
       String nomGradoEscolar = item['NomGradoEscolar'];
       String grupo = item['Grupo'];
       String claUn = item['ClaUn'];
+      int gradoSecuencia = item['gradoSecuencia'];
 
-      studentsList.add(
-          Student(matricula, clafam, alumno, claUn, grupo, nomGradoEscolar));
+      studentsList.add(Student(matricula, clafam, alumno, claUn, grupo,
+          nomGradoEscolar, gradoSecuencia));
     }
     return studentsList;
+  }
+}
+
+extension StringExtension on String {
+  String capitalize() {
+    return "${this[0].toUpperCase()}${this.substring(1).toLowerCase()}";
   }
 }
