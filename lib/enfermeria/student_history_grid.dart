@@ -121,7 +121,7 @@ class _StudentHistoryGridState extends State<StudentHistoryGrid> {
     double screenHeight = MediaQuery.of(context).size.height;
     double cardHeight = screenHeight / 1.0;
     double cardWidth =
-        MediaQuery.of(context).size.width * 0.8; // 80% of screen width
+        MediaQuery.of(context).size.width * 0.9; // 80% of screen width
 
     return Column(
       children: [
@@ -151,10 +151,10 @@ class _StudentHistoryGridState extends State<StudentHistoryGrid> {
                     child: Column(
                       children: [
                         Text('Historial del alumno',
-                            style: TextStyle(fontSize: 22.0)),
+                            style: TextStyle(fontSize: 25.0)),
                         Text(
                           selectedStudent.nombre,
-                          style: TextStyle(fontSize: 18.0),
+                          style: TextStyle(fontSize: 20.0),
                         ),
                         SizedBox(height: 8.0),
                         Divider(),

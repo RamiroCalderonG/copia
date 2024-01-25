@@ -271,32 +271,6 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
       }
     }
 
-    DropdownButton<String> responsableTeacher = DropdownButton<String>(
-        value: teacherDropDownValue,
-        hint: Text('Maestro responsable'),
-        borderRadius: BorderRadius.circular(15),
-        icon: Icon(Icons.person),
-        elevation: 6,
-        style: FlutterFlowTheme.of(context).bodyMedium.override(
-              fontFamily: 'Sora',
-              color: FlutterFlowTheme.of(context).primaryText,
-            ),
-        underline: Container(
-          height: 2,
-          color: Colors.white,
-        ),
-        items: teachersList.map<DropdownMenuItem<String>>((String value) {
-          return DropdownMenuItem<String>(
-            value: value,
-            child: Text(value),
-          );
-        }).toList(),
-        onChanged: (String? value) {
-          setState(() {
-            teacherDropDownValue = value!;
-          });
-        });
-
     return Stack(
       children: [
         SingleChildScrollView(
@@ -604,7 +578,7 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
                               });
 
                               //Get the type of notification
-                              // TODO: No real need to get the type of notification
+
                               var notifType = 0;
                               if (_isPhoneNotChecked = true) {
                                 notifType = 1;
@@ -657,65 +631,67 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
                                   deviceInformation.toString(),
                                   responsableTeacherID!);
 
-                              apiCallResponseResult =
-                                  postNurseryVisit(nurseryapiBody)
-                                      .then((apiCallResponseResult) {
-                                AlertDialog(
-                                  title: Text(
-                                    'El registro se completó con exito: ' +
-                                        apiCallResponseResult.toString(),
-                                    style: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .override(
-                                          fontFamily: 'Sora',
-                                          color: FlutterFlowTheme.of(context)
-                                              .primaryText,
-                                        ),
-                                  ),
-                                  content: Text(
-                                    'Se registro con exito: ' +
-                                        resultID!.toString(),
-                                    style: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .override(
-                                          fontFamily: 'Sora',
-                                          color: FlutterFlowTheme.of(context)
-                                              .primaryText,
-                                        ),
-                                  ),
-                                );
-                              }).catchError((error) {
-                                // Navigator.of(context).pop();
-                                //AlertDialog to display Error;
-                                AlertDialog(
-                                  title: Text(
-                                    'Error',
-                                    style: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .override(
-                                          fontFamily: 'Sora',
-                                          color: FlutterFlowTheme.of(context)
-                                              .primaryText,
-                                        ),
-                                  ),
-                                  content: Text(
-                                    error.toString(),
-                                    style: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .override(
-                                          fontFamily: 'Sora',
-                                          color: FlutterFlowTheme.of(context)
-                                              .primaryText,
-                                        ),
-                                  ),
-                                  actions: [okButton],
-                                );
-                              }).whenComplete(() {
+                              apiCallResponseResult = postNurseryVisit(
+                                      nurseryapiBody)
+                                  //         .then((apiCallResponseResult) {
+                                  //   // AlertDialog(
+                                  //   //   title: Text(
+                                  //   //     'El registro se completó con exito: ' +
+                                  //   //         apiCallResponseResult.toString(),
+                                  //   //     style: FlutterFlowTheme.of(context)
+                                  //   //         .bodyMedium
+                                  //   //         .override(
+                                  //   //           fontFamily: 'Sora',
+                                  //   //           color: FlutterFlowTheme.of(context)
+                                  //   //               .primaryText,
+                                  //   //         ),
+                                  //   //   ),
+                                  //   //   content: Text(
+                                  //   //     'Se registro con exito: ' +
+                                  //   //         resultID!.toString(),
+                                  //   //     style: FlutterFlowTheme.of(context)
+                                  //   //         .bodyMedium
+                                  //   //         .override(
+                                  //   //           fontFamily: 'Sora',
+                                  //   //           color: FlutterFlowTheme.of(context)
+                                  //   //               .primaryText,
+                                  //   //         ),
+                                  //   //   ),
+                                  //   // );
+                                  // }).catchError((error) {
+                                  //   // Navigator.of(context).pop();
+                                  //   //AlertDialog to display Error;
+                                  //   AlertDialog(
+                                  //     title: Text(
+                                  //       'Error',
+                                  //       style: FlutterFlowTheme.of(context)
+                                  //           .bodyMedium
+                                  //           .override(
+                                  //             fontFamily: 'Sora',
+                                  //             color: FlutterFlowTheme.of(context)
+                                  //                 .primaryText,
+                                  //           ),
+                                  //     ),
+                                  //     content: Text(
+                                  //       error.toString(),
+                                  //       style: FlutterFlowTheme.of(context)
+                                  //           .bodyMedium
+                                  //           .override(
+                                  //             fontFamily: 'Sora',
+                                  //             color: FlutterFlowTheme.of(context)
+                                  //                 .primaryText,
+                                  //           ),
+                                  //     ),
+                                  //     actions: [okButton],
+                                  //   );
+                                  // })
+                                  .whenComplete(() {
                                 // Hide loading indicator when API call is complete
                                 setState(() {
                                   isLoading = false;
                                 });
-                                // Navigate back to your main screen or handle the result as needed
+                                print(apiCallResponseResult.toString());
+                                // Navigate back to your main screen
                                 Navigator.of(context).pop();
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(

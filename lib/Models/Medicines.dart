@@ -1,8 +1,9 @@
 class Medicines {
   late int claMedicamento;
   late String nomMedicamento;
+  late int id;
 
-  Medicines(this.claMedicamento, this.nomMedicamento);
+  Medicines(this.claMedicamento, this.nomMedicamento, this.id);
 
   Map<dynamic, dynamic> toJson() => {
         'ClaMedicamento': claMedicamento,
@@ -19,7 +20,8 @@ dynamic getMedicinesFromJSON(List<dynamic> jsonList) {
       // item = jsonList[0];
       int claMedicamento = item['CLAMEDICAMENTO'];
       String nomMedicamento = item['NomMedicamento'];
-      studentMedicines.add(Medicines(claMedicamento, nomMedicamento));
+      int id = item['id'];
+      studentMedicines.add(Medicines(claMedicamento, nomMedicamento, id));
     }
     return studentMedicines;
   }
