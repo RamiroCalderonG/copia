@@ -6,10 +6,11 @@ class User {
   int? isWorker;
   String? claUn;
   String? claLogin;
+  String token;
   // late final notActive;
 
   User(this.claLogin, this.claUn, this.employeeName, this.employeeNumber,
-      this.idLogin, this.isWorker, this.isTeacher);
+      this.idLogin, this.isWorker, this.isTeacher, this.token);
 
   Map<dynamic, dynamic> toJson() => {
         "employeeNumber": employeeNumber,
@@ -18,7 +19,8 @@ class User {
         "isTeacher": isTeacher,
         "isWorker": isWorker,
         "claUn": claUn,
-        "claLogin": claLogin
+        "claLogin": claLogin,
+        "token": token
         // "notActive": notActive
       };
 
