@@ -55,7 +55,7 @@ class CurrentCicleCall {
       callType: ApiCallType.GET,
       headers: {
         'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
-        'token': userToken,
+        'token': currentUser!.token,
         'employeeNum': currentUser!.employeeNumber!.toString()
       },
       params: {},
