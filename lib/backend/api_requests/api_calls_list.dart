@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/constants/connection.dart';
 
 import 'package:requests/requests.dart';
@@ -11,6 +12,8 @@ Future<int> postNurseryVisit(var jsonBody) async {
         json: jsonBody, //We use a json style as body
         headers: {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'token': currentUser!.token,
+          'employeeNum': currentUser!.employeeNumber!.toString()
         },
         persistCookies: false,
         timeoutSeconds: 7);
@@ -35,6 +38,8 @@ Future<int> deleteNurseryStudent(var idValue) async {
         queryParameters: {'id': idValue},
         headers: {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'token': currentUser!.token,
+          'employeeNum': currentUser!.employeeNumber!.toString()
         },
         persistCookies: false,
         timeoutSeconds: 7);
