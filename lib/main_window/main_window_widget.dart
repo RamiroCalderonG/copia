@@ -365,7 +365,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                                     ));
                               } else {
                                 return Container(
-                                  padding: EdgeInsets.only(top: 10, bottom: 10),
+                                  padding: EdgeInsets.only(top: 10),
                                   width: MediaQuery.of(context).size.width,
                                   height:
                                       MediaQuery.of(context).size.height / 13,
