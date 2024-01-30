@@ -3,20 +3,12 @@ import 'package:oxschool/components/create_service_ticket.dart';
 import 'package:oxschool/components/drawer_menu.dart';
 import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/constants/url_links.dart';
-import 'package:oxschool/enfermeria/new_student_visit.dart';
-import 'package:oxschool/flutter_flow/flutter_flow_icon_button.dart';
-import 'package:oxschool/grades/grades_view.dart';
 import 'package:oxschool/user/user_view_view.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../components/quality_dialogs.dart';
-import '/components/side_nav04_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'main_window_model.dart';
 export 'main_window_model.dart';
 
@@ -113,21 +105,23 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                               icon: const Icon(Icons.person),
                               color: Color.fromRGBO(235, 48, 69, 0.988)),
 
-                          Text(
-                            'Ing. Sanchez',
-                            style: TextStyle(
-                                fontFamily: 'Sora',
-                                fontStyle: FontStyle.normal,
-                                fontSize: 20),
-                          ),
-                          //       Text('${currentUser?.employeeName?.toLowerCase().trimRight()}',
-                          // textAlign: TextAlign.center,
-                          // style: TextStyle(
-                          //     fontFamily: 'Roboto',
-                          //     fontSize: 20,
-                          //     color: Colors
-                          //         .black87) // FlutterFlowTheme.of(context).bodyMedium,
+                          // Text(
+                          //   'Ing. Sanchez',
+                          //   style: TextStyle(
+                          //       fontFamily: 'Sora',
+                          //       fontStyle: FontStyle.normal,
+                          //       fontSize: 20),
                           // ),
+                          Text(
+                              '${currentUser?.employeeName?.toLowerCase().trimRight()}',
+                              textAlign: TextAlign.center,
+                              style: FlutterFlowTheme.of(context)
+                                  .bodyMedium
+                                  .override(
+                                    fontFamily: 'Sora',
+                                    color: FlutterFlowTheme.of(context)
+                                        .primaryText, // FlutterFlowTheme.of(context).bodyMedium,
+                                  )),
                           Padding(
                               padding: EdgeInsets.only(left: 15, right: 15)),
                           IconButton(
@@ -212,8 +206,8 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                   crossAxisSpacing: 50.0,
                   mainAxisSpacing: 50.0,
                   childAspectRatio: 1.9),
-              // padding: EdgeInsets.only(left: 10, right: 10),
-              shrinkWrap: true,
+              padding: EdgeInsets.only(left: 10, right: 10),
+              // shrinkWrap: true,
               itemCount: oxlinks.length,
               itemBuilder: (BuildContext context, int index) {
                 return GestureDetector(
@@ -241,7 +235,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         drawer: Opacity(opacity: 1, child: DrawerClass()),
         body: NestedScrollView(
-          physics: NeverScrollableScrollPhysics(),
+          // physics: NeverScrollableScrollPhysics(),
           floatHeaderSlivers: true,
           headerSliverBuilder: (context, _) => [
             appHeader,
@@ -255,41 +249,58 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                     child: Column(
                       children: [
                         Expanded(
+                          flex: 3,
                           child: Padding(
                               padding: EdgeInsetsDirectional.fromSTEB(
-                                  16.0, 5.0, 16.0, 30.0),
-                              child: Row(
+                                  28.0, 5.0, 16.0, 10.0),
+                              child: Column(
                                 children: [
+                                  // Align(
+                                  //   alignment: AlignmentDirectional.topStart,
+                                  //   child: Column(
+                                  //     // mainAxisSize: MainAxisSize.max,
+                                  //     mainAxisAlignment:
+                                  //         MainAxisAlignment.start,
+                                  //     crossAxisAlignment:
+                                  //         CrossAxisAlignment.center,
+                                  //     children: [
+                                  //       Padding(
+                                  //         padding:
+                                  //             EdgeInsetsDirectional.fromSTEB(
+                                  //                 20.0, 40.0, 10.0, 0.0),
+                                  //         child: Text(
+                                  //           'Disciplina, Moralidad, \n Trabajo y Eficiencia',
+                                  //           style: FlutterFlowTheme.of(context)
+                                  //               .bodyMedium
+                                  //               .override(
+                                  //                 fontFamily: 'Inter',
+                                  //                 color: FlutterFlowTheme.of(
+                                  //                         context)
+                                  //                     .secondaryText,
+                                  //               ),
+                                  //         ),
+                                  //       ),
+                                  //     ],
+                                  //   ),
+                                  // ),
+                                  iconsLinksGrid,
                                   Align(
-                                    alignment: AlignmentDirectional.topStart,
-                                    child: Column(
-                                      // mainAxisSize: MainAxisSize.max,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  20.0, 40.0, 10.0, 0.0),
-                                          child: Text(
-                                            'Disciplina, Moralidad, \n Trabajo y Eficiencia',
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                                  fontFamily: 'Inter',
-                                                  color: FlutterFlowTheme.of(
-                                                          context)
-                                                      .secondaryText,
-                                                ),
-                                          ),
+                                      alignment:
+                                          AlignmentDirectional.bottomCenter,
+                                      child: Container(
+                                        margin: EdgeInsets.all(9),
+                                        child: Text(
+                                          'Disciplina, Moralidad, Trabajo y Eficiencia',
+                                          style: FlutterFlowTheme.of(context)
+                                              .bodyMedium
+                                              .override(
+                                                fontFamily: 'Sora',
+                                                color:
+                                                    FlutterFlowTheme.of(context)
+                                                        .primaryText,
+                                              ),
                                         ),
-                                      ],
-                                    ),
-                                  ),
-                                  iconsLinksGrid
-                                  //---------HERE--------
+                                      ))
                                 ],
                               )),
                         ),

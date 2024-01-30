@@ -146,6 +146,7 @@ class LightModeTheme extends FlutterFlowTheme {
   late Color info = const Color(0xFFFFFFFF);
   late Color titles = const Color(0xFFFFFFFF);
   final List<Color> mainWindowCards = [
+    //OXSCHOOL MAIN COLORS
     Color.fromRGBO(23, 76, 147, 1),
     Color.fromRGBO(246, 146, 51, 1),
     Color.fromRGBO(235, 48, 69, 1),

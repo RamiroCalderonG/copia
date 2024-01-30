@@ -1,11 +1,6 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
-import 'package:flutter/foundation.dart';
 import 'package:oxschool/constants/connection.dart';
-import 'package:oxschool/utils/device_information.dart';
-
-import '../../flutter_flow/flutter_flow_util.dart';
 
 import 'api_manager.dart';
 
@@ -15,19 +10,19 @@ const _kPrivateApiFunctionName = 'ffPrivateApiCall';
 
 class LoginUserCall {
   static Future<ApiCallResponse> call(
-      {required String nip, required String device}) {
+      {required String nip,
+      required String device,
+      required String ip_address}) {
     return ApiManager.instance.makeApiCall(
       callName: 'LoginVerify',
       apiUrl: hostUrl + port + '/login/userlogin?nip=$nip&device=$device',
       callType: ApiCallType.GET,
       headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},
-      params: {
-        'nip': nip,
-        'device': device,
-      },
+      params: {'nip': nip, 'device': device, 'l1': ip_address},
       returnBody: true,
       encodeBodyUtf8: false,
-      decodeUtf8: false,
+      decodeUtf8: true,
+      bodyType: BodyType.JSON,
       cache: false,
     );
   }
@@ -54,7 +49,7 @@ class UserPermissionsCall {
 class CurrentCicleCall {
   static Future<ApiCallResponse> call() {
     return ApiManager.instance.makeApiCall(
-      callName: 'cicles',
+      callName: 'cycles',
       apiUrl: hostUrl + port + '/api/cycles/1',
       callType: ApiCallType.GET,
       headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},
@@ -62,7 +57,7 @@ class CurrentCicleCall {
       returnBody: true,
       encodeBodyUtf8: false,
       decodeUtf8: false,
-      cache: true,
+      cache: false,
     );
   }
 }
@@ -79,7 +74,7 @@ class FamilyCall {
         returnBody: true,
         encodeBodyUtf8: false,
         decodeUtf8: false,
-        cache: true);
+        cache: false);
   }
 }
 
@@ -102,7 +97,7 @@ class NurseryStudentCall {
       returnBody: true,
       encodeBodyUtf8: false,
       decodeUtf8: false,
-      cache: true,
+      cache: false,
     );
   }
 }
@@ -116,7 +111,7 @@ class NurseryStudentMedication {
       headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},
       params: {"matricula": matricula},
       returnBody: true,
-      cache: true,
+      cache: false,
     );
   }
 }
@@ -132,7 +127,125 @@ class NurseryHistoryCall {
       returnBody: true,
       encodeBodyUtf8: false,
       decodeUtf8: false,
+      cache: false,
+    );
+  }
+}
+
+class CausesCall {
+  static Future<ApiCallResponse> call({required String claCausa}) {
+    return ApiManager.instance.makeApiCall(
+      callName: 'Causes',
+      apiUrl: hostUrl + port + '/api/causes',
+      callType: ApiCallType.GET,
+      headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},
+      params: {"ClaCausa": claCausa},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+    );
+  }
+}
+
+//Pending to add Log data to store at
+class NurseryPainListCall {
+  static Future<ApiCallResponse> call({required String dataLog}) {
+    return ApiManager.instance.makeApiCall(
+        callName: 'Nursery-Pain-List',
+        apiUrl: hostUrl + port + '/api/nursery-pain-list',
+        callType: ApiCallType.GET,
+        headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},
+        params: {},
+        returnBody: true,
+        encodeBodyUtf8: false,
+        decodeUtf8: false,
+        cache: true);
+  }
+}
+
+class NurseryWoundsCall {
+  static Future<ApiCallResponse> call({required String dataLog}) {
+    return ApiManager.instance.makeApiCall(
+      callName: 'Nursery-Wounds',
+      apiUrl: hostUrl + port + '/api/nursery-wounds',
+      callType: ApiCallType.GET,
+      headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
       cache: true,
+    );
+  }
+}
+
+class EmployeeCall {
+  static Future<ApiCallResponse> call(
+      {required String campus,
+      required String employeeID,
+      required String logData,
+      required String param,
+      required String ip}) {
+    return ApiManager.instance.makeApiCall(
+        callName: 'Employees',
+        apiUrl: hostUrl + port + '/api/employee',
+        callType: ApiCallType.GET,
+        headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},
+        params: {
+          "Required": param,
+          "campus": campus,
+          "employeeID": employeeID,
+          "l1": ip
+        },
+        returnBody: true,
+        encodeBodyUtf8: false,
+        decodeUtf8: false,
+        cache: false);
+  }
+}
+
+class TeacherCall {
+  static Future<ApiCallResponse> call({
+    required String ipData,
+    required String campus,
+    required int grade,
+    required String group,
+    required String param,
+    required String cycle,
+  }) {
+    return ApiManager.instance.makeApiCall(
+        callName: 'Teacher',
+        apiUrl: hostUrl + port + '/api/Employee/Teacher',
+        callType: ApiCallType.GET,
+        headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},
+        params: {
+          "ClaUn": campus,
+          "ClaCiclo": cycle,
+          "Grado": grade,
+          "Grupo": group,
+          "deviceInfo": ipData,
+          "param": param,
+        },
+        returnBody: true,
+        encodeBodyUtf8: false,
+        decodeUtf8: false,
+        cache: false);
+  }
+}
+
+class POSTNurseryStudentVisit {
+  static Future<ApiCallResponse> call(
+      {required Map<String, dynamic>? requiredBody}) {
+    var contentBody = requiredBody.toString();
+    return ApiManager.instance.makeApiCall(
+      callName: 'POST Student Nursery Visit',
+      apiUrl: hostUrl + port + '/api/nursery-visit/',
+      callType: ApiCallType.POST,
+      headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},
+      bodyType: BodyType.JSON,
+      body: contentBody,
+      returnBody: true,
     );
   }
 }

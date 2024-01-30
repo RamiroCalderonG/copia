@@ -1,17 +1,9 @@
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:oxschool/constants/User.dart';
-import 'package:oxschool/enfermeria/enfermeria_widget.dart';
 import 'package:oxschool/enfermeria/ficha_de_salud.dart';
 import 'package:oxschool/flutter_flow/flutter_flow_util.dart';
-import 'package:oxschool/login_view/login_view_widget.dart';
-import 'package:oxschool/main.dart';
-import '../constants/Student.dart';
-import 'package:oxschool/main.dart';
-import '../constants/Student.dart';
 import '../grades/grades_view_capture.dart';
-import '../models/user.dart';
 
 class DrawerClass extends StatefulWidget {
   const DrawerClass({super.key});

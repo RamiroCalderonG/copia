@@ -1,17 +1,19 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:oxschool/Models/Cycle.dart';
 import 'package:oxschool/Models/User.dart';
 import 'package:oxschool/constants/User.dart';
+import 'package:flutter/material.dart';
 
 import '../utils/device_information.dart';
 import '/backend/api_requests/api_calls.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
-import 'package:flutter/material.dart';
+
 import 'login_view_model.dart';
 export 'login_view_model.dart';
 
@@ -22,9 +24,12 @@ class LoginViewWidget extends StatefulWidget {
   _LoginViewWidgetState createState() => _LoginViewWidgetState();
 }
 
+var deviceIP;
+
 class _LoginViewWidgetState extends State<LoginViewWidget> {
   late LoginViewModel _model;
   String currentDeviceData = '';
+
   // late User currentUser;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -81,6 +86,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
         'Error:': 'Failed to get platform version.'
       };
     }
+    FetchDeviceIp();
 
     if (!mounted) return;
     print(deviceData.toString());
@@ -88,12 +94,144 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
     setState(() {
       deviceData = deviceData;
       currentDeviceData = deviceData.toString();
+      deviceInformation = deviceData;
     });
   }
 
   @override
   Widget build(BuildContext context) {
     String? _text;
+
+    dynamic loginButtonFunction() async {
+      try {
+        var value = trimSpaces(_model.textController2.text);
+        if (value.isNotEmpty) {
+          // Log In user
+          _model.apiResultxgr = await LoginUserCall.call(
+                  nip: _model.textController2.text,
+                  device: currentDeviceData,
+                  ip_address: deviceIP)
+              .timeout(Duration(seconds: 7));
+          if ((_model.apiResultxgr?.succeeded ?? true)) {
+            // Decode the JSON string into a Dart list
+            List<dynamic> jsonList =
+                json.decode(_model.apiResultxgr!.response!.body);
+            currentUser = userLogedIn(jsonList); //Store values into a const
+
+            // Get currentCycle
+            _model.apiResultxgr =
+                await CurrentCicleCall.call().timeout(Duration(seconds: 7));
+            if ((_model.apiResultxgr?.succeeded ?? true)) {
+              jsonList = json.decode(_model.apiResultxgr!.response!.body);
+              currentCycle = getcurrentCycle(jsonList); //parse from JSON
+            }
+            //GET User Permissions
+            _model.apiResultxgr = await UserPermissionsCall.call(
+                    idLogin: currentUser!.idLogin.toString())
+                .timeout(Duration(seconds: 7));
+            if ((_model.apiResultxgr?.succeeded ?? true)) {
+              jsonList = json.decode(_model.apiResultxgr!.response!.body);
+              userPermissions = jsonList;
+            }
+
+            if (Platform.isAndroid || Platform.isIOS) {
+              context.goNamed(
+                'MobileMainView',
+                extra: <String, dynamic>{
+                  kTransitionInfoKey: TransitionInfo(
+                    hasTransition: true,
+                    transitionType: PageTransitionType.fade,
+                  ),
+                },
+              );
+            } else {
+              context.goNamed(
+                'MainWindow',
+                extra: <String, dynamic>{
+                  kTransitionInfoKey: TransitionInfo(
+                    hasTransition: true,
+                    transitionType: PageTransitionType.fade,
+                  ),
+                },
+              );
+            }
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  (_model.apiResultxgr?.jsonBody ?? '').toString(),
+                  style: FlutterFlowTheme.of(context).labelMedium.override(
+                        fontFamily: 'Roboto',
+                        color: Color(0xFF130C0D),
+                        fontWeight: FontWeight.w500,
+                      ),
+                ),
+                action: SnackBarAction(
+                    label: 'Cerrar mensaje',
+                    textColor: FlutterFlowTheme.of(context).info,
+                    backgroundColor: Colors.black12,
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                    }),
+                duration: Duration(milliseconds: 9000),
+                backgroundColor: FlutterFlowTheme.of(context).secondary,
+              ),
+            );
+          }
+
+          setState(() {});
+        } else {
+          _model.textController2.text = '';
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Favor de verificar su contraseña',
+                style: FlutterFlowTheme.of(context).labelMedium.override(
+                      fontFamily: 'Roboto',
+                      color: Color(0xFF130C0D),
+                      fontWeight: FontWeight.w500,
+                    ),
+              ),
+              action: SnackBarAction(
+                  label: 'Cerrar mensaje',
+                  textColor: FlutterFlowTheme.of(context).info,
+                  backgroundColor: Colors.black12,
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  }),
+              duration: Duration(milliseconds: 9000),
+              backgroundColor: FlutterFlowTheme.of(context).secondary,
+            ),
+          );
+        }
+      } catch (e) {
+        // _model.textController2.text = '';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              e.toString(),
+              style: FlutterFlowTheme.of(context).labelMedium.override(
+                    fontFamily: 'Roboto',
+                    color: Color(0xFF130C0D),
+                    fontWeight: FontWeight.w500,
+                  ),
+            ),
+            action: SnackBarAction(
+                label: 'Cerrar mensaje',
+                textColor: FlutterFlowTheme.of(context).info,
+                backgroundColor: Colors.black12,
+                onPressed: () {
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                }),
+            duration: Duration(milliseconds: 9000),
+            backgroundColor: FlutterFlowTheme.of(context).secondary,
+          ),
+        );
+      }
+    }
+
+    ;
+
     return GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(_model.unfocusNode),
       child: Scaffold(
@@ -169,6 +307,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                 padding: EdgeInsetsDirectional.fromSTEB(
                                     0.0, 0.0, 0.0, 16.0),
                                 child: TextFormField(
+                                  enableSuggestions: true,
                                   controller: _model.textController1,
                                   obscureText: false,
                                   decoration: InputDecoration(
@@ -212,169 +351,10 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                 padding: EdgeInsetsDirectional.fromSTEB(
                                     0.0, 0.0, 0.0, 16.0),
                                 child: TextFormField(
+                                  autofocus: true,
+                                  // When the user press enter or send key
                                   onFieldSubmitted: (value) async {
-                                    try {
-                                      var value = trimSpaces(
-                                          _model.textController2.text);
-                                      if (value.isNotEmpty) {
-                                        // Log In user
-                                        _model.apiResultxgr =
-                                            await LoginUserCall.call(
-                                                nip:
-                                                    _model.textController2.text,
-                                                device: currentDeviceData);
-                                        if ((_model.apiResultxgr?.succeeded ??
-                                            true)) {
-                                          // Decode the JSON string into a Dart list
-                                          List<dynamic> jsonList = json.decode(
-                                              _model.apiResultxgr!.response!
-                                                  .body);
-                                          currentUser = userLogedIn(
-                                              jsonList); //Store values into a const
-
-                                          // Get currentCycle
-                                          _model.apiResultxgr =
-                                              await CurrentCicleCall.call();
-                                          if ((_model.apiResultxgr?.succeeded ??
-                                              true)) {
-                                            jsonList = json.decode(_model
-                                                .apiResultxgr!.response!.body);
-                                            currentCycle = getcurrentCycle(
-                                                jsonList); //parse from JSON
-                                          }
-                                          //GET User Permissions
-                                          _model.apiResultxgr =
-                                              await UserPermissionsCall.call(
-                                                  idLogin: currentUser!.idLogin
-                                                      .toString());
-                                          if ((_model.apiResultxgr?.succeeded ??
-                                              true)) {
-                                            jsonList = json.decode(_model
-                                                .apiResultxgr!.response!.body);
-                                            userPermissions = jsonList;
-                                          }
-
-                                          context.goNamed(
-                                            'MainWindow',
-                                            extra: <String, dynamic>{
-                                              kTransitionInfoKey:
-                                                  TransitionInfo(
-                                                hasTransition: true,
-                                                transitionType:
-                                                    PageTransitionType.fade,
-                                              ),
-                                            },
-                                          );
-                                        } else {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                (_model.apiResultxgr
-                                                            ?.jsonBody ??
-                                                        '')
-                                                    .toString(),
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .labelMedium
-                                                        .override(
-                                                          fontFamily: 'Roboto',
-                                                          color:
-                                                              Color(0xFF130C0D),
-                                                          fontWeight:
-                                                              FontWeight.w500,
-                                                        ),
-                                              ),
-                                              action: SnackBarAction(
-                                                  label: 'Cerrar mensaje',
-                                                  textColor:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .info,
-                                                  backgroundColor:
-                                                      Colors.black12,
-                                                  onPressed: () {
-                                                    ScaffoldMessenger.of(
-                                                            context)
-                                                        .hideCurrentSnackBar();
-                                                  }),
-                                              duration:
-                                                  Duration(milliseconds: 9000),
-                                              backgroundColor:
-                                                  FlutterFlowTheme.of(context)
-                                                      .secondary,
-                                            ),
-                                          );
-                                        }
-
-                                        setState(() {});
-                                      } else {
-                                        _model.textController2.text = '';
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              'Favor de verificar su contraseña',
-                                              style: FlutterFlowTheme.of(
-                                                      context)
-                                                  .labelMedium
-                                                  .override(
-                                                    fontFamily: 'Roboto',
-                                                    color: Color(0xFF130C0D),
-                                                    fontWeight: FontWeight.w500,
-                                                  ),
-                                            ),
-                                            action: SnackBarAction(
-                                                label: 'Cerrar mensaje',
-                                                textColor:
-                                                    FlutterFlowTheme.of(context)
-                                                        .info,
-                                                backgroundColor: Colors.black12,
-                                                onPressed: () {
-                                                  ScaffoldMessenger.of(context)
-                                                      .hideCurrentSnackBar();
-                                                }),
-                                            duration:
-                                                Duration(milliseconds: 9000),
-                                            backgroundColor:
-                                                FlutterFlowTheme.of(context)
-                                                    .secondary,
-                                          ),
-                                        );
-                                      }
-                                    } catch (e) {
-                                      // _model.textController2.text = '';
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            e.toString(),
-                                            style: FlutterFlowTheme.of(context)
-                                                .labelMedium
-                                                .override(
-                                                  fontFamily: 'Roboto',
-                                                  color: Color(0xFF130C0D),
-                                                  fontWeight: FontWeight.w500,
-                                                ),
-                                          ),
-                                          action: SnackBarAction(
-                                              label: 'Cerrar mensaje',
-                                              textColor:
-                                                  FlutterFlowTheme.of(context)
-                                                      .info,
-                                              backgroundColor: Colors.black12,
-                                              onPressed: () {
-                                                ScaffoldMessenger.of(context)
-                                                    .hideCurrentSnackBar();
-                                              }),
-                                          duration:
-                                              Duration(milliseconds: 9000),
-                                          backgroundColor:
-                                              FlutterFlowTheme.of(context)
-                                                  .secondary,
-                                        ),
-                                      );
-                                    }
+                                    loginButtonFunction();
                                   },
                                   controller: _model.textController2,
                                   obscureText: !_model.passwordVisibility,
@@ -436,146 +416,9 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                 padding: EdgeInsetsDirectional.fromSTEB(
                                     0.0, 0.0, 0.0, 16.0),
                                 child: FFButtonWidget(
+                                  //TODO: CHANGE TO A FUNCTION TO REDUCE FILE LENGTH
                                   onPressed: () async {
-                                    context.goNamed(
-                                      'MainWindow',
-                                      extra: <String, dynamic>{
-                                        kTransitionInfoKey: TransitionInfo(
-                                          hasTransition: true,
-                                          transitionType:
-                                              PageTransitionType.fade,
-                                        ),
-                                      },
-                                    );
-
-                                    var value =
-                                        trimSpaces(_model.textController2.text);
-
-                                    if (value.isNotEmpty || value.length >= 6) {
-                                      initPlatformState();
-                                      if (currentUser?.employeeNumber != null) {
-                                        currentUser?.clear();
-                                      }
-                                      // Log In user
-                                      _model.apiResultxgr =
-                                          await LoginUserCall.call(
-                                              nip: _model.textController2.text,
-                                              device: currentDeviceData);
-                                      if ((_model.apiResultxgr?.succeeded ??
-                                          true)) {
-                                        // Decode the JSON string into a Dart list
-                                        List<dynamic> jsonList = json.decode(
-                                            _model
-                                                .apiResultxgr!.response!.body);
-                                        currentUser = userLogedIn(
-                                            jsonList); //Store values into a const
-
-                                        if (currentCycle?.claCiclo != null) {
-                                          currentCycle?.clear();
-                                        }
-
-                                        // Get currentCycle
-                                        _model.apiResultxgr =
-                                            await CurrentCicleCall.call();
-                                        if ((_model.apiResultxgr?.succeeded ??
-                                            true)) {
-                                          jsonList = json.decode(_model
-                                              .apiResultxgr!.response!.body);
-                                          currentCycle = getcurrentCycle(
-                                              jsonList); //parse from JSON
-                                        }
-                                        //GET User Permissions
-                                        _model.apiResultxgr =
-                                            await UserPermissionsCall.call(
-                                                idLogin: currentUser!.idLogin
-                                                    .toString());
-                                        if ((_model.apiResultxgr?.succeeded ??
-                                            true)) {
-                                          jsonList = json.decode(_model
-                                              .apiResultxgr!.response!.body);
-                                          userPermissions = jsonList;
-                                        }
-
-                                        context.goNamed(
-                                          'MainWindow',
-                                          extra: <String, dynamic>{
-                                            kTransitionInfoKey: TransitionInfo(
-                                              hasTransition: true,
-                                              transitionType:
-                                                  PageTransitionType.fade,
-                                            ),
-                                          },
-                                        );
-                                      } else {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              (_model.apiResultxgr?.jsonBody ??
-                                                      '')
-                                                  .toString(),
-                                              style: FlutterFlowTheme.of(
-                                                      context)
-                                                  .labelMedium
-                                                  .override(
-                                                    fontFamily: 'Roboto',
-                                                    color: Color(0xFF130C0D),
-                                                    fontWeight: FontWeight.w500,
-                                                  ),
-                                            ),
-                                            action: SnackBarAction(
-                                                label: 'Cerrar mensaje',
-                                                textColor:
-                                                    FlutterFlowTheme.of(context)
-                                                        .info,
-                                                backgroundColor: Colors.black12,
-                                                onPressed: () {
-                                                  ScaffoldMessenger.of(context)
-                                                      .hideCurrentSnackBar();
-                                                }),
-                                            duration:
-                                                Duration(milliseconds: 9000),
-                                            backgroundColor:
-                                                FlutterFlowTheme.of(context)
-                                                    .secondary,
-                                          ),
-                                        );
-                                      }
-
-                                      setState(() {});
-                                    } else {
-                                      _model.textController2.text = '';
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            'Favor de verificar su contraseña',
-                                            style: FlutterFlowTheme.of(context)
-                                                .labelMedium
-                                                .override(
-                                                  fontFamily: 'Roboto',
-                                                  color: Color(0xFF130C0D),
-                                                  fontWeight: FontWeight.w500,
-                                                ),
-                                          ),
-                                          action: SnackBarAction(
-                                              label: 'Cerrar mensaje',
-                                              textColor:
-                                                  FlutterFlowTheme.of(context)
-                                                      .info,
-                                              backgroundColor: Colors.black12,
-                                              onPressed: () {
-                                                ScaffoldMessenger.of(context)
-                                                    .hideCurrentSnackBar();
-                                              }),
-                                          duration:
-                                              Duration(milliseconds: 9000),
-                                          backgroundColor:
-                                              FlutterFlowTheme.of(context)
-                                                  .secondary,
-                                        ),
-                                      );
-                                    }
+                                    loginButtonFunction();
                                   },
                                   text: 'Ingresar',
                                   options: FFButtonOptions(
@@ -602,28 +445,38 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 4.0, 0.0, 4.0),
-                                    child: Text(
-                                      'Olvide mi contraseña',
-                                      style: FlutterFlowTheme.of(context)
-                                          .bodyMedium,
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
-                                        4.0, 4.0, 0.0, 4.0),
-                                    child: Text(
-                                      'Click aqui',
-                                      style: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .override(
-                                            fontFamily: 'Inter',
-                                            color: FlutterFlowTheme.of(context)
-                                                .primary,
-                                          ),
-                                    ),
-                                  ),
+                                      padding: EdgeInsetsDirectional.fromSTEB(
+                                          0.0, 4.0, 0.0, 4.0),
+                                      child: TextButton(
+                                        onPressed: () {
+                                          _displayTextInputDialog(context);
+                                        },
+                                        child: Text(
+                                          'Olvide mi contraseña',
+                                          style: FlutterFlowTheme.of(context)
+                                              .bodyMedium
+                                              .override(
+                                                fontFamily: 'Sora',
+                                                color:
+                                                    FlutterFlowTheme.of(context)
+                                                        .primary,
+                                              ),
+                                        ),
+                                      )),
+                                  // Padding(
+                                  //   padding: EdgeInsetsDirectional.fromSTEB(
+                                  //       4.0, 4.0, 0.0, 4.0),
+                                  //   child: Text(
+                                  //     'Click aqui',
+                                  //     style: FlutterFlowTheme.of(context)
+                                  //         .bodyMedium
+                                  //         .override(
+                                  //           fontFamily: 'Sora',
+                                  //           color: FlutterFlowTheme.of(context)
+                                  //               .primary,
+                                  //         ),
+                                  //   ),
+                                  // ),
                                 ],
                               ),
                             ],
@@ -640,6 +493,44 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
       ),
     );
   }
+}
+
+TextEditingController _textFieldController = TextEditingController();
+
+Future<void> _displayTextInputDialog(BuildContext context) async {
+  return showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: Text(
+          'Recuperar contraseña',
+          style: TextStyle(fontFamily: 'Sora'),
+        ),
+        content: TextField(
+          controller: _textFieldController,
+          decoration: InputDecoration(
+              hintText: "Introducir Numero de empleado",
+              helperText: 'Le enviaremos un correo',
+              icon: Icon(Icons.numbers)),
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: Text('CANCEL'),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+          TextButton(
+            child: Text('OK'),
+            onPressed: () {
+              print(_textFieldController.text);
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      );
+    },
+  );
 }
 
 User userLogedIn(List<dynamic> jsonList) {
@@ -674,4 +565,8 @@ Cycle getcurrentCycle(List<dynamic> jsonList) {
   }
 
   return currentCycle;
+}
+
+Future FetchDeviceIp() async {
+  deviceIP = await getDeviceIP();
 }

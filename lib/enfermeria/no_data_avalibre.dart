@@ -6,7 +6,7 @@ class NoDataAvailble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Placeholder(
-      child: Text('No se tiene informaicon disponible, intente actualizar'),
+      child: Text('No se tiene información disponible'),
     );
   }
 }

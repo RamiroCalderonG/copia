@@ -8,6 +8,9 @@ late List<String>? _grades = [];
 
 late List<dynamic>? userPermissions = [];
 
+var deviceInformation = <String, dynamic>{};
+String? deviceIp;
+
 void clearUserData() {
   currentUser?.clear();
   currentCycle?.clear();

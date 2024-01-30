@@ -1,23 +1,22 @@
 import 'dart:convert';
-import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
-import 'package:oxschool/Models/Cycle.dart';
 import 'package:oxschool/Models/Family.dart';
 import 'package:oxschool/Models/Medicines.dart';
 import 'package:oxschool/Models/NurseryHistory.dart';
 import 'package:oxschool/Models/Student.dart';
 import 'package:oxschool/backend/api_requests/api_calls.dart';
+import 'package:oxschool/components/confirm_dialogs.dart';
 import 'package:oxschool/constants/Student.dart';
 import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/enfermeria/no_data_avalibre.dart';
 import 'package:oxschool/enfermeria/student_history_grid.dart';
 import 'package:oxschool/flutter_flow/flutter_flow_theme.dart';
+import 'package:oxschool/utils/loader_indicator.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
 import 'expandable_fab.dart';
-import 'nursery_history_grid.dart';
 
 class FichaDeSalud extends StatefulWidget {
   const FichaDeSalud({super.key});
@@ -28,8 +27,11 @@ class FichaDeSalud extends StatefulWidget {
 
 class _FichaDeSaludState extends State<FichaDeSalud>
     with TickerProviderStateMixin {
+  final GlobalKey<_FichaDeSaludState> key = GlobalKey<_FichaDeSaludState>();
+
   TextEditingController searchController = TextEditingController();
   bool isSearching = false; // Add a state variable to track search status
+  bool isLoading = false;
   ApiCallResponse? apiResultxgr;
   bool _showClearButton = true;
   List<String> listOfStudents = [];
@@ -42,8 +44,10 @@ class _FichaDeSaludState extends State<FichaDeSalud>
 
   late List<PlutoRow> nurseryHRows;
 
+  bool isSateManagerActive = false;
+
   onTap() {
-    isSearching = false;
+    // isSearching = false;
     // if (_isDisabled[_tabController.index]) {
     //   int index = _tabController.previousIndex;
     //   setState(() {
@@ -57,6 +61,7 @@ class _FichaDeSaludState extends State<FichaDeSalud>
       title: 'Relacion',
       field: 'Relacion',
       type: PlutoColumnType.text(),
+      enableRowChecked: true,
     ),
     PlutoColumn(
       title: 'Nombre',
@@ -94,7 +99,6 @@ class _FichaDeSaludState extends State<FichaDeSalud>
         setState(() {});
       });
     super.initState();
-    // _tabController = TabController(vsync: this, length: nurseryTabs.length);
     _tabController.addListener(onTap);
     searchController.addListener(() {
       setState(() {
@@ -129,19 +133,26 @@ class _FichaDeSaludState extends State<FichaDeSalud>
     double screenHeight = MediaQuery.of(context).size.height;
     double cardHeight = screenHeight / 1.0;
     double cardWidth =
-        MediaQuery.of(context).size.width * 0.8; // 80% of screen width
-    // var familyList;
-    // var selectedStudent;
+        MediaQuery.of(context).size.width * 0.9; // 90% of screen width
 
-    void reloadCurrentScreen(BuildContext context) {
-      selectedStudent = null;
-      nurseryHistoryStudent = null;
-      selectedFamily = null;
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (BuildContext context) {
-          return FichaDeSalud(); // Replace with the name of your current screen widget
-        }),
-      );
+    // void reloadCurrentScreen(BuildContext context) {
+    //   selectedStudent = null;
+    //   nurseryHistoryStudent = null;
+    //   selectedFamily = null;
+    //   Navigator.of(context).pushReplacement(
+    //     MaterialPageRoute(builder: (BuildContext context) {
+    //       return FichaDeSalud();
+    //     }),
+    //   );
+    // }
+
+    void rebuildView() {
+      setState(() {
+        selectedStudent = null;
+        nurseryHistoryStudent = null;
+        selectedFamily = null;
+        isSearching = false;
+      });
     }
 
     final nurseryStudentMedicines = Column(
@@ -175,9 +186,15 @@ class _FichaDeSaludState extends State<FichaDeSalud>
                           color: Colors.black38,
                         ),
                         trailing: IconButton(
-                          onPressed: () {
-                            print(
-                                studentAllowedMedicines[index].nomMedicamento);
+                          onPressed: () async {
+                            //INSER FUNCTION TO DELETE MEDS
+                            int deleteMedFromStudent =
+                                await showDeleteConfirmationAlertDialog(
+                                    context);
+                            if (deleteMedFromStudent == 1) {
+                              var idValue = studentAllowedMedicines[index].id;
+                              //Pending to call api using id from selected med
+                            }
                           },
                           icon: Icon(Icons.delete_forever),
                           color: Colors.black,
@@ -202,181 +219,200 @@ class _FichaDeSaludState extends State<FichaDeSalud>
       ],
     );
 
-    final nurseryHistoryGrid = Column(
+    final studentDataTab = Stack(
       children: [
-        Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                //
-              ],
-              // ,
-            )),
-        if (isSearching) // Display the Card when searching
-
-          Expanded(
-            // child: Center(
-            child: Container(
-              width: cardWidth, // Set the card width here
-              height: cardHeight,
-              padding: EdgeInsets.all(16.0),
-              child: Card(
-                elevation: 4.0, // Customize card elevation
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
-                child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      children: [
-                        Text('Historial del alumno',
-                            style: TextStyle(fontSize: 22.0)),
-                        Text(
-                          selectedStudent.nombre,
-                          style: TextStyle(fontSize: 18.0),
-                        ),
-                        SizedBox(height: 8.0),
-                        Divider(),
-                        Expanded(
-                            child: PlutoGrid(
-                          // configuration: const PlutoGridConfiguration.dark(),
-                          columns: nurseryHistoryColumns,
-                          rows: nurseryHistoryRows,
-                          onLoaded: (PlutoGridOnLoadedEvent event) {
-                            stateManager = event.stateManager;
-                            stateManager.setShowColumnFilter(true);
-                          },
-                        ))
-                      ],
-                    )),
-              ),
-            ),
-          )
-      ],
-    );
-
-    final studentDataTab = Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              TextField(
-                controller: searchController,
-                decoration: InputDecoration(
-                  helperText: 'Apellido Paterno + Apellido materno + Nombres',
-                  suffixIcon: _showClearButton
-                      ? IconButton(
-                          icon: Icon(Icons.clear),
-                          onPressed: () {
-                            reloadCurrentScreen(context);
-                          })
-                      : null,
-                  hintText: 'Buscar alumno',
-                  prefixIcon: Icon(Icons.search),
-                  border: OutlineInputBorder(),
-                ),
-                onSubmitted: (query) async {
-                  apiResultxgr = null;
-                  selectedStudent = null;
-                  selectedFamily = null;
-                  nurseryHistoryStudent = null;
-
-                  List<String> substrings =
-                      searchController.text.split(RegExp(' '));
-
-                  // Look for student -------------------------------
-                  apiResultxgr = await NurseryStudentCall.call(
-                          apPaterno: substrings[0],
-                          apMaterno: substrings[1],
-                          nombre: substrings[2],
-                          claUn: currentUser!.claUn,
-                          claCiclo: '2022-2023')
-                      .timeout(Duration(milliseconds: 9000));
-                  if ((apiResultxgr?.succeeded ?? true)) {
-                    List<dynamic> jsonList =
-                        json.decode(apiResultxgr!.response!.body);
-                    selectedStudent = studentNursery(jsonList);
-                    // jsonList.clear();
-
-                    if (jsonList.length == 1) {
-                      jsonList.clear();
-                      // Get student family details --------------------------------
-                      apiResultxgr = await FamilyCall.call(
-                              claFam: selectedStudent.claFamilia.toString())
-                          .timeout(Duration(milliseconds: 9000));
-                    } else {
-                      jsonList.clear();
-                      apiResultxgr = await FamilyCall.call(
-                              claFam: selectedStudent[0].claFamilia.toString())
-                          .timeout(Duration(milliseconds: 9000));
-                    }
-                    if ((apiResultxgr?.succeeded ?? true)) {
-                      List<dynamic> jsonList =
-                          json.decode(apiResultxgr!.response!.body);
-                      selectedFamily = familyFromJSON(jsonList);
-                      jsonList.clear();
-                      for (var line in selectedFamily) {
-                        rows.add(
-                          PlutoRow(
-                            cells: {
-                              'Relacion': PlutoCell(value: line.relationship),
-                              'Nombre': PlutoCell(
-                                  value: line.name +
-                                      ' ' +
-                                      line.firstLastName +
-                                      ' ' +
-                                      line.secondLastName),
-                              'Tutor': PlutoCell(value: line.isParent),
-                              'Fecha de Alta':
-                                  PlutoCell(value: line.registrationDate),
-                              'Celular': PlutoCell(value: line.cellPhoneNumber),
-                              // 'Email': PlutoCell(value: line.email)
-                            },
-                          ),
-                        );
-                      }
-                      apiResultxgr = null;
-                      //Get student Nursery History
-                      apiResultxgr = await NurseryHistoryCall.call(
-                              matricula: selectedStudent.matricula.toString())
-                          .timeout(Duration(milliseconds: 9000));
-                      if ((apiResultxgr?.succeeded ?? true)) {
-                        List<dynamic> jsonList =
-                            json.decode(apiResultxgr!.response!.body);
-                        nurseryHistoryStudent =
-                            studentHistoryFromJSON(jsonList);
-
-                        for (var line in nurseryHistoryStudent) {
-                          nurseryHistoryRows.add(
-                            PlutoRow(
-                              cells: {
-                                'idReporteEnfermeria':
-                                    PlutoCell(value: line.idReport),
-                                'Matricula': PlutoCell(value: line.studentId),
-                                'Fecha': PlutoCell(value: line.date),
-                                'Alumno': PlutoCell(value: line.studentName),
-                                'Causa': PlutoCell(value: line.cause),
-                                'Hora': PlutoCell(value: line.time),
-                                'Gradosecuencia': PlutoCell(value: line.grade),
-                                'ClaUn': PlutoCell(value: line.campuse),
-                                'Grupo': PlutoCell(value: line.group),
-                                'valoracionenfermeria':
-                                    PlutoCell(value: line.diagnosis),
-                                'obsGenerales':
-                                    PlutoCell(value: line.observations),
-                                'irconmedico':
-                                    PlutoCell(value: line.canalization),
-                                'envioclinica':
-                                    PlutoCell(value: line.hospitalize),
-                                'tx': PlutoCell(value: line.tx)
-                              },
-                            ),
-                          );
+        Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  TextFormField(
+                      controller: searchController,
+                      autofocus: true,
+                      validator: (value) {
+                        if (value == null || value.isEmpty || value == ' ') {
+                          return 'Please enter some text';
                         }
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
+                        return null; // Return null to indicate no validation errors
+                      },
+                      decoration: InputDecoration(
+                        helperText:
+                            'Apellido Paterno + Apellido materno + Nombres',
+                        suffixIcon: _showClearButton
+                            ? IconButton(
+                                icon: Icon(Icons.clear),
+                                onPressed: () {
+                                  searchController.text = '';
+
+                                  rebuildView();
+                                })
+                            : null,
+                        hintText: 'Buscar alumno',
+                        prefixIcon: Icon(Icons.search),
+                        border: OutlineInputBorder(),
+                      ),
+                      onFieldSubmitted: (query) async {
+                        if (query.trim().isEmpty) {
+                          showEmptyFieldAlertDialog(context);
+                          // Show an error message or perform any action for empty input
+                          return;
+                        }
+
+                        apiResultxgr = null;
+                        selectedStudent = null;
+                        selectedFamily = null;
+                        nurseryHistoryStudent = null;
+
+                        setState(() {
+                          isLoading = true;
+                        });
+                        List<String> substrings =
+                            searchController.text.split(RegExp(' '));
+
+                        // Look for student -------------------------------
+                        apiResultxgr = await NurseryStudentCall.call(
+                                apPaterno: substrings[0].capitalize(),
+                                apMaterno: substrings[1].capitalize(),
+                                nombre: substrings[2].capitalize(),
+                                claUn: currentUser!.claUn,
+                                claCiclo: currentCycle!.claCiclo)
+                            .timeout(Duration(seconds: 15));
+                        if ((apiResultxgr?.succeeded ?? true)) {
+                          List<dynamic> jsonList =
+                              json.decode(apiResultxgr!.response!.body);
+                          selectedStudent = studentNursery(jsonList);
+                          // jsonList.clear();
+
+                          if (jsonList.length == 1) {
+                            jsonList.clear();
+                            // Get student family details --------------------------------
+                            apiResultxgr = await FamilyCall.call(
+                                    claFam:
+                                        selectedStudent.claFamilia.toString())
+                                .timeout(Duration(milliseconds: 9000));
+                          } else {
+                            jsonList.clear();
+                            apiResultxgr = await FamilyCall.call(
+                                    claFam: selectedStudent[0]
+                                        .claFamilia
+                                        .toString())
+                                .timeout(Duration(milliseconds: 9000));
+                          }
+                          if ((apiResultxgr?.succeeded ?? true)) {
+                            List<dynamic> jsonList =
+                                json.decode(apiResultxgr!.response!.body);
+                            selectedFamily = familyFromJSON(jsonList);
+                            jsonList.clear();
+                            for (var line in selectedFamily) {
+                              rows.add(
+                                PlutoRow(
+                                  cells: {
+                                    'Relacion':
+                                        PlutoCell(value: line.relationship),
+                                    'Nombre': PlutoCell(
+                                        value: line.name +
+                                            ' ' +
+                                            line.firstLastName +
+                                            ' ' +
+                                            line.secondLastName),
+                                    'Tutor': PlutoCell(value: line.isParent),
+                                    'Fecha de Alta':
+                                        PlutoCell(value: line.registrationDate),
+                                    'Celular':
+                                        PlutoCell(value: line.cellPhoneNumber),
+                                    // 'Email': PlutoCell(value: line.email)
+                                  },
+                                ),
+                              );
+                            }
+                            apiResultxgr = null;
+                            //Get student Nursery History
+                            apiResultxgr = await NurseryHistoryCall.call(
+                                    matricula:
+                                        selectedStudent.matricula.toString())
+                                .timeout(Duration(milliseconds: 7000));
+                            if ((apiResultxgr?.succeeded ?? true)) {
+                              List<dynamic> jsonList =
+                                  json.decode(apiResultxgr!.response!.body);
+                              nurseryHistoryStudent =
+                                  studentHistoryFromJSON(jsonList);
+
+                              for (var line in nurseryHistoryStudent) {
+                                nurseryHistoryRows.add(
+                                  PlutoRow(
+                                    cells: {
+                                      'idReporteEnfermeria':
+                                          PlutoCell(value: line.idReport),
+                                      'Matricula':
+                                          PlutoCell(value: line.studentId),
+                                      'Fecha': PlutoCell(value: line.date),
+                                      'Alumno':
+                                          PlutoCell(value: line.studentName),
+                                      'Causa': PlutoCell(value: line.cause),
+                                      'Hora': PlutoCell(value: line.time),
+                                      'Gradosecuencia':
+                                          PlutoCell(value: line.grade),
+                                      'ClaUn': PlutoCell(value: line.campuse),
+                                      'Grupo': PlutoCell(value: line.group),
+                                      'valoracionenfermeria':
+                                          PlutoCell(value: line.diagnosis),
+                                      'obsGenerales':
+                                          PlutoCell(value: line.observations),
+                                      'irconmedico':
+                                          PlutoCell(value: line.canalization),
+                                      'envioclinica':
+                                          PlutoCell(value: line.hospitalize),
+                                      'tx': PlutoCell(value: line.tx)
+                                    },
+                                  ),
+                                );
+                              }
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content: Text(
+                                      (apiResultxgr?.jsonBody ?? '').toString(),
+                                      style: FlutterFlowTheme.of(context)
+                                          .labelMedium
+                                          .override(
+                                            fontFamily: 'Roboto',
+                                            color: Color(0xFF130C0D),
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                    ),
+                                    duration: Duration(milliseconds: 5000),
+                                    backgroundColor: Colors.amber),
+                              );
+
+                              isLoading = false;
+                            }
+                            nurseryHRows = nurseryHistoryRows;
+                            // Get student medicines
+                            apiResultxgr = await NurseryStudentMedication.call(
+                                    matricula:
+                                        selectedStudent.matricula.toString())
+                                .timeout(Duration(milliseconds: 9000));
+                            if (apiResultxgr!.response!.body.length > 0) {
+                              if ((apiResultxgr?.succeeded ?? true)) {
+                                jsonList =
+                                    json.decode(apiResultxgr!.response!.body);
+                              }
+                              isLoading = false;
+                            } else {
+                              isLoading = false;
+                            }
+                            studentAllowedMedicines =
+                                getMedicinesFromJSON(jsonList);
+                          }
+                          setState(() {
+                            isSearching = true;
+                            isSateManagerActive = true;
+                          });
+                          _refreshCard();
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
                               content: Text(
                                 (apiResultxgr?.jsonBody ?? '').toString(),
                                 style: FlutterFlowTheme.of(context)
@@ -387,103 +423,302 @@ class _FichaDeSaludState extends State<FichaDeSalud>
                                       fontWeight: FontWeight.w500,
                                     ),
                               ),
-                              duration: Duration(milliseconds: 5000),
-                              backgroundColor: Colors.amber),
-                        );
-                      }
-                      nurseryHRows = nurseryHistoryRows;
-                      // Get student medicines
-                      apiResultxgr = await NurseryStudentMedication.call(
-                              matricula: selectedStudent.matricula.toString())
-                          .timeout(Duration(milliseconds: 9000));
-                      if ((apiResultxgr?.succeeded ?? true)) {
-                        jsonList = json.decode(apiResultxgr!.response!.body);
-                      }
-                      studentAllowedMedicines = getMedicinesFromJSON(jsonList);
-                    }
-                    setState(() {
-                      isSearching = true;
-                    });
-                    _refreshCard();
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          (apiResultxgr?.jsonBody ?? '').toString(),
-                          style:
-                              FlutterFlowTheme.of(context).labelMedium.override(
-                                    fontFamily: 'Roboto',
-                                    color: Color(0xFF130C0D),
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                        ),
-                        duration: Duration(milliseconds: 8000),
-                        backgroundColor: FlutterFlowTheme.of(context).secondary,
-                      ),
-                    );
-                    searchController.clear();
-                  }
-                },
-              ),
-            ],
-          ),
-        ),
-        if (isSearching)
-          Expanded(
-              child: Container(
-            width: cardWidth,
-            height: cardHeight,
-            padding: EdgeInsets.all(16.0),
-            child: Card(
-              elevation: 4.0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    Text('Nombre del estudiante',
-                        style: TextStyle(fontSize: 22.0, fontFamily: 'Roboto')),
-                    Text(
-                      selectedStudent.nombre,
-                      style: TextStyle(fontSize: 18.0),
-                    ),
-                    SizedBox(height: 8.0),
-                    Text('Datos del alumno',
-                        style: TextStyle(fontSize: 18.0, fontFamily: 'Roboto')),
-                    SizedBox(height: 8.0),
-                    Divider(),
-                    Text(
-                      'Matricula',
-                      style: TextStyle(fontSize: 16.0, fontFamily: 'Roboto'),
-                    ),
-                    Text(
-                      selectedStudent.matricula,
-                      style: TextStyle(fontSize: 16.0),
-                    ),
-                    SizedBox(height: 10.0),
-                    Text('Campus',
-                        style: TextStyle(fontSize: 16.0, fontFamily: 'Roboto')),
-                    Text(selectedStudent.claUn),
-                    SizedBox(height: 10.0),
-                    Text(
-                      'Grado',
-                      style: TextStyle(fontSize: 16.0, fontFamily: 'Roboto'),
-                    ),
-                    Text(selectedStudent.grado),
-                    SizedBox(height: 10.0),
-                    Text(
-                      'Grupo',
-                      style: TextStyle(fontSize: 16.0, fontFamily: 'Roboto'),
-                    ),
-                    Text(selectedStudent.grupo),
-                    SizedBox(height: 10.0),
-                  ],
-                ),
+                              duration: Duration(milliseconds: 8000),
+                              backgroundColor:
+                                  FlutterFlowTheme.of(context).secondary,
+                            ),
+                          );
+                          isLoading = false;
+                          searchController.clear();
+                        }
+                      }),
+                  // TextField(
+                  //   controller: searchController,
+                  //   decoration: InputDecoration(
+                  //     helperText:
+                  //         'Apellido Paterno + Apellido materno + Nombres',
+                  //     suffixIcon: _showClearButton
+                  //         ? IconButton(
+                  //             icon: Icon(Icons.clear),
+                  //             onPressed: () {
+                  //               reloadCurrentScreen(context);
+                  //             })
+                  //         : null,
+                  //     hintText: 'Buscar alumno',
+                  //     prefixIcon: Icon(Icons.search),
+                  //     border: OutlineInputBorder(),
+                  //   ),
+                  //   onSubmitted: (query) async {
+                  //     apiResultxgr = null;
+                  //     selectedStudent = null;
+                  //     selectedFamily = null;
+                  //     nurseryHistoryStudent = null;
+
+                  //     List<String> substrings =
+                  //         searchController.text.split(RegExp(' '));
+
+                  //     // Look for student -------------------------------
+                  //     apiResultxgr = await NurseryStudentCall.call(
+                  //             apPaterno: substrings[0].capitalize(),
+                  //             apMaterno: substrings[1].capitalize(),
+                  //             nombre: substrings[2].capitalize(),
+                  //             claUn: currentUser!.claUn,
+                  //             claCiclo: currentCycle!.claCiclo)
+                  //         .timeout(Duration(seconds: 15));
+                  //     if ((apiResultxgr?.succeeded ?? true)) {
+                  //       List<dynamic> jsonList =
+                  //           json.decode(apiResultxgr!.response!.body);
+                  //       selectedStudent = studentNursery(jsonList);
+                  //       // jsonList.clear();
+
+                  //       if (jsonList.length == 1) {
+                  //         jsonList.clear();
+                  //         // Get student family details --------------------------------
+                  //         apiResultxgr = await FamilyCall.call(
+                  //                 claFam: selectedStudent.claFamilia.toString())
+                  //             .timeout(Duration(milliseconds: 9000));
+                  //       } else {
+                  //         jsonList.clear();
+                  //         apiResultxgr = await FamilyCall.call(
+                  //                 claFam:
+                  //                     selectedStudent[0].claFamilia.toString())
+                  //             .timeout(Duration(milliseconds: 9000));
+                  //       }
+                  //       if ((apiResultxgr?.succeeded ?? true)) {
+                  //         List<dynamic> jsonList =
+                  //             json.decode(apiResultxgr!.response!.body);
+                  //         selectedFamily = familyFromJSON(jsonList);
+                  //         jsonList.clear();
+                  //         for (var line in selectedFamily) {
+                  //           rows.add(
+                  //             PlutoRow(
+                  //               cells: {
+                  //                 'Relacion':
+                  //                     PlutoCell(value: line.relationship),
+                  //                 'Nombre': PlutoCell(
+                  //                     value: line.name +
+                  //                         ' ' +
+                  //                         line.firstLastName +
+                  //                         ' ' +
+                  //                         line.secondLastName),
+                  //                 'Tutor': PlutoCell(value: line.isParent),
+                  //                 'Fecha de Alta':
+                  //                     PlutoCell(value: line.registrationDate),
+                  //                 'Celular':
+                  //                     PlutoCell(value: line.cellPhoneNumber),
+                  //                 // 'Email': PlutoCell(value: line.email)
+                  //               },
+                  //             ),
+                  //           );
+                  //         }
+                  //         apiResultxgr = null;
+                  //         //Get student Nursery History
+                  //         apiResultxgr = await NurseryHistoryCall.call(
+                  //                 matricula:
+                  //                     selectedStudent.matricula.toString())
+                  //             .timeout(Duration(milliseconds: 7000));
+                  //         if ((apiResultxgr?.succeeded ?? true)) {
+                  //           List<dynamic> jsonList =
+                  //               json.decode(apiResultxgr!.response!.body);
+                  //           nurseryHistoryStudent =
+                  //               studentHistoryFromJSON(jsonList);
+
+                  //           for (var line in nurseryHistoryStudent) {
+                  //             nurseryHistoryRows.add(
+                  //               PlutoRow(
+                  //                 cells: {
+                  //                   'idReporteEnfermeria':
+                  //                       PlutoCell(value: line.idReport),
+                  //                   'Matricula':
+                  //                       PlutoCell(value: line.studentId),
+                  //                   'Fecha': PlutoCell(value: line.date),
+                  //                   'Alumno':
+                  //                       PlutoCell(value: line.studentName),
+                  //                   'Causa': PlutoCell(value: line.cause),
+                  //                   'Hora': PlutoCell(value: line.time),
+                  //                   'Gradosecuencia':
+                  //                       PlutoCell(value: line.grade),
+                  //                   'ClaUn': PlutoCell(value: line.campuse),
+                  //                   'Grupo': PlutoCell(value: line.group),
+                  //                   'valoracionenfermeria':
+                  //                       PlutoCell(value: line.diagnosis),
+                  //                   'obsGenerales':
+                  //                       PlutoCell(value: line.observations),
+                  //                   'irconmedico':
+                  //                       PlutoCell(value: line.canalization),
+                  //                   'envioclinica':
+                  //                       PlutoCell(value: line.hospitalize),
+                  //                   'tx': PlutoCell(value: line.tx)
+                  //                 },
+                  //               ),
+                  //             );
+                  //           }
+                  //         } else {
+                  //           ScaffoldMessenger.of(context).showSnackBar(
+                  //             SnackBar(
+                  //                 content: Text(
+                  //                   (apiResultxgr?.jsonBody ?? '').toString(),
+                  //                   style: FlutterFlowTheme.of(context)
+                  //                       .labelMedium
+                  //                       .override(
+                  //                         fontFamily: 'Roboto',
+                  //                         color: Color(0xFF130C0D),
+                  //                         fontWeight: FontWeight.w500,
+                  //                       ),
+                  //                 ),
+                  //                 duration: Duration(milliseconds: 5000),
+                  //                 backgroundColor: Colors.amber),
+                  //           );
+                  //         }
+                  //         nurseryHRows = nurseryHistoryRows;
+                  //         // Get student medicines
+                  //         apiResultxgr = await NurseryStudentMedication.call(
+                  //                 matricula:
+                  //                     selectedStudent.matricula.toString())
+                  //             .timeout(Duration(milliseconds: 9000));
+                  //         if (apiResultxgr!.response!.body.length > 0) {
+                  //           if ((apiResultxgr?.succeeded ?? true)) {
+                  //             jsonList =
+                  //                 json.decode(apiResultxgr!.response!.body);
+                  //           }
+                  //         } else {
+                  //           print(
+                  //               'No se encontraron medicación para el alumno' +
+                  //                   selectedStudent.matricula.toString());
+                  //         }
+                  //         studentAllowedMedicines =
+                  //             getMedicinesFromJSON(jsonList);
+                  //       }
+                  //       setState(() {
+                  //         isSearching = true;
+                  //         isSateManagerActive = true;
+                  //       });
+                  //       _refreshCard();
+                  //     } else {
+                  //       ScaffoldMessenger.of(context).showSnackBar(
+                  //         SnackBar(
+                  //           content: Text(
+                  //             (apiResultxgr?.jsonBody ?? '').toString(),
+                  //             style: FlutterFlowTheme.of(context)
+                  //                 .labelMedium
+                  //                 .override(
+                  //                   fontFamily: 'Roboto',
+                  //                   color: Color(0xFF130C0D),
+                  //                   fontWeight: FontWeight.w500,
+                  //                 ),
+                  //           ),
+                  //           duration: Duration(milliseconds: 8000),
+                  //           backgroundColor:
+                  //               FlutterFlowTheme.of(context).secondary,
+                  //         ),
+                  //       );
+                  //       searchController.clear();
+                  //     }
+                  //   },
+                  // ),
+                ],
               ),
             ),
-          ))
+            if (isSearching)
+              Expanded(
+                  child: Container(
+                width: cardWidth,
+                height: cardHeight,
+                padding: EdgeInsets.all(16.0),
+                child: Card(
+                  elevation: 4.0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        Text('Nombre del estudiante: ',
+                            style:
+                                TextStyle(fontSize: 22.0, fontFamily: 'Sora')),
+                        Text(
+                          selectedStudent.nombre,
+                          style: TextStyle(
+                              fontSize: 20.0,
+                              fontFamily: 'Sora',
+                              fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(height: 8.0),
+                        Text('Datos del alumno:',
+                            style:
+                                TextStyle(fontSize: 18.0, fontFamily: 'Sora')),
+                        SizedBox(height: 8.0),
+                        Divider(),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Matricula: ',
+                              style:
+                                  TextStyle(fontSize: 16.0, fontFamily: 'Sora'),
+                            ),
+                            Text(
+                              selectedStudent.matricula,
+                              style: TextStyle(
+                                  fontSize: 16.0, fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 10.0),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text('Campus: ',
+                                style: TextStyle(
+                                    fontSize: 16.0, fontFamily: 'Sora')),
+                            Text(
+                              selectedStudent.claUn,
+                              style: TextStyle(
+                                  fontSize: 16.0, fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 10.0),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Grado: ',
+                              style:
+                                  TextStyle(fontSize: 16.0, fontFamily: 'Sora'),
+                            ),
+                            Text(
+                              selectedStudent.grado,
+                              style: TextStyle(
+                                  fontSize: 16.0, fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 10.0),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Grupo: ',
+                              style:
+                                  TextStyle(fontSize: 16.0, fontFamily: 'Sora'),
+                            ),
+                            Text(selectedStudent.grupo,
+                                style: TextStyle(
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                        SizedBox(height: 10.0),
+                      ],
+                    ),
+                  ),
+                ),
+              ))
+          ],
+        ),
+        if (isLoading) Center(child: CustomLoadingIndicator())
       ],
     );
 
@@ -501,11 +736,11 @@ class _FichaDeSaludState extends State<FichaDeSalud>
           Expanded(
             // child: Center(
             child: Container(
-              width: cardWidth, // Set the card width here
+              width: cardWidth,
               height: cardHeight,
               padding: EdgeInsets.all(16.0),
               child: Card(
-                elevation: 4.0, // Customize card elevation
+                elevation: 4.0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.0),
                 ),
@@ -528,6 +763,7 @@ class _FichaDeSaludState extends State<FichaDeSalud>
                             child: PlutoGrid(
                           // configuration: const PlutoGridConfiguration.dark(),
                           columns: columns,
+                          mode: PlutoGridMode.readOnly,
                           rows: rows,
                           onLoaded: (PlutoGridOnLoadedEvent event) {
                             stateManager = event.stateManager;
@@ -545,6 +781,7 @@ class _FichaDeSaludState extends State<FichaDeSalud>
 
     return Material(
       child: DefaultTabController(
+          key: key,
           length: 4,
           child: Scaffold(
               appBar: AppBar(
@@ -607,8 +844,10 @@ dynamic studentNursery(List<dynamic> jsonList) {
     String nomGradoEscolar = item['NomGradoEscolar'];
     String grupo = item['Grupo'];
     String claUn = item['ClaUn'];
+    int gradoSecuencia = item['GradoSecuencia'];
 
-    return Student(matricula, clafam, alumno, claUn, grupo, nomGradoEscolar);
+    return Student(matricula, clafam, alumno, claUn, grupo, nomGradoEscolar,
+        gradoSecuencia);
   } else {
     // If there are multiple items in the list, return a List<Student>
     List<Student> studentsList = [];
@@ -619,10 +858,17 @@ dynamic studentNursery(List<dynamic> jsonList) {
       String nomGradoEscolar = item['NomGradoEscolar'];
       String grupo = item['Grupo'];
       String claUn = item['ClaUn'];
+      int gradoSecuencia = item['gradoSecuencia'];
 
-      studentsList.add(
-          Student(matricula, clafam, alumno, claUn, grupo, nomGradoEscolar));
+      studentsList.add(Student(matricula, clafam, alumno, claUn, grupo,
+          nomGradoEscolar, gradoSecuencia));
     }
     return studentsList;
+  }
+}
+
+extension StringExtension on String {
+  String capitalize() {
+    return "${this[0].toUpperCase()}${this.substring(1).toLowerCase()}";
   }
 }

@@ -34,7 +34,7 @@ class ApiCallRecord extends Equatable {
   final String apiUrl;
   final Map<String, dynamic> headers;
   final Map<String, dynamic> params;
-  final String? body;
+  String? body;
   final BodyType? bodyType;
 
   @override
