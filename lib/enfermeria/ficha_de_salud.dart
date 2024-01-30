@@ -193,7 +193,7 @@ class _FichaDeSaludState extends State<FichaDeSalud>
                                     context);
                             if (deleteMedFromStudent == 1) {
                               var idValue = studentAllowedMedicines[index].id;
-                              PENDING TO CALL FUNCTION TO DELETE FROM DB AND REFRESH LIST
+                              //PENDING TO CALL FUNCTION TO DELETE FROM DB AND REFRESH LIST
                               //Pending to call api using id from selected med
                             }
                           },
