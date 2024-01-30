@@ -1,7 +1,7 @@
 class Medicines {
   late int claMedicamento;
   late String nomMedicamento;
-  late int id;
+  late int? id;
 
   Medicines(this.claMedicamento, this.nomMedicamento, this.id);
 

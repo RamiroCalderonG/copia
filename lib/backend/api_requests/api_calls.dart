@@ -74,7 +74,11 @@ class FamilyCall {
         callName: 'family',
         apiUrl: hostUrl + port + '/api/family/$claFam/',
         callType: ApiCallType.GET,
-        headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},
+        headers: {
+          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'token': currentUser!.token,
+          'employeeNum': currentUser!.employeeNumber!.toString()
+        },
         params: {},
         returnBody: true,
         encodeBodyUtf8: false,
@@ -91,7 +95,11 @@ class NurseryStudentCall {
       callName: 'NursingStudent',
       apiUrl: hostUrl + port + '/api/nursery/student',
       callType: ApiCallType.GET,
-      headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},
+      headers: {
+        'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+        'token': currentUser!.token,
+        'employeeNum': currentUser!.employeeNumber!.toString()
+      },
       params: {
         'ClaCiclo': claCiclo,
         'ClaUn': claUn,
@@ -113,7 +121,11 @@ class NurseryStudentMedication {
       callName: 'NurseryMedication',
       apiUrl: hostUrl + port + '/api/nursery/medication',
       callType: ApiCallType.GET,
-      headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},
+      headers: {
+        'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+        'token': currentUser!.token,
+        'employeeNum': currentUser!.employeeNumber!.toString()
+      },
       params: {"matricula": matricula},
       returnBody: true,
       cache: false,
@@ -127,7 +139,11 @@ class NurseryHistoryCall {
       callName: 'NurseryHistory',
       apiUrl: hostUrl + port + '/api/nursery/history',
       callType: ApiCallType.GET,
-      headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},
+      headers: {
+        'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+        'token': currentUser!.token,
+        'employeeNum': currentUser!.employeeNumber!.toString()
+      },
       params: {"matricula": matricula},
       returnBody: true,
       encodeBodyUtf8: false,
@@ -143,7 +159,11 @@ class CausesCall {
       callName: 'Causes',
       apiUrl: hostUrl + port + '/api/causes',
       callType: ApiCallType.GET,
-      headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},
+      headers: {
+        'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+        'token': currentUser!.token,
+        'employeeNum': currentUser!.employeeNumber!.toString()
+      },
       params: {"ClaCausa": claCausa},
       returnBody: true,
       encodeBodyUtf8: false,
@@ -160,7 +180,11 @@ class NurseryPainListCall {
         callName: 'Nursery-Pain-List',
         apiUrl: hostUrl + port + '/api/nursery-pain-list',
         callType: ApiCallType.GET,
-        headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},
+        headers: {
+          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'token': currentUser!.token,
+          'employeeNum': currentUser!.employeeNumber!.toString()
+        },
         params: {},
         returnBody: true,
         encodeBodyUtf8: false,
@@ -175,7 +199,11 @@ class NurseryWoundsCall {
       callName: 'Nursery-Wounds',
       apiUrl: hostUrl + port + '/api/nursery-wounds',
       callType: ApiCallType.GET,
-      headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},
+      headers: {
+        'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+        'token': currentUser!.token,
+        'employeeNum': currentUser!.employeeNumber!.toString()
+      },
       params: {},
       returnBody: true,
       encodeBodyUtf8: false,
@@ -196,7 +224,11 @@ class EmployeeCall {
         callName: 'Employees',
         apiUrl: hostUrl + port + '/api/employee',
         callType: ApiCallType.GET,
-        headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},
+        headers: {
+          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'token': currentUser!.token,
+          'employeeNum': currentUser!.employeeNumber!.toString()
+        },
         params: {
           "Required": param,
           "campus": campus,
@@ -223,7 +255,11 @@ class TeacherCall {
         callName: 'Teacher',
         apiUrl: hostUrl + port + '/api/Employee/Teacher',
         callType: ApiCallType.GET,
-        headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},
+        headers: {
+          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'token': currentUser!.token,
+          'employeeNum': currentUser!.employeeNumber!.toString()
+        },
         params: {
           "ClaUn": campus,
           "ClaCiclo": cycle,
@@ -247,7 +283,11 @@ class POSTNurseryStudentVisit {
       callName: 'POST Student Nursery Visit',
       apiUrl: hostUrl + port + '/api/nursery-visit/',
       callType: ApiCallType.POST,
-      headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},
+      headers: {
+        'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+        'token': currentUser!.token,
+        'employeeNum': currentUser!.employeeNumber!.toString()
+      },
       bodyType: BodyType.JSON,
       body: contentBody,
       returnBody: true,
