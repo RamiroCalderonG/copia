@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/constants/connection.dart';
 
 import 'api_manager.dart';
@@ -52,7 +53,11 @@ class CurrentCicleCall {
       callName: 'cycles',
       apiUrl: hostUrl + port + '/api/cycles/1',
       callType: ApiCallType.GET,
-      headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},
+      headers: {
+        'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+        'token': currentUser!.token,
+        'employeeNum': currentUser!.employeeNumber!.toString()
+      },
       params: {},
       returnBody: true,
       encodeBodyUtf8: false,

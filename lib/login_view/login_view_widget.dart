@@ -7,6 +7,7 @@ import 'package:oxschool/Models/Cycle.dart';
 import 'package:oxschool/Models/User.dart';
 import 'package:oxschool/constants/User.dart';
 import 'package:flutter/material.dart';
+import 'package:oxschool/constants/connection.dart';
 
 import '../utils/device_information.dart';
 import '/backend/api_requests/api_calls.dart';
@@ -125,14 +126,14 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
               jsonList = json.decode(_model.apiResultxgr!.response!.body);
               currentCycle = getcurrentCycle(jsonList); //parse from JSON
             }
-            //GET User Permissions
-            _model.apiResultxgr = await UserPermissionsCall.call(
-                    idLogin: currentUser!.idLogin.toString())
-                .timeout(Duration(seconds: 7));
-            if ((_model.apiResultxgr?.succeeded ?? true)) {
-              jsonList = json.decode(_model.apiResultxgr!.response!.body);
-              userPermissions = jsonList;
-            }
+            //GET User Permissions PENDING!
+            // _model.apiResultxgr = await UserPermissionsCall.call(
+            //         idLogin: currentUser!.idLogin.toString())
+            //     .timeout(Duration(seconds: 7));
+            // if ((_model.apiResultxgr?.succeeded ?? true)) {
+            //   jsonList = json.decode(_model.apiResultxgr!.response!.body);
+            //   userPermissions = jsonList;
+            // }
 
             if (Platform.isAndroid || Platform.isIOS) {
               context.goNamed(
@@ -536,20 +537,37 @@ Future<void> _displayTextInputDialog(BuildContext context) async {
 User userLogedIn(List<dynamic> jsonList) {
   late User currentUser;
 
-  // Iterate through the list and split each item into variables
-  for (var item in jsonList) {
-    int employeeNumber = item['NoEmpleado'];
-    String employeeName = item['Nombre_Gafete'];
-    int idLogin = item['idLogin'];
-    int isTeacher = item['EsMaestro'];
-    int isWorker = item['EsTrabajador'];
-    String claUn = item['ClaUn'];
-    String claLogin = item['ClaLogin'];
-    // int notActive = item['Bajalogicasino'];
-
-    currentUser = User(claLogin, claUn, employeeName, employeeNumber, idLogin,
-        isWorker, isTeacher);
+  for (var i = 0; i < jsonList.length; i++) {
+    if (i == 0) {
+      //So we only get jsonList[0]
+      int employeeNumber = jsonList[i]['NoEmpleado'];
+      String employeeName = jsonList[i]['Nombre_Gafete'];
+      int idLogin = jsonList[i]['idLogin'];
+      int isTeacher = jsonList[i]['EsMaestro'];
+      int isWorker = jsonList[i]['EsTrabajador'];
+      String claUn = jsonList[i]['ClaUn'];
+      String claLogin = jsonList[i]['ClaLogin'];
+      String token = jsonList[1]['token']; //Token is stored at jsonList[1]
+      currentUser = User(claLogin, claUn, employeeName, employeeNumber, idLogin,
+          isWorker, isTeacher, token);
+    }
   }
+  // Iterate through the list and split each item into variables
+  // for (var item in jsonList) {
+  //   int employeeNumber = item['NoEmpleado'];
+  //   String employeeName = item['Nombre_Gafete'];
+  //   int idLogin = item['idLogin'];
+  //   int isTeacher = item['EsMaestro'];
+  //   int isWorker = item['EsTrabajador'];
+  //   String claUn = item['ClaUn'];
+  //   String claLogin = item['ClaLogin'];
+  //   String token = jsonList[1]['token'];
+  //   // int notActive = item['Bajalogicasino'];
+
+  //   currentUser = User(claLogin, claUn, employeeName, employeeNumber, idLogin,
+  //       isWorker, isTeacher, token);
+  // }
+  userToken = currentUser.token;
   return currentUser;
 }
 

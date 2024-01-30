@@ -2,7 +2,6 @@
 import 'dart:convert';
 
 import 'package:oxschool/backend/api_requests/api_calls.dart';
-import 'package:oxschool/backend/api_requests/api_calls_list.dart';
 import 'package:oxschool/constants/User.dart';
 
 Future<List<String>> getPainList(String logger) async {
