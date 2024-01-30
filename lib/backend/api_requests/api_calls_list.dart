@@ -29,27 +29,27 @@ Future<int> postNurseryVisit(var jsonBody) async {
 }
 
 // Function to delete an allowed medicine from a student
-//Pending to complete
-Future<int> deleteNurseryStudent(var idValue) async {
-  var postResponse;
+Future<int> deleteMedicineStudent(var idValue) async {
+  var responseCode;
   try {
-    var apiCall = await Requests.put(hostUrl + port + '/api/student-meds/',
-        // json: jsonBody, //We use a json style as body
-        queryParameters: {'id': idValue},
-        headers: {
-          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
-          'token': currentUser!.token,
-          'employeeNum': currentUser!.employeeNumber!.toString()
-        },
-        persistCookies: false,
-        timeoutSeconds: 7);
+    var apiCall =
+        await Requests.put(hostUrl + port + '/api/student-meds/' + idValue,
+            // json: jsonBody, //We use a json style as body
+            //queryParameters: {'id': idValue},
+            headers: {
+              'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+              'token': currentUser!.token,
+              'employeeNum': currentUser!.employeeNumber!.toString()
+            },
+            persistCookies: false,
+            timeoutSeconds: 7);
 
     apiCall.raiseForStatus();
 
-    postResponse = apiCall.content();
-    return postResponse;
+    responseCode = apiCall.statusCode;
+    return responseCode;
   } catch (e) {
-    print(e.toString());
+    debugPrint(e.toString());
   }
-  return postResponse;
+  return responseCode;
 }

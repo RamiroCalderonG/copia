@@ -7,6 +7,7 @@ import 'package:oxschool/Models/Medicines.dart';
 import 'package:oxschool/Models/NurseryHistory.dart';
 import 'package:oxschool/Models/Student.dart';
 import 'package:oxschool/backend/api_requests/api_calls.dart';
+import 'package:oxschool/backend/api_requests/api_calls_list.dart';
 import 'package:oxschool/components/confirm_dialogs.dart';
 import 'package:oxschool/constants/Student.dart';
 import 'package:oxschool/constants/User.dart';
@@ -193,8 +194,29 @@ class _FichaDeSaludState extends State<FichaDeSalud>
                                     context);
                             if (deleteMedFromStudent == 1) {
                               var idValue = studentAllowedMedicines[index].id;
-                              PENDING TO CALL FUNCTION TO DELETE FROM DB AND REFRESH LIST
-                              //Pending to call api using id from selected med
+                              var response = await deleteMedicineStudent(
+                                  idValue.toString());
+                              if (response == 200)
+                                setState(() {
+                                  studentAllowedMedicines.removeAt(index);
+                                });
+                              else {
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(SnackBar(
+                                        content: Text(
+                                          ('Error: ' + response.toString())
+                                              .toString(),
+                                          style: FlutterFlowTheme.of(context)
+                                              .labelMedium
+                                              .override(
+                                                fontFamily: 'Roboto',
+                                                color: Color(0xFF130C0D),
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                        ),
+                                        duration: Duration(milliseconds: 5000),
+                                        backgroundColor: Colors.amber));
+                              }
                             }
                           },
                           icon: Icon(Icons.delete_forever),
@@ -259,11 +281,12 @@ class _FichaDeSaludState extends State<FichaDeSalud>
                           // Show an error message or perform any action for empty input
                           return;
                         }
+                        // rebuildView();
 
-                        apiResultxgr = null;
-                        selectedStudent = null;
-                        selectedFamily = null;
-                        nurseryHistoryStudent = null;
+                        // apiResultxgr = null;
+                        // selectedStudent = null;
+                        // selectedFamily = null;
+                        // nurseryHistoryStudent = null;
 
                         setState(() {
                           isLoading = true;
