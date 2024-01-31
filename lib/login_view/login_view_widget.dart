@@ -90,7 +90,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
     FetchDeviceIp();
 
     if (!mounted) return;
-    print(deviceData.toString());
+
     currentDeviceData = deviceData.toString();
     setState(() {
       deviceData = deviceData;
