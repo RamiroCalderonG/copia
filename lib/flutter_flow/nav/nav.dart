@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:oxschool/components/pdf_viewer_screen.dart';
 import 'package:oxschool/main_window/mobile_main_window_widget.dart';
 import 'package:oxschool/user/user_view_view.dart';
 
@@ -60,6 +61,10 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
             name: 'MobileMainView',
             path: '/mobileMainView',
             builder: (context, params) => MobileMainWindow()),
+        FFRoute(
+            name: '/Print',
+            path: '/print',
+            builder: (context, params) => MyStatefulWidget())
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
     );
 

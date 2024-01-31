@@ -75,6 +75,8 @@ dependencies:
     git:
       url: https://github.com/google/flutter-desktop-embedding
       path: plugins/window_size
+  printing: ^5.11.1
+  pdf: ^3.10.7
       #ref: 927f8cbc09b35d85245c095f2db8f9b186f6618
 
 dev_dependencies:
