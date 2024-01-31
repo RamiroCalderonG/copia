@@ -16,6 +16,8 @@ class MyStatefulWidget extends StatefulWidget {
   State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
 }
 
+// TODO: PENDING TO USE IT AS FUNCTION TO GENERATE  PDF INSIDE THE APP IN A DYNAMIC WAY
+
 class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   Future<Uint8List> generatePdf() async {
     var logo = await networkImage(
