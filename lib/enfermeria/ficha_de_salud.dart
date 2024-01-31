@@ -194,6 +194,7 @@ class _FichaDeSaludState extends State<FichaDeSalud>
                                     context);
                             if (deleteMedFromStudent == 1) {
                               var idValue = studentAllowedMedicines[index].id;
+
                               var response = await deleteMedicineStudent(
                                   idValue.toString());
                               if (response == 200)
@@ -217,6 +218,7 @@ class _FichaDeSaludState extends State<FichaDeSalud>
                                         duration: Duration(milliseconds: 5000),
                                         backgroundColor: Colors.amber));
                               }
+
                             }
                           },
                           icon: Icon(Icons.delete_forever),
