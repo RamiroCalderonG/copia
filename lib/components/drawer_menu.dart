@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/enfermeria/ficha_de_salud.dart';
@@ -32,7 +31,7 @@ class _DrawerClassState extends State<DrawerClass> {
               ))),
           ExpansionTile(
             title: const Text('Enfermeria'),
-            leading: const Icon(Icons.supervised_user_circle_outlined),
+            leading: const Icon(Icons.healing),
             childrenPadding: const EdgeInsets.only(left: 60),
             children: [
               ListTile(
@@ -50,10 +49,10 @@ class _DrawerClassState extends State<DrawerClass> {
               ),
               ListTile(
                 title: const Text(
-                  'Otra cosa',
+                  'Alumnos con Padecimiento',
                   style: TextStyle(fontFamily: 'Roboto'),
                 ),
-                leading: const Icon(Icons.grid_4x4_outlined),
+                leading: const Icon(Icons.grid_4x4),
                 onTap: () {
                   // Navigator.pop(context);
                   // Navigator.push(
@@ -66,7 +65,7 @@ class _DrawerClassState extends State<DrawerClass> {
           ),
           ExpansionTile(
             title: const Text('Calificaciones'),
-            leading: const Icon(Icons.face),
+            leading: const Icon(Icons.grade),
             childrenPadding: const EdgeInsets.only(left: 60),
             children: [
               ListTile(
@@ -91,7 +90,7 @@ class _DrawerClassState extends State<DrawerClass> {
             ],
           ),
           ExpansionTile(
-            title: const Text('Otro modulo'),
+            title: const Text('Ticket de servicio'),
             leading: const Icon(Icons.store),
             childrenPadding: const EdgeInsets.only(left: 60),
             children: [
