@@ -1,6 +1,6 @@
 import 'package:pluto_grid/pluto_grid.dart';
 
-import '../constants/Student.dart';
+import '../../constants/Student.dart';
 
 final List<PlutoColumn> nurseryHistoryColumns = <PlutoColumn>[
   PlutoColumn(

@@ -11,8 +11,8 @@ import 'package:oxschool/backend/api_requests/api_calls_list.dart';
 import 'package:oxschool/components/confirm_dialogs.dart';
 import 'package:oxschool/constants/Student.dart';
 import 'package:oxschool/constants/User.dart';
-import 'package:oxschool/enfermeria/no_data_avalibre.dart';
-import 'package:oxschool/enfermeria/student_history_grid.dart';
+import 'package:oxschool/Modules/enfermeria/no_data_avalibre.dart';
+import 'package:oxschool/Modules/enfermeria/student_history_grid.dart';
 import 'package:oxschool/flutter_flow/flutter_flow_theme.dart';
 import 'package:oxschool/utils/loader_indicator.dart';
 import 'package:pluto_grid/pluto_grid.dart';
@@ -218,7 +218,6 @@ class _FichaDeSaludState extends State<FichaDeSalud>
                                         duration: Duration(milliseconds: 5000),
                                         backgroundColor: Colors.amber));
                               }
-
                             }
                           },
                           icon: Icon(Icons.delete_forever),

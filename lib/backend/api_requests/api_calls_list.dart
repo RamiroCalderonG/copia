@@ -28,6 +28,29 @@ Future<int> postNurseryVisit(var jsonBody) async {
   return postResponse;
 }
 
+Future<String> searchEmployee(String employeeNumber) async {
+  var postResponse;
+  try {
+    var apiCall = await Requests.get(
+        hostUrl + port + '/api/employee/' + employeeNumber.trim(),
+        headers: {
+          "Content-Type": "application/json",
+          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'token': currentUser!.token,
+          'employeeNum': currentUser!.employeeNumber!.toString()
+        },
+        persistCookies: false,
+        timeoutSeconds: 7);
+
+    apiCall.raiseForStatus();
+
+    postResponse = apiCall.content();
+    return postResponse;
+  } catch (e) {
+    throw FormatException(e.toString());
+  }
+}
+
 // Function to delete an allowed medicine from a student
 Future<int> deleteMedicineStudent(var idValue) async {
   var responseCode;
