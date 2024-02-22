@@ -1,10 +1,10 @@
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:oxschool/components/create_service_ticket.dart';
 import 'package:oxschool/components/drawer_menu.dart';
 import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/constants/url_links.dart';
 import 'package:oxschool/user/user_view_view.dart';
 
+import '../Modules/services_ticket/processes/create_service_ticket.dart';
 import '../components/quality_dialogs.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -178,7 +178,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                             style: TextButton.styleFrom(
                               textStyle: Theme.of(context).textTheme.labelLarge,
                             ),
-                            child: const Text('Ok'),
+                            child: const Text(''),
                             onPressed: () {
                               Navigator.of(context).pop();
                             },

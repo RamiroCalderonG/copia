@@ -15,59 +15,134 @@ class _UserWindowState extends State<UserWindow> {
   @override
   void initState() {
     super.initState();
-    //userFuture = _fetchUser(); // Fetch user data on initialization
   }
-
-  // // Simulating user data fetching
-  // Future<User> _fetchUser() async {
-  //   // Replace this with your actual implementation
-  //   await Future.delayed(const Duration(seconds: 2));
-  //   return User(
-  //     currentUser?.claLogin,
-  //     currentUser?.claUn,
-  //     currentUser?.employeeName,
-  //     currentUser?.employeeNumber,
-  //     currentUser?.idLogin,
-  //     currentUser?.isWorker,
-  //     currentUser?.isTeacher
-  //   );
-  // }
 
   @override
   Widget build(BuildContext context) {
+    return LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+      if (constraints.maxWidth < 600) {
+        return _smallScreenUserDisplay();
+      } else {
+        return Placeholder();
+        // TODO: CREATE FOR  LARGE SCREENS
+      }
+    });
+  }
+
+  Widget _smallScreenUserDisplay() {
     return Scaffold(
         appBar: AppBar(
+          title: Text('Mi  perfil', style: TextStyle(color: Colors.white)),
           backgroundColor: FlutterFlowTheme.of(context).primary,
         ),
-        body: Placeholder());
-    // return FutureBuilder<User>(
-    //   future: userFuture,
-    //   builder: (context, snapshot) {
-    //     if (snapshot.hasData) {
-    //       final user = snapshot.data!;
-    //       return Center(
-    //         child: Column(
-    //           mainAxisAlignment: MainAxisAlignment.center,
-    //           children: [
-    //             CircleAvatar(
-    //               radius: 50,
-    //               backgroundImage:
-    //                   NetworkImage('https://oxschool.edu.mx/index.aspx'),
-    //             ),
-    //             Text(
-    //               '${currentUser?.employeeName}',
-    //               style: Theme.of(context).textTheme.headline6,
-    //             ),
-    //             Text('${currentUser?.idLogin}'),
-    //           ],
-    //         ),
-    //       );
-    //     } else if (snapshot.hasError) {
-    //       return Text('Error fetching user data: ${snapshot.error}');
-    //     } else {
-    //       return const CircularProgressIndicator();
-    //     }
-    //   },
-    // );
+        body: Stack(
+          children: [
+            Center(
+                child: Column(
+              children: <Widget>[
+                Container(
+                  child: Center(
+                    child: Text(
+                      'Foto de empleado o inicial',
+                      style: TextStyle(fontFamily: 'Sora', fontSize: 12),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.cyan,
+                    borderRadius: BorderRadius.circular(100),
+                  ),
+                  width: 200,
+                  height: 200,
+                  margin: EdgeInsets.all(15),
+                ),
+                Row(
+                  children: <Widget>[
+                    Expanded(
+                        child: Container(
+                      margin: EdgeInsets.only(top: 20, left: 20, right: 20),
+                      width: MediaQuery.of(context).size.width,
+                      height: 50,
+                      decoration: BoxDecoration(
+                          color: Colors.blue.shade300,
+                          borderRadius: BorderRadius.circular(60)),
+                      child: Center(
+                        child: Text(
+                          'Nombre de usuario',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontFamily: 'Sora'),
+                        ),
+                      ),
+                    )),
+                  ],
+                ),
+                Row(
+                  children: <Widget>[
+                    Expanded(
+                        child: Container(
+                      margin: EdgeInsets.only(
+                          top: 8, left: 20, right: 20, bottom: 8),
+                      width: MediaQuery.of(context).size.width,
+                      height: 50,
+                      decoration: BoxDecoration(
+                          color: Colors.purple.shade300,
+                          borderRadius: BorderRadius.circular(60)),
+                      child: Center(
+                        child: Text(
+                          'Numero de empleado',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontFamily: 'Sora'),
+                        ),
+                      ),
+                    )),
+                  ],
+                ),
+                Row(
+                  children: <Widget>[
+                    Expanded(
+                        child: Container(
+                      margin: EdgeInsets.only(
+                          top: 8, left: 20, right: 20, bottom: 8),
+                      width: MediaQuery.of(context).size.width,
+                      height: 50,
+                      decoration: BoxDecoration(
+                          color: Colors.green.shade300,
+                          borderRadius: BorderRadius.circular(60)),
+                      child: Center(
+                        child: Text(
+                          'Puesto',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontFamily: 'Sora'),
+                        ),
+                      ),
+                    )),
+                  ],
+                ),
+                Row(
+                  children: <Widget>[
+                    Expanded(
+                        child: Container(
+                      margin: EdgeInsets.only(
+                          top: 8, left: 20, right: 20, bottom: 8),
+                      width: MediaQuery.of(context).size.width,
+                      height: 50,
+                      decoration: BoxDecoration(
+                          color: Colors.red.shade300,
+                          borderRadius: BorderRadius.circular(60)),
+                      child: Center(
+                        child: Text(
+                          'Campus',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontFamily: 'Sora'),
+                        ),
+                      ),
+                    )),
+                  ],
+                ),
+              ],
+            ))
+          ],
+        ));
   }
 }

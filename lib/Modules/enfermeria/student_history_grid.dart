@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
-import '../constants/Student.dart';
+import '../../constants/Student.dart';
 
 class StudentHistoryGrid extends StatefulWidget {
   const StudentHistoryGrid({super.key});
