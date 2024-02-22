@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:loading_indicator/loading_indicator.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
 class GradesPerStudent extends StatefulWidget {
@@ -9,81 +10,109 @@ class GradesPerStudent extends StatefulWidget {
 }
 
 final List<PlutoRow> rows = [];
+const List<String> grade_groups = <String>[
+  //TO STORE The teacher groups
+  '1 A',
+  '1 B',
+  '1 C',
+  '1 D'
+];
+String? groupSelected;
+
+const List<String> months = <String>['Enero', 'Febrero', 'Marzo', 'Abril'];
 
 class _GradesPerStudentState extends State<GradesPerStudent> {
   var rows;
 
   @override
   Widget build(BuildContext context) {
-    //Definition of Colums
-    final List<PlutoColumn> assignaturesColumns = <PlutoColumn>[
-      PlutoColumn(
-          title: 'Clave', field: 'ClaMateria', type: PlutoColumnType.number()),
-      PlutoColumn(
-          title: 'Materia', field: 'nomMateria', type: PlutoColumnType.text()),
-      PlutoColumn(
-          title: 'Grado escolar',
-          field: 'nomGradoEscolar',
-          type: PlutoColumnType.text()),
-      PlutoColumn(
-          title: 'Grado secuencia',
-          field: 'gradoSecuencia',
-          type: PlutoColumnType.text()),
-      PlutoColumn(title: 'Grado', field: 'grado', type: PlutoColumnType.text()),
-      PlutoColumn(
-          title: 'grupo', field: 'gradoGrupo', type: PlutoColumnType.text())
+    return Stack(children: [
+      Container(
+        width: MediaQuery.of(context).size.width,
+        child: LayoutBuilder(
+            builder: (BuildContext context, BoxConstraints constraints) {
+          if (constraints.maxWidth > 600) {
+            return SingleChildScrollView(
+              child: Column(
+                children: [
+                  Row(
+                    children: [_buildGradesPerStudent()],
+                  )
+                ],
+              ),
+            );
+          } else {
+            //TODO: CREATE A VERSION FOR SMALLER SCREEN
+            return Placeholder();
+          }
+        }),
+      )
+    ]);
+  }
+
+  Widget _buildGradesPerStudent() {
+    String? dropDownValue;
+    bool pause = true;
+
+    final List<PlutoRow> assignatureRows = [
+      PlutoRow(
+        cells: {
+          'Matricula': PlutoCell(value: 0001),
+          'Nombre': PlutoCell(value: 'Fulano Mendez '),
+          'Calif': PlutoCell(value: '100'),
+          'Conducta': PlutoCell(value: '4'),
+          'Uniforme': PlutoCell(value: '1'),
+          'Calificacion2': PlutoCell(value: 'B'),
+        },
+      ),
+      PlutoRow(
+        cells: {
+          'Matricula': PlutoCell(value: 0002),
+          'Nombre': PlutoCell(value: 'Jose velzaquez '),
+          'Calif': PlutoCell(value: '50'),
+          'Conducta': PlutoCell(value: '3'),
+          'Uniforme': PlutoCell(value: '5'),
+          'Calificacion2': PlutoCell(value: 'B'),
+        },
+      ),
+      PlutoRow(
+        cells: {
+          'Matricula': PlutoCell(value: 0003),
+          'Nombre': PlutoCell(value: 'Antonio Antonino Antonello '),
+          'Calif': PlutoCell(value: '100'),
+          'Conducta': PlutoCell(value: '9'),
+          'Uniforme': PlutoCell(value: '10'),
+          'Calificacion2': PlutoCell(value: 'A+'),
+        },
+      ),
     ];
 
-    final List<PlutoColumn> columns2 = <PlutoColumn>[
+    final List<PlutoColumn> assignaturesColumns = <PlutoColumn>[
       PlutoColumn(
-        title: 'Id',
-        field: 'id',
-        type: PlutoColumnType.text(),
-      ),
-      PlutoColumn(
-        title: 'Name',
-        field: 'name',
-        type: PlutoColumnType.text(),
-      ),
-      PlutoColumn(
-        title: 'Age',
-        field: 'age',
+        title: 'Matricula',
+        field: 'Matricula',
         type: PlutoColumnType.number(),
+        readOnly: true,
       ),
       PlutoColumn(
-        title: 'Role',
-        field: 'role',
-        type: PlutoColumnType.select(<String>[
-          'Programmer',
-          'Designer',
-          'Owner',
-        ]),
-      ),
+          title: 'Nombre del alumno',
+          field: 'Nombre',
+          type: PlutoColumnType.text()),
       PlutoColumn(
-        title: 'Joined',
-        field: 'joined',
-        type: PlutoColumnType.date(),
-      ),
-      PlutoColumn(
-        title: 'Working time',
-        field: 'working_time',
-        type: PlutoColumnType.time(),
-      ),
-      PlutoColumn(
-        title: 'salary',
-        field: 'salary',
-        type: PlutoColumnType.currency(),
+        title: 'Calificación',
+        field: 'Calif',
+        type: PlutoColumnType.text(),
         footerRenderer: (rendererContext) {
           return PlutoAggregateColumnFooter(
             rendererContext: rendererContext,
-            formatAsCurrency: true,
-            type: PlutoAggregateColumnType.sum,
-            format: '#,###',
+            formatAsCurrency: false,
+            type: PlutoAggregateColumnType.average,
+            format: '#,###.##',
             alignment: Alignment.center,
             titleSpanBuilder: (text) {
               return [
                 const TextSpan(
-                  text: 'Sum',
+                  text: 'Promedio general',
                   style: TextStyle(color: Colors.red),
                 ),
                 const TextSpan(text: ' : '),
@@ -93,87 +122,132 @@ class _GradesPerStudentState extends State<GradesPerStudent> {
           );
         },
       ),
+      PlutoColumn(
+          title: 'Conducta', field: 'Conducta', type: PlutoColumnType.text()),
+      PlutoColumn(
+          title: 'Uniforme', field: 'Uniforme', type: PlutoColumnType.text()),
+      PlutoColumn(
+          title: 'Califiacion extra',
+          field: 'Calificacion2',
+          type: PlutoColumnType.text())
     ];
+    final DropdownMenu monthSelectorButton = DropdownMenu<String>(
+        initialSelection: months.first,
+        onSelected: (String? value) {
+          setState(() {
+            dropDownValue = value;
+          });
+        },
+        dropdownMenuEntries:
+            months.map<DropdownMenuEntry<String>>((String value) {
+          return DropdownMenuEntry<String>(value: value, label: value);
+        }).toList());
 
-    final List<PlutoRow> rows2 = [
-      PlutoRow(
-        cells: {
-          'id': PlutoCell(value: 'user1'),
-          'name': PlutoCell(value: 'Mike'),
-          'age': PlutoCell(value: 20),
-          'role': PlutoCell(value: 'Programmer'),
-          'joined': PlutoCell(value: '2021-01-01'),
-          'working_time': PlutoCell(value: '09:00'),
-          'salary': PlutoCell(value: 300),
+    final DropdownMenu groupSelectorButton = DropdownMenu<String>(
+        initialSelection: grade_groups.first,
+        onSelected: (String? value) {
+          setState(() {
+            groupSelected = value;
+          });
         },
-      ),
-      PlutoRow(
-        cells: {
-          'id': PlutoCell(value: 'user2'),
-          'name': PlutoCell(value: 'Jack'),
-          'age': PlutoCell(value: 25),
-          'role': PlutoCell(value: 'Designer'),
-          'joined': PlutoCell(value: '2021-02-01'),
-          'working_time': PlutoCell(value: '10:00'),
-          'salary': PlutoCell(value: 400),
-        },
-      ),
-      PlutoRow(
-        cells: {
-          'id': PlutoCell(value: 'user3'),
-          'name': PlutoCell(value: 'Suzi'),
-          'age': PlutoCell(value: 40),
-          'role': PlutoCell(value: 'Owner'),
-          'joined': PlutoCell(value: '2021-03-01'),
-          'working_time': PlutoCell(value: '11:00'),
-          'salary': PlutoCell(value: 700),
-        },
-      ),
-    ];
+        dropdownMenuEntries:
+            grade_groups.map<DropdownMenuEntry<String>>((String value) {
+          return DropdownMenuEntry<String>(value: value, label: value);
+        }).toList());
 
-    return Card(
-      elevation: 5.0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10.0),
-      ),
-      child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              Column(
-                children: [
-                  Text('Insertar tabla')
-                  // PlutoGrid(
-                  //     columns: assignaturesColumns,
-                  //     rows: populateAssignatureRows(rows))
-                ],
-              )
-              // if (nurseryHistoryStudent != null)
-              //   Text('Nombre del estudiante', style: TextStyle(fontSize: 22.0)),
-              // Text(
-              //   selectedStudent.nombre,
-              //   style: TextStyle(fontSize: 18.0),
-              // ),
-              // SizedBox(height: 8.0),
-              // Text('Datos de contacto', style: TextStyle(fontSize: 18.0)),
-              // SizedBox(height: 8.0),
-              // Divider(),
-              // Expanded(
-              //     child: PlutoGrid(
-              //   // configuration: const PlutoGridConfiguration.dark(),
-              //   columns: columns,
-              //   rows: rows,
-              //   onLoaded: (PlutoGridOnLoadedEvent event) {
-              //     stateManager = event.stateManager;
-              //     stateManager.setShowColumnFilter(true);
-              //   },
-              // )),
-              // if (nurseryHistoryStudent == null ||
-              //     nurseryHistoryStudent.isEmpty)
-              //   Text('Sin informacion disponible'), // Placeholder or message
-            ],
-          )),
-    );
+    return Expanded(
+        // width: MediaQuery.of(context).size.width,
+        // height: MediaQuery.of(context).size.height,
+        child: Column(
+      children: [
+        Row(
+          children: [
+            SizedBox(width: 100),
+            Container(
+                margin: EdgeInsets.only(top: 20),
+                padding: EdgeInsets.all(1),
+                child: Row(
+                  children: [
+                    SizedBox(width: 50),
+                    Container(
+                      child: Row(
+                        children: [
+                          Text(
+                            'Grado y Grupo:    ',
+                            style: TextStyle(
+                                fontFamily: 'Sora',
+                                fontWeight: FontWeight.bold),
+                          ),
+                          groupSelectorButton,
+                        ],
+                      ),
+                    ),
+                    SizedBox(width: 50),
+                    Container(
+                      child: Row(
+                        children: [
+                          Text(
+                            'Mes:    ',
+                            style: TextStyle(
+                                fontFamily: 'Sora',
+                                fontWeight: FontWeight.bold),
+                          ),
+                          monthSelectorButton,
+                          SizedBox(width: 18),
+                          Text(
+                            'Selector de materia:',
+                            style: TextStyle(
+                                fontFamily: 'Sora',
+                                fontWeight: FontWeight.bold),
+                          ),
+                          SizedBox(width: 48),
+                        ],
+                      ),
+                    ),
+                    SizedBox(width: 50),
+                    Container(
+                      padding: EdgeInsets.all(2),
+                      child: ElevatedButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              pause = !pause;
+                            });
+
+                            LoadingIndicator(
+                                indicatorType: Indicator.ballPulse,
+                                colors: [Colors.red],
+                                backgroundColor: Colors.black87,
+                                strokeWidth: 2,
+                                pause: pause,
+                                pathBackgroundColor: Colors.black);
+                          },
+                          icon: Icon(Icons.search),
+                          label: Text('Buscar')),
+                    ),
+                    SizedBox(width: 10),
+                    Container(
+                      padding: EdgeInsets.all(2),
+                      child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red[400]),
+                          onPressed: () {},
+                          icon: Icon(Icons.save),
+                          label: Text('Guardar')),
+                    ),
+                    SizedBox(width: 10),
+                  ],
+                )),
+          ],
+        ),
+        Divider(thickness: 1),
+        Container(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          margin: EdgeInsets.all(9),
+          child: PlutoGrid(columns: assignaturesColumns, rows: assignatureRows),
+        )
+      ],
+    ));
   }
 }
 

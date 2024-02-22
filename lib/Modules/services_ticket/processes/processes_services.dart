@@ -49,6 +49,7 @@ class _ProcessesState extends State<Processes> {
               ),
             );
           } else {
+            //TODO: CREATE A VERSION FOR SMALLER SCREENS
             return Placeholder();
           }
         }),
