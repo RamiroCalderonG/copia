@@ -4,7 +4,7 @@ import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:oxschool/components/pdf_viewer_screen.dart';
 import 'package:oxschool/constants/Student.dart';
 import 'package:oxschool/constants/User.dart';
-import 'package:oxschool/enfermeria/new_student_visit.dart';
+import 'package:oxschool/Modules/enfermeria/new_student_visit.dart';
 import 'package:oxschool/reusable_methods/causes_methods.dart';
 import 'package:oxschool/reusable_methods/employees_methods.dart';
 import 'package:oxschool/reusable_methods/nursery_methods.dart';
