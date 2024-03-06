@@ -5,6 +5,7 @@ import 'package:oxschool/constants/url_links.dart';
 import 'package:oxschool/user/user_view_view.dart';
 
 import '../Modules/services_ticket/processes/create_service_ticket.dart';
+import '../components/custom_drawer.dart';
 import '../components/quality_dialogs.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -233,7 +234,9 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
       child: Scaffold(
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        drawer: Opacity(opacity: 1, child: DrawerClass()),
+        drawer: Opacity(
+            opacity: 1, child: createDrawer(context, userEvents) //DrawerClass()
+            ),
         body: NestedScrollView(
           // physics: NeverScrollableScrollPhysics(),
           floatHeaderSlivers: true,

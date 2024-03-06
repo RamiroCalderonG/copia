@@ -4,6 +4,8 @@ import 'package:oxschool/constants/connection.dart';
 
 import 'package:requests/requests.dart';
 
+import 'package:http/http.dart' as http;
+
 //Function to post new visit from a student to nursery
 Future<int> postNurseryVisit(var jsonBody) async {
   var postResponse;
@@ -72,7 +74,84 @@ Future<int> deleteMedicineStudent(var idValue) async {
     responseCode = apiCall.statusCode;
     return responseCode;
   } catch (e) {
-    debugPrint(e.toString());
+    throw FormatException(e.toString());
   }
-  return responseCode;
+  // return responseCode;
+}
+
+Future<dynamic> getEvents(var userId) async {
+  var responseCode;
+  try {
+    var apiCall = await Requests.put(hostUrl + port + '/api/events',
+        headers: {
+          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'token': currentUser!.token
+        },
+        persistCookies: false,
+        timeoutSeconds: 8);
+
+    apiCall.raiseForStatus();
+    responseCode = apiCall.content();
+    return responseCode;
+  } catch (e) {
+    throw FormatException(e.toString());
+  }
+}
+
+Future<dynamic> getRolesList() async {
+  var response;
+  try {
+    var apiCall = await Requests.put(hostUrl + port + '/api/roles',
+        headers: {
+          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'token': currentUser!.token
+        },
+        persistCookies: false,
+        timeoutSeconds: 8);
+
+    apiCall.raiseForStatus();
+    response = apiCall.content();
+    return response;
+  } catch (e) {
+    throw FormatException(e.toString());
+  }
+}
+
+//TODO: IMPLEMENT ENDPOINT ON BACKEND
+Future<dynamic> getUserEvents() async {
+  var response;
+  try {
+    var apiCall = await Requests.put(hostUrl + port + '/api/user/events',
+        headers: {
+          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'token': currentUser!.token
+        },
+        persistCookies: true,
+        timeoutSeconds: 10);
+    apiCall.raiseForStatus();
+    response = apiCall.content();
+    return response;
+  } catch (e) {
+    throw FormatException(e.toString());
+  }
+}
+
+Future<dynamic> getUserEvents2(int userId) async {
+  try {
+    Uri address = Uri(
+        scheme: 'http',
+        host: '10.0.0.36',
+        port: 8080,
+        path: '/api/user/events',
+        queryParameters: {'id': '${userId.toString()}'});
+
+    print(address);
+    return http.get(address, headers: {
+      'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+      'token': currentUser!.token
+    });
+  } catch (e) {
+    print(e.toString());
+    // throw FormatException(e.toString());
+  }
 }

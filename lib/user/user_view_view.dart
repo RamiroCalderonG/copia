@@ -53,9 +53,7 @@ class _UserWindowState extends State<UserWindow> {
             Container(
               decoration: BoxDecoration(
                 image: DecorationImage(
-                  image: NetworkImage(
-                    'https://oxschool.edu.mx/img/consulta-header.jpg',
-                  ),
+                  image: AssetImage('assets/images/background-header.jpg'),
                   fit: BoxFit.cover,
                 ),
               ),

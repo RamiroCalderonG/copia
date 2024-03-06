@@ -1,36 +1,33 @@
 class User {
   int? employeeNumber;
   String? employeeName;
-  int? idLogin;
-  int? isTeacher;
-  int? isWorker;
   String? claUn;
-  String? claLogin;
+  String role;
+  int userId;
   String token;
+
   // late final notActive;
 
-  User(this.claLogin, this.claUn, this.employeeName, this.employeeNumber,
-      this.idLogin, this.isWorker, this.isTeacher, this.token);
+  User(this.claUn, this.employeeName, this.employeeNumber, this.role,
+      this.userId, this.token);
 
   Map<dynamic, dynamic> toJson() => {
         "employeeNumber": employeeNumber,
         "employeeName": employeeName,
-        "idLogin": idLogin,
-        "isTeacher": isTeacher,
-        "isWorker": isWorker,
         "claUn": claUn,
-        "claLogin": claLogin,
-        "token": token
+        "token": token,
+        "id": userId,
+        "role": role,
+
         // "notActive": notActive
       };
 
   void clear() {
     employeeName = null;
     employeeNumber = null;
-    idLogin = null;
-    isTeacher = null;
-    isWorker = null;
+
     claUn = null;
-    claLogin = null;
+
+    token = "";
   }
 }
