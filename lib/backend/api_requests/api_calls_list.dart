@@ -136,7 +136,7 @@ Future<dynamic> getUserEvents() async {
   }
 }
 
-Future<dynamic> getUserEvents2(int userId) async {
+Future<http.Response> getUserEvents2(int userId) async {
   try {
     Uri address = Uri(
         scheme: 'http',
@@ -146,12 +146,14 @@ Future<dynamic> getUserEvents2(int userId) async {
         queryParameters: {'id': '${userId.toString()}'});
 
     print(address);
-    return http.get(address, headers: {
+    var response = http.get(address, headers: {
       'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
       'token': currentUser!.token
     });
+    userEvents = response;
+    return response;
   } catch (e) {
     print(e.toString());
-    // throw FormatException(e.toString());
+    return throw FormatException(e.toString());
   }
 }

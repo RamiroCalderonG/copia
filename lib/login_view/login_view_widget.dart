@@ -4,6 +4,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:http/src/response.dart';
 import 'package:oxschool/Models/Cycle.dart';
 import 'package:oxschool/Models/User.dart';
 import 'package:oxschool/backend/api_requests/api_calls_list.dart';
@@ -123,7 +124,9 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                 json.decode(_model.apiResultxgr!.response!.body);
             currentUser = userLogedIn(jsonList); //Store values into a const
 
-            userEvents = await getUserEvents2(currentUser!.userId);
+            //TODO: IMPLEMENT USEREVENTS
+            // userEvents = await
+            getUserEvents2(currentUser!.userId);
 
             // Get currentCycle
             _model.apiResultxgr =

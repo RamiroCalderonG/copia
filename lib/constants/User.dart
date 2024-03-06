@@ -1,6 +1,5 @@
 import 'package:oxschool/Models/Cycle.dart';
 import 'package:oxschool/Models/User.dart';
-
 import 'package:http/http.dart' as http;
 
 late User? currentUser;
