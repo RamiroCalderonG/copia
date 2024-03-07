@@ -144,8 +144,6 @@ Future<http.Response> getUserEvents2(int userId) async {
         port: 8080,
         path: '/api/user/events',
         queryParameters: {'id': '${userId.toString()}'});
-
-    print(address);
     var response = http.get(address, headers: {
       'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
       'token': currentUser!.token

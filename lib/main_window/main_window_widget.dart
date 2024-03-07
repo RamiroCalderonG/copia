@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -9,7 +10,7 @@ import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
 
 import '../Modules/services_ticket/processes/create_service_ticket.dart';
-import '../components/custom_drawer.dart';
+import '../constants/screens.dart';
 import '../components/quality_dialogs.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -450,11 +451,13 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
               ),
               currentAccountPicture: CircleAvatar(
                 backgroundColor: FlutterFlowTheme.of(context).accent4,
-                child: Text(currentUser!.employeeName![0],
-                    style: TextStyle(fontFamily: 'Sora', fontSize: 20)),
+                child:
+                    Image(image: AssetImage('assets/images/logoRedondoOx.png')),
+                // Text(currentUser!.employeeName![0],
+                //     style: TextStyle(fontFamily: 'Sora', fontSize: 20)),
               ),
-              decoration:
-                  BoxDecoration(color: FlutterFlowTheme.of(context).tertiary),
+              decoration: BoxDecoration(
+                  color: FlutterFlowTheme.of(context).primaryBackground),
             ),
             new FutureBuilder(
                 future: userEvents,
@@ -670,98 +673,72 @@ class Controller extends GetxController {
 }
 
 class _DrawerState extends State<MyExpansionTileList> {
-  // You can ask Get to find a Controller that is being used by another page and redirect you to it.
   final Controller c = Get.find();
-// iterating the menu list and present it in the navigation drawer
   List<Widget> _getChildren(final List<dynamic> userEvents) {
     List<Widget> children = [];
-    userEvents.toList().asMap().forEach((index, element) {
-      int selected = 0;
-      final subMenuChildren = <Widget>[];
-      try {
-        for (var i = 0; i < element['ScreenClass'].length; i++) {
-          subMenuChildren.add(new ListTile(
-            leading: Visibility(
-              child: Icon(
-                Icons.account_box_rounded,
-                size: 15,
-              ),
-              visible: false,
-            ),
-            onTap: () => {
-              setState(() {
-                log("The item clicked is " +
-                    element['ScreenClass'][i]['id'].toString());
 
-                switch (element['ScreenClass'][i]['id'].toString()) {
-                  case '/fund-type':
-                    _selectedPageIndex = 1;
+    // Map to store unique module titles and their screen classes
+    Map<String, List<String>> modulesMap = {};
 
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      if (_pageController.hasClients) {
-                        _pageController.animateToPage(1,
-                            duration: Duration(milliseconds: 1),
-                            curve: Curves.easeInOut);
-                      }
-                    });
-                    c.title.value = "Fund Type";
-                    Navigator.pop(context);
-
-                    break;
-                  case '/fund-sources':
-                    _selectedPageIndex = 2;
-                    // _pageController.jumpToPage(2);
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      if (_pageController.hasClients) {
-                        _pageController.animateToPage(2,
-                            duration: Duration(milliseconds: 1),
-                            curve: Curves.easeInOut);
-                      }
-                    });
-                    c.title.value = "Fund Source";
-
-                    Navigator.pop(context);
-
-                    break;
-                }
-              })
-            },
-            title: Text(
-              element['ScreenClass'], //[i]['id'].toString(),
-              style: TextStyle(fontWeight: FontWeight.w700),
-            ),
-          ));
+    // Iterate over userEvents to populate modulesMap
+    userEvents.forEach((element) {
+      element.forEach((module, screens) {
+        if (!modulesMap.containsKey(module)) {
+          modulesMap[module] = [];
         }
-        children.add(
-          new ExpansionTile(
-            key: Key(index.toString()),
-            initiallyExpanded: index == selected,
-            leading: Icon(
-              Icons.audiotrack,
-              color: Colors.green,
-              size: 30.0,
-            ),
-            title: Text(
-              element['ScreenClass'],
-              style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w500),
-            ),
-            children: subMenuChildren,
-            onExpansionChanged: ((newState) {
-              if (newState) {
-                Duration(seconds: 20000);
-                selected = index;
-                log(' selected ' + index.toString());
-              } else {
-                selected = -1;
-                log(' selected ' + selected.toString());
-              }
-            }),
-          ),
-        );
-      } catch (err) {
-        print('Caught error: $err');
-      }
+        screens.forEach((screenClass, description) {
+          modulesMap[module]!.add('$screenClass');
+        });
+      });
     });
+
+    // Iterate over modulesMap to create ExpansionTiles for each module
+    modulesMap.forEach((module, screens) {
+      List<Widget> subMenuChildren = [];
+      screens.forEach((screen) {
+        subMenuChildren.add(ListTile(
+          title: Text(
+            screen,
+            style: const TextStyle(fontFamily: 'Sora', fontSize: 15),
+          ),
+          onTap: () {
+            String moduleKey = screen;
+            String? moduleValue;
+
+            modulesMapped.forEach((k, v) {
+              if (k == moduleKey) {
+                moduleValue = v;
+              }
+            });
+            Navigator.pop(context);
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => pageRoutes[screen]));
+
+            // print('Selected screen: $screen');
+          },
+          leading: Icon(
+            Icons.arrow_right_sharp,
+            size: 10,
+          ),
+        ));
+      });
+
+      children.add(
+        ExpansionTile(
+          title: Text(
+            module,
+            style: TextStyle(fontFamily: 'Sora', fontSize: 18),
+          ),
+          children: subMenuChildren,
+          leading: moduleIcons[module],
+          // leading: Icon(
+          //   Icons.subdirectory_arrow_right_rounded,
+          //   size: ,
+          // ),
+        ),
+      );
+    });
+
     return children;
   }
 
