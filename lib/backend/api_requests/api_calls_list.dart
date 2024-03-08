@@ -117,15 +117,15 @@ Future<dynamic> getRolesList() async {
   }
 }
 
-//TODO: IMPLEMENT ENDPOINT ON BACKEND
-Future<dynamic> getUserEvents() async {
+Future<dynamic> asignateUserRole(String roleName, int userID) async {
   var response;
   try {
-    var apiCall = await Requests.put(hostUrl + port + '/api/user/events',
+    var apiCall = await Requests.patch(hostUrl + port + '/api/user/events',
         headers: {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
           'token': currentUser!.token
         },
+        body: {'role': roleName.toString(), 'userID': userID.toString()},
         persistCookies: true,
         timeoutSeconds: 10);
     apiCall.raiseForStatus();

@@ -3,7 +3,7 @@ import 'package:oxschool/components/drawer_menu.dart';
 import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/flutter_flow/flutter_flow_theme.dart';
 import 'package:oxschool/main_window/main_window_widget.dart';
-import 'package:oxschool/user/user_view_view.dart';
+import 'package:oxschool/Modules/user/user_view_screen.dart';
 
 import '../constants/url_links.dart';
 

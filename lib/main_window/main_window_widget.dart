@@ -5,7 +5,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:oxschool/components/drawer_menu.dart';
 import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/constants/url_links.dart';
-import 'package:oxschool/user/user_view_view.dart';
+import 'package:oxschool/Modules/user/user_view_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
 
