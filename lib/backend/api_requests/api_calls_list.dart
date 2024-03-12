@@ -117,10 +117,10 @@ Future<dynamic> getRolesList() async {
   }
 }
 
-Future<dynamic> asignateUserRole(String roleName, int userID) async {
+Future<dynamic> editUserRole(String roleName, int userID) async {
   var response;
   try {
-    var apiCall = await Requests.patch(hostUrl + port + '/api/user/events',
+    var apiCall = await Requests.patch(hostUrl + port + '/api/user/role',
         headers: {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
           'token': currentUser!.token
@@ -140,7 +140,7 @@ Future<http.Response> getUserEvents2(int userId) async {
   try {
     Uri address = Uri(
         scheme: 'http',
-        host: '10.0.0.36',
+        host: 'localhost',
         port: 8080,
         path: '/api/user/events',
         queryParameters: {'id': '${userId.toString()}'});
