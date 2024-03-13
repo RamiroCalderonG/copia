@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_connect/http/src/request/request.dart';
+import 'package:oxschool/Models/Employee.dart';
+import 'package:oxschool/Models/User.dart';
 import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/constants/connection.dart';
 
@@ -109,6 +112,30 @@ Future<dynamic> getRolesList() async {
         persistCookies: false,
         timeoutSeconds: 8);
 
+    apiCall.raiseForStatus();
+    response = apiCall.content();
+    return response;
+  } catch (e) {
+    throw FormatException(e.toString());
+  }
+}
+
+Future<dynamic> createUser(User newUser) async {
+  var response;
+  try {
+    var apiCall = await Requests.post(hostUrl + port + '/api/user/',
+        headers: {
+          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'token': currentUser!.token
+        },
+        body: {
+          'userName': newUser.employeeName,
+          'role': newUser.role,
+          'claUn': newUser.claUn,
+          'employeeNumber': newUser.employeeNumber,
+        },
+        persistCookies: false,
+        timeoutSeconds: 8);
     apiCall.raiseForStatus();
     response = apiCall.content();
     return response;
