@@ -911,7 +911,7 @@ User userLogedIn(List<dynamic> jsonList) {
       String employeeName = jsonList[i]['Nombre_Gafete'];
       String claUn = jsonList[i]['ClaUn'];
       String role = jsonList[i]['RoleName'];
-      int userId = jsonList[i]['user_id'];
+      int userId = jsonList[i]['id'];
       String token = jsonList[1]['token'];
       currentUser =
           User(claUn, employeeName, employeeNumber, role, userId, token);

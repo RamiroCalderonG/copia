@@ -270,7 +270,7 @@ class _NewUserScreenState extends State<NewUserScreen> {
                   controller: _employeeNumber,
                   decoration:
                       InputDecoration(labelText: 'Generar número de empleado'),
-                  enabled: false,
+                  enabled: true,
                 )),
                 SizedBox(width: 30),
                 Text(
@@ -301,9 +301,6 @@ class _NewUserScreenState extends State<NewUserScreen> {
                 SizedBox(width: 20),
                 Expanded(child: areaSelectorField)
               ],
-            ),
-            Divider(
-              thickness: 3,
             ),
             SizedBox(
               height: 20,
@@ -340,7 +337,7 @@ class _NewUserScreenState extends State<NewUserScreen> {
             ),
             ElevatedButton(
               onPressed: _nextPage,
-              child: Text('Next'),
+              child: Text('Continuar'),
             ),
           ],
         ),
@@ -351,6 +348,7 @@ class _NewUserScreenState extends State<NewUserScreen> {
     return Stack(
       children: [
         Container(
+            margin: EdgeInsets.all(10),
             width: MediaQuery.of(context).size.width,
             child: LayoutBuilder(
                 builder: (BuildContext context, BoxConstraints constraints) {
@@ -363,141 +361,6 @@ class _NewUserScreenState extends State<NewUserScreen> {
                 return Placeholder();
               }
             }))
-
-        // Container(
-        //     width: MediaQuery.of(context).size.width,
-        //     child: LayoutBuilder(
-        //         builder: (BuildContext context, BoxConstraints constraints) {
-        //       if (constraints.maxWidth > 600) {
-        //         return SingleChildScrollView(
-        //             child:
-        //             Column(
-        //           children: [
-        //             Row(
-        //               children: [
-        //                 Text(
-        //                   'Datos de acceso',
-        //                   style: TextStyle(
-        //                       fontStyle: FontStyle.italic, fontSize: 12),
-        //                 )
-        //               ],
-        //             ),
-        //             Row(
-        //               children: [
-        //                 SizedBox(width: 15),
-        //                 Expanded(
-        //                   child: TextFormField(
-        //                     controller: _userName,
-        //                     validator: (value) {
-        //                       if (value!.isEmpty) {
-        //                         setState(() {
-        //                           _userName.text = 'Please enter a username!';
-        //                         });
-        //                       }
-        //                     },
-        //                     decoration:
-        //                         InputDecoration(labelText: "Nombre completo"),
-        //                     textInputAction: TextInputAction.next,
-        //                   ),
-        //                 ),
-        //                 SizedBox(width: 15),
-        //                 Expanded(
-        //                     child: TextFormField(
-        //                   controller: _userEmail,
-        //                   decoration:
-        //                       InputDecoration(labelText: "Correo electrónico"),
-        //                 ))
-        //               ],
-        //             ),
-        //             SizedBox(height: 20),
-        //             Row(
-        //               children: [
-        //                 IconButton(
-        //                     onPressed: () {
-        //                       // TODO: IMPLEMENT EMPLOYEE NUMBER GENERATOR
-        //                     },
-        //                     icon: Icon(Icons.refresh)),
-        //                 Expanded(
-        //                     child: TextFormField(
-        //                   controller: _employeeNumber,
-        //                   decoration: InputDecoration(
-        //                       labelText: 'Generar número de empleado'),
-        //                   enabled: false,
-        //                 )),
-        //                 SizedBox(width: 30),
-        //                 Text(
-        //                   'Rol asignado   ',
-        //                   style: TextStyle(fontSize: 11),
-        //                 ),
-        //                 Expanded(child: roleSelectorField)
-        //               ],
-        //             ),
-        //             SizedBox(height: 30),
-        //             Row(
-        //               children: [
-        //                 Expanded(
-        //                     child: Text(
-        //                   'Campus',
-        //                   style: TextStyle(fontSize: 13),
-        //                 )),
-        //                 Expanded(
-        //                     child: Text(
-        //                   'Area / Depto',
-        //                   style: TextStyle(fontSize: 13),
-        //                 ))
-        //               ],
-        //             ),
-        //             Row(
-        //               children: [
-        //                 Expanded(child: campuseSelectorField),
-        //                 SizedBox(width: 20),
-        //                 Expanded(child: areaSelectorField)
-        //               ],
-        //             ),
-        //             Divider(
-        //               thickness: 3,
-        //             ),
-        //             SizedBox(
-        //               height: 20,
-        //             ),
-        //             Row(
-        //               children: [
-        //                 Text('Informacion personal',
-        //                     style: TextStyle(
-        //                         fontStyle: FontStyle.italic, fontSize: 12))
-        //               ],
-        //             ),
-        //             Row(
-        //               children: [
-        //                 Expanded(child: genderSelection),
-        //                 Expanded(
-        //                     child: Column(
-        //                   children: [
-        //                     Column(
-        //                       children: <Widget>[
-        //                         _selectedBirthdate != null
-        //                             ? Text(DateFormat('yyyy-MM-dd')
-        //                                 .format(_selectedBirthdate!))
-        //                             : Text(''),
-        //                         Divider(thickness: 1),
-        //                         ElevatedButton(
-        //                           onPressed: () => _selectDate(context),
-        //                           child:
-        //                               Text('Seleccionar fecha de nacimiento'),
-        //                         ),
-        //                         SizedBox(width: 16.0),
-        //                       ],
-        //                     ),
-        //                   ],
-        //                 )),
-        //               ],
-        //             )
-        //           ],
-        //         ));
-        //       } else {
-        //         return Placeholder();
-        //       }
-        //     }))
       ],
     );
   }
