@@ -3,7 +3,10 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:oxschool/flutter_flow/flutter_flow_theme.dart';
 
+import '../../Models/User.dart';
+import '../../backend/api_requests/api_calls_list.dart';
 import '../../flutter_flow/flutter_flow_util.dart';
+import '../../utils/loader_indicator.dart';
 
 class NewUserScreen extends StatefulWidget {
   const NewUserScreen({super.key});
@@ -19,16 +22,22 @@ List<String> campuseList = [
   'Prepa',
   'Concordia'
 ];
-String? campuseSelector = campuseList.first;
+String campuseSelector = campuseList.first;
 
 List<String> areaList = ['Academic', 'Sports', 'Library', 'Other'];
-String? areaSelector = areaList.first;
+String areaSelector = areaList.first;
 
-List<String> roleList = ['Admin', 'Maestro', 'IT Support', 'Analista calidad'];
-String? roleSelector = roleList.first;
+List<String> roleList = [
+  'Administrator',
+  'Maestro',
+  'IT Support',
+  'Analista calidad'
+];
+String roleSelector = roleList.first;
 
 String? _selectedGender;
 DateTime? _selectedBirthdate;
+bool isLoading = false;
 
 class _NewUserScreenState extends State<NewUserScreen> {
   final _formKey = GlobalKey<FormState>();
@@ -37,7 +46,6 @@ class _NewUserScreenState extends State<NewUserScreen> {
   final _userCampus = TextEditingController();
   final _employeeNumber = TextEditingController();
   final _isTeacher = TextEditingController();
-  final _genre = String;
 
   int _currentPageIndex = 0;
   PageController _pageController = PageController();
@@ -99,7 +107,7 @@ class _NewUserScreenState extends State<NewUserScreen> {
       onChanged: (String? value) {
         setState(() {
           campuseSelector =
-              value; // Update the state variable with the selected value
+              value!; // Update the state variable with the selected value
         });
       },
     );
@@ -240,9 +248,9 @@ class _NewUserScreenState extends State<NewUserScreen> {
                     controller: _userName,
                     validator: (value) {
                       if (value!.isEmpty) {
-                        setState(() {
-                          _userName.text = 'Please enter a username!';
-                        });
+                        // setState(() {
+                        //   _userName.text = 'Please enter a username!';
+                        // });
                       }
                     },
                     decoration: InputDecoration(labelText: "Nombre completo"),
@@ -268,6 +276,7 @@ class _NewUserScreenState extends State<NewUserScreen> {
                 Expanded(
                     child: TextFormField(
                   controller: _employeeNumber,
+                  keyboardType: TextInputType.number,
                   decoration:
                       InputDecoration(labelText: 'Generar número de empleado'),
                   enabled: true,
@@ -336,6 +345,97 @@ class _NewUserScreenState extends State<NewUserScreen> {
               ],
             ),
             ElevatedButton(
+                onPressed: () async {
+                  if (_userName.text.isEmpty ||
+                      _employeeNumber.text.isEmpty ||
+                      _userCampus.text.isEmpty ||
+                      _userEmail.text.isEmpty ||
+                      _selectedBirthdate.toString().isEmpty ||
+                      _selectedGender.toString().isEmpty) {
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text('Error'),
+                            content:
+                                Text('Verificar que no existan campos vacios'),
+                            actions: <Widget>[
+                              TextButton(
+                                style: TextButton.styleFrom(
+                                  textStyle:
+                                      Theme.of(context).textTheme.labelLarge,
+                                ),
+                                child: const Text('Ok'),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                            ],
+                          );
+                        });
+                  } else {
+                    var newUser = User(
+                            _userCampus.text,
+                            _userName.text,
+                            int.parse(_employeeNumber.text),
+                            roleSelector,
+                            0,
+                            '',
+                            _userEmail.text,
+                            _selectedGender,
+                            1)
+                        .toJson();
+
+                    try {
+                      setState(() {
+                        isLoading = true;
+                      });
+
+                      await createUser(newUser).whenComplete(() {
+                        Navigator.of(context).pop();
+                        setState(() {
+                          isLoading = false;
+                          _userName.clear();
+                          _userEmail.clear();
+                          _userCampus.clear();
+                          _employeeNumber.clear();
+                          _isTeacher.clear();
+                          _selectedBirthdate = null;
+                        });
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              ('Exito'),
+                              style: FlutterFlowTheme.of(context)
+                                  .labelMedium
+                                  .override(
+                                    fontFamily: 'Roboto',
+                                    color: Color(0xFF130C0D),
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                            ),
+                            action: SnackBarAction(
+                                label: 'Cerrar mensaje',
+                                textColor: FlutterFlowTheme.of(context).info,
+                                backgroundColor: Colors.black12,
+                                onPressed: () {
+                                  ScaffoldMessenger.of(context)
+                                      .hideCurrentSnackBar();
+                                }),
+                            duration: Duration(milliseconds: 9000),
+                            backgroundColor:
+                                FlutterFlowTheme.of(context).success,
+                          ),
+                        );
+                      });
+                    } catch (e) {
+                      throw Exception(e.toString());
+                    }
+                  }
+                },
+                child: Text('Guardar')),
+            SizedBox(height: 32),
+            ElevatedButton(
               onPressed: _nextPage,
               child: Text('Continuar'),
             ),
@@ -360,7 +460,8 @@ class _NewUserScreenState extends State<NewUserScreen> {
               } else {
                 return Placeholder();
               }
-            }))
+            })),
+        if (isLoading) CustomLoadingIndicator()
       ],
     );
   }

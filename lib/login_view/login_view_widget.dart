@@ -122,10 +122,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
             // Decode the JSON string into a Dart list
             List<dynamic> jsonList =
                 json.decode(_model.apiResultxgr!.response!.body);
-            currentUser = userLogedIn(jsonList); //Store values into a const
-
-            //TODO: IMPLEMENT USEREVENTS
-            // userEvents = await
+            currentUser = parseLogedInUserFromJSON(jsonList);
             getUserEvents2(currentUser!.userId);
 
             // Get currentCycle
@@ -901,7 +898,7 @@ Future<void> _displayTextInputDialog(BuildContext context) async {
   );
 }
 
-User userLogedIn(List<dynamic> jsonList) {
+User parseLogedInUserFromJSON(List<dynamic> jsonList) {
   late User currentUser;
   late List<dynamic> events = [];
 
@@ -913,8 +910,11 @@ User userLogedIn(List<dynamic> jsonList) {
       String role = jsonList[i]['RoleName'];
       int userId = jsonList[i]['id'];
       String token = jsonList[1]['token'];
-      currentUser =
-          User(claUn, employeeName, employeeNumber, role, userId, token);
+      String schoolEmail = jsonList[i]['user_email'];
+      String usergenre = jsonList[i]['genre'];
+      int isActive = jsonList[i]['bajalogicasino'];
+      currentUser = User(claUn, employeeName, employeeNumber, role, userId,
+          token, schoolEmail, usergenre, isActive);
     }
   }
   userToken = currentUser.token;

@@ -120,20 +120,22 @@ Future<dynamic> getRolesList() async {
   }
 }
 
-Future<dynamic> createUser(User newUser) async {
+Future<dynamic> createUser(var newUser) async {
   var response;
   try {
     var apiCall = await Requests.post(hostUrl + port + '/api/user/',
+        json: newUser,
         headers: {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
           'token': currentUser!.token
         },
-        body: {
-          'userName': newUser.employeeName,
-          'role': newUser.role,
-          'claUn': newUser.claUn,
-          'employeeNumber': newUser.employeeNumber,
-        },
+        // body: {
+        //   'nombre_gafete': newUser.employeeName,
+        //   'role': newUser.role,
+        //   'claUn': newUser.claUn,
+        //   'noempleado': newUser.employeeNumber,
+        //   'useremail': newUser.userEmail
+        // },
         persistCookies: false,
         timeoutSeconds: 8);
     apiCall.raiseForStatus();
@@ -155,6 +157,24 @@ Future<dynamic> editUserRole(String roleName, int userID) async {
         body: {'role': roleName.toString(), 'userID': userID.toString()},
         persistCookies: true,
         timeoutSeconds: 10);
+    apiCall.raiseForStatus();
+    response = apiCall.content();
+    return response;
+  } catch (e) {
+    throw FormatException(e.toString());
+  }
+}
+
+Future<dynamic> getUsers() async {
+  var response;
+  try {
+    var apiCall = await Requests.get(hostUrl + port + '/api/user',
+        headers: {
+          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'token': currentUser!.token
+        },
+        persistCookies: false,
+        timeoutSeconds: 20);
     apiCall.raiseForStatus();
     response = apiCall.content();
     return response;
