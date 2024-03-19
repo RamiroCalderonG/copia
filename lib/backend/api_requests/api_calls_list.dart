@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get_connect/http/src/request/request.dart';
 import 'package:oxschool/Models/Employee.dart';
 import 'package:oxschool/Models/User.dart';
+import 'package:oxschool/backend/api_requests/api_manager.dart';
 import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/constants/connection.dart';
 
@@ -177,6 +178,24 @@ Future<dynamic> getUsers() async {
         timeoutSeconds: 20);
     apiCall.raiseForStatus();
     response = apiCall.content();
+    return response;
+  } catch (e) {
+    throw FormatException(e.toString());
+  }
+}
+
+Future<dynamic> deleteUser(String id) async {
+  var response;
+  try {
+    var apiCall = await Requests.delete(hostUrl + port + '/api/user/' + id,
+        headers: {
+          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'token': currentUser!.token
+        },
+        persistCookies: false,
+        timeoutSeconds: 10);
+    apiCall.raiseForStatus();
+    response = apiCall.statusCode;
     return response;
   } catch (e) {
     throw FormatException(e.toString());

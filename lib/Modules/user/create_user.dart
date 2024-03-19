@@ -348,7 +348,7 @@ class _NewUserScreenState extends State<NewUserScreen> {
                 onPressed: () async {
                   if (_userName.text.isEmpty ||
                       _employeeNumber.text.isEmpty ||
-                      _userCampus.text.isEmpty ||
+                      campuseSelector.isEmpty ||
                       _userEmail.text.isEmpty ||
                       _selectedBirthdate.toString().isEmpty ||
                       _selectedGender.toString().isEmpty) {
@@ -414,15 +414,15 @@ class _NewUserScreenState extends State<NewUserScreen> {
                                     fontWeight: FontWeight.w500,
                                   ),
                             ),
-                            action: SnackBarAction(
-                                label: 'Cerrar mensaje',
-                                textColor: FlutterFlowTheme.of(context).info,
-                                backgroundColor: Colors.black12,
-                                onPressed: () {
-                                  ScaffoldMessenger.of(context)
-                                      .hideCurrentSnackBar();
-                                }),
-                            duration: Duration(milliseconds: 9000),
+                            // action: SnackBarAction(
+                            //     label: 'Cerrar mensaje',
+                            //     textColor: FlutterFlowTheme.of(context).info,
+                            //     backgroundColor: Colors.black12,
+                            //     onPressed: () {
+                            //       ScaffoldMessenger.of(context)
+                            //           .hideCurrentSnackBar();
+                            //     }),
+                            duration: Duration(milliseconds: 5000),
                             backgroundColor:
                                 FlutterFlowTheme.of(context).success,
                           ),
