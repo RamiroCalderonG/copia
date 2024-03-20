@@ -147,6 +147,25 @@ Future<dynamic> createUser(var newUser) async {
   }
 }
 
+Future<dynamic> editUser(Map<String, dynamic> bodyObject, String userID) async {
+  var response;
+  try {
+    var apiCall = await Requests.patch(hostUrl + port + '/api/user/' + userID,
+        headers: {
+          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'token': currentUser!.token
+        },
+        body: bodyObject,
+        persistCookies: false,
+        timeoutSeconds: 7);
+    apiCall.raiseForStatus();
+    response = apiCall.content();
+    return response;
+  } catch (e) {
+    throw FormatException(e.toString());
+  }
+}
+
 Future<dynamic> editUserRole(String roleName, int userID) async {
   var response;
   try {
@@ -196,6 +215,25 @@ Future<dynamic> deleteUser(String id) async {
         timeoutSeconds: 10);
     apiCall.raiseForStatus();
     response = apiCall.statusCode;
+    return response;
+  } catch (e) {
+    throw FormatException(e.toString());
+  }
+}
+
+Future<dynamic> getUserDetail(String userId) async {
+  var response;
+  try {
+    var apiCall = await Requests.get(hostUrl + port + '/api/user/detail',
+        headers: {
+          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'token': currentUser!.token
+        },
+        queryParameters: {'id': userId},
+        persistCookies: false,
+        timeoutSeconds: 10);
+    apiCall.raiseForStatus();
+    response = apiCall.content();
     return response;
   } catch (e) {
     throw FormatException(e.toString());

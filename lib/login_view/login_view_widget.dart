@@ -518,7 +518,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                         0.0, 4.0, 0.0, 4.0),
                                                 child: TextButton(
                                                   onPressed: () {
-                                                    _displayTextInputDialog(
+                                                    _displayForgotPassword(
                                                         context);
                                                   },
                                                   child: Text(
@@ -822,7 +822,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                         0.0, 4.0, 0.0, 4.0),
                                                 child: TextButton(
                                                   onPressed: () {
-                                                    _displayTextInputDialog(
+                                                    _displayForgotPassword(
                                                         context);
                                                   },
                                                   child: Text(
@@ -862,7 +862,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
 
 TextEditingController _textFieldController = TextEditingController();
 
-Future<void> _displayTextInputDialog(BuildContext context) async {
+Future<void> _displayForgotPassword(BuildContext context) async {
   return showDialog(
     context: context,
     builder: (context) {

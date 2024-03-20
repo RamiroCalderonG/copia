@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:oxschool/Models/User.dart';
+import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/flutter_flow/flutter_flow_theme.dart';
 
 class UserWindow extends StatefulWidget {
@@ -13,6 +14,7 @@ class UserWindow extends StatefulWidget {
 
 class _UserWindowState extends State<UserWindow> {
   late Future<User> userFuture; // Future to hold the user data
+  final TextEditingController _newPassword = TextEditingController();
 
   @override
   void initState() {
@@ -112,7 +114,7 @@ class _UserWindowState extends State<UserWindow> {
                   borderRadius: BorderRadius.circular(60)),
               child: Center(
                 child: Text(
-                  'Nombre de usuario',
+                  currentUser!.employeeName.toString(),
                   textAlign: TextAlign.center,
                   style: TextStyle(fontFamily: 'Sora'),
                 ),
@@ -132,7 +134,7 @@ class _UserWindowState extends State<UserWindow> {
                   borderRadius: BorderRadius.circular(60)),
               child: Center(
                 child: Text(
-                  'Numero de empleado',
+                  currentUser!.employeeNumber.toString(),
                   textAlign: TextAlign.center,
                   style: TextStyle(fontFamily: 'Sora'),
                 ),
@@ -152,7 +154,7 @@ class _UserWindowState extends State<UserWindow> {
                   borderRadius: BorderRadius.circular(60)),
               child: Center(
                 child: Text(
-                  'Puesto',
+                  currentUser!.role,
                   textAlign: TextAlign.center,
                   style: TextStyle(fontFamily: 'Sora'),
                 ),
@@ -172,7 +174,7 @@ class _UserWindowState extends State<UserWindow> {
                   borderRadius: BorderRadius.circular(60)),
               child: Center(
                 child: Text(
-                  'Campus',
+                  currentUser!.claUn.toString(),
                   textAlign: TextAlign.center,
                   style: TextStyle(fontFamily: 'Sora'),
                 ),
@@ -206,5 +208,38 @@ class _UserWindowState extends State<UserWindow> {
             ])
       ],
     ));
+  }
+
+  Future<void> _changeMyPassword(BuildContext context) async {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text(
+              'Cambiar mi contraseña',
+              style: TextStyle(fontFamily: 'Sora'),
+            ),
+            content: TextField(
+              controller: _newPassword,
+              decoration: InputDecoration(
+                  hintText: "Nueva Contraseña",
+                  helperText:
+                      "1 mayuscula, caracteres especiales, minimo 8 caracteres",
+                  icon: Icon(Icons.password)),
+            ),
+            actions: <Widget>[
+              TextButton(
+                  child: Text('Cancelar'),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  }),
+              TextButton(
+                  onPressed: () {
+                    //TODO: ADD EDIT USER ENDPOINT
+                  },
+                  child: Text('OK'))
+            ],
+          );
+        });
   }
 }

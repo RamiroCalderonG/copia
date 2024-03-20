@@ -1,3 +1,9 @@
+import 'dart:convert';
+
+import 'package:flutter/material.dart';
+import 'package:oxschool/backend/api_requests/api_calls_list.dart';
+import 'package:oxschool/temp/users_temp_data.dart';
+
 import '../Models/User.dart';
 
 List<User> parseUsersFromJSON(List<dynamic> jsonList) {
@@ -20,30 +26,48 @@ List<User> parseUsersFromJSON(List<dynamic> jsonList) {
     users.add(currentUser);
   }
 
-  // for (var i = 0; i < jsonList.length; i++) {
-  //   int employeeNumber = jsonList[i]['NoEmpleado'];
-  //   String employeeName = jsonList[i]['Nombre_Gafete'];
-  //   String claUn = jsonList[i]['ClaUn'];
-  //   String role = jsonList[i]['RoleName'];
-  //   int userId = jsonList[i]['id'];
-  //   String token = jsonList[i]['token'];
-  //   String schoolEmail = jsonList[i]['user_email'];
-  //   String usergenre = jsonList[i]['genre'];
-  //   int isActive = jsonList[i]['bajalogicasino'];
-
-  //   User currentUser = User(claUn, employeeName, employeeNumber, role, userId,
-  //       token, schoolEmail, usergenre, isActive);
-
-  //   users.add(currentUser);
-  // }
-
   return users;
 }
 
-bool isUserAdminFunction(User currentUser) {
+bool verifyUserAdmin(User currentUser) {
   if (currentUser.role == "Administrator") {
     return true;
   } else {
     return false;
+  }
+}
+
+dynamic getSingleUser(String? userId) async {
+  if (userId == null) {
+    userId = tempUserId;
+    selectedUser = await getUserDetail(userId!);
+    List<dynamic> jsonList = json.decode(selectedUser);
+    try {
+      for (var i = 0; i < jsonList.length; i++) {
+        var claUn = jsonList[i]['claun'];
+        var employeeName = jsonList[i]['nombre_gafete'];
+        var employeeNumber = jsonList[i]['noempleado'];
+        var role = jsonList[i]['role_name'];
+        var nwuserId = jsonList[i]['role_name'];
+        var token = '';
+        var userEmail = jsonList[i]['user_email'];
+        var usergenre = jsonList[i]['genre'];
+        var isActive = jsonList[i]['bajalogicasino'];
+        var userId = 0;
+
+        tempSelectedUsr = User(claUn, employeeName, employeeNumber, role,
+            userId, token, userEmail, usergenre, isActive);
+      }
+      return tempSelectedUsr;
+    } catch (e) {
+      AlertDialog(
+        title: Text("Error"),
+        content: Text(e.toString()),
+      );
+    }
+
+    // tempSelectedUsr = tempSelectedUsr!.fromJson(jsonList);
+  } else {
+    selectedUser = await getUserDetail(userId);
   }
 }

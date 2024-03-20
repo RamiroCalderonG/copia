@@ -27,6 +27,21 @@ class User {
 
         // "notActive": notActive
       };
+  User fromJson(List<dynamic> jsonUser) {
+    for (var item in jsonUser) {
+      claUn = jsonUser[item]['claun'];
+      employeeName = jsonUser[item]['nombre_gafete'];
+      employeeNumber = jsonUser[item]['noempleado'];
+      role = jsonUser[item]['role_name'];
+      userId = jsonUser[item]['role_name'];
+      token = '';
+      userEmail = jsonUser[item]['user_email'];
+      usergenre = jsonUser[item]['genre'];
+      isActive = jsonUser[item]['bajalogicasino'];
+    }
+    return User(claUn, employeeName, employeeNumber, role, userId, token,
+        userEmail, usergenre, isActive);
+  }
 
   void clear() {
     employeeName = null;

@@ -27,7 +27,7 @@ class UsersDashboard extends StatefulWidget {
 class _UsersDashboardState extends State<UsersDashboard> {
   late final PlutoGridStateManager stateManager;
   bool isSateManagerActive = false;
-  bool isUserAdmin = isUserAdminFunction(currentUser!);
+  bool isUserAdmin = verifyUserAdmin(currentUser!);
   List<PlutoRow> userRows = [];
   var listOfUsers;
 
@@ -51,7 +51,7 @@ class _UsersDashboardState extends State<UsersDashboard> {
         type: PlutoColumnType.number(),
         readOnly: true),
     PlutoColumn(
-        title: 'Rol del ususario',
+        title: 'Rol del usuario',
         field: 'userRole',
         type: PlutoColumnType.text(),
         readOnly: true),
@@ -192,7 +192,7 @@ class _UsersDashboardState extends State<UsersDashboard> {
           ),
           items: <PopupMenuEntry>[
             PopupMenuItem(
-              child: Text('Dar de baja ususario'),
+              child: Text('Dar de baja usuario'),
               onTap: () async {
                 setState(() {
                   isLoading = true;
@@ -231,9 +231,11 @@ class _UsersDashboardState extends State<UsersDashboard> {
               enabled: isUserAdmin,
             ),
             PopupMenuItem(
-              child: Text('Modificar ususario'),
-              onTap: () {
-                selectedUser = event.row.cells.values.first.value;
+              child: Text('Modificar usuario'),
+              onTap: () async {
+                tempUserId = event.row.cells.values.first.value;
+                await getSingleUser(null);
+
                 updateUserScreen(context);
                 // Handle Option 2
               },
@@ -243,7 +245,7 @@ class _UsersDashboardState extends State<UsersDashboard> {
           ],
         );
       },
-      mode: PlutoGridMode.selectWithOneTap,
+      mode: PlutoGridMode.readOnly,
       columns: employeeDashboardColumns,
       rows: usersPlutoRowList,
       // columnGroups: columnGroups,
@@ -280,13 +282,13 @@ class _UsersDashboardState extends State<UsersDashboard> {
               TextButton.icon(
                   onPressed: () async {},
                   icon: Icon(Icons.verified_user),
-                  label: Text('Administrar roles de ususarios')),
+                  label: Text('Administrar roles de usuarios')),
               TextButton.icon(
                   onPressed: () async {
                     buildNewUserScreen(context);
                   },
                   icon: FaIcon(FontAwesomeIcons.addressCard),
-                  label: Text('Agregar ususario')),
+                  label: Text('Agregar usuario')),
               TextButton.icon(
                   onPressed: () async {
                     refreshButton();
@@ -300,7 +302,7 @@ class _UsersDashboardState extends State<UsersDashboard> {
               SizedBox(width: 20),
             ]),
             backgroundColor: FlutterFlowTheme.of(context).primary,
-            title: Text('Administración de ususarios',
+            title: Text('Administración de usuarios',
                 style: TextStyle(color: Colors.white))),
         body: Stack(
           children: [
@@ -358,7 +360,7 @@ void updateUserScreen(BuildContext context) {
         return AlertDialog(
           contentPadding: EdgeInsets.all(20),
           title: const Text(
-            'Editar ususario',
+            'Editar usuario',
             textAlign: TextAlign.center,
             style: TextStyle(fontFamily: 'Sora'),
           ),
@@ -371,6 +373,7 @@ void updateUserScreen(BuildContext context) {
               child: const Text('Cancelar'),
               onPressed: () {
                 Navigator.of(context).pop();
+                selectedUser = null;
               },
             )
           ],
