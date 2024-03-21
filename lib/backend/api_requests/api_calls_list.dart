@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get_connect/http/src/request/request.dart';
 import 'package:oxschool/Models/Employee.dart';
 import 'package:oxschool/Models/User.dart';
@@ -14,7 +15,8 @@ import 'package:http/http.dart' as http;
 Future<int> postNurseryVisit(var jsonBody) async {
   var postResponse;
   try {
-    var apiCall = await Requests.post(hostUrl + port + '/api/nursery-visit/',
+    var apiCall = await Requests.post(
+        dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/nursery-visit/',
         json: jsonBody, //We use a json style as body
         headers: {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
@@ -38,7 +40,10 @@ Future<String> searchEmployee(String employeeNumber) async {
   var postResponse;
   try {
     var apiCall = await Requests.get(
-        hostUrl + port + '/api/employee/' + employeeNumber.trim(),
+        dotenv.env['HOSTURL']! +
+            dotenv.env['PORT']! +
+            '/api/employee/' +
+            employeeNumber.trim(),
         headers: {
           "Content-Type": "application/json",
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
@@ -61,17 +66,20 @@ Future<String> searchEmployee(String employeeNumber) async {
 Future<int> deleteMedicineStudent(var idValue) async {
   var responseCode;
   try {
-    var apiCall =
-        await Requests.put(hostUrl + port + '/api/student-meds/' + idValue,
-            // json: jsonBody, //We use a json style as body
-            //queryParameters: {'id': idValue},
-            headers: {
-              'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
-              'token': currentUser!.token,
-              'employeeNum': currentUser!.employeeNumber!.toString()
-            },
-            persistCookies: false,
-            timeoutSeconds: 7);
+    var apiCall = await Requests.put(
+        dotenv.env['HOSTURL']! +
+            dotenv.env['PORT']! +
+            '/api/student-meds/' +
+            idValue,
+        // json: jsonBody, //We use a json style as body
+        //queryParameters: {'id': idValue},
+        headers: {
+          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'token': currentUser!.token,
+          'employeeNum': currentUser!.employeeNumber!.toString()
+        },
+        persistCookies: false,
+        timeoutSeconds: 7);
 
     apiCall.raiseForStatus();
 
@@ -86,7 +94,8 @@ Future<int> deleteMedicineStudent(var idValue) async {
 Future<dynamic> getEvents(var userId) async {
   var responseCode;
   try {
-    var apiCall = await Requests.put(hostUrl + port + '/api/events',
+    var apiCall = await Requests.put(
+        dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/events',
         headers: {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
           'token': currentUser!.token
@@ -105,7 +114,8 @@ Future<dynamic> getEvents(var userId) async {
 Future<dynamic> getRolesList() async {
   var response;
   try {
-    var apiCall = await Requests.put(hostUrl + port + '/api/roles',
+    var apiCall = await Requests.put(
+        dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/roles',
         headers: {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
           'token': currentUser!.token
@@ -124,7 +134,8 @@ Future<dynamic> getRolesList() async {
 Future<dynamic> createUser(var newUser) async {
   var response;
   try {
-    var apiCall = await Requests.post(hostUrl + port + '/api/user/',
+    var apiCall = await Requests.post(
+        dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/user/',
         json: newUser,
         headers: {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
@@ -149,17 +160,20 @@ Future<dynamic> createUser(var newUser) async {
 
 Future<dynamic> editUser(Map<String, dynamic> bodyObject, String userID) async {
   var response;
+  // var apiBody = {};
   try {
-    var apiCall = await Requests.patch(hostUrl + port + '/api/user/' + userID,
+    var apiCall = await Requests.put(
+        dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/user/' + userID,
         headers: {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
           'token': currentUser!.token
         },
-        body: bodyObject,
+        json: bodyObject,
+        // body: bodyObject,
         persistCookies: false,
         timeoutSeconds: 7);
     apiCall.raiseForStatus();
-    response = apiCall.content();
+    response = apiCall.statusCode;
     return response;
   } catch (e) {
     throw FormatException(e.toString());
@@ -169,7 +183,8 @@ Future<dynamic> editUser(Map<String, dynamic> bodyObject, String userID) async {
 Future<dynamic> editUserRole(String roleName, int userID) async {
   var response;
   try {
-    var apiCall = await Requests.patch(hostUrl + port + '/api/user/role',
+    var apiCall = await Requests.patch(
+        dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/user/role',
         headers: {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
           'token': currentUser!.token
@@ -188,7 +203,8 @@ Future<dynamic> editUserRole(String roleName, int userID) async {
 Future<dynamic> getUsers() async {
   var response;
   try {
-    var apiCall = await Requests.get(hostUrl + port + '/api/user',
+    var apiCall = await Requests.get(
+        dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/user',
         headers: {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
           'token': currentUser!.token
@@ -206,7 +222,8 @@ Future<dynamic> getUsers() async {
 Future<dynamic> deleteUser(String id) async {
   var response;
   try {
-    var apiCall = await Requests.delete(hostUrl + port + '/api/user/' + id,
+    var apiCall = await Requests.delete(
+        dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/user/' + id,
         headers: {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
           'token': currentUser!.token
@@ -224,7 +241,8 @@ Future<dynamic> deleteUser(String id) async {
 Future<dynamic> getUserDetail(String userId) async {
   var response;
   try {
-    var apiCall = await Requests.get(hostUrl + port + '/api/user/detail',
+    var apiCall = await Requests.get(
+        dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/user/detail',
         headers: {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
           'token': currentUser!.token

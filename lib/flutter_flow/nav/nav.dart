@@ -5,6 +5,7 @@ import 'package:oxschool/components/pdf_viewer_screen.dart';
 import 'package:oxschool/main_window/mobile_main_window_widget.dart';
 import 'package:oxschool/Modules/user/user_view_screen.dart';
 
+import '../../Modules/user/users_dashboard.dart';
 import '/index.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 
@@ -64,7 +65,11 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
             name: '/Print',
             path: '/print',
-            builder: (context, params) => MyStatefulWidget())
+            builder: (context, params) => MyStatefulWidget()),
+        FFRoute(
+            name: 'UDashboard',
+            path: '/udashboard',
+            builder: (context, params) => UsersDashboard())
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
     );
 

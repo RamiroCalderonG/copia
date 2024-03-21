@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:oxschool/Modules/user/users_dashboard.dart';
 import 'package:oxschool/constants/User.dart';
+import 'package:oxschool/flutter_flow/flutter_flow_util.dart';
 import 'package:oxschool/temp/users_temp_data.dart';
+import 'package:oxschool/utils/loader_indicator.dart';
+
+import '../../backend/api_requests/api_calls_list.dart';
 
 class EditUserScreen extends StatefulWidget {
   const EditUserScreen({super.key});
@@ -18,6 +23,11 @@ class _EditUserScreenState extends State<EditUserScreen> {
   var isActive;
   var genre;
   var password;
+  Map<String, dynamic> dataToUpdate = {};
+  var _userNameUpdated = <String, dynamic>{};
+  var _emailUpdated = <String, dynamic>{};
+  var _passwordUpdated = <String, dynamic>{};
+  bool isloading = false;
 
   bool _obscureText = true;
 
@@ -84,6 +94,16 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                   }
                                   return null;
                                 },
+                                onSaved: (newValue) {
+                                  setState(() {
+                                    _userNameUpdated = {'user_name': newValue};
+                                    dataToUpdate.addAll(_userNameUpdated);
+                                  });
+                                },
+                                onChanged: (value) {
+                                  _passwordUpdated = {'nombre_gafete': value};
+                                  dataToUpdate.addAll(_userNameUpdated);
+                                },
                               )),
                             ],
                           ),
@@ -98,6 +118,10 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                     border: OutlineInputBorder(),
                                   ),
                                   validator: _validateEmail,
+                                  onChanged: (value) {
+                                    _passwordUpdated = {'user_email': value};
+                                    dataToUpdate.addAll(_emailUpdated);
+                                  },
                                 ),
                               ),
                               SizedBox(width: 20),
@@ -124,6 +148,10 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                       return 'Por favor ingrese una contraseña';
                                     }
                                     return null;
+                                  },
+                                  onChanged: (value) {
+                                    _passwordUpdated = {'user_password': value};
+                                    dataToUpdate.addAll(_passwordUpdated);
                                   },
                                 ),
                               )
@@ -157,26 +185,118 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                 showDialog(
                                   context: context,
                                   builder: (context) => AlertDialog(
-                                    title: Text('Confirm Registration'),
-                                    content: Text(
-                                        'Are you sure you want to register?'),
+                                    title: Text('Confirmación'),
+                                    content: Text('¿Realiar cambios?'),
                                     actions: <Widget>[
                                       TextButton(
-                                        onPressed: () {
-                                          //TODO : PENDING TO ADD API CALL
+                                        onPressed: () async {
                                           Navigator.of(context).pop();
+                                          context.goNamed(
+                                            'UDashboard',
+                                            extra: <String, dynamic>{
+                                              kTransitionInfoKey:
+                                                  TransitionInfo(
+                                                hasTransition: true,
+                                                transitionType:
+                                                    PageTransitionType
+                                                        .leftToRight,
+                                              ),
+                                            },
+                                          );
                                         },
-                                        child: Text('Cancel'),
+                                        child: Text('Cancelar'),
                                       ),
                                       ElevatedButton(
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                          // Proceed with registration logic here
-                                          String email = _emailController.text;
-                                          String password =
-                                              _passwordController.text;
-                                          print(
-                                              'Email: $email, Password: $password');
+                                        onPressed: () async {
+                                          if (dataToUpdate.isEmpty) {
+                                            return showDialog(
+                                                context: context,
+                                                builder: (context) =>
+                                                    AlertDialog(
+                                                      title: Text('Error'),
+                                                      content: Text(
+                                                          'No se detectó ningun cambio'),
+                                                      actions: [
+                                                        TextButton(
+                                                            onPressed: () {
+                                                              Navigator.pop(
+                                                                  context);
+                                                            },
+                                                            child: Text('Ok'))
+                                                      ],
+                                                    ));
+                                          } else {
+                                            try {
+                                              Navigator.of(context).pop();
+                                              Navigator.of(context).pop();
+                                              setState(() {
+                                                isloading = true;
+                                              });
+                                              var response = await editUser(
+                                                  dataToUpdate,
+                                                  tempSelectedUsr!
+                                                      .employeeNumber
+                                                      .toString());
+                                              if (response == 200) {
+                                                setState(() {
+                                                  isloading = false;
+                                                });
+
+                                                showDialog(
+                                                    context: context,
+                                                    builder: (context) =>
+                                                        AlertDialog(
+                                                          icon:
+                                                              Icon(Icons.done),
+                                                          iconColor: Colors
+                                                              .greenAccent,
+                                                          title: Text('Exito'),
+                                                          content: Text(
+                                                              'Usuario actualizado exitosamente'),
+                                                          actions: [
+                                                            TextButton(
+                                                              onPressed: () {
+                                                                Navigator.of(
+                                                                        context)
+                                                                    .pop();
+                                                              },
+                                                              child: Text(
+                                                                  'Cerrar'),
+                                                            )
+                                                          ],
+                                                        ));
+                                              }
+                                            } catch (e) {
+                                              setState(() {
+                                                isloading = false;
+                                              });
+                                              showDialog(
+                                                  context: context,
+                                                  builder: (context) =>
+                                                      AlertDialog(
+                                                        icon: Icon(Icons.error),
+                                                        iconColor:
+                                                            Colors.redAccent,
+                                                        title: Text('Error'),
+                                                        content:
+                                                            Text(e.toString()),
+                                                      ));
+                                            }
+                                            // setState(() {
+                                            //   isloading = false;
+                                            // });
+                                            // Navigator.of(context).pop();
+                                          }
+
+                                          //TODO : PENDING TO ADD API CALL
+                                          // Navigator.of(context).pop();}
+                                          // Navigator.of(context).pop();
+                                          // // Proceed with registration logic here
+                                          // String email = _emailController.text;
+                                          // String password =
+                                          //     _passwordController.text;
+                                          // print(
+                                          //     'Email: $email, Password: $password');
                                         },
                                         child: Text('Register'),
                                       ),
@@ -185,43 +305,18 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                 );
                               }
                             },
-                            child: Text('Register'),
+                            child: Text('Actualizar'),
                           ),
                         ],
                       ),
                     ));
-
-                // Container(
-                //     margin: EdgeInsets.all(10),
-                //     child: SingleChildScrollView(
-                //       child: Column(
-                //         children: [
-                //           Row(
-                //             children: [
-                //               Expanded(
-                //                   child: TextFormField(
-                //                 decoration: InputDecoration(
-                //                     labelText: "Nombre del ususario"),
-                //               )),
-                //               SizedBox(width: 40),
-                //               Expanded(
-                //                   child: TextFormField(
-                //                 decoration: InputDecoration(labelText: "Email"),
-                //               ))
-                //             ],
-                //           ),
-                //           Row(
-                //             children: [Expanded(child: TextFormField())],
-                //           )
-                //         ],
-                //       ),
-                //     ));
               } else {
                 return Placeholder();
               }
             },
           ),
-        )
+        ),
+        if (isloading) CustomLoadingIndicator()
       ],
     );
   }
