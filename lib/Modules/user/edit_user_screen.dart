@@ -94,15 +94,10 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                   }
                                   return null;
                                 },
-                                onSaved: (newValue) {
-                                  setState(() {
-                                    _userNameUpdated = {'user_name': newValue};
-                                    dataToUpdate.addAll(_userNameUpdated);
-                                  });
-                                },
                                 onChanged: (value) {
                                   _passwordUpdated = {'nombre_gafete': value};
-                                  dataToUpdate.addAll(_userNameUpdated);
+                                  dataToUpdate
+                                      .addEntries(_passwordUpdated.entries);
                                 },
                               )),
                             ],
@@ -120,7 +115,8 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                   validator: _validateEmail,
                                   onChanged: (value) {
                                     _passwordUpdated = {'user_email': value};
-                                    dataToUpdate.addAll(_emailUpdated);
+                                    dataToUpdate
+                                        .addEntries(_passwordUpdated.entries);
                                   },
                                 ),
                               ),
@@ -151,7 +147,8 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                   },
                                   onChanged: (value) {
                                     _passwordUpdated = {'user_password': value};
-                                    dataToUpdate.addAll(_passwordUpdated);
+                                    dataToUpdate
+                                        .addEntries(_passwordUpdated.entries);
                                   },
                                 ),
                               )
