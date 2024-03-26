@@ -235,7 +235,7 @@ class _UserWindowState extends State<UserWindow> {
                   }),
               TextButton(
                   onPressed: () {
-                    //TODO: ADD EDIT USER ENDPOINT
+                    //TODO: ADD EDIT USER SCREEN
                   },
                   child: Text('OK'))
             ],
