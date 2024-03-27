@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:oxschool/components/confirm_dialogs.dart';
 import 'package:oxschool/flutter_flow/flutter_flow_theme.dart';
 
 class RolesAndProfilesScreen extends StatefulWidget {
@@ -9,15 +10,29 @@ class RolesAndProfilesScreen extends StatefulWidget {
 }
 
 class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
-  List<String> roles = ['Admin', 'User', 'Second', 'Item'];
+  List<String> roles = [
+    'Admin',
+    'User',
+    'Second',
+    'Item',
+    'Role5',
+    'Role6',
+    'Role7',
+    'Role8',
+  ];
   List<String> description = [
     'Admins',
     'Mortals',
     'Other description',
-    'Another description to use'
+    'Another description to use',
+    'Another description',
+    'Another description',
+    'Another description',
+    'Role new description'
   ];
+  int selectedCardIndex = -1;
 
-  Widget roleContainerCard(String role, String desc) {
+  Widget roleContainerCard(String role, String desc, int index) {
     return Card(
       color: Colors.cyan[50],
       elevation: 4,
@@ -28,11 +43,12 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          SizedBox(height: 2),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                role,
+                '  ' + role,
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
@@ -42,9 +58,20 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                 maxLines: 1,
               ),
               IconButton(
-                icon: Icon(Icons.delete_outline),
-                onPressed: () {
-                  // Implement delete functionality here
+                icon: Icon(
+                  Icons.delete_outline,
+                  color: Colors.black,
+                ),
+                onPressed: () async {
+                  var deleteItem =
+                      await showDeleteConfirmationAlertDialog(context);
+
+                  if (deleteItem == 1) {
+                    setState(() {
+                      roles.removeAt(index);
+                      description.removeAt(index);
+                    });
+                  }
                 },
               ),
             ],
@@ -66,10 +93,12 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
             alignment: Alignment.bottomLeft,
             child: ElevatedButton.icon(
               onPressed: () {
-                // Implement open functionality here
+                setState(() {
+                  selectedCardIndex = index;
+                });
               },
               icon: Icon(Icons.arrow_forward),
-              label: Text('Open'),
+              label: Text('Ver Detalle'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
                 shape: RoundedRectangleBorder(
@@ -86,15 +115,50 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
     );
   }
 
+  void _showEditRoleScreen(BuildContext context, int index) async {
+    final result = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => AddEditRoleScreen(
+          role: roles[index],
+          description: description[index],
+        ),
+      ),
+    );
+    if (result != null &&
+        result.containsKey('role') &&
+        result.containsKey('desc')) {
+      setState(() {
+        roles[index] = result['role'];
+        description[index] = result['desc'];
+      });
+    }
+  }
+
+  void _showAddRoleScreen(BuildContext context) async {
+    final result = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => AddEditRoleScreen(),
+      ),
+    );
+    if (result != null &&
+        result.containsKey('role') &&
+        result.containsKey('desc')) {
+      setState(() {
+        roles.add(result['role']);
+        description.add(result['desc']);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-            backgroundColor: FlutterFlowTheme.of(context).primary,
-            title: Text('Administración de usuarios',
-                style: TextStyle(color: Colors.white))),
-        body: LayoutBuilder(
-            builder: (BuildContext context, BoxConstraints constraints) {
+      appBar: AppBar(
+        title: Text('Admin. de rol de ususario'),
+        backgroundColor: FlutterFlowTheme.of(context).primary,
+      ),
+      body: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
           if (constraints.maxWidth < 600) {
             return Card(
               child: Placeholder(),
@@ -104,44 +168,207 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
               width: MediaQuery.of(context).size.width,
               child: Column(
                 children: [
-                  Expanded(
+                  SizedBox(height: 15),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      SizedBox(width: 10),
+                      TextButton(
+                        onPressed: () {
+                          _showAddRoleScreen(context);
+                        },
+                        child: Text('Nuevo '),
+                        style: ButtonStyle(
+                          foregroundColor:
+                              MaterialStateProperty.all<Color>(Colors.white),
+                          backgroundColor:
+                              MaterialStateProperty.all<Color>(Colors.blue),
+                          padding:
+                              MaterialStateProperty.all<EdgeInsetsGeometry>(
+                                  EdgeInsets.all(10)),
+                          shape: MaterialStateProperty.all<OutlinedBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 20),
+                      TextButton(
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text('Todos los Roles'),
+                                content: SizedBox(
+                                  width: double.minPositive,
+                                  height: 300,
+                                  child: ListView.builder(
+                                    itemCount: roles.length,
+                                    itemBuilder: (context, index) {
+                                      return ListTile(
+                                        title: Text(roles[index]),
+                                        subtitle: Text(description[index]),
+                                        onTap: () {
+                                          _showEditRoleScreen(context, index);
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: Text('Cerrar'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                        child: Text('Mostrar todos'),
+                        style: ButtonStyle(
+                          foregroundColor:
+                              MaterialStateProperty.all<Color>(Colors.white),
+                          backgroundColor:
+                              MaterialStateProperty.all<Color>(Colors.blue),
+                          padding:
+                              MaterialStateProperty.all<EdgeInsetsGeometry>(
+                                  EdgeInsets.all(10)),
+                          shape: MaterialStateProperty.all<OutlinedBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 36),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        TextButton(onPressed: () {}, child: Text('Nuevo Rol')),
-                        TextButton(
-                            onPressed: () {}, child: Text('Mostrar todos'))
-                      ],
+                      children: List.generate(
+                        roles.length,
+                        (index) => Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: SizedBox(
+                            height: 100,
+                            width: 200,
+                            child: roleContainerCard(
+                              roles[index],
+                              description[index],
+                              index,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                   SizedBox(width: 36),
-                  SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Container(
-                          // height: MediaQuery.of(context).size.height * 0.5,
-                          child: SizedBox(
-                              height: MediaQuery.of(context).size.height * 0.5,
-                              child: Expanded(
-                                child: Row(
-                                  children: List.generate(
-                                      roles.length,
-                                      (index) => Expanded(
-                                            child: Padding(
-                                                padding:
-                                                    const EdgeInsets.all(8.0),
-                                                child: SizedBox(
-                                                  width: 200,
-                                                  child: roleContainerCard(
-                                                      roles[index],
-                                                      description[index]),
-                                                )),
-                                          )),
-                                ),
-                              ))))
+                  Divider(thickness: 1),
+                  if (selectedCardIndex != -1) ...[
+                    SizedBox(height: 10),
+                    Text(
+                      'Detalle del Rol Seleccionado:',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      'Rol: ${roles[selectedCardIndex]}',
+                      style: TextStyle(fontSize: 14),
+                    ),
+                    SizedBox(height: 5),
+                    Text(
+                      'Descripción: ${description[selectedCardIndex]}',
+                      style: TextStyle(fontSize: 14),
+                    ),
+                  ],
                 ],
               ),
             );
           }
-        }));
+        },
+      ),
+    );
+  }
+}
+
+class AddEditRoleScreen extends StatefulWidget {
+  final String? role;
+  final String? description;
+
+  const AddEditRoleScreen({Key? key, this.role, this.description})
+      : super(key: key);
+
+  @override
+  _AddEditRoleScreenState createState() => _AddEditRoleScreenState();
+}
+
+class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
+  late TextEditingController _roleController;
+  late TextEditingController _descriptionController;
+
+  @override
+  void initState() {
+    super.initState();
+    _roleController = TextEditingController(text: widget.role ?? '');
+    _descriptionController =
+        TextEditingController(text: widget.description ?? '');
+  }
+
+  @override
+  void dispose() {
+    _roleController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.role != null ? 'Editar Rol' : 'Agregar Rol'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: _roleController,
+              decoration: InputDecoration(
+                labelText: 'Rol',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            SizedBox(height: 16),
+            TextField(
+              controller: _descriptionController,
+              decoration: InputDecoration(
+                labelText: 'Descripción',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                //TODO: INSER FUNCTION TO CREATE OR EDIT
+                // Save or update role logic
+                Navigator.of(context).pop();
+              },
+              child:
+                  Text(widget.role != null ? 'Actualizar Rol' : 'Agregar Rol'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
