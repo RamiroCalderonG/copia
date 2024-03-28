@@ -1,6 +1,14 @@
+import 'dart:convert';
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:oxschool/components/confirm_dialogs.dart';
 import 'package:oxschool/flutter_flow/flutter_flow_theme.dart';
+import 'package:oxschool/login_view/login_view_widget.dart';
+import 'package:oxschool/temp/users_temp_data.dart';
+import 'package:oxschool/utils/loader_indicator.dart';
+
+import '../../backend/api_requests/api_calls_list.dart';
 
 class RolesAndProfilesScreen extends StatefulWidget {
   const RolesAndProfilesScreen({super.key});
@@ -9,28 +17,24 @@ class RolesAndProfilesScreen extends StatefulWidget {
   State<RolesAndProfilesScreen> createState() => _RolesAndProfilesScreenState();
 }
 
+bool _isloading = false;
+
 class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
-  List<String> roles = [
-    'Admin',
-    'User',
-    'Second',
-    'Item',
-    'Role5',
-    'Role6',
-    'Role7',
-    'Role8',
-  ];
-  List<String> description = [
-    'Admins',
-    'Mortals',
-    'Other description',
-    'Another description to use',
-    'Another description',
-    'Another description',
-    'Another description',
-    'Role new description'
-  ];
+  List<String> roles = [];
+  List<String> description = [];
+  List<bool> isActive = [];
   int selectedCardIndex = -1;
+
+  @override
+  void initState() {
+    for (var item in tmpRolesList) {
+      roles.add(item['Role']);
+      description.add(item['Description']);
+      isActive.add(item['Active']);
+    }
+
+    super.initState();
+  }
 
   Widget roleContainerCard(String role, String desc, int index) {
     return Card(
@@ -47,15 +51,30 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                '  ' + role,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
+              Row(
+                children: [
+                  Text(
+                    '  ' + role,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                  SizedBox(child: Text(' ')),
+                  if (!isActive[index])
+                    Container(
+                      margin: EdgeInsets.only(right: 8),
+                      width: 10,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.red,
+                      ),
+                    ),
+                ],
               ),
               IconButton(
                 icon: Icon(
@@ -67,9 +86,13 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                       await showDeleteConfirmationAlertDialog(context);
 
                   if (deleteItem == 1) {
+                    var roleName = roles[index];
+                    var roleIdValue = getRoleIdValue(tmpRolesList, roleName);
+                    deleteRole(roleIdValue);
                     setState(() {
                       roles.removeAt(index);
                       description.removeAt(index);
+                      isActive.removeAt(index);
                     });
                   }
                 },
@@ -92,9 +115,26 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
           Align(
             alignment: Alignment.bottomLeft,
             child: ElevatedButton.icon(
-              onPressed: () {
+              onPressed: () async {
                 setState(() {
-                  selectedCardIndex = index;
+                  _isloading = false;
+                  _showEditRoleScreen(context, index);
+                });
+                // var response = await getRolesList();
+                // tmpRolesList = jsonDecode(response);
+                // roles.clear();
+                // description.clear();
+                // isActive.clear();
+                // setState(() {
+                //   for (var item in tmpRolesList) {
+                //     roles.add(item['Role']);
+                //     description.add(item['Description']);
+                //     isActive.add(item['Active']);
+                //   }
+                // });
+
+                setState(() {
+                  _isloading = false;
                 });
               },
               icon: Icon(Icons.arrow_forward),
@@ -115,12 +155,13 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
     );
   }
 
-  void _showEditRoleScreen(BuildContext context, int index) async {
+  Future<void> _showEditRoleScreen(BuildContext context, int index) async {
     final result = await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => AddEditRoleScreen(
           role: roles[index],
           description: description[index],
+          isActive: isActive[index],
         ),
       ),
     );
@@ -146,6 +187,7 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
       setState(() {
         roles.add(result['role']);
         description.add(result['desc']);
+        isActive.add(result['active']);
       });
     }
   }
@@ -180,7 +222,7 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                         child: Text('Nuevo '),
                         style: ButtonStyle(
                           foregroundColor:
-                              MaterialStateProperty.all<Color>(Colors.white),
+                              MaterialStateProperty.all<Color>(Colors.black),
                           backgroundColor:
                               MaterialStateProperty.all<Color>(Colors.blue),
                           padding:
@@ -232,7 +274,7 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                         child: Text('Mostrar todos'),
                         style: ButtonStyle(
                           foregroundColor:
-                              MaterialStateProperty.all<Color>(Colors.white),
+                              MaterialStateProperty.all<Color>(Colors.black),
                           backgroundColor:
                               MaterialStateProperty.all<Color>(Colors.blue),
                           padding:
@@ -245,6 +287,25 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                           ),
                         ),
                       ),
+                      SizedBox(width: 20),
+                      // TextButton(
+                      //   onPressed: () {},
+                      //   child: Text(' Usuarios por Rol '),
+                      //   style: ButtonStyle(
+                      //     foregroundColor:
+                      //         MaterialStateProperty.all<Color>(Colors.black),
+                      //     backgroundColor:
+                      //         MaterialStateProperty.all<Color>(Colors.blue),
+                      //     padding:
+                      //         MaterialStateProperty.all<EdgeInsetsGeometry>(
+                      //             EdgeInsets.all(10)),
+                      //     shape: MaterialStateProperty.all<OutlinedBorder>(
+                      //       RoundedRectangleBorder(
+                      //         borderRadius: BorderRadius.circular(8),
+                      //       ),
+                      //     ),
+                      //   ),
+                      // ),
                     ],
                   ),
                   SizedBox(height: 36),
@@ -256,7 +317,7 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                         (index) => Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: SizedBox(
-                            height: 100,
+                            height: 150,
                             width: 200,
                             child: roleContainerCard(
                               roles[index],
@@ -270,26 +331,9 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                   ),
                   SizedBox(width: 36),
                   Divider(thickness: 1),
-                  if (selectedCardIndex != -1) ...[
-                    SizedBox(height: 10),
-                    Text(
-                      'Detalle del Rol Seleccionado:',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 10),
-                    Text(
-                      'Rol: ${roles[selectedCardIndex]}',
-                      style: TextStyle(fontSize: 14),
-                    ),
-                    SizedBox(height: 5),
-                    Text(
-                      'Descripción: ${description[selectedCardIndex]}',
-                      style: TextStyle(fontSize: 14),
-                    ),
-                  ],
+                  // Row(
+                  //   children: [Text('Seccion ususarios por rol')],
+                  // )
                 ],
               ),
             );
@@ -303,8 +347,10 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
 class AddEditRoleScreen extends StatefulWidget {
   final String? role;
   final String? description;
+  final bool? isActive;
 
-  const AddEditRoleScreen({Key? key, this.role, this.description})
+  const AddEditRoleScreen(
+      {Key? key, this.role, this.description, this.isActive})
       : super(key: key);
 
   @override
@@ -314,6 +360,7 @@ class AddEditRoleScreen extends StatefulWidget {
 class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
   late TextEditingController _roleController;
   late TextEditingController _descriptionController;
+  late bool _isActive;
 
   @override
   void initState() {
@@ -321,6 +368,7 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
     _roleController = TextEditingController(text: widget.role ?? '');
     _descriptionController =
         TextEditingController(text: widget.description ?? '');
+    _isActive = widget.isActive ?? false;
   }
 
   @override
@@ -330,45 +378,133 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
     super.dispose();
   }
 
+  void _updateRole(BuildContext context, int roleID) async {
+    // Prepare JSON data for update
+    final jsonData = {
+      'name': _roleController.text,
+      'description': _descriptionController.text,
+      'isActive': _isActive,
+    };
+
+    await editRole(roleID, jsonData);
+    // Close the dialog
+    // Navigator.of(context).pop();
+  }
+
+  void _addRole(BuildContext context) {
+    // Prepare JSON data for adding role
+    final jsonData = {
+      'name': _roleController.text,
+      'description': _descriptionController.text,
+      'isActive': _isActive,
+      // Add other fields as needed
+    };
+
+    // TODO: Perform API call to add role using jsonData
+
+    // Close the dialog
+    Navigator.of(context).pop();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.role != null ? 'Editar Rol' : 'Agregar Rol'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: _roleController,
-              decoration: InputDecoration(
-                labelText: 'Rol',
-                border: OutlineInputBorder(),
-              ),
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: 16),
+                Row(
+                  children: [
+                    ChoiceChip(
+                      selectedColor: Colors.green,
+                      label: Text('Activo'),
+                      selected: _isActive,
+                      onSelected: (selected) {
+                        setState(() {
+                          _isActive = selected;
+                        });
+                      },
+                    ),
+                    SizedBox(width: 8),
+                    ChoiceChip(
+                      selectedColor: Colors.red,
+                      label: Text('Inactivo'),
+                      selected: !_isActive,
+                      onSelected: (selected) {
+                        setState(() {
+                          _isActive = !selected;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+                SizedBox(height: 16),
+                TextField(
+                  controller: _roleController,
+                  decoration: InputDecoration(
+                    labelText: 'Rol',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                SizedBox(height: 16),
+                TextField(
+                  controller: _descriptionController,
+                  decoration: InputDecoration(
+                    labelText: 'Descripción',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () async {
+                    // setState(() {
+                    //   _isloading = true;
+                    // });
+                    if (widget.role != null) {
+                      String roleName = widget.role!;
+                      int roleId = getRoleIdValue(tmpRolesList, roleName);
+                      if (roleId != 0) {
+                        setState(() {
+                          _isloading = true;
+                        });
+                        _updateRole(context, roleId);
+                      }
+
+                      setState(() {
+                        _isloading = false;
+                      });
+
+                      Navigator.of(context).pop();
+                    } else {
+                      _addRole(context);
+                      _isloading = false;
+                    }
+                  },
+                  child: Text(
+                      widget.role != null ? 'Actualizar Rol' : 'Agregar Rol'),
+                ),
+              ],
             ),
-            SizedBox(height: 16),
-            TextField(
-              controller: _descriptionController,
-              decoration: InputDecoration(
-                labelText: 'Descripción',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                //TODO: INSER FUNCTION TO CREATE OR EDIT
-                // Save or update role logic
-                Navigator.of(context).pop();
-              },
-              child:
-                  Text(widget.role != null ? 'Actualizar Rol' : 'Agregar Rol'),
-            ),
-          ],
-        ),
+          ),
+          if (_isloading) CustomLoadingIndicator()
+        ],
       ),
     );
   }
+}
+
+int getRoleIdValue(List<dynamic> rolesList, String roleName) {
+  for (var role in rolesList) {
+    if (role["Role"] == roleName) {
+      return role["Roleid"];
+    }
+  }
+  return 0; // Role not found
 }

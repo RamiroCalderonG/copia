@@ -114,8 +114,8 @@ Future<dynamic> getEvents(var userId) async {
 Future<dynamic> getRolesList() async {
   var response;
   try {
-    var apiCall = await Requests.put(
-        dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/roles',
+    var apiCall = await Requests.get(
+        dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/role',
         headers: {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
           'token': currentUser!.token
@@ -123,6 +123,90 @@ Future<dynamic> getRolesList() async {
         persistCookies: false,
         timeoutSeconds: 8);
 
+    apiCall.raiseForStatus();
+    response = apiCall.content();
+    return response;
+  } catch (e) {
+    throw FormatException(e.toString());
+  }
+}
+
+Future<dynamic> getRole(String roleName) async {
+  var response;
+  try {
+    var apiCall = await Requests.get(
+        dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/role',
+        headers: {
+          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'token': currentUser!.token
+        },
+        persistCookies: false,
+        timeoutSeconds: 8);
+    apiCall.raiseForStatus();
+    response = apiCall.content();
+    return response;
+  } catch (e) {
+    throw FormatException(e.toString());
+  }
+}
+
+Future<dynamic> editRole(int roleID, Map<String, dynamic> bodyObject) async {
+  var response;
+  try {
+    var apiCall = await Requests.put(
+        dotenv.env['HOSTURL']! +
+            dotenv.env['PORT']! +
+            '/api/role/' +
+            roleID.toString(),
+        headers: {
+          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'token': currentUser!.token
+        },
+        json: bodyObject,
+        persistCookies: false,
+        timeoutSeconds: 8);
+    apiCall.raiseForStatus();
+    response = apiCall.content();
+    return response;
+  } catch (e) {
+    throw FormatException(e.toString());
+  }
+}
+
+Future<dynamic> deleteRole(int roleID) async {
+  var response;
+  try {
+    var apiCall = await Requests.delete(
+        dotenv.env['HOSTURL']! +
+            dotenv.env['PORT']! +
+            '/api/role/' +
+            roleID.toString(),
+        headers: {
+          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'token': currentUser!.token
+        },
+        persistCookies: false,
+        timeoutSeconds: 8);
+    apiCall.raiseForStatus();
+    response = apiCall.content();
+    return response;
+  } catch (e) {
+    throw FormatException(e.toString());
+  }
+}
+
+Future<dynamic> createRole(Map<String, dynamic> bodyObject) async {
+  var response;
+  try {
+    var apiCall = await Requests.post(
+        dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/role',
+        headers: {
+          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'token': currentUser!.token
+        },
+        json: bodyObject,
+        persistCookies: false,
+        timeoutSeconds: 8);
     apiCall.raiseForStatus();
     response = apiCall.content();
     return response;

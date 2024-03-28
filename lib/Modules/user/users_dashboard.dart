@@ -83,6 +83,9 @@ class _UsersDashboardState extends State<UsersDashboard> {
             bottom: AppBar(automaticallyImplyLeading: false, actions: [
               TextButton.icon(
                   onPressed: () async {
+                    var response = await getRolesList();
+                    tmpRolesList = jsonDecode(response);
+
                     Navigator.push(
                         context,
                         MaterialPageRoute(
