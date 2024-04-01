@@ -4,7 +4,6 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:http/src/response.dart';
 import 'package:oxschool/Models/Cycle.dart';
 import 'package:oxschool/Models/User.dart';
 import 'package:oxschool/backend/api_requests/api_calls_list.dart';
@@ -107,31 +106,54 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
   @override
   Widget build(BuildContext context) {
     String? _text;
+    Map<String, dynamic> apiBody = {};
+    var apiResponse;
 
     dynamic loginButtonFunction() async {
       try {
         var value = trimSpaces(_model.textController2.text);
+        Map<String, dynamic> nip = {'Nip': value};
+        apiBody.addEntries(nip.entries);
+        Map<String, dynamic> employeeNumber = {
+          'employeeNumber': _model.textController1.text
+        };
+        apiBody.addEntries(employeeNumber.entries);
+        Map<String, dynamic> device = {'device': currentDeviceData};
+        apiBody.addEntries(device.entries);
+        Map<String, dynamic> deviceIp = {'ip_address': deviceIP};
+        apiBody.addEntries(deviceIp.entries);
+
         if (value.isNotEmpty) {
           // Log In user
-          _model.apiResultxgr = await LoginUserCall.call(
-                  nip: _model.textController2.text,
-                  device: currentDeviceData,
-                  ip_address: deviceIP)
-              .timeout(Duration(seconds: 7));
-          if ((_model.apiResultxgr?.succeeded ?? true)) {
-            // Decode the JSON string into a Dart list
-            List<dynamic> jsonList =
-                json.decode(_model.apiResultxgr!.response!.body);
+          // _model.apiResultxgr = await LoginUserCall.call(bodyContent: apiBody)
+          //     .timeout(Duration(seconds: 7));
+
+          apiResponse = await loginUser(apiBody);
+          if (apiResponse != null) {
+            List<dynamic> jsonList = json.decode(apiResponse);
             currentUser = parseLogedInUserFromJSON(jsonList);
             getUserEvents2(currentUser!.userId);
 
-            // Get currentCycle
-            _model.apiResultxgr =
+            apiResponse =
                 await CurrentCicleCall.call().timeout(Duration(seconds: 7));
-            if ((_model.apiResultxgr?.succeeded ?? true)) {
-              jsonList = json.decode(_model.apiResultxgr!.response!.body);
-              currentCycle = getcurrentCycle(jsonList); //parse from JSON
+            if (apiResponse != null) {
+              List<dynamic> jsonList = json.decode(apiResponse);
+
+              // jsonList = json.decode(apiResponse);
+              currentCycle = getcurrentCycle(jsonList);
             }
+          }
+
+          if ((currentCycle != null)) {
+            // Decode the JSON string into a Dart list
+
+            // Get currentCycle
+            // _model.apiResultxgr =
+            //     await CurrentCicleCall.call().timeout(Duration(seconds: 7));
+            // if ((_model.apiResultxgr?.succeeded ?? true)) {
+            //   jsonList = json.decode(_model.apiResultxgr!.response!.body);
+            //   currentCycle = getcurrentCycle(jsonList); //parse from JSON
+            // }
             if (Platform.isAndroid || Platform.isIOS) {
               context.goNamed(
                 'MobileMainView',
@@ -334,8 +356,10 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                             enableSuggestions: true,
                                             controller: _model.textController1,
                                             obscureText: false,
+                                            keyboardType: TextInputType.number,
+                                            maxLength: 8,
                                             decoration: InputDecoration(
-                                              labelText: 'Email',
+                                              labelText: 'Numero de empleado',
                                               hintStyle:
                                                   FlutterFlowTheme.of(context)
                                                       .bodyLarge,
@@ -653,8 +677,10 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                             enableSuggestions: true,
                                             controller: _model.textController1,
                                             obscureText: false,
+                                            keyboardType: TextInputType.number,
+                                            maxLength: 8,
                                             decoration: InputDecoration(
-                                              labelText: 'Email',
+                                              labelText: 'Numero de empleado',
                                               hintStyle:
                                                   FlutterFlowTheme.of(context)
                                                       .bodySmall,

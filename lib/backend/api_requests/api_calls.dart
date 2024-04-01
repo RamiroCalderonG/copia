@@ -11,25 +11,22 @@ export 'api_manager.dart' show ApiCallResponse;
 const _kPrivateApiFunctionName = 'ffPrivateApiCall';
 
 class LoginUserCall {
-  static Future<ApiCallResponse> call(
-      {required String nip,
-      required String device,
-      required String ip_address}) {
+  static Future<ApiCallResponse> call({
+    required dynamic bodyContent,
+  }) {
     return ApiManager.instance.makeApiCall(
-      callName: 'LoginVerify',
-      apiUrl: dotenv.env['HOSTURL']! +
-          dotenv.env['PORT']! +
-          '/login/userlogin?nip=$nip&device=$device',
+      callName: 'LoginUser',
+      apiUrl:
+          dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/login/userlogin/',
       callType: ApiCallType.GET,
       headers: {
         'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
-        'device': device,
-        'l1': ip_address
       },
-      params: {'nip': nip},
+      body: bodyContent.toString(),
+      // params: {'nip': nip},
       returnBody: true,
       encodeBodyUtf8: false,
-      decodeUtf8: true,
+      decodeUtf8: false,
       bodyType: BodyType.JSON,
       cache: false,
     );

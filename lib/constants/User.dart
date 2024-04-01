@@ -7,6 +7,7 @@ late Cycle? currentCycle;
 
 late List<String>? _grades = [];
 late Future<http.Response> userEvents;
+late List<dynamic>? eventsList = [];
 
 var deviceInformation = <String, dynamic>{};
 String? deviceIp;

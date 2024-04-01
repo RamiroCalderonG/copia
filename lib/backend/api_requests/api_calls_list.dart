@@ -11,8 +11,28 @@ import 'package:requests/requests.dart';
 
 import 'package:http/http.dart' as http;
 
+Future<dynamic> loginUser(var jsonBody) async {
+  var response;
+  try {
+    var apiCall = await Requests.post(
+        dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/login/userlogin/',
+        json: jsonBody,
+        headers: {
+          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+        },
+        persistCookies: false,
+        timeoutSeconds: 7);
+    apiCall.raiseForStatus();
+    response = apiCall.body;
+    print(response);
+    return response;
+  } catch (e) {
+    throw FormatException(e.toString());
+  }
+}
+
 //Function to post new visit from a student to nursery
-Future<int> postNurseryVisit(var jsonBody) async {
+Future<int> postNurseryVisit(Map<String, dynamic> jsonBody) async {
   var postResponse;
   try {
     var apiCall = await Requests.post(
