@@ -23,11 +23,50 @@ Future<dynamic> loginUser(var jsonBody) async {
         persistCookies: false,
         timeoutSeconds: 7);
     apiCall.raiseForStatus();
-    response = apiCall.body;
+    response = apiCall;
     print(response);
     return response;
   } catch (e) {
-    throw FormatException(e.toString());
+    return null;
+  }
+}
+
+Future<dynamic> getCycle(
+  int month,
+) async {
+  var response;
+  if (month == 0) {
+    try {
+      var apiCall = await Requests.get(
+          dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/cycles/1',
+          headers: {
+            'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+            'token': currentUser!.token,
+          },
+          persistCookies: false,
+          timeoutSeconds: 7);
+      apiCall.raiseForStatus();
+      response = apiCall.content();
+      return response;
+    } catch (e) {
+      throw FormatException(e.toString());
+    }
+  } else {
+    try {
+      var apiCall = await Requests.get(
+          dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/cycles/',
+          headers: {
+            'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+            'token': currentUser!.token,
+          },
+          persistCookies: false,
+          timeoutSeconds: 7);
+      apiCall.raiseForStatus();
+      response = apiCall.content();
+      return response;
+    } catch (e) {
+      throw FormatException(e.toString());
+    }
   }
 }
 
@@ -111,7 +150,7 @@ Future<int> deleteMedicineStudent(var idValue) async {
   // return responseCode;
 }
 
-Future<dynamic> getEvents(var userId) async {
+Future<dynamic> getEvents() async {
   var responseCode;
   try {
     var apiCall = await Requests.put(
@@ -362,7 +401,27 @@ Future<dynamic> getUserDetail(String userId) async {
   }
 }
 
-Future<http.Response> getUserEvents2(int userId) async {
+Future<dynamic> getUserEvents(int userId) async {
+  var response;
+  try {
+    var apiCall = await Requests.get(
+        dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/user/events/',
+        headers: {
+          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'token': currentUser!.token
+        },
+        queryParameters: {'id': '${userId.toString()}'},
+        persistCookies: false,
+        timeoutSeconds: 10);
+    apiCall.raiseForStatus();
+    response = apiCall.content();
+    return response;
+  } catch (e) {
+    throw FormatException(e.toString());
+  }
+}
+
+Future<http.Response> getUserPermissions(int userId) async {
   try {
     Uri address = Uri(
         scheme: 'http',

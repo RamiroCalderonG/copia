@@ -4,13 +4,17 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:oxschool/Models/Cycle.dart';
 import 'package:oxschool/Models/User.dart';
 import 'package:oxschool/backend/api_requests/api_calls_list.dart';
 import 'package:oxschool/constants/User.dart';
 import 'package:flutter/material.dart';
 import 'package:oxschool/constants/connection.dart';
+import 'package:oxschool/temp/users_temp_data.dart';
+import 'package:requests/requests.dart';
 
+import '../components/custom_scaffold_messenger.dart';
 import '../utils/device_information.dart';
 import '../utils/loader_indicator.dart';
 import '/backend/api_requests/api_calls.dart';
@@ -112,6 +116,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
     dynamic loginButtonFunction() async {
       try {
         var value = trimSpaces(_model.textController2.text);
+        var emplNumberValue = trimSpaces(_model.textController1.text);
         Map<String, dynamic> nip = {'Nip': value};
         apiBody.addEntries(nip.entries);
         Map<String, dynamic> employeeNumber = {
@@ -123,80 +128,85 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
         Map<String, dynamic> deviceIp = {'ip_address': deviceIP};
         apiBody.addEntries(deviceIp.entries);
 
-        if (value.isNotEmpty) {
+        if (value.isNotEmpty && emplNumberValue.isNotEmpty) {
           // Log In user
           // _model.apiResultxgr = await LoginUserCall.call(bodyContent: apiBody)
           //     .timeout(Duration(seconds: 7));
 
           apiResponse = await loginUser(apiBody);
           if (apiResponse != null) {
-            List<dynamic> jsonList = json.decode(apiResponse);
+            List<dynamic> jsonList = json.decode(apiResponse.body);
             currentUser = parseLogedInUserFromJSON(jsonList);
-            getUserEvents2(currentUser!.userId);
 
-            apiResponse =
-                await CurrentCicleCall.call().timeout(Duration(seconds: 7));
+            //TODO: GET USER EVENTS
+            getUserPermissions(currentUser!.userId);
+
+            apiResponse = await getUserEvents(currentUser!.userId);
+            jsonList = json.decode(apiResponse);
+            userRoles = jsonList;
+
+            apiResponse = await getCycle(
+                0); //CurrentCicleCall.call().timeout(Duration(seconds: 7));
             if (apiResponse != null) {
               List<dynamic> jsonList = json.decode(apiResponse);
 
               // jsonList = json.decode(apiResponse);
               currentCycle = getcurrentCycle(jsonList);
             }
-          }
 
-          if ((currentCycle != null)) {
-            // Decode the JSON string into a Dart list
-
-            // Get currentCycle
-            // _model.apiResultxgr =
-            //     await CurrentCicleCall.call().timeout(Duration(seconds: 7));
-            // if ((_model.apiResultxgr?.succeeded ?? true)) {
-            //   jsonList = json.decode(_model.apiResultxgr!.response!.body);
-            //   currentCycle = getcurrentCycle(jsonList); //parse from JSON
-            // }
-            if (Platform.isAndroid || Platform.isIOS) {
-              context.goNamed(
-                'MobileMainView',
-                extra: <String, dynamic>{
-                  kTransitionInfoKey: TransitionInfo(
-                    hasTransition: true,
-                    transitionType: PageTransitionType.fade,
-                  ),
-                },
-              );
+            if ((currentCycle != null)) {
+              if (Platform.isAndroid || Platform.isIOS) {
+                context.goNamed(
+                  'MobileMainView',
+                  extra: <String, dynamic>{
+                    kTransitionInfoKey: TransitionInfo(
+                      hasTransition: true,
+                      transitionType: PageTransitionType.fade,
+                    ),
+                  },
+                );
+              } else {
+                context.goNamed(
+                  'MainWindow',
+                  extra: <String, dynamic>{
+                    kTransitionInfoKey: TransitionInfo(
+                      hasTransition: true,
+                      transitionType: PageTransitionType.fade,
+                    ),
+                  },
+                );
+              }
             } else {
-              context.goNamed(
-                'MainWindow',
-                extra: <String, dynamic>{
-                  kTransitionInfoKey: TransitionInfo(
-                    hasTransition: true,
-                    transitionType: PageTransitionType.fade,
-                  ),
-                },
-              );
+              ScaffoldMessenger.of(context).showSnackBar(customScaffoldMesg(
+                  context,
+                  'No se encuentran los datos, favor de verificar',
+                  null));
             }
           } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  (_model.apiResultxgr?.jsonBody ?? '').toString(),
-                  style: FlutterFlowTheme.of(context).labelMedium.override(
-                        fontFamily: 'Roboto',
-                        color: Color(0xFF130C0D),
-                        fontWeight: FontWeight.w500,
-                      ),
-                ),
-                action: SnackBarAction(
-                    label: 'Cerrar mensaje',
-                    textColor: FlutterFlowTheme.of(context).info,
-                    backgroundColor: Colors.black12,
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                    }),
-                duration: Duration(milliseconds: 9000),
-                backgroundColor: FlutterFlowTheme.of(context).secondary,
-              ),
-            );
+            ScaffoldMessenger.of(context).showSnackBar(customScaffoldMesg(
+                    context,
+                    'No se encuentran los datos, favor de verificar',
+                    null)
+                // SnackBar(
+                //   content: Text(
+                //     (apiResponse.toString()).toString(),
+                //     style: FlutterFlowTheme.of(context).labelMedium.override(
+                //           fontFamily: 'Roboto',
+                //           color: Color(0xFF130C0D),
+                //           fontWeight: FontWeight.w500,
+                //         ),
+                //   ),
+                //   action: SnackBarAction(
+                //       label: 'Cerrar mensaje',
+                //       textColor: FlutterFlowTheme.of(context).info,
+                //       backgroundColor: Colors.black12,
+                //       onPressed: () {
+                //         ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                //       }),
+                //   duration: Duration(milliseconds: 9000),
+                //   backgroundColor: FlutterFlowTheme.of(context).secondary,
+                // ),
+                );
           }
 
           setState(() {});
@@ -204,8 +214,9 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
           _model.textController2.text = '';
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
+              elevation: 20,
               content: Text(
-                'Favor de verificar su contraseña',
+                'Favor de no dejar campos en blanco',
                 style: FlutterFlowTheme.of(context).labelMedium.override(
                       fontFamily: 'Roboto',
                       color: Color(0xFF130C0D),
@@ -353,6 +364,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                               EdgeInsetsDirectional.fromSTEB(
                                                   0.0, 0.0, 0.0, 16.0),
                                           child: TextFormField(
+                                            autofocus: true,
                                             enableSuggestions: true,
                                             controller: _model.textController1,
                                             obscureText: false,
@@ -401,6 +413,9 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                             ),
                                             style: FlutterFlowTheme.of(context)
                                                 .bodyLarge,
+                                            validator: _model
+                                                .textController1Validator
+                                                .asValidator(context),
                                           ),
                                         ),
                                         Padding(
@@ -408,16 +423,32 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                               EdgeInsetsDirectional.fromSTEB(
                                                   0.0, 0.0, 0.0, 16.0),
                                           child: TextFormField(
-                                            autofocus: true,
+                                            // autofocus: true,
                                             // When the user press enter or send key
                                             onFieldSubmitted: (value) async {
-                                              setState(() {
-                                                isLoading = true;
-                                              });
-                                              await loginButtonFunction()
-                                                  .whenComplete(() {
-                                                isLoading = false;
-                                              });
+                                              if (_model.textController1.text !=
+                                                      '' &&
+                                                  _model.textController2.text !=
+                                                      '') {
+                                                setState(() {
+                                                  isLoading = true;
+                                                });
+                                                await loginButtonFunction()
+                                                    .whenComplete(() {
+                                                  isLoading = false;
+                                                });
+                                              } else {
+                                                setState(() {
+                                                  isLoading = false;
+                                                });
+                                              }
+                                              // setState(() {
+                                              //   isLoading = true;
+                                              // });
+                                              // await loginButtonFunction()
+                                              //     .whenComplete(() {
+                                              //   isLoading = false;
+                                              // });
                                             },
                                             controller: _model.textController2,
                                             obscureText:
@@ -674,6 +705,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                               EdgeInsetsDirectional.fromSTEB(
                                                   0.0, 0.0, 0.0, 16.0),
                                           child: TextFormField(
+                                            autofocus: true,
                                             enableSuggestions: true,
                                             controller: _model.textController1,
                                             obscureText: false,
@@ -722,6 +754,9 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                             ),
                                             style: FlutterFlowTheme.of(context)
                                                 .bodyLarge,
+                                            validator: _model
+                                                .textController2Validator
+                                                .asValidator(context),
                                           ),
                                         ),
                                         Padding(
@@ -729,9 +764,24 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                               EdgeInsetsDirectional.fromSTEB(
                                                   0.0, 0.0, 0.0, 16.0),
                                           child: TextFormField(
-                                            autofocus: true,
+                                            // autofocus: true,
                                             onFieldSubmitted: (value) async {
-                                              loginButtonFunction();
+                                              if (_model.textController1.text !=
+                                                      '' &&
+                                                  _model.textController2.text !=
+                                                      '') {
+                                                setState(() {
+                                                  isLoading = true;
+                                                });
+                                                await loginButtonFunction()
+                                                    .whenComplete(() {
+                                                  isLoading = false;
+                                                });
+                                              } else {
+                                                setState(() {
+                                                  isLoading = false;
+                                                });
+                                              }
                                             },
                                             controller: _model.textController2,
                                             obscureText:
@@ -811,7 +861,17 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                   0.0, 0.0, 0.0, 16.0),
                                           child: FFButtonWidget(
                                             onPressed: () async {
-                                              loginButtonFunction();
+                                              if (_model.textController1.text !=
+                                                      '' &&
+                                                  _model.textController2.text !=
+                                                      '') {
+                                                loginButtonFunction();
+                                              } else {
+                                                setState(() {
+                                                  isLoading = false;
+                                                });
+                                              }
+                                              // loginButtonFunction();
                                             },
                                             text: 'Ingresar',
                                             options: FFButtonOptions(

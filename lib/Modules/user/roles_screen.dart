@@ -37,50 +37,18 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
   }
 
   Widget roleContainerCard(String role, String desc, int index) {
-    return Card(
-      color: Colors.cyan[50],
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(height: 2),
-          Row(
+    return ExpansionTile(
+      title: Text(role),
+      subtitle: Text(desc),
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Text(
-                    '  ' + role,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                  ),
-                  SizedBox(child: Text(' ')),
-                  if (!isActive[index])
-                    Container(
-                      margin: EdgeInsets.only(right: 8),
-                      width: 10,
-                      height: 10,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.red,
-                      ),
-                    ),
-                ],
-              ),
+              Text('Active: ${isActive[index]}'),
               IconButton(
-                icon: Icon(
-                  Icons.delete_outline,
-                  color: Colors.black,
-                ),
+                icon: Icon(Icons.delete_outline),
                 onPressed: () async {
                   var deleteItem =
                       await showDeleteConfirmationAlertDialog(context);
@@ -99,59 +67,8 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
               ),
             ],
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Text(
-              desc,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 2,
-            ),
-          ),
-          Spacer(),
-          Align(
-            alignment: Alignment.bottomLeft,
-            child: ElevatedButton.icon(
-              onPressed: () async {
-                setState(() {
-                  _isloading = false;
-                  _showEditRoleScreen(context, index);
-                });
-                // var response = await getRolesList();
-                // tmpRolesList = jsonDecode(response);
-                // roles.clear();
-                // description.clear();
-                // isActive.clear();
-                // setState(() {
-                //   for (var item in tmpRolesList) {
-                //     roles.add(item['Role']);
-                //     description.add(item['Description']);
-                //     isActive.add(item['Active']);
-                //   }
-                // });
-
-                setState(() {
-                  _isloading = false;
-                });
-              },
-              icon: Icon(Icons.arrow_forward),
-              label: Text('Ver Detalle'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(12),
-                    bottomRight: Radius.circular(12),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -196,8 +113,9 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Admin. de rol de ususario'),
-        backgroundColor: FlutterFlowTheme.of(context).primary,
+        title: Text('Admin. de rol de usuario'),
+        backgroundColor:
+            Colors.blue, // Assuming FlutterFlowTheme is not available
       ),
       body: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
@@ -219,7 +137,7 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                         onPressed: () {
                           _showAddRoleScreen(context);
                         },
-                        child: Text('Nuevo '),
+                        child: Text('Nuevo'),
                         style: ButtonStyle(
                           foregroundColor:
                               MaterialStateProperty.all<Color>(Colors.black),
@@ -288,30 +206,30 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                         ),
                       ),
                       SizedBox(width: 20),
-                      // TextButton(
-                      //   onPressed: () {},
-                      //   child: Text(' Usuarios por Rol '),
-                      //   style: ButtonStyle(
-                      //     foregroundColor:
-                      //         MaterialStateProperty.all<Color>(Colors.black),
-                      //     backgroundColor:
-                      //         MaterialStateProperty.all<Color>(Colors.blue),
-                      //     padding:
-                      //         MaterialStateProperty.all<EdgeInsetsGeometry>(
-                      //             EdgeInsets.all(10)),
-                      //     shape: MaterialStateProperty.all<OutlinedBorder>(
-                      //       RoundedRectangleBorder(
-                      //         borderRadius: BorderRadius.circular(8),
-                      //       ),
-                      //     ),
-                      //   ),
-                      // ),
+                      TextButton(
+                        onPressed: () {},
+                        child: Text('Administrar eventos'),
+                        style: ButtonStyle(
+                          foregroundColor:
+                              MaterialStateProperty.all<Color>(Colors.black),
+                          backgroundColor:
+                              MaterialStateProperty.all<Color>(Colors.blue),
+                          padding:
+                              MaterialStateProperty.all<EdgeInsetsGeometry>(
+                                  EdgeInsets.all(10)),
+                          shape: MaterialStateProperty.all<OutlinedBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                   SizedBox(height: 36),
                   SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
+                    scrollDirection: Axis.vertical,
+                    child: Column(
                       children: List.generate(
                         roles.length,
                         (index) => Padding(
@@ -330,10 +248,18 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                     ),
                   ),
                   SizedBox(width: 36),
-                  Divider(thickness: 1),
-                  // Row(
-                  //   children: [Text('Seccion ususarios por rol')],
-                  // )
+                  // Divider(thickness: 1),
+                  if (selectedCardIndex != -1)
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        description[selectedCardIndex],
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
                 ],
               ),
             );

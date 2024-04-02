@@ -18,6 +18,7 @@ import 'package:pluto_grid/pluto_grid.dart';
 
 import '../../backend/api_requests/api_calls_list.dart';
 import '../../flutter_flow/flutter_flow_theme.dart';
+import '../../reusable_methods/temp_data_functions.dart';
 import '../../reusable_methods/user_functions.dart';
 
 class UsersDashboard extends StatefulWidget {
@@ -96,6 +97,7 @@ class _UsersDashboardState extends State<UsersDashboard> {
               TextButton.icon(
                   onPressed: () async {
                     buildNewUserScreen(context);
+                    getEventsList();
                   },
                   icon: FaIcon(FontAwesomeIcons.addressCard),
                   label: Text('Agregar usuario')),

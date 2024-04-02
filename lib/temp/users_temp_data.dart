@@ -8,4 +8,6 @@ String? tempUserId;
 User? tempSelectedUsr;
 List<PlutoRow> userRows = [];
 List<dynamic> tmpRolesList = [];
+List<dynamic> userRoles = [];
+List<dynamic> eventsList = [];
 //var
