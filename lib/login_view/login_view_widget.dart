@@ -134,7 +134,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
           //     .timeout(Duration(seconds: 7));
 
           apiResponse = await loginUser(apiBody);
-          if (apiResponse != null) {
+          if (apiResponse != null && apiResponse.statusCode == 200) {
             List<dynamic> jsonList = json.decode(apiResponse.body);
             currentUser = parseLogedInUserFromJSON(jsonList);
 
@@ -183,10 +183,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                   null));
             }
           } else {
-            ScaffoldMessenger.of(context).showSnackBar(customScaffoldMesg(
-                    context,
-                    'No se encuentran los datos, favor de verificar',
-                    null)
+            ScaffoldMessenger.of(context).showSnackBar(
+                customScaffoldMesg(context, 'Error', null)
                 // SnackBar(
                 //   content: Text(
                 //     (apiResponse.toString()).toString(),

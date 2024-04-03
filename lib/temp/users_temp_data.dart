@@ -9,5 +9,6 @@ User? tempSelectedUsr;
 List<PlutoRow> userRows = [];
 List<dynamic> tmpRolesList = [];
 List<dynamic> userRoles = [];
-List<dynamic> eventsList = [];
+List<dynamic> tmpeventsList = [];
+List<Map<String, dynamic>> eventsLisToShow = [];
 //var

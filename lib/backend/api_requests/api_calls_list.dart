@@ -23,9 +23,13 @@ Future<dynamic> loginUser(var jsonBody) async {
         persistCookies: false,
         timeoutSeconds: 7);
     apiCall.raiseForStatus();
-    response = apiCall;
-    print(response);
-    return response;
+    if (apiCall.statusCode == 200) {
+      response = apiCall;
+
+      return response;
+    } else {
+      return apiCall.body.toString();
+    }
   } catch (e) {
     return null;
   }
@@ -153,7 +157,7 @@ Future<int> deleteMedicineStudent(var idValue) async {
 Future<dynamic> getEvents() async {
   var responseCode;
   try {
-    var apiCall = await Requests.put(
+    var apiCall = await Requests.get(
         dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/events',
         headers: {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,

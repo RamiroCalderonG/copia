@@ -16,11 +16,13 @@ void clearTempData() {
 //var
 }
 
-void getEventsList() async {
+Future getEventsList() async {
   try {
     var apiResponse = await getEvents();
     List<dynamic> jsonList = json.decode(apiResponse);
-    eventsList = jsonList;
+    tmpeventsList = jsonList;
+    eventsLisToShow =
+        tmpeventsList.map((item) => Map<String, dynamic>.from(item)).toList();
   } catch (e) {
     throw FormatException(e.toString());
   }

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:ffi';
 
 import 'package:flutter/material.dart';
+import 'package:oxschool/Modules/user/user_events_manager.dart';
 import 'package:oxschool/components/confirm_dialogs.dart';
 import 'package:oxschool/flutter_flow/flutter_flow_theme.dart';
 import 'package:oxschool/login_view/login_view_widget.dart';
@@ -22,6 +23,7 @@ bool _isloading = false;
 class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
   List<String> roles = [];
   List<String> description = [];
+  List<int> role_id = [];
   List<bool> isActive = [];
   int selectedCardIndex = -1;
 
@@ -31,22 +33,66 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
       roles.add(item['Role']);
       description.add(item['Description']);
       isActive.add(item['Active']);
+      role_id.add(item['role_id']);
     }
 
     super.initState();
   }
 
   Widget roleContainerCard(String role, String desc, int index) {
+    List roleEvents =
+        tmpeventsList.where((event) => event['role_id'] == index).toList();
+
     return ExpansionTile(
-      title: Text(role),
+      title: Row(
+        children: [
+          Text(
+            role,
+            style: TextStyle(fontFamily: 'Sora', fontWeight: FontWeight.bold),
+          ),
+          if (!isActive[index]) // Conditionally show red dot
+            Container(
+              margin: EdgeInsets.only(left: 5), // Adjust margin as needed
+              width: 10,
+              height: 10,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.red,
+              ),
+            ),
+        ],
+      ),
       subtitle: Text(desc),
       children: [
+        for (var event in roleEvents)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('${event['EventName']}' +
+                    ' role: ' +
+                    event['role_id'].toString()),
+                Checkbox(
+                  // checkColor: Colors.green.shade200,
+                  activeColor: Colors.green.shade300,
+                  value: event['isActive'],
+                  onChanged: (value) {
+                    setState(() {
+                      event['isActive'] = value!;
+                    });
+                  },
+                ),
+              ],
+            ),
+          ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
               Text('Active: ${isActive[index]}'),
+              SizedBox(width: 5),
               IconButton(
                 icon: Icon(Icons.delete_outline),
                 onPressed: () async {
@@ -63,6 +109,13 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                       isActive.removeAt(index);
                     });
                   }
+                },
+              ),
+              SizedBox(width: 5),
+              IconButton(
+                icon: Icon(Icons.edit),
+                onPressed: () async {
+                  _showEditRoleScreen(context, index);
                 },
               ),
             ],
@@ -113,9 +166,10 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Admin. de rol de usuario'),
-        backgroundColor:
-            Colors.blue, // Assuming FlutterFlowTheme is not available
+        title: Text('Admin. de rol de usuario',
+            style: TextStyle(color: Colors.white)),
+        backgroundColor: FlutterFlowTheme.of(context)
+            .primary, // Assuming FlutterFlowTheme is not available
       ),
       body: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
@@ -132,7 +186,7 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      SizedBox(width: 10),
+                      SizedBox(width: 20),
                       TextButton(
                         onPressed: () {
                           _showAddRoleScreen(context);
@@ -153,61 +207,69 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                           ),
                         ),
                       ),
+                      // SizedBox(width: 20),
+                      // TextButton(
+                      //   onPressed: () {
+                      //     showDialog(
+                      //       context: context,
+                      //       builder: (BuildContext context) {
+                      //         return AlertDialog(
+                      //           title: Text('Todos los Roles'),
+                      //           content: SizedBox(
+                      //             width: double.minPositive,
+                      //             height: 300,
+                      //             child: ListView.builder(
+                      //               itemCount: roles.length,
+                      //               itemBuilder: (context, index) {
+                      //                 return ListTile(
+                      //                   title: Text(roles[index]),
+                      //                   subtitle: Text(description[index]),
+                      //                   onTap: () {
+                      //                     _showEditRoleScreen(context, index);
+                      //                   },
+                      //                 );
+                      //               },
+                      //             ),
+                      //           ),
+                      //           actions: [
+                      //             TextButton(
+                      //               onPressed: () {
+                      //                 Navigator.of(context).pop();
+                      //               },
+                      //               child: Text('Cerrar'),
+                      //             ),
+                      //           ],
+                      //         );
+                      //       },
+                      //     );
+                      //   },
+                      //   child: Text('Mostrar todos'),
+                      //   style: ButtonStyle(
+                      //     foregroundColor:
+                      //         MaterialStateProperty.all<Color>(Colors.black),
+                      //     backgroundColor:
+                      //         MaterialStateProperty.all<Color>(Colors.blue),
+                      //     padding:
+                      //         MaterialStateProperty.all<EdgeInsetsGeometry>(
+                      //             EdgeInsets.all(10)),
+                      //     shape: MaterialStateProperty.all<OutlinedBorder>(
+                      //       RoundedRectangleBorder(
+                      //         borderRadius: BorderRadius.circular(8),
+                      //       ),
+                      //     ),
+                      //   ),
+                      // ),
                       SizedBox(width: 20),
                       TextButton(
                         onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: Text('Todos los Roles'),
-                                content: SizedBox(
-                                  width: double.minPositive,
-                                  height: 300,
-                                  child: ListView.builder(
-                                    itemCount: roles.length,
-                                    itemBuilder: (context, index) {
-                                      return ListTile(
-                                        title: Text(roles[index]),
-                                        subtitle: Text(description[index]),
-                                        onTap: () {
-                                          _showEditRoleScreen(context, index);
-                                        },
-                                      );
-                                    },
-                                  ),
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: Text('Cerrar'),
-                                  ),
-                                ],
-                              );
-                            },
-                          );
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      UserEventsManagerDataTable(
+                                        eventsList: eventsLisToShow,
+                                      )));
                         },
-                        child: Text('Mostrar todos'),
-                        style: ButtonStyle(
-                          foregroundColor:
-                              MaterialStateProperty.all<Color>(Colors.black),
-                          backgroundColor:
-                              MaterialStateProperty.all<Color>(Colors.blue),
-                          padding:
-                              MaterialStateProperty.all<EdgeInsetsGeometry>(
-                                  EdgeInsets.all(10)),
-                          shape: MaterialStateProperty.all<OutlinedBorder>(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 20),
-                      TextButton(
-                        onPressed: () {},
                         child: Text('Administrar eventos'),
                         style: ButtonStyle(
                           foregroundColor:
@@ -226,27 +288,39 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 36),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.vertical,
-                    child: Column(
-                      children: List.generate(
-                        roles.length,
-                        (index) => Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: SizedBox(
-                            height: 150,
-                            width: 200,
-                            child: roleContainerCard(
-                              roles[index],
-                              description[index],
-                              index,
+                  SizedBox(height: 16),
+                  Divider(thickness: 1),
+                  Text(
+                    'Listado de roles',
+                    style: TextStyle(fontFamily: 'Sora'),
+                  ),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: List.generate(
+                          roles.length,
+                          (index) => Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  border:
+                                      Border.all(color: Colors.grey.shade300)),
+                              // height: 150,
+                              width: MediaQuery.of(context).size.width,
+                              child: roleContainerCard(
+                                roles[index],
+                                description[index],
+                                role_id[
+                                    index], //TODO: PENDING TO FIX IT, IS NOT WORKING
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
                   ),
+
                   SizedBox(width: 36),
                   // Divider(thickness: 1),
                   if (selectedCardIndex != -1)
@@ -336,7 +410,9 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.role != null ? 'Editar Rol' : 'Agregar Rol'),
+        title: Text(widget.role != null ? 'Editar Rol' : 'Agregar Rol',
+            style: TextStyle(color: Colors.white)),
+        backgroundColor: FlutterFlowTheme.of(context).primary,
       ),
       body: Stack(
         children: [

@@ -168,8 +168,8 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
         leading: IconButton(
           hoverColor: Colors.black12,
           icon: Icon(
-            Icons.menu_open_rounded,
-            // size: 40.5,
+            Icons.menu_open_outlined,
+            size: 38.5,
           ),
           onPressed: () async {
             scaffoldKey.currentState!.openDrawer();

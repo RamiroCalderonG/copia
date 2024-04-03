@@ -84,9 +84,17 @@ class _UsersDashboardState extends State<UsersDashboard> {
             bottom: AppBar(automaticallyImplyLeading: false, actions: [
               TextButton.icon(
                   onPressed: () async {
+                    setState(() {
+                      isLoading = true;
+                    });
+
+                    await getEventsList();
+
                     var response = await getRolesList();
                     tmpRolesList = jsonDecode(response);
-
+                    setState(() {
+                      isLoading = false;
+                    });
                     Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -97,7 +105,7 @@ class _UsersDashboardState extends State<UsersDashboard> {
               TextButton.icon(
                   onPressed: () async {
                     buildNewUserScreen(context);
-                    getEventsList();
+                    await getEventsList();
                   },
                   icon: FaIcon(FontAwesomeIcons.addressCard),
                   label: Text('Agregar usuario')),
