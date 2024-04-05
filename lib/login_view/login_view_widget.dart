@@ -4,20 +4,16 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
 import 'package:oxschool/Models/Cycle.dart';
 import 'package:oxschool/Models/User.dart';
 import 'package:oxschool/backend/api_requests/api_calls_list.dart';
 import 'package:oxschool/constants/User.dart';
 import 'package:flutter/material.dart';
 import 'package:oxschool/constants/connection.dart';
-import 'package:oxschool/temp/users_temp_data.dart';
-import 'package:requests/requests.dart';
 
 import '../components/custom_scaffold_messenger.dart';
 import '../utils/device_information.dart';
 import '../utils/loader_indicator.dart';
-import '/backend/api_requests/api_calls.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -138,12 +134,12 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
             List<dynamic> jsonList = json.decode(apiResponse.body);
             currentUser = parseLogedInUserFromJSON(jsonList);
 
-            //TODO: GET USER EVENTS
+            // //TODO: GET USER EVENTS
             getUserPermissions(currentUser!.userId);
 
-            apiResponse = await getUserEvents(currentUser!.userId);
-            jsonList = json.decode(apiResponse);
-            userRoles = jsonList;
+            // apiResponse = await getUserEvents(currentUser!.userId);
+            // jsonList = json.decode(apiResponse);
+            // userRoles = jsonList;
 
             apiResponse = await getCycle(
                 0); //CurrentCicleCall.call().timeout(Duration(seconds: 7));

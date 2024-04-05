@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:get/get_connect/http/src/request/request.dart';
-import 'package:oxschool/Models/Employee.dart';
-import 'package:oxschool/Models/User.dart';
-import 'package:oxschool/backend/api_requests/api_manager.dart';
 import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/constants/connection.dart';
 
@@ -405,25 +401,25 @@ Future<dynamic> getUserDetail(String userId) async {
   }
 }
 
-Future<dynamic> getUserEvents(int userId) async {
-  var response;
-  try {
-    var apiCall = await Requests.get(
-        dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/user/events/',
-        headers: {
-          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
-          'token': currentUser!.token
-        },
-        queryParameters: {'id': '${userId.toString()}'},
-        persistCookies: false,
-        timeoutSeconds: 10);
-    apiCall.raiseForStatus();
-    response = apiCall.content();
-    return response;
-  } catch (e) {
-    throw FormatException(e.toString());
-  }
-}
+// Future<dynamic> getUserEvents(int userId) async {
+//   var response;
+//   try {
+//     var apiCall = await Requests.get(
+//         dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/user/events/',
+//         headers: {
+//           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+//           'token': currentUser!.token
+//         },
+//         queryParameters: {'id': '${userId.toString()}'},
+//         persistCookies: false,
+//         timeoutSeconds: 10);
+//     apiCall.raiseForStatus();
+//     response = apiCall.content();
+//     return response;
+//   } catch (e) {
+//     throw FormatException(e.toString());
+//   }
+// }
 
 Future<http.Response> getUserPermissions(int userId) async {
   try {

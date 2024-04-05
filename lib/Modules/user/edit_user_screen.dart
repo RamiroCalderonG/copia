@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:oxschool/Modules/user/users_dashboard.dart';
-import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/flutter_flow/flutter_flow_util.dart';
 import 'package:oxschool/temp/users_temp_data.dart';
 import 'package:oxschool/utils/loader_indicator.dart';

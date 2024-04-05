@@ -1,9 +1,11 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:oxschool/Models/Role.dart';
 import 'package:oxschool/backend/api_requests/api_calls_list.dart';
 import 'package:oxschool/temp/users_temp_data.dart';
 
+import '../Models/Event.dart';
 import '../Models/User.dart';
 
 List<User> parseUsersFromJSON(List<dynamic> jsonList) {
@@ -69,5 +71,40 @@ dynamic getSingleUser(String? userId) async {
     // tempSelectedUsr = tempSelectedUsr!.fromJson(jsonList);
   } else {
     selectedUser = await getUserDetail(userId);
+  }
+}
+
+dynamic EventFromJSON(List<dynamic> jsonData) {
+  List<Event> eventList = [];
+  if (jsonData.isEmpty) {
+    return null;
+  } else {
+    for (var item in jsonData) {
+      int idEvento = item['id'];
+      String eventName = item['event_name'];
+      bool isActive = item['active'];
+      String moduleName = item['module_name'];
+      int moduleID = item['module_id'];
+
+      eventList.add(Event(idEvento, eventName, isActive, moduleName, moduleID));
+    }
+    return eventList;
+  }
+}
+
+dynamic RoleFromJSON(List<dynamic> jsonData) {
+  List<Role> roleList = [];
+  if (jsonData.isEmpty) {
+    return null;
+  } else {
+    for (var item in jsonData) {
+      int roleID = item['role_id'];
+      String roleName = item['role_name'];
+      String roleDescription = item['role_description'];
+      bool isActive = item['is_active'];
+
+      roleList.add(Role(roleID, roleName, roleDescription, isActive));
+    }
+    return roleList;
   }
 }

@@ -1,9 +1,6 @@
-import 'dart:convert';
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
+import 'package:oxschool/Models/Event.dart';
 import 'package:oxschool/Modules/user/user_events_manager.dart';
-import 'package:oxschool/components/confirm_dialogs.dart';
 import 'package:oxschool/flutter_flow/flutter_flow_theme.dart';
 import 'package:oxschool/login_view/login_view_widget.dart';
 import 'package:oxschool/temp/users_temp_data.dart';
@@ -23,7 +20,7 @@ bool _isloading = false;
 class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
   List<String> roles = [];
   List<String> description = [];
-  List<int> role_id = [];
+  // List<int> role_id = [];
   List<bool> isActive = [];
   int selectedCardIndex = -1;
 
@@ -33,15 +30,14 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
       roles.add(item['Role']);
       description.add(item['Description']);
       isActive.add(item['Active']);
-      role_id.add(item['role_id']);
+      // role_id.add(item['role_id']);
     }
 
     super.initState();
   }
 
   Widget roleContainerCard(String role, String desc, int index) {
-    List roleEvents =
-        tmpeventsList.where((event) => event['role_id'] == index).toList();
+    List<String> roleEvents = getEventNamesForRole(role, tmpeventsList);
 
     return ExpansionTile(
       title: Row(
@@ -64,23 +60,18 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
       ),
       subtitle: Text(desc),
       children: [
-        for (var event in roleEvents)
+        for (var eventName in roleEvents)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('${event['EventName']}' +
-                    ' role: ' +
-                    event['role_id'].toString()),
+                Text(eventName),
                 Checkbox(
-                  // checkColor: Colors.green.shade200,
                   activeColor: Colors.green.shade300,
-                  value: event['isActive'],
+                  value: true, // Change this to the actual value
                   onChanged: (value) {
-                    setState(() {
-                      event['isActive'] = value!;
-                    });
+                    // Implement your logic here
                   },
                 ),
               ],
@@ -91,33 +82,26 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Text('Active: ${isActive[index]}'),
+              // Text('Active: ${isActive[index]}'),
               SizedBox(width: 5),
               IconButton(
                 icon: Icon(Icons.delete_outline),
                 onPressed: () async {
-                  var deleteItem =
-                      await showDeleteConfirmationAlertDialog(context);
-
-                  if (deleteItem == 1) {
-                    var roleName = roles[index];
-                    var roleIdValue = getRoleIdValue(tmpRolesList, roleName);
-                    deleteRole(roleIdValue);
-                    setState(() {
-                      roles.removeAt(index);
-                      description.removeAt(index);
-                      isActive.removeAt(index);
-                    });
-                  }
+                  // Implement your delete logic here
                 },
               ),
               SizedBox(width: 5),
               IconButton(
                 icon: Icon(Icons.edit),
                 onPressed: () async {
-                  _showEditRoleScreen(context, index);
+                  await _showEditRoleScreen(context, index);
                 },
               ),
+              IconButton(onPressed: () {}, icon: Icon(Icons.add)),
+              // ElevatedButton.icon(
+              //     onPressed: () {},
+              //     icon: Icon(Icons.add),
+              //     label: Text('Agregar eventos a rol'))
             ],
           ),
         ),
@@ -141,6 +125,7 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
       setState(() {
         roles[index] = result['role'];
         description[index] = result['desc'];
+        // role_id[index] = result['role_id'];
       });
     }
   }
@@ -158,6 +143,7 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
         roles.add(result['role']);
         description.add(result['desc']);
         isActive.add(result['active']);
+        // role_id.add(result['role_id']);
       });
     }
   }
@@ -207,58 +193,6 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                           ),
                         ),
                       ),
-                      // SizedBox(width: 20),
-                      // TextButton(
-                      //   onPressed: () {
-                      //     showDialog(
-                      //       context: context,
-                      //       builder: (BuildContext context) {
-                      //         return AlertDialog(
-                      //           title: Text('Todos los Roles'),
-                      //           content: SizedBox(
-                      //             width: double.minPositive,
-                      //             height: 300,
-                      //             child: ListView.builder(
-                      //               itemCount: roles.length,
-                      //               itemBuilder: (context, index) {
-                      //                 return ListTile(
-                      //                   title: Text(roles[index]),
-                      //                   subtitle: Text(description[index]),
-                      //                   onTap: () {
-                      //                     _showEditRoleScreen(context, index);
-                      //                   },
-                      //                 );
-                      //               },
-                      //             ),
-                      //           ),
-                      //           actions: [
-                      //             TextButton(
-                      //               onPressed: () {
-                      //                 Navigator.of(context).pop();
-                      //               },
-                      //               child: Text('Cerrar'),
-                      //             ),
-                      //           ],
-                      //         );
-                      //       },
-                      //     );
-                      //   },
-                      //   child: Text('Mostrar todos'),
-                      //   style: ButtonStyle(
-                      //     foregroundColor:
-                      //         MaterialStateProperty.all<Color>(Colors.black),
-                      //     backgroundColor:
-                      //         MaterialStateProperty.all<Color>(Colors.blue),
-                      //     padding:
-                      //         MaterialStateProperty.all<EdgeInsetsGeometry>(
-                      //             EdgeInsets.all(10)),
-                      //     shape: MaterialStateProperty.all<OutlinedBorder>(
-                      //       RoundedRectangleBorder(
-                      //         borderRadius: BorderRadius.circular(8),
-                      //       ),
-                      //     ),
-                      //   ),
-                      // ),
                       SizedBox(width: 20),
                       TextButton(
                         onPressed: () {
@@ -266,9 +200,11 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                               context,
                               MaterialPageRoute(
                                   builder: (context) =>
-                                      UserEventsManagerDataTable(
-                                        eventsList: eventsLisToShow,
-                                      )));
+                                      PoliciesScreen() // UserEventsManagerDataTable(
+                                  //   eventsList: eventsLisToShow,
+                                  // )
+
+                                  ));
                         },
                         child: Text('Administrar eventos'),
                         style: ButtonStyle(
@@ -309,11 +245,7 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                               // height: 150,
                               width: MediaQuery.of(context).size.width,
                               child: roleContainerCard(
-                                roles[index],
-                                description[index],
-                                role_id[
-                                    index], //TODO: PENDING TO FIX IT, IS NOT WORKING
-                              ),
+                                  roles[index], description[index], index),
                             ),
                           ),
                         ),
@@ -361,6 +293,7 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
   late TextEditingController _roleController;
   late TextEditingController _descriptionController;
   late bool _isActive;
+  List<Event> _events = [];
 
   @override
   void initState() {
@@ -369,6 +302,9 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
     _descriptionController =
         TextEditingController(text: widget.description ?? '');
     _isActive = widget.isActive ?? false;
+    _events = tmpeventsList
+        .map((e) => Event(e.EventId, e.eventName, _isActive))
+        .toList();
   }
 
   @override
@@ -378,17 +314,28 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
     super.dispose();
   }
 
-  void _updateRole(BuildContext context, int roleID) async {
+  Future<void> _updateRole(BuildContext context, int roleID) async {
     // Prepare JSON data for update
     final jsonData = {
       'name': _roleController.text,
       'description': _descriptionController.text,
       'isActive': _isActive,
     };
+    var updatedRole = [
+      _roleController.text,
+      _descriptionController.text,
+      _isActive
+    ];
+    setState(() {
+      isLoading = true;
+    });
 
     await editRole(roleID, jsonData);
-    // Close the dialog
-    // Navigator.of(context).pop();
+    setState(() {
+      tmpRolesList.removeAt(roleID);
+      tmpRolesList.add(updatedRole);
+      isLoading = false;
+    });
   }
 
   void _addRole(BuildContext context) {
@@ -473,12 +420,11 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
                       String roleName = widget.role!;
                       int roleId = getRoleIdValue(tmpRolesList, roleName);
                       if (roleId != 0) {
-                        setState(() {
-                          _isloading = true;
-                        });
-                        _updateRole(context, roleId);
+                        // setState(() {
+                        //   _isloading = true;
+                        // });
+                        await _updateRole(context, roleId);
                       }
-
                       setState(() {
                         _isloading = false;
                       });
@@ -509,4 +455,14 @@ int getRoleIdValue(List<dynamic> rolesList, String roleName) {
     }
   }
   return 0; // Role not found
+}
+
+List<String> getEventNamesForRole(String roleName, List<dynamic> json) {
+  List<String> eventNames = [];
+  for (var item in json) {
+    if (item['RoleName'] == roleName) {
+      eventNames.add(item['EventName']);
+    }
+  }
+  return eventNames;
 }

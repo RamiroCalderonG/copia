@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:oxschool/Models/User.dart';
 import 'package:oxschool/Modules/user/edit_user_screen.dart';
 import 'package:oxschool/backend/api_requests/api_calls_list.dart';
 import 'package:oxschool/components/plutogrid_export_options.dart';
@@ -253,18 +252,16 @@ class _UsersTableViewState extends State<UsersTableView> {
                                       setState(() {
                                         isLoading = false;
                                       });
-                                      if (e != null) {
-                                        showDialog(
-                                            context: context,
-                                            builder: (BuildContext context) {
-                                              return AlertDialog(
-                                                icon: Icon(Icons.error),
-                                                title: Text('Error'),
-                                                content: Text(e.toString()),
-                                              );
-                                            });
-                                      }
-                                    }
+                                      showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              icon: Icon(Icons.error),
+                                              title: Text('Error'),
+                                              content: Text(e.toString()),
+                                            );
+                                          });
+                                                                        }
                                     setState(() {
                                       isLoading = false;
                                     });
