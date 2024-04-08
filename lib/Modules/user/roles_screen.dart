@@ -303,7 +303,8 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
         TextEditingController(text: widget.description ?? '');
     _isActive = widget.isActive ?? false;
     _events = tmpeventsList
-        .map((e) => Event(e.EventId, e.eventName, _isActive))
+        .map((e) =>
+            Event(e.EventId, e.eventName, _isActive, e.moduleName, e.moduleID))
         .toList();
   }
 

@@ -130,11 +130,10 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
           //     .timeout(Duration(seconds: 7));
 
           apiResponse = await loginUser(apiBody);
-          if (apiResponse != null && apiResponse.statusCode == 200) {
+          if (apiResponse.statusCode == 200) {
             List<dynamic> jsonList = json.decode(apiResponse.body);
             currentUser = parseLogedInUserFromJSON(jsonList);
 
-            // //TODO: GET USER EVENTS
             getUserPermissions(currentUser!.userId);
 
             // apiResponse = await getUserEvents(currentUser!.userId);
@@ -179,8 +178,14 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                   null));
             }
           } else {
+            Map<String, dynamic> jsonMap = jsonDecode(apiResponse.body);
+            String description = jsonMap['description'];
+            Map<dynamic, String> response = {
+              apiResponse.statusCode: description
+            };
+
             ScaffoldMessenger.of(context).showSnackBar(
-                customScaffoldMesg(context, 'Error', null)
+                customScaffoldMesg(context, response.toString(), null)
                 // SnackBar(
                 //   content: Text(
                 //     (apiResponse.toString()).toString(),
@@ -230,6 +235,9 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
           );
         }
       } catch (e) {
+        setState(() {
+          isLoading = false;
+        });
         // _model.textController2.text = '';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

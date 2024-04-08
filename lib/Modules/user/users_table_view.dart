@@ -17,6 +17,7 @@ class UsersTableView extends StatefulWidget {
 
 class _UsersTableViewState extends State<UsersTableView> {
   List<PlutoRow> userRows = [];
+  var toSee;
   bool isUserAdmin = verifyUserAdmin(currentUser!);
   bool confirmation = false;
   bool isSearching = true;
@@ -173,23 +174,32 @@ class _UsersTableViewState extends State<UsersTableView> {
                                   Offset.zero & overlay.size),
                               items: <PopupMenuEntry>[
                                 PopupMenuItem(
-                                  child: Text('Desactivar ususario'),
+                                  child: event.row.cells.values
+                                              .elementAt(4)
+                                              .value ==
+                                          1
+                                      ? Text('Activar usuario')
+                                      : Text('Desactivar usuario'),
                                   onTap: () async {
+                                    toSee = event.row.cells.values;
                                     setState(() {
                                       isLoading = true;
                                     });
                                     try {
-                                      if (event.row.cells.values.elementAt(5) ==
+                                      if (event.row.cells.values
+                                              .elementAt(4)
+                                              .value ==
                                           0) {
                                         showDialog(
                                             context: context,
                                             builder: (BuildContext context) {
                                               return AlertDialog(
                                                 icon: const Icon(Icons.warning),
-                                                iconColor: Colors.yellow,
+                                                iconColor:
+                                                    Colors.yellow.shade300,
                                                 title: const Text('Confirmar'),
                                                 content: const Text(
-                                                    'Desactivar ususario?'),
+                                                    'Desactivar usuario?'),
                                                 actions: [
                                                   Row(
                                                     children: [
@@ -198,6 +208,9 @@ class _UsersTableViewState extends State<UsersTableView> {
                                                         onPressed: () {
                                                           setState(() {
                                                             confirmation = true;
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop();
                                                           });
                                                         },
                                                         child: Text('Si'),
@@ -205,9 +218,13 @@ class _UsersTableViewState extends State<UsersTableView> {
                                                       Expanded(
                                                           child: TextButton(
                                                               onPressed: () {
-                                                                Navigator.of(
-                                                                        context)
-                                                                    .pop();
+                                                                setState(() {
+                                                                  isSearching =
+                                                                      false;
+                                                                  Navigator.of(
+                                                                          context)
+                                                                      .pop();
+                                                                });
                                                               },
                                                               child:
                                                                   Text('No')))
@@ -233,17 +250,52 @@ class _UsersTableViewState extends State<UsersTableView> {
                                             context: context,
                                             builder: (BuildContext context) {
                                               return AlertDialog(
-                                                icon: Icon(Icons.error),
-                                                title: Text('Error'),
-                                                content: Text(
-                                                    'Usuario ya se encuentra desactivado'),
+                                                icon: const Icon(Icons.warning),
+                                                iconColor: Colors.yellow,
+                                                title: const Text('Confirmar'),
+                                                content: const Text(
+                                                    'Activar usuario?'),
                                                 actions: [
-                                                  TextButton(
-                                                      onPressed: () {
-                                                        Navigator.of(context)
-                                                            .pop();
-                                                      },
-                                                      child: Text('Cerrar'))
+                                                  Row(
+                                                    children: [
+                                                      Expanded(
+                                                          child: TextButton(
+                                                        onPressed: () {
+                                                          setState(() {
+                                                            confirmation = true;
+                                                            isSearching = true;
+                                                          });
+                                                          if (confirmation ==
+                                                              true) {
+                                                            activateUser(
+                                                                event.row.cells
+                                                                    .values
+                                                                    .elementAt(
+                                                                        2)
+                                                                    .value
+                                                                    .toString(),
+                                                                0);
+                                                          }
+                                                          setState(() {
+                                                            isSearching = false;
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop();
+                                                          });
+                                                        },
+                                                        child: Text('Si'),
+                                                      )),
+                                                      Expanded(
+                                                          child: TextButton(
+                                                              onPressed: () {
+                                                                Navigator.of(
+                                                                        context)
+                                                                    .pop();
+                                                              },
+                                                              child:
+                                                                  Text('No')))
+                                                    ],
+                                                  )
                                                 ],
                                               );
                                             });
@@ -261,7 +313,7 @@ class _UsersTableViewState extends State<UsersTableView> {
                                               content: Text(e.toString()),
                                             );
                                           });
-                                                                        }
+                                    }
                                     setState(() {
                                       isLoading = false;
                                     });

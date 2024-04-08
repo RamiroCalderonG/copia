@@ -32,7 +32,7 @@ List<User> parseUsersFromJSON(List<dynamic> jsonList) {
 }
 
 bool verifyUserAdmin(User currentUser) {
-  if (currentUser.role == "Administrator") {
+  if (currentUser.role == "Administrador") {
     return true;
   } else {
     return false;
@@ -106,5 +106,15 @@ dynamic RoleFromJSON(List<dynamic> jsonData) {
       roleList.add(Role(roleID, roleName, roleDescription, isActive));
     }
     return roleList;
+  }
+}
+
+dynamic activateUser(String employeeNum, int activeValue) async {
+  var body = {'bajalogicasino': activeValue};
+  try {
+    var response = await editUser(body, employeeNum);
+    return response;
+  } catch (e) {
+    return ErrorDescription(e.toString());
   }
 }

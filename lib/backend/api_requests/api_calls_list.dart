@@ -1,5 +1,9 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:get/get.dart';
 import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/constants/connection.dart';
 
@@ -9,25 +13,25 @@ import 'package:http/http.dart' as http;
 
 Future<dynamic> loginUser(var jsonBody) async {
   var response;
-  try {
-    var apiCall = await Requests.post(
-        dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/login/userlogin/',
-        json: jsonBody,
-        headers: {
-          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
-        },
-        persistCookies: false,
-        timeoutSeconds: 7);
-    apiCall.raiseForStatus();
-    if (apiCall.statusCode == 200) {
-      response = apiCall;
 
+  var apiCall = await Requests.post(
+      dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/login/userlogin/',
+      json: jsonBody,
+      headers: {
+        'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+      },
+      persistCookies: false,
+      timeoutSeconds: 7);
+  try {
+    apiCall.raiseForStatus();
+    return apiCall;
+  } catch (e) {
+    if (apiCall.statusCode == 200) {
+      response = apiCall.body;
       return response;
     } else {
-      return apiCall.body.toString();
+      return apiCall;
     }
-  } catch (e) {
-    return null;
   }
 }
 
