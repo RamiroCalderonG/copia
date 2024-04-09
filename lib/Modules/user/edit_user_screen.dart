@@ -17,6 +17,8 @@ class _EditUserScreenState extends State<EditUserScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
+  var _userRole;
+  List<String> roleNames = [];
 
   var isActive;
   var genre;
@@ -33,7 +35,9 @@ class _EditUserScreenState extends State<EditUserScreen> {
   void initState() {
     _emailController.text = tempSelectedUsr!.userEmail.toString();
     _nameController.text = tempSelectedUsr!.employeeName.toString();
+    _userRole = tempSelectedUsr!.role.toString();
     super.initState();
+    roleNames = tmpRolesList.map((role) => role["Role"] as String).toList();
   }
 
   String? _validateEmail(String? value) {
@@ -168,10 +172,24 @@ class _EditUserScreenState extends State<EditUserScreen> {
                           SizedBox(height: 20),
                           Row(
                             children: [
-                              // Expanded(
-                              //   child:
-
-                              //   ),
+                              Expanded(
+                                child: DropdownButton<String>(
+                                  value: _userRole,
+                                  onChanged: (String? newValue) {
+                                    setState(() {
+                                      _userRole = newValue!;
+                                    });
+                                  },
+                                  items: roleNames
+                                      .map<DropdownMenuItem<String>>(
+                                          (String value) {
+                                    return DropdownMenuItem<String>(
+                                      value: value,
+                                      child: Text(value),
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
                             ],
                           ),
                           ElevatedButton(

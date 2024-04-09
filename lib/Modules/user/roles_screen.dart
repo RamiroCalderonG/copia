@@ -22,14 +22,31 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
   List<String> description = [];
   // List<int> role_id = [];
   List<bool> isActive = [];
+  List<bool> roleCanAcces = [];
+
+  List<bool> checkboxValues = [];
   int selectedCardIndex = -1;
 
   @override
   void initState() {
+    Map<dynamic, dynamic> eventsAreActive = {};
+    for (var item in tmpeventsList) {
+      var eventName = item['EventName'];
+      var isEventActive = item['role_event_active'];
+
+      eventsAreActive[eventName] = isEventActive;
+
+      checkboxValues.add(isEventActive);
+      roleCanAcces.add(item['role_event_active']);
+    }
+
     for (var item in tmpRolesList) {
       roles.add(item['Role']);
       description.add(item['Description']);
       isActive.add(item['Active']);
+      // roleCanAcces.add(item['role_event_active']);
+
+      // roleCanAcces.add(item['event_can_acces']);
       // role_id.add(item['role_id']);
     }
 
@@ -37,7 +54,8 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
   }
 
   Widget roleContainerCard(String role, String desc, int index) {
-    List<String> roleEvents = getEventNamesForRole(role, tmpeventsList);
+    List events =
+        tmpeventsList.where((event) => event['RoleName'] == role).toList();
 
     return ExpansionTile(
       title: Row(
@@ -60,29 +78,23 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
       ),
       subtitle: Text(desc),
       children: [
-        for (var eventName in roleEvents)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(eventName),
-                Checkbox(
-                  activeColor: Colors.green.shade300,
-                  value: true, // Change this to the actual value
-                  onChanged: (value) {
-                    // Implement your logic here
-                  },
-                ),
-              ],
-            ),
+        for (var event in events)
+          SwitchListTile(
+            title: Text(event['EventName']),
+            value: event['role_event_active']!,
+            onChanged: (value) {
+              print(event.toString());
+              setState(() {
+                event['role_event_active'] = value;
+              });
+            },
+            controlAffinity: ListTileControlAffinity.trailing,
           ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              // Text('Active: ${isActive[index]}'),
               SizedBox(width: 5),
               IconButton(
                 icon: Icon(Icons.delete_outline),
@@ -94,14 +106,10 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
               IconButton(
                 icon: Icon(Icons.edit),
                 onPressed: () async {
-                  await _showEditRoleScreen(context, index);
+                  await _showEditRoleScreen(context, index, isActive[index]);
                 },
               ),
               IconButton(onPressed: () {}, icon: Icon(Icons.add)),
-              // ElevatedButton.icon(
-              //     onPressed: () {},
-              //     icon: Icon(Icons.add),
-              //     label: Text('Agregar eventos a rol'))
             ],
           ),
         ),
@@ -109,14 +117,15 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
     );
   }
 
-  Future<void> _showEditRoleScreen(BuildContext context, int index) async {
+  Future<void> _showEditRoleScreen(
+      BuildContext context, int index, bool isActive) async {
     final result = await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => AddEditRoleScreen(
-          role: roles[index],
-          description: description[index],
-          isActive: isActive[index],
-        ),
+            role: roles[index],
+            description: description[index],
+            isActive: isActive, // Pass the isActive value
+            roleCanAcces: roleCanAcces[index]),
       ),
     );
     if (result != null &&
@@ -280,9 +289,10 @@ class AddEditRoleScreen extends StatefulWidget {
   final String? role;
   final String? description;
   final bool? isActive;
+  final bool? roleCanAcces;
 
   const AddEditRoleScreen(
-      {Key? key, this.role, this.description, this.isActive})
+      {Key? key, this.role, this.description, this.isActive, this.roleCanAcces})
       : super(key: key);
 
   @override
@@ -294,6 +304,7 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
   late TextEditingController _descriptionController;
   late bool _isActive;
   List<Event> _events = [];
+  Map<int, bool> role_event_active = {};
 
   @override
   void initState() {
@@ -302,10 +313,11 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
     _descriptionController =
         TextEditingController(text: widget.description ?? '');
     _isActive = widget.isActive ?? false;
-    _events = tmpeventsList
-        .map((e) =>
-            Event(e.EventId, e.eventName, _isActive, e.moduleName, e.moduleID))
-        .toList();
+    _events = tmpeventsList.map((e) {
+      bool isActive = e['RoleName'] == widget.role && e['isActive'];
+      return Event(e['id'], e['EventName'], isActive, e['moduleName'],
+          e['role_event_active']);
+    }).toList();
   }
 
   @override
@@ -321,11 +333,19 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
       'name': _roleController.text,
       'description': _descriptionController.text,
       'isActive': _isActive,
+      'events': _events
+          .map((e) => {
+                'id': e.eventID,
+                'EventName': e.eventName,
+                'role_event_active': e.eventCanAccesModule,
+                'moduleName': e.moduleName,
+              })
+          .toList(),
     };
     var updatedRole = [
       _roleController.text,
       _descriptionController.text,
-      _isActive
+      _isActive,
     ];
     setState(() {
       isLoading = true;
@@ -345,9 +365,15 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
       'name': _roleController.text,
       'description': _descriptionController.text,
       'isActive': _isActive,
-      // Add other fields as needed
+      'events': _events
+          .map((e) => {
+                'id': e.eventID,
+                'EventName': e.eventName,
+                'role_event_active': e.eventCanAccesModule,
+                'moduleName': e.moduleName,
+              })
+          .toList(),
     };
-
     // TODO: Perform API call to add role using jsonData
 
     // Close the dialog
@@ -356,6 +382,15 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Group events by moduleName
+    Map<String, List<Event>> groupedEvents = {};
+    _events.forEach((event) {
+      if (!groupedEvents.containsKey(event.moduleName)) {
+        groupedEvents[event.moduleName] = [];
+      }
+      groupedEvents[event.moduleName]!.add(event);
+    });
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.role != null ? 'Editar Rol' : 'Agregar Rol',
@@ -409,6 +444,55 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
                   decoration: InputDecoration(
                     labelText: 'Descripción',
                     border: OutlineInputBorder(),
+                  ),
+                ),
+                SizedBox(height: 16),
+                // Display the grouped events
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: groupedEvents.length,
+                    itemBuilder: (context, index) {
+                      String moduleName = groupedEvents.keys.elementAt(index);
+                      List<Event> events = groupedEvents[moduleName]!;
+                      Set<String> uniqueEventNames =
+                          events.map((e) => e.eventName).toSet();
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: Text(
+                              moduleName,
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          for (var eventName in uniqueEventNames)
+                            ListTile(
+                              title: Text(eventName),
+                              subtitle: Text('Module: $moduleName'),
+                              trailing: Checkbox(
+                                value: events.any((e) =>
+                                    e.eventName == eventName &&
+                                    e.eventCanAccesModule),
+                                onChanged: (value) {
+                                  setState(() {
+                                    events
+                                        .where((e) => e.eventName == eventName)
+                                        .forEach((e) => e.eventCanAccesModule =
+                                            value ?? false);
+                                  });
+                                },
+                              ),
+                            ),
+                          Divider(
+                            thickness: 1,
+                          )
+                        ],
+                      );
+                    },
                   ),
                 ),
                 SizedBox(height: 16),

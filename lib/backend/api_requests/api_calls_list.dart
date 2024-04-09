@@ -405,6 +405,24 @@ Future<dynamic> getUserDetail(String userId) async {
   }
 }
 
+Future<dynamic> getAllModules() async {
+  var response;
+  try {
+    var apiCall = await Requests.get(
+        dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/modules',
+        headers: {
+          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'token': currentUser!.token
+        },
+        persistCookies: true,
+        timeoutSeconds: 10);
+    apiCall.raiseForStatus();
+    return apiCall.content();
+  } catch (e) {
+    throw FormatException(e.toString());
+  }
+}
+
 // Future<dynamic> getUserEvents(int userId) async {
 //   var response;
 //   try {

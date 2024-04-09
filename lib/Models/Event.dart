@@ -3,16 +3,16 @@ class Event {
   String eventName;
   bool isActive;
   String moduleName;
-  int moduleID;
+  bool eventCanAccesModule;
 
   Event(this.eventID, this.eventName, this.isActive, this.moduleName,
-      this.moduleID);
+      this.eventCanAccesModule);
 
   Map<String, dynamic> toJSON() => {
         'event_ID': eventID,
         'event_name': eventName,
         "is_active": isActive,
         "module_name": moduleName,
-        "module_id": moduleID
+        "role_event_active": eventCanAccesModule
       };
 }
