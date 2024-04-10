@@ -1,8 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:oxschool/Models/Event.dart';
 import 'package:oxschool/Modules/user/user_events_manager.dart';
 import 'package:oxschool/flutter_flow/flutter_flow_theme.dart';
+import 'package:oxschool/flutter_flow/flutter_flow_util.dart';
 import 'package:oxschool/login_view/login_view_widget.dart';
+import 'package:oxschool/reusable_methods/temp_data_functions.dart';
 import 'package:oxschool/temp/users_temp_data.dart';
 import 'package:oxschool/utils/loader_indicator.dart';
 
@@ -81,10 +85,15 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
         for (var event in events)
           SwitchListTile(
             title: Text(event['EventName']),
-            value: event['role_event_active']!,
-            onChanged: (value) {
-              print(event.toString());
+            value: event['role_event_active'],
+            onChanged: (value) async {
               setState(() {
+                _isloading = true;
+              });
+              await modifyActiveOfEventRole(
+                  event['id'], value, event['role_id']);
+              setState(() {
+                _isloading = false;
                 event['role_event_active'] = value;
               });
             },
@@ -98,18 +107,73 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
               SizedBox(width: 5),
               IconButton(
                 icon: Icon(Icons.delete_outline),
+                tooltip: 'Eliminar Rol',
                 onPressed: () async {
-                  // Implement your delete logic here
+                  //TODO: VERIFY IF ITS NEEDED, OR ONLY LOGIC
                 },
               ),
+              if (tmpRolesList[index]['Active'] == false)
+                IconButton(
+                  onPressed: () async {
+                    setState(() {
+                      isLoading = true;
+                    });
+                    var role_id = tmpRolesList[index]['Roleid'];
+                    var body_edit = {'isActive': true};
+                    await editRole(role_id, body_edit);
+                    setState(() {
+                      isLoading = false;
+                    });
+                    var response = await getRolesList();
+                    tmpRolesList = jsonDecode(response);
+                    Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute<void>(
+                          builder: (BuildContext context) =>
+                              const RolesAndProfilesScreen(),
+                        ));
+                  },
+                  icon: Icon(Icons.arrow_circle_up),
+                  tooltip: 'Activar Rol',
+                ),
+              if (tmpRolesList[index]['Active'] == true)
+                IconButton(
+                    onPressed: () async {
+                      setState(() {
+                        isLoading = true;
+                      });
+                      var role_id = tmpRolesList[index]['Roleid'];
+                      var body_edit = {'isActive': false};
+                      await editRole(role_id, body_edit);
+                      setState(() {
+                        isLoading = false;
+                      });
+                      await getEventsList();
+
+                      var response = await getRolesList();
+                      tmpRolesList = jsonDecode(response);
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute<void>(
+                            builder: (BuildContext context) =>
+                                const RolesAndProfilesScreen(),
+                          ));
+                    },
+                    tooltip: 'Desactivar rol',
+                    icon: Icon(Icons.arrow_circle_down_outlined)),
               SizedBox(width: 5),
               IconButton(
                 icon: Icon(Icons.edit),
+                tooltip: 'Editar Rol',
                 onPressed: () async {
                   await _showEditRoleScreen(context, index, isActive[index]);
                 },
               ),
-              IconButton(onPressed: () {}, icon: Icon(Icons.add)),
+              IconButton(
+                onPressed: () {},
+                icon: Icon(Icons.add),
+                tooltip: 'Agregar evento a Rol',
+              ),
             ],
           ),
         ),
@@ -448,53 +512,54 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
                 ),
                 SizedBox(height: 16),
                 // Display the grouped events
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: groupedEvents.length,
-                    itemBuilder: (context, index) {
-                      String moduleName = groupedEvents.keys.elementAt(index);
-                      List<Event> events = groupedEvents[moduleName]!;
-                      Set<String> uniqueEventNames =
-                          events.map((e) => e.eventName).toSet();
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: Text(
-                              moduleName,
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          for (var eventName in uniqueEventNames)
-                            ListTile(
-                              title: Text(eventName),
-                              subtitle: Text('Module: $moduleName'),
-                              trailing: Checkbox(
-                                value: events.any((e) =>
-                                    e.eventName == eventName &&
-                                    e.eventCanAccesModule),
-                                onChanged: (value) {
-                                  setState(() {
-                                    events
-                                        .where((e) => e.eventName == eventName)
-                                        .forEach((e) => e.eventCanAccesModule =
-                                            value ?? false);
-                                  });
-                                },
-                              ),
-                            ),
-                          Divider(
-                            thickness: 1,
-                          )
-                        ],
-                      );
-                    },
-                  ),
-                ),
+                // Expanded(
+                //   child: ListView.builder(
+                //     itemCount: groupedEvents.length,
+                //     itemBuilder: (context, index) {
+                //       String moduleName = groupedEvents.keys.elementAt(index);
+                //       List<Event> events = groupedEvents[moduleName]!;
+                //       Set<String> uniqueEventNames =
+                //           events.map((e) => e.eventName).toSet();
+                //       return Column(
+                //         crossAxisAlignment: CrossAxisAlignment.start,
+                //         children: [
+                //           Padding(
+                //             padding: const EdgeInsets.symmetric(vertical: 8.0),
+                //             child: Text(
+                //               moduleName,
+                //               style: TextStyle(
+                //                 fontSize: 18,
+                //                 fontWeight: FontWeight.bold,
+                //               ),
+                //             ),
+                //           ),
+                //           for (var eventName in uniqueEventNames)
+
+                //           // ListTile(
+                //           //   title: Text(eventName),
+                //           //   subtitle: Text('Module: $moduleName'),
+                //           //   // trailing: Checkbox(
+                //           //   //   value: events.any((e) =>
+                //           //   //       e.eventName == eventName &&
+                //           //   //       e.eventCanAccesModule),
+                //           //   //   onChanged: (value) {
+                //           //   //     setState(() {
+                //           //   //       events
+                //           //   //           .where((e) => e.eventName == eventName)
+                //           //   //           .forEach((e) => e.eventCanAccesModule =
+                //           //   //               value ?? false);
+                //           //   //     });
+                //           //   //   },
+                //           //   // ),
+                //           // ),
+                //           Divider(
+                //             thickness: 1,
+                //           )
+                //         ],
+                //       );
+                //     },
+                //   ),
+                // ),
                 SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () async {

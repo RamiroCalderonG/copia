@@ -174,6 +174,33 @@ Future<dynamic> getEvents() async {
   }
 }
 
+Future<dynamic> modifyActiveOfEventRole(
+    int eventId, bool role_event_value, int role_selected) async {
+  var body = {
+    'type': eventId,
+    'role_event_active': role_event_value,
+    'role': role_selected
+  };
+  try {
+    var apiCall = await Requests.put(
+        dotenv.env['HOSTURL']! +
+            dotenv.env['PORT']! +
+            '/api/event-role/' +
+            eventId.toString(),
+        headers: {
+          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'token': currentUser!.token
+        },
+        json: body,
+        persistCookies: false,
+        timeoutSeconds: 10);
+    apiCall.raiseForStatus();
+    return apiCall.content();
+  } catch (e) {
+    throw FormatException(e.toString());
+  }
+}
+
 Future<dynamic> getRolesList() async {
   var response;
   try {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:oxschool/Modules/user/users_dashboard.dart';
 
 import '../Modules/enfermeria/ficha_de_salud.dart';
+import '../Modules/enfermeria/students_with_illness.dart';
 import '../Modules/grades/grades_view_capture.dart';
 import '../Modules/services_ticket/processes/services_main_screen.dart';
 import '../login_view/login_view_widget.dart';
@@ -14,7 +15,8 @@ const Map<String, dynamic> pageRoutes = {
   'Ficha Medica de alumnos': FichaDeSalud(),
   'Calificaciones': GradesViewScreen(),
   'Procesos': ServicesTicketHistory(),
-  'Dashboard': UsersDashboard()
+  'Dashboard': UsersDashboard(),
+  'Alumnos con Padecimientos': StudentsIlness()
 };
 
 const mobilePages = [
