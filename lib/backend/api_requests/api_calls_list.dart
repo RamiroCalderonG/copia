@@ -474,7 +474,7 @@ Future<http.Response> getUserPermissions(int userId) async {
   try {
     Uri address = Uri(
         scheme: 'http',
-        host: 'localhost',
+        host: '10.0.0.36',
         port: 8080,
         path: '/api/user/events',
         queryParameters: {'id': '${userId.toString()}'});

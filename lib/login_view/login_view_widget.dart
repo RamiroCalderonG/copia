@@ -644,7 +644,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                               padding: EdgeInsetsDirectional.fromSTEB(
                                   0.0, 32.0, 0.0, 32.0),
                               child: Container(
-                                width: MediaQuery.of(context).size.width / 2,
+                                width: MediaQuery.of(context).size.width / 3,
                                 height: 177.0,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(16.0),
@@ -665,8 +665,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                               padding: EdgeInsetsDirectional.fromSTEB(
                                   12.0, 12.0, 12.0, 12.0),
                               child: Container(
-                                width: MediaQuery.of(context).size.width /
-                                    2, //double.infinity,
+                                width: MediaQuery.of(context).size.width,
+                                // /    3, //double.infinity,
                                 decoration: BoxDecoration(
                                   color: FlutterFlowTheme.of(context)
                                       .secondaryBackground,
