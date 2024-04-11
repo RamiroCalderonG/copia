@@ -16,7 +16,7 @@ const Map<String, dynamic> pageRoutes = {
   'Calificaciones': GradesViewScreen(),
   'Procesos': ServicesTicketHistory(),
   'Dashboard': UsersDashboard(),
-  'Alumnos con Padecimientos': StudentsIlness()
+  'Alumnos con padecimientos': StudentsIlness()
 };
 
 const mobilePages = [
