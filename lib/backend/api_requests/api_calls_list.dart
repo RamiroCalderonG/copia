@@ -154,23 +154,44 @@ Future<int> deleteMedicineStudent(var idValue) async {
   // return responseCode;
 }
 
-Future<dynamic> getEvents() async {
+Future<dynamic> getEvents(String? param) async {
   var responseCode;
-  try {
-    var apiCall = await Requests.get(
-        dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/events',
-        headers: {
-          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
-          'token': currentUser!.token
-        },
-        persistCookies: false,
-        timeoutSeconds: 8);
 
-    apiCall.raiseForStatus();
-    responseCode = apiCall.content();
-    return responseCode;
-  } catch (e) {
-    throw FormatException(e.toString());
+  if (param == null) {
+    try {
+      var apiCall = await Requests.get(
+          dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/events',
+          headers: {
+            'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+            'token': currentUser!.token
+          },
+          persistCookies: false,
+          timeoutSeconds: 8);
+
+      apiCall.raiseForStatus();
+      responseCode = apiCall.content();
+      return responseCode;
+    } catch (e) {
+      throw FormatException(e.toString());
+    }
+  } else {
+    try {
+      var apiCall = await Requests.get(
+          dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/events',
+          headers: {
+            'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+            'token': currentUser!.token
+          },
+          queryParameters: {'detail': param},
+          persistCookies: false,
+          timeoutSeconds: 8);
+
+      apiCall.raiseForStatus();
+      responseCode = apiCall.content();
+      return responseCode;
+    } catch (e) {
+      throw FormatException(e.toString());
+    }
   }
 }
 
@@ -235,6 +256,24 @@ Future<dynamic> getRole(String roleName) async {
     apiCall.raiseForStatus();
     response = apiCall.content();
     return response;
+  } catch (e) {
+    throw FormatException(e.toString());
+  }
+}
+
+Future<dynamic> getEventsByRole(int? roleID) async {
+  try {
+    var apiCal = await Requests.get(
+        dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/role/events',
+        headers: {
+          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'token': currentUser!.token
+        },
+        queryParameters: {'role': roleID},
+        persistCookies: false,
+        timeoutSeconds: 8);
+    apiCal.raiseForStatus();
+    return apiCal.content();
   } catch (e) {
     throw FormatException(e.toString());
   }

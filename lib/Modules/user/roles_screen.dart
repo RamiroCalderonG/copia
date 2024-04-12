@@ -170,7 +170,14 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                 },
               ),
               IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => PoliciesScreen(
+                                roleID: tmpRolesList[index]['Roleid'],
+                              )));
+                },
                 icon: Icon(Icons.add),
                 tooltip: 'Agregar evento a Rol',
               ),
@@ -267,34 +274,34 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                         ),
                       ),
                       SizedBox(width: 20),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      PoliciesScreen() // UserEventsManagerDataTable(
-                                  //   eventsList: eventsLisToShow,
-                                  // )
+                      // TextButton(
+                      //   onPressed: () {
+                      //     Navigator.push(
+                      //         context,
+                      //         MaterialPageRoute(
+                      //             builder: (context) =>
+                      //                 PoliciesScreen(roleID: ,) // UserEventsManagerDataTable(
+                      //             //   eventsList: eventsLisToShow,
+                      //             // )
 
-                                  ));
-                        },
-                        child: Text('Administrar eventos'),
-                        style: ButtonStyle(
-                          foregroundColor:
-                              MaterialStateProperty.all<Color>(Colors.black),
-                          backgroundColor:
-                              MaterialStateProperty.all<Color>(Colors.blue),
-                          padding:
-                              MaterialStateProperty.all<EdgeInsetsGeometry>(
-                                  EdgeInsets.all(10)),
-                          shape: MaterialStateProperty.all<OutlinedBorder>(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                        ),
-                      ),
+                      //             ));
+                      //   },
+                      //   child: Text('Administrar eventos'),
+                      //   style: ButtonStyle(
+                      //     foregroundColor:
+                      //         MaterialStateProperty.all<Color>(Colors.black),
+                      //     backgroundColor:
+                      //         MaterialStateProperty.all<Color>(Colors.blue),
+                      //     padding:
+                      //         MaterialStateProperty.all<EdgeInsetsGeometry>(
+                      //             EdgeInsets.all(10)),
+                      //     shape: MaterialStateProperty.all<OutlinedBorder>(
+                      //       RoundedRectangleBorder(
+                      //         borderRadius: BorderRadius.circular(8),
+                      //       ),
+                      //     ),
+                      //   ),
+                      // ),
                     ],
                   ),
                   SizedBox(height: 16),

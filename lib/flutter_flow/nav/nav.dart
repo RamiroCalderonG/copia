@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:oxschool/Modules/user/user_events_manager.dart';
 import 'package:oxschool/components/pdf_viewer_screen.dart';
 import 'package:oxschool/main_window/mobile_main_window_widget.dart';
 import 'package:oxschool/Modules/user/user_view_screen.dart';
@@ -69,7 +70,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
             name: 'UDashboard',
             path: '/udashboard',
-            builder: (context, params) => UsersDashboard())
+            builder: (context, params) => UsersDashboard()),
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
     );
 

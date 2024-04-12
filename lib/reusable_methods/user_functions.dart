@@ -105,7 +105,7 @@ dynamic RoleFromJSON(List<dynamic> jsonData) {
       String roleDescription = item['role_description'];
       bool isActive = item['is_active'];
 
-      roleList.add(Role(roleID, roleName, roleDescription, isActive));
+      roleList.add(Role(roleID, roleName, roleDescription, isActive, null));
     }
     return roleList;
   }

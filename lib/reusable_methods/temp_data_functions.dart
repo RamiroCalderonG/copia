@@ -13,12 +13,11 @@ void clearTempData() {
   userRows.clear();
   tmpRolesList.clear();
   userRoles.clear();
-//var
 }
 
 Future getEventsList() async {
   try {
-    var apiResponse = await getEvents();
+    var apiResponse = await getEvents(null);
     List<dynamic> jsonList = json.decode(apiResponse);
     tmpeventsList = jsonList;
     eventsLisToShow =

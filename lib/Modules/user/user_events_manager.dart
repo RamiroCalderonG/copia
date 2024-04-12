@@ -1,7 +1,28 @@
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:oxschool/Models/Event.dart';
+import 'package:oxschool/backend/api_requests/api_calls_list.dart';
+import 'package:oxschool/flutter_flow/flutter_flow_theme.dart';
 
-class PoliciesScreen extends StatelessWidget {
+class PoliciesScreen extends StatefulWidget {
+  final int roleID;
+  const PoliciesScreen({Key? key, required this.roleID}) : super(key: key);
+
+  @override
+  State<PoliciesScreen> createState() => _PoliciesScreenState();
+}
+
+class _PoliciesScreenState extends State<PoliciesScreen> {
+  late Future<void> _refreshEventsFuture;
+  List<Event> eventsToDisplay = [];
+
+  @override
+  void initState() {
+    _refreshEventsFuture = refreshEvents(widget.roleID);
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -15,21 +36,87 @@ class PoliciesScreen extends StatelessWidget {
             },
           ),
         ],
+        backgroundColor: FlutterFlowTheme.of(context).primary,
       ),
-      body: ListView.builder(
-        itemCount: policies.length,
-        itemBuilder: (context, index) {
-          return PolicyCard(policy: policies[index]);
+      body: FutureBuilder<void>(
+        future: _refreshEventsFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          } else {
+            return ListView.builder(
+              itemCount: eventsToDisplay.length,
+              itemBuilder: (context, index) {
+                final currentEvent = eventsToDisplay[index];
+                final previousEvent =
+                    index > 0 ? eventsToDisplay[index - 1] : null;
+
+                final showModuleName = previousEvent == null ||
+                    currentEvent.moduleName != previousEvent.moduleName;
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (showModuleName)
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          'Modulo: ' + currentEvent.moduleName,
+                          style: TextStyle(fontSize: 20, fontFamily: 'Sora'),
+                        ),
+                      ),
+                    PolicyCard(
+                      policy: currentEvent,
+                      onToggle: (event) {
+                        setState(() {
+                          event.isActive =
+                              !event.isActive; // Toggle the isActive status
+                        });
+                      },
+                    ),
+                  ],
+                );
+              },
+            );
+          }
         },
       ),
     );
   }
+
+  Future<void> refreshEvents(int? idRole) async {
+    var response = await getEventsByRole(idRole);
+    var policyList = jsonDecode(response);
+
+    // Map to group events by moduleName
+    Map<String, List<Event>> groupedEvents = {};
+
+    for (var jsonItem in policyList) {
+      Event event = Event(0, jsonItem['event'], jsonItem['is_active'],
+          jsonItem['module'], true);
+
+      // Check if the moduleName already exists in the map
+      if (groupedEvents.containsKey(event.moduleName)) {
+        groupedEvents[event.moduleName]!.add(event);
+      } else {
+        groupedEvents[event.moduleName] = [event];
+      }
+    }
+
+    setState(() {
+      eventsToDisplay =
+          groupedEvents.values.expand((events) => events).toList();
+    });
+  }
 }
 
 class PolicyCard extends StatelessWidget {
-  final Policy policy;
+  final Event policy;
+  final Function(Event) onToggle;
 
-  const PolicyCard({required this.policy});
+  const PolicyCard({required this.policy, required this.onToggle});
 
   @override
   Widget build(BuildContext context) {
@@ -39,26 +126,32 @@ class PolicyCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              policy.title,
-              style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+            // Text(
+            //   policy.eventName,
+            //   style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+            // ),
+            SwitchListTile(
+              title: Text(policy.eventName),
+              value: policy.isActive,
+              onChanged: (value) {
+                onToggle(policy); // Call the callback function
+              },
             ),
-            Text(policy.description),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                TextButton(
-                  onPressed: () {
-                    // navigate to view policy details screen
-                  },
-                  child: Text('View'),
-                ),
-                TextButton(
-                  onPressed: () {
-                    // navigate to edit policy screen
-                  },
-                  child: Text('Edit'),
-                ),
+                // TextButton(
+                //   onPressed: () {
+                //     // navigate to view policy details screen
+                //   },
+                //   child: Text('View'),
+                // ),
+                // TextButton(
+                //   onPressed: () {
+                //     // navigate to edit policy screen
+                //   },
+                //   child: Text('Edit'),
+                // ),
                 // conditionally render buttons based on permissions
                 // if (/* has permission to contact radiologist */)
                 //   TextButton(
@@ -89,207 +182,3 @@ class PolicyCard extends StatelessWidget {
     );
   }
 }
-
-class Policy {
-  final String title;
-  final String description;
-
-  const Policy({required this.title, required this.description});
-}
-
-List<Policy> policies = [
-  Policy(title: 'Policy 1', description: 'Functionality Description'),
-  Policy(title: 'Policy 2', description: 'Functionality Centription'),
-  Policy(title: 'Policy 3', description: 'Functionary besenesen'),
-  Policy(title: 'Policy 4', description: 'Functionalityr Desengron'),
-  // ... more policies
-];
-
-// class UserEventsManagerDataTable extends StatefulWidget {
-//   final List<Map<String, dynamic>> eventsList;
-
-//   UserEventsManagerDataTable({required this.eventsList});
-
-//   @override
-//   _UserEventsManagerDataTableState createState() =>
-//       _UserEventsManagerDataTableState();
-// }
-
-// class _UserEventsManagerDataTableState
-//     extends State<UserEventsManagerDataTable> {
-//   late List<Map<String, dynamic>> _eventsList;
-//   bool _sortAscending = true;
-//   int _sortColumnIndex = 0;
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     _eventsList = List.from(widget.eventsList);
-//   }
-
-//   void _sort<T>(Comparable<T> Function(Map<String, dynamic>) getField,
-//       int columnIndex, bool ascending) {
-//     _eventsList.sort((a, b) {
-//       if (!ascending) {
-//         final temp = a;
-//         a = b;
-//         b = temp;
-//       }
-//       final Comparable<T> aValue = getField(a);
-//       final Comparable<T> bValue = getField(b);
-//       return Comparable.compare(aValue, bValue);
-//     });
-//   }
-
-//   void _addNewEvent() {
-//     showDialog(
-//       context: context,
-//       builder: (BuildContext context) {
-//         TextEditingController eventNameController = TextEditingController();
-//         String selectedRoleName =
-//             _eventsList.isNotEmpty ? _eventsList.first['RoleName'] : '';
-//         return StatefulBuilder(
-//           builder: (context, setState) {
-//             return AlertDialog(
-//               title: Text('Add New Event'),
-//               content: SingleChildScrollView(
-//                 child: Column(
-//                   mainAxisSize: MainAxisSize.min,
-//                   children: [
-//                     // DropdownButton<String>(
-//                     //   value: selectedRoleName,
-//                     //   onChanged: (String? newValue) {
-//                     //     setState(() {
-//                     //       selectedRoleName = newValue!;
-//                     //     });
-//                     //   },
-//                     //   items: _eventsList
-//                     //       .map((event) {
-//                     //         return DropdownMenuItem<String>(
-//                     //           value: event['RoleName'].toString(),
-//                     //           child: Text(event['RoleName'].toString()),
-//                     //         );
-//                     //       })
-//                     //       .toSet()
-//                     //       .toList(),
-//                     // ),
-//                     TextField(
-//                       controller: eventNameController,
-//                       decoration: InputDecoration(labelText: 'Event Name'),
-//                     ),
-//                   ],
-//                 ),
-//               ),
-//               actions: [
-//                 TextButton(
-//                   onPressed: () {
-//                     Navigator.of(context).pop();
-//                   },
-//                   child: Text('Cancel'),
-//                 ),
-//                 TextButton(
-//                   onPressed: () {
-//                     setState(() {
-//                       _eventsList.add({
-//                         'id': _eventsList.length + 1,
-//                         'role_id': _eventsList.firstWhere((element) =>
-//                             element['RoleName'] == selectedRoleName)['role_id'],
-//                         'RoleName': selectedRoleName,
-//                         'EventName': eventNameController.text,
-//                         'isActive': true,
-//                       });
-//                     });
-//                     Navigator.of(context).pop();
-//                   },
-//                   child: Text('Add'),
-//                 ),
-//               ],
-//             );
-//           },
-//         );
-//       },
-//     );
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text('Event Manager'),
-//       ),
-//       body: SingleChildScrollView(
-//         scrollDirection: Axis.horizontal,
-//         child: DataTable(
-//           sortColumnIndex: _sortColumnIndex,
-//           sortAscending: _sortAscending,
-//           columns: [
-//             DataColumn(
-//               label: Text('Rol'),
-//               onSort: (columnIndex, ascending) {
-//                 setState(() {
-//                   _sortColumnIndex = columnIndex;
-//                   _sortAscending = ascending;
-//                   _sort<String>((event) => event['RoleName'].toString(),
-//                       columnIndex, ascending);
-//                 });
-//               },
-//             ),
-//             DataColumn(
-//               label: Text('Evento'),
-//               onSort: (columnIndex, ascending) {
-//                 setState(() {
-//                   _sortColumnIndex = columnIndex;
-//                   _sortAscending = ascending;
-//                   _sort<String>((event) => event['EventName'].toString(),
-//                       columnIndex, ascending);
-//                 });
-//               },
-//             ),
-//             DataColumn(label: Text('¿Activo?')),
-//             DataColumn(label: Text('Acciones')),
-//           ],
-//           rows: _eventsList.map((event) {
-//             return DataRow(cells: [
-//               DataCell(Text(event['RoleName'].toString())),
-//               DataCell(Text(event['EventName'].toString())),
-//               DataCell(Center(
-//                 child: Checkbox(
-//                   value: event['isActive'] as bool,
-//                   onChanged: (value) {
-//                     setState(() {
-//                       event['isActive'] = value;
-//                     });
-//                   },
-//                 ),
-//               )),
-//               DataCell(Row(
-//                 children: [
-//                   IconButton(
-//                     icon: Icon(Icons.edit),
-//                     onPressed: () {
-//                       // Implement edit logic
-//                     },
-//                   ),
-//                   IconButton(
-//                     icon: Icon(Icons.delete),
-//                     onPressed: () {
-//                       setState(() {
-//                         _eventsList.remove(event);
-//                       });
-//                     },
-//                   ),
-//                 ],
-//               )),
-//             ]);
-//           }).toList(),
-//         ),
-//       ),
-//       floatingActionButton: FloatingActionButton(
-//         onPressed: () {
-//           _addNewEvent();
-//         },
-//         child: Icon(Icons.add),
-//       ),
-//     );
-//   }
-// }
