@@ -86,6 +86,7 @@ dynamic EventFromJSON(List<dynamic> jsonData) {
       String moduleName = item['module_name'];
       int moduleID = item['module_id'];
       bool event_can_acces_module = item['event_can_acces_module'];
+      // int roleID = item['role_id'];
 
       eventList.add(Event(
           idEvento, eventName, isActive, moduleName, event_can_acces_module));

@@ -197,11 +197,6 @@ Future<dynamic> getEvents(String? param) async {
 
 Future<dynamic> modifyActiveOfEventRole(
     int eventId, bool role_event_value, int role_selected) async {
-  var body = {
-    'type': eventId,
-    'role_event_active': role_event_value,
-    'role': role_selected
-  };
   try {
     var apiCall = await Requests.put(
         dotenv.env['HOSTURL']! +
@@ -212,7 +207,11 @@ Future<dynamic> modifyActiveOfEventRole(
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
           'token': currentUser!.token
         },
-        json: body,
+        json: {
+          'type': eventId,
+          'role_event_active': role_event_value,
+          'role': role_selected
+        },
         persistCookies: false,
         timeoutSeconds: 10);
     apiCall.raiseForStatus();
@@ -513,7 +512,7 @@ Future<http.Response> getUserPermissions(int userId) async {
   try {
     Uri address = Uri(
         scheme: 'http',
-        host: '10.0.0.36',
+        host: 'localhost',
         port: 8080,
         path: '/api/user/events',
         queryParameters: {'id': '${userId.toString()}'});

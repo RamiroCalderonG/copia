@@ -12,3 +12,16 @@ List<dynamic> userRoles = [];
 List<dynamic> tmpeventsList = [];
 List<Map<String, dynamic>> eventsLisToShow = [];
 //var
+
+void cleatTempData() async {
+  listOfUsersForGrid = null;
+  usersPlutoRowList.clear();
+  selectedUser = null;
+  tempUserId = null;
+  tempSelectedUsr?.clear();
+  userRows.clear();
+  tmpRolesList.clear();
+  userRoles.clear();
+  tmpeventsList.clear();
+  eventsLisToShow.clear();
+}

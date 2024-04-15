@@ -1,4 +1,3 @@
-
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'package:oxschool/constants/User.dart';
@@ -6,6 +5,7 @@ import 'package:oxschool/constants/url_links.dart';
 import 'package:oxschool/Modules/user/user_view_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
+import 'package:oxschool/temp/users_temp_data.dart';
 
 import '../Modules/services_ticket/processes/create_service_ticket.dart';
 import '../constants/screens.dart';
@@ -479,8 +479,18 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
               title: Text('Cerrar sesión'),
               leading: const Icon(Icons.exit_to_app),
               onTap: () {
+                // Clear any necessary data or variables
                 // clearStudentData();
                 // clearUserData();
+                setState(() {
+                  currentUser?.clear();
+                  currentCycle?.clear();
+                  eventsList?.clear();
+                  deviceIp = '';
+                  cleatTempData();
+                });
+
+                // Navigate to the initial screen
 
                 context.goNamed(
                   '_initialize',

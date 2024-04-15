@@ -5,6 +5,8 @@ import 'package:oxschool/Models/Event.dart';
 import 'package:oxschool/backend/api_requests/api_calls_list.dart';
 import 'package:oxschool/flutter_flow/flutter_flow_theme.dart';
 
+import '../../reusable_methods/temp_data_functions.dart';
+
 class PoliciesScreen extends StatefulWidget {
   final int roleID;
   const PoliciesScreen({Key? key, required this.roleID}) : super(key: key);
@@ -27,7 +29,7 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Eventos'),
+        title: Text('Eventos : '),
         actions: [
           IconButton(
             icon: Icon(Icons.add),
@@ -69,6 +71,7 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
                       ),
                     PolicyCard(
                       policy: currentEvent,
+                      roleID: widget.roleID,
                       onToggle: (event) {
                         setState(() {
                           event.isActive =
@@ -114,9 +117,11 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
 
 class PolicyCard extends StatelessWidget {
   final Event policy;
+  final int roleID;
   final Function(Event) onToggle;
 
-  const PolicyCard({required this.policy, required this.onToggle});
+  const PolicyCard(
+      {required this.policy, required this.roleID, required this.onToggle});
 
   @override
   Widget build(BuildContext context) {
@@ -133,8 +138,12 @@ class PolicyCard extends StatelessWidget {
             SwitchListTile(
               title: Text(policy.eventName),
               value: policy.isActive,
-              onChanged: (value) {
+              onChanged: (value) async {
                 onToggle(policy); // Call the callback function
+                // print(policy.eventName);
+                // print(value.toString() + ' ' + roleID.toString());
+                var idValue = getEventIDbyName(policy.eventName);
+                await modifyActiveOfEventRole(idValue, value, roleID);
               },
             ),
             Row(

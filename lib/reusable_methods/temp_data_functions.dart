@@ -26,3 +26,13 @@ Future getEventsList() async {
     throw FormatException(e.toString());
   }
 }
+
+int getEventIDbyName(String eventName) {
+  var idValue;
+  for (var item in tmpeventsList) {
+    if ((item['EventName'] as String).compareTo(eventName) == 0) {
+      idValue = item['id'];
+    }
+  }
+  return idValue;
+}

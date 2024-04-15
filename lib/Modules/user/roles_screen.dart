@@ -253,27 +253,55 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       SizedBox(width: 20),
-                      TextButton(
-                        onPressed: () {
-                          _showAddRoleScreen(context);
-                        },
-                        child: Text('Nuevo'),
-                        style: ButtonStyle(
-                          foregroundColor:
-                              MaterialStateProperty.all<Color>(Colors.black),
-                          backgroundColor:
-                              MaterialStateProperty.all<Color>(Colors.blue),
-                          padding:
-                              MaterialStateProperty.all<EdgeInsetsGeometry>(
-                                  EdgeInsets.all(10)),
-                          shape: MaterialStateProperty.all<OutlinedBorder>(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                        ),
-                      ),
+                      // TextButton(
+                      //   onPressed: () {
+                      //     _showAddRoleScreen(context);
+                      //   },
+                      //   child: Text('Nuevo'),
+                      //   style: ButtonStyle(
+                      //     foregroundColor:
+                      //         MaterialStateProperty.all<Color>(Colors.black),
+                      //     backgroundColor:
+                      //         MaterialStateProperty.all<Color>(Colors.blue),
+                      //     padding:
+                      //         MaterialStateProperty.all<EdgeInsetsGeometry>(
+                      //             EdgeInsets.all(10)),
+                      //     shape: MaterialStateProperty.all<OutlinedBorder>(
+                      //       RoundedRectangleBorder(
+                      //         borderRadius: BorderRadius.circular(8),
+                      //       ),
+                      //     ),
+                      //   ),
+                      // ),
+                      TextButton.icon(
+                          onPressed: () {
+                            _showAddRoleScreen(context);
+                          },
+                          icon: Icon(Icons.add),
+                          label: Text('Nuevo Rol')),
                       SizedBox(width: 20),
+                      TextButton.icon(
+                          onPressed: () async {
+                            setState(() {
+                              isLoading = true;
+                            });
+
+                            await getEventsList();
+
+                            var response = await getRolesList();
+                            tmpRolesList = jsonDecode(response);
+                            setState(() {
+                              isLoading = false;
+                            });
+                            Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        RolesAndProfilesScreen()));
+                          },
+                          icon: Icon(Icons.refresh),
+                          label: Text('Refrescar'))
+
                       // TextButton(
                       //   onPressed: () {
                       //     Navigator.push(
