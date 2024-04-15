@@ -6,13 +6,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:oxschool/Models/Cycle.dart';
 import 'package:oxschool/Models/User.dart';
+import 'package:oxschool/backend/api_requests/api_calls_list.dart';
 import 'package:oxschool/constants/User.dart';
 import 'package:flutter/material.dart';
 import 'package:oxschool/constants/connection.dart';
 
+import '../components/custom_scaffold_messenger.dart';
 import '../utils/device_information.dart';
 import '../utils/loader_indicator.dart';
-import '/backend/api_requests/api_calls.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -105,73 +106,106 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
   @override
   Widget build(BuildContext context) {
     String? _text;
+    Map<String, dynamic> apiBody = {};
+    var apiResponse;
 
     dynamic loginButtonFunction() async {
       try {
         var value = trimSpaces(_model.textController2.text);
-        if (value.isNotEmpty) {
-          // Log In user
-          _model.apiResultxgr = await LoginUserCall.call(
-                  nip: _model.textController2.text,
-                  device: currentDeviceData,
-                  ip_address: deviceIP)
-              .timeout(Duration(seconds: 7));
-          if ((_model.apiResultxgr?.succeeded ?? true)) {
-            // Decode the JSON string into a Dart list
-            List<dynamic> jsonList =
-                json.decode(_model.apiResultxgr!.response!.body);
-            currentUser = userLogedIn(jsonList); //Store values into a const
+        var emplNumberValue = trimSpaces(_model.textController1.text);
+        Map<String, dynamic> nip = {'Nip': value};
+        apiBody.addEntries(nip.entries);
+        Map<String, dynamic> employeeNumber = {
+          'employeeNumber': _model.textController1.text
+        };
+        apiBody.addEntries(employeeNumber.entries);
+        Map<String, dynamic> device = {'device': currentDeviceData};
+        apiBody.addEntries(device.entries);
+        Map<String, dynamic> deviceIp = {'ip_address': deviceIP};
+        apiBody.addEntries(deviceIp.entries);
 
-            // Get currentCycle
-            _model.apiResultxgr =
-                await CurrentCicleCall.call().timeout(Duration(seconds: 7));
-            if ((_model.apiResultxgr?.succeeded ?? true)) {
-              jsonList = json.decode(_model.apiResultxgr!.response!.body);
-              currentCycle = getcurrentCycle(jsonList); //parse from JSON
+        if (value.isNotEmpty && emplNumberValue.isNotEmpty) {
+          // Log In user
+          // _model.apiResultxgr = await LoginUserCall.call(bodyContent: apiBody)
+          //     .timeout(Duration(seconds: 7));
+
+          apiResponse = await loginUser(apiBody);
+          if (apiResponse.statusCode == 200) {
+            List<dynamic> jsonList = json.decode(apiResponse.body);
+            currentUser = parseLogedInUserFromJSON(jsonList);
+
+            getUserPermissions(currentUser!.userId);
+
+            // apiResponse = await getUserEvents(currentUser!.userId);
+            // jsonList = json.decode(apiResponse);
+            // userRoles = jsonList;
+
+            apiResponse = await getCycle(
+                0); //CurrentCicleCall.call().timeout(Duration(seconds: 7));
+            if (apiResponse != null) {
+              List<dynamic> jsonList = json.decode(apiResponse);
+
+              // jsonList = json.decode(apiResponse);
+              currentCycle = getcurrentCycle(jsonList);
             }
-            if (Platform.isAndroid || Platform.isIOS) {
-              context.goNamed(
-                'MobileMainView',
-                extra: <String, dynamic>{
-                  kTransitionInfoKey: TransitionInfo(
-                    hasTransition: true,
-                    transitionType: PageTransitionType.fade,
-                  ),
-                },
-              );
+
+            if ((currentCycle != null)) {
+              if (Platform.isAndroid || Platform.isIOS) {
+                context.goNamed(
+                  'MobileMainView',
+                  extra: <String, dynamic>{
+                    kTransitionInfoKey: TransitionInfo(
+                      hasTransition: true,
+                      transitionType: PageTransitionType.fade,
+                    ),
+                  },
+                );
+              } else {
+                context.goNamed(
+                  'MainWindow',
+                  extra: <String, dynamic>{
+                    kTransitionInfoKey: TransitionInfo(
+                      hasTransition: true,
+                      transitionType: PageTransitionType.fade,
+                    ),
+                  },
+                );
+              }
             } else {
-              context.goNamed(
-                'MainWindow',
-                extra: <String, dynamic>{
-                  kTransitionInfoKey: TransitionInfo(
-                    hasTransition: true,
-                    transitionType: PageTransitionType.fade,
-                  ),
-                },
-              );
+              ScaffoldMessenger.of(context).showSnackBar(customScaffoldMesg(
+                  context,
+                  'No se encuentran los datos, favor de verificar',
+                  null));
             }
           } else {
+            Map<String, dynamic> jsonMap = jsonDecode(apiResponse.body);
+            String description = jsonMap['description'];
+            Map<dynamic, String> response = {
+              apiResponse.statusCode: description
+            };
+
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  (_model.apiResultxgr?.jsonBody ?? '').toString(),
-                  style: FlutterFlowTheme.of(context).labelMedium.override(
-                        fontFamily: 'Roboto',
-                        color: Color(0xFF130C0D),
-                        fontWeight: FontWeight.w500,
-                      ),
-                ),
-                action: SnackBarAction(
-                    label: 'Cerrar mensaje',
-                    textColor: FlutterFlowTheme.of(context).info,
-                    backgroundColor: Colors.black12,
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                    }),
-                duration: Duration(milliseconds: 9000),
-                backgroundColor: FlutterFlowTheme.of(context).secondary,
-              ),
-            );
+                customScaffoldMesg(context, response.toString(), null)
+                // SnackBar(
+                //   content: Text(
+                //     (apiResponse.toString()).toString(),
+                //     style: FlutterFlowTheme.of(context).labelMedium.override(
+                //           fontFamily: 'Roboto',
+                //           color: Color(0xFF130C0D),
+                //           fontWeight: FontWeight.w500,
+                //         ),
+                //   ),
+                //   action: SnackBarAction(
+                //       label: 'Cerrar mensaje',
+                //       textColor: FlutterFlowTheme.of(context).info,
+                //       backgroundColor: Colors.black12,
+                //       onPressed: () {
+                //         ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                //       }),
+                //   duration: Duration(milliseconds: 9000),
+                //   backgroundColor: FlutterFlowTheme.of(context).secondary,
+                // ),
+                );
           }
 
           setState(() {});
@@ -179,8 +213,9 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
           _model.textController2.text = '';
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
+              elevation: 20,
               content: Text(
-                'Favor de verificar su contraseña',
+                'Favor de no dejar campos en blanco',
                 style: FlutterFlowTheme.of(context).labelMedium.override(
                       fontFamily: 'Roboto',
                       color: Color(0xFF130C0D),
@@ -200,6 +235,9 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
           );
         }
       } catch (e) {
+        setState(() {
+          isLoading = false;
+        });
         // _model.textController2.text = '';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -240,9 +278,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                   Container(
                     decoration: BoxDecoration(
                       image: DecorationImage(
-                        image: NetworkImage(
-                          'https://oxschool.edu.mx/img/consulta-header.jpg',
-                        ),
+                        image:
+                            AssetImage('assets/images/background-header.jpg'),
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -329,11 +366,14 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                               EdgeInsetsDirectional.fromSTEB(
                                                   0.0, 0.0, 0.0, 16.0),
                                           child: TextFormField(
+                                            autofocus: true,
                                             enableSuggestions: true,
                                             controller: _model.textController1,
                                             obscureText: false,
+                                            keyboardType: TextInputType.number,
+                                            maxLength: 8,
                                             decoration: InputDecoration(
-                                              labelText: 'Email',
+                                              labelText: 'Numero de empleado',
                                               hintStyle:
                                                   FlutterFlowTheme.of(context)
                                                       .bodyLarge,
@@ -375,6 +415,9 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                             ),
                                             style: FlutterFlowTheme.of(context)
                                                 .bodyLarge,
+                                            validator: _model
+                                                .textController1Validator
+                                                .asValidator(context),
                                           ),
                                         ),
                                         Padding(
@@ -382,16 +425,32 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                               EdgeInsetsDirectional.fromSTEB(
                                                   0.0, 0.0, 0.0, 16.0),
                                           child: TextFormField(
-                                            autofocus: true,
+                                            // autofocus: true,
                                             // When the user press enter or send key
                                             onFieldSubmitted: (value) async {
-                                              setState(() {
-                                                isLoading = true;
-                                              });
-                                              await loginButtonFunction()
-                                                  .whenComplete(() {
-                                                isLoading = false;
-                                              });
+                                              if (_model.textController1.text !=
+                                                      '' &&
+                                                  _model.textController2.text !=
+                                                      '') {
+                                                setState(() {
+                                                  isLoading = true;
+                                                });
+                                                await loginButtonFunction()
+                                                    .whenComplete(() {
+                                                  isLoading = false;
+                                                });
+                                              } else {
+                                                setState(() {
+                                                  isLoading = false;
+                                                });
+                                              }
+                                              // setState(() {
+                                              //   isLoading = true;
+                                              // });
+                                              // await loginButtonFunction()
+                                              //     .whenComplete(() {
+                                              //   isLoading = false;
+                                              // });
                                             },
                                             controller: _model.textController2,
                                             obscureText:
@@ -516,7 +575,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                         0.0, 4.0, 0.0, 4.0),
                                                 child: TextButton(
                                                   onPressed: () {
-                                                    _displayTextInputDialog(
+                                                    _displayForgotPassword(
                                                         context);
                                                   },
                                                   child: Text(
@@ -560,9 +619,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                   Container(
                     decoration: BoxDecoration(
                       image: DecorationImage(
-                        image: NetworkImage(
-                          'https://oxschool.edu.mx/img/consulta-header.jpg',
-                        ),
+                        image:
+                            AssetImage('assets/images/background-header.jpg'),
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -586,7 +644,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                               padding: EdgeInsetsDirectional.fromSTEB(
                                   0.0, 32.0, 0.0, 32.0),
                               child: Container(
-                                width: MediaQuery.of(context).size.width / 2,
+                                width: MediaQuery.of(context).size.width / 3,
                                 height: 177.0,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(16.0),
@@ -607,8 +665,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                               padding: EdgeInsetsDirectional.fromSTEB(
                                   12.0, 12.0, 12.0, 12.0),
                               child: Container(
-                                width: MediaQuery.of(context).size.width /
-                                    2, //double.infinity,
+                                width: MediaQuery.of(context).size.width,
+                                // /    3, //double.infinity,
                                 decoration: BoxDecoration(
                                   color: FlutterFlowTheme.of(context)
                                       .secondaryBackground,
@@ -649,11 +707,14 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                               EdgeInsetsDirectional.fromSTEB(
                                                   0.0, 0.0, 0.0, 16.0),
                                           child: TextFormField(
+                                            autofocus: true,
                                             enableSuggestions: true,
                                             controller: _model.textController1,
                                             obscureText: false,
+                                            keyboardType: TextInputType.number,
+                                            maxLength: 8,
                                             decoration: InputDecoration(
-                                              labelText: 'Email',
+                                              labelText: 'Numero de empleado',
                                               hintStyle:
                                                   FlutterFlowTheme.of(context)
                                                       .bodySmall,
@@ -695,6 +756,9 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                             ),
                                             style: FlutterFlowTheme.of(context)
                                                 .bodyLarge,
+                                            validator: _model
+                                                .textController2Validator
+                                                .asValidator(context),
                                           ),
                                         ),
                                         Padding(
@@ -702,9 +766,24 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                               EdgeInsetsDirectional.fromSTEB(
                                                   0.0, 0.0, 0.0, 16.0),
                                           child: TextFormField(
-                                            autofocus: true,
+                                            // autofocus: true,
                                             onFieldSubmitted: (value) async {
-                                              loginButtonFunction();
+                                              if (_model.textController1.text !=
+                                                      '' &&
+                                                  _model.textController2.text !=
+                                                      '') {
+                                                setState(() {
+                                                  isLoading = true;
+                                                });
+                                                await loginButtonFunction()
+                                                    .whenComplete(() {
+                                                  isLoading = false;
+                                                });
+                                              } else {
+                                                setState(() {
+                                                  isLoading = false;
+                                                });
+                                              }
                                             },
                                             controller: _model.textController2,
                                             obscureText:
@@ -784,7 +863,17 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                   0.0, 0.0, 0.0, 16.0),
                                           child: FFButtonWidget(
                                             onPressed: () async {
-                                              loginButtonFunction();
+                                              if (_model.textController1.text !=
+                                                      '' &&
+                                                  _model.textController2.text !=
+                                                      '') {
+                                                loginButtonFunction();
+                                              } else {
+                                                setState(() {
+                                                  isLoading = false;
+                                                });
+                                              }
+                                              // loginButtonFunction();
                                             },
                                             text: 'Ingresar',
                                             options: FFButtonOptions(
@@ -821,7 +910,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                         0.0, 4.0, 0.0, 4.0),
                                                 child: TextButton(
                                                   onPressed: () {
-                                                    _displayTextInputDialog(
+                                                    _displayForgotPassword(
                                                         context);
                                                   },
                                                   child: Text(
@@ -861,7 +950,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
 
 TextEditingController _textFieldController = TextEditingController();
 
-Future<void> _displayTextInputDialog(BuildContext context) async {
+Future<void> _displayForgotPassword(BuildContext context) async {
   return showDialog(
     context: context,
     builder: (context) {
@@ -897,39 +986,25 @@ Future<void> _displayTextInputDialog(BuildContext context) async {
   );
 }
 
-User userLogedIn(List<dynamic> jsonList) {
+User parseLogedInUserFromJSON(List<dynamic> jsonList) {
   late User currentUser;
+  late List<dynamic> events = [];
 
   for (var i = 0; i < jsonList.length; i++) {
     if (i == 0) {
-      //So we only get jsonList[0]
       int employeeNumber = jsonList[i]['NoEmpleado'];
       String employeeName = jsonList[i]['Nombre_Gafete'];
-      int idLogin = jsonList[i]['idLogin'];
-      int isTeacher = jsonList[i]['EsMaestro'];
-      int isWorker = jsonList[i]['EsTrabajador'];
       String claUn = jsonList[i]['ClaUn'];
-      String claLogin = jsonList[i]['ClaLogin'];
-      String token = jsonList[1]['token']; //Token is stored at jsonList[1]
-      currentUser = User(claLogin, claUn, employeeName, employeeNumber, idLogin,
-          isWorker, isTeacher, token);
+      String role = jsonList[i]['RoleName'];
+      int userId = jsonList[i]['id'];
+      String token = jsonList[1]['token'];
+      String schoolEmail = jsonList[i]['user_email'];
+      String usergenre = jsonList[i]['genre'];
+      int isActive = jsonList[i]['bajalogicasino'];
+      currentUser = User(claUn, employeeName, employeeNumber, role, userId,
+          token, schoolEmail, usergenre, isActive);
     }
   }
-  // Iterate through the list and split each item into variables
-  // for (var item in jsonList) {
-  //   int employeeNumber = item['NoEmpleado'];
-  //   String employeeName = item['Nombre_Gafete'];
-  //   int idLogin = item['idLogin'];
-  //   int isTeacher = item['EsMaestro'];
-  //   int isWorker = item['EsTrabajador'];
-  //   String claUn = item['ClaUn'];
-  //   String claLogin = item['ClaLogin'];
-  //   String token = jsonList[1]['token'];
-  //   // int notActive = item['Bajalogicasino'];
-
-  //   currentUser = User(claLogin, claUn, employeeName, employeeNumber, idLogin,
-  //       isWorker, isTeacher, token);
-  // }
   userToken = currentUser.token;
   return currentUser;
 }
@@ -941,7 +1016,6 @@ Cycle getcurrentCycle(List<dynamic> jsonList) {
     String claCiclo = item['ClaCiclo'];
     String fecIniCiclo = item['FecIniCiclo'];
     String fecFinCiclo = item['FecFinCiclo'];
-
     currentCycle = Cycle(claCiclo, fecIniCiclo, fecFinCiclo);
   }
 

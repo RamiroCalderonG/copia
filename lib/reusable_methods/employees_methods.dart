@@ -32,17 +32,17 @@ getEmployee(
     if (numberOfRecords >= 1) {
       for (var jsonItem in jsonList) {
         Employee employee = Employee(
-          jsonItem['employeeID'],
-          jsonItem['name'],
-          jsonItem['firstLastName'],
-          jsonItem['secondLastName'],
-          jsonItem['workPosition'],
-          jsonItem['workArea'],
-          jsonItem['birthDate'] != null
-              ? DateTime.parse(jsonItem['birthDate']).toString()
-              : null,
-          jsonItem['disabled'],
-        );
+            jsonItem['employeeID'],
+            jsonItem['name'],
+            jsonItem['firstLastName'],
+            jsonItem['secondLastName'],
+            jsonItem['workPosition'],
+            jsonItem['workArea'],
+            jsonItem['birthDate'] != null
+                ? DateTime.parse(jsonItem['birthDate']).toString()
+                : null,
+            jsonItem['disabled'],
+            jsonItem['genre']);
         employeeResultList.add(employee);
       }
     } else {

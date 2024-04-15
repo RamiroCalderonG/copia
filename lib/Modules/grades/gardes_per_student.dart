@@ -164,7 +164,7 @@ class _GradesPerStudentState extends State<GradesPerStudent> {
           children: [
             SizedBox(width: 100),
             Container(
-                margin: EdgeInsets.only(top: 20),
+                margin: EdgeInsets.only(top: 20, bottom: 20),
                 padding: EdgeInsets.all(1),
                 child: Row(
                   children: [
@@ -242,8 +242,8 @@ class _GradesPerStudentState extends State<GradesPerStudent> {
         Divider(thickness: 1),
         Container(
           width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          margin: EdgeInsets.all(9),
+          height: MediaQuery.of(context).size.height / 1.5,
+          margin: EdgeInsets.all(20),
           child: PlutoGrid(columns: assignaturesColumns, rows: assignatureRows),
         )
       ],

@@ -77,6 +77,10 @@ dependencies:
       path: plugins/window_size
   printing: ^5.11.1
   pdf: ^3.10.7
+  get: ^4.6.6
+  pluto_grid_export: ^1.0.6
+  file_saver: ^0.2.6
+  flutter_dotenv: ^5.1.0
       #ref: 927f8cbc09b35d85245c095f2db8f9b186f6618
 
 dev_dependencies:
@@ -111,6 +115,8 @@ flutter:
     - assets/rive_animations/
     - assets/pdfs/
     - assets/fonts/SoraFont/
+    - assets/fonts/SoraFont/static/
+    - lib/oxschool.env
  
   
 

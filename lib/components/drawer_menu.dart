@@ -3,6 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/Modules/enfermeria/ficha_de_salud.dart';
 import 'package:oxschool/flutter_flow/flutter_flow_util.dart';
+import 'package:oxschool/reusable_methods/temp_data_functions.dart';
 import '../Modules/grades/grades_view_capture.dart';
 import '../Modules/services_ticket/processes/services_main_screen.dart';
 
@@ -200,6 +201,7 @@ class _DrawerClassState extends State<DrawerClass> {
             onTap: () {
               // clearStudentData();
               clearUserData();
+              clearTempData();
 
               context.goNamed(
                 '_initialize',

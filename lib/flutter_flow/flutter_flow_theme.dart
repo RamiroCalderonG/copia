@@ -130,6 +130,7 @@ class LightModeTheme extends FlutterFlowTheme {
       Color.fromRGBO(235, 48, 69, 0.988); //fromARGB(232, 252, 37, 41);
   // late Color primary = Color.fromARGB(255, 235, 47, 69);
   late Color secondary = Color.fromARGB(255, 219, 29, 42);
+  late Color alternativeColor = Color.fromARGB(173, 10, 135, 219);
   late Color tertiary = const Color(0xFF0299FF);
   late Color alternate = const Color(0xFFE3E7ED);
   late Color primaryText = const Color(0xFF14181B);
@@ -310,6 +311,7 @@ class DarkModeTheme extends FlutterFlowTheme {
 
   late Color primary = Color.fromRGBO(235, 48, 69, 0.988);
   // late Color primary = const Color(0xFFF83B46);
+  late Color alternativeColor = Color.fromARGB(173, 10, 135, 219);
   late Color secondary = const Color(0xFFFF6A73);
   late Color tertiary = const Color(0xFF0299FF);
   late Color alternate = const Color(0xFF262D34);
