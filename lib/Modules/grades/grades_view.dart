@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
-import '../flutter_flow/flutter_flow_theme.dart';
+import '../../flutter_flow/flutter_flow_theme.dart';
 
-class GradesViewScreen extends StatefulWidget {
-  const GradesViewScreen({super.key});
+class CaptureGradesScreen extends StatefulWidget {
+  const CaptureGradesScreen({super.key});
 
   @override
-  State<GradesViewScreen> createState() => _GradesViewScreenState();
+  State<CaptureGradesScreen> createState() => _CaptureGradesScreenState();
 }
 
-class _GradesViewScreenState extends State<GradesViewScreen>
+class _CaptureGradesScreenState extends State<CaptureGradesScreen>
     with TickerProviderStateMixin {
   bool showGrid = false; // Flag to control grid visibility
 

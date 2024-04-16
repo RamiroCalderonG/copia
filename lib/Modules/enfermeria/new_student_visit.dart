@@ -9,11 +9,11 @@ import 'package:oxschool/flutter_flow/flutter_flow_theme.dart';
 import 'package:oxschool/reusable_methods/nursery_methods.dart';
 import 'package:oxschool/utils/loader_indicator.dart';
 
-import '../backend/api_requests/api_calls.dart';
-import '../backend/api_requests/api_manager.dart';
-import '../constants/User.dart';
-import '../reusable_methods/employees_methods.dart';
-import '../utils/temp_data.dart';
+import '../../backend/api_requests/api_calls.dart';
+import '../../backend/api_requests/api_manager.dart';
+import '../../constants/User.dart';
+import '../../reusable_methods/employees_methods.dart';
+import '../../utils/temp_data.dart';
 
 class NewStudentNurseryVisit extends StatefulWidget {
   const NewStudentNurseryVisit({super.key});

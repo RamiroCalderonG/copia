@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
+import 'package:oxschool/components/pdf_viewer_screen.dart';
 import 'package:oxschool/constants/Student.dart';
 import 'package:oxschool/constants/User.dart';
-import 'package:oxschool/enfermeria/new_student_visit.dart';
+import 'package:oxschool/Modules/enfermeria/new_student_visit.dart';
 import 'package:oxschool/reusable_methods/causes_methods.dart';
 import 'package:oxschool/reusable_methods/employees_methods.dart';
 import 'package:oxschool/reusable_methods/nursery_methods.dart';
 import 'package:oxschool/utils/loader_indicator.dart';
+
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
 class ExpandableFABNursery extends StatefulWidget {
   const ExpandableFABNursery({super.key});
@@ -17,6 +22,7 @@ class ExpandableFABNursery extends StatefulWidget {
 }
 
 class ExpandableFABNurseryState extends State<ExpandableFABNursery> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final _key = GlobalKey<ExpandableFabState>();
   bool isLoading = false;
 
@@ -128,11 +134,11 @@ class ExpandableFABNurseryState extends State<ExpandableFABNursery> {
                 'Agregar medicamento autorizado',
                 style: TextStyle(color: Colors.black),
               ),
-              icon: Icon(Icons.medication),
+              icon: Icon(Icons.edit),
               shape: ContinuousRectangleBorder(
                 borderRadius: BorderRadius.circular(20.0),
               ),
-              tooltip: 'Agregar medicamento autorizado',
+              tooltip: 'Editar información de ficha médica',
               heroTag: null,
               // child: const Icon(Icons.edit),
               onPressed: () {
@@ -142,11 +148,70 @@ class ExpandableFABNurseryState extends State<ExpandableFABNursery> {
               },
               backgroundColor: Colors.blueAccent,
             ),
+            FloatingActionButton.extended(
+              label: Text(
+                'Impresión de fichas',
+                style: TextStyle(color: Colors.black),
+              ),
+              icon: Icon(Icons.print),
+              shape: ContinuousRectangleBorder(
+                borderRadius: BorderRadius.circular(20.0),
+              ),
+              tooltip: 'Impresión de fichas',
+              heroTag: null,
+              // child: const Icon(Icons.edit),
+              onPressed: () {
+                // Navigator.pop(context);
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => MyStatefulWidget()));
+              },
+              backgroundColor: Colors.blueAccent,
+            ),
           ],
         ),
         if (isLoading) CustomLoadingIndicator()
       ],
     );
+  }
+
+  pw.Document generatePdf() {
+    final pdf = pw.Document();
+    pdf.addPage(
+      pw.Page(
+        build: (context) {
+          return pw.Center(
+            child: pw.Text('Hello, World!', style: pw.TextStyle(fontSize: 20)),
+          );
+        },
+      ),
+    );
+    return pdf;
+  }
+
+  void printPdf() async {
+    try {
+      setState(() {
+        isLoading = true;
+      });
+
+      Printing.layoutPdf(onLayout: (PdfPageFormat format) {
+        return generatePdf().save();
+      });
+
+      // Show a SnackBar to inform the user that the PDF is being processed
+      // _scaffoldKey.currentState?.showSnackBar(
+      //   SnackBar(
+      //     content: Text('Processing PDF...'),
+      //     duration: Duration(seconds: 2),
+      //   ),
+      // );
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 }
 

@@ -1,9 +1,11 @@
-
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:oxschool/constants/User.dart';
-import 'package:oxschool/enfermeria/ficha_de_salud.dart';
+import 'package:oxschool/Modules/enfermeria/ficha_de_salud.dart';
 import 'package:oxschool/flutter_flow/flutter_flow_util.dart';
-import '../grades/grades_view_capture.dart';
+import 'package:oxschool/reusable_methods/temp_data_functions.dart';
+import '../Modules/grades/grades_view_capture.dart';
+import '../Modules/services_ticket/processes/services_main_screen.dart';
 
 class DrawerClass extends StatefulWidget {
   const DrawerClass({super.key});
@@ -32,7 +34,7 @@ class _DrawerClassState extends State<DrawerClass> {
               ))),
           ExpansionTile(
             title: const Text('Enfermeria'),
-            leading: const Icon(Icons.supervised_user_circle_outlined),
+            leading: const Icon(Icons.healing),
             childrenPadding: const EdgeInsets.only(left: 60),
             children: [
               ListTile(
@@ -50,10 +52,10 @@ class _DrawerClassState extends State<DrawerClass> {
               ),
               ListTile(
                 title: const Text(
-                  'Otra cosa',
+                  'Alumnos con Padecimiento',
                   style: TextStyle(fontFamily: 'Roboto'),
                 ),
-                leading: const Icon(Icons.grid_4x4_outlined),
+                leading: const Icon(Icons.grid_4x4),
                 onTap: () {
                   // Navigator.pop(context);
                   // Navigator.push(
@@ -65,16 +67,16 @@ class _DrawerClassState extends State<DrawerClass> {
             ],
           ),
           ExpansionTile(
-            title: const Text('Calificaciones'),
-            leading: const Icon(Icons.face),
+            title: const Text('Academic Jr. & Middle School'),
+            leading: const Icon(Icons.grade),
             childrenPadding: const EdgeInsets.only(left: 60),
             children: [
               ListTile(
                 title: const Text(
-                  'Capturar calificaciones',
-                  style: TextStyle(fontFamily: 'Roboto'),
+                  'Calificaciones',
+                  // style: TextStyle(fontFamily: 'Sora'),
                 ),
-                leading: Icon(Icons.add),
+                leading: Icon(Icons.school),
                 onTap: () {
                   Navigator.pop(context);
                   Navigator.push(
@@ -84,32 +86,64 @@ class _DrawerClassState extends State<DrawerClass> {
                 },
               ),
               ListTile(
-                title: const Text('Otra cosa'),
-                leading: const Icon(Icons.grid_on),
+                title: const Text('Disciplina'),
+                leading: const Icon(Icons.directions_run_outlined),
                 onTap: () {},
+              ),
+              ListTile(
+                title: const Text('Reportes'),
+                leading: const Icon(Icons.note),
+                onTap: () {},
+              ),
+              ListTile(
+                title: const Text('Reconocimientos'),
+                leading: const FaIcon(FontAwesomeIcons.award),
+                onTap: () {},
+              ),
+              ListTile(
+                title: const Text('Bajo rendimiento'),
+                leading: const FaIcon(FontAwesomeIcons.arrowDown),
+              ),
+              ListTile(
+                title: const Text('Indicadores'),
+                leading: const FaIcon(FontAwesomeIcons.chartColumn),
+              ),
+              ListTile(
+                title: const Text('Configure'),
+                leading: const FaIcon(FontAwesomeIcons.gears),
               )
             ],
           ),
           ExpansionTile(
-            title: const Text('Otro modulo'),
-            leading: const Icon(Icons.store),
+            title: const Text('Servicios'),
+            leading: const Icon(Icons.density_small_sharp),
             childrenPadding: const EdgeInsets.only(left: 60),
             children: [
               ListTile(
                 title: const Text(
-                  'Accion de modulo',
+                  'Procesos',
                   style: TextStyle(fontFamily: 'Roboto'),
                 ),
-                leading: const Icon(Icons.point_of_sale),
+                leading: const Icon(Icons.grid_view_sharp),
                 onTap: () {
-                  // Navigator.pop(context);
-                  // Navigator.push(context,
-                  //     MaterialPageRoute(builder: (context) => PointOfSale()));
+                  Navigator.pop(context);
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ServicesTicketHistory()));
                 },
               ),
               ListTile(
                 title: const Text(
-                  'Otra accion',
+                  'Consultas',
+                  style: TextStyle(fontFamily: 'Roboto'),
+                ),
+                leading: const Icon(Icons.info),
+                onTap: () {},
+              ),
+              ListTile(
+                title: const Text(
+                  'Reportes',
                   style: TextStyle(fontFamily: 'Roboto'),
                 ),
                 leading: const Icon(Icons.grid_on_outlined),
@@ -117,19 +151,21 @@ class _DrawerClassState extends State<DrawerClass> {
               ),
               ListTile(
                 title: const Text(
-                  'Cosas',
-                  style: TextStyle(fontFamily: 'Roboto'),
-                ),
-                leading: const Icon(Icons.grid_on_outlined),
-                onTap: () {},
-              ),
-              ListTile(
-                title: const Text(
-                  'Mas cosas',
+                  'Indicadores',
                   style: TextStyle(fontFamily: 'Roboto'),
                 ),
                 leading: const Icon(
-                  Icons.add_circle,
+                  Icons.bar_chart,
+                ),
+                onTap: () {},
+              ),
+              ListTile(
+                title: const Text(
+                  'Administracion',
+                  style: TextStyle(fontFamily: 'Roboto'),
+                ),
+                leading: const Icon(
+                  Icons.settings,
                 ),
                 onTap: () {},
               )
@@ -165,6 +201,7 @@ class _DrawerClassState extends State<DrawerClass> {
             onTap: () {
               // clearStudentData();
               clearUserData();
+              clearTempData();
 
               context.goNamed(
                 '_initialize',

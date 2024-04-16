@@ -7,9 +7,18 @@ class Employee {
   String? workArea;
   DateTime? birthDate;
   bool? disabled;
+  String? genre;
 
-  Employee(this.employeeID, this.name, this.firstLastName, this.secondLastName,
-      this.birthDate, this.workArea, this.workPosition, this.disabled);
+  Employee(
+      this.employeeID,
+      this.name,
+      this.firstLastName,
+      this.secondLastName,
+      this.birthDate,
+      this.workArea,
+      this.workPosition,
+      this.disabled,
+      this.genre);
 
   Map<dynamic, dynamic> toJson() => {
         'EmployeeId': employeeID,
@@ -19,6 +28,7 @@ class Employee {
         'BirthDate': "${birthDate?.year.toString()}",
         "Area": workArea,
         "Puesto": workPosition,
-        "bajalogicaSiNo": disabled
+        "bajalogicaSiNo": disabled,
+        "genre": genre
       };
 }
