@@ -11,6 +11,9 @@ List<dynamic> tmpRolesList = [];
 List<dynamic> userRoles = [];
 List<dynamic> tmpeventsList = [];
 List<Map<String, dynamic>> eventsLisToShow = [];
+List<String> campuseList = [];
+List<String> areaList = [];
+
 //var
 
 void cleatTempData() async {
@@ -24,4 +27,5 @@ void cleatTempData() async {
   userRoles.clear();
   tmpeventsList.clear();
   eventsLisToShow.clear();
+  campuseList.clear();
 }

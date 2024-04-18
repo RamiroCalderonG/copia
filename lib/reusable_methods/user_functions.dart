@@ -21,9 +21,23 @@ List<User> parseUsersFromJSON(List<dynamic> jsonList) {
     String schoolEmail = item['user_email'];
     String usergenre = item['genre'];
     int isActive = item['bajalogicasino'];
+    String? work_Area = item['department'];
+    String? work_position = item['positon'];
+    DateTime? creationDate = item['createdAt'];
 
-    User currentUser = User(claUn, employeeName, employeeNumber, role, userId,
-        token, schoolEmail, usergenre, isActive);
+    User currentUser = User(
+        claUn,
+        employeeName,
+        employeeNumber,
+        role,
+        userId,
+        token,
+        schoolEmail,
+        usergenre,
+        isActive,
+        work_Area,
+        work_position,
+        creationDate);
 
     users.add(currentUser);
   }
@@ -56,9 +70,23 @@ dynamic getSingleUser(String? userId) async {
         var usergenre = jsonList[i]['genre'];
         var isActive = jsonList[i]['bajalogicasino'];
         var userId = 0;
+        String? work_Area = jsonList[i]['department'];
+        String? work_position = jsonList[i]['positon'];
+        DateTime? creationDate = jsonList[i]['createdAt'];
 
-        tempSelectedUsr = User(claUn, employeeName, employeeNumber, role,
-            userId, token, userEmail, usergenre, isActive);
+        tempSelectedUsr = User(
+            claUn,
+            employeeName,
+            employeeNumber,
+            role,
+            userId,
+            token,
+            userEmail,
+            usergenre,
+            isActive,
+            work_Area,
+            work_position,
+            creationDate);
       }
       return tempSelectedUsr;
     } catch (e) {
