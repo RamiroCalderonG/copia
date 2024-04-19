@@ -17,10 +17,10 @@ class NewUserScreen extends StatefulWidget {
 }
 
 // List<String> areaList = [];
-String areaSelector = areaList.first;
+String areaSelector = ''; //areaList.first;
 
 List<String> roleNames = [];
-String roleSelector = roleNames.first;
+String roleSelector = ''; //roleNames.first;
 // List<String> roleList = [
 //   'Administrator',
 //   'Maestro',
@@ -32,7 +32,7 @@ String? _selectedGender;
 DateTime? _selectedBirthdate;
 DateTime? _creationDate;
 bool isLoading = false;
-String campuseSelector = campuseList.first;
+String campuseSelector = ''; //= campuseList.first;
 
 class _NewUserScreenState extends State<NewUserScreen> {
   final _formKey = GlobalKey<FormState>();
@@ -48,7 +48,14 @@ class _NewUserScreenState extends State<NewUserScreen> {
   @override
   void initState() {
     super.initState();
+
     roleNames = tmpRolesList.map((role) => role["Role"] as String).toList();
+    roleNames.first;
+    campuseSelector = campuseList.first;
+    areaSelector = areaList.first;
+    roleSelector = roleNames.first;
+    _selectedBirthdate = null;
+    _creationDate = null;
   }
 
   @override
@@ -363,7 +370,7 @@ class _NewUserScreenState extends State<NewUserScreen> {
                         _creationDate != null
                             ? Text(
                                 DateFormat('yyyy-MM-dd').format(_creationDate!))
-                            : Text(''),
+                            : Text(_creationDate.toString()),
                         Divider(thickness: 1),
                         ElevatedButton(
                           onPressed: () {
@@ -387,25 +394,6 @@ class _NewUserScreenState extends State<NewUserScreen> {
                     ),
                   ],
                 )),
-                // Expanded(
-                //     child: Column(
-                //   children: [
-                //     Column(
-                //       children: <Widget>[
-                //         _creationDate != null
-                //             ? Text(
-                //                 DateFormat('yyyy-MM-dd').format(_creationDate!))
-                //             : Text(''),
-                //         // Divider(thickness: 1),
-                //         ElevatedButton(
-                //           onPressed: () => _selectDate(context, _creationDate),
-                //           child: Text('Fecha de alta'),
-                //         ),
-                //         SizedBox(width: 16.0),
-                //       ],
-                //     ),
-                //   ],
-                // )),
               ],
             ),
             ElevatedButton(
@@ -438,7 +426,7 @@ class _NewUserScreenState extends State<NewUserScreen> {
                           );
                         });
                   } else {
-                    var newUser = {
+                    Map<String, dynamic> newUser = {
                       'employeeNumber': int.parse(_employeeNumber.text),
                       'employeeName': _userName.text,
                       'claUn': campuseSelector,
@@ -448,30 +436,15 @@ class _NewUserScreenState extends State<NewUserScreen> {
                       'bajalogicasino': 1,
                       'department': areaSelector,
                       'position': '',
-                      'birthdate': _selectedBirthdate.toString(),
-                      'creationDate': _creationDate.toString(),
+                      'birthdate': _selectedBirthdate!.toIso8601String(),
+                      'creationDate': _creationDate!.toIso8601String(),
                       'createdBy': currentUser!.employeeNumber
                     };
-                    // User(
-                    //         campuseSelector,
-                    //         _userName.text,
-                    //         int.parse(_employeeNumber.text),
-                    //         roleSelector,
-                    //         0,
-                    //         '',
-                    //         _userEmail.text,
-                    //         _selectedGender,
-                    //         1,
-                    //         areaSelector,
-                    //         '',
-                    //         DateTime.now())
-                    //     .toJson();
 
                     try {
                       setState(() {
                         isLoading = true;
                       });
-//TODO: REMOVE WHENCOMPLETE AND INCLUDE A VALIDATION
                       var statusCode = await createUser(newUser);
 
                       if (statusCode == 200) {
@@ -485,7 +458,7 @@ class _NewUserScreenState extends State<NewUserScreen> {
                           _isTeacher.clear();
                           _selectedBirthdate = null;
                         });
-                        Navigator.of(context).pop();
+                        // Navigator.of(context).pop();
                         showDialog(
                             context: context,
                             builder: (context) => AlertDialog(
@@ -502,31 +475,10 @@ class _NewUserScreenState extends State<NewUserScreen> {
                                     )
                                   ],
                                 ));
-                        // ScaffoldMessenger.of(context).showSnackBar(
-                        //   SnackBar(
-                        //     content: Text(
-                        //       ('Exito'),
-                        //       style: FlutterFlowTheme.of(context)
-                        //           .labelMedium
-                        //           .override(
-                        //             fontFamily: 'Roboto',
-                        //             color: Color(0xFF130C0D),
-                        //             fontWeight: FontWeight.w500,
-                        //           ),
-                        //     ),
-                        //     // action: SnackBarAction(
-                        //     //     label: 'Cerrar mensaje',
-                        //     //     textColor: FlutterFlowTheme.of(context).info,
-                        //     //     backgroundColor: Colors.black12,
-                        //     //     onPressed: () {
-                        //     //       ScaffoldMessenger.of(context)
-                        //     //           .hideCurrentSnackBar();
-                        //     //     }),
-                        //     duration: Duration(milliseconds: 5000),
-                        //     backgroundColor:
-                        //         FlutterFlowTheme.of(context).success,
-                        //   ),
-                        // );
+                      } else {
+                        setState(() {
+                          isLoading = false;
+                        });
                       }
                     } catch (e) {
                       throw Exception(e.toString());

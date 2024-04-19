@@ -21,9 +21,10 @@ List<User> parseUsersFromJSON(List<dynamic> jsonList) {
     String schoolEmail = item['user_email'];
     String usergenre = item['genre'];
     int isActive = item['bajalogicasino'];
-    String? work_Area = item['department'];
-    String? work_position = item['positon'];
-    DateTime? creationDate = item['createdAt'];
+    String? work_Area = item['work_department'];
+    String? work_position = item['work_positon'];
+    String creationDate = item['creation'];
+    String? birthdate = item['birthdate'];
 
     User currentUser = User(
         claUn,
@@ -37,7 +38,8 @@ List<User> parseUsersFromJSON(List<dynamic> jsonList) {
         isActive,
         work_Area,
         work_position,
-        creationDate);
+        creationDate,
+        birthdate);
 
     users.add(currentUser);
   }
@@ -55,7 +57,7 @@ bool verifyUserAdmin(User currentUser) {
 
 dynamic getSingleUser(String? userId) async {
   if (userId == null) {
-    userId = tempUserId;
+    userId = tempUserId.toString();
     selectedUser = await getUserDetail(userId!);
     List<dynamic> jsonList = json.decode(selectedUser);
     try {
@@ -72,7 +74,8 @@ dynamic getSingleUser(String? userId) async {
         var userId = 0;
         String? work_Area = jsonList[i]['department'];
         String? work_position = jsonList[i]['positon'];
-        DateTime? creationDate = jsonList[i]['createdAt'];
+        String? creationDate = jsonList[i]['createdAt'];
+        String? birthdate = jsonList[i]['birthdate'];
 
         tempSelectedUsr = User(
             claUn,
@@ -86,7 +89,8 @@ dynamic getSingleUser(String? userId) async {
             isActive,
             work_Area,
             work_position,
-            creationDate);
+            creationDate,
+            birthdate);
       }
       return tempSelectedUsr;
     } catch (e) {

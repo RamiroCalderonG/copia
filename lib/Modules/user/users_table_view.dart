@@ -1,9 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:oxschool/Modules/user/edit_user_screen.dart';
 import 'package:oxschool/backend/api_requests/api_calls_list.dart';
 import 'package:oxschool/components/plutogrid_export_options.dart';
 import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/login_view/login_view_widget.dart';
+import 'package:oxschool/reusable_methods/reusable_functions.dart';
 import 'package:oxschool/reusable_methods/user_functions.dart';
 import 'package:oxschool/temp/users_temp_data.dart';
 import 'package:pluto_grid/pluto_grid.dart';
@@ -38,7 +41,10 @@ class _UsersTableViewState extends State<UsersTableView> {
           'isActive': PlutoCell(value: line.isActive),
           'campus': PlutoCell(value: line.claUn),
           // 'area': PlutoCell(value: user),
-          'mail': PlutoCell(value: line.userEmail)
+          'mail': PlutoCell(value: line.userEmail),
+          'creation': PlutoCell(value: line.creationDate),
+          'birthdate': PlutoCell(value: line.birthdate),
+          'position': PlutoCell(value: line.work_area)
         },
       ));
     }
@@ -82,7 +88,7 @@ class _UsersTableViewState extends State<UsersTableView> {
                           PlutoColumn(
                               title: 'Id',
                               field: 'id',
-                              type: PlutoColumnType.text(),
+                              type: PlutoColumnType.number(),
                               readOnly: true,
                               sort: PlutoColumnSort.ascending,
                               width: 80,
@@ -128,6 +134,18 @@ class _UsersTableViewState extends State<UsersTableView> {
                               field: 'mail',
                               type: PlutoColumnType.text(),
                               readOnly: true),
+                          PlutoColumn(
+                            title: 'Fecha de alta',
+                            field: 'creation',
+                            type: PlutoColumnType.text(),
+                            readOnly: true,
+                          ),
+                          PlutoColumn(
+                              title: 'Posición',
+                              field: 'position',
+                              type: PlutoColumnType.text(),
+                              readOnly: true)
+
                           // PlutoColumn(
                           //   title: 'Foto',
                           //   field: 'photo',
@@ -338,7 +356,11 @@ class _UsersTableViewState extends State<UsersTableView> {
                         },
                         onRowDoubleTap: (event) async {
                           tempUserId = event.row.cells.values.first.value;
+                          tmpRolesList.clear();
                           await getSingleUser(null);
+                          await getWorkDepartmentList();
+                          var response = await getRolesList();
+                          tmpRolesList = jsonDecode(response);
                           updateUserScreen(context);
                         },
                         mode: PlutoGridMode.readOnly,

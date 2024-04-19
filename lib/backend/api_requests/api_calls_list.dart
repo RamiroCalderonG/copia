@@ -340,7 +340,7 @@ Future<dynamic> createRole(Map<String, dynamic> bodyObject) async {
   }
 }
 
-Future<dynamic> createUser(var newUser) async {
+Future<dynamic> createUser(Map<String, dynamic> newUser) async {
   var response;
   try {
     var apiCall = await Requests.post(

@@ -10,7 +10,8 @@ class User {
   int? isActive;
   String? work_area;
   String? work_position;
-  DateTime? creationDate;
+  String? creationDate;
+  String? birthdate;
 
   // late final notActive;
 
@@ -26,7 +27,8 @@ class User {
       this.isActive,
       this.work_area,
       this.work_position,
-      this.creationDate);
+      this.creationDate,
+      this.birthdate);
 
   Map<dynamic, dynamic> toJson() => {
         "employeeNumber": employeeNumber,
@@ -40,7 +42,8 @@ class User {
         "bajalogicasino": isActive,
         "department": work_area,
         "position": work_position,
-        "creationDate": creationDate.toString()
+        "creationDate": creationDate.toString(),
+        "birthdate": birthdate,
 
         // "notActive": notActive
       };
@@ -58,9 +61,22 @@ class User {
       work_area = jsonUser[item]['work_area'];
       work_position = jsonUser[item]['work_position'];
       creationDate = jsonUser[item]['creation_date'];
+      birthdate = jsonUser[item]['birthdate'];
     }
-    return User(claUn, employeeName, employeeNumber, role, userId, token,
-        userEmail, usergenre, isActive, work_area, work_position, creationDate);
+    return User(
+        claUn,
+        employeeName,
+        employeeNumber,
+        role,
+        userId,
+        token,
+        userEmail,
+        usergenre,
+        isActive,
+        work_area,
+        work_position,
+        creationDate,
+        birthdate);
   }
 
   void clear() {
