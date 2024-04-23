@@ -43,7 +43,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
     _userDepartment = tempSelectedUsr!.work_area.toString();
     super.initState();
     roleNames = tmpRolesList.map((role) => role["Role"] as String).toList();
-    departmentsList = areaList.map((e) => e["department"]).toList();
+    // departmentsList = areaList.map((e) => e["department"]).toList();
     if (tempSelectedUsr!.isActive == 1) {
       isUserActive = false;
     } else {

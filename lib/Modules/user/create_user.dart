@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/flutter_flow/flutter_flow_theme.dart';
-import 'package:oxschool/reusable_methods/reusable_functions.dart';
 import 'package:oxschool/temp/users_temp_data.dart';
 
-import '../../Models/User.dart';
 import '../../backend/api_requests/api_calls_list.dart';
 import '../../flutter_flow/flutter_flow_util.dart';
 import '../../utils/loader_indicator.dart';

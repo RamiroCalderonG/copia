@@ -519,6 +519,36 @@ Future<dynamic> getWorkDepartments() async {
   }
 }
 
+Future<dynamic> sendUserPasswordToMail(
+    String employeeNumber, String deviceInfo, String deviceIP) async {
+  // var bodyToSend = {};
+  // Map<String, dynamic> deviceInformation = {'device': deviceInfo};
+  // Map<String, dynamic> deviceIpAddress = {'ip_address': deviceIP};
+
+  // bodyToSend.addEntries(deviceInformation.entries);
+  // bodyToSend.addEntries(deviceIpAddress.entries);
+
+  try {
+    var apiCall = await Requests.get(
+        dotenv.env['HOSTURL']! +
+            dotenv.env['PORT']! +
+            '/login/forgot-password/' +
+            employeeNumber,
+        headers: {
+          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'device': deviceInfo,
+          'ip_address': deviceIp.toString()
+        },
+        persistCookies: false,
+        timeoutSeconds: 10);
+    apiCall.raiseForStatus();
+
+    return apiCall.content();
+  } catch (e) {
+    throw FormatException(e.toString());
+  }
+}
+
 // Future<dynamic> getUserEvents(int userId) async {
 //   var response;
 //   try {

@@ -951,6 +951,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
 TextEditingController _textFieldController = TextEditingController();
 
 Future<void> _displayForgotPassword(BuildContext context) async {
+  _textFieldController..text = '';
   return showDialog(
     context: context,
     builder: (context) {
@@ -960,10 +961,11 @@ Future<void> _displayForgotPassword(BuildContext context) async {
           style: TextStyle(fontFamily: 'Sora'),
         ),
         content: TextField(
+          autofocus: true,
           controller: _textFieldController,
           decoration: InputDecoration(
-              hintText: "Introducir Numero de empleado",
-              helperText: 'Le enviaremos un correo',
+              hintText: "Numero de empleado",
+              helperText: 'Ingrese su numero de empleado',
               icon: Icon(Icons.numbers)),
         ),
         actions: <Widget>[
@@ -975,9 +977,27 @@ Future<void> _displayForgotPassword(BuildContext context) async {
           ),
           TextButton(
             child: Text('OK'),
-            onPressed: () {
-              print(_textFieldController.text);
+            onPressed: () async {
+              await sendUserPasswordToMail(_textFieldController.text,
+                  deviceInformation.toString(), deviceIP);
               Navigator.pop(context);
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text("Solicitud enviada"),
+                      content: Text(
+                          "Si los resultados coinciden, recibirá en su correo su contraseña"),
+                      icon: (Icon(Icons.beenhere_outlined)),
+                      actions: [
+                        TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: Text('OK'))
+                      ],
+                    );
+                  });
             },
           ),
         ],

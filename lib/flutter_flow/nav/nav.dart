@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:oxschool/Modules/user/user_events_manager.dart';
 import 'package:oxschool/components/pdf_viewer_screen.dart';
 import 'package:oxschool/main_window/mobile_main_window_widget.dart';
 import 'package:oxschool/Modules/user/user_view_screen.dart';
