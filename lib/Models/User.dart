@@ -8,11 +8,27 @@ class User {
   String? userEmail;
   String? usergenre;
   int? isActive;
+  String? work_area;
+  String? work_position;
+  String? creationDate;
+  String? birthdate;
 
   // late final notActive;
 
-  User(this.claUn, this.employeeName, this.employeeNumber, this.role,
-      this.userId, this.token, this.userEmail, this.usergenre, this.isActive);
+  User(
+      this.claUn,
+      this.employeeName,
+      this.employeeNumber,
+      this.role,
+      this.userId,
+      this.token,
+      this.userEmail,
+      this.usergenre,
+      this.isActive,
+      this.work_area,
+      this.work_position,
+      this.creationDate,
+      this.birthdate);
 
   Map<dynamic, dynamic> toJson() => {
         "employeeNumber": employeeNumber,
@@ -23,7 +39,11 @@ class User {
         "role": role,
         'useremail': userEmail,
         'genre': usergenre,
-        "bajalogicasino": isActive
+        "bajalogicasino": isActive,
+        "department": work_area,
+        "position": work_position,
+        "creationDate": creationDate.toString(),
+        "birthdate": birthdate,
 
         // "notActive": notActive
       };
@@ -38,17 +58,31 @@ class User {
       userEmail = jsonUser[item]['user_email'];
       usergenre = jsonUser[item]['genre'];
       isActive = jsonUser[item]['bajalogicasino'];
+      work_area = jsonUser[item]['work_area'];
+      work_position = jsonUser[item]['work_position'];
+      creationDate = jsonUser[item]['creation_date'];
+      birthdate = jsonUser[item]['birthdate'];
     }
-    return User(claUn, employeeName, employeeNumber, role, userId, token,
-        userEmail, usergenre, isActive);
+    return User(
+        claUn,
+        employeeName,
+        employeeNumber,
+        role,
+        userId,
+        token,
+        userEmail,
+        usergenre,
+        isActive,
+        work_area,
+        work_position,
+        creationDate,
+        birthdate);
   }
 
   void clear() {
     employeeName = null;
     employeeNumber = null;
-
     claUn = null;
-
     token = "";
   }
 }

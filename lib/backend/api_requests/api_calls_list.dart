@@ -1,9 +1,6 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:get/get.dart';
+
 import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/constants/connection.dart';
 
@@ -343,7 +340,7 @@ Future<dynamic> createRole(Map<String, dynamic> bodyObject) async {
   }
 }
 
-Future<dynamic> createUser(var newUser) async {
+Future<dynamic> createUser(Map<String, dynamic> newUser) async {
   var response;
   try {
     var apiCall = await Requests.post(
@@ -363,7 +360,7 @@ Future<dynamic> createUser(var newUser) async {
         persistCookies: false,
         timeoutSeconds: 8);
     apiCall.raiseForStatus();
-    response = apiCall.content();
+    response = apiCall.statusCode;
     return response;
   } catch (e) {
     throw FormatException(e.toString());
@@ -479,12 +476,68 @@ Future<dynamic> getAllModules() async {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
           'token': currentUser!.token
         },
+        persistCookies: false,
+        timeoutSeconds: 10);
+    apiCall.raiseForStatus();
+    return apiCall.content();
+  } catch (e) {
+    throw FormatException(e.toString());
+  }
+}
+
+Future<dynamic> getCampuseList() async {
+  try {
+    var apiCall = await Requests.get(
+        dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/campus',
+        headers: {
+          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'token': currentUser!.token
+        },
         persistCookies: true,
         timeoutSeconds: 10);
     apiCall.raiseForStatus();
     return apiCall.content();
   } catch (e) {
     throw FormatException(e.toString());
+  }
+}
+
+Future<dynamic> getWorkDepartments() async {
+  try {
+    var apiCall = await Requests.get(
+        dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/work-dept',
+        headers: {
+          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'token': currentUser!.token
+        },
+        persistCookies: false,
+        timeoutSeconds: 10);
+    apiCall.raiseForStatus();
+    return apiCall.content();
+  } catch (e) {
+    throw FormatException(e.toString());
+  }
+}
+
+Future<dynamic> sendUserPasswordToMail(
+    String employeeNumber, String deviceInfo, String deviceIP) async {
+  try {
+    var apiCall = await Requests.get(
+        dotenv.env['HOSTURL']! +
+            dotenv.env['PORT']! +
+            '/login/forgot-password/' +
+            employeeNumber,
+        headers: {
+          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'device': deviceInfo,
+          'ip_address': deviceIp.toString()
+        },
+        persistCookies: false,
+        timeoutSeconds: 10);
+    apiCall.raiseForStatus();
+    return 200;
+  } catch (e) {
+    return e;
   }
 }
 

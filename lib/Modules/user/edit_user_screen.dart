@@ -18,7 +18,9 @@ class _EditUserScreenState extends State<EditUserScreen> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   var _userRole;
+  var _userDepartment;
   List<String> roleNames = [];
+  List<String> departmentsList = [];
 
   var isActive;
   var genre;
@@ -27,7 +29,9 @@ class _EditUserScreenState extends State<EditUserScreen> {
   var _userNameUpdated = <String, dynamic>{};
   var _emailUpdated = <String, dynamic>{};
   var _passwordUpdated = <String, dynamic>{};
+  var _isActive = <String, dynamic>{};
   bool isloading = false;
+  bool isUserActive = false;
 
   bool _obscureText = true;
 
@@ -36,8 +40,15 @@ class _EditUserScreenState extends State<EditUserScreen> {
     _emailController.text = tempSelectedUsr!.userEmail.toString();
     _nameController.text = tempSelectedUsr!.employeeName.toString();
     _userRole = tempSelectedUsr!.role.toString();
+    _userDepartment = tempSelectedUsr!.work_area.toString();
     super.initState();
     roleNames = tmpRolesList.map((role) => role["Role"] as String).toList();
+    // departmentsList = areaList.map((e) => e["department"]).toList();
+    if (tempSelectedUsr!.isActive == 1) {
+      isUserActive = false;
+    } else {
+      isUserActive = true;
+    }
   }
 
   String? _validateEmail(String? value) {
@@ -156,19 +167,19 @@ class _EditUserScreenState extends State<EditUserScreen> {
                               )
                             ],
                           ),
-                          SizedBox(height: 46.0),
-                          Row(
-                            children: [
-                              Text(
-                                'Datos personales del ususario',
-                                style: TextStyle(
-                                    fontFamily: 'Sora', color: Colors.grey),
-                              )
-                            ],
-                          ),
-                          Divider(
-                            thickness: 2,
-                          ),
+                          // SizedBox(height: 46.0),
+                          // Row(
+                          //   children: [
+                          //     Text(
+                          //       'Datos personales del ususario',
+                          //       style: TextStyle(
+                          //           fontFamily: 'Sora', color: Colors.grey),
+                          //     )
+                          //   ],
+                          // ),
+                          // Divider(
+                          //   thickness: 2,
+                          // ),
                           SizedBox(height: 20),
                           Row(
                             children: [
@@ -190,6 +201,58 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                   }).toList(),
                                 ),
                               ),
+                              SizedBox(width: 15),
+                              Expanded(
+                                child: SwitchListTile(
+                                  title: Text(
+                                    isUserActive
+                                        ? 'Usuario activo'
+                                        : 'Usuario desactivado',
+                                    style: TextStyle(fontFamily: 'Sora'),
+                                  ),
+                                  value: isUserActive,
+                                  onChanged: (value) async {
+                                    setState(() {
+                                      isloading = true;
+                                      tempSelectedUsr!.isActive = value ? 1 : 0;
+                                      _isActive = {
+                                        'active': tempSelectedUsr!.isActive
+                                      };
+                                      dataToUpdate
+                                          .addEntries(_isActive.entries);
+                                      isUserActive = value;
+                                    });
+                                    setState(() {
+                                      isloading = false;
+                                      isUserActive = value;
+                                    });
+                                  },
+                                  controlAffinity:
+                                      ListTileControlAffinity.trailing,
+                                ),
+                              )
+                            ],
+                          ),
+                          SizedBox(height: 20),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: DropdownButton<String>(
+                                  value: _userDepartment,
+                                  onChanged: (String? newValue) {
+                                    setState(() {
+                                      _userDepartment = newValue!;
+                                    });
+                                  },
+                                  items: areaList.map<DropdownMenuItem<String>>(
+                                      (String value) {
+                                    return DropdownMenuItem<String>(
+                                      value: value,
+                                      child: Text(value),
+                                    );
+                                  }).toList(),
+                                ),
+                              )
                             ],
                           ),
                           ElevatedButton(
@@ -301,7 +364,6 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                             // Navigator.of(context).pop();
                                           }
 
-                                          //TODO : PENDING TO ADD API CALL
                                           // Navigator.of(context).pop();}
                                           // Navigator.of(context).pop();
                                           // // Proceed with registration logic here

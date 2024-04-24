@@ -575,8 +575,14 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                         0.0, 4.0, 0.0, 4.0),
                                                 child: TextButton(
                                                   onPressed: () {
+                                                    setState(() {
+                                                      isLoading = true;
+                                                    });
                                                     _displayForgotPassword(
                                                         context);
+                                                    setState(() {
+                                                      isLoading = false;
+                                                    });
                                                   },
                                                   child: Text(
                                                     'Olvide mi contraseña',
@@ -951,37 +957,135 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
 TextEditingController _textFieldController = TextEditingController();
 
 Future<void> _displayForgotPassword(BuildContext context) async {
+  _textFieldController..text = '';
+  bool isLoading = false; // Flag to track loading state
+
   return showDialog(
     context: context,
     builder: (context) {
-      return AlertDialog(
-        title: Text(
-          'Recuperar contraseña',
-          style: TextStyle(fontFamily: 'Sora'),
-        ),
-        content: TextField(
-          controller: _textFieldController,
-          decoration: InputDecoration(
-              hintText: "Introducir Numero de empleado",
-              helperText: 'Le enviaremos un correo',
-              icon: Icon(Icons.numbers)),
-        ),
-        actions: <Widget>[
-          TextButton(
-            child: Text('CANCEL'),
-            onPressed: () {
-              Navigator.pop(context);
-            },
+      return StatefulBuilder(builder: (context, setState) {
+        return AlertDialog(
+          title: Text(
+            'Recuperar contraseña',
+            style: TextStyle(fontFamily: 'Sora'),
           ),
-          TextButton(
-            child: Text('OK'),
-            onPressed: () {
-              print(_textFieldController.text);
-              Navigator.pop(context);
-            },
-          ),
-        ],
-      );
+          content: isLoading
+              ? Center(
+                  child: CircularProgressIndicator(),
+                )
+              : TextFormField(
+                  autofocus: true,
+                  controller: _textFieldController,
+                  decoration: InputDecoration(
+                    hintText: "Numero de empleado",
+                    helperText: 'Ingrese su numero de empleado',
+                    icon: Icon(Icons.numbers),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Por favor, ingrese un número de empleado válido';
+                    }
+                    return null;
+                  },
+                ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('CANCEL'),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            TextButton(
+              child: Text('OK'),
+              onPressed: isLoading
+                  ? null // Disable the button when loading
+                  : () async {
+                      setState(() {
+                        isLoading = true; // Start loading animation
+                      });
+
+                      if (_textFieldController.text.isNotEmpty ||
+                          _textFieldController.text != '') {
+                        var responseCode = await sendUserPasswordToMail(
+                            _textFieldController.text,
+                            deviceInformation.toString(),
+                            deviceIP);
+                        if (responseCode == 200) {
+                          Navigator.pop(context);
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: Text(
+                                    "Solicitud enviada",
+                                    style: TextStyle(fontFamily: 'Sora'),
+                                  ),
+                                  content: Text(
+                                      "Si los resultados coinciden, recibirá en su correo su contraseña"),
+                                  icon: (Icon(Icons.beenhere_outlined)),
+                                  actions: [
+                                    TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                        child: Text('OK'))
+                                  ],
+                                );
+                              });
+                        } else {
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: Text(
+                                    "Error",
+                                    style: TextStyle(fontFamily: 'Sora'),
+                                  ),
+                                  content: Text(responseCode.toString()),
+                                  icon: (Icon(Icons.error_outline)),
+                                  actions: [
+                                    TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                        child: Text('OK'))
+                                  ],
+                                );
+                              });
+                        }
+                      } else {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              icon: Icon(Icons.error_outline),
+                              title: Text(
+                                "Error",
+                                style: TextStyle(fontFamily: 'Sora'),
+                              ),
+                              content: Text(
+                                "Por favor, ingrese un número de empleado válido",
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: Text('OK'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      }
+                      setState(() {
+                        isLoading = false; // Stop loading animation
+                      });
+                    },
+            ),
+          ],
+        );
+      });
     },
   );
 }
@@ -1001,8 +1105,24 @@ User parseLogedInUserFromJSON(List<dynamic> jsonList) {
       String schoolEmail = jsonList[i]['user_email'];
       String usergenre = jsonList[i]['genre'];
       int isActive = jsonList[i]['bajalogicasino'];
-      currentUser = User(claUn, employeeName, employeeNumber, role, userId,
-          token, schoolEmail, usergenre, isActive);
+      String? department = jsonList[i]['department'];
+      String? position = jsonList[i]['position'];
+      String? dateTime = jsonList[i]['createdAt'];
+      String? birthdate = jsonList[i]['birthdate'];
+      currentUser = User(
+          claUn,
+          employeeName,
+          employeeNumber,
+          role,
+          userId,
+          token,
+          schoolEmail,
+          usergenre,
+          isActive,
+          department,
+          position,
+          dateTime,
+          birthdate);
     }
   }
   userToken = currentUser.token;

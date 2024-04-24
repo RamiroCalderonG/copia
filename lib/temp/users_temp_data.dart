@@ -4,13 +4,16 @@ import 'package:pluto_grid/pluto_grid.dart';
 dynamic listOfUsersForGrid;
 late List<PlutoRow> usersPlutoRowList;
 late dynamic selectedUser;
-String? tempUserId;
+int? tempUserId;
 User? tempSelectedUsr;
 List<PlutoRow> userRows = [];
 List<dynamic> tmpRolesList = [];
 List<dynamic> userRoles = [];
 List<dynamic> tmpeventsList = [];
 List<Map<String, dynamic>> eventsLisToShow = [];
+List<String> campuseList = [];
+List<String> areaList = [];
+
 //var
 
 void cleatTempData() async {
@@ -24,4 +27,5 @@ void cleatTempData() async {
   userRoles.clear();
   tmpeventsList.clear();
   eventsLisToShow.clear();
+  campuseList.clear();
 }

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/flutter_flow/flutter_flow_theme.dart';
+import 'package:oxschool/temp/users_temp_data.dart';
 
-import '../../Models/User.dart';
 import '../../backend/api_requests/api_calls_list.dart';
 import '../../flutter_flow/flutter_flow_util.dart';
 import '../../utils/loader_indicator.dart';
@@ -13,29 +14,23 @@ class NewUserScreen extends StatefulWidget {
   State<NewUserScreen> createState() => _NewUserScreenState();
 }
 
-List<String> campuseList = [
-  'Barragan',
-  'Anahuac',
-  'Sendero',
-  'Prepa',
-  'Concordia'
-];
-String campuseSelector = campuseList.first;
+// List<String> areaList = [];
+String areaSelector = ''; //areaList.first;
 
-List<String> areaList = ['Academic', 'Sports', 'Library', 'Other'];
-String areaSelector = areaList.first;
-
-List<String> roleList = [
-  'Administrator',
-  'Maestro',
-  'IT Support',
-  'Analista calidad'
-];
-String roleSelector = roleList.first;
+List<String> roleNames = [];
+String roleSelector = ''; //roleNames.first;
+// List<String> roleList = [
+//   'Administrator',
+//   'Maestro',
+//   'IT Support',
+//   'Analista calidad'
+// ];
 
 String? _selectedGender;
 DateTime? _selectedBirthdate;
+DateTime? _creationDate;
 bool isLoading = false;
+String campuseSelector = ''; //= campuseList.first;
 
 class _NewUserScreenState extends State<NewUserScreen> {
   final _formKey = GlobalKey<FormState>();
@@ -47,6 +42,19 @@ class _NewUserScreenState extends State<NewUserScreen> {
 
   int _currentPageIndex = 0;
   PageController _pageController = PageController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    roleNames = tmpRolesList.map((role) => role["Role"] as String).toList();
+    roleNames.first;
+    campuseSelector = campuseList.first;
+    areaSelector = areaList.first;
+    roleSelector = roleNames.first;
+    _selectedBirthdate = null;
+    _creationDate = null;
+  }
 
   @override
   void dispose() {
@@ -69,22 +77,26 @@ class _NewUserScreenState extends State<NewUserScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Future<void> _selectDate(BuildContext context) async {
+    Future<DateTime> _selectDate(
+        BuildContext context, DateTime? returnDate) async {
       final DateTime? picked = await showDatePicker(
         context: context,
         initialDate: DateTime.now(),
         firstDate: DateTime(1900),
         lastDate: DateTime.now(),
       );
-      if (picked != null && picked != _selectedBirthdate) {
+      if (picked != null && picked != returnDate) {
         setState(() {
-          _selectedBirthdate = picked;
+          returnDate = picked;
         });
+        return picked;
+      } else {
+        return returnDate!;
       }
     }
 
     final campuseSelectorField = DropdownButton<String>(
-      value: campuseSelector, // Use the current value here
+      value: campuseSelector,
       hint: Text('Campus'),
       borderRadius: BorderRadius.circular(15),
       elevation: 6,
@@ -111,7 +123,7 @@ class _NewUserScreenState extends State<NewUserScreen> {
     );
 
     final areaSelectorField = DropdownButton<String>(
-      value: areaSelector ?? areaList.first,
+      value: areaSelector, //?? areaList.first,
       hint: Text('Departamento'),
       borderRadius: BorderRadius.circular(15),
       // icon: Icon(Icons.),
@@ -139,8 +151,7 @@ class _NewUserScreenState extends State<NewUserScreen> {
     );
 
     final roleSelectorField = DropdownButton<String>(
-      value: roleSelector ??
-          roleList.first, // Set default value to the first item,
+      value: roleSelector,
       hint: Text('Rol asignado '),
       borderRadius: BorderRadius.circular(15),
 
@@ -154,7 +165,7 @@ class _NewUserScreenState extends State<NewUserScreen> {
         height: 2,
         color: Colors.white,
       ),
-      items: roleList.map<DropdownMenuItem<String>>((String value) {
+      items: roleNames.map<DropdownMenuItem<String>>((String value) {
         return DropdownMenuItem<String>(
           value: value,
           child: Text(value),
@@ -163,7 +174,7 @@ class _NewUserScreenState extends State<NewUserScreen> {
       onChanged: (String? value) {
         setState(() {
           roleSelector = value!;
-          roleSelector = value;
+          // roleSelector = value;
         });
       },
     );
@@ -209,10 +220,10 @@ class _NewUserScreenState extends State<NewUserScreen> {
           },
         ),
         SizedBox(height: 16.0),
-        Text(
-          'Selected gender: $_selectedGender',
-          style: TextStyle(fontSize: 16.0),
-        ),
+        // Text(
+        //   'Selected gender: $_selectedGender',
+        //   style: TextStyle(fontSize: 16.0),
+        // ),
       ],
     );
 
@@ -329,11 +340,52 @@ class _NewUserScreenState extends State<NewUserScreen> {
                         _selectedBirthdate != null
                             ? Text(DateFormat('yyyy-MM-dd')
                                 .format(_selectedBirthdate!))
-                            : Text(''),
+                            : Text(_selectedBirthdate.toString()),
                         Divider(thickness: 1),
                         ElevatedButton(
-                          onPressed: () => _selectDate(context),
-                          child: Text('Seleccionar fecha de nacimiento'),
+                          onPressed: () {
+                            showDatePicker(
+                              context: context,
+                              initialDate: _selectedBirthdate ?? DateTime.now(),
+                              firstDate: DateTime(1900),
+                              lastDate: DateTime.now(),
+                            ).then((selectedDate) {
+                              if (selectedDate != null) {
+                                setState(() {
+                                  _selectedBirthdate = selectedDate;
+                                });
+                              }
+                            });
+                          },
+                          child: Text('Fecha de nacimiento'),
+                        ),
+                        SizedBox(width: 16.0),
+                      ],
+                    ),
+                    SizedBox(height: 10.0),
+                    Column(
+                      children: <Widget>[
+                        _creationDate != null
+                            ? Text(
+                                DateFormat('yyyy-MM-dd').format(_creationDate!))
+                            : Text(_creationDate.toString()),
+                        Divider(thickness: 1),
+                        ElevatedButton(
+                          onPressed: () {
+                            showDatePicker(
+                              context: context,
+                              initialDate: _creationDate ?? DateTime.now(),
+                              firstDate: DateTime(1900),
+                              lastDate: DateTime.now(),
+                            ).then((selectedDate) {
+                              if (selectedDate != null) {
+                                setState(() {
+                                  _creationDate = selectedDate;
+                                });
+                              }
+                            });
+                          },
+                          child: Text('Fecha de alta'),
                         ),
                         SizedBox(width: 16.0),
                       ],
@@ -372,24 +424,28 @@ class _NewUserScreenState extends State<NewUserScreen> {
                           );
                         });
                   } else {
-                    var newUser = User(
-                            _userCampus.text,
-                            _userName.text,
-                            int.parse(_employeeNumber.text),
-                            roleSelector,
-                            0,
-                            '',
-                            _userEmail.text,
-                            _selectedGender,
-                            1)
-                        .toJson();
+                    Map<String, dynamic> newUser = {
+                      'employeeNumber': int.parse(_employeeNumber.text),
+                      'employeeName': _userName.text,
+                      'claUn': campuseSelector,
+                      'role': roleSelector,
+                      'useremail': _userEmail.text,
+                      'genre': _selectedGender,
+                      'bajalogicasino': 1,
+                      'department': areaSelector,
+                      'position': '',
+                      'birthdate': _selectedBirthdate!.toIso8601String(),
+                      'creationDate': _creationDate!.toIso8601String(),
+                      'createdBy': currentUser!.employeeNumber
+                    };
 
                     try {
                       setState(() {
                         isLoading = true;
                       });
+                      var statusCode = await createUser(newUser);
 
-                      await createUser(newUser).whenComplete(() {
+                      if (statusCode == 200) {
                         Navigator.of(context).pop();
                         setState(() {
                           isLoading = false;
@@ -400,32 +456,28 @@ class _NewUserScreenState extends State<NewUserScreen> {
                           _isTeacher.clear();
                           _selectedBirthdate = null;
                         });
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              ('Exito'),
-                              style: FlutterFlowTheme.of(context)
-                                  .labelMedium
-                                  .override(
-                                    fontFamily: 'Roboto',
-                                    color: Color(0xFF130C0D),
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                            ),
-                            // action: SnackBarAction(
-                            //     label: 'Cerrar mensaje',
-                            //     textColor: FlutterFlowTheme.of(context).info,
-                            //     backgroundColor: Colors.black12,
-                            //     onPressed: () {
-                            //       ScaffoldMessenger.of(context)
-                            //           .hideCurrentSnackBar();
-                            //     }),
-                            duration: Duration(milliseconds: 5000),
-                            backgroundColor:
-                                FlutterFlowTheme.of(context).success,
-                          ),
-                        );
-                      });
+                        // Navigator.of(context).pop();
+                        showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                                  icon: Icon(Icons.done),
+                                  iconColor: Colors.greenAccent,
+                                  title: Text('Exito'),
+                                  content: Text('Usuario creado exitosamente'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: Text('Cerrar'),
+                                    )
+                                  ],
+                                ));
+                      } else {
+                        setState(() {
+                          isLoading = false;
+                        });
+                      }
                     } catch (e) {
                       throw Exception(e.toString());
                     }
