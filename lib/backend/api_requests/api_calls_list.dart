@@ -521,13 +521,6 @@ Future<dynamic> getWorkDepartments() async {
 
 Future<dynamic> sendUserPasswordToMail(
     String employeeNumber, String deviceInfo, String deviceIP) async {
-  // var bodyToSend = {};
-  // Map<String, dynamic> deviceInformation = {'device': deviceInfo};
-  // Map<String, dynamic> deviceIpAddress = {'ip_address': deviceIP};
-
-  // bodyToSend.addEntries(deviceInformation.entries);
-  // bodyToSend.addEntries(deviceIpAddress.entries);
-
   try {
     var apiCall = await Requests.get(
         dotenv.env['HOSTURL']! +
@@ -542,10 +535,9 @@ Future<dynamic> sendUserPasswordToMail(
         persistCookies: false,
         timeoutSeconds: 10);
     apiCall.raiseForStatus();
-
-    return apiCall.content();
+    return 200;
   } catch (e) {
-    throw FormatException(e.toString());
+    return e;
   }
 }
 
