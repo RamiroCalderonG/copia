@@ -34,20 +34,20 @@ class _ServicesTicketHistoryState extends State<ServicesTicketHistory>
 
   @override
   Widget build(BuildContext context) {
-    final servicesDetail = Stack(
-      children: [
-        Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [const Placeholder()],
-              ),
-            )
-          ],
-        )
-      ],
-    );
+    // final servicesDetail = Stack(
+    //   children: [
+    //     Column(
+    //       children: [
+    //         Padding(
+    //           padding: const EdgeInsets.all(16.0),
+    //           child: Column(
+    //             children: [const Placeholder()],
+    //           ),
+    //         )
+    //       ],
+    //     )
+    //   ],
+    // );
 
     return Material(
       child: Scaffold(

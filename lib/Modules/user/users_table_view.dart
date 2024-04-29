@@ -52,7 +52,7 @@ class _UsersTableViewState extends State<UsersTableView> {
 
   @override
   Widget build(BuildContext context) {
-    double screenHeight = MediaQuery.of(context).size.height;
+    // double screenHeight = MediaQuery.of(context).size.height;
 
     return Column(
       children: [

@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/constants/connection.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -8,7 +6,7 @@ import 'api_manager.dart';
 
 export 'api_manager.dart' show ApiCallResponse;
 
-const _kPrivateApiFunctionName = 'ffPrivateApiCall';
+// const _kPrivateApiFunctionName = 'ffPrivateApiCall';
 
 class LoginUserCall {
   static Future<ApiCallResponse> call({
@@ -353,20 +351,20 @@ class ApiPagingParams {
       'PagingParams(nextPageNumber: $nextPageNumber, numItems: $numItems, lastResponse: $lastResponse,)';
 }
 
-String _serializeList(List? list) {
-  list ??= <String>[];
-  try {
-    return json.encode(list);
-  } catch (_) {
-    return '[]';
-  }
-}
+// String _serializeList(List? list) {
+//   list ??= <String>[];
+//   try {
+//     return json.encode(list);
+//   } catch (_) {
+//     return '[]';
+//   }
+// }
 
-String _serializeJson(dynamic jsonVar, [bool isList = false]) {
-  jsonVar ??= (isList ? [] : {});
-  try {
-    return json.encode(jsonVar);
-  } catch (_) {
-    return isList ? '[]' : '{}';
-  }
-}
+// String _serializeJson(dynamic jsonVar, [bool isList = false]) {
+//   jsonVar ??= (isList ? [] : {});
+//   try {
+//     return json.encode(jsonVar);
+//   } catch (_) {
+//     return isList ? '[]' : '{}';
+//   }
+// }

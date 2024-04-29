@@ -41,8 +41,9 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
     Controller c = Get.put(Controller());
-    //Define appbar for mobile version
+
     final appBar = SliverAppBar(
       pinned: false,
       floating: true,

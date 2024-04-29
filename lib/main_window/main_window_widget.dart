@@ -23,8 +23,8 @@ class MainWindowWidget extends StatefulWidget {
   _MainWindowWidgetState createState() => _MainWindowWidgetState();
 }
 
-var _selectedPageIndex = 0;
-late PageController _pageController;
+// var _selectedPageIndex = 0;
+// late PageController _pageController;
 
 class _MainWindowWidgetState extends State<MainWindowWidget> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
@@ -52,6 +52,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
     Controller c = Get.put(Controller());
     final appHeader = SliverAppBar(
       pinned: true,
@@ -711,6 +712,7 @@ class _DrawerState extends State<MyExpansionTileList> {
           ),
           onTap: () {
             String moduleKey = screen;
+            // ignore: unused_local_variable
             String? moduleValue;
 
             modulesMapped.forEach((k, v) {

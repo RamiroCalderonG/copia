@@ -14,6 +14,7 @@ import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/Modules/enfermeria/no_data_avalibre.dart';
 import 'package:oxschool/Modules/enfermeria/student_history_grid.dart';
 import 'package:oxschool/flutter_flow/flutter_flow_theme.dart';
+import 'package:oxschool/main_window/main_window_widget.dart';
 import 'package:oxschool/utils/loader_indicator.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
@@ -122,12 +123,12 @@ class _FichaDeSaludState extends State<FichaDeSalud>
     });
   }
 
-  void _clearText() {
-    setState(() {
-      searchController.clear();
-      _showClearButton = false;
-    });
-  }
+  // void _clearText() {
+  //   setState(() {
+  //     searchController.clear();
+  //     _showClearButton = false;
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -177,6 +178,7 @@ class _FichaDeSaludState extends State<FichaDeSalud>
                   padding: const EdgeInsets.symmetric(horizontal: 40),
                   itemCount: studentAllowedMedicines.length,
                   itemBuilder: (BuildContext context, int index) {
+                    // ignore: unused_local_variable
                     for (var item in studentAllowedMedicines) {
                       return ListTile(
                         key: Key('$index'),
@@ -649,6 +651,16 @@ class _FichaDeSaludState extends State<FichaDeSalud>
                   ],
                   indicatorColor: Colors.blueAccent,
                 ),
+                actions: [
+                  IconButton(
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => MainWindowWidget()));
+                      },
+                      icon: Icon(Icons.home))
+                ],
                 backgroundColor: FlutterFlowTheme.of(context).primary,
                 title: Text('Enfermeria', style: TextStyle(color: Colors.white)
                     // FlutterFlowTheme.of(context).headlineSmall,

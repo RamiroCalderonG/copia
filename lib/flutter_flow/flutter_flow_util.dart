@@ -10,7 +10,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../main.dart';
 
-
 export 'keep_alive_wrapper.dart';
 export 'lat_lng.dart';
 export 'place.dart';
@@ -37,9 +36,9 @@ String dateTimeFormat(String format, DateTime? dateTime, {String? locale}) {
 }
 
 Future launchURL(String url) async {
-  var uri = Uri.parse(url).toString();
+  var uri = Uri.parse(url);
   try {
-    await launch(uri);
+    await launchUrl(uri);
   } catch (e) {
     throw 'Could not launch $uri: $e';
   }

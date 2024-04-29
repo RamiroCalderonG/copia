@@ -108,9 +108,9 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                   return null;
                                 },
                                 onChanged: (value) {
-                                  _passwordUpdated = {'nombre_gafete': value};
+                                  _userNameUpdated = {'nombre_gafete': value};
                                   dataToUpdate
-                                      .addEntries(_passwordUpdated.entries);
+                                      .addEntries(_userNameUpdated.entries);
                                 },
                               )),
                             ],
@@ -127,9 +127,9 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                   ),
                                   validator: _validateEmail,
                                   onChanged: (value) {
-                                    _passwordUpdated = {'user_email': value};
+                                    _emailUpdated = {'user_email': value};
                                     dataToUpdate
-                                        .addEntries(_passwordUpdated.entries);
+                                        .addEntries(_emailUpdated.entries);
                                   },
                                 ),
                               ),

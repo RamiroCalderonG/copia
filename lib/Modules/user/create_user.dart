@@ -33,7 +33,7 @@ bool isLoading = false;
 String campuseSelector = ''; //= campuseList.first;
 
 class _NewUserScreenState extends State<NewUserScreen> {
-  final _formKey = GlobalKey<FormState>();
+  // final _formKey = GlobalKey<FormState>();
   final _userName = TextEditingController();
   final _userEmail = TextEditingController();
   final _userCampus = TextEditingController();
@@ -77,23 +77,23 @@ class _NewUserScreenState extends State<NewUserScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Future<DateTime> _selectDate(
-        BuildContext context, DateTime? returnDate) async {
-      final DateTime? picked = await showDatePicker(
-        context: context,
-        initialDate: DateTime.now(),
-        firstDate: DateTime(1900),
-        lastDate: DateTime.now(),
-      );
-      if (picked != null && picked != returnDate) {
-        setState(() {
-          returnDate = picked;
-        });
-        return picked;
-      } else {
-        return returnDate!;
-      }
-    }
+    // Future<DateTime> _selectDate(
+    //     BuildContext context, DateTime? returnDate) async {
+    //   final DateTime? picked = await showDatePicker(
+    //     context: context,
+    //     initialDate: DateTime.now(),
+    //     firstDate: DateTime(1900),
+    //     lastDate: DateTime.now(),
+    //   );
+    //   if (picked != null && picked != returnDate) {
+    //     setState(() {
+    //       returnDate = picked;
+    //     });
+    //     return picked;
+    //   } else {
+    //     return returnDate!;
+    //   }
+    // }
 
     final campuseSelectorField = DropdownButton<String>(
       value: campuseSelector,
@@ -257,10 +257,9 @@ class _NewUserScreenState extends State<NewUserScreen> {
                     controller: _userName,
                     validator: (value) {
                       if (value!.isEmpty) {
-                        // setState(() {
-                        //   _userName.text = 'Please enter a username!';
-                        // });
+                        return 'Campo no puede estar vacio';
                       }
+                      return null;
                     },
                     decoration: InputDecoration(labelText: "Nombre completo"),
                     textInputAction: TextInputAction.next,

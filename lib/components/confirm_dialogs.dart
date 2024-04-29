@@ -24,6 +24,25 @@ void showEmptyFieldAlertDialog(BuildContext context) {
   );
 }
 
+void showErrorFromBackend(BuildContext context, String errorMessage) {
+  showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Error'),
+          content: Text(errorMessage),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Ok'),
+            )
+          ],
+        );
+      });
+}
+
 Future<int> showDeleteConfirmationAlertDialog(BuildContext context) async {
   Completer<int> completer = Completer<int>();
   showDialog(

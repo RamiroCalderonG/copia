@@ -222,7 +222,9 @@ class _UserWindowState extends State<UserWindow> {
                           // backgroundColor:
                           //     MaterialStatePropertyAll<Color>(Colors.orange),
                           ),
-                      onPressed: () {},
+                      onPressed: () {
+                        _changeMyPassword(context);
+                      },
                       icon: const Icon(Icons.create),
                       label: const Text('Cambiar contraseña')),
                 ])

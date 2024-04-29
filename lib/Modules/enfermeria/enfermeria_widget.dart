@@ -59,7 +59,7 @@ class _EnfermeriaWidgetState extends State<EnfermeriaWidget>
               //       fontSize: 25.0,
               //     ),
               ),
-          actions: [],
+          actions: [IconButton(onPressed: () {}, icon: Icon(Icons.home))],
           centerTitle: true,
           elevation: 4.0,
         ),
