@@ -51,6 +51,7 @@ class _GradesPerStudentState extends State<GradesPerStudent> {
   }
 
   Widget _buildGradesPerStudent() {
+    // ignore: unused_local_variable
     String? dropDownValue;
     bool pause = true;
 
@@ -255,11 +256,11 @@ class _GradesPerStudentState extends State<GradesPerStudent> {
 List<PlutoRow> populateAssignatureRows(var assignatures) {
   for (var line in assignatures) {
     rows.add(PlutoRow(cells: {
-      'ClaMateria': PlutoCell(value: assignatures.claMateria),
-      'nomMateria': PlutoCell(value: assignatures.nomMateria),
-      'nomGradoEscolar': PlutoCell(value: assignatures.nomGradoEscolar),
-      'gradoSecuencia': PlutoCell(value: assignatures.gradoSecuencia),
-      'grado': PlutoCell(value: assignatures.grado),
+      'ClaMateria': PlutoCell(value: line.claMateria),
+      'nomMateria': PlutoCell(value: line.nomMateria),
+      'nomGradoEscolar': PlutoCell(value: line.nomGradoEscolar),
+      'gradoSecuencia': PlutoCell(value: line.gradoSecuencia),
+      'grado': PlutoCell(value: line.grado),
     }));
   }
   return rows;

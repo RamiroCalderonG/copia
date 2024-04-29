@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:oxschool/backend/api_requests/api_calls_list.dart';
 import 'package:oxschool/components/save_and_cancel_buttons.dart';
 import 'package:oxschool/utils/loader_indicator.dart';
 
@@ -24,10 +22,10 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
   final _observationsController = TextEditingController();
   late DateTime selectedDateTime;
 
-  bool _showSearchIcon = false;
+  // bool _showSearchIcon = false;
   bool _isDescriptionFieldEmpty = false;
   bool _isObservationsFieldEmpty = false;
-  bool _showSearchEmployee = false;
+  // bool _showSearchEmployee = false;
   bool _isSearching = false;
 
   @override
@@ -60,6 +58,7 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
     ];
     const List<String> employeeList = <String>['Fulano', 'Mengano', 'Sutano'];
 
+    // ignore: unused_local_variable
     String? dropDownValue;
 
     final DropdownMenu employeSelectorName = DropdownMenu<String>(
@@ -131,34 +130,35 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
       ),
     ));
 
-    final employeeNameField = Expanded(
-        child: TextFormField(
-      controller: _employeeNameController,
-      // inputFormatters: [FilteringTextInputFormatter.singleLineFormatter],
-      keyboardType: TextInputType.name,
-      decoration: InputDecoration(
-        label: const Text('Nombre de quien solicita el servicio'),
-        prefixIcon: const Icon(Icons.person),
-        suffixIcon: _showSearchEmployee
-            ? GestureDetector(
-                onTap: () async {
-                  var apiResponse;
-                  setState(() {
-                    _isSearching = true;
-                  });
-                  apiResponse =
-                      await searchEmployee(_employeeNumberController.text)
-                          .whenComplete(() {
-                    setState(() {
-                      _isSearching = false;
-                    });
-                  });
-                },
-                child: const Icon(Icons.numbers),
-              )
-            : null,
-      ),
-    ));
+    // final employeeNameField = Expanded(
+    //     child: TextFormField(
+    //   controller: _employeeNameController,
+    //   // inputFormatters: [FilteringTextInputFormatter.singleLineFormatter],
+    //   keyboardType: TextInputType.name,
+    //   decoration: InputDecoration(
+    //     label: const Text('Nombre de quien solicita el servicio'),
+    //     prefixIcon: const Icon(Icons.person),
+    //     suffixIcon: _showSearchEmployee
+    //         ? GestureDetector(
+    //             onTap: () async {
+    //               // ignore: unused_local_variable
+    //               var apiResponse;
+    //               setState(() {
+    //                 _isSearching = true;
+    //               });
+    //               apiResponse =
+    //                   await searchEmployee(_employeeNumberController.text)
+    //                       .whenComplete(() {
+    //                 setState(() {
+    //                   _isSearching = false;
+    //                 });
+    //               });
+    //             },
+    //             child: const Icon(Icons.numbers),
+    //           )
+    //         : null,
+    //   ),
+    // ));
 
     final dateAndTimeField = Expanded(
         child: TextField(
@@ -178,6 +178,7 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
       ),
       readOnly: true,
       onTap: () async {
+        // ignore: unused_local_variable
         DateTime? pickedDate = await showDatePicker(
                 context: context,
                 initialDate: DateTime.now(),
@@ -190,6 +191,7 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
               _date.text = DateFormat('yyyy-MM-dd').format(pickedDate);
             });
           }
+          return null;
         });
       },
     ));
@@ -347,57 +349,60 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
     );
   }
 
-  Widget _buildEmployeeNumberField() {
-    return Expanded(
-      flex: 5,
-      child: TextFormField(
-        controller: _employeeNumberController,
-        onChanged: (value) {
-          setState(() {
-            _showSearchIcon = value.length >= 3;
-          });
-        },
-        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        keyboardType: TextInputType.number,
-        autofocus: true,
-        // textInputAction: TextInputAction.next,
-        onFieldSubmitted: (value) async {
-          var apiResponse;
-          setState(() {
-            _isSearching = true;
-          });
-          apiResponse = await searchEmployee(_employeeNumberController.text)
-              .whenComplete(() {
-            setState(() {
-              _isSearching = false;
-            });
-          });
-        },
-        decoration: InputDecoration(
-          label: const Text('No. Empleado que solicita servicio'),
-          prefixIcon: const Icon(Icons.numbers),
-          suffixIcon: _showSearchIcon
-              ? GestureDetector(
-                  onTap: () async {
-                    var apiResponse;
-                    setState(() {
-                      _isSearching = true;
-                    });
-                    apiResponse =
-                        await searchEmployee(_employeeNumberController.text)
-                            .whenComplete(() {
-                      setState(() {
-                        _isSearching = false;
-                      });
-                    });
-                  },
-                  child: const Icon(Icons.search),
-                )
-              : null,
-        ),
-      ),
-    );
-  }
+  //TODO: DO NOT DELETE, CAN BE USED  FOR SEARCHING EMPLOYEES
+  // Widget _buildEmployeeNumberField() {
+  //   return Expanded(
+  //     flex: 5,
+  //     child: TextFormField(
+  //       controller: _employeeNumberController,
+  //       onChanged: (value) {
+  //         setState(() {
+  //           _showSearchIcon = value.length >= 3;
+  //         });
+  //       },
+  //       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+  //       keyboardType: TextInputType.number,
+  //       autofocus: true,
+  //       // textInputAction: TextInputAction.next,
+  //       onFieldSubmitted: (value) async {
+  //         // ignore: unused_local_variable
+  //         var apiResponse;
+  //         setState(() {
+  //           _isSearching = true;
+  //         });
+  //         apiResponse = await searchEmployee(_employeeNumberController.text)
+  //             .whenComplete(() {
+  //           setState(() {
+  //             _isSearching = false;
+  //           });
+  //         });
+  //       },
+  //       decoration: InputDecoration(
+  //         label: const Text('No. Empleado que solicita servicio'),
+  //         prefixIcon: const Icon(Icons.numbers),
+  //         suffixIcon: _showSearchIcon
+  //             ? GestureDetector(
+  //                 onTap: () async {
+  //                   // ignore: unused_local_variable
+  //                   var apiResponse;
+  //                   setState(() {
+  //                     _isSearching = true;
+  //                   });
+  //                   apiResponse =
+  //                       await searchEmployee(_employeeNumberController.text)
+  //                           .whenComplete(() {
+  //                     setState(() {
+  //                       _isSearching = false;
+  //                     });
+  //                   });
+  //                 },
+  //                 child: const Icon(Icons.search),
+  //               )
+  //             : null,
+  //       ),
+  //     ),
+  //   );
+  // }
 
   final ButtonStyle raisedButtonStyle = ElevatedButton.styleFrom(
     foregroundColor: Colors.black87,

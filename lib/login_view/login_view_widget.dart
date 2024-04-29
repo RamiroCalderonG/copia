@@ -36,7 +36,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
   String currentDeviceData = '';
 
   // late User currentUser;
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  // final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -105,7 +106,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
 
   @override
   Widget build(BuildContext context) {
-    String? _text;
+    // String? _text;
     Map<String, dynamic> apiBody = {};
     var apiResponse;
 
@@ -1092,7 +1093,7 @@ Future<void> _displayForgotPassword(BuildContext context) async {
 
 User parseLogedInUserFromJSON(List<dynamic> jsonList) {
   late User currentUser;
-  late List<dynamic> events = [];
+  // late List<dynamic> events = [];
 
   for (var i = 0; i < jsonList.length; i++) {
     if (i == 0) {

@@ -68,7 +68,7 @@ class _SideNav04WidgetState extends State<SideNav04Widget> {
                   mainAxisSize: MainAxisSize.max,
                   children: [
                     FaIcon(
-                      FontAwesomeIcons.home,
+                      FontAwesomeIcons.house,
                       color: Color(0xFF6F61EF),
                       size: 32.0,
                     ),

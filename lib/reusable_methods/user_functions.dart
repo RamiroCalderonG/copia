@@ -58,7 +58,7 @@ bool verifyUserAdmin(User currentUser) {
 dynamic getSingleUser(String? userId) async {
   if (userId == null) {
     userId = tempUserId.toString();
-    selectedUser = await getUserDetail(userId!);
+    selectedUser = await getUserDetail(userId);
     List<dynamic> jsonList = json.decode(selectedUser);
     try {
       for (var i = 0; i < jsonList.length; i++) {
@@ -66,7 +66,7 @@ dynamic getSingleUser(String? userId) async {
         var employeeName = jsonList[i]['nombre_gafete'];
         var employeeNumber = jsonList[i]['noempleado'];
         var role = jsonList[i]['role_name'];
-        var nwuserId = jsonList[i]['role_name'];
+        // var nwuserId = jsonList[i]['role_name'];
         var token = '';
         var userEmail = jsonList[i]['user_email'];
         var usergenre = jsonList[i]['genre'];
@@ -116,7 +116,7 @@ dynamic EventFromJSON(List<dynamic> jsonData) {
       String eventName = item['event_name'];
       bool isActive = item['active'];
       String moduleName = item['module_name'];
-      int moduleID = item['module_id'];
+      // int moduleID = item['module_id'];
       bool event_can_acces_module = item['event_can_acces_module'];
       // int roleID = item['role_id'];
 

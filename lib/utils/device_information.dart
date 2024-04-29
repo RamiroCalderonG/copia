@@ -150,16 +150,16 @@ Map<String, dynamic> readWindowsDeviceInfo(WindowsDeviceInfo data) {
   };
 }
 
-String _getAppBarTitle() => kIsWeb
-    ? 'Web Browser info'
-    : switch (defaultTargetPlatform) {
-        TargetPlatform.android => 'Android Device Info',
-        TargetPlatform.iOS => 'iOS Device Info',
-        TargetPlatform.linux => 'Linux Device Info',
-        TargetPlatform.windows => 'Windows Device Info',
-        TargetPlatform.macOS => 'MacOS Device Info',
-        TargetPlatform.fuchsia => 'Fuchsia Device Info',
-      };
+// String _getAppBarTitle() => kIsWeb
+//     ? 'Web Browser info'
+//     : switch (defaultTargetPlatform) {
+//         TargetPlatform.android => 'Android Device Info',
+//         TargetPlatform.iOS => 'iOS Device Info',
+//         TargetPlatform.linux => 'Linux Device Info',
+//         TargetPlatform.windows => 'Windows Device Info',
+//         TargetPlatform.macOS => 'MacOS Device Info',
+//         TargetPlatform.fuchsia => 'Fuchsia Device Info',
+//       };
 
 Future getDeviceIP() async {
   var interface;

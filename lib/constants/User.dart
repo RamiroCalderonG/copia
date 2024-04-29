@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 late User? currentUser;
 late Cycle? currentCycle;
 
+// ignore: unused_element
 late List<String>? _grades = [];
 late Future<http.Response> userEvents;
 late List<dynamic>? eventsList = [];

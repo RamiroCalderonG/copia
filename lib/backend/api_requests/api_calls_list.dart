@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:oxschool/constants/User.dart';
@@ -72,8 +71,8 @@ Future<dynamic> getCycle(
 }
 
 //Function to post new visit from a student to nursery
-Future<int> postNurseryVisit(Map<String, dynamic> jsonBody) async {
-  var postResponse;
+Future<dynamic> postNurseryVisit(Map<String, dynamic> jsonBody) async {
+  // var postResponse;
   try {
     var apiCall = await Requests.post(
         dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/nursery-visit/',
@@ -87,13 +86,14 @@ Future<int> postNurseryVisit(Map<String, dynamic> jsonBody) async {
         timeoutSeconds: 7);
 
     apiCall.raiseForStatus();
-    postResponse = apiCall.content();
+    // postResponse = apiCall.content();
 
-    return postResponse;
+    return apiCall.statusCode;
   } catch (e) {
-    ErrorDescription(e.toString());
+    return e.toString();
+    // ErrorDescription(e.toString());
   }
-  return postResponse;
+  // return postResponse;
 }
 
 Future<String> searchEmployee(String employeeNumber) async {
@@ -468,7 +468,6 @@ Future<dynamic> getUserDetail(String userId) async {
 }
 
 Future<dynamic> getAllModules() async {
-  var response;
   try {
     var apiCall = await Requests.get(
         dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/modules',
@@ -565,7 +564,7 @@ Future<http.Response> getUserPermissions(int userId) async {
   try {
     Uri address = Uri(
         scheme: 'http',
-        host: 'localhost',
+        host: '10.0.0.36',
         port: 8080,
         path: '/api/user/events',
         queryParameters: {'id': '${userId.toString()}'});

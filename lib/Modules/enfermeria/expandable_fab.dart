@@ -22,7 +22,7 @@ class ExpandableFABNursery extends StatefulWidget {
 }
 
 class ExpandableFABNurseryState extends State<ExpandableFABNursery> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  // final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final _key = GlobalKey<ExpandableFabState>();
   bool isLoading = false;
 
@@ -142,9 +142,7 @@ class ExpandableFABNurseryState extends State<ExpandableFABNursery> {
               heroTag: null,
               // child: const Icon(Icons.edit),
               onPressed: () {
-                const SnackBar snackBar = SnackBar(
-                  content: Text("SnackBar"),
-                );
+                //TODO: INSERT AGREGAR MEDICAMENTO LOGIC
               },
               backgroundColor: Colors.blueAccent,
             ),
