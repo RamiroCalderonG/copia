@@ -36,7 +36,7 @@ class _UserWindowState extends State<UserWindow> {
   Widget _smallScreenUserDisplay() {
     return Scaffold(
         appBar: AppBar(
-          title: Text('Mi  perfil', style: TextStyle(color: Colors.white)),
+          title: Text('Mi perfil', style: TextStyle(color: Colors.white)),
           backgroundColor: FlutterFlowTheme.of(context).primary,
         ),
         body: Stack(
@@ -72,7 +72,7 @@ class _UserWindowState extends State<UserWindow> {
                 width: MediaQuery.of(context).size.width / 2,
                 height: MediaQuery.of(context).size.height,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: FlutterFlowTheme.of(context).primaryBackground,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Center(child: _formContentsFields()),
@@ -83,131 +83,158 @@ class _UserWindowState extends State<UserWindow> {
   }
 
   Widget _formContentsFields() {
-    return Center(
-        child: Column(
-      children: <Widget>[
-        Container(
-          child: Center(
-            child: Text(
-              'Foto de empleado o inicial',
-              style: TextStyle(fontFamily: 'Sora', fontSize: 12),
-              textAlign: TextAlign.center,
+    return LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+      if (constraints.maxWidth > 600) {
+        return Center(
+            child: Column(
+          children: <Widget>[
+            Container(
+              child: Center(
+                child: Text(
+                  currentUser!.employeeName![0],
+                  style: TextStyle(fontFamily: 'Sora', fontSize: 20),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              decoration: BoxDecoration(
+                border:
+                    Border.all(color: FlutterFlowTheme.of(context).primaryText),
+                // color: Colors.cyan,
+                borderRadius: BorderRadius.circular(100),
+              ),
+              width: 200,
+              height: 200,
+              margin: EdgeInsets.all(15),
             ),
-          ),
-          decoration: BoxDecoration(
-            color: Colors.cyan,
-            borderRadius: BorderRadius.circular(100),
-          ),
-          width: 200,
-          height: 200,
-          margin: EdgeInsets.all(15),
-        ),
-        Row(
-          children: <Widget>[
-            Expanded(
-                child: Container(
-              margin: EdgeInsets.only(top: 20, left: 20, right: 20),
-              width: MediaQuery.of(context).size.width,
-              height: 50,
-              decoration: BoxDecoration(
-                  color: Colors.blue.shade300,
-                  borderRadius: BorderRadius.circular(60)),
-              child: Center(
-                child: Text(
-                  currentUser!.employeeName.toString(),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontFamily: 'Sora'),
-                ),
-              ),
-            )),
-          ],
-        ),
-        Row(
-          children: <Widget>[
-            Expanded(
-                child: Container(
-              margin: EdgeInsets.only(top: 8, left: 20, right: 20, bottom: 8),
-              width: MediaQuery.of(context).size.width,
-              height: 50,
-              decoration: BoxDecoration(
-                  color: Colors.purple.shade300,
-                  borderRadius: BorderRadius.circular(60)),
-              child: Center(
-                child: Text(
-                  currentUser!.employeeNumber.toString(),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontFamily: 'Sora'),
-                ),
-              ),
-            )),
-          ],
-        ),
-        Row(
-          children: <Widget>[
-            Expanded(
-                child: Container(
-              margin: EdgeInsets.only(top: 8, left: 20, right: 20, bottom: 8),
-              width: MediaQuery.of(context).size.width,
-              height: 50,
-              decoration: BoxDecoration(
-                  color: Colors.green.shade300,
-                  borderRadius: BorderRadius.circular(60)),
-              child: Center(
-                child: Text(
-                  currentUser!.role,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontFamily: 'Sora'),
-                ),
-              ),
-            )),
-          ],
-        ),
-        Row(
-          children: <Widget>[
-            Expanded(
-                child: Container(
-              margin: EdgeInsets.only(top: 8, left: 20, right: 20, bottom: 30),
-              width: MediaQuery.of(context).size.width,
-              height: 50,
-              decoration: BoxDecoration(
-                  color: Colors.red.shade300,
-                  borderRadius: BorderRadius.circular(60)),
-              child: Center(
-                child: Text(
-                  currentUser!.claUn.toString(),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontFamily: 'Sora'),
-                ),
-              ),
-            )),
-          ],
-        ),
-        Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: <Widget>[
-              ElevatedButton.icon(
-                  style: ButtonStyle(
-                    backgroundColor:
-                        MaterialStatePropertyAll<Color>(Colors.green),
+            Row(
+              children: <Widget>[
+                Expanded(
+                    child: Container(
+                  margin: EdgeInsets.only(top: 20, left: 20, right: 20),
+                  width: MediaQuery.of(context).size.width,
+                  height: 50,
+                  decoration: BoxDecoration(
+                      border: Border.all(
+                          color: FlutterFlowTheme.of(context).primaryText),
+                      // color: Colors.blue.shade300,
+                      borderRadius: BorderRadius.circular(60)),
+                  child: Center(
+                    child: Text(
+                      'Nombre: ' + currentUser!.employeeName.toString(),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Sora',
+                        fontSize: 20,
+                      ),
+                    ),
                   ),
-                  onPressed: () {},
-                  icon: const Icon(Icons.attach_money_outlined),
-                  label: const Text('Consulta  recibo nomina')),
-              ElevatedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.abc),
-                  label: const Text('Otra consulta')),
-              ElevatedButton.icon(
-                  style: ButtonStyle(
-                    backgroundColor:
-                        MaterialStatePropertyAll<Color>(Colors.orange),
+                )),
+              ],
+            ),
+            Row(
+              children: <Widget>[
+                Expanded(
+                    child: Container(
+                  margin:
+                      EdgeInsets.only(top: 8, left: 20, right: 20, bottom: 8),
+                  width: MediaQuery.of(context).size.width,
+                  height: 50,
+                  decoration: BoxDecoration(
+                      border: Border.all(
+                          color: FlutterFlowTheme.of(context).primaryText),
+                      // color: Colors.purple.shade300,
+                      borderRadius: BorderRadius.circular(60)),
+                  child: Center(
+                    child: Text(
+                      'Numero de empleado: ' +
+                          currentUser!.employeeNumber.toString(),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontFamily: 'Sora', fontSize: 20),
+                    ),
                   ),
-                  onPressed: () {},
-                  icon: const Icon(Icons.create),
-                  label: const Text('Cambiar contraseña')),
-            ])
-      ],
-    ));
+                )),
+              ],
+            ),
+            Row(
+              children: <Widget>[
+                Expanded(
+                    child: Container(
+                  margin:
+                      EdgeInsets.only(top: 8, left: 20, right: 20, bottom: 8),
+                  width: MediaQuery.of(context).size.width,
+                  height: 50,
+                  decoration: BoxDecoration(
+                      border: Border.all(
+                          color: FlutterFlowTheme.of(context).primaryText),
+                      // color: Colors.green.shade300,
+                      borderRadius: BorderRadius.circular(60)),
+                  child: Center(
+                    child: Text(
+                      'Rol de ususario: ' + currentUser!.role,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontFamily: 'Sora', fontSize: 20),
+                    ),
+                  ),
+                )),
+              ],
+            ),
+            Row(
+              children: <Widget>[
+                Expanded(
+                    child: Container(
+                  margin:
+                      EdgeInsets.only(top: 8, left: 20, right: 20, bottom: 30),
+                  width: MediaQuery.of(context).size.width,
+                  height: 50,
+                  decoration: BoxDecoration(
+                      border: Border.all(
+                          color: FlutterFlowTheme.of(context).primaryText),
+                      // color: Colors.red.shade300,
+                      borderRadius: BorderRadius.circular(60)),
+                  child: Center(
+                    child: Text(
+                      'Campus: ' + currentUser!.claUn.toString(),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontFamily: 'Sora', fontSize: 20),
+                    ),
+                  ),
+                )),
+              ],
+            ),
+            Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: <Widget>[
+                  ElevatedButton.icon(
+                      style: ButtonStyle(
+                          // backgroundColor:
+                          // MaterialStatePropertyAll<Color>(Colors.green),
+                          ),
+                      onPressed: () {},
+                      icon: const Icon(Icons.attach_money_outlined),
+                      label: const Text('Consulta  recibo nomina')),
+                  ElevatedButton.icon(
+                      onPressed: () {},
+                      icon: const Icon(Icons.abc),
+                      label: const Text('Otra consulta')),
+                  ElevatedButton.icon(
+                      style: ButtonStyle(
+                          // backgroundColor:
+                          //     MaterialStatePropertyAll<Color>(Colors.orange),
+                          ),
+                      onPressed: () {
+                        _changeMyPassword(context);
+                      },
+                      icon: const Icon(Icons.create),
+                      label: const Text('Cambiar contraseña')),
+                ])
+          ],
+        ));
+      }
+      return SingleChildScrollView(
+        child: Placeholder(),
+      );
+    });
   }
 
   Future<void> _changeMyPassword(BuildContext context) async {

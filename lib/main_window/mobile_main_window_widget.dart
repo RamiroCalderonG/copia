@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:http/http.dart' as http;
 import 'package:oxschool/constants/User.dart';
 
@@ -42,8 +41,9 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
     Controller c = Get.put(Controller());
-    //Define appbar for mobile version
+
     final appBar = SliverAppBar(
       pinned: false,
       floating: true,

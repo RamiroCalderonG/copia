@@ -461,7 +461,7 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
   void _addRole(BuildContext context) {
     // Prepare JSON data for adding role
     final jsonData = {
-      'name': _roleController.text,
+      'roleName': _roleController.text,
       'description': _descriptionController.text,
       'isActive': _isActive,
       'events': _events
@@ -473,7 +473,7 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
               })
           .toList(),
     };
-    // TODO: Perform API call to add role using jsonData
+    createRole(jsonData);
 
     // Close the dialog
     Navigator.of(context).pop();

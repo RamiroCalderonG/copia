@@ -8,6 +8,7 @@ import 'package:oxschool/Modules/user/create_user.dart';
 import 'package:oxschool/Modules/user/roles_screen.dart';
 import 'package:oxschool/Modules/user/users_table_view.dart';
 import 'package:oxschool/constants/User.dart';
+import 'package:oxschool/reusable_methods/reusable_functions.dart';
 import 'package:oxschool/temp/users_temp_data.dart';
 import 'package:oxschool/utils/loader_indicator.dart';
 
@@ -99,11 +100,17 @@ class _UsersDashboardState extends State<UsersDashboard> {
                   label: Text('Administrar roles de usuarios')),
               TextButton.icon(
                   onPressed: () async {
+                    campuseList.clear();
+                    areaList.clear();
+                    await getAllCampuse();
+                    await getWorkDepartmentList();
+                    var response = await getRolesList();
+                    tmpRolesList = jsonDecode(response);
                     buildNewUserScreen(context);
                     await getEventsList();
                   },
                   icon: FaIcon(FontAwesomeIcons.addressCard),
-                  label: Text('Agregar usuario')),
+                  label: Text('Nuevo usuario')),
               TextButton.icon(
                   onPressed: () async {
                     refreshButton();

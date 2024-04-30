@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import 'package:multi_select_flutter/dialog/multi_select_dialog_field.dart';
 import 'package:multi_select_flutter/util/multi_select_item.dart';
 import 'package:oxschool/Models/Cause.dart';
 import 'package:oxschool/backend/api_requests/api_calls_list.dart';
+import 'package:oxschool/components/confirm_dialogs.dart';
 import 'package:oxschool/constants/Student.dart';
 import 'package:oxschool/flutter_flow/flutter_flow_theme.dart';
 import 'package:oxschool/reusable_methods/nursery_methods.dart';
@@ -39,6 +41,7 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
   late var _kindOfWound = TextEditingController();
   late var _otherCauses = TextEditingController();
   late var _observations = TextEditingController();
+  late var _accidentTypes = TextEditingController();
   late String _teacherResponsable = '';
   late DateTime selectedDateTime;
   var apiCallResponseResult;
@@ -47,7 +50,7 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
   bool isLoading = false;
 
   String? teacherDropDownValue = teachersList.first;
-  String? _accidentTypes;
+  // String? _accidentTypes;
 
   bool? _isClinicChecked = false;
   bool? _isDoctorConsultChecked = false;
@@ -93,7 +96,7 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
             fontFamily: 'Sora',
             color: FlutterFlowTheme.of(context).tertiary,
           ),
-      title: Text("Tipo dolor"),
+      title: Text("Tipo de dolor"),
       selectedColor: Colors.blue,
       decoration: BoxDecoration(
         color: Colors.blue.withOpacity(0.1),
@@ -157,9 +160,8 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
     );
 
     MultiSelectDialogField causes = MultiSelectDialogField(
-      items: causesLst!
-          .map((pain) => MultiSelectItem<String>(pain, pain))
-          .toList(),
+      items:
+          causesLst.map((pain) => MultiSelectItem<String>(pain, pain)).toList(),
       itemsTextStyle: FlutterFlowTheme.of(context).bodyMedium.override(
             fontFamily: 'Sora',
             color: FlutterFlowTheme.of(context).primaryText,
@@ -196,7 +198,7 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
     );
 
     MultiSelectDialogField accidentTypes = MultiSelectDialogField(
-      items: accidentType!
+      items: accidentType
           .map((pain) => MultiSelectItem<String>(pain, pain))
           .toList(),
       itemsTextStyle: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -208,7 +210,7 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
             color: FlutterFlowTheme.of(context).tertiary,
           ),
       //causess.map((pain) => MultiSelectItem<String>(pain, pain)).toList(),
-      initialValue: [accidentType.first],
+      // initialValue: [accidentType.first],
       title: Text("Tipo de Accidente"),
       selectedColor: Colors.blue,
       searchable: true,
@@ -228,8 +230,7 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
       onConfirm: (results) {
         setState(() {
           isNoAplicaSelected = results.contains(' NO APLICA');
-          _accidentTypes =
-              results.isEmpty ? accidentType[0] : results.join(', ');
+          _accidentTypes.text = results.toString();
         });
 
         //_selectedAnimals = results;
@@ -526,6 +527,7 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
                           ),
                           readOnly: true,
                           onTap: () async {
+                            // ignore: unused_local_variable
                             DateTime? pickedDate = await showDatePicker(
                                     context: context,
                                     initialDate: DateTime.now(),
@@ -553,6 +555,7 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
                                   });
                                 });
                               }
+                              return null;
                             });
                           },
                         )
@@ -572,143 +575,131 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
                       child: Padding(
                         padding: EdgeInsets.all(8),
                         child: ElevatedButton.icon(
-                            onPressed: () {
+                            onPressed: () async {
                               setState(() {
                                 isLoading = true;
                               });
+                              if (_kindOfPain.text.isNotEmpty ||
+                                  _kindOfWound.text.isNotEmpty ||
+                                  _otherCauses.text.isNotEmpty ||
+                                  _date.text.isNotEmpty) {
+                                //Get the type of notification
 
-                              //Get the type of notification
+                                var notifType = 0;
+                                if (_isPhoneNotChecked = true) {
+                                  notifType = 1;
+                                } else if (_isPersonalNotifChecked = true) {
+                                  notifType = 2;
+                                } else if (_isReportNotifChecked = true) {
+                                  notifType = 3;
+                                }
 
-                              var notifType = 0;
-                              if (_isPhoneNotChecked = true) {
-                                notifType = 1;
-                              } else if (_isPersonalNotifChecked = true) {
-                                notifType = 2;
-                              } else if (_isReportNotifChecked = true) {
-                                notifType = 3;
-                              }
+                                //Validate if there is a teacher selected
+                                var responsableTeacherID;
 
-                              //Validate if there is a teacher selected
-                              var responsableTeacherID;
+                                if (_teacherResponsable != '') {
+                                  responsableTeacherID =
+                                      obtainEmployeeNumberbyName(
+                                          tempTeachersList,
+                                          _teacherResponsable);
+                                } else {
+                                  responsableTeacherID = '0';
+                                }
 
-                              if (_teacherResponsable != '') {
-                                responsableTeacherID =
-                                    obtainEmployeeNumberbyName(
-                                        tempTeachersList, _teacherResponsable);
-                              } else {
-                                responsableTeacherID = '0';
-                              }
+                                //Get responable teacher ID
 
-                              //Validate empty fields
-                              if (_date.text.isEmpty) {
-                                setState(() {
-                                  _date.text = DateTime.now().toString();
-                                });
-                              }
+                                var nurseryapiBody = nurseryToJSON(
+                                    currentUser!.employeeNumber!.toInt(),
+                                    _kindOfPain.text
+                                        .replaceAll(
+                                          "[",
+                                          "",
+                                        )
+                                        .replaceAll(
+                                          "]",
+                                          "",
+                                        ),
+                                    _kindOfWound.text
+                                        .replaceAll(
+                                          "[",
+                                          "",
+                                        )
+                                        .replaceAll(
+                                          "]",
+                                          "",
+                                        ),
+                                    _otherCauses.text
+                                        .replaceAll(
+                                          "[",
+                                          "",
+                                        )
+                                        .replaceAll(
+                                          "]",
+                                          "",
+                                        ),
+                                    _studentId.text,
+                                    currentCycle!.claCiclo.toString(),
+                                    _visitMotive.text,
+                                    _valoration.text,
+                                    _tx.text,
+                                    _accidentTypes.text
+                                        .replaceAll(
+                                          "[",
+                                          "",
+                                        )
+                                        .replaceAll(
+                                          "]",
+                                          "",
+                                        ),
+                                    _teacherResponsable,
+                                    _observations.text,
+                                    _isClinicChecked!,
+                                    _isDoctorConsultChecked!,
+                                    _isPhoneNotChecked!,
+                                    _isPersonalNotifChecked!,
+                                    _isReportNotifChecked!,
+                                    selectedDateTime,
+                                    notifType,
+                                    deviceInformation.toString(),
+                                    responsableTeacherID!);
 
-                              //Get responable teacher ID
-
-                              var nurseryapiBody = nurseryToJSON(
-                                  currentUser!.employeeNumber!.toInt(),
-                                  _kindOfPain.text,
-                                  _kindOfWound.text,
-                                  _otherCauses.text,
-                                  _studentId.text,
-                                  currentCycle!.claCiclo.toString(),
-                                  _visitMotive.text,
-                                  _valoration.text,
-                                  _tx.text,
-                                  _accidentTypes!,
-                                  _teacherResponsable,
-                                  _observations.text,
-                                  _isClinicChecked!,
-                                  _isDoctorConsultChecked!,
-                                  _isPhoneNotChecked!,
-                                  _isPersonalNotifChecked!,
-                                  _isReportNotifChecked!,
-                                  selectedDateTime,
-                                  notifType,
-                                  deviceInformation.toString(),
-                                  responsableTeacherID!);
-
-                              apiCallResponseResult = postNurseryVisit(
-                                      nurseryapiBody)
-                                  //         .then((apiCallResponseResult) {
-                                  //   // AlertDialog(
-                                  //   //   title: Text(
-                                  //   //     'El registro se completó con exito: ' +
-                                  //   //         apiCallResponseResult.toString(),
-                                  //   //     style: FlutterFlowTheme.of(context)
-                                  //   //         .bodyMedium
-                                  //   //         .override(
-                                  //   //           fontFamily: 'Sora',
-                                  //   //           color: FlutterFlowTheme.of(context)
-                                  //   //               .primaryText,
-                                  //   //         ),
-                                  //   //   ),
-                                  //   //   content: Text(
-                                  //   //     'Se registro con exito: ' +
-                                  //   //         resultID!.toString(),
-                                  //   //     style: FlutterFlowTheme.of(context)
-                                  //   //         .bodyMedium
-                                  //   //         .override(
-                                  //   //           fontFamily: 'Sora',
-                                  //   //           color: FlutterFlowTheme.of(context)
-                                  //   //               .primaryText,
-                                  //   //         ),
-                                  //   //   ),
-                                  //   // );
-                                  // }).catchError((error) {
-                                  //   // Navigator.of(context).pop();
-                                  //   //AlertDialog to display Error;
-                                  //   AlertDialog(
-                                  //     title: Text(
-                                  //       'Error',
-                                  //       style: FlutterFlowTheme.of(context)
-                                  //           .bodyMedium
-                                  //           .override(
-                                  //             fontFamily: 'Sora',
-                                  //             color: FlutterFlowTheme.of(context)
-                                  //                 .primaryText,
-                                  //           ),
-                                  //     ),
-                                  //     content: Text(
-                                  //       error.toString(),
-                                  //       style: FlutterFlowTheme.of(context)
-                                  //           .bodyMedium
-                                  //           .override(
-                                  //             fontFamily: 'Sora',
-                                  //             color: FlutterFlowTheme.of(context)
-                                  //                 .primaryText,
-                                  //           ),
-                                  //     ),
-                                  //     actions: [okButton],
-                                  //   );
-                                  // })
-                                  .whenComplete(() {
+                                apiCallResponseResult =
+                                    await postNurseryVisit(nurseryapiBody);
+                                // .whenComplete(() {
                                 // Hide loading indicator when API call is complete
                                 setState(() {
                                   isLoading = false;
                                 });
-                                print(apiCallResponseResult.toString());
-                                // Navigate back to your main screen
-                                Navigator.of(context).pop();
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                      content: Text(
-                                        apiCallResponseResult.toString(),
-                                        style: FlutterFlowTheme.of(context)
-                                            .labelMedium
-                                            .override(
-                                              fontFamily: 'Roboto',
-                                              color: Color(0xFF130C0D),
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                      ),
-                                      duration: Duration(milliseconds: 12000),
-                                      backgroundColor: Colors.green[200]),
-                                );
-                              });
+
+                                if (apiCallResponseResult == 200) {
+                                  // Navigate back to your main screen
+                                  Navigator.of(context).pop();
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content: Text(
+                                          'Exito al registrar visita de alumno',
+                                          style: FlutterFlowTheme.of(context)
+                                              .labelMedium
+                                              .override(
+                                                fontFamily: 'Roboto',
+                                                color: Color(0xFF130C0D),
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                        ),
+                                        duration: Duration(milliseconds: 12000),
+                                        backgroundColor: Colors.green[200]),
+                                  );
+                                } else {
+                                  showErrorFromBackend(context,
+                                      apiCallResponseResult.toString());
+                                }
+                                // });
+                              } else {
+                                showEmptyFieldAlertDialog(context);
+                                setState(() {
+                                  isLoading = false;
+                                });
+                              }
                             },
                             icon: Icon(Icons.save_outlined),
                             label: Text('Registrar visita')),
@@ -748,7 +739,8 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
       String deviceInformation,
       String responsableTeacherID) async {
     try {
-      String result = await postNurseryStudent(
+      //String result =
+      await postNurseryStudent(
           employeeID,
           kindOfPain,
           kindOfWound,
@@ -790,21 +782,19 @@ dynamic studentNewVisit(List<dynamic> jsonList) {
     var item = jsonList[0];
     String claCause = item['claCausa'];
     String nomCause = item['nomCausa'];
-    int area = item['ClaArea'];
-    int isactive = item['Bajalogicasino'];
+    // int area = item['ClaArea'];
+    // int isactive = item['Bajalogicasino'];
     return Cause(
       claCause, nomCause,
       //  area, isactive
     );
   } else {
-    // If there are multiple items in the list, return a List<Student>
     List<Cause> causeList = [];
     for (var item in jsonList) {
       String claCause = item['claCausa'];
       String nomCause = item['nomCausa'];
-      int area = item['ClaArea'];
-      int isactive = item['Bajalogicasino'];
-
+      // int area = item['ClaArea'];
+      // int isactive = item['Bajalogicasino'];
       causeList.add(Cause(
         claCause, nomCause,
         //  area, isactive

@@ -21,9 +21,25 @@ List<User> parseUsersFromJSON(List<dynamic> jsonList) {
     String schoolEmail = item['user_email'];
     String usergenre = item['genre'];
     int isActive = item['bajalogicasino'];
+    String? work_Area = item['work_department'];
+    String? work_position = item['work_positon'];
+    String creationDate = item['creation'];
+    String? birthdate = item['birthdate'];
 
-    User currentUser = User(claUn, employeeName, employeeNumber, role, userId,
-        token, schoolEmail, usergenre, isActive);
+    User currentUser = User(
+        claUn,
+        employeeName,
+        employeeNumber,
+        role,
+        userId,
+        token,
+        schoolEmail,
+        usergenre,
+        isActive,
+        work_Area,
+        work_position,
+        creationDate,
+        birthdate);
 
     users.add(currentUser);
   }
@@ -41,8 +57,8 @@ bool verifyUserAdmin(User currentUser) {
 
 dynamic getSingleUser(String? userId) async {
   if (userId == null) {
-    userId = tempUserId;
-    selectedUser = await getUserDetail(userId!);
+    userId = tempUserId.toString();
+    selectedUser = await getUserDetail(userId);
     List<dynamic> jsonList = json.decode(selectedUser);
     try {
       for (var i = 0; i < jsonList.length; i++) {
@@ -50,15 +66,31 @@ dynamic getSingleUser(String? userId) async {
         var employeeName = jsonList[i]['nombre_gafete'];
         var employeeNumber = jsonList[i]['noempleado'];
         var role = jsonList[i]['role_name'];
-        var nwuserId = jsonList[i]['role_name'];
+        // var nwuserId = jsonList[i]['role_name'];
         var token = '';
         var userEmail = jsonList[i]['user_email'];
         var usergenre = jsonList[i]['genre'];
         var isActive = jsonList[i]['bajalogicasino'];
         var userId = 0;
+        String? work_Area = jsonList[i]['department'];
+        String? work_position = jsonList[i]['positon'];
+        String? creationDate = jsonList[i]['createdAt'];
+        String? birthdate = jsonList[i]['birthdate'];
 
-        tempSelectedUsr = User(claUn, employeeName, employeeNumber, role,
-            userId, token, userEmail, usergenre, isActive);
+        tempSelectedUsr = User(
+            claUn,
+            employeeName,
+            employeeNumber,
+            role,
+            userId,
+            token,
+            userEmail,
+            usergenre,
+            isActive,
+            work_Area,
+            work_position,
+            creationDate,
+            birthdate);
       }
       return tempSelectedUsr;
     } catch (e) {
@@ -84,7 +116,7 @@ dynamic EventFromJSON(List<dynamic> jsonData) {
       String eventName = item['event_name'];
       bool isActive = item['active'];
       String moduleName = item['module_name'];
-      int moduleID = item['module_id'];
+      // int moduleID = item['module_id'];
       bool event_can_acces_module = item['event_can_acces_module'];
       // int roleID = item['role_id'];
 

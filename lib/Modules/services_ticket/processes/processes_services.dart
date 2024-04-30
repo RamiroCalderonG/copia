@@ -104,6 +104,7 @@ class _ProcessesState extends State<Processes> {
                   ),
                   readOnly: true,
                   onTap: () async {
+                    // ignore: unused_local_variable
                     DateTime? pickedDate = await showDatePicker(
                             context: context,
                             initialDate: DateTime.now(),
@@ -116,6 +117,7 @@ class _ProcessesState extends State<Processes> {
                               DateFormat('yyyy-MM-dd').format(pickedDate);
                         });
                       }
+                      return DateTime.now();
                     });
                   },
                 ),

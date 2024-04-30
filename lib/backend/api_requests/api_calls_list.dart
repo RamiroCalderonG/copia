@@ -1,9 +1,5 @@
-import 'dart:convert';
-import 'dart:io';
-
-import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:get/get.dart';
+
 import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/constants/connection.dart';
 
@@ -75,8 +71,8 @@ Future<dynamic> getCycle(
 }
 
 //Function to post new visit from a student to nursery
-Future<int> postNurseryVisit(Map<String, dynamic> jsonBody) async {
-  var postResponse;
+Future<dynamic> postNurseryVisit(Map<String, dynamic> jsonBody) async {
+  // var postResponse;
   try {
     var apiCall = await Requests.post(
         dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/nursery-visit/',
@@ -90,13 +86,14 @@ Future<int> postNurseryVisit(Map<String, dynamic> jsonBody) async {
         timeoutSeconds: 7);
 
     apiCall.raiseForStatus();
-    postResponse = apiCall.content();
+    // postResponse = apiCall.content();
 
-    return postResponse;
+    return apiCall.statusCode;
   } catch (e) {
-    ErrorDescription(e.toString());
+    return e.toString();
+    // ErrorDescription(e.toString());
   }
-  return postResponse;
+  // return postResponse;
 }
 
 Future<String> searchEmployee(String employeeNumber) async {
@@ -343,7 +340,7 @@ Future<dynamic> createRole(Map<String, dynamic> bodyObject) async {
   }
 }
 
-Future<dynamic> createUser(var newUser) async {
+Future<dynamic> createUser(Map<String, dynamic> newUser) async {
   var response;
   try {
     var apiCall = await Requests.post(
@@ -363,7 +360,7 @@ Future<dynamic> createUser(var newUser) async {
         persistCookies: false,
         timeoutSeconds: 8);
     apiCall.raiseForStatus();
-    response = apiCall.content();
+    response = apiCall.statusCode;
     return response;
   } catch (e) {
     throw FormatException(e.toString());
@@ -471,10 +468,26 @@ Future<dynamic> getUserDetail(String userId) async {
 }
 
 Future<dynamic> getAllModules() async {
-  var response;
   try {
     var apiCall = await Requests.get(
         dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/modules',
+        headers: {
+          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'token': currentUser!.token
+        },
+        persistCookies: false,
+        timeoutSeconds: 10);
+    apiCall.raiseForStatus();
+    return apiCall.content();
+  } catch (e) {
+    throw FormatException(e.toString());
+  }
+}
+
+Future<dynamic> getCampuseList() async {
+  try {
+    var apiCall = await Requests.get(
+        dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/campus',
         headers: {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
           'token': currentUser!.token
@@ -485,6 +498,45 @@ Future<dynamic> getAllModules() async {
     return apiCall.content();
   } catch (e) {
     throw FormatException(e.toString());
+  }
+}
+
+Future<dynamic> getWorkDepartments() async {
+  try {
+    var apiCall = await Requests.get(
+        dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/work-dept',
+        headers: {
+          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'token': currentUser!.token
+        },
+        persistCookies: false,
+        timeoutSeconds: 10);
+    apiCall.raiseForStatus();
+    return apiCall.content();
+  } catch (e) {
+    throw FormatException(e.toString());
+  }
+}
+
+Future<dynamic> sendUserPasswordToMail(
+    String employeeNumber, String deviceInfo, String deviceIP) async {
+  try {
+    var apiCall = await Requests.get(
+        dotenv.env['HOSTURL']! +
+            dotenv.env['PORT']! +
+            '/login/forgot-password/' +
+            employeeNumber,
+        headers: {
+          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'device': deviceInfo,
+          'ip_address': deviceIp.toString()
+        },
+        persistCookies: false,
+        timeoutSeconds: 10);
+    apiCall.raiseForStatus();
+    return 200;
+  } catch (e) {
+    return e;
   }
 }
 
