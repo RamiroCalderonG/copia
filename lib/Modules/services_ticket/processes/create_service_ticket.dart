@@ -245,7 +245,10 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
                               SizedBox(height: 15),
                               Row(
                                 children: [
-                                  campusSelectorDropDown,
+                                  SizedBox(
+                                    width: 10,
+                                    child: campusSelectorDropDown,
+                                  ),
                                 ],
                               ),
                               SizedBox(height: 15),
@@ -256,10 +259,12 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
                               Row(
                                 children: [
                                   dateAndTimeField,
-                                  SizedBox(width: 10),
+                                  // SizedBox(width: 10),
                                 ],
                               ),
-                              SizedBox(height: 18),
+                              SizedBox(
+                                height: 18,
+                              ),
                               Row(
                                 children: [descriptionField],
                               ),
