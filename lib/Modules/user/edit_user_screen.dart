@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_typing_uninitialized_variables, use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:oxschool/flutter_flow/flutter_flow_util.dart';
 import 'package:oxschool/temp/users_temp_data.dart';
@@ -66,19 +68,19 @@ class _EditUserScreenState extends State<EditUserScreen> {
     return Stack(
       children: [
         Container(
-          margin: EdgeInsets.all(10),
+          margin: const EdgeInsets.all(10),
           width: MediaQuery.of(context).size.width,
           child: LayoutBuilder(
             builder: (BuildContext context, BoxConstraints constraints) {
               if (constraints.maxWidth > 600) {
                 return Padding(
-                    padding: EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.all(16.0),
                     child: Form(
                       key: _formKey,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          Row(
+                          const Row(
                             children: [
                               Expanded(
                                   child: Text(
@@ -88,16 +90,16 @@ class _EditUserScreenState extends State<EditUserScreen> {
                               ))
                             ],
                           ),
-                          Divider(
+                          const Divider(
                             thickness: 2,
                           ),
-                          SizedBox(height: 20),
+                          const SizedBox(height: 20),
                           Row(
                             children: [
                               Expanded(
                                   child: TextFormField(
                                 controller: _nameController,
-                                decoration: InputDecoration(
+                                decoration: const InputDecoration(
                                   labelText: 'Nombre del usuario',
                                   border: OutlineInputBorder(),
                                 ),
@@ -115,13 +117,13 @@ class _EditUserScreenState extends State<EditUserScreen> {
                               )),
                             ],
                           ),
-                          SizedBox(height: 16.0),
+                          const SizedBox(height: 16.0),
                           Row(
                             children: [
                               Expanded(
                                 child: TextFormField(
                                   controller: _emailController,
-                                  decoration: InputDecoration(
+                                  decoration: const InputDecoration(
                                     labelText: 'Email',
                                     border: OutlineInputBorder(),
                                   ),
@@ -133,14 +135,14 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                   },
                                 ),
                               ),
-                              SizedBox(width: 20),
+                              const SizedBox(width: 20),
                               Expanded(
                                 child: TextFormField(
                                   textInputAction: TextInputAction.next,
                                   controller: _passwordController,
                                   decoration: InputDecoration(
                                       labelText: 'Nueva contraseña',
-                                      border: OutlineInputBorder(),
+                                      border: const OutlineInputBorder(),
                                       suffixIcon: GestureDetector(
                                         onTap: () {
                                           setState(() {
@@ -180,7 +182,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
                           // Divider(
                           //   thickness: 2,
                           // ),
-                          SizedBox(height: 20),
+                          const SizedBox(height: 20),
                           Row(
                             children: [
                               Expanded(
@@ -201,14 +203,14 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                   }).toList(),
                                 ),
                               ),
-                              SizedBox(width: 15),
+                              const SizedBox(width: 15),
                               Expanded(
                                 child: SwitchListTile(
                                   title: Text(
                                     isUserActive
                                         ? 'Usuario activo'
                                         : 'Usuario desactivado',
-                                    style: TextStyle(fontFamily: 'Sora'),
+                                    style: const TextStyle(fontFamily: 'Sora'),
                                   ),
                                   value: isUserActive,
                                   onChanged: (value) async {
@@ -233,7 +235,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
                               )
                             ],
                           ),
-                          SizedBox(height: 20),
+                          const SizedBox(height: 20),
                           Row(
                             children: [
                               Expanded(
@@ -261,8 +263,8 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                 showDialog(
                                   context: context,
                                   builder: (context) => AlertDialog(
-                                    title: Text('Confirmación'),
-                                    content: Text('¿Realiar cambios?'),
+                                    title: const Text('Confirmación'),
+                                    content: const Text('¿Realiar cambios?'),
                                     actions: <Widget>[
                                       TextButton(
                                         onPressed: () async {
@@ -271,7 +273,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                             'UDashboard',
                                             extra: <String, dynamic>{
                                               kTransitionInfoKey:
-                                                  TransitionInfo(
+                                                  const TransitionInfo(
                                                 hasTransition: true,
                                                 transitionType:
                                                     PageTransitionType
@@ -280,7 +282,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                             },
                                           );
                                         },
-                                        child: Text('Cancelar'),
+                                        child: const Text('Cancelar'),
                                       ),
                                       ElevatedButton(
                                         onPressed: () async {
@@ -289,8 +291,9 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                                 context: context,
                                                 builder: (context) =>
                                                     AlertDialog(
-                                                      title: Text('Error'),
-                                                      content: Text(
+                                                      title:
+                                                          const Text('Error'),
+                                                      content: const Text(
                                                           'No se detectó ningun cambio'),
                                                       actions: [
                                                         TextButton(
@@ -298,7 +301,8 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                                               Navigator.pop(
                                                                   context);
                                                             },
-                                                            child: Text('Ok'))
+                                                            child: const Text(
+                                                                'Ok'))
                                                       ],
                                                     ));
                                           } else {
@@ -322,12 +326,13 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                                     context: context,
                                                     builder: (context) =>
                                                         AlertDialog(
-                                                          icon:
-                                                              Icon(Icons.done),
+                                                          icon: const Icon(
+                                                              Icons.done),
                                                           iconColor: Colors
                                                               .greenAccent,
-                                                          title: Text('Exito'),
-                                                          content: Text(
+                                                          title: const Text(
+                                                              'Exito'),
+                                                          content: const Text(
                                                               'Usuario actualizado exitosamente'),
                                                           actions: [
                                                             TextButton(
@@ -336,7 +341,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                                                         context)
                                                                     .pop();
                                                               },
-                                                              child: Text(
+                                                              child: const Text(
                                                                   'Cerrar'),
                                                             )
                                                           ],
@@ -350,10 +355,12 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                                   context: context,
                                                   builder: (context) =>
                                                       AlertDialog(
-                                                        icon: Icon(Icons.error),
+                                                        icon: const Icon(
+                                                            Icons.error),
                                                         iconColor:
                                                             Colors.redAccent,
-                                                        title: Text('Error'),
+                                                        title:
+                                                            const Text('Error'),
                                                         content:
                                                             Text(e.toString()),
                                                       ));
@@ -373,20 +380,20 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                           // print(
                                           //     'Email: $email, Password: $password');
                                         },
-                                        child: Text('Register'),
+                                        child: const Text('Register'),
                                       ),
                                     ],
                                   ),
                                 );
                               }
                             },
-                            child: Text('Actualizar'),
+                            child: const Text('Actualizar'),
                           ),
                         ],
                       ),
                     ));
               } else {
-                return Placeholder();
+                return const Placeholder();
               }
             },
           ),

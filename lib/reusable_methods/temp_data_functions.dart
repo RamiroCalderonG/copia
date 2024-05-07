@@ -28,6 +28,7 @@ Future getEventsList() async {
 }
 
 int getEventIDbyName(String eventName) {
+  // ignore: prefer_typing_uninitialized_variables
   var idValue;
   for (var item in tmpeventsList) {
     if ((item['EventName'] as String).compareTo(eventName) == 0) {

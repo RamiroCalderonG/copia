@@ -35,11 +35,11 @@ class _GradesViewScreenState extends State<GradesViewScreen>
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          actions: [],
+          actions: const [],
           bottom: TabBar(
             labelColor: Colors.white,
             controller: _tabController,
-            tabs: <Widget>[
+            tabs: const <Widget>[
               Tab(
                 icon: Icon(Icons.person, color: Colors.white),
                 text: 'Carga por alumno',
@@ -51,12 +51,13 @@ class _GradesViewScreenState extends State<GradesViewScreen>
             ],
             indicatorColor: Colors.blueAccent,
           ),
-          title: Text('Calificaciones', style: TextStyle(color: Colors.white)),
+          title: const Text('Calificaciones',
+              style: TextStyle(color: Colors.white)),
           backgroundColor: FlutterFlowTheme.of(context).primary,
         ),
         body: TabBarView(
           controller: _tabController,
-          children: <Widget>[GradesPerStudent(), GradesByAsignature()],
+          children: const <Widget>[GradesPerStudent(), GradesByAsignature()],
         ));
   }
 }

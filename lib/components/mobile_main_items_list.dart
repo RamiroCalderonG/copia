@@ -5,12 +5,14 @@ class MainViewItemList extends StatefulWidget {
   final Color backgroundColor;
   final String title;
 
-  MainViewItemList(
+  // ignore: use_key_in_widget_constructors
+  const MainViewItemList(
       {required this.imagePath,
       required this.backgroundColor,
       required this.title});
 
   @override
+  // ignore: library_private_types_in_public_api
   _MainViewItemList createState() => _MainViewItemList();
 }
 
@@ -22,11 +24,11 @@ class _MainViewItemList extends State<MainViewItemList> {
     return LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
       return SingleChildScrollView(
-        child: Container(
+        child: SizedBox(
           height: constraints.maxHeight * 0.9,
           width: constraints.maxWidth,
           child: Card(
-            margin: EdgeInsets.all(2.0),
+            margin: const EdgeInsets.all(2.0),
             elevation: isHovered ? 10 : 0,
             shadowColor: Colors.black,
             shape: RoundedRectangleBorder(
@@ -42,7 +44,7 @@ class _MainViewItemList extends State<MainViewItemList> {
               padding: EdgeInsets.all(isHovered ? 20 : 10),
               decoration: BoxDecoration(
                 color: isHovered
-                    ? Color.fromRGBO(73, 73, 73, 1)
+                    ? const Color.fromRGBO(73, 73, 73, 1)
                     : widget.backgroundColor,
                 borderRadius: BorderRadius.circular(15),
               ),
@@ -52,7 +54,7 @@ class _MainViewItemList extends State<MainViewItemList> {
                     widget.title,
                     textScaleFactor: 0.8,
                     softWrap: true,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                       fontFamily: 'Sora',

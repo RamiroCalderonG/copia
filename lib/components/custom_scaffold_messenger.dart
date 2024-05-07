@@ -8,7 +8,7 @@ dynamic customScaffoldMesg(
       message,
       style: FlutterFlowTheme.of(context).labelMedium.override(
             fontFamily: 'Roboto',
-            color: Color(0xFF130C0D),
+            color: const Color(0xFF130C0D),
             fontWeight: FontWeight.w500,
           ),
     ),
@@ -19,7 +19,7 @@ dynamic customScaffoldMesg(
         onPressed: () {
           ScaffoldMessenger.of(context).hideCurrentSnackBar();
         }),
-    duration: Duration(milliseconds: 9000),
+    duration: const Duration(milliseconds: 9000),
     backgroundColor: FlutterFlowTheme.of(context).secondary,
   );
 }

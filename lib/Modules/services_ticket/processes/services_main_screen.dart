@@ -81,13 +81,13 @@ class _ServicesTicketHistoryState extends State<ServicesTicketHistory>
             ],
             indicatorColor: Colors.blueAccent,
           ),
-          title: Text('Ticket de servicio ',
+          title: const Text('Ticket de servicio ',
               style: TextStyle(color: Colors.white)),
           backgroundColor: FlutterFlowTheme.of(context).primary,
         ),
         body: TabBarView(
           controller: _tabController,
-          children: [
+          children: const [
             Processes(),
             EvaluateDept(),
             EvaluateServices(),

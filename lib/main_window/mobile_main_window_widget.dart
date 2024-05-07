@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+// ignore: depend_on_referenced_packages
 import 'package:http/http.dart' as http;
 import 'package:oxschool/constants/User.dart';
 
@@ -58,7 +59,7 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
             return Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Padding(padding: EdgeInsets.only(left: 10.5)),
+                const Padding(padding: EdgeInsets.only(left: 10.5)),
                 Image.asset(
                   Theme.of(context).brightness == Brightness.light
                       ? 'assets/images/1_OS_color.png' //igth theme image
@@ -67,7 +68,7 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
                   height: 40,
                   filterQuality: FilterQuality.high,
                 ),
-                Spacer(
+                const Spacer(
                   flex: 1,
                 ),
               ],
@@ -77,7 +78,7 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
             return Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Padding(padding: EdgeInsets.only(left: 5.5)),
+                const Padding(padding: EdgeInsets.only(left: 5.5)),
                 Center(
                   child: Image.asset(
                     Theme.of(context).brightness == Brightness.light
@@ -88,14 +89,14 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
                     filterQuality: FilterQuality.high,
                   ),
                 ),
-                Spacer(
+                const Spacer(
                   flex: 1,
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Padding(
-                      padding: EdgeInsets.all(10),
+                      padding: const EdgeInsets.all(10),
                       child: Row(
                         children: [
                           IconButton(
@@ -105,7 +106,7 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
                             },
                             icon: const Icon(Icons.person),
                             iconSize: 30.2,
-                            color: Color.fromRGBO(235, 48, 69, 0.988),
+                            color: const Color.fromRGBO(235, 48, 69, 0.988),
                           ),
                           Text(
                               '${currentUser?.employeeName?.toLowerCase().trimRight()}',
@@ -131,7 +132,7 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
         backgroundColor: FlutterFlowTheme.of(context).primary,
         leading: IconButton(
           hoverColor: Colors.black12,
-          icon: Icon(
+          icon: const Icon(
             Icons.menu,
             size: 30,
             // size: 40.5,
@@ -146,10 +147,10 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
 // LIST OF CARDS TO SHOW
     final menuListItems = Center(
       child: Container(
-        padding: EdgeInsets.all(5),
-        margin: EdgeInsets.all(5),
+        padding: const EdgeInsets.all(5),
+        margin: const EdgeInsets.all(5),
         child: GridView.builder(
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 1, childAspectRatio: 3),
 
             // physics: NeverScrollableScrollPhysics(),
@@ -157,8 +158,8 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
             itemBuilder: (BuildContext context, int index) {
               return GestureDetector(
                 onTap: () {
-                  Uri _url = Uri.parse(oxlinks[index]);
-                  launchUrlDirection(_url);
+                  Uri url = Uri.parse(oxlinks[index]);
+                  launchUrlDirection(url);
                 },
                 child: HoverCard(
                   imagePath: gridMainWindowIcons[index],
@@ -174,13 +175,14 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
       ),
     );
 
+    // ignore: no_leading_underscores_for_local_identifiers
     Widget _createDrawer(
         BuildContext context, Future<http.Response> userEvents) {
-      final _controller = ScrollController();
+      final controller = ScrollController();
 
       return Drawer(
         child: SingleChildScrollView(
-          controller: _controller,
+          controller: controller,
           child: Column(
             children: <Widget>[
               UserAccountsDrawerHeader(
@@ -200,7 +202,7 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
                 ),
                 currentAccountPicture: CircleAvatar(
                   backgroundColor: FlutterFlowTheme.of(context).accent4,
-                  child: Image(
+                  child: const Image(
                       image: AssetImage('assets/images/logoRedondoOx.png')),
                   // Text(currentUser!.employeeName![0],
                   //     style: TextStyle(fontFamily: 'Sora', fontSize: 20)),
@@ -208,26 +210,26 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
                 decoration: BoxDecoration(
                     color: FlutterFlowTheme.of(context).primaryBackground),
               ),
-              new FutureBuilder(
+              FutureBuilder(
                   future: userEvents,
                   builder: (BuildContext context,
                       AsyncSnapshot<http.Response> response) {
                     if (!response.hasData) {
                       return const Center(
-                        child: const Text('Loading...'),
+                        child: Text('Loading...'),
                       );
                     } else if (response.data!.statusCode != 200) {
                       return const Center(
-                        child: const Text('Error Loading'),
+                        child: Text('Error Loading'),
                       );
                     } else {
                       List<dynamic> json = jsonDecode(response.data!.body);
                       return MyExpansionTileList(elementList: json);
                     }
                   }),
-              Divider(thickness: 3),
+              const Divider(thickness: 3),
               ListTile(
-                title: Text('Cerrar sesión'),
+                title: const Text('Cerrar sesión'),
                 leading: const Icon(Icons.exit_to_app),
                 onTap: () {
                   // clearStudentData();
@@ -236,7 +238,7 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
                   context.goNamed(
                     '_initialize',
                     extra: <String, dynamic>{
-                      kTransitionInfoKey: TransitionInfo(
+                      kTransitionInfoKey: const TransitionInfo(
                         hasTransition: true,
                         transitionType: PageTransitionType.leftToRight,
                       ),
@@ -294,15 +296,15 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
           onPressed: () {},
           child: PopupMenuButton<int>(
             itemBuilder: (context) => [
-              PopupMenuItem<int>(
+              const PopupMenuItem<int>(
                 value: 1,
                 child: Text('Crear ticket de servicio'),
               ),
-              PopupMenuItem<int>(
+              const PopupMenuItem<int>(
                 value: 2,
                 child: Text('Consultar recibo de nomina'),
               ),
-              PopupMenuItem<int>(
+              const PopupMenuItem<int>(
                 value: 3,
                 child: Text('Consulta huellas en checador'),
               ),
@@ -343,10 +345,10 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
 
 final menuListItems = Center(
   child: Container(
-    padding: EdgeInsets.all(5),
-    margin: EdgeInsets.all(5),
+    padding: const EdgeInsets.all(5),
+    margin: const EdgeInsets.all(5),
     child: GridView.builder(
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 1, childAspectRatio: 3),
 
         // physics: NeverScrollableScrollPhysics(),
@@ -354,8 +356,8 @@ final menuListItems = Center(
         itemBuilder: (BuildContext context, int index) {
           return GestureDetector(
             onTap: () {
-              Uri _url = Uri.parse(oxlinks[index]);
-              launchUrlDirection(_url);
+              Uri url = Uri.parse(oxlinks[index]);
+              launchUrlDirection(url);
             },
             child: HoverCard(
               imagePath: gridMainWindowIcons[index],

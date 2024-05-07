@@ -1,3 +1,5 @@
+// ignore_for_file: constant_identifier_names, prefer_typing_uninitialized_variables
+
 import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:pluto_grid/pluto_grid.dart';
@@ -27,7 +29,7 @@ class _GradesPerStudentState extends State<GradesPerStudent> {
   @override
   Widget build(BuildContext context) {
     return Stack(children: [
-      Container(
+      SizedBox(
         width: MediaQuery.of(context).size.width,
         child: LayoutBuilder(
             builder: (BuildContext context, BoxConstraints constraints) {
@@ -43,7 +45,7 @@ class _GradesPerStudentState extends State<GradesPerStudent> {
             );
           } else {
             //TODO: CREATE A VERSION FOR SMALLER SCREEN
-            return Placeholder();
+            return const Placeholder();
           }
         }),
       )
@@ -163,51 +165,44 @@ class _GradesPerStudentState extends State<GradesPerStudent> {
       children: [
         Row(
           children: [
-            SizedBox(width: 100),
+            const SizedBox(width: 100),
             Container(
-                margin: EdgeInsets.only(top: 20, bottom: 20),
-                padding: EdgeInsets.all(1),
+                margin: const EdgeInsets.only(top: 20, bottom: 20),
+                padding: const EdgeInsets.all(1),
                 child: Row(
                   children: [
-                    SizedBox(width: 50),
-                    Container(
-                      child: Row(
-                        children: [
-                          Text(
-                            'Grado y Grupo:    ',
-                            style: TextStyle(
-                                fontFamily: 'Sora',
-                                fontWeight: FontWeight.bold),
-                          ),
-                          groupSelectorButton,
-                        ],
-                      ),
+                    const SizedBox(width: 50),
+                    Row(
+                      children: [
+                        const Text(
+                          'Grado y Grupo:    ',
+                          style: TextStyle(
+                              fontFamily: 'Sora', fontWeight: FontWeight.bold),
+                        ),
+                        groupSelectorButton,
+                      ],
                     ),
-                    SizedBox(width: 50),
-                    Container(
-                      child: Row(
-                        children: [
-                          Text(
-                            'Mes:    ',
-                            style: TextStyle(
-                                fontFamily: 'Sora',
-                                fontWeight: FontWeight.bold),
-                          ),
-                          monthSelectorButton,
-                          SizedBox(width: 18),
-                          Text(
-                            'Selector de materia:',
-                            style: TextStyle(
-                                fontFamily: 'Sora',
-                                fontWeight: FontWeight.bold),
-                          ),
-                          SizedBox(width: 48),
-                        ],
-                      ),
+                    const SizedBox(width: 50),
+                    Row(
+                      children: [
+                        const Text(
+                          'Mes:    ',
+                          style: TextStyle(
+                              fontFamily: 'Sora', fontWeight: FontWeight.bold),
+                        ),
+                        monthSelectorButton,
+                        const SizedBox(width: 18),
+                        const Text(
+                          'Selector de materia:',
+                          style: TextStyle(
+                              fontFamily: 'Sora', fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(width: 48),
+                      ],
                     ),
-                    SizedBox(width: 50),
+                    const SizedBox(width: 50),
                     Container(
-                      padding: EdgeInsets.all(2),
+                      padding: const EdgeInsets.all(2),
                       child: ElevatedButton.icon(
                           onPressed: () {
                             setState(() {
@@ -216,35 +211,35 @@ class _GradesPerStudentState extends State<GradesPerStudent> {
 
                             LoadingIndicator(
                                 indicatorType: Indicator.ballPulse,
-                                colors: [Colors.red],
+                                colors: const [Colors.red],
                                 backgroundColor: Colors.black87,
                                 strokeWidth: 2,
                                 pause: pause,
                                 pathBackgroundColor: Colors.black);
                           },
-                          icon: Icon(Icons.search),
-                          label: Text('Buscar')),
+                          icon: const Icon(Icons.search),
+                          label: const Text('Buscar')),
                     ),
-                    SizedBox(width: 10),
+                    const SizedBox(width: 10),
                     Container(
-                      padding: EdgeInsets.all(2),
+                      padding: const EdgeInsets.all(2),
                       child: ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.red[400]),
                           onPressed: () {},
-                          icon: Icon(Icons.save),
-                          label: Text('Guardar')),
+                          icon: const Icon(Icons.save),
+                          label: const Text('Guardar')),
                     ),
-                    SizedBox(width: 10),
+                    const SizedBox(width: 10),
                   ],
                 )),
           ],
         ),
-        Divider(thickness: 1),
+        const Divider(thickness: 1),
         Container(
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height / 1.5,
-          margin: EdgeInsets.all(20),
+          margin: const EdgeInsets.all(20),
           child: PlutoGrid(columns: assignaturesColumns, rows: assignatureRows),
         )
       ],

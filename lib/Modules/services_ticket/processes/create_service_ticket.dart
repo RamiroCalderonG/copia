@@ -26,6 +26,7 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
   bool _isDescriptionFieldEmpty = false;
   bool _isObservationsFieldEmpty = false;
   // bool _showSearchEmployee = false;
+  // ignore: prefer_final_fields
   bool _isSearching = false;
 
   @override
@@ -63,7 +64,7 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
 
     final DropdownMenu employeSelectorName = DropdownMenu<String>(
         initialSelection: employeeList.first,
-        label: Text('Nombre de empleado que solicita'),
+        label: const Text('Nombre de empleado que solicita'),
         onSelected: (String? value) {
           setState(() {
             dropDownValue = value!;
@@ -168,7 +169,7 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
         labelText: "Requerido para:",
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10.0),
-          borderSide: BorderSide(
+          borderSide: const BorderSide(
             color: Colors.grey,
             width: 1.0,
           ),
@@ -198,7 +199,7 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
 
     final DropdownMenu campusSelectorDropDown = DropdownMenu<String>(
         initialSelection: months.first,
-        label: Text('Campus'),
+        label: const Text('Campus'),
         onSelected: (String? value) {
           setState(() {
             dropDownValue = value;
@@ -211,7 +212,7 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
 
     final DropdownMenu deptSelectorDropDown = DropdownMenu<String>(
         initialSelection: deptsList.first,
-        label: Text('Departamento al que solicita'),
+        label: const Text('Departamento al que solicita'),
         onSelected: (String? value) {
           setState(() {
             dropDownValue = value;
@@ -224,7 +225,7 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
 
     return Stack(
       children: [
-        Container(
+        SizedBox(
             width: MediaQuery.of(context).size.width * 3 / 4,
             child: LayoutBuilder(
               builder: (BuildContext context, BoxConstraints constraints) {
@@ -242,39 +243,39 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
                                   employeSelectorName,
                                 ],
                               ),
-                              SizedBox(height: 15),
+                              const SizedBox(height: 15),
                               Row(
                                 children: [
                                   campusSelectorDropDown,
                                 ],
                               ),
-                              SizedBox(height: 15),
+                              const SizedBox(height: 15),
                               Row(
                                 children: [deptSelectorDropDown],
                               ),
-                              SizedBox(height: 15),
+                              const SizedBox(height: 15),
                               Row(
                                 children: [
                                   dateAndTimeField,
-                                  SizedBox(width: 10),
+                                  const SizedBox(width: 10),
                                 ],
                               ),
-                              SizedBox(height: 18),
+                              const SizedBox(height: 18),
                               Row(
                                 children: [descriptionField],
                               ),
-                              SizedBox(height: 20),
+                              const SizedBox(height: 20),
                               Row(
                                 children: [observationsField],
                               ),
-                              SizedBox(height: 20),
+                              const SizedBox(height: 20),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   CustomSaveButton(
                                     onPressed: () {},
                                   ),
-                                  SizedBox(
+                                  const SizedBox(
                                     width: 30,
                                   ),
                                   CustomCancelButton(onPressed: () {
@@ -299,34 +300,34 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              SizedBox(width: 18),
+                              const SizedBox(width: 18),
                               employeSelectorName,
                               // _buildEmployeeNumberField(),
-                              SizedBox(width: 18),
+                              const SizedBox(width: 18),
                               campusSelectorDropDown,
-                              SizedBox(width: 18),
+                              const SizedBox(width: 18),
                               deptSelectorDropDown,
-                              SizedBox(width: 18),
+                              const SizedBox(width: 18),
                               dateAndTimeField
                             ],
                           ),
-                          Divider(thickness: 1),
-                          SizedBox(height: 18),
+                          const Divider(thickness: 1),
+                          const SizedBox(height: 18),
                           Row(
                             children: [descriptionField],
                           ),
-                          SizedBox(height: 20),
+                          const SizedBox(height: 20),
                           Row(
                             children: [observationsField],
                           ),
-                          SizedBox(height: 20),
+                          const SizedBox(height: 20),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               CustomSaveButton(
                                 onPressed: () {},
                               ),
-                              SizedBox(
+                              const SizedBox(
                                 width: 30,
                               ),
                               CustomCancelButton(onPressed: () {
@@ -407,8 +408,8 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
   final ButtonStyle raisedButtonStyle = ElevatedButton.styleFrom(
     foregroundColor: Colors.black87,
     backgroundColor: Colors.grey[300],
-    minimumSize: Size(88, 36),
-    padding: EdgeInsets.symmetric(horizontal: 16),
+    minimumSize: const Size(88, 36),
+    padding: const EdgeInsets.symmetric(horizontal: 16),
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(2)),
     ),

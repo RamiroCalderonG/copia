@@ -11,10 +11,12 @@ class MainWindowModel extends FlutterFlowModel {
 
   /// Initialization and disposal methods.
 
+  @override
   void initState(BuildContext context) {
     sideNav04Model = createModel(context, () => SideNav04Model());
   }
 
+  @override
   void dispose() {
     unfocusNode.dispose();
     sideNav04Model.dispose();

@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 class Cycle {
   late String? claCiclo;
   late String? fecIniCiclo;

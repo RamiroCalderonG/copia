@@ -1,5 +1,8 @@
+// ignore_for_file: file_names, unnecessary_late
+
 import 'package:oxschool/Models/Cycle.dart';
 import 'package:oxschool/Models/User.dart';
+// ignore: depend_on_referenced_packages
 import 'package:http/http.dart' as http;
 
 late User? currentUser;

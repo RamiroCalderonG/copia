@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/flutter_flow/flutter_flow_theme.dart';
@@ -41,7 +43,7 @@ class _NewUserScreenState extends State<NewUserScreen> {
   final _isTeacher = TextEditingController();
 
   int _currentPageIndex = 0;
-  PageController _pageController = PageController();
+  final PageController _pageController = PageController();
 
   @override
   void initState() {
@@ -70,7 +72,7 @@ class _NewUserScreenState extends State<NewUserScreen> {
     });
     _pageController.animateToPage(
       _currentPageIndex,
-      duration: Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 300),
       curve: Curves.ease,
     );
   }
@@ -97,7 +99,7 @@ class _NewUserScreenState extends State<NewUserScreen> {
 
     final campuseSelectorField = DropdownButton<String>(
       value: campuseSelector,
-      hint: Text('Campus'),
+      hint: const Text('Campus'),
       borderRadius: BorderRadius.circular(15),
       elevation: 6,
       style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -124,7 +126,7 @@ class _NewUserScreenState extends State<NewUserScreen> {
 
     final areaSelectorField = DropdownButton<String>(
       value: areaSelector, //?? areaList.first,
-      hint: Text('Departamento'),
+      hint: const Text('Departamento'),
       borderRadius: BorderRadius.circular(15),
       // icon: Icon(Icons.),
       elevation: 6,
@@ -152,7 +154,7 @@ class _NewUserScreenState extends State<NewUserScreen> {
 
     final roleSelectorField = DropdownButton<String>(
       value: roleSelector,
-      hint: Text('Rol asignado '),
+      hint: const Text('Rol asignado '),
       borderRadius: BorderRadius.circular(15),
 
       // icon: Icon(Icons.person),
@@ -182,7 +184,7 @@ class _NewUserScreenState extends State<NewUserScreen> {
     final genderSelection = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text(
+        const Text(
           'Genero',
           style: TextStyle(
             fontWeight: FontWeight.bold,
@@ -190,7 +192,7 @@ class _NewUserScreenState extends State<NewUserScreen> {
           ),
         ),
         RadioListTile<String>(
-          title: Text('Male'),
+          title: const Text('Male'),
           value: 'male',
           groupValue: _selectedGender,
           onChanged: (value) {
@@ -200,7 +202,7 @@ class _NewUserScreenState extends State<NewUserScreen> {
           },
         ),
         RadioListTile<String>(
-          title: Text('Female'),
+          title: const Text('Female'),
           value: 'female',
           groupValue: _selectedGender,
           onChanged: (value) {
@@ -210,7 +212,7 @@ class _NewUserScreenState extends State<NewUserScreen> {
           },
         ),
         RadioListTile<String>(
-          title: Text('Other'),
+          title: const Text('Other'),
           value: 'other',
           groupValue: _selectedGender,
           onChanged: (value) {
@@ -219,7 +221,7 @@ class _NewUserScreenState extends State<NewUserScreen> {
             });
           },
         ),
-        SizedBox(height: 16.0),
+        const SizedBox(height: 16.0),
         // Text(
         //   'Selected gender: $_selectedGender',
         //   style: TextStyle(fontSize: 16.0),
@@ -231,7 +233,7 @@ class _NewUserScreenState extends State<NewUserScreen> {
       child: Placeholder(
         child: ElevatedButton(
           onPressed: _nextPage,
-          child: Text('Next'),
+          child: const Text('Next'),
         ),
       ),
     );
@@ -241,7 +243,7 @@ class _NewUserScreenState extends State<NewUserScreen> {
       SingleChildScrollView(
         child: Column(
           children: [
-            Row(
+            const Row(
               children: [
                 Text(
                   'Datos de acceso',
@@ -251,7 +253,7 @@ class _NewUserScreenState extends State<NewUserScreen> {
             ),
             Row(
               children: [
-                SizedBox(width: 15),
+                const SizedBox(width: 15),
                 Expanded(
                   child: TextFormField(
                     controller: _userName,
@@ -261,44 +263,46 @@ class _NewUserScreenState extends State<NewUserScreen> {
                       }
                       return null;
                     },
-                    decoration: InputDecoration(labelText: "Nombre completo"),
+                    decoration:
+                        const InputDecoration(labelText: "Nombre completo"),
                     textInputAction: TextInputAction.next,
                   ),
                 ),
-                SizedBox(width: 15),
+                const SizedBox(width: 15),
                 Expanded(
                     child: TextFormField(
                   controller: _userEmail,
-                  decoration: InputDecoration(labelText: "Correo electrónico"),
+                  decoration:
+                      const InputDecoration(labelText: "Correo electrónico"),
                 ))
               ],
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Row(
               children: [
                 IconButton(
                     onPressed: () {
                       // TODO: IMPLEMENT EMPLOYEE NUMBER GENERATOR
                     },
-                    icon: Icon(Icons.refresh)),
+                    icon: const Icon(Icons.refresh)),
                 Expanded(
                     child: TextFormField(
                   controller: _employeeNumber,
                   keyboardType: TextInputType.number,
-                  decoration:
-                      InputDecoration(labelText: 'Generar número de empleado'),
+                  decoration: const InputDecoration(
+                      labelText: 'Generar número de empleado'),
                   enabled: true,
                 )),
-                SizedBox(width: 30),
-                Text(
+                const SizedBox(width: 30),
+                const Text(
                   'Rol asignado   ',
                   style: TextStyle(fontSize: 11),
                 ),
                 Expanded(child: roleSelectorField)
               ],
             ),
-            SizedBox(height: 30),
-            Row(
+            const SizedBox(height: 30),
+            const Row(
               children: [
                 Expanded(
                     child: Text(
@@ -315,14 +319,14 @@ class _NewUserScreenState extends State<NewUserScreen> {
             Row(
               children: [
                 Expanded(child: campuseSelectorField),
-                SizedBox(width: 20),
+                const SizedBox(width: 20),
                 Expanded(child: areaSelectorField)
               ],
             ),
-            SizedBox(
+            const SizedBox(
               height: 20,
             ),
-            Row(
+            const Row(
               children: [
                 Text('Informacion personal',
                     style: TextStyle(fontStyle: FontStyle.italic, fontSize: 12))
@@ -340,7 +344,7 @@ class _NewUserScreenState extends State<NewUserScreen> {
                             ? Text(DateFormat('yyyy-MM-dd')
                                 .format(_selectedBirthdate!))
                             : Text(_selectedBirthdate.toString()),
-                        Divider(thickness: 1),
+                        const Divider(thickness: 1),
                         ElevatedButton(
                           onPressed: () {
                             showDatePicker(
@@ -356,19 +360,19 @@ class _NewUserScreenState extends State<NewUserScreen> {
                               }
                             });
                           },
-                          child: Text('Fecha de nacimiento'),
+                          child: const Text('Fecha de nacimiento'),
                         ),
-                        SizedBox(width: 16.0),
+                        const SizedBox(width: 16.0),
                       ],
                     ),
-                    SizedBox(height: 10.0),
+                    const SizedBox(height: 10.0),
                     Column(
                       children: <Widget>[
                         _creationDate != null
                             ? Text(
                                 DateFormat('yyyy-MM-dd').format(_creationDate!))
                             : Text(_creationDate.toString()),
-                        Divider(thickness: 1),
+                        const Divider(thickness: 1),
                         ElevatedButton(
                           onPressed: () {
                             showDatePicker(
@@ -384,9 +388,9 @@ class _NewUserScreenState extends State<NewUserScreen> {
                               }
                             });
                           },
-                          child: Text('Fecha de alta'),
+                          child: const Text('Fecha de alta'),
                         ),
-                        SizedBox(width: 16.0),
+                        const SizedBox(width: 16.0),
                       ],
                     ),
                   ],
@@ -406,8 +410,8 @@ class _NewUserScreenState extends State<NewUserScreen> {
                         builder: (BuildContext context) {
                           return AlertDialog(
                             title: const Text('Error'),
-                            content:
-                                Text('Verificar que no existan campos vacios'),
+                            content: const Text(
+                                'Verificar que no existan campos vacios'),
                             actions: <Widget>[
                               TextButton(
                                 style: TextButton.styleFrom(
@@ -459,16 +463,17 @@ class _NewUserScreenState extends State<NewUserScreen> {
                         showDialog(
                             context: context,
                             builder: (context) => AlertDialog(
-                                  icon: Icon(Icons.done),
+                                  icon: const Icon(Icons.done),
                                   iconColor: Colors.greenAccent,
-                                  title: Text('Exito'),
-                                  content: Text('Usuario creado exitosamente'),
+                                  title: const Text('Exito'),
+                                  content:
+                                      const Text('Usuario creado exitosamente'),
                                   actions: [
                                     TextButton(
                                       onPressed: () {
                                         Navigator.of(context).pop();
                                       },
-                                      child: Text('Cerrar'),
+                                      child: const Text('Cerrar'),
                                     )
                                   ],
                                 ));
@@ -482,11 +487,11 @@ class _NewUserScreenState extends State<NewUserScreen> {
                     }
                   }
                 },
-                child: Text('Guardar')),
-            SizedBox(height: 32),
+                child: const Text('Guardar')),
+            const SizedBox(height: 32),
             ElevatedButton(
               onPressed: _nextPage,
-              child: Text('Continuar'),
+              child: const Text('Continuar'),
             ),
           ],
         ),
@@ -497,17 +502,17 @@ class _NewUserScreenState extends State<NewUserScreen> {
     return Stack(
       children: [
         Container(
-            margin: EdgeInsets.all(10),
+            margin: const EdgeInsets.all(10),
             width: MediaQuery.of(context).size.width,
             child: LayoutBuilder(
                 builder: (BuildContext context, BoxConstraints constraints) {
               if (constraints.maxWidth > 600) {
                 return PageView(
                     controller: _pageController,
-                    physics: NeverScrollableScrollPhysics(),
+                    physics: const NeverScrollableScrollPhysics(),
                     children: forms);
               } else {
-                return Placeholder();
+                return const Placeholder();
               }
             })),
         if (isLoading) CustomLoadingIndicator()

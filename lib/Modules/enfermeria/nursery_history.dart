@@ -121,15 +121,16 @@ class _HistoryNurseryState extends State<HistoryNursery> {
           child: Column(
             children: [
               if (nurseryHistoryStudent != null)
-                Text('Nombre del estudiante', style: TextStyle(fontSize: 22.0)),
+                const Text('Nombre del estudiante',
+                    style: TextStyle(fontSize: 22.0)),
               Text(
                 selectedStudent.nombre,
-                style: TextStyle(fontSize: 18.0),
+                style: const TextStyle(fontSize: 18.0),
               ),
-              SizedBox(height: 8.0),
-              Text('Datos de contacto', style: TextStyle(fontSize: 18.0)),
-              SizedBox(height: 8.0),
-              Divider(),
+              const SizedBox(height: 8.0),
+              const Text('Datos de contacto', style: TextStyle(fontSize: 18.0)),
+              const SizedBox(height: 8.0),
+              const Divider(),
               Expanded(
                   child: PlutoGrid(
                 // configuration: const PlutoGridConfiguration.dark(),
@@ -142,7 +143,8 @@ class _HistoryNurseryState extends State<HistoryNursery> {
               )),
               if (nurseryHistoryStudent == null ||
                   nurseryHistoryStudent.isEmpty)
-                Text('Sin informacion disponible'), // Placeholder or message
+                const Text(
+                    'Sin informacion disponible'), // Placeholder or message
             ],
           )),
     );

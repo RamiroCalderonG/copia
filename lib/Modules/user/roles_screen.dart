@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously, library_private_types_in_public_api
+
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -66,14 +68,15 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
         children: [
           Text(
             role,
-            style: TextStyle(fontFamily: 'Sora', fontWeight: FontWeight.bold),
+            style: const TextStyle(
+                fontFamily: 'Sora', fontWeight: FontWeight.bold),
           ),
           if (!isActive[index]) // Conditionally show red dot
             Container(
-              margin: EdgeInsets.only(left: 5), // Adjust margin as needed
+              margin: const EdgeInsets.only(left: 5), // Adjust margin as needed
               width: 10,
               height: 10,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 shape: BoxShape.circle,
                 color: Colors.red,
               ),
@@ -104,9 +107,9 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              SizedBox(width: 5),
+              const SizedBox(width: 5),
               IconButton(
-                icon: Icon(Icons.delete_outline),
+                icon: const Icon(Icons.delete_outline),
                 tooltip: 'Eliminar Rol',
                 onPressed: () async {
                   //TODO: VERIFY IF ITS NEEDED, OR ONLY LOGIC
@@ -118,9 +121,9 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                     setState(() {
                       isLoading = true;
                     });
-                    var role_id = tmpRolesList[index]['Roleid'];
-                    var body_edit = {'isActive': true};
-                    await editRole(role_id, body_edit);
+                    var roleId = tmpRolesList[index]['Roleid'];
+                    var bodyEdit = {'isActive': true};
+                    await editRole(roleId, bodyEdit);
                     setState(() {
                       isLoading = false;
                     });
@@ -133,7 +136,7 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                               const RolesAndProfilesScreen(),
                         ));
                   },
-                  icon: Icon(Icons.arrow_circle_up),
+                  icon: const Icon(Icons.arrow_circle_up),
                   tooltip: 'Activar Rol',
                 ),
               if (tmpRolesList[index]['Active'] == true)
@@ -142,9 +145,9 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                       setState(() {
                         isLoading = true;
                       });
-                      var role_id = tmpRolesList[index]['Roleid'];
-                      var body_edit = {'isActive': false};
-                      await editRole(role_id, body_edit);
+                      var roleId = tmpRolesList[index]['Roleid'];
+                      var bodyEdit = {'isActive': false};
+                      await editRole(roleId, bodyEdit);
                       setState(() {
                         isLoading = false;
                       });
@@ -160,10 +163,10 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                           ));
                     },
                     tooltip: 'Desactivar rol',
-                    icon: Icon(Icons.arrow_circle_down_outlined)),
-              SizedBox(width: 5),
+                    icon: const Icon(Icons.arrow_circle_down_outlined)),
+              const SizedBox(width: 5),
               IconButton(
-                icon: Icon(Icons.edit),
+                icon: const Icon(Icons.edit),
                 tooltip: 'Editar Rol',
                 onPressed: () async {
                   await _showEditRoleScreen(context, index, isActive[index]);
@@ -178,7 +181,7 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                                 roleID: tmpRolesList[index]['Roleid'],
                               )));
                 },
-                icon: Icon(Icons.add),
+                icon: const Icon(Icons.add),
                 tooltip: 'Agregar evento a Rol',
               ),
             ],
@@ -213,7 +216,7 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
   void _showAddRoleScreen(BuildContext context) async {
     final result = await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => AddEditRoleScreen(),
+        builder: (_) => const AddEditRoleScreen(),
       ),
     );
     if (result != null &&
@@ -232,7 +235,7 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Admin. de rol de usuario',
+        title: const Text('Admin. de rol de usuario',
             style: TextStyle(color: Colors.white)),
         backgroundColor: FlutterFlowTheme.of(context)
             .primary, // Assuming FlutterFlowTheme is not available
@@ -240,19 +243,19 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
       body: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           if (constraints.maxWidth < 600) {
-            return Card(
+            return const Card(
               child: Placeholder(),
             );
           } else {
-            return Container(
+            return SizedBox(
               width: MediaQuery.of(context).size.width,
               child: Column(
                 children: [
-                  SizedBox(height: 15),
+                  const SizedBox(height: 15),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      SizedBox(width: 20),
+                      const SizedBox(width: 20),
                       // TextButton(
                       //   onPressed: () {
                       //     _showAddRoleScreen(context);
@@ -277,9 +280,9 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                           onPressed: () {
                             _showAddRoleScreen(context);
                           },
-                          icon: Icon(Icons.add),
-                          label: Text('Nuevo Rol')),
-                      SizedBox(width: 20),
+                          icon: const Icon(Icons.add),
+                          label: const Text('Nuevo Rol')),
+                      const SizedBox(width: 20),
                       TextButton.icon(
                           onPressed: () async {
                             setState(() {
@@ -297,10 +300,10 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) =>
-                                        RolesAndProfilesScreen()));
+                                        const RolesAndProfilesScreen()));
                           },
-                          icon: Icon(Icons.refresh),
-                          label: Text('Refrescar'))
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Refrescar'))
 
                       // TextButton(
                       //   onPressed: () {
@@ -332,9 +335,9 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                       // ),
                     ],
                   ),
-                  SizedBox(height: 16),
-                  Divider(thickness: 1),
-                  Text(
+                  const SizedBox(height: 16),
+                  const Divider(thickness: 1),
+                  const Text(
                     'Listado de roles',
                     style: TextStyle(fontFamily: 'Sora'),
                   ),
@@ -361,14 +364,14 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                     ),
                   ),
 
-                  SizedBox(width: 36),
+                  const SizedBox(width: 36),
                   // Divider(thickness: 1),
                   if (selectedCardIndex != -1)
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Text(
                         description[selectedCardIndex],
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -391,8 +394,11 @@ class AddEditRoleScreen extends StatefulWidget {
   final bool? roleCanAcces;
 
   const AddEditRoleScreen(
-      {Key? key, this.role, this.description, this.isActive, this.roleCanAcces})
-      : super(key: key);
+      {super.key,
+      this.role,
+      this.description,
+      this.isActive,
+      this.roleCanAcces});
 
   @override
   _AddEditRoleScreenState createState() => _AddEditRoleScreenState();
@@ -403,7 +409,7 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
   late TextEditingController _descriptionController;
   late bool _isActive;
   List<Event> _events = [];
-  Map<int, bool> role_event_active = {};
+  Map<int, bool> roleEventActive = {};
 
   @override
   void initState() {
@@ -483,6 +489,7 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
   Widget build(BuildContext context) {
     // Group events by moduleName
     Map<String, List<Event>> groupedEvents = {};
+    // ignore: avoid_function_literals_in_foreach_calls
     _events.forEach((event) {
       if (!groupedEvents.containsKey(event.moduleName)) {
         groupedEvents[event.moduleName] = [];
@@ -493,7 +500,7 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.role != null ? 'Editar Rol' : 'Agregar Rol',
-            style: TextStyle(color: Colors.white)),
+            style: const TextStyle(color: Colors.white)),
         backgroundColor: FlutterFlowTheme.of(context).primary,
       ),
       body: Stack(
@@ -503,12 +510,12 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 Row(
                   children: [
                     ChoiceChip(
                       selectedColor: Colors.green,
-                      label: Text('Activo'),
+                      label: const Text('Activo'),
                       selected: _isActive,
                       onSelected: (selected) {
                         setState(() {
@@ -516,10 +523,10 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
                         });
                       },
                     ),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     ChoiceChip(
                       selectedColor: Colors.red,
-                      label: Text('Inactivo'),
+                      label: const Text('Inactivo'),
                       selected: !_isActive,
                       onSelected: (selected) {
                         setState(() {
@@ -529,23 +536,23 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
                     ),
                   ],
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 TextField(
                   controller: _roleController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Rol',
                     border: OutlineInputBorder(),
                   ),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 TextField(
                   controller: _descriptionController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Descripción',
                     border: OutlineInputBorder(),
                   ),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 // Display the grouped events
                 // Expanded(
                 //   child: ListView.builder(
@@ -595,7 +602,7 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
                 //     },
                 //   ),
                 // ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () async {
                     // setState(() {

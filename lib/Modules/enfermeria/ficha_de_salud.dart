@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -109,6 +111,7 @@ class _FichaDeSaludState extends State<FichaDeSalud>
     });
   }
 
+  @override
   void dispose() {
     _tabController.dispose();
     controller.dispose();
@@ -159,8 +162,8 @@ class _FichaDeSaludState extends State<FichaDeSalud>
 
     final nurseryStudentMedicines = Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.all(16.0),
+        const Padding(
+          padding: EdgeInsets.all(16.0),
           child: Column(
             children: [
               Text('Medicinas autorizadas para el alumno'),
@@ -190,7 +193,6 @@ class _FichaDeSaludState extends State<FichaDeSalud>
                         ),
                         trailing: IconButton(
                           onPressed: () async {
-                            //INSER FUNCTION TO DELETE MEDS
                             int deleteMedFromStudent =
                                 await showDeleteConfirmationAlertDialog(
                                     context);
@@ -199,35 +201,35 @@ class _FichaDeSaludState extends State<FichaDeSalud>
 
                               var response = await deleteMedicineStudent(
                                   idValue.toString());
-                              if (response == 200)
+                              if (response == 200) {
                                 setState(() {
                                   studentAllowedMedicines.removeAt(index);
                                 });
-                              else {
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(SnackBar(
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
                                         content: Text(
-                                          ('Error: ' + response.toString())
-                                              .toString(),
+                                          ('Error: $response').toString(),
                                           style: FlutterFlowTheme.of(context)
                                               .labelMedium
                                               .override(
                                                 fontFamily: 'Roboto',
-                                                color: Color(0xFF130C0D),
+                                                color: const Color(0xFF130C0D),
                                                 fontWeight: FontWeight.w500,
                                               ),
                                         ),
-                                        duration: Duration(milliseconds: 5000),
+                                        duration:
+                                            const Duration(milliseconds: 5000),
                                         backgroundColor: Colors.amber));
                               }
                             }
                           },
-                          icon: Icon(Icons.delete_forever),
+                          icon: const Icon(Icons.delete_forever),
                           color: Colors.black,
                         ),
                         title: Text(
                           studentAllowedMedicines[index].nomMedicamento,
-                          style: TextStyle(color: Colors.black),
+                          style: const TextStyle(color: Colors.black),
                         ),
                       );
                     }
@@ -236,7 +238,7 @@ class _FichaDeSaludState extends State<FichaDeSalud>
                 ),
               if (studentAllowedMedicines == null ||
                   studentAllowedMedicines.isEmpty)
-                Placeholder(
+                const Placeholder(
                   child: Text('Sin informacion disponible'),
                 )
               // Placeholder or message
@@ -267,7 +269,7 @@ class _FichaDeSaludState extends State<FichaDeSalud>
                             'Apellido Paterno + Apellido materno + Nombres',
                         suffixIcon: _showClearButton
                             ? IconButton(
-                                icon: Icon(Icons.clear),
+                                icon: const Icon(Icons.clear),
                                 onPressed: () {
                                   searchController.text = '';
 
@@ -275,8 +277,8 @@ class _FichaDeSaludState extends State<FichaDeSalud>
                                 })
                             : null,
                         hintText: 'Buscar alumno',
-                        prefixIcon: Icon(Icons.search),
-                        border: OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.search),
+                        border: const OutlineInputBorder(),
                       ),
                       onFieldSubmitted: (query) async {
                         if (query.trim().isEmpty) {
@@ -304,7 +306,7 @@ class _FichaDeSaludState extends State<FichaDeSalud>
                                 nombre: substrings[2].capitalize(),
                                 claUn: currentUser!.claUn,
                                 claCiclo: currentCycle!.claCiclo)
-                            .timeout(Duration(seconds: 15));
+                            .timeout(const Duration(seconds: 15));
                         if ((apiResultxgr?.succeeded ?? true)) {
                           List<dynamic> jsonList =
                               json.decode(apiResultxgr!.response!.body);
@@ -317,14 +319,14 @@ class _FichaDeSaludState extends State<FichaDeSalud>
                             apiResultxgr = await FamilyCall.call(
                                     claFam:
                                         selectedStudent.claFamilia.toString())
-                                .timeout(Duration(milliseconds: 9000));
+                                .timeout(const Duration(milliseconds: 9000));
                           } else {
                             jsonList.clear();
                             apiResultxgr = await FamilyCall.call(
                                     claFam: selectedStudent[0]
                                         .claFamilia
                                         .toString())
-                                .timeout(Duration(milliseconds: 9000));
+                                .timeout(const Duration(milliseconds: 9000));
                           }
                           if ((apiResultxgr?.succeeded ?? true)) {
                             List<dynamic> jsonList =
@@ -358,7 +360,7 @@ class _FichaDeSaludState extends State<FichaDeSalud>
                             apiResultxgr = await NurseryHistoryCall.call(
                                     matricula:
                                         selectedStudent.matricula.toString())
-                                .timeout(Duration(milliseconds: 7000));
+                                .timeout(const Duration(milliseconds: 7000));
                             if ((apiResultxgr?.succeeded ?? true)) {
                               List<dynamic> jsonList =
                                   json.decode(apiResultxgr!.response!.body);
@@ -404,11 +406,12 @@ class _FichaDeSaludState extends State<FichaDeSalud>
                                           .labelMedium
                                           .override(
                                             fontFamily: 'Roboto',
-                                            color: Color(0xFF130C0D),
+                                            color: const Color(0xFF130C0D),
                                             fontWeight: FontWeight.w500,
                                           ),
                                     ),
-                                    duration: Duration(milliseconds: 5000),
+                                    duration:
+                                        const Duration(milliseconds: 5000),
                                     backgroundColor: Colors.amber),
                               );
 
@@ -419,8 +422,8 @@ class _FichaDeSaludState extends State<FichaDeSalud>
                             apiResultxgr = await NurseryStudentMedication.call(
                                     matricula:
                                         selectedStudent.matricula.toString())
-                                .timeout(Duration(milliseconds: 9000));
-                            if (apiResultxgr!.response!.body.length > 0) {
+                                .timeout(const Duration(milliseconds: 9000));
+                            if (apiResultxgr!.response!.body.isNotEmpty) {
                               if ((apiResultxgr?.succeeded ?? true)) {
                                 jsonList =
                                     json.decode(apiResultxgr!.response!.body);
@@ -446,11 +449,11 @@ class _FichaDeSaludState extends State<FichaDeSalud>
                                     .labelMedium
                                     .override(
                                       fontFamily: 'Roboto',
-                                      color: Color(0xFF130C0D),
+                                      color: const Color(0xFF130C0D),
                                       fontWeight: FontWeight.w500,
                                     ),
                               ),
-                              duration: Duration(milliseconds: 8000),
+                              duration: const Duration(milliseconds: 8000),
                               backgroundColor:
                                   FlutterFlowTheme.of(context).secondary,
                             ),
@@ -467,7 +470,7 @@ class _FichaDeSaludState extends State<FichaDeSalud>
                   child: Container(
                 width: cardWidth,
                 height: cardHeight,
-                padding: EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(16.0),
                 child: Card(
                   elevation: 4.0,
                   shape: RoundedRectangleBorder(
@@ -477,83 +480,83 @@ class _FichaDeSaludState extends State<FichaDeSalud>
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
                       children: [
-                        Text('Nombre del estudiante: ',
+                        const Text('Nombre del estudiante: ',
                             style:
                                 TextStyle(fontSize: 22.0, fontFamily: 'Sora')),
                         Text(
                           selectedStudent.nombre,
-                          style: TextStyle(
+                          style: const TextStyle(
                               fontSize: 20.0,
                               fontFamily: 'Sora',
                               fontWeight: FontWeight.bold),
                         ),
-                        SizedBox(height: 8.0),
-                        Text('Datos del alumno:',
+                        const SizedBox(height: 8.0),
+                        const Text('Datos del alumno:',
                             style:
                                 TextStyle(fontSize: 18.0, fontFamily: 'Sora')),
-                        SizedBox(height: 8.0),
-                        Divider(),
+                        const SizedBox(height: 8.0),
+                        const Divider(),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
+                            const Text(
                               'Matricula: ',
                               style:
                                   TextStyle(fontSize: 16.0, fontFamily: 'Sora'),
                             ),
                             Text(
                               selectedStudent.matricula,
-                              style: TextStyle(
+                              style: const TextStyle(
                                   fontSize: 16.0, fontWeight: FontWeight.bold),
                             ),
                           ],
                         ),
-                        SizedBox(height: 10.0),
+                        const SizedBox(height: 10.0),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text('Campus: ',
+                            const Text('Campus: ',
                                 style: TextStyle(
                                     fontSize: 16.0, fontFamily: 'Sora')),
                             Text(
                               selectedStudent.claUn,
-                              style: TextStyle(
+                              style: const TextStyle(
                                   fontSize: 16.0, fontWeight: FontWeight.bold),
                             ),
                           ],
                         ),
-                        SizedBox(height: 10.0),
+                        const SizedBox(height: 10.0),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
+                            const Text(
                               'Grado: ',
                               style:
                                   TextStyle(fontSize: 16.0, fontFamily: 'Sora'),
                             ),
                             Text(
                               selectedStudent.grado,
-                              style: TextStyle(
+                              style: const TextStyle(
                                   fontSize: 16.0, fontWeight: FontWeight.bold),
                             ),
                           ],
                         ),
-                        SizedBox(height: 10.0),
+                        const SizedBox(height: 10.0),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
+                            const Text(
                               'Grupo: ',
                               style:
                                   TextStyle(fontSize: 16.0, fontFamily: 'Sora'),
                             ),
                             Text(selectedStudent.grupo,
-                                style: TextStyle(
+                                style: const TextStyle(
                                     fontSize: 16.0,
                                     fontWeight: FontWeight.bold)),
                           ],
                         ),
-                        SizedBox(height: 10.0),
+                        const SizedBox(height: 10.0),
                       ],
                     ),
                   ),
@@ -567,8 +570,8 @@ class _FichaDeSaludState extends State<FichaDeSalud>
 
     final emergencyContacts = Column(
       children: [
-        Padding(
-            padding: const EdgeInsets.all(16.0),
+        const Padding(
+            padding: EdgeInsets.all(16.0),
             child: Column(
               children: [
                 //
@@ -581,7 +584,7 @@ class _FichaDeSaludState extends State<FichaDeSalud>
             child: Container(
               width: cardWidth,
               height: cardHeight,
-              padding: EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16.0),
               child: Card(
                 elevation: 4.0,
                 shape: RoundedRectangleBorder(
@@ -591,17 +594,17 @@ class _FichaDeSaludState extends State<FichaDeSalud>
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
                       children: [
-                        Text('Nombre del estudiante',
+                        const Text('Nombre del estudiante',
                             style: TextStyle(fontSize: 22.0)),
                         Text(
                           selectedStudent.nombre,
-                          style: TextStyle(fontSize: 18.0),
+                          style: const TextStyle(fontSize: 18.0),
                         ),
-                        SizedBox(height: 8.0),
-                        Text('Datos de contacto',
+                        const SizedBox(height: 8.0),
+                        const Text('Datos de contacto',
                             style: TextStyle(fontSize: 18.0)),
-                        SizedBox(height: 8.0),
-                        Divider(),
+                        const SizedBox(height: 8.0),
+                        const Divider(),
                         Expanded(
                             child: PlutoGrid(
                           // configuration: const PlutoGridConfiguration.dark(),
@@ -631,7 +634,7 @@ class _FichaDeSaludState extends State<FichaDeSalud>
                 bottom: TabBar(
                   labelColor: Colors.white,
                   controller: _tabController,
-                  tabs: <Widget>[
+                  tabs: const <Widget>[
                     Tab(
                       icon: Icon(Icons.person, color: Colors.white),
                       text: 'Informacion del alumno',
@@ -657,12 +660,14 @@ class _FichaDeSaludState extends State<FichaDeSalud>
                         Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => MainWindowWidget()));
+                                builder: (context) =>
+                                    const MainWindowWidget()));
                       },
-                      icon: Icon(Icons.home))
+                      icon: const Icon(Icons.home))
                 ],
                 backgroundColor: FlutterFlowTheme.of(context).primary,
-                title: Text('Enfermeria', style: TextStyle(color: Colors.white)
+                title: const Text('Enfermeria',
+                    style: TextStyle(color: Colors.white)
                     // FlutterFlowTheme.of(context).headlineSmall,
                     ),
               ),
@@ -672,14 +677,14 @@ class _FichaDeSaludState extends State<FichaDeSalud>
                 children: <Widget>[
                   studentDataTab,
                   emergencyContacts,
-                  if (nurseryHistoryStudent != null) StudentHistoryGrid(),
-                  if (nurseryHistoryStudent == null) NoDataAvailble(),
+                  if (nurseryHistoryStudent != null) const StudentHistoryGrid(),
+                  if (nurseryHistoryStudent == null) const NoDataAvailble(),
                   // nurseryHistoryGrid,
                   if (studentAllowedMedicines != null) nurseryStudentMedicines,
-                  if (studentAllowedMedicines == null) NoDataAvailble()
+                  if (studentAllowedMedicines == null) const NoDataAvailble()
                 ],
               ),
-              floatingActionButton: ExpandableFABNursery(),
+              floatingActionButton: const ExpandableFABNursery(),
               floatingActionButtonLocation: ExpandableFab.location)),
     );
   }
@@ -722,6 +727,6 @@ dynamic studentNursery(List<dynamic> jsonList) {
 
 extension StringExtension on String {
   String capitalize() {
-    return "${this[0].toUpperCase()}${this.substring(1).toLowerCase()}";
+    return "${this[0].toUpperCase()}${substring(1).toLowerCase()}";
   }
 }

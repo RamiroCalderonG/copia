@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously
+
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
@@ -22,12 +24,13 @@ import 'login_view_model.dart';
 export 'login_view_model.dart';
 
 class LoginViewWidget extends StatefulWidget {
-  const LoginViewWidget({Key? key}) : super(key: key);
+  const LoginViewWidget({super.key});
 
   @override
   _LoginViewWidgetState createState() => _LoginViewWidgetState();
 }
 
+// ignore: prefer_typing_uninitialized_variables
 var deviceIP;
 bool isLoading = false;
 
@@ -108,6 +111,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
   Widget build(BuildContext context) {
     // String? _text;
     Map<String, dynamic> apiBody = {};
+    // ignore: prefer_typing_uninitialized_variables
     var apiResponse;
 
     dynamic loginButtonFunction() async {
@@ -155,7 +159,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                 context.goNamed(
                   'MobileMainView',
                   extra: <String, dynamic>{
-                    kTransitionInfoKey: TransitionInfo(
+                    kTransitionInfoKey: const TransitionInfo(
                       hasTransition: true,
                       transitionType: PageTransitionType.fade,
                     ),
@@ -165,7 +169,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                 context.goNamed(
                   'MainWindow',
                   extra: <String, dynamic>{
-                    kTransitionInfoKey: TransitionInfo(
+                    kTransitionInfoKey: const TransitionInfo(
                       hasTransition: true,
                       transitionType: PageTransitionType.fade,
                     ),
@@ -219,7 +223,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                 'Favor de no dejar campos en blanco',
                 style: FlutterFlowTheme.of(context).labelMedium.override(
                       fontFamily: 'Roboto',
-                      color: Color(0xFF130C0D),
+                      color: const Color(0xFF130C0D),
                       fontWeight: FontWeight.w500,
                     ),
               ),
@@ -230,7 +234,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                   onPressed: () {
                     ScaffoldMessenger.of(context).hideCurrentSnackBar();
                   }),
-              duration: Duration(milliseconds: 9000),
+              duration: const Duration(milliseconds: 9000),
               backgroundColor: FlutterFlowTheme.of(context).secondary,
             ),
           );
@@ -246,7 +250,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
               e.toString(),
               style: FlutterFlowTheme.of(context).labelMedium.override(
                     fontFamily: 'Roboto',
-                    color: Color(0xFF130C0D),
+                    color: const Color(0xFF130C0D),
                     fontWeight: FontWeight.w500,
                   ),
             ),
@@ -257,14 +261,12 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                 onPressed: () {
                   ScaffoldMessenger.of(context).hideCurrentSnackBar();
                 }),
-            duration: Duration(milliseconds: 9000),
+            duration: const Duration(milliseconds: 9000),
             backgroundColor: FlutterFlowTheme.of(context).secondary,
           ),
         );
       }
     }
-
-    ;
 
     return LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
@@ -277,7 +279,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
               body: Stack(
                 children: [
                   Container(
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       image: DecorationImage(
                         image:
                             AssetImage('assets/images/background-header.jpg'),
@@ -294,14 +296,14 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                   SafeArea(
                     top: true,
                     child: Align(
-                      alignment: AlignmentDirectional(0.0, -1.0),
+                      alignment: const AlignmentDirectional(0.0, -1.0),
                       child: SingleChildScrollView(
                         child: Column(
                           mainAxisSize: MainAxisSize.max,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 32.0, 0.0, 32.0),
                               child: Container(
                                 width: double.infinity,
@@ -309,7 +311,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(16.0),
                                 ),
-                                alignment: AlignmentDirectional(0.0, 0.0),
+                                alignment: const AlignmentDirectional(0.0, 0.0),
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(8.0),
                                   child: Image.asset(
@@ -322,7 +324,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                               ),
                             ),
                             Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   12.0, 12.0, 12.0, 12.0),
                               child: Container(
                                 width: MediaQuery.of(context).size.width /
@@ -338,10 +340,12 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                   ),
                                 ),
                                 child: Align(
-                                  alignment: AlignmentDirectional(0.0, 0.0),
+                                  alignment:
+                                      const AlignmentDirectional(0.0, 0.0),
                                   child: Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
-                                        24.0, 24.0, 24.0, 24.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            24.0, 24.0, 24.0, 24.0),
                                     child: Column(
                                       mainAxisSize: MainAxisSize.max,
                                       crossAxisAlignment:
@@ -353,9 +357,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                               .displaySmall,
                                         ),
                                         Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 12.0, 0.0, 24.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 12.0, 0.0, 24.0),
                                           child: Text(
                                             'Ingresa tus datos de acceso',
                                             style: FlutterFlowTheme.of(context)
@@ -363,9 +366,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                           ),
                                         ),
                                         Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 0.0, 0.0, 16.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 0.0, 0.0, 16.0),
                                           child: TextFormField(
                                             autofocus: true,
                                             enableSuggestions: true,
@@ -389,7 +391,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                     BorderRadius.circular(12.0),
                                               ),
                                               focusedBorder: OutlineInputBorder(
-                                                borderSide: BorderSide(
+                                                borderSide: const BorderSide(
                                                   color: Color(0x00000000),
                                                   width: 2.0,
                                                 ),
@@ -397,7 +399,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                     BorderRadius.circular(12.0),
                                               ),
                                               errorBorder: OutlineInputBorder(
-                                                borderSide: BorderSide(
+                                                borderSide: const BorderSide(
                                                   color: Color(0x00000000),
                                                   width: 2.0,
                                                 ),
@@ -406,7 +408,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                               ),
                                               focusedErrorBorder:
                                                   OutlineInputBorder(
-                                                borderSide: BorderSide(
+                                                borderSide: const BorderSide(
                                                   color: Color(0x00000000),
                                                   width: 2.0,
                                                 ),
@@ -422,9 +424,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                           ),
                                         ),
                                         Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 0.0, 0.0, 16.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 0.0, 0.0, 16.0),
                                           child: TextFormField(
                                             // autofocus: true,
                                             // When the user press enter or send key
@@ -472,7 +473,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                     BorderRadius.circular(12.0),
                                               ),
                                               focusedBorder: OutlineInputBorder(
-                                                borderSide: BorderSide(
+                                                borderSide: const BorderSide(
                                                   color: Color(0x00000000),
                                                   width: 2.0,
                                                 ),
@@ -480,7 +481,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                     BorderRadius.circular(12.0),
                                               ),
                                               errorBorder: OutlineInputBorder(
-                                                borderSide: BorderSide(
+                                                borderSide: const BorderSide(
                                                   color: Color(0x00000000),
                                                   width: 2.0,
                                                 ),
@@ -489,7 +490,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                               ),
                                               focusedErrorBorder:
                                                   OutlineInputBorder(
-                                                borderSide: BorderSide(
+                                                borderSide: const BorderSide(
                                                   color: Color(0x00000000),
                                                   width: 2.0,
                                                 ),
@@ -526,9 +527,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                           ),
                                         ),
                                         Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 0.0, 0.0, 16.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 0.0, 0.0, 16.0),
                                           child: FFButtonWidget(
                                             onPressed: () async {
                                               setState(() {
@@ -545,10 +545,14 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                             options: FFButtonOptions(
                                               width: 370.0,
                                               height: 44.0,
-                                              padding: EdgeInsetsDirectional
-                                                  .fromSTEB(0.0, 0.0, 0.0, 0.0),
-                                              iconPadding: EdgeInsetsDirectional
-                                                  .fromSTEB(0.0, 0.0, 0.0, 0.0),
+                                              padding:
+                                                  const EdgeInsetsDirectional
+                                                      .fromSTEB(
+                                                      0.0, 0.0, 0.0, 0.0),
+                                              iconPadding:
+                                                  const EdgeInsetsDirectional
+                                                      .fromSTEB(
+                                                      0.0, 0.0, 0.0, 0.0),
                                               color:
                                                   FlutterFlowTheme.of(context)
                                                       .primary,
@@ -571,8 +575,9 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                               MainAxisAlignment.center,
                                           children: [
                                             Padding(
-                                                padding: EdgeInsetsDirectional
-                                                    .fromSTEB(
+                                                padding:
+                                                    const EdgeInsetsDirectional
+                                                        .fromSTEB(
                                                         0.0, 4.0, 0.0, 4.0),
                                                 child: TextButton(
                                                   onPressed: () {
@@ -624,7 +629,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
               body: Stack(
                 children: [
                   Container(
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       image: DecorationImage(
                         image:
                             AssetImage('assets/images/background-header.jpg'),
@@ -641,14 +646,14 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                   SafeArea(
                     top: true,
                     child: Align(
-                      alignment: AlignmentDirectional(0.0, -1.0),
+                      alignment: const AlignmentDirectional(0.0, -1.0),
                       child: SingleChildScrollView(
                         child: Column(
                           mainAxisSize: MainAxisSize.max,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 32.0, 0.0, 32.0),
                               child: Container(
                                 width: MediaQuery.of(context).size.width / 3,
@@ -656,7 +661,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(16.0),
                                 ),
-                                alignment: AlignmentDirectional(0.0, 0.0),
+                                alignment: const AlignmentDirectional(0.0, 0.0),
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(8.0),
                                   child: Image.asset(
@@ -669,7 +674,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                               ),
                             ),
                             Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   12.0, 12.0, 12.0, 12.0),
                               child: Container(
                                 width: MediaQuery.of(context).size.width,
@@ -685,10 +690,12 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                   ),
                                 ),
                                 child: Align(
-                                  alignment: AlignmentDirectional(0.0, 0.0),
+                                  alignment:
+                                      const AlignmentDirectional(0.0, 0.0),
                                   child: Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
-                                        24.0, 24.0, 24.0, 24.0),
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            24.0, 24.0, 24.0, 24.0),
                                     child: Column(
                                       mainAxisSize: MainAxisSize.max,
                                       crossAxisAlignment:
@@ -700,9 +707,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                               .displaySmall,
                                         ),
                                         Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 12.0, 0.0, 24.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 12.0, 0.0, 24.0),
                                           child: Text(
                                             'Ingresa tus datos de acceso',
                                             style: FlutterFlowTheme.of(context)
@@ -710,9 +716,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                           ),
                                         ),
                                         Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 0.0, 0.0, 16.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 0.0, 0.0, 16.0),
                                           child: TextFormField(
                                             autofocus: true,
                                             enableSuggestions: true,
@@ -736,7 +741,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                     BorderRadius.circular(12.0),
                                               ),
                                               focusedBorder: OutlineInputBorder(
-                                                borderSide: BorderSide(
+                                                borderSide: const BorderSide(
                                                   color: Color(0x00000000),
                                                   width: 2.0,
                                                 ),
@@ -744,7 +749,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                     BorderRadius.circular(12.0),
                                               ),
                                               errorBorder: OutlineInputBorder(
-                                                borderSide: BorderSide(
+                                                borderSide: const BorderSide(
                                                   color: Color(0x00000000),
                                                   width: 2.0,
                                                 ),
@@ -753,7 +758,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                               ),
                                               focusedErrorBorder:
                                                   OutlineInputBorder(
-                                                borderSide: BorderSide(
+                                                borderSide: const BorderSide(
                                                   color: Color(0x00000000),
                                                   width: 2.0,
                                                 ),
@@ -769,9 +774,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                           ),
                                         ),
                                         Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 0.0, 0.0, 16.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 0.0, 0.0, 16.0),
                                           child: TextFormField(
                                             // autofocus: true,
                                             onFieldSubmitted: (value) async {
@@ -811,7 +815,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                     BorderRadius.circular(12.0),
                                               ),
                                               focusedBorder: OutlineInputBorder(
-                                                borderSide: BorderSide(
+                                                borderSide: const BorderSide(
                                                   color: Color(0x00000000),
                                                   width: 2.0,
                                                 ),
@@ -819,7 +823,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                     BorderRadius.circular(12.0),
                                               ),
                                               errorBorder: OutlineInputBorder(
-                                                borderSide: BorderSide(
+                                                borderSide: const BorderSide(
                                                   color: Color(0x00000000),
                                                   width: 2.0,
                                                 ),
@@ -828,7 +832,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                               ),
                                               focusedErrorBorder:
                                                   OutlineInputBorder(
-                                                borderSide: BorderSide(
+                                                borderSide: const BorderSide(
                                                   color: Color(0x00000000),
                                                   width: 2.0,
                                                 ),
@@ -865,9 +869,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                           ),
                                         ),
                                         Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 0.0, 0.0, 16.0),
+                                          padding: const EdgeInsetsDirectional
+                                              .fromSTEB(0.0, 0.0, 0.0, 16.0),
                                           child: FFButtonWidget(
                                             onPressed: () async {
                                               if (_model.textController1.text !=
@@ -886,10 +889,14 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                             options: FFButtonOptions(
                                               width: 370.0,
                                               height: 44.0,
-                                              padding: EdgeInsetsDirectional
-                                                  .fromSTEB(0.0, 0.0, 0.0, 0.0),
-                                              iconPadding: EdgeInsetsDirectional
-                                                  .fromSTEB(0.0, 0.0, 0.0, 0.0),
+                                              padding:
+                                                  const EdgeInsetsDirectional
+                                                      .fromSTEB(
+                                                      0.0, 0.0, 0.0, 0.0),
+                                              iconPadding:
+                                                  const EdgeInsetsDirectional
+                                                      .fromSTEB(
+                                                      0.0, 0.0, 0.0, 0.0),
                                               color:
                                                   FlutterFlowTheme.of(context)
                                                       .primary,
@@ -912,8 +919,9 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                               MainAxisAlignment.center,
                                           children: [
                                             Padding(
-                                                padding: EdgeInsetsDirectional
-                                                    .fromSTEB(
+                                                padding:
+                                                    const EdgeInsetsDirectional
+                                                        .fromSTEB(
                                                         0.0, 4.0, 0.0, 4.0),
                                                 child: TextButton(
                                                   onPressed: () {
@@ -958,7 +966,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
 TextEditingController _textFieldController = TextEditingController();
 
 Future<void> _displayForgotPassword(BuildContext context) async {
-  _textFieldController..text = '';
+  _textFieldController.text = '';
   bool isLoading = false; // Flag to track loading state
 
   return showDialog(
@@ -966,18 +974,18 @@ Future<void> _displayForgotPassword(BuildContext context) async {
     builder: (context) {
       return StatefulBuilder(builder: (context, setState) {
         return AlertDialog(
-          title: Text(
+          title: const Text(
             'Recuperar contraseña',
             style: TextStyle(fontFamily: 'Sora'),
           ),
           content: isLoading
-              ? Center(
+              ? const Center(
                   child: CircularProgressIndicator(),
                 )
               : TextFormField(
                   autofocus: true,
                   controller: _textFieldController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: "Numero de empleado",
                     helperText: 'Ingrese su numero de empleado',
                     icon: Icon(Icons.numbers),
@@ -991,13 +999,12 @@ Future<void> _displayForgotPassword(BuildContext context) async {
                 ),
           actions: <Widget>[
             TextButton(
-              child: Text('CANCEL'),
+              child: const Text('CANCEL'),
               onPressed: () {
                 Navigator.pop(context);
               },
             ),
             TextButton(
-              child: Text('OK'),
               onPressed: isLoading
                   ? null // Disable the button when loading
                   : () async {
@@ -1017,19 +1024,19 @@ Future<void> _displayForgotPassword(BuildContext context) async {
                               context: context,
                               builder: (BuildContext context) {
                                 return AlertDialog(
-                                  title: Text(
+                                  title: const Text(
                                     "Solicitud enviada",
                                     style: TextStyle(fontFamily: 'Sora'),
                                   ),
-                                  content: Text(
+                                  content: const Text(
                                       "Si los resultados coinciden, recibirá en su correo su contraseña"),
-                                  icon: (Icon(Icons.beenhere_outlined)),
+                                  icon: (const Icon(Icons.beenhere_outlined)),
                                   actions: [
                                     TextButton(
                                         onPressed: () {
                                           Navigator.pop(context);
                                         },
-                                        child: Text('OK'))
+                                        child: const Text('OK'))
                                   ],
                                 );
                               });
@@ -1038,18 +1045,18 @@ Future<void> _displayForgotPassword(BuildContext context) async {
                               context: context,
                               builder: (BuildContext context) {
                                 return AlertDialog(
-                                  title: Text(
+                                  title: const Text(
                                     "Error",
                                     style: TextStyle(fontFamily: 'Sora'),
                                   ),
                                   content: Text(responseCode.toString()),
-                                  icon: (Icon(Icons.error_outline)),
+                                  icon: (const Icon(Icons.error_outline)),
                                   actions: [
                                     TextButton(
                                         onPressed: () {
                                           Navigator.pop(context);
                                         },
-                                        child: Text('OK'))
+                                        child: const Text('OK'))
                                   ],
                                 );
                               });
@@ -1059,12 +1066,12 @@ Future<void> _displayForgotPassword(BuildContext context) async {
                           context: context,
                           builder: (BuildContext context) {
                             return AlertDialog(
-                              icon: Icon(Icons.error_outline),
-                              title: Text(
+                              icon: const Icon(Icons.error_outline),
+                              title: const Text(
                                 "Error",
                                 style: TextStyle(fontFamily: 'Sora'),
                               ),
-                              content: Text(
+                              content: const Text(
                                 "Por favor, ingrese un número de empleado válido",
                               ),
                               actions: [
@@ -1072,7 +1079,7 @@ Future<void> _displayForgotPassword(BuildContext context) async {
                                   onPressed: () {
                                     Navigator.pop(context);
                                   },
-                                  child: Text('OK'),
+                                  child: const Text('OK'),
                                 ),
                               ],
                             );
@@ -1083,6 +1090,7 @@ Future<void> _displayForgotPassword(BuildContext context) async {
                         isLoading = false; // Stop loading animation
                       });
                     },
+              child: const Text('OK'),
             ),
           ],
         );
@@ -1143,6 +1151,7 @@ Cycle getcurrentCycle(List<dynamic> jsonList) {
   return currentCycle;
 }
 
+// ignore: non_constant_identifier_names
 Future FetchDeviceIp() async {
   deviceIP = await getDeviceIP();
 }

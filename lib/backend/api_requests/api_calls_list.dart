@@ -5,13 +5,14 @@ import 'package:oxschool/constants/connection.dart';
 
 import 'package:requests/requests.dart';
 
+// ignore: depend_on_referenced_packages
 import 'package:http/http.dart' as http;
 
 Future<dynamic> loginUser(var jsonBody) async {
-  var response;
+  String response;
 
   var apiCall = await Requests.post(
-      dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/login/userlogin/',
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/login/userlogin/',
       json: jsonBody,
       headers: {
         'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
@@ -34,11 +35,11 @@ Future<dynamic> loginUser(var jsonBody) async {
 Future<dynamic> getCycle(
   int month,
 ) async {
-  var response;
+  String response;
   if (month == 0) {
     try {
       var apiCall = await Requests.get(
-          dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/cycles/1',
+          '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/cycles/1',
           headers: {
             'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
             'token': currentUser!.token,
@@ -54,7 +55,7 @@ Future<dynamic> getCycle(
   } else {
     try {
       var apiCall = await Requests.get(
-          dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/cycles/',
+          '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/cycles/',
           headers: {
             'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
             'token': currentUser!.token,
@@ -75,7 +76,7 @@ Future<dynamic> postNurseryVisit(Map<String, dynamic> jsonBody) async {
   // var postResponse;
   try {
     var apiCall = await Requests.post(
-        dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/nursery-visit/',
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/nursery-visit/',
         json: jsonBody, //We use a json style as body
         headers: {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
@@ -97,13 +98,10 @@ Future<dynamic> postNurseryVisit(Map<String, dynamic> jsonBody) async {
 }
 
 Future<String> searchEmployee(String employeeNumber) async {
-  var postResponse;
+  String postResponse;
   try {
     var apiCall = await Requests.get(
-        dotenv.env['HOSTURL']! +
-            dotenv.env['PORT']! +
-            '/api/employee/' +
-            employeeNumber.trim(),
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/employee/${employeeNumber.trim()}',
         headers: {
           "Content-Type": "application/json",
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
@@ -124,12 +122,11 @@ Future<String> searchEmployee(String employeeNumber) async {
 
 // Function to delete an allowed medicine from a student
 Future<int> deleteMedicineStudent(var idValue) async {
-  var responseCode;
+  int responseCode;
   try {
     var apiCall = await Requests.put(
-        dotenv.env['HOSTURL']! +
-            dotenv.env['PORT']! +
-            '/api/student-meds/' +
+        // ignore: prefer_interpolation_to_compose_strings
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/student-meds/' +
             idValue,
         // json: jsonBody, //We use a json style as body
         //queryParameters: {'id': idValue},
@@ -152,12 +149,12 @@ Future<int> deleteMedicineStudent(var idValue) async {
 }
 
 Future<dynamic> getEvents(String? param) async {
-  var responseCode;
+  String responseCode;
 
   if (param == null) {
     try {
       var apiCall = await Requests.get(
-          dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/events',
+          '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/events',
           headers: {
             'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
             'token': currentUser!.token
@@ -174,7 +171,7 @@ Future<dynamic> getEvents(String? param) async {
   } else {
     try {
       var apiCall = await Requests.get(
-          dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/events',
+          '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/events',
           headers: {
             'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
             'token': currentUser!.token
@@ -193,21 +190,18 @@ Future<dynamic> getEvents(String? param) async {
 }
 
 Future<dynamic> modifyActiveOfEventRole(
-    int eventId, bool role_event_value, int role_selected) async {
+    int eventId, bool roleEventValue, int roleSelected) async {
   try {
     var apiCall = await Requests.put(
-        dotenv.env['HOSTURL']! +
-            dotenv.env['PORT']! +
-            '/api/event-role/' +
-            eventId.toString(),
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/event-role/$eventId',
         headers: {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
           'token': currentUser!.token
         },
         json: {
           'type': eventId,
-          'role_event_active': role_event_value,
-          'role': role_selected
+          'role_event_active': roleEventValue,
+          'role': roleSelected
         },
         persistCookies: false,
         timeoutSeconds: 10);
@@ -219,10 +213,10 @@ Future<dynamic> modifyActiveOfEventRole(
 }
 
 Future<dynamic> getRolesList() async {
-  var response;
+  String response;
   try {
     var apiCall = await Requests.get(
-        dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/role',
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/role',
         headers: {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
           'token': currentUser!.token
@@ -239,10 +233,10 @@ Future<dynamic> getRolesList() async {
 }
 
 Future<dynamic> getRole(String roleName) async {
-  var response;
+  String response;
   try {
     var apiCall = await Requests.get(
-        dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/role',
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/role',
         headers: {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
           'token': currentUser!.token
@@ -260,7 +254,7 @@ Future<dynamic> getRole(String roleName) async {
 Future<dynamic> getEventsByRole(int? roleID) async {
   try {
     var apiCal = await Requests.get(
-        dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/role/events',
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/role/events',
         headers: {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
           'token': currentUser!.token
@@ -276,13 +270,10 @@ Future<dynamic> getEventsByRole(int? roleID) async {
 }
 
 Future<dynamic> editRole(int roleID, Map<String, dynamic> bodyObject) async {
-  var response;
+  String response;
   try {
     var apiCall = await Requests.put(
-        dotenv.env['HOSTURL']! +
-            dotenv.env['PORT']! +
-            '/api/role/' +
-            roleID.toString(),
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/role/$roleID',
         headers: {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
           'token': currentUser!.token
@@ -299,13 +290,10 @@ Future<dynamic> editRole(int roleID, Map<String, dynamic> bodyObject) async {
 }
 
 Future<dynamic> deleteRole(int roleID) async {
-  var response;
+  String response;
   try {
     var apiCall = await Requests.delete(
-        dotenv.env['HOSTURL']! +
-            dotenv.env['PORT']! +
-            '/api/role/' +
-            roleID.toString(),
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/role/$roleID',
         headers: {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
           'token': currentUser!.token
@@ -321,10 +309,10 @@ Future<dynamic> deleteRole(int roleID) async {
 }
 
 Future<dynamic> createRole(Map<String, dynamic> bodyObject) async {
-  var response;
+  String response;
   try {
     var apiCall = await Requests.post(
-        dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/role',
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/role',
         headers: {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
           'token': currentUser!.token
@@ -341,10 +329,10 @@ Future<dynamic> createRole(Map<String, dynamic> bodyObject) async {
 }
 
 Future<dynamic> createUser(Map<String, dynamic> newUser) async {
-  var response;
+  int response;
   try {
     var apiCall = await Requests.post(
-        dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/user/',
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/user/',
         json: newUser,
         headers: {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
@@ -368,11 +356,11 @@ Future<dynamic> createUser(Map<String, dynamic> newUser) async {
 }
 
 Future<dynamic> editUser(Map<String, dynamic> bodyObject, String userID) async {
-  var response;
+  int response;
   // var apiBody = {};
   try {
     var apiCall = await Requests.put(
-        dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/user/' + userID,
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/user/$userID',
         headers: {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
           'token': currentUser!.token
@@ -390,10 +378,10 @@ Future<dynamic> editUser(Map<String, dynamic> bodyObject, String userID) async {
 }
 
 Future<dynamic> editUserRole(String roleName, int userID) async {
-  var response;
+  String response;
   try {
     var apiCall = await Requests.patch(
-        dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/user/role',
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/user/role',
         headers: {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
           'token': currentUser!.token
@@ -410,10 +398,10 @@ Future<dynamic> editUserRole(String roleName, int userID) async {
 }
 
 Future<dynamic> getUsers() async {
-  var response;
+  String response;
   try {
     var apiCall = await Requests.get(
-        dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/user',
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/user',
         headers: {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
           'token': currentUser!.token
@@ -429,10 +417,10 @@ Future<dynamic> getUsers() async {
 }
 
 Future<dynamic> deleteUser(String id) async {
-  var response;
+  int response;
   try {
     var apiCall = await Requests.delete(
-        dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/user/' + id,
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/user/$id',
         headers: {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
           'token': currentUser!.token
@@ -448,10 +436,10 @@ Future<dynamic> deleteUser(String id) async {
 }
 
 Future<dynamic> getUserDetail(String userId) async {
-  var response;
+  String response;
   try {
     var apiCall = await Requests.get(
-        dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/user/detail',
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/user/detail',
         headers: {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
           'token': currentUser!.token
@@ -470,7 +458,7 @@ Future<dynamic> getUserDetail(String userId) async {
 Future<dynamic> getAllModules() async {
   try {
     var apiCall = await Requests.get(
-        dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/modules',
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/modules',
         headers: {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
           'token': currentUser!.token
@@ -487,7 +475,7 @@ Future<dynamic> getAllModules() async {
 Future<dynamic> getCampuseList() async {
   try {
     var apiCall = await Requests.get(
-        dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/campus',
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/campus',
         headers: {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
           'token': currentUser!.token
@@ -504,7 +492,7 @@ Future<dynamic> getCampuseList() async {
 Future<dynamic> getWorkDepartments() async {
   try {
     var apiCall = await Requests.get(
-        dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/work-dept',
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/work-dept',
         headers: {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
           'token': currentUser!.token
@@ -522,10 +510,7 @@ Future<dynamic> sendUserPasswordToMail(
     String employeeNumber, String deviceInfo, String deviceIP) async {
   try {
     var apiCall = await Requests.get(
-        dotenv.env['HOSTURL']! +
-            dotenv.env['PORT']! +
-            '/login/forgot-password/' +
-            employeeNumber,
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/login/forgot-password/$employeeNumber',
         headers: {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
           'device': deviceInfo,
@@ -564,10 +549,10 @@ Future<http.Response> getUserPermissions(int userId) async {
   try {
     Uri address = Uri(
         scheme: 'http',
-        host: 'localhost',
+        host: '10.0.0.36',
         port: 8080,
         path: '/api/user/events',
-        queryParameters: {'id': '${userId.toString()}'});
+        queryParameters: {'id': userId.toString()});
     var response = http.get(address, headers: {
       'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
       'token': currentUser!.token
@@ -575,7 +560,6 @@ Future<http.Response> getUserPermissions(int userId) async {
     userEvents = response;
     return response;
   } catch (e) {
-    print(e.toString());
     return throw FormatException(e.toString());
   }
 }

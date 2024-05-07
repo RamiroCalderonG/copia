@@ -1,3 +1,5 @@
+// ignore_for_file: depend_on_referenced_packages, library_private_types_in_public_api, prefer_const_constructors_in_immutables, use_super_parameters, avoid_function_literals_in_foreach_calls
+
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'package:oxschool/constants/User.dart';
@@ -17,7 +19,7 @@ import 'main_window_model.dart';
 export 'main_window_model.dart';
 
 class MainWindowWidget extends StatefulWidget {
-  const MainWindowWidget({Key? key}) : super(key: key);
+  const MainWindowWidget({super.key});
 
   @override
   _MainWindowWidgetState createState() => _MainWindowWidgetState();
@@ -68,7 +70,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
             return Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Padding(padding: EdgeInsets.only(left: 10.5)),
+                const Padding(padding: EdgeInsets.only(left: 10.5)),
                 Image.asset(
                   Theme.of(context).brightness == Brightness.light
                       ? 'assets/images/1_OS_color.png' //igth theme image
@@ -77,7 +79,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                   height: 50,
                   filterQuality: FilterQuality.high,
                 ),
-                Spacer(
+                const Spacer(
                   flex: 1,
                 ),
               ],
@@ -87,7 +89,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
             return Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Padding(padding: EdgeInsets.only(left: 10.5)),
+                const Padding(padding: EdgeInsets.only(left: 10.5)),
                 Image.asset(
                   Theme.of(context).brightness == Brightness.light
                       ? 'assets/images/1_OS_color.png' //igth theme image
@@ -96,14 +98,14 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                   height: 50,
                   filterQuality: FilterQuality.high,
                 ),
-                Spacer(
+                const Spacer(
                   flex: 1,
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Padding(
-                      padding: EdgeInsets.all(20),
+                      padding: const EdgeInsets.all(20),
                       child: Row(
                         children: [
                           IconButton(
@@ -112,7 +114,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                                     builder: (context) => const UserWindow()));
                               },
                               icon: const Icon(Icons.person),
-                              color: Color.fromRGBO(235, 48, 69, 0.988)),
+                              color: const Color.fromRGBO(235, 48, 69, 0.988)),
 
                           // Text(
                           //   'Ing. Sanchez',
@@ -131,26 +133,27 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                                     color: FlutterFlowTheme.of(context)
                                         .primaryText, // FlutterFlowTheme.of(context).bodyMedium,
                                   )),
-                          Padding(
+                          const Padding(
                               padding: EdgeInsets.only(left: 15, right: 15)),
                           IconButton(
                               onPressed: () {},
-                              icon: FaIcon(FontAwesomeIcons.facebookF),
-                              color: Color.fromRGBO(235, 48, 69, 0.988)),
-                          Padding(
+                              icon: const FaIcon(FontAwesomeIcons.facebookF),
+                              color: const Color.fromRGBO(235, 48, 69, 0.988)),
+                          const Padding(
                               padding: EdgeInsets.only(left: 15, right: 15)),
                           IconButton(
                               onPressed: () {},
-                              icon: FaIcon(FontAwesomeIcons.instagram),
-                              color: Color.fromRGBO(235, 48, 69, 0.988)),
-                          Padding(
+                              icon: const FaIcon(FontAwesomeIcons.instagram),
+                              color: const Color.fromRGBO(235, 48, 69, 0.988)),
+                          const Padding(
                               padding: EdgeInsets.only(left: 15, right: 15)),
                           IconButton(
                               onPressed: () {},
-                              icon: FaIcon(FontAwesomeIcons.youtube),
-                              color: Color.fromRGBO(235, 48, 69, 0.988)),
+                              icon: const FaIcon(FontAwesomeIcons.youtube),
+                              color: const Color.fromRGBO(235, 48, 69, 0.988)),
 
-                          Padding(padding: EdgeInsets.only(left: 15, right: 5)),
+                          const Padding(
+                              padding: EdgeInsets.only(left: 15, right: 5)),
                         ],
                       ),
                     ),
@@ -165,7 +168,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
         backgroundColor: FlutterFlowTheme.of(context).primary,
         leading: IconButton(
           hoverColor: Colors.black12,
-          icon: Icon(
+          icon: const Icon(
             Icons.menu_open_outlined,
             size: 38.5,
           ),
@@ -181,7 +184,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                     builder: (BuildContext context) {
                       return AlertDialog(
                         title: const Text('Crear Ticket de servicio'),
-                        content: CreateServiceTicket(),
+                        content: const CreateServiceTicket(),
                         actions: <Widget>[
                           TextButton(
                             style: TextButton.styleFrom(
@@ -206,23 +209,23 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
     final iconsLinksGrid = Expanded(
         flex: 2,
         child: Container(
-          padding: EdgeInsets.all(5),
-          margin: EdgeInsets.all(5),
+          padding: const EdgeInsets.all(5),
+          margin: const EdgeInsets.all(5),
           child: GridView.builder(
               // physics: NeverScrollableScrollPhysics(),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3,
                   crossAxisSpacing: 50.0,
                   mainAxisSpacing: 50.0,
                   childAspectRatio: 1.9),
-              padding: EdgeInsets.only(left: 10, right: 10),
+              padding: const EdgeInsets.only(left: 10, right: 10),
               // shrinkWrap: true,
               itemCount: oxlinks.length,
               itemBuilder: (BuildContext context, int index) {
                 return GestureDetector(
                   onTap: () {
-                    Uri _url = Uri.parse(oxlinks[index]);
-                    launchUrlDirection(_url);
+                    Uri url = Uri.parse(oxlinks[index]);
+                    launchUrlDirection(url);
                   },
                   child: HoverCard(
                     imagePath: gridMainWindowIcons[index],
@@ -257,13 +260,13 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
               return SafeArea(
                 top: false,
                 child: Align(
-                    alignment: AlignmentDirectional(0.0, 0.0),
+                    alignment: const AlignmentDirectional(0.0, 0.0),
                     child: Column(
                       children: [
                         Expanded(
                           flex: 3,
                           child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   28.0, 5.0, 16.0, 10.0),
                               child: Column(
                                 children: [
@@ -272,7 +275,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                                       alignment:
                                           AlignmentDirectional.bottomCenter,
                                       child: Container(
-                                        margin: EdgeInsets.all(9),
+                                        margin: const EdgeInsets.all(9),
                                         child: Text(
                                           'Disciplina, Moralidad, Trabajo y Eficiencia',
                                           style: FlutterFlowTheme.of(context)
@@ -294,11 +297,11 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                                 BoxConstraints constraints) {
                               if (constraints.maxWidth < 600) {
                                 return Container(
-                                    padding:
-                                        EdgeInsets.only(top: 10, bottom: 10),
+                                    padding: const EdgeInsets.only(
+                                        top: 10, bottom: 10),
                                     width: MediaQuery.of(context).size.width,
                                     height: 100,
-                                    color: Color.fromRGBO(23, 76, 147, 1),
+                                    color: const Color.fromRGBO(23, 76, 147, 1),
                                     child: Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
@@ -349,11 +352,11 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                                     ));
                               } else {
                                 return Container(
-                                  padding: EdgeInsets.only(top: 10),
+                                  padding: const EdgeInsets.only(top: 10),
                                   width: MediaQuery.of(context).size.width,
                                   height:
                                       MediaQuery.of(context).size.height / 13,
-                                  color: Color.fromRGBO(23, 76, 147, 1),
+                                  color: const Color.fromRGBO(23, 76, 147, 1),
                                   child: Row(children: <Widget>[
                                     Expanded(
                                         child: Column(
@@ -364,7 +367,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                                                 onPressed: () {
                                                   showMision(context);
                                                 },
-                                                child: Text('Misión',
+                                                child: const Text('Misión',
                                                     style: TextStyle(
                                                         fontFamily: 'Sora',
                                                         fontSize: 16,
@@ -382,7 +385,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                                                 onPressed: () {
                                                   showVision(context);
                                                 },
-                                                child: Text('Visión',
+                                                child: const Text('Visión',
                                                     style: TextStyle(
                                                       fontFamily: 'Sora',
                                                       fontSize: 16,
@@ -426,11 +429,11 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
   }
 
   Widget _createDrawer(BuildContext context, Future<http.Response> userEvents) {
-    final _controller = ScrollController();
+    final controller = ScrollController();
 
     return Drawer(
       child: SingleChildScrollView(
-        controller: _controller,
+        controller: controller,
         child: Column(
           children: <Widget>[
             UserAccountsDrawerHeader(
@@ -450,34 +453,34 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
               ),
               currentAccountPicture: CircleAvatar(
                 backgroundColor: FlutterFlowTheme.of(context).accent4,
-                child:
-                    Image(image: AssetImage('assets/images/logoRedondoOx.png')),
+                child: const Image(
+                    image: AssetImage('assets/images/logoRedondoOx.png')),
                 // Text(currentUser!.employeeName![0],
                 //     style: TextStyle(fontFamily: 'Sora', fontSize: 20)),
               ),
               decoration: BoxDecoration(
                   color: FlutterFlowTheme.of(context).primaryBackground),
             ),
-            new FutureBuilder(
+            FutureBuilder(
                 future: userEvents,
                 builder: (BuildContext context,
                     AsyncSnapshot<http.Response> response) {
                   if (!response.hasData) {
                     return const Center(
-                      child: const Text('Loading...'),
+                      child: Text('Loading...'),
                     );
                   } else if (response.data!.statusCode != 200) {
                     return const Center(
-                      child: const Text('Error Loading'),
+                      child: Text('Error Loading'),
                     );
                   } else {
                     List<dynamic> json = jsonDecode(response.data!.body);
                     return MyExpansionTileList(elementList: json);
                   }
                 }),
-            Divider(thickness: 3),
+            const Divider(thickness: 3),
             ListTile(
-              title: Text('Cerrar sesión'),
+              title: const Text('Cerrar sesión'),
               leading: const Icon(Icons.exit_to_app),
               onTap: () {
                 // Clear any necessary data or variables
@@ -496,7 +499,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                 context.goNamed(
                   '_initialize',
                   extra: <String, dynamic>{
-                    kTransitionInfoKey: TransitionInfo(
+                    kTransitionInfoKey: const TransitionInfo(
                       hasTransition: true,
                       transitionType: PageTransitionType.leftToRight,
                     ),
@@ -519,6 +522,7 @@ class HoverCard extends StatefulWidget {
   final Color backgroundColor;
   final String title;
 
+  // ignore: use_key_in_widget_constructors
   HoverCard({
     required this.imagePath,
     required this.backgroundColor,
@@ -548,11 +552,11 @@ class _HoverCardState extends State<HoverCard> {
                 isHovered = false;
               });
             },
-            child: Container(
+            child: SizedBox(
               width: 100,
               height: 100,
               child: Card(
-                margin: EdgeInsets.all(2.0),
+                margin: const EdgeInsets.all(2.0),
                 elevation: isHovered ? 10 : 0,
                 shadowColor: Colors.black,
                 shape: RoundedRectangleBorder(
@@ -568,7 +572,7 @@ class _HoverCardState extends State<HoverCard> {
                   padding: EdgeInsets.all(isHovered ? 20 : 10),
                   decoration: BoxDecoration(
                     color: isHovered
-                        ? Color.fromRGBO(73, 73, 73, 1)
+                        ? const Color.fromRGBO(73, 73, 73, 1)
                         : widget.backgroundColor,
                     borderRadius: BorderRadius.circular(15),
                   ),
@@ -578,7 +582,7 @@ class _HoverCardState extends State<HoverCard> {
                         widget.title,
                         textScaleFactor: 0.8,
                         softWrap: true,
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                           fontFamily: 'Sora',
@@ -602,11 +606,11 @@ class _HoverCardState extends State<HoverCard> {
                 isHovered = false;
               });
             },
-            child: Container(
+            child: SizedBox(
               width: 100,
               height: 100,
               child: Card(
-                margin: EdgeInsets.all(2.0),
+                margin: const EdgeInsets.all(2.0),
                 elevation: isHovered ? 10 : 0,
                 shadowColor: Colors.black,
                 shape: RoundedRectangleBorder(
@@ -622,7 +626,7 @@ class _HoverCardState extends State<HoverCard> {
                   padding: EdgeInsets.all(isHovered ? 20 : 10),
                   decoration: BoxDecoration(
                     color: isHovered
-                        ? Color.fromRGBO(73, 73, 73, 1)
+                        ? const Color.fromRGBO(73, 73, 73, 1)
                         : widget.backgroundColor,
                     borderRadius: BorderRadius.circular(15),
                   ),
@@ -631,23 +635,21 @@ class _HoverCardState extends State<HoverCard> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        Container(
-                          child: Image.asset(
-                            widget.imagePath,
-                            fit: BoxFit.fill,
-                            scale: 15,
-                            // width: constraints.maxWidth * 0.5, // Adjust image width
-                            // height:
-                            // constraints.maxHeight * 0.5, // Adjust image height
-                            alignment: Alignment.center,
-                          ),
+                        Image.asset(
+                          widget.imagePath,
+                          fit: BoxFit.fill,
+                          scale: 15,
+                          // width: constraints.maxWidth * 0.5, // Adjust image width
+                          // height:
+                          // constraints.maxHeight * 0.5, // Adjust image height
+                          alignment: Alignment.center,
                         ),
-                        SizedBox(height: 7), // Add spacing
+                        const SizedBox(height: 7), // Add spacing
                         Align(
                           alignment: Alignment.bottomCenter,
                           child: Text(
                             widget.title,
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
                               fontFamily: 'Sora',
@@ -671,7 +673,8 @@ class MyExpansionTileList extends StatefulWidget {
   // BuildContext context;
   final List<dynamic> elementList;
 
-  MyExpansionTileList({Key? key, required this.elementList}) : super(key: key);
+  const MyExpansionTileList({Key? key, required this.elementList})
+      : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _DrawerState();
@@ -690,6 +693,7 @@ class _DrawerState extends State<MyExpansionTileList> {
     Map<String, List<String>> modulesMap = {};
 
     // Iterate over userEvents to populate modulesMap
+
     userEvents.forEach((element) {
       element.forEach((module, screens) {
         if (!modulesMap.containsKey(module)) {
@@ -726,7 +730,7 @@ class _DrawerState extends State<MyExpansionTileList> {
 
             // print('Selected screen: $screen');
           },
-          leading: Icon(
+          leading: const Icon(
             Icons.arrow_right_sharp,
             size: 10,
           ),
@@ -737,10 +741,10 @@ class _DrawerState extends State<MyExpansionTileList> {
         ExpansionTile(
           title: Text(
             module,
-            style: TextStyle(fontFamily: 'Sora', fontSize: 18),
+            style: const TextStyle(fontFamily: 'Sora', fontSize: 18),
           ),
-          children: subMenuChildren,
           leading: moduleIcons[module],
+          children: subMenuChildren,
           // leading: Icon(
           //   Icons.subdirectory_arrow_right_rounded,
           //   size: ,
@@ -754,7 +758,7 @@ class _DrawerState extends State<MyExpansionTileList> {
 
   @override
   Widget build(BuildContext context) {
-    return new Column(
+    return Column(
       children: _getChildren(widget.elementList),
     );
   }

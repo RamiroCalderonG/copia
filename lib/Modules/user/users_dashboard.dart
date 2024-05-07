@@ -1,5 +1,8 @@
+// ignore_for_file: prefer_typing_uninitialized_variables
+
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -48,12 +51,14 @@ class _UsersDashboardState extends State<UsersDashboard> {
           // userRows = createPlutoRows(listOfUsersForGrid);
         });
       } else {
-        print('Cant fetch  data from server');
+        if (kDebugMode) {
+          print('Cant fetch  data from server');
+        }
       }
     } catch (e) {
       isLoading = false;
       AlertDialog(
-        title: Text("Error"),
+        title: const Text("Error"),
         content: Text(e.toString()),
       );
     }
@@ -69,6 +74,7 @@ class _UsersDashboardState extends State<UsersDashboard> {
     super.initState();
   }
 
+  @override
   void dispose() {
     super.dispose();
   }
@@ -91,13 +97,15 @@ class _UsersDashboardState extends State<UsersDashboard> {
                     setState(() {
                       isLoading = false;
                     });
+                    // ignore: use_build_context_synchronously
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => RolesAndProfilesScreen()));
+                            builder: (context) =>
+                                const RolesAndProfilesScreen()));
                   },
-                  icon: Icon(Icons.verified_user),
-                  label: Text('Administrar roles de usuarios')),
+                  icon: const Icon(Icons.verified_user),
+                  label: const Text('Administrar roles de usuarios')),
               TextButton.icon(
                   onPressed: () async {
                     campuseList.clear();
@@ -106,41 +114,42 @@ class _UsersDashboardState extends State<UsersDashboard> {
                     await getWorkDepartmentList();
                     var response = await getRolesList();
                     tmpRolesList = jsonDecode(response);
+                    // ignore: use_build_context_synchronously
                     buildNewUserScreen(context);
                     await getEventsList();
                   },
-                  icon: FaIcon(FontAwesomeIcons.addressCard),
-                  label: Text('Nuevo usuario')),
+                  icon: const FaIcon(FontAwesomeIcons.addressCard),
+                  label: const Text('Nuevo usuario')),
               TextButton.icon(
                   onPressed: () async {
                     refreshButton();
                   },
-                  icon: Icon(Icons.refresh),
-                  label: Text('Refresca')),
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Refresca')),
               // TextButton.icon(
               //     onPressed: () {},
               //     icon: FaIcon(FontAwesomeIcons.download),
               //     label: Text('Exportar ususarios')),
-              SizedBox(width: 20),
+              const SizedBox(width: 20),
             ]),
             backgroundColor: FlutterFlowTheme.of(context).primary,
-            title: Text('Administración de usuarios',
+            title: const Text('Administración de usuarios',
                 style: TextStyle(color: Colors.white))),
         body: Stack(
           children: [
             LayoutBuilder(
                 builder: (BuildContext context, BoxConstraints constraints) {
               if (constraints.maxWidth < 600) {
-                return Card(
+                return const Card(
                   child: Placeholder(),
                 );
               } else {
                 if (listOfUsersForGrid != null) {
-                  return Container(
+                  return SizedBox(
                       width: MediaQuery.of(context).size.width,
-                      child: UsersTableView());
+                      child: const UsersTableView());
                 } else {
-                  return NoDataAvailble();
+                  return const NoDataAvailble();
                 }
               }
             }),
@@ -155,13 +164,13 @@ void buildNewUserScreen(BuildContext context) {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          contentPadding: EdgeInsets.all(50),
+          contentPadding: const EdgeInsets.all(50),
           title: const Text(
             'Nuevo usuario',
             textAlign: TextAlign.center,
             style: TextStyle(fontFamily: 'Sora'),
           ),
-          content: NewUserScreen(),
+          content: const NewUserScreen(),
           actions: <Widget>[
             TextButton(
               style: TextButton.styleFrom(

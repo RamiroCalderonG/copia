@@ -16,7 +16,7 @@ void showEmptyFieldAlertDialog(BuildContext context) {
             onPressed: () {
               Navigator.of(context).pop();
             },
-            child: Text('OK'),
+            child: const Text('OK'),
           ),
         ],
       );
@@ -36,7 +36,7 @@ void showErrorFromBackend(BuildContext context, String errorMessage) {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Ok'),
+              child: const Text('Ok'),
             )
           ],
         );
@@ -61,33 +61,33 @@ Future<int> showDeleteConfirmationAlertDialog(BuildContext context) async {
                 Navigator.of(context).pop();
                 completer.complete(0); // User selected 'No'
               },
+              style: ButtonStyle(
+                  backgroundColor:
+                      MaterialStateProperty.all<Color>(Colors.red)),
               child: Text(
                 'No',
                 style: FlutterFlowTheme.of(context).labelLarge.override(
                       fontFamily: 'Roboto',
-                      color: Color(0xFF130C0D),
+                      color: const Color(0xFF130C0D),
                       fontWeight: FontWeight.w500,
                     ),
               ),
-              style: ButtonStyle(
-                  backgroundColor:
-                      MaterialStateProperty.all<Color>(Colors.red)),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
                 completer.complete(1); // User selected 'Yes'
               },
-              child: Text('Si',
-                  style: FlutterFlowTheme.of(context).labelLarge.override(
-                        fontFamily: 'Roboto',
-                        color: Color(0xFF130C0D),
-                        fontWeight: FontWeight.w500,
-                      )),
               style: ButtonStyle(
                 backgroundColor:
                     MaterialStateProperty.all<Color>(Colors.greenAccent),
               ),
+              child: Text('Si',
+                  style: FlutterFlowTheme.of(context).labelLarge.override(
+                        fontFamily: 'Roboto',
+                        color: const Color(0xFF130C0D),
+                        fontWeight: FontWeight.w500,
+                      )),
             ),
           ],
         );

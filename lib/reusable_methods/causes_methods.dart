@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:oxschool/backend/api_requests/api_calls.dart';
 
 //GET LIST OF CAUSES
@@ -8,7 +9,7 @@ Future<List<String>> getCauses(int causeCla) async {
   List<String> causesLst = [];
 
   var apiResultxgr = await CausesCall.call(claCausa: causeCla.toString())
-      .timeout(Duration(seconds: 15));
+      .timeout(const Duration(seconds: 15));
 
   if (apiResultxgr.succeeded) {
     // Parse the JSON response
@@ -19,7 +20,9 @@ Future<List<String>> getCauses(int causeCla) async {
 
     return causesLst;
   } else {
-    print("Error en llamada a causas" + apiResultxgr.response!.body.toString());
+    if (kDebugMode) {
+      print("Error en llamada a causas${apiResultxgr.response!.body}");
+    }
     // Throw an exception or return an empty list based on your error handling strategy
     throw Exception("Failed to fetch causes");
   }

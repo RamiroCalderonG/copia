@@ -1,6 +1,9 @@
 //GET LIST OF CAUSES
+// ignore_for_file: prefer_typing_uninitialized_variables
+
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:oxschool/backend/api_requests/api_calls.dart';
 import 'package:oxschool/constants/User.dart';
 
@@ -9,7 +12,7 @@ Future<List<String>> getPainList(String logger) async {
   List<String> resultPainList = [];
 
   var apiResultxgr = await NurseryPainListCall.call(dataLog: logger)
-      .timeout(Duration(seconds: 15));
+      .timeout(const Duration(seconds: 15));
 
   if (apiResultxgr.succeeded) {
     // Parse the JSON response
@@ -21,7 +24,9 @@ Future<List<String>> getPainList(String logger) async {
 
     return resultPainList;
   } else {
-    print("Error en llamada a dolores");
+    if (kDebugMode) {
+      print("Error en llamada a dolores");
+    }
     // Throw an exception or return an empty list based on your error handling strategy
     throw Exception("Failed to fetch");
   }
@@ -32,7 +37,7 @@ Future<List<String>> getWoundsList(String logger) async {
   List<String> resultWoundsList = [];
 
   var apiResultxgr = await NurseryWoundsCall.call(dataLog: logger)
-      .timeout(Duration(seconds: 15));
+      .timeout(const Duration(seconds: 15));
 
   if (apiResultxgr.succeeded) {
     // Parse the JSON response
@@ -44,7 +49,9 @@ Future<List<String>> getWoundsList(String logger) async {
 
     return resultWoundsList;
   } else {
-    print("Error en llamada a dolores");
+    if (kDebugMode) {
+      print("Error en llamada a dolores");
+    }
     // Throw an exception or return an empty list based on your error handling strategy
     throw Exception("Failed to fetch");
   }
@@ -100,7 +107,7 @@ Future<String> postNurseryStudent(
 
   try {
     var apiResultxgr = await POSTNurseryStudentVisit.call(requiredBody: body)
-        .timeout(Duration(seconds: 15));
+        .timeout(const Duration(seconds: 15));
 
     if (apiResultxgr.succeeded) {
       // Parse the JSON response ID from DB
@@ -108,7 +115,9 @@ Future<String> postNurseryStudent(
     }
     return responseID;
   } catch (e) {
-    print("Error in API Call" + e.toString());
+    if (kDebugMode) {
+      print("Error in API Call$e");
+    }
     throw Exception(e.toString());
   }
 }

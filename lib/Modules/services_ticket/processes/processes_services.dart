@@ -33,7 +33,7 @@ class _ProcessesState extends State<Processes> {
   @override
   Widget build(BuildContext context) {
     return Stack(children: [
-      Container(
+      SizedBox(
         width: MediaQuery.of(context).size.width,
         child: LayoutBuilder(
             builder: (BuildContext context, BoxConstraints constraints) {
@@ -49,7 +49,7 @@ class _ProcessesState extends State<Processes> {
             );
           } else {
             //TODO: CREATE A VERSION FOR SMALLER SCREENS
-            return Placeholder();
+            return const Placeholder();
           }
         }),
       )
@@ -60,7 +60,7 @@ class _ProcessesState extends State<Processes> {
     return Expanded(
       child: Column(
         children: [
-          Row(
+          const Row(
             children: [
               SizedBox(
                 height: 10,
@@ -70,26 +70,28 @@ class _ProcessesState extends State<Processes> {
           Row(
             // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              SizedBox(width: 15),
+              const SizedBox(width: 15),
               IconButton.outlined(
                 onPressed: () {},
-                icon: Icon(Icons.refresh),
+                icon: const Icon(Icons.refresh),
               ),
-              SizedBox(
+              const SizedBox(
                 width: 5,
               ),
               IconButton.outlined(
-                  onPressed: () {}, icon: FaIcon(FontAwesomeIcons.fileExcel)),
-              SizedBox(width: 5),
-              IconButton.outlined(onPressed: () {}, icon: Icon(Icons.print))
+                  onPressed: () {},
+                  icon: const FaIcon(FontAwesomeIcons.fileExcel)),
+              const SizedBox(width: 5),
+              IconButton.outlined(
+                  onPressed: () {}, icon: const Icon(Icons.print))
             ],
           ),
-          Divider(
+          const Divider(
             thickness: 1,
           ),
           Row(
             children: [
-              SizedBox(width: 30),
+              const SizedBox(width: 30),
               Expanded(
                 child: TextField(
                   controller: _dateController,
@@ -97,7 +99,8 @@ class _ProcessesState extends State<Processes> {
                     labelText: 'Tickets desde',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10.0),
-                      borderSide: BorderSide(color: Colors.grey, width: 1.0),
+                      borderSide:
+                          const BorderSide(color: Colors.grey, width: 1.0),
                     ),
                     filled: true,
                     fillColor: Colors.transparent,
@@ -122,12 +125,12 @@ class _ProcessesState extends State<Processes> {
                   },
                 ),
               ),
-              SizedBox(width: 30),
+              const SizedBox(width: 30),
               Expanded(
                   // flex: 2,
                   child: DropdownMenu<String>(
                       initialSelection: serviceListStatus.first,
-                      label: Text('Estatus'),
+                      label: const Text('Estatus'),
                       onSelected: (String? value) {
                         setState(() {
                           serviceStatusSelected = value;
@@ -139,7 +142,7 @@ class _ProcessesState extends State<Processes> {
                             value: value, label: value);
                       }).toList())),
               // SizedBox(width: 30),
-              Text(
+              const Text(
                 'Tipo de servicio:',
                 style:
                     TextStyle(fontFamily: 'Sora', fontWeight: FontWeight.bold),
@@ -149,7 +152,7 @@ class _ProcessesState extends State<Processes> {
                 width: 250,
                 height: 50,
                 decoration: BoxDecoration(
-                    color: Color.fromARGB(0, 255, 255, 255),
+                    color: const Color.fromARGB(0, 255, 255, 255),
                     // border: Border.all(width: 1),
                     borderRadius: BorderRadius.circular(12)),
                 child: ListTile(
@@ -169,7 +172,7 @@ class _ProcessesState extends State<Processes> {
                 width: 100,
                 height: 50,
                 decoration: BoxDecoration(
-                    color: Color.fromARGB(0, 255, 255, 255),
+                    color: const Color.fromARGB(0, 255, 255, 255),
                     borderRadius: BorderRadius.circular(12)),
                 child: ListTile(
                     title: const Text('Que reporté'),
@@ -185,25 +188,25 @@ class _ProcessesState extends State<Processes> {
               )),
             ],
           ),
-          SizedBox(
+          const SizedBox(
             height: 30,
           ),
-          Align(
+          const Align(
             alignment: Alignment.bottomLeft,
             child: Text('  Servicios',
                 style: TextStyle(fontFamily: 'Sora', fontSize: 18)),
           ),
-          Divider(
+          const Divider(
             thickness: 1,
           ),
           LayoutBuilder(
               builder: (BuildContext context, BoxConstraints constraints) {
-            return Container(
+            return SizedBox(
               height: constraints.maxWidth,
               width: constraints.maxWidth,
               child: Table(
                 border: TableBorder.all(),
-                children: [
+                children: const [
                   TableRow(
                     children: [
                       TableCell(

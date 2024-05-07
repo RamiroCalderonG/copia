@@ -9,7 +9,7 @@ import '../../reusable_methods/temp_data_functions.dart';
 
 class PoliciesScreen extends StatefulWidget {
   final int roleID;
-  const PoliciesScreen({Key? key, required this.roleID}) : super(key: key);
+  const PoliciesScreen({super.key, required this.roleID});
 
   @override
   State<PoliciesScreen> createState() => _PoliciesScreenState();
@@ -29,10 +29,10 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Eventos : '),
+        title: const Text('Eventos : '),
         actions: [
           IconButton(
-            icon: Icon(Icons.add),
+            icon: const Icon(Icons.add),
             onPressed: () {
               // navigate to create new policy screen
             },
@@ -44,7 +44,7 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
         future: _refreshEventsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
+            return const Center(
               child: CircularProgressIndicator(),
             );
           } else {
@@ -65,8 +65,9 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Text(
-                          'Modulo: ' + currentEvent.moduleName,
-                          style: TextStyle(fontSize: 20, fontFamily: 'Sora'),
+                          'Modulo: ${currentEvent.moduleName}',
+                          style:
+                              const TextStyle(fontSize: 20, fontFamily: 'Sora'),
                         ),
                       ),
                     PolicyCard(
@@ -120,6 +121,7 @@ class PolicyCard extends StatelessWidget {
   final int roleID;
   final Function(Event) onToggle;
 
+  // ignore: use_key_in_widget_constructors
   const PolicyCard(
       {required this.policy, required this.roleID, required this.onToggle});
 
@@ -146,7 +148,7 @@ class PolicyCard extends StatelessWidget {
                 await modifyActiveOfEventRole(idValue, value, roleID);
               },
             ),
-            Row(
+            const Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 // TextButton(

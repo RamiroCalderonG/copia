@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 class Student {
   late String? matricula;
   late int? claFamilia;
