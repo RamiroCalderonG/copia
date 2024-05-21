@@ -2,7 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
+import 'package:oxschool/constants/User.dart';
 import 'package:pluto_grid/pluto_grid.dart';
+
+import '../../reusable_methods/academic_functions.dart';
 
 class GradesPerStudent extends StatefulWidget {
   const GradesPerStudent({super.key});
@@ -25,6 +28,11 @@ const List<String> months = <String>['Enero', 'Febrero', 'Marzo', 'Abril'];
 
 class _GradesPerStudentState extends State<GradesPerStudent> {
   var rows;
+
+  void initState() {
+    super.initState();
+    loadStartGrading(currentUser!.employeeNumber!, currentCycle!.toString());
+  }
 
   @override
   Widget build(BuildContext context) {

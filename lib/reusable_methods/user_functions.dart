@@ -23,7 +23,7 @@ List<User> parseUsersFromJSON(List<dynamic> jsonList) {
     int isActive = item['bajalogicasino'];
     String? workArea = item['work_department'];
     String? workPosition = item['work_positon'];
-    String creationDate = item['creation'];
+    String? creationDate = item['creation'];
     String? birthdate = item['birthdate'];
 
     User currentUser = User(

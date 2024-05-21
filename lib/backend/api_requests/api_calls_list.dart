@@ -525,6 +525,30 @@ Future<dynamic> sendUserPasswordToMail(
   }
 }
 
+Future<dynamic> getTeacherGradeAndCourses(
+    int employeeNumberE, String currentYear) async {
+  Map<String, dynamic> bodyObject = {
+    'employee': employeeNumberE,
+    'school_year': currentYear
+  };
+  try {
+    var apiCall = await Requests.get(
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/teacher/start-student-rating',
+        headers: {
+          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'ip_address': deviceIp.toString(),
+          'token': currentUser!.token
+        },
+        json: bodyObject,
+        persistCookies: false,
+        timeoutSeconds: 10);
+    apiCall.raiseForStatus();
+    return apiCall.body;
+  } catch (e) {
+    throw FormatException(e.toString());
+  }
+}
+
 // Future<dynamic> getUserEvents(int userId) async {
 //   var response;
 //   try {
