@@ -525,12 +525,7 @@ Future<dynamic> sendUserPasswordToMail(
   }
 }
 
-Future<dynamic> getTeacherGradeAndCourses(
-    int employeeNumberE, String currentYear) async {
-  Map<String, dynamic> bodyObject = {
-    'employee': employeeNumberE,
-    'school_year': currentYear
-  };
+Future<dynamic> getTeacherGradeAndCourses(var employee, var year) async {
   try {
     var apiCall = await Requests.get(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/teacher/start-student-rating',
@@ -539,11 +534,15 @@ Future<dynamic> getTeacherGradeAndCourses(
           'ip_address': deviceIp.toString(),
           'token': currentUser!.token
         },
-        json: bodyObject,
+        // json: {"teacherNumber": employee},
+        queryParameters: {
+          'teacher': currentUser!.employeeNumber.toString(),
+          "year": currentCycle!.claCiclo
+        },
         persistCookies: false,
         timeoutSeconds: 10);
     apiCall.raiseForStatus();
-    return apiCall.body;
+    return apiCall.content();
   } catch (e) {
     throw FormatException(e.toString());
   }

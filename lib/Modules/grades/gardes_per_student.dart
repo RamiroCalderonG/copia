@@ -5,7 +5,9 @@ import 'package:loading_indicator/loading_indicator.dart';
 import 'package:oxschool/constants/User.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
+import '../../constants/date_constants.dart';
 import '../../reusable_methods/academic_functions.dart';
+import '../../temp/teacher_grades_temp.dart';
 
 class GradesPerStudent extends StatefulWidget {
   const GradesPerStudent({super.key});
@@ -143,14 +145,26 @@ class _GradesPerStudentState extends State<GradesPerStudent> {
           type: PlutoColumnType.text())
     ];
     final DropdownMenu monthSelectorButton = DropdownMenu<String>(
-        initialSelection: months.first,
+        initialSelection: monthsList.first,
         onSelected: (String? value) {
           setState(() {
             dropDownValue = value;
           });
         },
         dropdownMenuEntries:
-            months.map<DropdownMenuEntry<String>>((String value) {
+            monthsList.map<DropdownMenuEntry<String>>((String value) {
+          return DropdownMenuEntry<String>(value: value, label: value);
+        }).toList());
+
+    final DropdownMenu assignatureSelector = DropdownMenu<String>(
+        initialSelection: oneTeacherAssignatures.first,
+        onSelected: (String? value) {
+          setState(() {
+            dropDownValue = value;
+          });
+        },
+        dropdownMenuEntries: oneTeacherAssignatures
+            .map<DropdownMenuEntry<String>>((String value) {
           return DropdownMenuEntry<String>(value: value, label: value);
         }).toList());
 
@@ -201,10 +215,11 @@ class _GradesPerStudentState extends State<GradesPerStudent> {
                         monthSelectorButton,
                         const SizedBox(width: 18),
                         const Text(
-                          'Selector de materia:',
+                          'Materia:',
                           style: TextStyle(
                               fontFamily: 'Sora', fontWeight: FontWeight.bold),
                         ),
+                        assignatureSelector,
                         const SizedBox(width: 48),
                       ],
                     ),
