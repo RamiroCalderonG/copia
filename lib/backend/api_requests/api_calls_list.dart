@@ -542,7 +542,7 @@ Future<dynamic> getTeacherGradeAndCourses(var employee, var year) async {
         persistCookies: false,
         timeoutSeconds: 10);
     apiCall.raiseForStatus();
-    return apiCall.content();
+    return apiCall.body;
   } catch (e) {
     throw FormatException(e.toString());
   }
@@ -572,7 +572,7 @@ Future<http.Response> getUserPermissions(int userId) async {
   try {
     Uri address = Uri(
         scheme: 'http',
-        host: '10.200.200.2',
+        host: '10.0.0.36',
         port: 8080,
         path: '/api/user/events',
         queryParameters: {'id': userId.toString()});
