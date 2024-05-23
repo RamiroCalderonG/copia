@@ -542,9 +542,14 @@ Future<dynamic> getTeacherGradeAndCourses(var employee, var year) async {
         persistCookies: false,
         timeoutSeconds: 10);
     apiCall.raiseForStatus();
-    return apiCall.body;
+
+    if (apiCall.statusCode == 200) {
+      return apiCall.body;
+    } else {
+      return throw const FormatException('Usuario no cuenta con horario');
+    }
   } catch (e) {
-    throw FormatException(e.toString());
+    return throw const FormatException('Usuario no cuenta con horario');
   }
 }
 

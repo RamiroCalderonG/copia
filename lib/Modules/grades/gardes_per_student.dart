@@ -31,35 +31,48 @@ const List<String> months = <String>['Enero', 'Febrero', 'Marzo', 'Abril'];
 class _GradesPerStudentState extends State<GradesPerStudent> {
   var rows;
 
+  @override
   void initState() {
     super.initState();
-    loadStartGrading(currentUser!.employeeNumber!, currentCycle!.toString());
   }
 
   @override
   Widget build(BuildContext context) {
-    return Stack(children: [
-      SizedBox(
-        width: MediaQuery.of(context).size.width,
-        child: LayoutBuilder(
-            builder: (BuildContext context, BoxConstraints constraints) {
-          if (constraints.maxWidth > 600) {
-            return SingleChildScrollView(
-              child: Column(
-                children: [
-                  Row(
-                    children: [_buildGradesPerStudent()],
-                  )
-                ],
-              ),
-            );
+    return FutureBuilder(
+        future: loadStartGrading(
+            currentUser!.employeeNumber!, currentCycle!.toString()),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data == null) {
+            return const Center(child: Text('No data available'));
           } else {
-            //TODO: CREATE A VERSION FOR SMALLER SCREEN
-            return const Placeholder();
+            return Stack(children: [
+              SizedBox(
+                width: MediaQuery.of(context).size.width,
+                child: LayoutBuilder(builder:
+                    (BuildContext context, BoxConstraints constraints) {
+                  if (constraints.maxWidth > 600) {
+                    return SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [_buildGradesPerStudent()],
+                          )
+                        ],
+                      ),
+                    );
+                  } else {
+                    //TODO: CREATE A VERSION FOR SMALLER SCREEN
+                    return const Placeholder();
+                  }
+                }),
+              )
+            ]);
           }
-        }),
-      )
-    ]);
+        });
   }
 
   Widget _buildGradesPerStudent() {
@@ -169,14 +182,14 @@ class _GradesPerStudentState extends State<GradesPerStudent> {
         }).toList());
 
     final DropdownMenu groupSelectorButton = DropdownMenu<String>(
-        initialSelection: grade_groups.first,
+        initialSelection: oneTeacherGrades.first,
         onSelected: (String? value) {
           setState(() {
             groupSelected = value;
           });
         },
         dropdownMenuEntries:
-            grade_groups.map<DropdownMenuEntry<String>>((String value) {
+            oneTeacherGrades.map<DropdownMenuEntry<String>>((String value) {
           return DropdownMenuEntry<String>(value: value, label: value);
         }).toList());
 
@@ -197,7 +210,7 @@ class _GradesPerStudentState extends State<GradesPerStudent> {
                     Row(
                       children: [
                         const Text(
-                          'Grado y Grupo:    ',
+                          'Grupo:    ',
                           style: TextStyle(
                               fontFamily: 'Sora', fontWeight: FontWeight.bold),
                         ),

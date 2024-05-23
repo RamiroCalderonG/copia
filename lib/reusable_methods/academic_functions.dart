@@ -5,7 +5,7 @@ import 'package:oxschool/constants/User.dart';
 import '../backend/api_requests/api_calls_list.dart';
 import '../temp/teacher_grades_temp.dart';
 
-void loadStartGrading(int employeeNumber, String schoolYear) async {
+dynamic loadStartGrading(int employeeNumber, String schoolYear) async {
   try {
     var startGrading = await getTeacherGradeAndCourses(
         currentUser!.employeeNumber, currentCycle);
@@ -15,6 +15,7 @@ void loadStartGrading(int employeeNumber, String schoolYear) async {
       getSingleTeacherGrades(jsonList);
       getSingleTeacherGroups(jsonList);
       getSingleTeacherAssignatures(jsonList);
+      return 200;
     } catch (e) {
       throw FormatException(e.toString());
     }
@@ -49,6 +50,9 @@ void getSingleTeacherGroups(List<dynamic> apiResponse) async {
 
 void getSingleTeacherAssignatures(List<dynamic> apiResponse) async {
   if (apiResponse.isNotEmpty) {
+    if (oneTeacherAssignatures.isNotEmpty) {
+      oneTeacherAssignatures.clear();
+    }
     for (var i = 0; i < apiResponse.length; i++) {
       String assignature = apiResponse[i]['assignature_name'];
       oneTeacherAssignatures.add(assignature);
