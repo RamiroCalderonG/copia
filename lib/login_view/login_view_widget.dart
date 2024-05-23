@@ -877,7 +877,12 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                       '' &&
                                                   _model.textController2.text !=
                                                       '') {
-                                                loginButtonFunction();
+                                                await loginButtonFunction()
+                                                    .whenComplete(() {
+                                                  setState(() {
+                                                    isLoading = false;
+                                                  });
+                                                });
                                               } else {
                                                 setState(() {
                                                   isLoading = false;

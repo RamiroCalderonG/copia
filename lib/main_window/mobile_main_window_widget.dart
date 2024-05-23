@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 // ignore: depend_on_referenced_packages
 import 'package:http/http.dart' as http;
+import 'package:oxschool/Modules/services_ticket/processes/create_service_ticket.dart';
 import 'package:oxschool/constants/User.dart';
 
 import 'package:oxschool/flutter_flow/flutter_flow_theme.dart';
@@ -295,6 +296,7 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
           tooltip: 'Menu rapido',
           onPressed: () {},
           child: PopupMenuButton<int>(
+            key: UniqueKey(),
             itemBuilder: (context) => [
               const PopupMenuItem<int>(
                 value: 1,
@@ -310,9 +312,34 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
               ),
             ],
             onSelected: (value) {
-              // Handle the selected option here
+              switch (value) {
+                case 1:
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: const Text('Crear Ticket de servicio'),
+                          content: CreateServiceTicket(),
+                          actions: <Widget>[
+                            TextButton(
+                              style: TextButton.styleFrom(
+                                textStyle:
+                                    Theme.of(context).textTheme.labelLarge,
+                              ),
+                              child: const Text(''),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                          ],
+                        );
+                      });
+
+                  break;
+                default:
+              }
             },
-            child: const Icon(Icons.add, size: 28),
+            child: const Icon(Icons.menu, size: 28),
           ),
         ),
         bottomNavigationBar: BottomAppBar(

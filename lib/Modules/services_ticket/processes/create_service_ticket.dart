@@ -246,7 +246,10 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
                               const SizedBox(height: 15),
                               Row(
                                 children: [
-                                  campusSelectorDropDown,
+                                  SizedBox(
+                                    width: 10,
+                                    child: campusSelectorDropDown,
+                                  ),
                                 ],
                               ),
                               const SizedBox(height: 15),
@@ -261,6 +264,7 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
                                 ],
                               ),
                               const SizedBox(height: 18),
+
                               Row(
                                 children: [descriptionField],
                               ),
