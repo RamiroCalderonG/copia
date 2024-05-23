@@ -36,7 +36,7 @@ class _UserWindowState extends State<UserWindow> {
   Widget _smallScreenUserDisplay() {
     return Scaffold(
         appBar: AppBar(
-          title: Text('Mi perfil', style: TextStyle(color: Colors.white)),
+          title: const Text('Mi perfil', style: TextStyle(color: Colors.white)),
           backgroundColor: FlutterFlowTheme.of(context).primary,
         ),
         body: Stack(
@@ -47,13 +47,14 @@ class _UserWindowState extends State<UserWindow> {
   Widget _largerScreenUserDisplay() {
     return Scaffold(
         appBar: AppBar(
-          title: Text('Mi  perfil', style: TextStyle(color: Colors.white)),
+          title:
+              const Text('Mi  perfil', style: TextStyle(color: Colors.white)),
           backgroundColor: FlutterFlowTheme.of(context).primary,
         ),
         body: Stack(
           children: [
             Container(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage('assets/images/background-header.jpg'),
                   fit: BoxFit.cover,
@@ -68,7 +69,7 @@ class _UserWindowState extends State<UserWindow> {
             ),
             Center(
               child: Container(
-                margin: EdgeInsets.all(30),
+                margin: const EdgeInsets.all(30),
                 width: MediaQuery.of(context).size.width / 2,
                 height: MediaQuery.of(context).size.height,
                 decoration: BoxDecoration(
@@ -90,13 +91,6 @@ class _UserWindowState extends State<UserWindow> {
             child: Column(
           children: <Widget>[
             Container(
-              child: Center(
-                child: Text(
-                  currentUser!.employeeName![0],
-                  style: TextStyle(fontFamily: 'Sora', fontSize: 20),
-                  textAlign: TextAlign.center,
-                ),
-              ),
               decoration: BoxDecoration(
                 border:
                     Border.all(color: FlutterFlowTheme.of(context).primaryText),
@@ -105,13 +99,20 @@ class _UserWindowState extends State<UserWindow> {
               ),
               width: 200,
               height: 200,
-              margin: EdgeInsets.all(15),
+              margin: const EdgeInsets.all(15),
+              child: Center(
+                child: Text(
+                  currentUser!.employeeName![0],
+                  style: const TextStyle(fontFamily: 'Sora', fontSize: 20),
+                  textAlign: TextAlign.center,
+                ),
+              ),
             ),
             Row(
               children: <Widget>[
                 Expanded(
                     child: Container(
-                  margin: EdgeInsets.only(top: 20, left: 20, right: 20),
+                  margin: const EdgeInsets.only(top: 20, left: 20, right: 20),
                   width: MediaQuery.of(context).size.width,
                   height: 50,
                   decoration: BoxDecoration(
@@ -121,9 +122,9 @@ class _UserWindowState extends State<UserWindow> {
                       borderRadius: BorderRadius.circular(60)),
                   child: Center(
                     child: Text(
-                      'Nombre: ' + currentUser!.employeeName.toString(),
+                      'Nombre: ${currentUser!.employeeName}',
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontFamily: 'Sora',
                         fontSize: 20,
                       ),
@@ -136,8 +137,8 @@ class _UserWindowState extends State<UserWindow> {
               children: <Widget>[
                 Expanded(
                     child: Container(
-                  margin:
-                      EdgeInsets.only(top: 8, left: 20, right: 20, bottom: 8),
+                  margin: const EdgeInsets.only(
+                      top: 8, left: 20, right: 20, bottom: 8),
                   width: MediaQuery.of(context).size.width,
                   height: 50,
                   decoration: BoxDecoration(
@@ -147,10 +148,9 @@ class _UserWindowState extends State<UserWindow> {
                       borderRadius: BorderRadius.circular(60)),
                   child: Center(
                     child: Text(
-                      'Numero de empleado: ' +
-                          currentUser!.employeeNumber.toString(),
+                      'Numero de empleado: ${currentUser!.employeeNumber}',
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontFamily: 'Sora', fontSize: 20),
+                      style: const TextStyle(fontFamily: 'Sora', fontSize: 20),
                     ),
                   ),
                 )),
@@ -160,8 +160,8 @@ class _UserWindowState extends State<UserWindow> {
               children: <Widget>[
                 Expanded(
                     child: Container(
-                  margin:
-                      EdgeInsets.only(top: 8, left: 20, right: 20, bottom: 8),
+                  margin: const EdgeInsets.only(
+                      top: 8, left: 20, right: 20, bottom: 8),
                   width: MediaQuery.of(context).size.width,
                   height: 50,
                   decoration: BoxDecoration(
@@ -171,9 +171,9 @@ class _UserWindowState extends State<UserWindow> {
                       borderRadius: BorderRadius.circular(60)),
                   child: Center(
                     child: Text(
-                      'Rol de ususario: ' + currentUser!.role,
+                      'Rol de ususario: ${currentUser!.role}',
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontFamily: 'Sora', fontSize: 20),
+                      style: const TextStyle(fontFamily: 'Sora', fontSize: 20),
                     ),
                   ),
                 )),
@@ -183,8 +183,8 @@ class _UserWindowState extends State<UserWindow> {
               children: <Widget>[
                 Expanded(
                     child: Container(
-                  margin:
-                      EdgeInsets.only(top: 8, left: 20, right: 20, bottom: 30),
+                  margin: const EdgeInsets.only(
+                      top: 8, left: 20, right: 20, bottom: 30),
                   width: MediaQuery.of(context).size.width,
                   height: 50,
                   decoration: BoxDecoration(
@@ -194,9 +194,9 @@ class _UserWindowState extends State<UserWindow> {
                       borderRadius: BorderRadius.circular(60)),
                   child: Center(
                     child: Text(
-                      'Campus: ' + currentUser!.claUn.toString(),
+                      'Campus: ${currentUser!.claUn}',
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontFamily: 'Sora', fontSize: 20),
+                      style: const TextStyle(fontFamily: 'Sora', fontSize: 20),
                     ),
                   ),
                 )),
@@ -206,7 +206,7 @@ class _UserWindowState extends State<UserWindow> {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: <Widget>[
                   ElevatedButton.icon(
-                      style: ButtonStyle(
+                      style: const ButtonStyle(
                           // backgroundColor:
                           // MaterialStatePropertyAll<Color>(Colors.green),
                           ),
@@ -218,7 +218,7 @@ class _UserWindowState extends State<UserWindow> {
                       icon: const Icon(Icons.abc),
                       label: const Text('Otra consulta')),
                   ElevatedButton.icon(
-                      style: ButtonStyle(
+                      style: const ButtonStyle(
                           // backgroundColor:
                           //     MaterialStatePropertyAll<Color>(Colors.orange),
                           ),
@@ -231,7 +231,7 @@ class _UserWindowState extends State<UserWindow> {
           ],
         ));
       }
-      return SingleChildScrollView(
+      return const SingleChildScrollView(
         child: Placeholder(),
       );
     });
@@ -242,13 +242,13 @@ class _UserWindowState extends State<UserWindow> {
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: Text(
+            title: const Text(
               'Cambiar mi contraseña',
               style: TextStyle(fontFamily: 'Sora'),
             ),
             content: TextField(
               controller: _newPassword,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                   hintText: "Nueva Contraseña",
                   helperText:
                       "1 mayuscula, caracteres especiales, minimo 8 caracteres",
@@ -256,7 +256,7 @@ class _UserWindowState extends State<UserWindow> {
             ),
             actions: <Widget>[
               TextButton(
-                  child: Text('Cancelar'),
+                  child: const Text('Cancelar'),
                   onPressed: () {
                     Navigator.pop(context);
                   }),
@@ -264,7 +264,7 @@ class _UserWindowState extends State<UserWindow> {
                   onPressed: () {
                     //TODO: ADD EDIT USER SCREEN
                   },
-                  child: Text('OK'))
+                  child: const Text('OK'))
             ],
           );
         });

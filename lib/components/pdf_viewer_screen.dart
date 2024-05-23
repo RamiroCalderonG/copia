@@ -1,8 +1,7 @@
 import 'dart:io';
-import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -53,8 +52,8 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
               pw.Table(
                 border: pw.TableBorder.all(),
                 columnWidths: {
-                  0: pw.FixedColumnWidth(200),
-                  1: pw.FixedColumnWidth(200),
+                  0: const pw.FixedColumnWidth(200),
+                  1: const pw.FixedColumnWidth(200),
                 },
                 children: [
                   pw.TableRow(children: [
@@ -125,7 +124,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       ),
       body: PdfPreview(
         actions: [
-          IconButton(onPressed: () {}, icon: FaIcon(FontAwesomeIcons.aws))
+          IconButton(onPressed: () {}, icon: const FaIcon(FontAwesomeIcons.aws))
         ],
         canChangeOrientation: false,
         build: (context) => generatePdf(),
@@ -134,22 +133,22 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   }
 }
 
+// ignore: use_key_in_widget_constructors
 class MyListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      itemCount: 20, // Number of items in your list
+      itemCount: 20,
       itemBuilder: (context, index) {
         return ListTile(
           title: Text('Item $index'),
           subtitle: Text('Subtitle $index'),
-          leading:
-              Icon(Icons.star), // You can use any widget as the leading element
-          trailing: Icon(Icons
-              .arrow_forward), // You can use any widget as the trailing element
+          leading: const Icon(Icons.star),
+          trailing: const Icon(Icons.arrow_forward),
           onTap: () {
-            // Do something when the item is tapped
-            print('Tapped on Item $index');
+            if (kDebugMode) {
+              print('Tapped on Item $index');
+            }
           },
         );
       },

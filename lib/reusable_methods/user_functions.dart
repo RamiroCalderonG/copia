@@ -21,9 +21,9 @@ List<User> parseUsersFromJSON(List<dynamic> jsonList) {
     String schoolEmail = item['user_email'];
     String usergenre = item['genre'];
     int isActive = item['bajalogicasino'];
-    String? work_Area = item['work_department'];
-    String? work_position = item['work_positon'];
-    String creationDate = item['creation'];
+    String? workArea = item['work_department'];
+    String? workPosition = item['work_positon'];
+    String? creationDate = item['creation'];
     String? birthdate = item['birthdate'];
 
     User currentUser = User(
@@ -36,8 +36,8 @@ List<User> parseUsersFromJSON(List<dynamic> jsonList) {
         schoolEmail,
         usergenre,
         isActive,
-        work_Area,
-        work_position,
+        workArea,
+        workPosition,
         creationDate,
         birthdate);
 
@@ -72,8 +72,8 @@ dynamic getSingleUser(String? userId) async {
         var usergenre = jsonList[i]['genre'];
         var isActive = jsonList[i]['bajalogicasino'];
         var userId = 0;
-        String? work_Area = jsonList[i]['department'];
-        String? work_position = jsonList[i]['positon'];
+        String? workArea = jsonList[i]['department'];
+        String? workPosition = jsonList[i]['positon'];
         String? creationDate = jsonList[i]['createdAt'];
         String? birthdate = jsonList[i]['birthdate'];
 
@@ -87,15 +87,15 @@ dynamic getSingleUser(String? userId) async {
             userEmail,
             usergenre,
             isActive,
-            work_Area,
-            work_position,
+            workArea,
+            workPosition,
             creationDate,
             birthdate);
       }
       return tempSelectedUsr;
     } catch (e) {
       AlertDialog(
-        title: Text("Error"),
+        title: const Text("Error"),
         content: Text(e.toString()),
       );
     }
@@ -106,6 +106,7 @@ dynamic getSingleUser(String? userId) async {
   }
 }
 
+// ignore: non_constant_identifier_names
 dynamic EventFromJSON(List<dynamic> jsonData) {
   List<Event> eventList = [];
   if (jsonData.isEmpty) {
@@ -117,16 +118,17 @@ dynamic EventFromJSON(List<dynamic> jsonData) {
       bool isActive = item['active'];
       String moduleName = item['module_name'];
       // int moduleID = item['module_id'];
-      bool event_can_acces_module = item['event_can_acces_module'];
+      bool eventCanAccesModule = item['event_can_acces_module'];
       // int roleID = item['role_id'];
 
       eventList.add(Event(
-          idEvento, eventName, isActive, moduleName, event_can_acces_module));
+          idEvento, eventName, isActive, moduleName, eventCanAccesModule));
     }
     return eventList;
   }
 }
 
+// ignore: non_constant_identifier_names
 dynamic RoleFromJSON(List<dynamic> jsonData) {
   List<Role> roleList = [];
   if (jsonData.isEmpty) {

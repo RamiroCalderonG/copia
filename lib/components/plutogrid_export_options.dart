@@ -10,8 +10,8 @@ import 'package:pluto_grid/pluto_grid.dart';
 class Header extends StatefulWidget {
   const Header({
     required this.stateManager,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final PlutoGridStateManager stateManager;
 
@@ -67,7 +67,7 @@ class _HeaderState extends State<Header> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return Dialog(
+        return const Dialog(
           child: Padding(
             padding: EdgeInsets.all(20.0),
             child: Row(
@@ -89,11 +89,12 @@ class _HeaderState extends State<Header> {
       var exported = const Utf8Encoder().convert(
           pluto_grid_export.PlutoGridExport.exportCSV(widget.stateManager));
       await FileSaver.instance.saveFile(
-        name: "$title",
+        name: title,
         bytes: exported,
         ext: ".csv",
       );
     } finally {
+      // ignore: use_build_context_synchronously
       Navigator.of(context).pop(); // Close the dialog
     }
     // String title = "pluto_grid_export";

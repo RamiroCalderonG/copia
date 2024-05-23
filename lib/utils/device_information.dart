@@ -162,30 +162,17 @@ Map<String, dynamic> readWindowsDeviceInfo(WindowsDeviceInfo data) {
 //       };
 
 Future getDeviceIP() async {
+  // ignore: prefer_typing_uninitialized_variables
   var interface;
   String responseData = '';
   String ipFromDevice;
+  // ignore: prefer_typing_uninitialized_variables
   var addr;
   for (interface in await NetworkInterface.list()) {
     for (addr in interface.addresses) {
-      if (responseData.length <= 0) {
-        responseData = 'ip:' +
-            addr.address.toString() +
-            ' | ' +
-            'host:' +
-            addr.host.toString() +
-            ' | ' +
-            'isLoopback:' +
-            addr.isLoopback.toString() +
-            ' | ' +
-            'rawAddress:' +
-            addr.rawAddress.toString() +
-            ' | ' +
-            'ipType: ' +
-            addr.type.name.toString() +
-            ' | ' +
-            'isLinkLocal:' +
-            addr.isLinkLocal.toString();
+      if (responseData.isEmpty) {
+        responseData =
+            'ip:${addr.address} | host:${addr.host} | isLoopback:${addr.isLoopback} | rawAddress:${addr.rawAddress} | ipType: ${addr.type.name} | isLinkLocal:${addr.isLinkLocal}';
       }
     }
   }

@@ -24,11 +24,11 @@ class _DrawerClassState extends State<DrawerClass> {
           child: Column(
         children: [
           Container(
-              padding: EdgeInsets.all(10),
+              padding: const EdgeInsets.all(10),
               height: 200,
               color: Colors.transparent,
               child: const Center(
-                  child: const Image(
+                  child: Image(
                 image: AssetImage('assets/images/logoRedondoOx.png'),
                 fit: BoxFit.fill,
               ))),
@@ -46,8 +46,10 @@ class _DrawerClassState extends State<DrawerClass> {
                 //const Image(image: AssetImage('assets/images/user-add.png')),
                 onTap: () {
                   Navigator.pop(context);
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => FichaDeSalud()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const FichaDeSalud()));
                 },
               ),
               ListTile(
@@ -76,13 +78,13 @@ class _DrawerClassState extends State<DrawerClass> {
                   'Calificaciones',
                   // style: TextStyle(fontFamily: 'Sora'),
                 ),
-                leading: Icon(Icons.school),
+                leading: const Icon(Icons.school),
                 onTap: () {
                   Navigator.pop(context);
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => GradesViewScreen()));
+                          builder: (context) => const GradesViewScreen()));
                 },
               ),
               ListTile(
@@ -100,17 +102,17 @@ class _DrawerClassState extends State<DrawerClass> {
                 leading: const FaIcon(FontAwesomeIcons.award),
                 onTap: () {},
               ),
-              ListTile(
-                title: const Text('Bajo rendimiento'),
-                leading: const FaIcon(FontAwesomeIcons.arrowDown),
+              const ListTile(
+                title: Text('Bajo rendimiento'),
+                leading: FaIcon(FontAwesomeIcons.arrowDown),
               ),
-              ListTile(
-                title: const Text('Indicadores'),
-                leading: const FaIcon(FontAwesomeIcons.chartColumn),
+              const ListTile(
+                title: Text('Indicadores'),
+                leading: FaIcon(FontAwesomeIcons.chartColumn),
               ),
-              ListTile(
-                title: const Text('Configure'),
-                leading: const FaIcon(FontAwesomeIcons.gears),
+              const ListTile(
+                title: Text('Configure'),
+                leading: FaIcon(FontAwesomeIcons.gears),
               )
             ],
           ),
@@ -130,7 +132,7 @@ class _DrawerClassState extends State<DrawerClass> {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => ServicesTicketHistory()));
+                          builder: (context) => const ServicesTicketHistory()));
                 },
               ),
               ListTile(
@@ -206,7 +208,7 @@ class _DrawerClassState extends State<DrawerClass> {
               context.goNamed(
                 '_initialize',
                 extra: <String, dynamic>{
-                  kTransitionInfoKey: TransitionInfo(
+                  kTransitionInfoKey: const TransitionInfo(
                     hasTransition: true,
                     transitionType: PageTransitionType.leftToRight,
                   ),
@@ -222,7 +224,7 @@ class _DrawerClassState extends State<DrawerClass> {
             color: Colors.transparent,
           ),
           Container(
-            padding: EdgeInsets.only(bottom: 10.4),
+            padding: const EdgeInsets.only(bottom: 10.4),
             alignment: Alignment.topCenter,
             child: Text(
               'Hola: ${currentUser?.employeeName}',

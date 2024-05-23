@@ -1,3 +1,7 @@
+// ignore_for_file: library_private_types_in_public_api
+
+import 'package:flutter/foundation.dart';
+
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -7,7 +11,7 @@ import 'enfermeria_model.dart';
 export 'enfermeria_model.dart';
 
 class EnfermeriaWidget extends StatefulWidget {
-  const EnfermeriaWidget({Key? key}) : super(key: key);
+  const EnfermeriaWidget({super.key});
 
   @override
   _EnfermeriaWidgetState createState() => _EnfermeriaWidgetState();
@@ -52,14 +56,14 @@ class _EnfermeriaWidgetState extends State<EnfermeriaWidget>
         appBar: AppBar(
           backgroundColor: FlutterFlowTheme.of(context).primary,
           automaticallyImplyLeading: true,
-          title: Text('Enfermeria', style: TextStyle(color: Colors.white)
+          title: const Text('Enfermeria', style: TextStyle(color: Colors.white)
               // FlutterFlowTheme.of(context).bodyMedium.override(
               //       fontFamily: 'Roboto',
               //       color: Color(0xFFF1F4F8),
               //       fontSize: 25.0,
               //     ),
               ),
-          actions: [IconButton(onPressed: () {}, icon: Icon(Icons.home))],
+          actions: [IconButton(onPressed: () {}, icon: const Icon(Icons.home))],
           centerTitle: true,
           elevation: 4.0,
         ),
@@ -73,17 +77,17 @@ class _EnfermeriaWidgetState extends State<EnfermeriaWidget>
                 child: Column(
                   children: [
                     Align(
-                      alignment: Alignment(0.0, 0),
+                      alignment: const Alignment(0.0, 0),
                       child: TabBar(
                         labelColor: FlutterFlowTheme.of(context).primaryText,
                         unselectedLabelColor:
                             FlutterFlowTheme.of(context).secondaryText,
                         labelStyle: FlutterFlowTheme.of(context).titleMedium,
-                        unselectedLabelStyle: TextStyle(),
+                        unselectedLabelStyle: const TextStyle(),
                         indicatorColor: FlutterFlowTheme.of(context).primary,
-                        padding:
-                            EdgeInsetsDirectional.fromSTEB(4.0, 4.0, 4.0, 4.0),
-                        tabs: [
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                            4.0, 4.0, 4.0, 4.0),
+                        tabs: const [
                           Tab(
                             text: 'Example 1',
                           ),
@@ -106,7 +110,8 @@ class _EnfermeriaWidgetState extends State<EnfermeriaWidget>
                             mainAxisSize: MainAxisSize.max,
                             children: [
                               Align(
-                                alignment: AlignmentDirectional(0.0, -1.0),
+                                alignment:
+                                    const AlignmentDirectional(0.0, -1.0),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.max,
                                   mainAxisAlignment: MainAxisAlignment.end,
@@ -114,8 +119,8 @@ class _EnfermeriaWidgetState extends State<EnfermeriaWidget>
                                   children: [
                                     Expanded(
                                       child: Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            8.0, 0.0, 8.0, 0.0),
+                                        padding: const EdgeInsetsDirectional
+                                            .fromSTEB(8.0, 0.0, 8.0, 0.0),
                                         child: TextFormField(
                                           controller:
                                               _model.searchFielfController,
@@ -180,8 +185,9 @@ class _EnfermeriaWidgetState extends State<EnfermeriaWidget>
                                       ),
                                     ),
                                     Padding(
-                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 0.0, 24.0, 0.0),
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 0.0, 24.0, 0.0),
                                       child: FlutterFlowIconButton(
                                         borderColor: Colors.transparent,
                                         borderRadius: 30.0,
@@ -194,14 +200,16 @@ class _EnfermeriaWidgetState extends State<EnfermeriaWidget>
                                           size: 30.0,
                                         ),
                                         onPressed: () {
-                                          print('SearchBttn pressed ...');
+                                          if (kDebugMode) {
+                                            print('SearchBttn pressed ...');
+                                          }
                                         },
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                              Align(
+                              const Align(
                                 alignment: AlignmentDirectional(0.0, 0.0),
                                 child: Padding(
                                   padding: EdgeInsetsDirectional.fromSTEB(

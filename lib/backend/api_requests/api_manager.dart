@@ -1,11 +1,16 @@
+// ignore_for_file: constant_identifier_names
+
 import 'dart:convert';
 import 'dart:io';
 import 'dart:core';
 import 'dart:typed_data';
 
+// ignore: depend_on_referenced_packages
 import 'package:collection/collection.dart';
+// ignore: depend_on_referenced_packages
 import 'package:http/http.dart' as http;
 import 'package:equatable/equatable.dart';
+// ignore: depend_on_referenced_packages
 import 'package:http_parser/http_parser.dart';
 import 'package:mime_type/mime_type.dart';
 
@@ -28,7 +33,7 @@ enum BodyType {
 }
 
 class ApiCallRecord extends Equatable {
-  ApiCallRecord(this.callName, this.apiUrl, this.headers, this.params,
+  const ApiCallRecord(this.callName, this.apiUrl, this.headers, this.params,
       this.body, this.bodyType);
   final String callName;
   final String apiUrl;
@@ -67,6 +72,7 @@ class ApiCallResponse {
     bool returnBody,
     bool decodeUtf8,
   ) {
+    // ignore: prefer_typing_uninitialized_variables
     var jsonBody;
     try {
       final responseBody = decodeUtf8 && returnBody
@@ -94,6 +100,7 @@ class ApiManager {
   ApiManager._();
 
   // Cache that will ensure identical calls are not repeatedly made.
+  // ignore: prefer_final_fields
   static Map<ApiCallRecord, ApiCallResponse> _apiCache = {};
 
   static ApiManager? _instance;
@@ -182,6 +189,7 @@ class ApiManager {
       {ApiCallType.POST, ApiCallType.PUT, ApiCallType.PATCH}.contains(type),
       'Invalid ApiCallType $type for request with body',
     );
+    // ignore: no_leading_underscores_for_local_identifiers, prefer_function_declarations_over_variables
     bool Function(dynamic) _isFile = (e) =>
         e is FFUploadedFile ||
         e is List<FFUploadedFile> ||
@@ -196,6 +204,7 @@ class ApiManager {
       final uploadedFiles = param is List
           ? param as List<FFUploadedFile>
           : [param as FFUploadedFile];
+      // ignore: avoid_function_literals_in_foreach_calls
       uploadedFiles.forEach((uploadedFile) => files.add(
             http.MultipartFile.fromBytes(
               e.key,

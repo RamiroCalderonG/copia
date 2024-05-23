@@ -1,4 +1,6 @@
 // TODO: Pending to add more params
+// ignore_for_file: file_names
+
 class Cause {
   final String claCause;
   final String nomCause;

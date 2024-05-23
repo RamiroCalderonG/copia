@@ -78,11 +78,11 @@ class ExpandableFABNurseryState extends State<ExpandableFABNursery> {
           },
           children: [
             FloatingActionButton.extended(
-              label: Text(
+              label: const Text(
                 'Registrar visita de alumno',
                 style: TextStyle(color: Colors.black),
               ),
-              icon: Icon(Icons.people),
+              icon: const Icon(Icons.people),
               shape: ContinuousRectangleBorder(
                 borderRadius: BorderRadius.circular(20.0),
               ),
@@ -108,7 +108,8 @@ class ExpandableFABNurseryState extends State<ExpandableFABNursery> {
                       builder: (BuildContext context) {
                         return AlertDialog(
                           title: const Text('Error'),
-                          content: Text('Primero se debe buscar al alumno'),
+                          content:
+                              const Text('Primero se debe buscar al alumno'),
                           actions: <Widget>[
                             TextButton(
                               style: TextButton.styleFrom(
@@ -130,11 +131,11 @@ class ExpandableFABNurseryState extends State<ExpandableFABNursery> {
               backgroundColor: Colors.blueAccent,
             ),
             FloatingActionButton.extended(
-              label: Text(
+              label: const Text(
                 'Agregar medicamento autorizado',
                 style: TextStyle(color: Colors.black),
               ),
-              icon: Icon(Icons.edit),
+              icon: const Icon(Icons.edit),
               shape: ContinuousRectangleBorder(
                 borderRadius: BorderRadius.circular(20.0),
               ),
@@ -147,11 +148,11 @@ class ExpandableFABNurseryState extends State<ExpandableFABNursery> {
               backgroundColor: Colors.blueAccent,
             ),
             FloatingActionButton.extended(
-              label: Text(
+              label: const Text(
                 'Impresión de fichas',
                 style: TextStyle(color: Colors.black),
               ),
-              icon: Icon(Icons.print),
+              icon: const Icon(Icons.print),
               shape: ContinuousRectangleBorder(
                 borderRadius: BorderRadius.circular(20.0),
               ),
@@ -163,7 +164,7 @@ class ExpandableFABNurseryState extends State<ExpandableFABNursery> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => MyStatefulWidget()));
+                        builder: (context) => const MyStatefulWidget()));
               },
               backgroundColor: Colors.blueAccent,
             ),
@@ -180,7 +181,8 @@ class ExpandableFABNurseryState extends State<ExpandableFABNursery> {
       pw.Page(
         build: (context) {
           return pw.Center(
-            child: pw.Text('Hello, World!', style: pw.TextStyle(fontSize: 20)),
+            child: pw.Text('Hello, World!',
+                style: const pw.TextStyle(fontSize: 20)),
           );
         },
       ),
@@ -233,7 +235,7 @@ void showFormDialog(BuildContext context) {
     builder: (BuildContext context) {
       return AlertDialog(
         title: const Text('Nueva visita a enfermeria'),
-        content: NewStudentNurseryVisit(),
+        content: const NewStudentNurseryVisit(),
         actions: <Widget>[
           TextButton(
             style: TextButton.styleFrom(

@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously, non_constant_identifier_names
+
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -20,11 +22,13 @@ class UsersTableView extends StatefulWidget {
 
 class _UsersTableViewState extends State<UsersTableView> {
   List<PlutoRow> userRows = [];
+  // ignore: prefer_typing_uninitialized_variables
   var toSee;
   bool isUserAdmin = verifyUserAdmin(currentUser!);
   bool confirmation = false;
   bool isSearching = true;
   late final PlutoGridStateManager stateManager;
+  // ignore: prefer_typing_uninitialized_variables
   var listOfUsers;
 
   @override
@@ -56,23 +60,23 @@ class _UsersTableViewState extends State<UsersTableView> {
 
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.all(1),
+        const Padding(
+          padding: EdgeInsets.all(1),
           child: Column(
             children: [],
           ),
         ),
         if (isSearching)
-          SizedBox(
+          const SizedBox(
             height: 5,
           ),
-        Divider(
+        const Divider(
           thickness: 1,
         ),
         Expanded(
             child: Container(
           width: MediaQuery.of(context).size.width,
-          padding: EdgeInsets.all(2),
+          padding: const EdgeInsets.all(2),
           child: Card(
             elevation: 4.0,
             shape: RoundedRectangleBorder(
@@ -192,12 +196,6 @@ class _UsersTableViewState extends State<UsersTableView> {
                                   Offset.zero & overlay.size),
                               items: <PopupMenuEntry>[
                                 PopupMenuItem(
-                                  child: event.row.cells.values
-                                              .elementAt(4)
-                                              .value ==
-                                          1
-                                      ? Text('Activar usuario')
-                                      : Text('Desactivar usuario'),
                                   onTap: () async {
                                     toSee = event.row.cells.values;
                                     setState(() {
@@ -231,7 +229,7 @@ class _UsersTableViewState extends State<UsersTableView> {
                                                                 .pop();
                                                           });
                                                         },
-                                                        child: Text('Si'),
+                                                        child: const Text('Si'),
                                                       )),
                                                       Expanded(
                                                           child: TextButton(
@@ -244,8 +242,8 @@ class _UsersTableViewState extends State<UsersTableView> {
                                                                       .pop();
                                                                 });
                                                               },
-                                                              child:
-                                                                  Text('No')))
+                                                              child: const Text(
+                                                                  'No')))
                                                     ],
                                                   )
                                                 ],
@@ -301,7 +299,7 @@ class _UsersTableViewState extends State<UsersTableView> {
                                                                 .pop();
                                                           });
                                                         },
-                                                        child: Text('Si'),
+                                                        child: const Text('Si'),
                                                       )),
                                                       Expanded(
                                                           child: TextButton(
@@ -310,8 +308,8 @@ class _UsersTableViewState extends State<UsersTableView> {
                                                                         context)
                                                                     .pop();
                                                               },
-                                                              child:
-                                                                  Text('No')))
+                                                              child: const Text(
+                                                                  'No')))
                                                     ],
                                                   )
                                                 ],
@@ -326,8 +324,8 @@ class _UsersTableViewState extends State<UsersTableView> {
                                           context: context,
                                           builder: (BuildContext context) {
                                             return AlertDialog(
-                                              icon: Icon(Icons.error),
-                                              title: Text('Error'),
+                                              icon: const Icon(Icons.error),
+                                              title: const Text('Error'),
                                               content: Text(e.toString()),
                                             );
                                           });
@@ -337,9 +335,14 @@ class _UsersTableViewState extends State<UsersTableView> {
                                     });
                                   },
                                   enabled: isUserAdmin,
+                                  child: event.row.cells.values
+                                              .elementAt(4)
+                                              .value ==
+                                          1
+                                      ? const Text('Activar usuario')
+                                      : const Text('Desactivar usuario'),
                                 ),
                                 PopupMenuItem(
-                                  child: Text('Modificar ususario'),
                                   onTap: () async {
                                     tempUserId =
                                         event.row.cells.values.first.value;
@@ -347,9 +350,10 @@ class _UsersTableViewState extends State<UsersTableView> {
                                     updateUserScreen(context);
                                   },
                                   enabled: isUserAdmin,
+                                  child: const Text('Modificar ususario'),
                                 ),
                                 PopupMenuItem(
-                                  child: Text('Cambiar contraseña'),
+                                  child: const Text('Cambiar contraseña'),
                                   onTap: () {},
                                 )
                               ]);
@@ -408,13 +412,13 @@ void updateUserScreen(BuildContext context) {
       context: context,
       builder: (BuildContextcontext) {
         return AlertDialog(
-          contentPadding: EdgeInsets.all(20),
+          contentPadding: const EdgeInsets.all(20),
           title: const Text(
             'Editar usuario',
             textAlign: TextAlign.center,
             style: TextStyle(fontFamily: 'Sora'),
           ),
-          content: EditUserScreen(),
+          content: const EditUserScreen(),
           actions: <Widget>[
             TextButton(
               style: TextButton.styleFrom(

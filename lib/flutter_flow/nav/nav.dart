@@ -32,44 +32,44 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
       initialLocation: '/',
       debugLogDiagnostics: true,
       refreshListenable: appStateNotifier,
-      errorBuilder: (context, state) => LoginViewWidget(),
+      errorBuilder: (context, state) => const LoginViewWidget(),
       routes: [
         FFRoute(
           name: '_initialize',
           path: '/',
-          builder: (context, _) => LoginViewWidget(),
+          builder: (context, _) => const LoginViewWidget(),
         ),
         FFRoute(
           name: 'LoginView',
           path: '/loginView',
-          builder: (context, params) => LoginViewWidget(),
+          builder: (context, params) => const LoginViewWidget(),
         ),
         FFRoute(
           name: 'MainWindow',
           path: '/mainWindow',
-          builder: (context, params) => MainWindowWidget(),
+          builder: (context, params) => const MainWindowWidget(),
         ),
         FFRoute(
           name: 'Enfermeria',
           path: '/enfermeria',
-          builder: (context, params) => EnfermeriaWidget(),
+          builder: (context, params) => const EnfermeriaWidget(),
         ),
         FFRoute(
             name: 'UserView',
             path: '/userView',
-            builder: (context, params) => UserWindow()),
+            builder: (context, params) => const UserWindow()),
         FFRoute(
             name: 'MobileMainView',
             path: '/mobileMainView',
-            builder: (context, params) => MobileMainWindow()),
+            builder: (context, params) => const MobileMainWindow()),
         FFRoute(
             name: '/Print',
             path: '/print',
-            builder: (context, params) => MyStatefulWidget()),
+            builder: (context, params) => const MyStatefulWidget()),
         FFRoute(
             name: 'UDashboard',
             path: '/udashboard',
-            builder: (context, params) => UsersDashboard()),
+            builder: (context, params) => const UsersDashboard()),
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
     );
 
@@ -224,5 +224,6 @@ class TransitionInfo {
   final Duration duration;
   final Alignment? alignment;
 
-  static TransitionInfo appDefault() => TransitionInfo(hasTransition: false);
+  static TransitionInfo appDefault() =>
+      const TransitionInfo(hasTransition: false);
 }

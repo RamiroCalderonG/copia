@@ -15,7 +15,7 @@ class LoginUserCall {
     return ApiManager.instance.makeApiCall(
       callName: 'LoginUser',
       apiUrl:
-          dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/login/userlogin/',
+          '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/login/userlogin/',
       callType: ApiCallType.GET,
       headers: {
         'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
@@ -61,9 +61,8 @@ class UserPermissionsCall {
   }) {
     return ApiManager.instance.makeApiCall(
       callName: 'permissions',
-      apiUrl: dotenv.env['HOSTURL']! +
-          dotenv.env['PORT']! +
-          '/api/user/permissions?idLogin=$idLogin',
+      apiUrl:
+          '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/user/permissions?idLogin=$idLogin',
       callType: ApiCallType.GET,
       headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},
       params: {'idLogin': idLogin},
@@ -79,7 +78,7 @@ class CurrentCicleCall {
   static Future<ApiCallResponse> call() {
     return ApiManager.instance.makeApiCall(
       callName: 'cycles',
-      apiUrl: dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/cycles/1',
+      apiUrl: '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/cycles/1',
       callType: ApiCallType.GET,
       headers: {
         'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
@@ -100,9 +99,8 @@ class FamilyCall {
   static Future<ApiCallResponse> call({String? claFam}) {
     return ApiManager.instance.makeApiCall(
         callName: 'family',
-        apiUrl: dotenv.env['HOSTURL']! +
-            dotenv.env['PORT']! +
-            '/api/family/$claFam/',
+        apiUrl:
+            '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/family/$claFam/',
         callType: ApiCallType.GET,
         headers: {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
@@ -124,7 +122,7 @@ class NurseryStudentCall {
     return ApiManager.instance.makeApiCall(
       callName: 'NursingStudent',
       apiUrl:
-          dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/nursery/student',
+          '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/nursery/student',
       callType: ApiCallType.GET,
       headers: {
         'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
@@ -150,9 +148,8 @@ class NurseryStudentMedication {
   static Future<ApiCallResponse> call({required String matricula}) {
     return ApiManager.instance.makeApiCall(
       callName: 'NurseryMedication',
-      apiUrl: dotenv.env['HOSTURL']! +
-          dotenv.env['PORT']! +
-          '/api/nursery/medication',
+      apiUrl:
+          '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/nursery/medication',
       callType: ApiCallType.GET,
       headers: {
         'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
@@ -171,7 +168,7 @@ class NurseryHistoryCall {
     return ApiManager.instance.makeApiCall(
       callName: 'NurseryHistory',
       apiUrl:
-          dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/nursery/history',
+          '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/nursery/history',
       callType: ApiCallType.GET,
       headers: {
         'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
@@ -191,7 +188,7 @@ class CausesCall {
   static Future<ApiCallResponse> call({required String claCausa}) {
     return ApiManager.instance.makeApiCall(
       callName: 'Causes',
-      apiUrl: dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/causes',
+      apiUrl: '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/causes',
       callType: ApiCallType.GET,
       headers: {
         'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
@@ -212,9 +209,8 @@ class NurseryPainListCall {
   static Future<ApiCallResponse> call({required String dataLog}) {
     return ApiManager.instance.makeApiCall(
         callName: 'Nursery-Pain-List',
-        apiUrl: dotenv.env['HOSTURL']! +
-            dotenv.env['PORT']! +
-            '/api/nursery-pain-list',
+        apiUrl:
+            '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/nursery-pain-list',
         callType: ApiCallType.GET,
         headers: {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
@@ -234,7 +230,7 @@ class NurseryWoundsCall {
     return ApiManager.instance.makeApiCall(
       callName: 'Nursery-Wounds',
       apiUrl:
-          dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/nursery-wounds',
+          '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/nursery-wounds',
       callType: ApiCallType.GET,
       headers: {
         'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
@@ -259,7 +255,7 @@ class EmployeeCall {
       required String ip}) {
     return ApiManager.instance.makeApiCall(
         callName: 'Employees',
-        apiUrl: dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/employee',
+        apiUrl: '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/employee',
         callType: ApiCallType.GET,
         headers: {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
@@ -290,9 +286,8 @@ class TeacherCall {
   }) {
     return ApiManager.instance.makeApiCall(
         callName: 'Teacher',
-        apiUrl: dotenv.env['HOSTURL']! +
-            dotenv.env['PORT']! +
-            '/api/Employee/Teacher',
+        apiUrl:
+            '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/Employee/Teacher',
         callType: ApiCallType.GET,
         headers: {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
@@ -321,7 +316,7 @@ class POSTNurseryStudentVisit {
     return ApiManager.instance.makeApiCall(
       callName: 'POST Student Nursery Visit',
       apiUrl:
-          dotenv.env['HOSTURL']! + dotenv.env['PORT']! + '/api/nursery-visit/',
+          '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/nursery-visit/',
       callType: ApiCallType.POST,
       headers: {
         'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,

@@ -125,8 +125,8 @@ class _StudentHistoryGridState extends State<StudentHistoryGrid> {
 
     return Column(
       children: [
-        Padding(
-            padding: const EdgeInsets.all(16.0),
+        const Padding(
+            padding: EdgeInsets.all(16.0),
             child: Column(
               children: [
                 //
@@ -140,7 +140,7 @@ class _StudentHistoryGridState extends State<StudentHistoryGrid> {
             child: Container(
               width: cardWidth, // Set the card width here
               height: cardHeight,
-              padding: EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16.0),
               child: Card(
                 elevation: 4.0, // Customize card elevation
                 shape: RoundedRectangleBorder(
@@ -150,14 +150,14 @@ class _StudentHistoryGridState extends State<StudentHistoryGrid> {
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
                       children: [
-                        Text('Historial del alumno',
+                        const Text('Historial del alumno',
                             style: TextStyle(fontSize: 25.0)),
                         Text(
                           selectedStudent.nombre,
-                          style: TextStyle(fontSize: 20.0),
+                          style: const TextStyle(fontSize: 20.0),
                         ),
-                        SizedBox(height: 8.0),
-                        Divider(),
+                        const SizedBox(height: 8.0),
+                        const Divider(),
                         Expanded(
                             child: PlutoGrid(
                           // configuration: const PlutoGridConfiguration.dark(),

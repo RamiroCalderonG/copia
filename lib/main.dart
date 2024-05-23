@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:flutter_localizations/flutter_localizations.dart';
+// ignore: depend_on_referenced_packages
 import 'package:flutter_web_plugins/url_strategy.dart';
 import "package:window_size/window_size.dart";
 import 'flutter_flow/flutter_flow_theme.dart';
@@ -24,11 +25,13 @@ void main() async {
   runApp(MyApp());
 }
 
+// ignore: use_key_in_widget_constructors
 class MyApp extends StatefulWidget {
   // This widget is the root of your application.
   @override
   State<MyApp> createState() => _MyAppState();
 
+  // ignore: library_private_types_in_public_api
   static _MyAppState of(BuildContext context) =>
       context.findAncestorStateOfType<_MyAppState>()!;
 }
@@ -60,7 +63,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       title: 'Oxschool',
-      localizationsDelegates: [
+      localizationsDelegates: const [
         FFLocalizationsDelegate(),
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
@@ -72,11 +75,11 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.light,
-        scrollbarTheme: ScrollbarThemeData(),
+        scrollbarTheme: const ScrollbarThemeData(),
       ),
       darkTheme: ThemeData(
         brightness: Brightness.dark,
-        scrollbarTheme: ScrollbarThemeData(),
+        scrollbarTheme: const ScrollbarThemeData(),
       ),
       themeMode: _themeMode,
       routerConfig: _router,

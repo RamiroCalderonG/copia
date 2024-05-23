@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 class NurseryHistory {
   late String? studentId;
   late String? date;
@@ -35,7 +37,7 @@ dynamic studentHistoryFromJSON(List<dynamic> jsonList) {
   List<dynamic> nurseryHistory = [];
   if (jsonList.isEmpty) {
     return null; // Return null if the list is empty
-  } else if (jsonList.length >= 1) {
+  } else if (jsonList.isNotEmpty) {
     for (var item in jsonList) {
       // var item = jsonList[0];
       String? studentId = item['Matricula'];

@@ -21,7 +21,7 @@ getEmployee(
           logData: logData,
           param: param.toString(),
           ip: deviceIp!)
-      .timeout(Duration(seconds: 15));
+      .timeout(const Duration(seconds: 15));
 
   if (apiResultxgr.succeeded) {
     // Parse the JSON response
@@ -63,7 +63,7 @@ getTeacherByGradeAndGroup(int grade, String group, String campus, String cycle,
           param:
               '11', //Number 11 means to the backend that it has to fetch all the teachers from the selected group and grade
           cycle: cycle)
-      .timeout(Duration(seconds: 15));
+      .timeout(const Duration(seconds: 15));
 
   if (apiResultxgr.succeeded) {
     try {
@@ -75,7 +75,9 @@ getTeacherByGradeAndGroup(int grade, String group, String campus, String cycle,
       tempTeachersList = jsonList;
       return teacherList;
     } catch (e) {
-      print(e.toString());
+      if (kDebugMode) {
+        print(e.toString());
+      }
     }
   }
 }

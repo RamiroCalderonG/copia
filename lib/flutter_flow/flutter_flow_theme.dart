@@ -127,16 +127,16 @@ class LightModeTheme extends FlutterFlowTheme {
   Color get tertiaryColor => tertiary;
 
   late Color primary =
-      Color.fromRGBO(235, 48, 69, 0.988); //fromARGB(232, 252, 37, 41);
+      const Color.fromRGBO(235, 48, 69, 0.988); //fromARGB(232, 252, 37, 41);
   // late Color primary = Color.fromARGB(255, 235, 47, 69);
-  late Color secondary = Color.fromARGB(255, 219, 29, 42);
-  late Color alternativeColor = Color.fromARGB(173, 10, 135, 219);
+  late Color secondary = const Color.fromARGB(255, 219, 29, 42);
+  late Color alternativeColor = const Color.fromARGB(173, 10, 135, 219);
   late Color tertiary = const Color(0xFF0299FF);
   late Color alternate = const Color(0xFFE3E7ED);
   late Color primaryText = const Color(0xFF14181B);
   late Color secondaryText = const Color(0xFF677681);
-  late Color primaryBackground = Color.fromARGB(246, 241, 244, 248);
-  late Color secondaryBackground = Color.fromARGB(219, 255, 255, 255);
+  late Color primaryBackground = const Color.fromARGB(246, 241, 244, 248);
+  late Color secondaryBackground = const Color.fromARGB(219, 255, 255, 255);
   late Color accent1 = const Color(0x4CF83B46);
   late Color accent2 = const Color(0x4CFF6A73);
   late Color accent3 = const Color(0x4D0299FF);
@@ -148,12 +148,12 @@ class LightModeTheme extends FlutterFlowTheme {
   late Color titles = const Color(0xFFFFFFFF);
   final List<Color> mainWindowCards = [
     //OXSCHOOL MAIN COLORS
-    Color.fromRGBO(23, 76, 147, 1),
-    Color.fromRGBO(246, 146, 51, 1),
-    Color.fromRGBO(235, 48, 69, 1),
-    Color.fromRGBO(23, 76, 147, 1),
-    Color.fromRGBO(246, 146, 51, 1),
-    Color.fromRGBO(235, 48, 69, 1)
+    const Color.fromRGBO(23, 76, 147, 1),
+    const Color.fromRGBO(246, 146, 51, 1),
+    const Color.fromRGBO(235, 48, 69, 1),
+    const Color.fromRGBO(23, 76, 147, 1),
+    const Color.fromRGBO(246, 146, 51, 1),
+    const Color.fromRGBO(235, 48, 69, 1)
   ];
 }
 
@@ -309,9 +309,9 @@ class DarkModeTheme extends FlutterFlowTheme {
   @Deprecated('Use tertiary instead')
   Color get tertiaryColor => tertiary;
 
-  late Color primary = Color.fromRGBO(235, 48, 69, 0.988);
+  late Color primary = const Color.fromRGBO(235, 48, 69, 0.988);
   // late Color primary = const Color(0xFFF83B46);
-  late Color alternativeColor = Color.fromARGB(173, 10, 135, 219);
+  late Color alternativeColor = const Color.fromARGB(173, 10, 135, 219);
   late Color secondary = const Color(0xFFFF6A73);
   late Color tertiary = const Color(0xFF0299FF);
   late Color alternate = const Color(0xFF262D34);
@@ -329,12 +329,12 @@ class DarkModeTheme extends FlutterFlowTheme {
   late Color info = const Color(0xFFFFFFFF);
   late Color titles = const Color(0xFFFFFFFF);
   final List<Color> mainWindowCards = [
-    Color.fromRGBO(185, 201, 222, 1),
-    Color.fromRGBO(246, 146, 51, 1),
-    Color.fromRGBO(249, 192, 199, 1),
-    Color.fromRGBO(185, 201, 222, 1),
-    Color.fromRGBO(246, 146, 51, 1),
-    Color.fromRGBO(249, 192, 199, 1)
+    const Color.fromRGBO(185, 201, 222, 1),
+    const Color.fromRGBO(246, 146, 51, 1),
+    const Color.fromRGBO(249, 192, 199, 1),
+    const Color.fromRGBO(185, 201, 222, 1),
+    const Color.fromRGBO(246, 146, 51, 1),
+    const Color.fromRGBO(249, 192, 199, 1)
   ];
 }
 

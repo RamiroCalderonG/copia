@@ -1,3 +1,6 @@
+// ignore_for_file: prefer_final_fields, prefer_typing_uninitialized_variables, use_build_context_synchronously
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -96,11 +99,11 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
             fontFamily: 'Sora',
             color: FlutterFlowTheme.of(context).tertiary,
           ),
-      title: Text("Tipo de dolor"),
+      title: const Text("Tipo de dolor"),
       selectedColor: Colors.blue,
       decoration: BoxDecoration(
         color: Colors.blue.withOpacity(0.1),
-        borderRadius: BorderRadius.all(Radius.circular(40)),
+        borderRadius: const BorderRadius.all(Radius.circular(40)),
         border: Border.all(
           color: Colors.blue,
           width: 2,
@@ -133,11 +136,11 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
             fontFamily: 'Sora',
             color: FlutterFlowTheme.of(context).tertiary,
           ),
-      title: Text("Tipo de herida"),
+      title: const Text("Tipo de herida"),
       selectedColor: Colors.blue,
       decoration: BoxDecoration(
         color: Colors.blue.withOpacity(0.1),
-        borderRadius: BorderRadius.all(Radius.circular(40)),
+        borderRadius: const BorderRadius.all(Radius.circular(40)),
         border: Border.all(
           color: Colors.blue,
           width: 2,
@@ -171,12 +174,12 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
             color: FlutterFlowTheme.of(context).tertiary,
           ),
       //causess.map((pain) => MultiSelectItem<String>(pain, pain)).toList(),
-      title: Text("Otras Causas"),
+      title: const Text("Otras Causas"),
       selectedColor: Colors.blue,
       searchable: true,
       decoration: BoxDecoration(
         color: Colors.blue.withOpacity(0.1),
-        borderRadius: BorderRadius.all(Radius.circular(40)),
+        borderRadius: const BorderRadius.all(Radius.circular(40)),
         border: Border.all(
           color: Colors.blue,
           width: 2,
@@ -211,12 +214,12 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
           ),
       //causess.map((pain) => MultiSelectItem<String>(pain, pain)).toList(),
       // initialValue: [accidentType.first],
-      title: Text("Tipo de Accidente"),
+      title: const Text("Tipo de Accidente"),
       selectedColor: Colors.blue,
       searchable: true,
       decoration: BoxDecoration(
         color: Colors.blue.withOpacity(0.1),
-        borderRadius: BorderRadius.all(Radius.circular(40)),
+        borderRadius: const BorderRadius.all(Radius.circular(40)),
         border: Border.all(
           color: Colors.blue,
           width: 2,
@@ -242,9 +245,9 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
         return DropdownButton<String>(
           value: teacherDropDownValue ??
               teachersList.first, // Set default value to the first item,
-          hint: Text('Maestro responsable'),
+          hint: const Text('Maestro responsable'),
           borderRadius: BorderRadius.circular(15),
-          icon: Icon(Icons.person),
+          icon: const Icon(Icons.person),
           elevation: 6,
           style: FlutterFlowTheme.of(context).bodyMedium.override(
                 fontFamily: 'Sora',
@@ -275,7 +278,7 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
     return Stack(
       children: [
         SingleChildScrollView(
-          child: Container(
+          child: SizedBox(
             width: MediaQuery.of(context).size.width * 2 / 2,
             // height: MediaQuery.of(context).size.height,
             child: Column(
@@ -283,18 +286,18 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
                 Row(
                   children: [
                     Expanded(child: painsSelector),
-                    SizedBox(width: 6),
+                    const SizedBox(width: 6),
                     Expanded(child: kindOfLesion),
-                    SizedBox(width: 6),
+                    const SizedBox(width: 6),
                     Expanded(child: causes)
                   ],
                 ),
-                Divider(thickness: 3),
+                const Divider(thickness: 3),
                 TextFormField(
                   controller: _studentId,
                   enableSuggestions: false,
                   decoration: InputDecoration(
-                    label: Text('Matricula'),
+                    label: const Text('Matricula'),
                     prefixIcon: const Icon(Icons.numbers),
                     suffixIcon: _studentId.text.isNotEmpty
                         ? IconButton(
@@ -303,7 +306,7 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
                                 _studentId.clear();
                               });
                             },
-                            icon: Icon(Icons.clear_rounded),
+                            icon: const Icon(Icons.clear_rounded),
                           )
                         : null,
                   ),
@@ -319,7 +322,7 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
                   controller: _studentname,
                   enableSuggestions: false,
                   decoration: InputDecoration(
-                      label: Text('Nombre del alumno'),
+                      label: const Text('Nombre del alumno'),
                       prefixIcon: const Icon(Icons.person_pin_rounded),
                       suffixIcon: _studentname.text.isNotEmpty
                           ? IconButton(
@@ -328,30 +331,30 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
                                   _studentname.clear();
                                 });
                               },
-                              icon: Icon(Icons.clear_rounded))
+                              icon: const Icon(Icons.clear_rounded))
                           : null),
                   onChanged: (value) {
                     setState(() {});
                   },
                   textInputAction: TextInputAction.next,
                 ),
-                SizedBox(height: 5),
+                const SizedBox(height: 5),
                 TextFormField(
                   controller: _visitMotive,
                   enableSuggestions: true,
                   decoration: InputDecoration(
-                      label: Text('Motivo de visita'),
+                      label: const Text('Motivo de visita'),
                       prefixIcon: const Icon(Icons.abc),
-                      suffixIcon: _visitMotive.text.length > 0
+                      suffixIcon: _visitMotive.text.isNotEmpty
                           ? IconButton(
                               onPressed: _visitMotive.clear,
-                              icon: Icon(Icons.clear_rounded))
+                              icon: const Icon(Icons.clear_rounded))
                           : null),
                   // textInputAction: TextInputAction.next,
                   autofocus: true,
                   maxLines: 3,
                 ),
-                SizedBox(height: 18),
+                const SizedBox(height: 18),
                 Row(
                   children: [
                     Expanded(
@@ -359,30 +362,30 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
                         controller: _valoration,
                         enableSuggestions: true,
                         decoration: InputDecoration(
-                            label: Text('Valoracion'),
+                            label: const Text('Valoracion'),
                             prefixIcon: const Icon(Icons.abc),
-                            suffixIcon: _valoration.text.length > 0
+                            suffixIcon: _valoration.text.isNotEmpty
                                 ? IconButton(
                                     onPressed: _valoration.clear,
-                                    icon: Icon(Icons.clear_rounded))
+                                    icon: const Icon(Icons.clear_rounded))
                                 : null),
                         // textInputAction: TextInputAction.next,
                         maxLines: 2,
                       ),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       width: 10,
                     ),
                     Expanded(
                       child: TextFormField(
                         controller: _tx,
                         decoration: InputDecoration(
-                            label: Text('Tratamiento'),
+                            label: const Text('Tratamiento'),
                             prefixIcon: const Icon(Icons.abc),
-                            suffixIcon: _tx.text.length > 0
+                            suffixIcon: _tx.text.isNotEmpty
                                 ? IconButton(
                                     onPressed: _tx.clear,
-                                    icon: Icon(Icons.clear_rounded))
+                                    icon: const Icon(Icons.clear_rounded))
                                 : null),
                         // textInputAction: TextInputAction.next,
                         maxLines: 2,
@@ -390,16 +393,16 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
                     )
                   ],
                 ),
-                SizedBox(height: 15),
+                const SizedBox(height: 15),
                 Row(
                   children: [
                     Expanded(child: accidentTypes),
-                    SizedBox(width: 20),
+                    const SizedBox(width: 20),
                     Expanded(child: responsableTeacherWidget()),
                     // Expanded(child: responsableTeacher)
                   ],
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Row(
                   children: [
                     Expanded(
@@ -407,12 +410,12 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
                         controller: _observations,
                         enableSuggestions: true,
                         decoration: InputDecoration(
-                            label: Text('Observaciones Generales'),
+                            label: const Text('Observaciones Generales'),
                             prefixIcon: const Icon(Icons.abc),
-                            suffixIcon: _observations.text.length > 0
+                            suffixIcon: _observations.text.isNotEmpty
                                 ? IconButton(
                                     onPressed: _observations.clear,
-                                    icon: Icon(Icons.clear_rounded))
+                                    icon: const Icon(Icons.clear_rounded))
                                 : null),
                         // textInputAction: TextInputAction.next,
                         maxLines: 2,
@@ -420,7 +423,7 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
                     ),
                   ],
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Row(
                   children: [
                     Expanded(
@@ -439,7 +442,7 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
                                   });
                                 },
                               ),
-                              Text('Se envió a clinica')
+                              const Text('Se envió a clinica')
                             ],
                           ),
                           Row(
@@ -455,7 +458,7 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
                                   });
                                 },
                               ),
-                              Text('Molestias consulte a su Médico')
+                              const Text('Molestias consulte a su Médico')
                             ],
                           ),
                         ],
@@ -465,7 +468,7 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
                         child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Tipo de notificación'),
+                        const Text('Tipo de notificación'),
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -479,7 +482,7 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
                                     _isPhoneNotChecked = value!;
                                   });
                                 }),
-                            Text('Telefono')
+                            const Text('Telefono')
                           ],
                         ),
                         Row(
@@ -495,7 +498,7 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
                                     _isPersonalNotifChecked = value!;
                                   });
                                 }),
-                            Text('En persona')
+                            const Text('En persona')
                           ],
                         ),
                         Row(
@@ -511,7 +514,7 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
                                     _isReportNotifChecked = value!;
                                   });
                                 }),
-                            Text('Reporte')
+                            const Text('Reporte')
                           ],
                         )
                       ],
@@ -566,14 +569,14 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
                     //     child: ),
                   ],
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Center(
                       child: Padding(
-                        padding: EdgeInsets.all(8),
+                        padding: const EdgeInsets.all(8),
                         child: ElevatedButton.icon(
                             onPressed: () async {
                               setState(() {
@@ -673,7 +676,9 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
 
                                 if (apiCallResponseResult == 200) {
                                   // Navigate back to your main screen
+
                                   Navigator.of(context).pop();
+
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                         content: Text(
@@ -682,11 +687,12 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
                                               .labelMedium
                                               .override(
                                                 fontFamily: 'Roboto',
-                                                color: Color(0xFF130C0D),
+                                                color: const Color(0xFF130C0D),
                                                 fontWeight: FontWeight.w500,
                                               ),
                                         ),
-                                        duration: Duration(milliseconds: 12000),
+                                        duration:
+                                            const Duration(milliseconds: 12000),
                                         backgroundColor: Colors.green[200]),
                                   );
                                 } else {
@@ -701,8 +707,8 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
                                 });
                               }
                             },
-                            icon: Icon(Icons.save_outlined),
-                            label: Text('Registrar visita')),
+                            icon: const Icon(Icons.save_outlined),
+                            label: const Text('Registrar visita')),
                       ),
                     ),
                   ],
@@ -763,13 +769,15 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
           deviceInformation,
           responsableTeacherID);
     } catch (e) {
-      print(e.toString());
+      if (kDebugMode) {
+        print(e.toString());
+      }
       throw Exception(e.toString());
     }
   }
 
   Widget okButton = TextButton(
-    child: Text("OK"),
+    child: const Text("OK"),
     onPressed: () {},
   );
 }

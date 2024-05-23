@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 class CustomSaveButton extends StatelessWidget {
   final VoidCallback onPressed;
 
-  const CustomSaveButton({Key? key, required this.onPressed}) : super(key: key);
+  const CustomSaveButton({super.key, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: onPressed,
-      child: Text('Guardar'),
+      child: const Text('Guardar'),
     );
   }
 }
@@ -17,8 +17,7 @@ class CustomSaveButton extends StatelessWidget {
 class CustomCancelButton extends StatelessWidget {
   final VoidCallback onPressed;
 
-  const CustomCancelButton({Key? key, required this.onPressed})
-      : super(key: key);
+  const CustomCancelButton({super.key, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +26,7 @@ class CustomCancelButton extends StatelessWidget {
         backgroundColor: MaterialStateProperty.all<Color>(Colors.red.shade300),
       ),
       onPressed: onPressed,
-      child: Text('Cancelar'),
+      child: const Text('Cancelar'),
     );
   }
 }

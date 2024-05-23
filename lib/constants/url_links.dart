@@ -20,21 +20,21 @@ final List<String> gridMainWindowIcons = [
 ];
 
 final List<Color> gridMainWindowColors = [
-  Color.fromRGBO(23, 76, 147, 1),
-  Color.fromRGBO(246, 146, 51, 1),
-  Color.fromRGBO(235, 48, 69, 1),
-  Color.fromRGBO(23, 76, 147, 1),
-  Color.fromRGBO(246, 146, 51, 1),
-  Color.fromRGBO(235, 48, 69, 1)
+  const Color.fromRGBO(23, 76, 147, 1),
+  const Color.fromRGBO(246, 146, 51, 1),
+  const Color.fromRGBO(235, 48, 69, 1),
+  const Color.fromRGBO(23, 76, 147, 1),
+  const Color.fromRGBO(246, 146, 51, 1),
+  const Color.fromRGBO(235, 48, 69, 1)
 ];
 
 final List<Color> gridDarkColorsMainWindow = [
-  Color.fromRGBO(62, 120, 178, 1),
-  Color.fromRGBO(222, 158, 54, 1),
-  Color.fromRGBO(227, 101, 91, 1),
-  Color.fromRGBO(62, 120, 178, 1),
-  Color.fromRGBO(222, 158, 54, 1),
-  Color.fromRGBO(227, 101, 91, 1),
+  const Color.fromRGBO(62, 120, 178, 1),
+  const Color.fromRGBO(222, 158, 54, 1),
+  const Color.fromRGBO(227, 101, 91, 1),
+  const Color.fromRGBO(62, 120, 178, 1),
+  const Color.fromRGBO(222, 158, 54, 1),
+  const Color.fromRGBO(227, 101, 91, 1),
 ];
 
 final List<String> mainWindowGridTitles = [
@@ -46,8 +46,8 @@ final List<String> mainWindowGridTitles = [
   'Cafetería'
 ];
 
-Future<void> launchUrlDirection(_url) async {
-  if (!await launchUrl(_url)) {
-    throw Exception('Could not launch $_url');
+Future<void> launchUrlDirection(url) async {
+  if (!await launchUrl(url)) {
+    throw Exception('Could not launch $url');
   }
 }

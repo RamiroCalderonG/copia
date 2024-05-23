@@ -1,3 +1,5 @@
+// ignore_for_file: use_super_parameters, prefer_const_constructors_in_immutables
+
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 

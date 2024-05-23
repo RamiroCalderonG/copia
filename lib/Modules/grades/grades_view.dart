@@ -48,13 +48,12 @@ class _CaptureGradesScreenState extends State<CaptureGradesScreen>
             ],
             indicatorColor: Colors.blueAccent,
           ),
-          title: Text('Calificaciones', style: TextStyle(color: Colors.white)),
+          title: const Text('Calificaciones',
+              style: TextStyle(color: Colors.white)),
           backgroundColor: FlutterFlowTheme.of(context).primary,
         ),
-        body: Container(
-          child: Center(
-            child: Text('Calificaciones'),
-          ),
+        body: const Center(
+          child: Text('Calificaciones'),
         ));
   }
 }

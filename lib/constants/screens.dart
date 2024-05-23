@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:oxschool/Modules/grades/grades_modules_configuration.dart';
 import 'package:oxschool/Modules/user/users_dashboard.dart';
 
 import '../Modules/enfermeria/ficha_de_salud.dart';
@@ -16,7 +17,8 @@ const Map<String, dynamic> pageRoutes = {
   'Calificaciones': GradesViewScreen(),
   'Procesos': ServicesTicketHistory(),
   'Dashboard': UsersDashboard(),
-  'Alumnos con padecimientos': StudentsIlness()
+  'Alumnos con padecimientos': StudentsIlness(),
+  'Configuracion Academica': GradesModuleConfiguration()
 };
 
 const mobilePages = [
