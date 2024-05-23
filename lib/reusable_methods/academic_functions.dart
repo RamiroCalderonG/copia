@@ -9,7 +9,7 @@ void loadStartGrading(int employeeNumber, String schoolYear) async {
   try {
     var startGrading = await getTeacherGradeAndCourses(
         currentUser!.employeeNumber, currentCycle);
-    List<dynamic> jsonList = json.decode(startGrading.body);
+    List<dynamic> jsonList = json.decode(startGrading);
 
     try {
       getSingleTeacherGrades(jsonList);
