@@ -1,12 +1,13 @@
 // ignore_for_file: constant_identifier_names, prefer_typing_uninitialized_variables
 
 import 'package:flutter/material.dart';
-import 'package:loading_indicator/loading_indicator.dart';
 import 'package:oxschool/constants/User.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
 import '../../constants/date_constants.dart';
+import '../../flutter_flow/flutter_flow_util.dart';
 import '../../reusable_methods/academic_functions.dart';
+import '../../reusable_methods/user_functions.dart';
 import '../../temp/teacher_grades_temp.dart';
 
 class GradesPerStudent extends StatefulWidget {
@@ -25,8 +26,23 @@ const List<String> grade_groups = <String>[
   '1 D'
 ];
 String? groupSelected;
+String currentMonth = DateFormat.MMMM().format(DateTime.now());
+List<String> allMonths = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December'
+];
 
-const List<String> months = <String>['Enero', 'Febrero', 'Marzo', 'Abril'];
+bool isUserAdmin = verifyUserAdmin(currentUser!);
 
 class _GradesPerStudentState extends State<GradesPerStudent> {
   var rows;
@@ -80,44 +96,58 @@ class _GradesPerStudentState extends State<GradesPerStudent> {
     String? dropDownValue;
     bool pause = true;
 
-    final List<PlutoRow> assignatureRows = [
-      PlutoRow(
+    List<PlutoRow> assignatureRows = [];
+
+    for (var i = 0; i < oneTeacherStudents.length; i++) {
+      assignatureRows.add(PlutoRow(
         cells: {
-          'Matricula': PlutoCell(value: 0001),
-          'Nombre': PlutoCell(value: 'Fulano Mendez '),
+          'Matricula': PlutoCell(value: oneTeacherStudentID[i]),
+          'Nombre': PlutoCell(value: oneTeacherStudents[i]),
           'Calif': PlutoCell(value: '100'),
           'Conducta': PlutoCell(value: '4'),
           'Uniforme': PlutoCell(value: '1'),
           'Calificacion2': PlutoCell(value: 'B'),
         },
-      ),
-      PlutoRow(
-        cells: {
-          'Matricula': PlutoCell(value: 0002),
-          'Nombre': PlutoCell(value: 'Jose velzaquez '),
-          'Calif': PlutoCell(value: '50'),
-          'Conducta': PlutoCell(value: '3'),
-          'Uniforme': PlutoCell(value: '5'),
-          'Calificacion2': PlutoCell(value: 'B'),
-        },
-      ),
-      PlutoRow(
-        cells: {
-          'Matricula': PlutoCell(value: 0003),
-          'Nombre': PlutoCell(value: 'Antonio Antonino Antonello '),
-          'Calif': PlutoCell(value: '100'),
-          'Conducta': PlutoCell(value: '9'),
-          'Uniforme': PlutoCell(value: '10'),
-          'Calificacion2': PlutoCell(value: 'A+'),
-        },
-      ),
-    ];
+      ));
+    }
+
+    //   PlutoRow(
+    //     cells: {
+    //       'Matricula': PlutoCell(value: 0001),
+    //       'Nombre': PlutoCell(value: 'Fulano Mendez '),
+    //       'Calif': PlutoCell(value: '100'),
+    //       'Conducta': PlutoCell(value: '4'),
+    //       'Uniforme': PlutoCell(value: '1'),
+    //       'Calificacion2': PlutoCell(value: 'B'),
+    //     },
+    //   ),
+    //   PlutoRow(
+    //     cells: {
+    //       'Matricula': PlutoCell(value: 0002),
+    //       'Nombre': PlutoCell(value: 'Jose velzaquez '),
+    //       'Calif': PlutoCell(value: '50'),
+    //       'Conducta': PlutoCell(value: '3'),
+    //       'Uniforme': PlutoCell(value: '5'),
+    //       'Calificacion2': PlutoCell(value: 'B'),
+    //     },
+    //   ),
+    //   PlutoRow(
+    //     cells: {
+    //       'Matricula': PlutoCell(value: 0003),
+    //       'Nombre': PlutoCell(value: 'Antonio Antonino Antonello '),
+    //       'Calif': PlutoCell(value: '100'),
+    //       'Conducta': PlutoCell(value: '9'),
+    //       'Uniforme': PlutoCell(value: '10'),
+    //       'Calificacion2': PlutoCell(value: 'A+'),
+    //     },
+    //   ),
+    // ];
 
     final List<PlutoColumn> assignaturesColumns = <PlutoColumn>[
       PlutoColumn(
         title: 'Matricula',
         field: 'Matricula',
-        type: PlutoColumnType.number(),
+        type: PlutoColumnType.number(format: '####'),
         readOnly: true,
       ),
       PlutoColumn(
@@ -160,9 +190,10 @@ class _GradesPerStudentState extends State<GradesPerStudent> {
     final DropdownMenu monthSelectorButton = DropdownMenu<String>(
         initialSelection: monthsList.first,
         onSelected: (String? value) {
-          setState(() {
-            dropDownValue = value;
-          });
+          dropDownValue = value;
+          // setState(() {
+
+          // });
         },
         dropdownMenuEntries:
             monthsList.map<DropdownMenuEntry<String>>((String value) {
@@ -172,114 +203,162 @@ class _GradesPerStudentState extends State<GradesPerStudent> {
     final DropdownMenu assignatureSelector = DropdownMenu<String>(
         initialSelection: oneTeacherAssignatures.first,
         onSelected: (String? value) {
-          setState(() {
-            dropDownValue = value;
-          });
+          dropDownValue = value;
+          // setState(() {
+
+          // });
         },
         dropdownMenuEntries: oneTeacherAssignatures
             .map<DropdownMenuEntry<String>>((String value) {
           return DropdownMenuEntry<String>(value: value, label: value);
         }).toList());
 
-    final DropdownMenu groupSelectorButton = DropdownMenu<String>(
+    final DropdownMenu gradeSelectorButton2 = DropdownMenu<String>(
         initialSelection: oneTeacherGrades.first,
         onSelected: (String? value) {
-          setState(() {
-            groupSelected = value;
-          });
+          groupSelected = value;
+          // setState(() {
+
+          // });
         },
         dropdownMenuEntries:
             oneTeacherGrades.map<DropdownMenuEntry<String>>((String value) {
           return DropdownMenuEntry<String>(value: value, label: value);
         }).toList());
 
-    return Expanded(
-        // width: MediaQuery.of(context).size.width,
-        // height: MediaQuery.of(context).size.height,
-        child: Column(
-      children: [
-        Row(
-          children: [
-            const SizedBox(width: 100),
-            Container(
-                margin: const EdgeInsets.only(top: 20, bottom: 20),
-                padding: const EdgeInsets.all(1),
-                child: Row(
-                  children: [
-                    const SizedBox(width: 50),
-                    Row(
-                      children: [
-                        const Text(
-                          'Grupo:    ',
-                          style: TextStyle(
-                              fontFamily: 'Sora', fontWeight: FontWeight.bold),
-                        ),
-                        groupSelectorButton,
-                      ],
-                    ),
-                    const SizedBox(width: 50),
-                    Row(
-                      children: [
-                        const Text(
-                          'Mes:    ',
-                          style: TextStyle(
-                              fontFamily: 'Sora', fontWeight: FontWeight.bold),
-                        ),
-                        monthSelectorButton,
-                        const SizedBox(width: 18),
-                        const Text(
-                          'Materia:',
-                          style: TextStyle(
-                              fontFamily: 'Sora', fontWeight: FontWeight.bold),
-                        ),
-                        assignatureSelector,
-                        const SizedBox(width: 48),
-                      ],
-                    ),
-                    const SizedBox(width: 50),
-                    Container(
-                      padding: const EdgeInsets.all(2),
-                      child: ElevatedButton.icon(
-                          onPressed: () {
-                            setState(() {
-                              pause = !pause;
-                            });
+    final DropdownMenu groupSelectorButton = DropdownMenu<String>(
+        initialSelection: oneTeacherGroups.first,
+        onSelected: (String? value) {
+          groupSelected = value;
+          // setState(() {
 
-                            LoadingIndicator(
-                                indicatorType: Indicator.ballPulse,
-                                colors: const [Colors.red],
-                                backgroundColor: Colors.black87,
-                                strokeWidth: 2,
-                                pause: pause,
-                                pathBackgroundColor: Colors.black);
-                          },
-                          icon: const Icon(Icons.search),
-                          label: const Text('Buscar')),
+          // });
+        },
+        dropdownMenuEntries:
+            oneTeacherGroups.map<DropdownMenuEntry<String>>((String value) {
+          return DropdownMenuEntry<String>(value: value, label: value);
+        }).toList());
+
+    return Expanded(
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Grado:',
+                        style: TextStyle(
+                          fontFamily: 'Sora',
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      gradeSelectorButton2,
+                    ],
+                  ),
+                ),
+                Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Grupo:',
+                        style: TextStyle(
+                          fontFamily: 'Sora',
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      groupSelectorButton,
+                    ],
+                  ),
+                ),
+                Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Mes:',
+                        style: TextStyle(
+                          fontFamily: 'Sora',
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      if (isUserAdmin == false)
+                        Text(
+                          currentMonth,
+                          style: const TextStyle(
+                            fontFamily: 'Sora',
+                            fontWeight: FontWeight.bold,
+                          ),
+                        )
+                      else
+                        monthSelectorButton,
+                    ],
+                  ),
+                ),
+                Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Materia:',
+                        style: TextStyle(
+                          fontFamily: 'Sora',
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      assignatureSelector,
+                    ],
+                  ),
+                ),
+                Flexible(
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      // setState(() {
+                      //   pause = !pause;
+                      // });
+
+                      // LoadingIndicator(
+                      //     indicatorType: Indicator.ballPulse,
+                      //     colors: const [Colors.red],
+                      //     backgroundColor: Colors.black87,
+                      //     strokeWidth: 2,
+                      //     pause: pause,
+                      //     pathBackgroundColor: Colors.black);
+                    },
+                    icon: const Icon(Icons.search),
+                    label: const Text('Buscar'),
+                  ),
+                ),
+                Flexible(
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red[400],
                     ),
-                    const SizedBox(width: 10),
-                    Container(
-                      padding: const EdgeInsets.all(2),
-                      child: ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red[400]),
-                          onPressed: () {},
-                          icon: const Icon(Icons.save),
-                          label: const Text('Guardar')),
-                    ),
-                    const SizedBox(width: 10),
-                  ],
-                )),
-          ],
-        ),
-        const Divider(thickness: 1),
-        Container(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height / 1.5,
-          margin: const EdgeInsets.all(20),
-          child: PlutoGrid(columns: assignaturesColumns, rows: assignatureRows),
-        )
-      ],
-    ));
+                    onPressed: () {},
+                    icon: const Icon(Icons.save),
+                    label: const Text('Guardar'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(thickness: 1),
+          Container(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height / 1.5,
+            margin: const EdgeInsets.all(20),
+            child:
+                PlutoGrid(columns: assignaturesColumns, rows: assignatureRows),
+          ),
+        ],
+      ),
+    );
   }
 }
 

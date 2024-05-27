@@ -154,12 +154,12 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                             : Icons.visibility_off),
                                       )),
                                   obscureText: _obscureText,
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Por favor ingrese una contraseña';
-                                    }
-                                    return null;
-                                  },
+                                  // validator: (value) {
+                                  //   if (value == null || value.isEmpty) {
+                                  //     return 'Por favor ingrese una contraseña';
+                                  //   }
+                                  //   return null;
+                                  // },
                                   onChanged: (value) {
                                     _passwordUpdated = {'user_password': value};
                                     dataToUpdate
@@ -187,6 +187,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
                             children: [
                               Expanded(
                                 child: DropdownButton<String>(
+                                  hint: const Text('Rol de ususario'),
                                   value: _userRole,
                                   onChanged: (String? newValue) {
                                     setState(() {
