@@ -21,7 +21,7 @@ Future<dynamic> getWorkDepartmentList() async {
   var jsonList = jsonDecode(response);
 
   for (var item in jsonList) {
-    areaList.add(item['department']);
+    areaList.add(item['name']);
   }
 
   // return departments;

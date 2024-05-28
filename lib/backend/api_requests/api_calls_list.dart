@@ -492,7 +492,7 @@ Future<dynamic> getCampuseList() async {
 Future<dynamic> getWorkDepartments() async {
   try {
     var apiCall = await Requests.get(
-        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/work-dept',
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/departments',
         headers: {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
           'token': currentUser!.token

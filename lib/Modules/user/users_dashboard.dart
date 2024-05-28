@@ -111,7 +111,7 @@ class _UsersDashboardState extends State<UsersDashboard> {
                     campuseList.clear();
                     areaList.clear();
                     await getAllCampuse();
-                    // await getWorkDepartmentList();
+                    await getWorkDepartmentList();
                     var response = await getRolesList();
                     tmpRolesList = jsonDecode(response);
 

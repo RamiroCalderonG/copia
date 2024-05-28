@@ -52,7 +52,7 @@ class _NewUserScreenState extends State<NewUserScreen> {
     roleNames = tmpRolesList.map((role) => role["Role"] as String).toList();
     roleNames.first;
     campuseSelector = campuseList.first;
-    // areaSelector = areaList.first;
+    areaSelector = areaList.first;
     roleSelector = roleNames.first;
     _selectedBirthdate = null;
     _creationDate = null;

@@ -347,6 +347,10 @@ class _UsersTableViewState extends State<UsersTableView> {
                                     tempUserId =
                                         event.row.cells.values.first.value;
                                     await getSingleUser(null);
+                                    await getWorkDepartmentList();
+                                    var response = await getRolesList();
+                                    tmpRolesList = jsonDecode(response);
+
                                     updateUserScreen(context);
                                   },
                                   enabled: isUserAdmin,

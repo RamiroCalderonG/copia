@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_typing_uninitialized_variables, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:oxschool/flutter_flow/flutter_flow_util.dart';
 import 'package:oxschool/temp/users_temp_data.dart';
 import 'package:oxschool/utils/loader_indicator.dart';
@@ -20,7 +21,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   var _userRole;
-  var _userDepartment;
+  String? _userDepartment;
   List<String> roleNames = [];
   List<String> departmentsList = [];
 
@@ -43,14 +44,30 @@ class _EditUserScreenState extends State<EditUserScreen> {
     _nameController.text = tempSelectedUsr!.employeeName.toString();
     _userRole = tempSelectedUsr!.role.toString();
     _userDepartment = tempSelectedUsr!.work_area.toString();
-    super.initState();
+
     roleNames = tmpRolesList.map((role) => role["Role"] as String).toList();
-    // departmentsList = areaList.map((e) => e["department"]).toList();
+    // departmentsList = areaList.map((e) => e["work_department"]).toList();
     if (tempSelectedUsr!.isActive == 1) {
       isUserActive = false;
     } else {
       isUserActive = true;
     }
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _nameController.dispose();
+    roleNames.clear();
+    departmentsList.clear();
+    dataToUpdate.clear();
+    _userDepartment = null;
+    tempSelectedUsr?.clear();
+    areaList.clear();
+    tmpRolesList.clear();
+    super.dispose();
   }
 
   String? _validateEmail(String? value) {
@@ -65,6 +82,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
 
   @override
   Widget build(BuildContext context) {
+    String dropdownValue = _userDepartment ?? 'Select Department';
     return Stack(
       children: [
         Container(
@@ -241,7 +259,10 @@ class _EditUserScreenState extends State<EditUserScreen> {
                             children: [
                               Expanded(
                                 child: DropdownButton<String>(
-                                  value: _userDepartment,
+                                  value: areaList.contains(dropdownValue)
+                                      ? dropdownValue
+                                      : 'Select Department',
+                                  hint: const Text('Departamento'),
                                   onChanged: (String? newValue) {
                                     setState(() {
                                       _userDepartment = newValue!;

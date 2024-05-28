@@ -1,6 +1,7 @@
 // ignore_for_file: depend_on_referenced_packages, library_private_types_in_public_api, prefer_const_constructors_in_immutables, use_super_parameters, avoid_function_literals_in_foreach_calls
 
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:oxschool/constants/Student.dart';
 
 import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/constants/url_links.dart';
@@ -37,6 +38,8 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
   @override
   void dispose() {
     _model.dispose();
+    clearUserData();
+    clearStudentData();
 
     super.dispose();
   }
