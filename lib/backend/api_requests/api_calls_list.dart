@@ -553,6 +553,30 @@ Future<dynamic> getTeacherGradeAndCourses(var employee, var year) async {
   }
 }
 
+Future<dynamic> getStudentsToGrade(
+    String assignature, String group, String grade) async {
+  try {
+    var apiCall = await Requests.get(
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/rate/students',
+        headers: {
+          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'ip_address': deviceIp.toString(),
+          'token': currentUser!.token
+        },
+        queryParameters: {
+          "grade": grade,
+          "group": group,
+          "assignature": assignature
+        },
+        persistCookies: false,
+        timeoutSeconds: 20);
+    apiCall.raiseForStatus();
+    return apiCall.body;
+  } catch (e) {
+    return e;
+  }
+}
+
 // Future<dynamic> getUserEvents(int userId) async {
 //   var response;
 //   try {

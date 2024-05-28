@@ -15,8 +15,8 @@ dynamic loadStartGrading(int employeeNumber, String schoolYear) async {
       await getSingleTeacherGrades(jsonList);
       await getSingleTeacherGroups(jsonList);
       await getSingleTeacherAssignatures(jsonList);
-      await getStudentsByTeacher(jsonList);
-      await getStudentsIDByTeacher(jsonList);
+      // await getStudentsByTeacher(jsonList);
+      // await getStudentsIDByTeacher(jsonList);
       // await getGroupsByTeacher(jsonList);
       return 200;
     } catch (e) {
@@ -110,3 +110,27 @@ Future<void> getStudentsIDByTeacher(List<dynamic> apiResponse) async {
 //     }
 //   }
 // }
+
+Future<void> getStudentsByAssinature(
+    String group, gradeSelected, dropDownValue) async {
+  var studentsList =
+      await getStudentsToGrade(dropDownValue, group, gradeSelected);
+
+  List<dynamic> jsonList = json.decode(studentsList);
+
+  try {
+    if (jsonList.isNotEmpty) {
+      if (oneTeacherStudents.isNotEmpty) {
+        oneTeacherStudents.clear();
+      }
+      for (var i = 0; i < jsonList.length; i++) {
+        String studentName = jsonList[i]['student_name'];
+        int studentID = jsonList[i]['student_id'];
+        int grades = jsonList[i]['evaluation'];
+        oneTeacherStudentID.add(studentID);
+        oneTeacherStudents.add(studentName);
+        gradesID.add(grades);
+      }
+    }
+  } catch (e) {}
+}

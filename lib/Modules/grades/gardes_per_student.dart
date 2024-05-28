@@ -18,14 +18,9 @@ class GradesPerStudent extends StatefulWidget {
 }
 
 final List<PlutoRow> rows = [];
-const List<String> grade_groups = <String>[
-  //TO STORE The teacher groups
-  '1 A',
-  '1 B',
-  '1 C',
-  '1 D'
-];
+
 String? groupSelected;
+String? gradeSelected;
 String currentMonth = DateFormat.MMMM().format(DateTime.now());
 List<String> allMonths = [
   'January',
@@ -50,6 +45,18 @@ class _GradesPerStudentState extends State<GradesPerStudent> {
   @override
   void initState() {
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    oneTeacherGrades.clear();
+    oneTeacherGroups.clear();
+    oneTeacherAssignatures.clear();
+    oneTeacherStudents.clear();
+    oneTeacherStudentID.clear();
+    oneTeacherGroup.clear();
+
+    super.dispose();
   }
 
   @override
@@ -94,7 +101,6 @@ class _GradesPerStudentState extends State<GradesPerStudent> {
   Widget _buildGradesPerStudent() {
     // ignore: unused_local_variable
     String? dropDownValue;
-    bool pause = true;
 
     List<PlutoRow> assignatureRows = [];
 
@@ -157,7 +163,7 @@ class _GradesPerStudentState extends State<GradesPerStudent> {
       PlutoColumn(
         title: 'Calificación',
         field: 'Calif',
-        type: PlutoColumnType.text(),
+        type: PlutoColumnType.number(),
         footerRenderer: (rendererContext) {
           return PlutoAggregateColumnFooter(
             rendererContext: rendererContext,
@@ -216,7 +222,7 @@ class _GradesPerStudentState extends State<GradesPerStudent> {
     final DropdownMenu gradeSelectorButton2 = DropdownMenu<String>(
         initialSelection: oneTeacherGrades.first,
         onSelected: (String? value) {
-          groupSelected = value;
+          gradeSelected = value;
           // setState(() {
 
           // });
@@ -318,19 +324,7 @@ class _GradesPerStudentState extends State<GradesPerStudent> {
                 ),
                 Flexible(
                   child: ElevatedButton.icon(
-                    onPressed: () {
-                      // setState(() {
-                      //   pause = !pause;
-                      // });
-
-                      // LoadingIndicator(
-                      //     indicatorType: Indicator.ballPulse,
-                      //     colors: const [Colors.red],
-                      //     backgroundColor: Colors.black87,
-                      //     strokeWidth: 2,
-                      //     pause: pause,
-                      //     pathBackgroundColor: Colors.black);
-                    },
+                    onPressed: () {},
                     icon: const Icon(Icons.search),
                     label: const Text('Buscar'),
                   ),
@@ -362,16 +356,16 @@ class _GradesPerStudentState extends State<GradesPerStudent> {
   }
 }
 
-//Function to populate Assignature Rows
-List<PlutoRow> populateAssignatureRows(var assignatures) {
-  for (var line in assignatures) {
-    rows.add(PlutoRow(cells: {
-      'ClaMateria': PlutoCell(value: line.claMateria),
-      'nomMateria': PlutoCell(value: line.nomMateria),
-      'nomGradoEscolar': PlutoCell(value: line.nomGradoEscolar),
-      'gradoSecuencia': PlutoCell(value: line.gradoSecuencia),
-      'grado': PlutoCell(value: line.grado),
-    }));
-  }
-  return rows;
-}
+// //Function to populate Assignature Rows
+// List<PlutoRow> populateAssignatureRows(var assignatures) {
+//   for (var line in assignatures) {
+//     rows.add(PlutoRow(cells: {
+//       'ClaMateria': PlutoCell(value: line.claMateria),
+//       'nomMateria': PlutoCell(value: line.nomMateria),
+//       'nomGradoEscolar': PlutoCell(value: line.nomGradoEscolar),
+//       'gradoSecuencia': PlutoCell(value: line.gradoSecuencia),
+//       'grado': PlutoCell(value: line.grado),
+//     }));
+//   }
+//   return rows;
+// }
