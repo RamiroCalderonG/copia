@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:oxschool/constants/User.dart';
+import 'package:oxschool/reusable_methods/reusable_functions.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
 import '../../constants/date_constants.dart';
@@ -19,23 +20,9 @@ class GradesPerStudent extends StatefulWidget {
 
 final List<PlutoRow> rows = [];
 
-String? groupSelected;
-String? gradeSelected;
+String? groupSelected = oneTeacherGroups.first;
+String? gradeSelected = oneTeacherGrades.first;
 String currentMonth = DateFormat.MMMM().format(DateTime.now());
-List<String> allMonths = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December'
-];
 
 bool isUserAdmin = verifyUserAdmin(currentUser!);
 
@@ -55,6 +42,7 @@ class _GradesPerStudentState extends State<GradesPerStudent> {
     oneTeacherStudents.clear();
     oneTeacherStudentID.clear();
     oneTeacherGroup.clear();
+    assignaturesMap.clear();
 
     super.dispose();
   }
@@ -89,7 +77,9 @@ class _GradesPerStudentState extends State<GradesPerStudent> {
                     );
                   } else {
                     //TODO: CREATE A VERSION FOR SMALLER SCREEN
-                    return const Placeholder();
+                    return const Placeholder(
+                      child: Text('Smaller version pending to design'),
+                    );
                   }
                 }),
               )
@@ -100,7 +90,8 @@ class _GradesPerStudentState extends State<GradesPerStudent> {
 
   Widget _buildGradesPerStudent() {
     // ignore: unused_local_variable
-    String? dropDownValue;
+    String? dropDownValue = oneTeacherAssignatures.first;
+    String? monthValue = monthsList.first;
 
     List<PlutoRow> assignatureRows = [];
 
@@ -196,7 +187,7 @@ class _GradesPerStudentState extends State<GradesPerStudent> {
     final DropdownMenu monthSelectorButton = DropdownMenu<String>(
         initialSelection: monthsList.first,
         onSelected: (String? value) {
-          dropDownValue = value;
+          monthValue = value;
           // setState(() {
 
           // });
@@ -324,7 +315,28 @@ class _GradesPerStudentState extends State<GradesPerStudent> {
                 ),
                 Flexible(
                   child: ElevatedButton.icon(
-                    onPressed: () {},
+                    onPressed: () async {
+                      int? monthNumber;
+
+                      if (isUserAdmin == true) {
+                        monthNumber =
+                            getKeyFromValue(monthsListMap, monthValue!);
+                      } else {
+                        monthNumber =
+                            getKeyFromValue(monthsListMap, currentMonth);
+                      }
+                      var gradeInt =
+                          getKeyFromValue(assignaturesMap, gradeSelected!);
+
+                      var studentList = await getStudentsByAssinature(
+                          groupSelected!,
+                          gradeInt.toString(), //IS SENDING 0
+                          dropDownValue!,
+                          monthNumber.toString() //SENGIND 0
+                          );
+
+                      print(studentList.toString());
+                    },
                     icon: const Icon(Icons.search),
                     label: const Text('Buscar'),
                   ),
@@ -334,7 +346,7 @@ class _GradesPerStudentState extends State<GradesPerStudent> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red[400],
                     ),
-                    onPressed: () {},
+                    onPressed: () async {},
                     icon: const Icon(Icons.save),
                     label: const Text('Guardar'),
                   ),

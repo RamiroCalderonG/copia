@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:oxschool/Models/Student_eval.dart';
 import 'package:oxschool/constants/User.dart';
 
 import '../backend/api_requests/api_calls_list.dart';
@@ -63,8 +64,13 @@ Future<void> getSingleTeacherAssignatures(List<dynamic> apiResponse) async {
     }
     for (var i = 0; i < apiResponse.length; i++) {
       String assignature = apiResponse[i]['assignature_name'];
+      int assignatureID = int.parse(apiResponse[i]['assignature_id']);
       originalList.add(assignature);
+
       oneTeacherAssignatures = originalList.toSet().toList();
+
+      Map<int, String> currentMapValue = {assignatureID: assignature};
+      assignaturesMap.addEntries(currentMapValue.entries);
     }
   }
 }
@@ -111,26 +117,41 @@ Future<void> getStudentsIDByTeacher(List<dynamic> apiResponse) async {
 //   }
 // }
 
-Future<void> getStudentsByAssinature(
-    String group, gradeSelected, dropDownValue) async {
-  var studentsList =
-      await getStudentsToGrade(dropDownValue, group, gradeSelected);
+Future<dynamic> getStudentsByAssinature(
+    String group, gradeSelected, assignature, month) async {
+  var studentsList = await getStudentsToGrade(assignature, group, gradeSelected,
+      currentCycle!.claCiclo, currentUser!.claUn, month);
 
-  List<dynamic> jsonList = json.decode(studentsList);
+  List<dynamic> jsonList = json.decode(studentsList.body);
 
-  try {
-    if (jsonList.isNotEmpty) {
-      if (oneTeacherStudents.isNotEmpty) {
-        oneTeacherStudents.clear();
-      }
-      for (var i = 0; i < jsonList.length; i++) {
-        String studentName = jsonList[i]['student_name'];
-        int studentID = jsonList[i]['student_id'];
-        int grades = jsonList[i]['evaluation'];
-        oneTeacherStudentID.add(studentID);
-        oneTeacherStudents.add(studentName);
-        gradesID.add(grades);
-      }
-    }
-  } catch (e) {}
+  List<StudentEval> evaluations = getEvalFromJSON(jsonList);
+
+  return evaluations;
+
+  // try {
+  //   if (jsonList.isNotEmpty) {
+  //     if (oneTeacherStudents.isNotEmpty) {
+  //       oneTeacherStudents.clear();
+  //     }
+  //     for (var i = 0; i < jsonList.length; i++) {
+  //       int rateID = jsonList[i]['id'];
+  //       String studentName = jsonList[i]['student_name'];
+  //       String student1LastName = jsonList[i]['1lastName'];
+  //       String student2LastName = jsonList[i]['2lastName'];
+  //       String studentID = jsonList[i]['studentID'];
+  //       int grades = jsonList[i]['eval_type'];
+  //       int absence = jsonList[i]['absence_eval'];
+  //       int homework = jsonList[i]['homework_eval'];
+  //       int discipline = jsonList[i]['discipline_eval'];
+  //       int comment = jsonList[i]['comment'];
+  //       int habits_evaluation = jsonList[i]['habit_eval'];
+  //       int other = jsonList[i]['other'];
+  //       int subject = jsonList[i]['subject'];
+
+  //       oneTeacherStudentID.add(studentID);
+  //       oneTeacherStudents.add(studentName);
+  //       gradesID.add(grades);
+  //     }
+  //   }
+  // } catch (e) {}
 }

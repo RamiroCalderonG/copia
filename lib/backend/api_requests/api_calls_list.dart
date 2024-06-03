@@ -553,11 +553,11 @@ Future<dynamic> getTeacherGradeAndCourses(var employee, var year) async {
   }
 }
 
-Future<dynamic> getStudentsToGrade(
-    String assignature, String group, String grade) async {
+Future<dynamic> getStudentsToGrade(String assignature, String group,
+    String grade, String? cycle, String? campus, String month) async {
   try {
     var apiCall = await Requests.get(
-        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/rate/students',
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/school-rating/active-students',
         headers: {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
           'ip_address': deviceIp.toString(),
@@ -566,12 +566,15 @@ Future<dynamic> getStudentsToGrade(
         queryParameters: {
           "grade": grade,
           "group": group,
-          "assignature": assignature
+          "assignature": assignature,
+          "cycle": cycle,
+          "campus": campus,
+          "month": month
         },
         persistCookies: false,
         timeoutSeconds: 20);
     apiCall.raiseForStatus();
-    return apiCall.body;
+    return apiCall;
   } catch (e) {
     return e;
   }
@@ -601,7 +604,7 @@ Future<http.Response> getUserPermissions(int userId) async {
   try {
     Uri address = Uri(
         scheme: 'http',
-        host: '10.0.0.36',
+        host: 'localhost',
         port: 8080,
         path: '/api/user/events',
         queryParameters: {'id': userId.toString()});

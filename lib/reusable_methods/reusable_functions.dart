@@ -26,3 +26,10 @@ Future<dynamic> getWorkDepartmentList() async {
 
   // return departments;
 }
+
+int? getKeyFromValue(Map<int, String> map, String value) {
+  return map.entries
+      .firstWhere((entry) => entry.value == value,
+          orElse: () => const MapEntry(-1, ''))
+      .key;
+}
