@@ -4,5 +4,6 @@ List<String> oneTeacherAssignatures = [];
 List<String> oneTeacherStudents = [];
 List<int> oneTeacherStudentID = [];
 List<int> gradesID = [];
-List<String> oneTeacherGroup = [];
+// List<String> oneTeacherGroup = [];
 Map<int, String> assignaturesMap = {};
+Map<int, String> teacherGradesMap = {};

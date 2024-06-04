@@ -36,8 +36,13 @@ Future<void> getSingleTeacherGrades(List<dynamic> apiResponse) async {
     }
     for (var i = 0; i < apiResponse.length; i++) {
       String grade = apiResponse[i]['grade'];
+      int gradeSequence = apiResponse[i]['gradeseq'];
       originalList.add(grade);
       oneTeacherGrades = originalList.toSet().toList();
+
+      Map<int, String> currentMapValue = {gradeSequence: grade};
+
+      teacherGradesMap.addEntries(currentMapValue.entries);
     }
   }
 }
@@ -50,6 +55,7 @@ Future<void> getSingleTeacherGroups(List<dynamic> apiResponse) async {
     }
     for (var i = 0; i < apiResponse.length; i++) {
       String group = apiResponse[i]['school_group'];
+
       originalList.add(group);
       oneTeacherGroups = originalList.toSet().toList();
     }

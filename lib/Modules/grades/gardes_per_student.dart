@@ -1,10 +1,12 @@
 // ignore_for_file: constant_identifier_names, prefer_typing_uninitialized_variables
 
 import 'package:flutter/material.dart';
+import 'package:oxschool/constants/Student.dart';
 import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/reusable_methods/reusable_functions.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
+import '../../Models/Student_eval.dart';
 import '../../constants/date_constants.dart';
 import '../../flutter_flow/flutter_flow_util.dart';
 import '../../reusable_methods/academic_functions.dart';
@@ -20,7 +22,7 @@ class GradesPerStudent extends StatefulWidget {
 
 final List<PlutoRow> rows = [];
 
-String? groupSelected = oneTeacherGroups.first;
+String? groupSelected = oneTeacherGroups.first.toString();
 String? gradeSelected = oneTeacherGrades.first;
 String currentMonth = DateFormat.MMMM().format(DateTime.now());
 
@@ -28,6 +30,11 @@ bool isUserAdmin = verifyUserAdmin(currentUser!);
 
 class _GradesPerStudentState extends State<GradesPerStudent> {
   var rows;
+  var studentList;
+  List<PlutoRow> assignatureRows = [];
+  var isDataFetched = 0;
+  String? dropDownValue = oneTeacherAssignatures.first;
+  String? monthValue = monthsList.first;
 
   @override
   void initState() {
@@ -41,11 +48,34 @@ class _GradesPerStudentState extends State<GradesPerStudent> {
     oneTeacherAssignatures.clear();
     oneTeacherStudents.clear();
     oneTeacherStudentID.clear();
-    oneTeacherGroup.clear();
     assignaturesMap.clear();
+    isDataFetched = 0;
+    // studentList.clear;
 
     super.dispose();
   }
+
+  // void fetchAndPopulateGrid() async {
+  //   int? monthNumber;
+
+  //   if (isUserAdmin == true) {
+  //     monthNumber = getKeyFromValue(monthsListMap, monthValue!);
+  //   } else {
+  //     monthNumber = getKeyFromValue(monthsListMap, currentMonth);
+  //   }
+  //   var gradeInt = getKeyFromValue(teacherGradesMap, gradeSelected!);
+
+  //   var assignatureID = getKeyFromValue(assignaturesMap, dropDownValue!);
+
+  //   studentList = await getStudentsByAssinature(
+  //       groupSelected!,
+  //       gradeInt.toString(), //IS SENDING 0
+  //       assignatureID.toString(),
+  //       monthNumber.toString() //SENGIND 0
+  //       );
+
+  //   _updateGrid(studentList);
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -89,57 +119,6 @@ class _GradesPerStudentState extends State<GradesPerStudent> {
   }
 
   Widget _buildGradesPerStudent() {
-    // ignore: unused_local_variable
-    String? dropDownValue = oneTeacherAssignatures.first;
-    String? monthValue = monthsList.first;
-
-    List<PlutoRow> assignatureRows = [];
-
-    for (var i = 0; i < oneTeacherStudents.length; i++) {
-      assignatureRows.add(PlutoRow(
-        cells: {
-          'Matricula': PlutoCell(value: oneTeacherStudentID[i]),
-          'Nombre': PlutoCell(value: oneTeacherStudents[i]),
-          'Calif': PlutoCell(value: '100'),
-          'Conducta': PlutoCell(value: '4'),
-          'Uniforme': PlutoCell(value: '1'),
-          'Calificacion2': PlutoCell(value: 'B'),
-        },
-      ));
-    }
-
-    //   PlutoRow(
-    //     cells: {
-    //       'Matricula': PlutoCell(value: 0001),
-    //       'Nombre': PlutoCell(value: 'Fulano Mendez '),
-    //       'Calif': PlutoCell(value: '100'),
-    //       'Conducta': PlutoCell(value: '4'),
-    //       'Uniforme': PlutoCell(value: '1'),
-    //       'Calificacion2': PlutoCell(value: 'B'),
-    //     },
-    //   ),
-    //   PlutoRow(
-    //     cells: {
-    //       'Matricula': PlutoCell(value: 0002),
-    //       'Nombre': PlutoCell(value: 'Jose velzaquez '),
-    //       'Calif': PlutoCell(value: '50'),
-    //       'Conducta': PlutoCell(value: '3'),
-    //       'Uniforme': PlutoCell(value: '5'),
-    //       'Calificacion2': PlutoCell(value: 'B'),
-    //     },
-    //   ),
-    //   PlutoRow(
-    //     cells: {
-    //       'Matricula': PlutoCell(value: 0003),
-    //       'Nombre': PlutoCell(value: 'Antonio Antonino Antonello '),
-    //       'Calif': PlutoCell(value: '100'),
-    //       'Conducta': PlutoCell(value: '9'),
-    //       'Uniforme': PlutoCell(value: '10'),
-    //       'Calificacion2': PlutoCell(value: 'A+'),
-    //     },
-    //   ),
-    // ];
-
     final List<PlutoColumn> assignaturesColumns = <PlutoColumn>[
       PlutoColumn(
         title: 'Matricula',
@@ -148,9 +127,26 @@ class _GradesPerStudentState extends State<GradesPerStudent> {
         readOnly: true,
       ),
       PlutoColumn(
-          title: 'Nombre del alumno',
-          field: 'Nombre',
-          type: PlutoColumnType.text()),
+        title: 'Nombre del alumno',
+        field: 'Nombre',
+        type: PlutoColumnType.text(),
+        readOnly: true,
+        sort: PlutoColumnSort.ascending,
+      ),
+      PlutoColumn(
+        title: 'Apellido paterno',
+        field: 'Apellido paterno',
+        type: PlutoColumnType.text(),
+        readOnly: true,
+        sort: PlutoColumnSort.ascending,
+      ),
+      PlutoColumn(
+        title: 'Apellido Materno',
+        field: 'Apellido Materno',
+        type: PlutoColumnType.text(),
+        readOnly: true,
+        sort: PlutoColumnSort.ascending,
+      ),
       PlutoColumn(
         title: 'Calificación',
         field: 'Calif',
@@ -176,13 +172,21 @@ class _GradesPerStudentState extends State<GradesPerStudent> {
         },
       ),
       PlutoColumn(
-          title: 'Conducta', field: 'Conducta', type: PlutoColumnType.text()),
+          title: 'Conducta', field: 'Conducta', type: PlutoColumnType.number()),
       PlutoColumn(
-          title: 'Uniforme', field: 'Uniforme', type: PlutoColumnType.text()),
+          title: 'Uniforme', field: 'Uniforme', type: PlutoColumnType.number()),
+      // PlutoColumn(
+      //     title: 'Califiacion extra',
+      //     field: 'Calificacion2',
+      //     type: PlutoColumnType.text()),
       PlutoColumn(
-          title: 'Califiacion extra',
-          field: 'Calificacion2',
-          type: PlutoColumnType.text())
+          title: 'Ausencia', field: 'Ausencia', type: PlutoColumnType.number()),
+      PlutoColumn(
+          title: 'Tareas', field: 'Tareas', type: PlutoColumnType.number()),
+      PlutoColumn(
+          title: 'Comentario',
+          field: 'Comentario',
+          type: PlutoColumnType.number()),
     ];
     final DropdownMenu monthSelectorButton = DropdownMenu<String>(
         initialSelection: monthsList.first,
@@ -326,16 +330,26 @@ class _GradesPerStudentState extends State<GradesPerStudent> {
                             getKeyFromValue(monthsListMap, currentMonth);
                       }
                       var gradeInt =
-                          getKeyFromValue(assignaturesMap, gradeSelected!);
+                          getKeyFromValue(teacherGradesMap, gradeSelected!);
 
-                      var studentList = await getStudentsByAssinature(
+                      var assignatureID =
+                          getKeyFromValue(assignaturesMap, dropDownValue!);
+
+                      studentList = await getStudentsByAssinature(
                           groupSelected!,
                           gradeInt.toString(), //IS SENDING 0
-                          dropDownValue!,
+                          assignatureID.toString(),
                           monthNumber.toString() //SENGIND 0
                           );
 
-                      print(studentList.toString());
+                      await _updateGrid(studentList);
+
+                      setState(() {
+                        // assignatureRows.clear();
+                        PopulateGrid(
+                            assignatureColumns: assignaturesColumns,
+                            assignatureRow: assignatureRows);
+                      });
                     },
                     icon: const Icon(Icons.search),
                     label: const Text('Buscar'),
@@ -356,28 +370,71 @@ class _GradesPerStudentState extends State<GradesPerStudent> {
           ),
           const Divider(thickness: 1),
           Container(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height / 1.5,
-            margin: const EdgeInsets.all(20),
-            child:
-                PlutoGrid(columns: assignaturesColumns, rows: assignatureRows),
-          ),
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height / 1.5,
+              margin: const EdgeInsets.all(20),
+              child: PopulateGrid(
+                  assignatureColumns: assignaturesColumns,
+                  assignatureRow: assignatureRows)
+              // PlutoGrid(columns: assignaturesColumns, rows: assignatureRows),
+              ),
         ],
       ),
     );
   }
+
+  Future _updateGrid(List<StudentEval> evaluationList) async {
+    // for (var item in evaluationList) {
+    //   assignatureRows.add(PlutoRow(cells: {
+    //     'Matricula': PlutoCell(value: item.studentID),
+    //     'Nombre': PlutoCell(value: item.studentName),
+    //     'Apellido paterno': PlutoCell(value: item.student1LastName),
+    //     'Apellido materno': PlutoCell(value: item.student2LastName),
+    //     'Calif': PlutoCell(value: item.evaluation),
+    //     'Conducta': PlutoCell(value: item.discipline),
+    //     'Uniforme': PlutoCell(value: item.other),
+    //     'Ausencia': PlutoCell(value: item.absence),
+    //     'Tareas': PlutoCell(value: item.homework),
+    //     'Comentario': PlutoCell(value: item.comment),
+    //   }));
+    // }
+
+    assignatureRows = evaluationList.map((item) {
+      return PlutoRow(
+        cells: {
+          'Matricula': PlutoCell(value: item.studentID),
+          'Nombre': PlutoCell(value: item.studentName),
+          'Apellido paterno': PlutoCell(value: item.student1LastName),
+          'Apellido materno': PlutoCell(value: item.student2LastName),
+          'Calif': PlutoCell(value: item.evaluation),
+          'Conducta': PlutoCell(value: item.discipline),
+          'Uniforme': PlutoCell(value: item.other),
+          'Ausencia': PlutoCell(value: item.absence),
+          'Tareas': PlutoCell(value: item.homework),
+          'Comentario': PlutoCell(value: item.comment),
+        },
+      );
+    }).toList();
+  }
 }
 
-// //Function to populate Assignature Rows
-// List<PlutoRow> populateAssignatureRows(var assignatures) {
-//   for (var line in assignatures) {
-//     rows.add(PlutoRow(cells: {
-//       'ClaMateria': PlutoCell(value: line.claMateria),
-//       'nomMateria': PlutoCell(value: line.nomMateria),
-//       'nomGradoEscolar': PlutoCell(value: line.nomGradoEscolar),
-//       'gradoSecuencia': PlutoCell(value: line.gradoSecuencia),
-//       'grado': PlutoCell(value: line.grado),
-//     }));
-//   }
-//   return rows;
-// }
+class PopulateGrid extends StatefulWidget {
+  final List<PlutoColumn> assignatureColumns;
+  final List<PlutoRow> assignatureRow;
+
+  const PopulateGrid(
+      {super.key,
+      required this.assignatureColumns,
+      required this.assignatureRow});
+
+  @override
+  State<PopulateGrid> createState() => _PopulateGridState();
+}
+
+class _PopulateGridState extends State<PopulateGrid> {
+  @override
+  Widget build(BuildContext context) {
+    return PlutoGrid(
+        columns: widget.assignatureColumns, rows: widget.assignatureRow);
+  }
+}

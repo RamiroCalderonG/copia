@@ -12,6 +12,7 @@ class StudentEval {
   int habits_evaluation;
   int other;
   int subject;
+  int evaluation;
 
   StudentEval(
       this.rateID,
@@ -26,7 +27,8 @@ class StudentEval {
       this.comment,
       this.habits_evaluation,
       this.other,
-      this.subject);
+      this.subject,
+      this.evaluation);
 }
 
 dynamic getEvalFromJSON(List<dynamic> jsonList) {
@@ -35,21 +37,22 @@ dynamic getEvalFromJSON(List<dynamic> jsonList) {
     return null;
   } else {
     for (var item in jsonList) {
-      int rateID = jsonList[item]['id'];
-      String studentName = jsonList[item]['student_name'];
-      String student1LastName = jsonList[item]['1lastName'];
-      String student2LastName = jsonList[item]['2lastName'];
-      String studentID = jsonList[item]['studentID'];
-      int grades = jsonList[item]['eval_type'];
-      int absence = jsonList[item]['absence_eval'];
-      int homework = jsonList[item]['homework_eval'];
-      int discipline = jsonList[item]['discipline_eval'];
-      int comment = jsonList[item]['comment'];
-      int habits_evaluation = jsonList[item]['habit_eval'];
-      int other = jsonList[item]['other'];
-      int subject = jsonList[item]['subject'];
+      String rateID = item['id'];
+      String studentName = item['student'];
+      String student1LastName = item['1lastName'];
+      String student2LastName = item['2lastName'];
+      String studentID = item['studentID'];
+      int grades = item['eval_type'];
+      int absence = item['absence_eval'];
+      int homework = item['homework_eval'];
+      int discipline = item['discipline_eval'];
+      int comment = item['comment'];
+      int habits_evaluation = item['habit_eval'];
+      int other = item['other'];
+      int subject = item['subject'];
+      int evaluation = item['evaluation'];
       studentEval.add(StudentEval(
-          rateID,
+          int.parse(rateID),
           studentName,
           student1LastName,
           student2LastName,
@@ -61,7 +64,9 @@ dynamic getEvalFromJSON(List<dynamic> jsonList) {
           comment,
           habits_evaluation,
           other,
-          subject));
+          subject,
+          evaluation));
     }
+    return studentEval;
   }
 }
