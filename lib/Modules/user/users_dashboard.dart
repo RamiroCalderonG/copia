@@ -76,6 +76,11 @@ class _UsersDashboardState extends State<UsersDashboard> {
 
   @override
   void dispose() {
+    tmpRolesList.clear();
+    userRows.clear();
+    // listOfUsersForGrid.clear();
+    isLoading = false;
+
     super.dispose();
   }
 

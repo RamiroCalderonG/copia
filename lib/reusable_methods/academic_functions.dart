@@ -109,6 +109,7 @@ Future<void> getStudentsIDByTeacher(List<dynamic> apiResponse) async {
   }
 }
 
+Future<void> updateStudentGrades() async {}
 // Future<void> getGroupsByTeacher(List<dynamic> apiResponse) async {
 //   List<String> originalList = [];
 //   if (apiResponse.isNotEmpty) {
@@ -123,16 +124,19 @@ Future<void> getStudentsIDByTeacher(List<dynamic> apiResponse) async {
 //   }
 // }
 
-Future<dynamic> getStudentsByAssinature(
+Future<List<StudentEval>> getStudentsByAssinature(
     String group, gradeSelected, assignature, month) async {
-  var studentsList = await getStudentsToGrade(assignature, group, gradeSelected,
-      currentCycle!.claCiclo, currentUser!.claUn, month);
+  try {
+    var studentsList = await getStudentsToGrade(assignature, group,
+        gradeSelected, currentCycle!.claCiclo, currentUser!.claUn, month);
+    List<dynamic> jsonList = json.decode(studentsList.body);
 
-  List<dynamic> jsonList = json.decode(studentsList.body);
+    List<StudentEval> evaluations = getEvalFromJSON(jsonList);
 
-  List<StudentEval> evaluations = getEvalFromJSON(jsonList);
-
-  return evaluations;
+    return evaluations;
+  } catch (e) {
+    return throw FormatException(e.toString());
+  }
 
   // try {
   //   if (jsonList.isNotEmpty) {

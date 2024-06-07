@@ -525,6 +525,19 @@ Future<dynamic> sendUserPasswordToMail(
   }
 }
 
+// TODO: CONTINUE PATCH FOR STUDENT-GRADES
+// Future<dynamic> updateStudentsGrades(
+//   dynamic body
+// ) async {
+//   try {
+//     var apiCall = await Requests.patch(
+//       '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/student/grades'
+//     )
+//   } catch (e) {
+
+//   }
+// }
+
 Future<dynamic> getTeacherGradeAndCourses(var employee, var year) async {
   try {
     var apiCall = await Requests.get(
@@ -576,7 +589,7 @@ Future<dynamic> getStudentsToGrade(String assignature, String group,
     apiCall.raiseForStatus();
     return apiCall;
   } catch (e) {
-    return e;
+    return throw FormatException(e.toString());
   }
 }
 
