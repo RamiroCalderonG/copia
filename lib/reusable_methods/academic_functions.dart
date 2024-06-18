@@ -165,3 +165,55 @@ Future<List<StudentEval>> getStudentsByAssinature(
   //   }
   // } catch (e) {}
 }
+
+void composeUpdateStudentGradesBody(String key, dynamic value, int rowIndex) {
+  var idToupdate = studentList[rowIndex].rateID;
+  bool idExists = false;
+
+  if (studentGradesBodyToUpgrade.isEmpty) {
+    studentGradesBodyToUpgrade.add({'id': idToupdate, key: value});
+  } else {
+    for (var obj in studentGradesBodyToUpgrade) {
+      if (obj['id'] == idToupdate) {
+        idExists = true;
+        if (obj.containsKey(key)) {
+          obj[key] = value; // Update the existing value
+        } else {
+          obj[key] = value; // Add the new key-value pair
+        }
+      }
+    }
+    if (!idExists) {
+      studentGradesBodyToUpgrade.add({'id': idToupdate, key: value});
+    }
+  }
+}
+
+Future<dynamic> postStudentGradesToDB() async {
+  var response = await patchStudentsGrades(studentGradesBodyToUpgrade);
+  return response;
+}
+
+String validateNewGradeValue(String newValue, String columnNameToFind) {
+  List<String> columnName = [
+    'Calif',
+    'Conducta',
+    'Uniforme',
+    'Ausencia',
+    'Tareas',
+    'Comentarios'
+  ];
+
+  bool isContained = columnName.contains(columnNameToFind);
+
+  if (isContained) {
+    if (int.parse(newValue) <= 50) {
+      newValue = 50.toString();
+      return newValue;
+    } else {
+      return newValue;
+    }
+  } else {
+    return newValue;
+  }
+}

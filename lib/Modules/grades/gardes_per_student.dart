@@ -1,6 +1,7 @@
 // ignore_for_file: constant_identifier_names, prefer_typing_uninitialized_variables
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/reusable_methods/reusable_functions.dart';
 import 'package:pluto_grid/pluto_grid.dart';
@@ -22,15 +23,15 @@ class GradesPerStudent extends StatefulWidget {
   State<GradesPerStudent> createState() => _GradesPerStudentState();
 }
 
-String groupSelected = ''; // = oneTeacherGroups.first.toString();
-String gradeSelected = ''; // = oneTeacherGrades.first;
 String currentMonth = DateFormat.MMMM().format(DateTime.now());
 
+String? subjectSelected = oneTeacherAssignatures.first;
 bool isUserAdmin = verifyUserAdmin(currentUser!);
 List<PlutoRow> rows = [];
 
 class _GradesPerStudentState extends State<GradesPerStudent> {
-  String? subjectSelected;
+  String groupSelected = ''; // = oneTeacherGroups.first.toString();
+  String gradeSelected = ''; // = oneTeacherAssignatures.first;
 
   @override
   void initState() {
@@ -48,6 +49,7 @@ class _GradesPerStudentState extends State<GradesPerStudent> {
     studentList.clear();
     assignatureRows.clear();
     assignaturesColumns.clear();
+    studentGradesBodyToUpgrade.clear();
     super.dispose();
   }
 
@@ -197,7 +199,7 @@ class _GradesPerStudentState extends State<GradesPerStudent> {
     );
 
     final DropdownMenu assignatureSelector = DropdownMenu<String>(
-      initialSelection: oneTeacherAssignatures.first,
+      initialSelection: subjectSelected,
       onSelected: (String? value) {
         dropDownValue = value!;
         subjectSelected = dropDownValue;
@@ -310,6 +312,10 @@ class _GradesPerStudentState extends State<GradesPerStudent> {
                 Flexible(
                   child: ElevatedButton.icon(
                     onPressed: () async {
+                      if (studentList.isNotEmpty) {
+                        studentList.clear();
+                      }
+
                       int? monthNumber;
 
                       if (groupSelected.isEmpty || groupSelected == '') {
@@ -408,7 +414,40 @@ class _GradesPerStudentState extends State<GradesPerStudent> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red[400],
                     ),
-                    onPressed: () async {},
+                    onPressed: () async {
+                      if (studentGradesBodyToUpgrade.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            elevation: 20,
+                            content: Text(
+                              'Sin información para enviar, verifique su captura',
+                              // ignore: use_build_context_synchronously
+                              style: FlutterFlowTheme.of(context)
+                                  .labelMedium
+                                  .override(
+                                    fontFamily: 'Sora',
+                                    color: const Color(0xFF130C0D),
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                            ),
+                            action: SnackBarAction(
+                                label: 'Copiar mensaje a portapapeles',
+                                // ignore: use_build_context_synchronously
+                                textColor: FlutterFlowTheme.of(context).info,
+                                backgroundColor: Colors.black12,
+                                onPressed: () {
+                                  Clipboard.setData(const ClipboardData(
+                                      text:
+                                          'Sin información para enviar, verifique su captura '));
+                                }),
+                            duration: const Duration(milliseconds: 6700),
+                            backgroundColor:
+                                // ignore: use_build_context_synchronously
+                                FlutterFlowTheme.of(context).secondary,
+                          ),
+                        );
+                      }
+                    },
                     icon: const Icon(Icons.save),
                     label: const Text('Guardar'),
                   ),
@@ -437,7 +476,17 @@ class _GradesPerStudentState extends State<GradesPerStudent> {
                   return StatefulBuilder(
                     builder: (context, setState) {
                       return PlutoGrid(
-                          columns: assignaturesColumns, rows: assignatureRows);
+                        columns: assignaturesColumns,
+                        rows: assignatureRows,
+                        onChanged: (event) {
+                          var newValue = validateNewGradeValue(
+                              event.value.toString(), event.column.title);
+
+                          composeUpdateStudentGradesBody(
+                              event.column.title, newValue, event.rowIdx);
+                          // TODO: COMPLETE PATCH FUNCTION
+                        },
+                      );
                     },
                   );
                 }

@@ -1,4 +1,5 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:get/get.dart';
 
 import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/constants/connection.dart';
@@ -615,6 +616,30 @@ Future<dynamic> getStudentsGrades(
         timeoutSeconds: 20);
     apiCall.raiseForStatus();
     return apiCall;
+  } catch (e) {
+    return throw FormatException(e.toString());
+  }
+}
+
+Future<dynamic> patchStudentsGrades(
+    List<Map<String, dynamic>> requestBody) async {
+  try {
+    if (requestBody.isEmpty) {
+      return throw const FormatException("No data to send");
+    } else {
+      var apiCall = await Requests.patch(
+          '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student/grades',
+          headers: {
+            'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+            'ip_address': deviceIp.toString(),
+            'token': currentUser!.token
+          },
+          persistCookies: false,
+          timeoutSeconds: 25,
+          body: requestBody);
+      apiCall.raiseForStatus();
+      return apiCall;
+    }
   } catch (e) {
     return throw FormatException(e.toString());
   }
