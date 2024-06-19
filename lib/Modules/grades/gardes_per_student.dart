@@ -446,6 +446,10 @@ class _GradesPerStudentState extends State<GradesPerStudent> {
                                 FlutterFlowTheme.of(context).secondary,
                           ),
                         );
+                      } else {
+                        var response = patchStudentGradesToDB();
+
+                        print(response.toString());
                       }
                     },
                     icon: const Icon(Icons.save),
@@ -484,7 +488,6 @@ class _GradesPerStudentState extends State<GradesPerStudent> {
 
                           composeUpdateStudentGradesBody(
                               event.column.title, newValue, event.rowIdx);
-                          // TODO: COMPLETE PATCH FUNCTION
                         },
                       );
                     },

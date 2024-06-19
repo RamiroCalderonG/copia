@@ -636,7 +636,7 @@ Future<dynamic> patchStudentsGrades(
           },
           persistCookies: false,
           timeoutSeconds: 25,
-          body: requestBody);
+          json: requestBody);
       apiCall.raiseForStatus();
       return apiCall;
     }

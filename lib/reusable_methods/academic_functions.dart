@@ -189,12 +189,13 @@ void composeUpdateStudentGradesBody(String key, dynamic value, int rowIndex) {
   }
 }
 
-Future<dynamic> postStudentGradesToDB() async {
+Future<dynamic> patchStudentGradesToDB() async {
   var response = await patchStudentsGrades(studentGradesBodyToUpgrade);
   return response;
 }
 
 String validateNewGradeValue(String newValue, String columnNameToFind) {
+  //If value < 50 -> returns 50
   List<String> columnName = [
     'Calif',
     'Conducta',
