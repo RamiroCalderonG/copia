@@ -10,7 +10,7 @@ class StudentEval {
   int discipline;
   int comment;
   int habits_evaluation;
-  int other;
+  int outfit;
   int subject;
   int evaluation;
 
@@ -26,7 +26,7 @@ class StudentEval {
       this.discipline,
       this.comment,
       this.habits_evaluation,
-      this.other,
+      this.outfit,
       this.subject,
       this.evaluation);
 }
@@ -48,7 +48,7 @@ dynamic getEvalFromJSON(List<dynamic> jsonList) {
       int discipline = item['discipline_eval'];
       int comment = item['comment'];
       int habits_evaluation = item['habit_eval'];
-      int other = item['other'];
+      int outfit = item['outfit'];
       int subject = item['subject'];
       int evaluation = item['evaluation'];
       studentEval.add(StudentEval(
@@ -63,7 +63,7 @@ dynamic getEvalFromJSON(List<dynamic> jsonList) {
           discipline,
           comment,
           habits_evaluation,
-          other,
+          outfit,
           subject,
           evaluation));
     }

@@ -641,6 +641,7 @@ Future<dynamic> patchStudentsGrades(
       return apiCall;
     }
   } catch (e) {
+    print(e.toString());
     return throw FormatException(e.toString());
   }
 }

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:oxschool/Modules/grades/gardes_per_student.dart';
+import 'package:oxschool/Modules/grades/grades_by_asignature.dart';
 
 import '../../flutter_flow/flutter_flow_theme.dart';
-import 'grades_by_asignature.dart';
+import 'grades_per_student.dart';
 
 class GradesViewScreen extends StatefulWidget {
   const GradesViewScreen({super.key});
@@ -41,12 +41,12 @@ class _GradesViewScreenState extends State<GradesViewScreen>
             controller: _tabController,
             tabs: const <Widget>[
               Tab(
-                icon: Icon(Icons.person, color: Colors.white),
-                text: 'Carga por alumno',
+                icon: Icon(Icons.abc, color: Colors.white),
+                text: 'Carga por materia',
               ),
               Tab(
-                icon: Icon(Icons.contact_emergency),
-                text: 'Carga por materia',
+                icon: Icon(Icons.boy),
+                text: 'Carga por alumno',
               ),
             ],
             indicatorColor: Colors.blueAccent,
@@ -57,7 +57,7 @@ class _GradesViewScreenState extends State<GradesViewScreen>
         ),
         body: TabBarView(
           controller: _tabController,
-          children: const <Widget>[GradesPerStudent(), GradesByAsignature()],
+          children: const <Widget>[GradesByAsignature(), GradesByStudent()],
         ));
   }
 }
