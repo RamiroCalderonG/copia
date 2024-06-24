@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/reusable_methods/reusable_functions.dart';
 import 'package:pluto_grid/pluto_grid.dart';
@@ -9,6 +10,7 @@ import 'package:intl/intl.dart';
 
 import '../../Models/Student_eval.dart';
 
+import '../../backend/api_requests/api_calls_list.dart';
 import '../../constants/date_constants.dart';
 import '../../flutter_flow/flutter_flow_theme.dart';
 import '../../flutter_flow/flutter_flow_util.dart';
@@ -74,6 +76,17 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
     });
   }
 
+  dynamic patchStudentGradesToDB() async {
+    var response = await patchStudentsGrades(studentGradesBodyToUpgrade);
+    if (response == 200) {
+      return 200;
+    } else {
+      return 400;
+    }
+
+    // return response;
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -98,7 +111,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                       child: Column(
                         children: [
                           Row(
-                            children: [_buildGradesPerStudent()],
+                            children: [_buildGradesbyAssignature()],
                           )
                         ],
                       ),
@@ -183,7 +196,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
         width: 100),
   ];
 
-  Widget _buildGradesPerStudent() {
+  Widget _buildGradesbyAssignature() {
     String dropDownValue = ''; //oneTeacherAssignatures.first;
     String monthValue = ''; //monthsList.first;
 
@@ -447,9 +460,40 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                           ),
                         );
                       } else {
-                        var response = patchStudentGradesToDB();
+                        var response;
+                        response = await patchStudentGradesToDB();
 
-                        print(response.toString());
+                        //TODO: PENDING TO CREATE A BANNER TO NOTIFY THE STATUS
+                        //TODO: PENDING TO RELOAD SCREEN AFTER PATCH
+                        if (response == 200) {
+                          SnackBar(
+                              content: Text(
+                                'Error: $response',
+                                style: FlutterFlowTheme.of(context)
+                                    .labelMedium
+                                    .override(
+                                      fontFamily: 'Roboto',
+                                      color: const Color(0xFF130C0D),
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                              ),
+                              duration: const Duration(milliseconds: 12000),
+                              backgroundColor: Colors.green[200]);
+                        } else {
+                          SnackBar(
+                              content: Text(
+                                'Error: $response',
+                                style: FlutterFlowTheme.of(context)
+                                    .labelMedium
+                                    .override(
+                                      fontFamily: 'Roboto',
+                                      color: const Color(0xFF130C0D),
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                              ),
+                              duration: const Duration(milliseconds: 12000),
+                              backgroundColor: Colors.green[200]);
+                        }
                       }
                     },
                     icon: const Icon(Icons.save),

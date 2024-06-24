@@ -638,10 +638,9 @@ Future<dynamic> patchStudentsGrades(
           timeoutSeconds: 25,
           json: requestBody);
       apiCall.raiseForStatus();
-      return apiCall;
+      return apiCall.statusCode;
     }
   } catch (e) {
-    print(e.toString());
     return throw FormatException(e.toString());
   }
 }

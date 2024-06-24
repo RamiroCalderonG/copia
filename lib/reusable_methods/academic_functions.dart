@@ -189,10 +189,16 @@ void composeUpdateStudentGradesBody(String key, dynamic value, int rowIndex) {
   }
 }
 
-Future<dynamic> patchStudentGradesToDB() async {
-  var response = await patchStudentsGrades(studentGradesBodyToUpgrade);
-  return response;
-}
+// dynamic patchStudentGradesToDB() async {
+//   var response = await patchStudentsGrades(studentGradesBodyToUpgrade);
+//   if (response == 200) {
+//     return 200;
+//   } else {
+//     return 400;
+//   }
+
+//   // return response;
+// }
 
 String validateNewGradeValue(String newValue, String columnNameToFind) {
   //If value < 50 -> returns 50
