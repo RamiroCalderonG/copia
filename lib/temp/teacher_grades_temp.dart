@@ -13,4 +13,5 @@ Map<int, String> teacherGradesMap = {};
 
 List<StudentEval> studentList = [];
 List<PlutoRow> assignatureRows = [];
+List<PlutoRow> studentEvaluationRows = [];
 List<Map<String, dynamic>> studentGradesBodyToUpgrade = [];

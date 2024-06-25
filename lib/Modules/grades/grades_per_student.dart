@@ -38,16 +38,16 @@ class _GradesByStudentState extends State<GradesByStudent> {
 
   @override
   void dispose() {
-    // oneTeacherGrades.clear();
-    // oneTeacherGroups.clear();
-    // oneTeacherAssignatures.clear();
-    // oneTeacherStudents.clear();
-    // oneTeacherStudentID.clear();
-    // assignaturesMap.clear();
-    // studentList.clear();
-    // assignatureRows.clear();
-    // assignaturesColumns.clear();
-    // studentGradesBodyToUpgrade.clear();
+    oneTeacherGrades.clear();
+    oneTeacherGroups.clear();
+    oneTeacherAssignatures.clear();
+    oneTeacherStudents.clear();
+    oneTeacherStudentID.clear();
+    assignaturesMap.clear();
+    studentList.clear();
+    studentEvaluationRows.clear();
+    studentsColumns.clear();
+    studentGradesBodyToUpgrade.clear();
     super.dispose();
   }
 
@@ -70,6 +70,66 @@ class _GradesByStudentState extends State<GradesByStudent> {
         );
       }).toList();
     });
+  }
+
+  void searchBUttonAction(
+      String groupSelected, gradeInt, assignatureID, monthNumber) async {
+    try {
+      studentList = await getStudentsByAssinature(
+        groupSelected,
+        gradeInt.toString(),
+        assignatureID.toString(),
+        monthNumber.toString(),
+      );
+      fillGrid(studentList);
+      setState(() {
+        studentEvaluationRows.clear();
+        for (var item in studentList) {
+          studentEvaluationRows.add(PlutoRow(cells: {
+            // 'Matricula': PlutoCell(value: item.studentID),
+            'Nombre Alumno': PlutoCell(
+                value:
+                    '${item.studentName} ${item.student1LastName} ${item.student2LastName}'),
+            'Apellido paterno': PlutoCell(value: item.student1LastName),
+            'Apellido materno': PlutoCell(value: item.student2LastName),
+            // 'Calif': PlutoCell(value: item.evaluation),
+            // 'Conducta': PlutoCell(value: item.discipline),
+            // 'Uniforme': PlutoCell(value: item.outfit),
+            // 'Ausencia': PlutoCell(value: item.absence),
+            // 'Tareas': PlutoCell(value: item.homework),
+            // 'Comentarios': PlutoCell(value: item.comment),
+          }));
+        }
+//                           // StudentsPlutoGrid(rows: assignatureRows);
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          elevation: 20,
+          content: Text(
+            e.toString(),
+            // ignore: use_build_context_synchronously
+            style: FlutterFlowTheme.of(context).labelMedium.override(
+                  fontFamily: 'Sora',
+                  color: const Color(0xFF130C0D),
+                  fontWeight: FontWeight.w500,
+                ),
+          ),
+          action: SnackBarAction(
+              label: 'Cerrar mensaje',
+              // ignore: use_build_context_synchronously
+              textColor: FlutterFlowTheme.of(context).info,
+              backgroundColor: Colors.black12,
+              onPressed: () {
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              }),
+          duration: const Duration(milliseconds: 6700),
+          backgroundColor:
+              // ignore: use_build_context_synchronously
+              FlutterFlowTheme.of(context).secondary,
+        ),
+      );
+    }
   }
 
   @override
@@ -115,13 +175,13 @@ class _GradesByStudentState extends State<GradesByStudent> {
     );
   }
 
-  final List<PlutoColumn> assignaturesColumns = <PlutoColumn>[
-    PlutoColumn(
-        title: 'Matricula',
-        field: 'Matricula',
-        type: PlutoColumnType.number(format: '####'),
-        readOnly: true,
-        width: 100),
+  final List<PlutoColumn> studentsColumns = <PlutoColumn>[
+    // PlutoColumn(
+    //     title: 'Matricula',
+    //     field: 'Matricula',
+    //     type: PlutoColumnType.number(format: '####'),
+    //     readOnly: true,
+    //     width: 100),
     PlutoColumn(
       title: 'Nombre del alumno',
       field: 'Nombre',
@@ -142,43 +202,43 @@ class _GradesByStudentState extends State<GradesByStudent> {
         type: PlutoColumnType.text(),
         readOnly: true,
         sort: PlutoColumnSort.ascending,
-        width: 150),
-    PlutoColumn(
-        title: 'Calif',
-        field: 'Calif',
-        type: PlutoColumnType.number(negative: false),
-        readOnly: false,
-        width: 100),
-    PlutoColumn(
-        title: 'Faltas',
-        field: 'Ausencia',
-        type: PlutoColumnType.number(negative: false, format: '#'),
-        readOnly: false,
-        width: 100),
-    PlutoColumn(
-        title: 'Tareas',
-        field: 'Tareas',
-        type: PlutoColumnType.number(negative: false),
-        readOnly: false,
-        width: 100),
-    PlutoColumn(
-        title: 'Conducta',
-        field: 'Conducta',
-        type: PlutoColumnType.number(negative: false),
-        readOnly: false,
-        width: 100),
-    PlutoColumn(
-        title: 'Uniforme',
-        field: 'Uniforme',
-        type: PlutoColumnType.number(negative: false),
-        readOnly: false,
-        width: 100),
-    PlutoColumn(
-        title: 'Comentarios',
-        field: 'Comentarios',
-        type: PlutoColumnType.number(negative: false),
-        readOnly: false,
-        width: 100),
+        width: 150)
+    // PlutoColumn(
+    //     title: 'Calif',
+    //     field: 'Calif',
+    //     type: PlutoColumnType.number(negative: false),
+    //     readOnly: false,
+    //     width: 100),
+    // PlutoColumn(
+    //     title: 'Faltas',
+    //     field: 'Ausencia',
+    //     type: PlutoColumnType.number(negative: false, format: '#'),
+    //     readOnly: false,
+    //     width: 100),
+    // PlutoColumn(
+    //     title: 'Tareas',
+    //     field: 'Tareas',
+    //     type: PlutoColumnType.number(negative: false),
+    //     readOnly: false,
+    //     width: 100),
+    // PlutoColumn(
+    //     title: 'Conducta',
+    //     field: 'Conducta',
+    //     type: PlutoColumnType.number(negative: false),
+    //     readOnly: false,
+    //     width: 100),
+    // PlutoColumn(
+    //     title: 'Uniforme',
+    //     field: 'Uniforme',
+    //     type: PlutoColumnType.number(negative: false),
+    //     readOnly: false,
+    //     width: 100),
+    // PlutoColumn(
+    //     title: 'Comentarios',
+    //     field: 'Comentarios',
+    //     type: PlutoColumnType.number(negative: false),
+    //     readOnly: false,
+    //     width: 100),
   ];
 
   Widget _buildGradesPerStudent() {
@@ -292,21 +352,6 @@ class _GradesByStudentState extends State<GradesByStudent> {
                     ],
                   ),
                 ),
-                // Flexible(
-                //   child: Column(
-                //     crossAxisAlignment: CrossAxisAlignment.start,
-                //     children: [
-                //       const Text(
-                //         'Materia:',
-                //         style: TextStyle(
-                //           fontFamily: 'Sora',
-                //           fontWeight: FontWeight.bold,
-                //         ),
-                //       ),
-                //       assignatureSelector,
-                //     ],
-                //   ),
-                // ),
                 Flexible(
                   child: ElevatedButton.icon(
                     onPressed: () async {
@@ -339,69 +384,15 @@ class _GradesByStudentState extends State<GradesByStudent> {
                       var gradeInt =
                           getKeyFromValue(teacherGradesMap, gradeSelected!);
 
-                      var assignatureID =
-                          getKeyFromValue(assignaturesMap, dropDownValue!);
+                      // var assignatureID =
+                      //     getKeyFromValue(assignaturesMap, dropDownValue!);
 
-                      try {
-                        studentList = await getStudentsByAssinature(
-                          groupSelected,
-                          gradeInt.toString(),
-                          assignatureID.toString(),
-                          monthNumber.toString(),
-                        );
-                        fillGrid(studentList);
-                        setState(() {
-                          assignatureRows.clear();
-                          for (var item in studentList) {
-                            assignatureRows.add(PlutoRow(cells: {
-                              'Matricula': PlutoCell(value: item.studentID),
-                              'Nombre': PlutoCell(value: item.studentName),
-                              'Apellido paterno':
-                                  PlutoCell(value: item.student1LastName),
-                              'Apellido materno':
-                                  PlutoCell(value: item.student2LastName),
-                              'Calif': PlutoCell(value: item.evaluation),
-                              'Conducta': PlutoCell(value: item.discipline),
-                              'Uniforme': PlutoCell(value: item.outfit),
-                              'Ausencia': PlutoCell(value: item.absence),
-                              'Tareas': PlutoCell(value: item.homework),
-                              'Comentarios': PlutoCell(value: item.comment),
-                            }));
-                          }
-                          // StudentsPlutoGrid(rows: assignatureRows);
-                        });
-                      } catch (e) {
-                        // ignore: use_build_context_synchronously
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            elevation: 20,
-                            content: Text(
-                              e.toString(),
-                              // ignore: use_build_context_synchronously
-                              style: FlutterFlowTheme.of(context)
-                                  .labelMedium
-                                  .override(
-                                    fontFamily: 'Sora',
-                                    color: const Color(0xFF130C0D),
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                            ),
-                            action: SnackBarAction(
-                                label: 'Cerrar mensaje',
-                                // ignore: use_build_context_synchronously
-                                textColor: FlutterFlowTheme.of(context).info,
-                                backgroundColor: Colors.black12,
-                                onPressed: () {
-                                  ScaffoldMessenger.of(context)
-                                      .hideCurrentSnackBar();
-                                }),
-                            duration: const Duration(milliseconds: 6700),
-                            backgroundColor:
-                                // ignore: use_build_context_synchronously
-                                FlutterFlowTheme.of(context).secondary,
-                          ),
-                        );
-                      }
+                      searchBUttonAction(
+                        groupSelected,
+                        gradeInt.toString(),
+                        assignatureID.toString(),
+                        monthNumber.toString(),
+                      );
                     },
                     icon: const Icon(Icons.search),
                     label: const Text('Buscar'),
@@ -461,16 +452,6 @@ class _GradesByStudentState extends State<GradesByStudent> {
                                       fontWeight: FontWeight.w500,
                                     ),
                               ),
-                              // action: SnackBarAction(
-                              //     label: 'Copiar mensaje a portapapeles',
-                              //     // ignore: use_build_context_synchronously
-                              //     textColor: FlutterFlowTheme.of(context).info,
-                              //     backgroundColor: Colors.black12,
-                              //     onPressed: () {
-                              //       Clipboard.setData(const ClipboardData(
-                              //           text:
-                              //               'Sin información para enviar, verifique su captura '));
-                              //     }),
                               duration: const Duration(milliseconds: 6700),
                               backgroundColor:
                                   // ignore: use_build_context_synchronously
@@ -507,16 +488,37 @@ class _GradesByStudentState extends State<GradesByStudent> {
                 } else {
                   return StatefulBuilder(
                     builder: (context, setState) {
-                      return PlutoGrid(
-                        columns: assignaturesColumns,
-                        rows: assignatureRows,
-                        onChanged: (event) {
-                          var newValue = validateNewGradeValue(
-                              event.value.toString(), event.column.title);
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Expanded(
+                              child: Container(
+                                  child: PlutoGrid(
+                            columns: studentsColumns,
+                            rows: studentEvaluationRows,
+                            // onChanged: (event) {
+                            //   var newValue = validateNewGradeValue(
+                            //       event.value.toString(),
+                            //       event.column.title);
 
-                          composeUpdateStudentGradesBody(
-                              event.column.title, newValue, event.rowIdx);
-                        },
+                            //   composeUpdateStudentGradesBody(
+                            //       event.column.title,
+                            //       newValue,
+                            //       event.rowIdx);
+                            // },
+                          ))),
+                          const SizedBox(
+                            width: 20,
+                          ),
+                          Expanded(
+                              flex: 3,
+                              child: Container(
+                                decoration: BoxDecoration(color: Colors.blue),
+                                child: Center(
+                                    child:
+                                        Text('Materia, Calif, F, T, H , Con')),
+                              ))
+                        ],
                       );
                     },
                   );

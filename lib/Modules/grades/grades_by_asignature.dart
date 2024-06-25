@@ -60,6 +60,36 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
       rows = evaluationList.map((item) {
         return PlutoRow(
           cells: {
+            // 'Matricula': PlutoCell(value: item.studentID),
+            'Nombre': PlutoCell(value: item.studentName),
+            'Apellido paterno': PlutoCell(value: item.student1LastName),
+            'Apellido materno': PlutoCell(value: item.student2LastName),
+            // 'Calif': PlutoCell(value: item.evaluation),
+            // 'Conducta': PlutoCell(value: item.discipline),
+            // 'Uniforme': PlutoCell(value: item.outfit),
+            // 'Ausencia': PlutoCell(value: item.absence),
+            // 'Tareas': PlutoCell(value: item.homework),
+            // 'Comentario': PlutoCell(value: item.comment),
+          },
+        );
+      }).toList();
+    });
+  }
+
+  void searchBUttonAction(
+      String groupSelected, gradeInt, assignatureID, monthNumber) async {
+    try {
+      studentList = await getStudentsByAssinature(
+        groupSelected,
+        gradeInt.toString(),
+        assignatureID.toString(),
+        monthNumber.toString(),
+      );
+      fillGrid(studentList);
+      setState(() {
+        assignatureRows.clear();
+        for (var item in studentList) {
+          assignatureRows.add(PlutoRow(cells: {
             'Matricula': PlutoCell(value: item.studentID),
             'Nombre': PlutoCell(value: item.studentName),
             'Apellido paterno': PlutoCell(value: item.student1LastName),
@@ -69,11 +99,39 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
             'Uniforme': PlutoCell(value: item.outfit),
             'Ausencia': PlutoCell(value: item.absence),
             'Tareas': PlutoCell(value: item.homework),
-            'Comentario': PlutoCell(value: item.comment),
-          },
-        );
-      }).toList();
-    });
+            'Comentarios': PlutoCell(value: item.comment),
+          }));
+        }
+//                           // StudentsPlutoGrid(rows: assignatureRows);
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          elevation: 20,
+          content: Text(
+            e.toString(),
+            // ignore: use_build_context_synchronously
+            style: FlutterFlowTheme.of(context).labelMedium.override(
+                  fontFamily: 'Sora',
+                  color: const Color(0xFF130C0D),
+                  fontWeight: FontWeight.w500,
+                ),
+          ),
+          action: SnackBarAction(
+              label: 'Cerrar mensaje',
+              // ignore: use_build_context_synchronously
+              textColor: FlutterFlowTheme.of(context).info,
+              backgroundColor: Colors.black12,
+              onPressed: () {
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              }),
+          duration: const Duration(milliseconds: 6700),
+          backgroundColor:
+              // ignore: use_build_context_synchronously
+              FlutterFlowTheme.of(context).secondary,
+        ),
+      );
+    }
   }
 
   dynamic patchStudentGradesToDB() async {
@@ -357,66 +415,12 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                       var assignatureID =
                           getKeyFromValue(assignaturesMap, dropDownValue!);
 
-                      try {
-                        studentList = await getStudentsByAssinature(
-                          groupSelected,
-                          gradeInt.toString(),
-                          assignatureID.toString(),
-                          monthNumber.toString(),
-                        );
-                        fillGrid(studentList);
-                        setState(() {
-                          assignatureRows.clear();
-                          for (var item in studentList) {
-                            assignatureRows.add(PlutoRow(cells: {
-                              'Matricula': PlutoCell(value: item.studentID),
-                              'Nombre': PlutoCell(value: item.studentName),
-                              'Apellido paterno':
-                                  PlutoCell(value: item.student1LastName),
-                              'Apellido materno':
-                                  PlutoCell(value: item.student2LastName),
-                              'Calif': PlutoCell(value: item.evaluation),
-                              'Conducta': PlutoCell(value: item.discipline),
-                              'Uniforme': PlutoCell(value: item.outfit),
-                              'Ausencia': PlutoCell(value: item.absence),
-                              'Tareas': PlutoCell(value: item.homework),
-                              'Comentarios': PlutoCell(value: item.comment),
-                            }));
-                          }
-                          // StudentsPlutoGrid(rows: assignatureRows);
-                        });
-                      } catch (e) {
-                        // ignore: use_build_context_synchronously
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            elevation: 20,
-                            content: Text(
-                              e.toString(),
-                              // ignore: use_build_context_synchronously
-                              style: FlutterFlowTheme.of(context)
-                                  .labelMedium
-                                  .override(
-                                    fontFamily: 'Sora',
-                                    color: const Color(0xFF130C0D),
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                            ),
-                            action: SnackBarAction(
-                                label: 'Cerrar mensaje',
-                                // ignore: use_build_context_synchronously
-                                textColor: FlutterFlowTheme.of(context).info,
-                                backgroundColor: Colors.black12,
-                                onPressed: () {
-                                  ScaffoldMessenger.of(context)
-                                      .hideCurrentSnackBar();
-                                }),
-                            duration: const Duration(milliseconds: 6700),
-                            backgroundColor:
-                                // ignore: use_build_context_synchronously
-                                FlutterFlowTheme.of(context).secondary,
-                          ),
-                        );
-                      }
+                      searchBUttonAction(
+                        groupSelected,
+                        gradeInt.toString(),
+                        assignatureID.toString(),
+                        monthNumber.toString(),
+                      );
                     },
                     icon: const Icon(Icons.search),
                     label: const Text('Buscar'),
@@ -461,14 +465,15 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                         );
                       } else {
                         var response;
-                        response = await patchStudentGradesToDB();
-
-                        //TODO: PENDING TO CREATE A BANNER TO NOTIFY THE STATUS
-                        //TODO: PENDING TO RELOAD SCREEN AFTER PATCH
+                        try {
+                          response = await patchStudentGradesToDB();
+                        } catch (e) {
+                          print(e);
+                        }
                         if (response == 200) {
-                          SnackBar(
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                               content: Text(
-                                'Error: $response',
+                                'Cambios guardados con exito!',
                                 style: FlutterFlowTheme.of(context)
                                     .labelMedium
                                     .override(
@@ -477,10 +482,48 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                                       fontWeight: FontWeight.w500,
                                     ),
                               ),
-                              duration: const Duration(milliseconds: 12000),
-                              backgroundColor: Colors.green[200]);
+                              duration: const Duration(milliseconds: 6000),
+                              backgroundColor: Colors.green[200]));
+                          if (studentList.isNotEmpty) {
+                            studentList.clear();
+                          }
+
+                          int? monthNumber;
+
+                          if (groupSelected.isEmpty || groupSelected == '') {
+                            groupSelected = oneTeacherGroups.first.toString();
+                          }
+                          if (gradeSelected.isEmpty || gradeSelected == '') {
+                            gradeSelected = oneTeacherGrades.first;
+                          }
+                          if (dropDownValue.isEmpty || dropDownValue == '') {
+                            dropDownValue = oneTeacherAssignatures.first;
+                          }
+                          if (monthValue.isEmpty) {
+                            monthValue = monthsList.first;
+                          }
+
+                          if (isUserAdmin == true) {
+                            monthNumber =
+                                getKeyFromValue(monthsListMap, monthValue!);
+                          } else {
+                            monthNumber =
+                                getKeyFromValue(monthsListMap, currentMonth);
+                          }
+                          var gradeInt =
+                              getKeyFromValue(teacherGradesMap, gradeSelected!);
+
+                          var assignatureID =
+                              getKeyFromValue(assignaturesMap, dropDownValue!);
+
+                          searchBUttonAction(
+                            groupSelected,
+                            gradeInt.toString(),
+                            assignatureID.toString(),
+                            monthNumber.toString(),
+                          );
                         } else {
-                          SnackBar(
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                               content: Text(
                                 'Error: $response',
                                 style: FlutterFlowTheme.of(context)
@@ -491,8 +534,8 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                                       fontWeight: FontWeight.w500,
                                     ),
                               ),
-                              duration: const Duration(milliseconds: 12000),
-                              backgroundColor: Colors.green[200]);
+                              duration: const Duration(milliseconds: 6000),
+                              backgroundColor: Colors.green[200]));
                         }
                       }
                     },
