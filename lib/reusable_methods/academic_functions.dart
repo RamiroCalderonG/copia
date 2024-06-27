@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:oxschool/Models/Student_eval.dart';
 import 'package:oxschool/constants/User.dart';
 
+import '../Models/Student.dart';
 import '../backend/api_requests/api_calls_list.dart';
 import '../temp/teacher_grades_temp.dart';
 
@@ -131,39 +132,26 @@ Future<List<StudentEval>> getStudentsByAssinature(
         gradeSelected, currentCycle!.claCiclo, currentUser!.claUn, month);
     List<dynamic> jsonList = json.decode(studentsList.body);
 
-    List<StudentEval> evaluations = getEvalFromJSON(jsonList);
+    List<StudentEval> evaluations = getEvalFromJSON(jsonList, false);
 
     return evaluations;
   } catch (e) {
     return throw FormatException(e.toString());
   }
+}
 
-  // try {
-  //   if (jsonList.isNotEmpty) {
-  //     if (oneTeacherStudents.isNotEmpty) {
-  //       oneTeacherStudents.clear();
-  //     }
-  //     for (var i = 0; i < jsonList.length; i++) {
-  //       int rateID = jsonList[i]['id'];
-  //       String studentName = jsonList[i]['student_name'];
-  //       String student1LastName = jsonList[i]['1lastName'];
-  //       String student2LastName = jsonList[i]['2lastName'];
-  //       String studentID = jsonList[i]['studentID'];
-  //       int grades = jsonList[i]['eval_type'];
-  //       int absence = jsonList[i]['absence_eval'];
-  //       int homework = jsonList[i]['homework_eval'];
-  //       int discipline = jsonList[i]['discipline_eval'];
-  //       int comment = jsonList[i]['comment'];
-  //       int habits_evaluation = jsonList[i]['habit_eval'];
-  //       int other = jsonList[i]['other'];
-  //       int subject = jsonList[i]['subject'];
+Future<List<StudentEval>> getSubjectsAndGradesByStudent(
+    String grade, group, cycle, campus, month) async {
+  try {
+    var subjectsGradesList =
+        await getSubjectsAndGradeByStuent(group, grade, cycle, campus, month);
 
-  //       oneTeacherStudentID.add(studentID);
-  //       oneTeacherStudents.add(studentName);
-  //       gradesID.add(grades);
-  //     }
-  //   }
-  // } catch (e) {}
+    List<dynamic> jsonList = json.decode(subjectsGradesList.body);
+    List<StudentEval> evaluations = getEvalFromJSON(jsonList, true);
+    return evaluations;
+  } catch (e) {
+    return throw FormatException(e.toString());
+  }
 }
 
 void composeUpdateStudentGradesBody(String key, dynamic value, int rowIndex) {

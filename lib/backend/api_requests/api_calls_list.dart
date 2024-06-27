@@ -1,5 +1,6 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
+import 'package:get/get_connect/http/src/request/request.dart';
 
 import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/constants/connection.dart';
@@ -614,6 +615,32 @@ Future<dynamic> getStudentsGrades(
         },
         persistCookies: false,
         timeoutSeconds: 20);
+    apiCall.raiseForStatus();
+    return apiCall;
+  } catch (e) {
+    return throw FormatException(e.toString());
+  }
+}
+
+//getSubjectsAndGradeByStuent will get based on the current teacher consuming the API.
+Future<dynamic> getSubjectsAndGradeByStuent(
+    String? group, grade, cycle, campus, month) async {
+  try {
+    var apiCall = await Requests.get(
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student/grades',
+        headers: {
+          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'ip_address': deviceIp.toString(),
+          'token': currentUser!.token
+        },
+        queryParameters: {
+          "grade": grade,
+          "group": group,
+          "cycle": cycle,
+          "campus": campus,
+          "month": month
+        },
+        persistCookies: false);
     apiCall.raiseForStatus();
     return apiCall;
   } catch (e) {

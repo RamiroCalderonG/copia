@@ -72,15 +72,10 @@ class _GradesByStudentState extends State<GradesByStudent> {
     });
   }
 
-  void searchBUttonAction(
-      String groupSelected, gradeInt, assignatureID, monthNumber) async {
+  void searchBUttonAction(String groupSelected, gradeInt, monthNumber) async {
     try {
-      studentList = await getStudentsByAssinature(
-        groupSelected,
-        gradeInt.toString(),
-        assignatureID.toString(),
-        monthNumber.toString(),
-      );
+      studentList = await getSubjectsAndGradesByStudent(gradeInt, groupSelected,
+          currentCycle!.claCiclo, currentUser!.claUn, monthNumber);
       fillGrid(studentList);
       setState(() {
         studentEvaluationRows.clear();
@@ -376,21 +371,17 @@ class _GradesByStudentState extends State<GradesByStudent> {
 
                       if (isUserAdmin == true) {
                         monthNumber =
-                            getKeyFromValue(monthsListMap, monthValue!);
+                            getKeyFromValue(monthsListMap, monthValue);
                       } else {
                         monthNumber =
                             getKeyFromValue(monthsListMap, currentMonth);
                       }
                       var gradeInt =
-                          getKeyFromValue(teacherGradesMap, gradeSelected!);
-
-                      // var assignatureID =
-                      //     getKeyFromValue(assignaturesMap, dropDownValue!);
+                          getKeyFromValue(teacherGradesMap, gradeSelected);
 
                       searchBUttonAction(
                         groupSelected,
                         gradeInt.toString(),
-                        assignatureID.toString(),
                         monthNumber.toString(),
                       );
                     },
