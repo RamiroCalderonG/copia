@@ -11,6 +11,7 @@ import 'package:oxschool/temp/teacher_grades_temp.dart';
 import 'package:oxschool/utils/loader_indicator.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
+import '../../constants/Student.dart';
 import '../../flutter_flow/flutter_flow_theme.dart';
 import '../../reusable_methods/reusable_functions.dart';
 
@@ -33,23 +34,24 @@ class _GradesByStudentState extends State<GradesByStudent> {
 
   @override
   void initState() {
+    // loadStartGrading(currentUser!.employeeNumber!, currentCycle!.claCiclo!);
     super.initState();
   }
 
-  @override
-  void dispose() {
-    oneTeacherGrades.clear();
-    oneTeacherGroups.clear();
-    oneTeacherAssignatures.clear();
-    oneTeacherStudents.clear();
-    oneTeacherStudentID.clear();
-    assignaturesMap.clear();
-    studentList.clear();
-    studentEvaluationRows.clear();
-    studentsColumns.clear();
-    studentGradesBodyToUpgrade.clear();
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   oneTeacherGrades.clear();
+  //   oneTeacherGroups.clear();
+  //   oneTeacherAssignatures.clear();
+  //   oneTeacherStudents.clear();
+  //   oneTeacherStudentID.clear();
+  //   assignaturesMap.clear();
+  //   studentList.clear();
+  //   studentEvaluationRows.clear();
+  //   studentsColumns.clear();
+  //   studentGradesBodyToUpgrade.clear();
+  //   super.dispose();
+  // }
 
   Future<void> fillGrid(List<StudentEval> evaluationList) async {
     setState(() {
@@ -170,71 +172,71 @@ class _GradesByStudentState extends State<GradesByStudent> {
     );
   }
 
-  final List<PlutoColumn> studentsColumns = <PlutoColumn>[
-    // PlutoColumn(
-    //     title: 'Matricula',
-    //     field: 'Matricula',
-    //     type: PlutoColumnType.number(format: '####'),
-    //     readOnly: true,
-    //     width: 100),
-    PlutoColumn(
-      title: 'Nombre del alumno',
-      field: 'Nombre',
-      type: PlutoColumnType.text(),
-      readOnly: true,
-      sort: PlutoColumnSort.ascending,
-    ),
-    PlutoColumn(
-        title: 'Apellido paterno',
-        field: 'Apellido paterno',
-        type: PlutoColumnType.text(),
-        readOnly: true,
-        sort: PlutoColumnSort.ascending,
-        width: 150),
-    PlutoColumn(
-        title: 'Apellido materno',
-        field: 'Apellido materno',
-        type: PlutoColumnType.text(),
-        readOnly: true,
-        sort: PlutoColumnSort.ascending,
-        width: 150)
-    // PlutoColumn(
-    //     title: 'Calif',
-    //     field: 'Calif',
-    //     type: PlutoColumnType.number(negative: false),
-    //     readOnly: false,
-    //     width: 100),
-    // PlutoColumn(
-    //     title: 'Faltas',
-    //     field: 'Ausencia',
-    //     type: PlutoColumnType.number(negative: false, format: '#'),
-    //     readOnly: false,
-    //     width: 100),
-    // PlutoColumn(
-    //     title: 'Tareas',
-    //     field: 'Tareas',
-    //     type: PlutoColumnType.number(negative: false),
-    //     readOnly: false,
-    //     width: 100),
-    // PlutoColumn(
-    //     title: 'Conducta',
-    //     field: 'Conducta',
-    //     type: PlutoColumnType.number(negative: false),
-    //     readOnly: false,
-    //     width: 100),
-    // PlutoColumn(
-    //     title: 'Uniforme',
-    //     field: 'Uniforme',
-    //     type: PlutoColumnType.number(negative: false),
-    //     readOnly: false,
-    //     width: 100),
-    // PlutoColumn(
-    //     title: 'Comentarios',
-    //     field: 'Comentarios',
-    //     type: PlutoColumnType.number(negative: false),
-    //     readOnly: false,
-    //     width: 100),
-  ];
+  // final List<PlutoColumn> studentsColumns = <PlutoColumn>[
+  //   // PlutoColumn(
+  //   //     title: 'Matricula',
+  //   //     field: 'Matricula',
+  //   //     type: PlutoColumnType.number(format: '####'),
+  //   //     readOnly: true,
+  //   //     width: 100),
+  //   PlutoColumn(
+  //     title: 'Nombre del alumno',
+  //     field: 'Nombre',
+  //     type: PlutoColumnType.text(),
+  //     readOnly: true,
+  //     sort: PlutoColumnSort.ascending,
+  //   ),
+  //   PlutoColumn(
+  //       title: 'Apellido paterno',
+  //       field: 'Apellido paterno',
+  //       type: PlutoColumnType.text(),
+  //       readOnly: true,
+  //       sort: PlutoColumnSort.ascending,
+  //       width: 150),
+  //   PlutoColumn(
+  //       title: 'Apellido materno',
+  //       field: 'Apellido materno',
+  //       type: PlutoColumnType.text(),
+  //       readOnly: true,
+  //       sort: PlutoColumnSort.ascending,
+  //       width: 150)
+  //   // PlutoColumn(
+  //   //     title: 'Calif',
+  //   //     field: 'Calif',
+  //   //     type: PlutoColumnType.number(negative: false),
+  //   //     readOnly: false,
+  //   //     width: 100),
+  //   // PlutoColumn(
+  //   //     title: 'Faltas',
+  //   //     field: 'Ausencia',
+  //   //     type: PlutoColumnType.number(negative: false, format: '#'),
+  //   //     readOnly: false,
+  //   //     width: 100),
+  //   // PlutoColumn(
+  //   //     title: 'Tareas',
+  //   //     field: 'Tareas',
+  //   //     type: PlutoColumnType.number(negative: false),
+  //   //     readOnly: false,
+  //   //     width: 100),
+  //   // PlutoColumn(
+  //   //     title: 'Conducta',
+  //   //     field: 'Conducta',
+  //   //     type: PlutoColumnType.number(negative: false),
+  //   //     readOnly: false,
+  //   //     width: 100),
+  //   // PlutoColumn(
+  //   //     title: 'Uniforme',
+  //   //     field: 'Uniforme',
+  //   //     type: PlutoColumnType.number(negative: false),
+  //   //     readOnly: false,
+  //   //     width: 100),
+  //   // PlutoColumn(
+  //   //     title: 'Comentarios',
+  //   //     field: 'Comentarios',
+  //   //     type: PlutoColumnType.number(negative: false),
+  //   //     readOnly: false,
+  //   //     width: 100),
+  // ];
 
   Widget _buildGradesPerStudent() {
     String dropDownValue = ''; //oneTeacherAssignatures.first;
@@ -449,7 +451,28 @@ class _GradesByStudentState extends State<GradesByStudent> {
                                   Colors.green,
                             ),
                           );
-                        } catch (e) {}
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              elevation: 20,
+                              content: Text(
+                                e.toString(),
+                                // ignore: use_build_context_synchronously
+                                style: FlutterFlowTheme.of(context)
+                                    .labelMedium
+                                    .override(
+                                      fontFamily: 'Sora',
+                                      color: const Color(0xFF130C0D),
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                              ),
+                              duration: const Duration(milliseconds: 6700),
+                              backgroundColor:
+                                  // ignore: use_build_context_synchronously
+                                  Colors.green,
+                            ),
+                          );
+                        }
                       }
                     },
                     icon: const Icon(Icons.save),

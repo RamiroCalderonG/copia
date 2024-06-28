@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:oxschool/Modules/grades/grades_by_asignature.dart';
 
+import '../../constants/Student.dart';
 import '../../flutter_flow/flutter_flow_theme.dart';
+import '../../temp/teacher_grades_temp.dart';
 import 'grades_per_student.dart';
 
 class GradesViewScreen extends StatefulWidget {
@@ -29,6 +31,21 @@ class _GradesViewScreenState extends State<GradesViewScreen>
     super.initState();
     // _tabController = TabController(vsync: this, length: nurseryTabs.length);
     _tabController.addListener(onTap);
+  }
+
+  @override
+  void dispose() {
+    oneTeacherGrades.clear();
+    oneTeacherGroups.clear();
+    oneTeacherAssignatures.clear();
+    oneTeacherStudents.clear();
+    oneTeacherStudentID.clear();
+    assignaturesMap.clear();
+    studentList.clear();
+    studentEvaluationRows.clear();
+    studentsColumns.clear();
+    studentGradesBodyToUpgrade.clear();
+    super.dispose();
   }
 
   @override
