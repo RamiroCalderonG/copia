@@ -35,6 +35,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
   @override
   void initState() {
     // loadStartGrading(currentUser!.employeeNumber!, currentCycle!.claCiclo!);
+    loadStartGrading(currentUser!.employeeNumber!, currentCycle!.claCiclo!);
     super.initState();
   }
 
@@ -78,7 +79,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
     try {
       studentList = await getSubjectsAndGradesByStudent(gradeInt, groupSelected,
           currentCycle!.claCiclo, currentUser!.claUn, monthNumber);
-      fillGrid(studentList);
+      // fillGrid(studentList);
       setState(() {
         studentEvaluationRows.clear();
         for (var item in studentList) {
@@ -160,7 +161,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
                     );
                   } else {
                     return const Placeholder(
-                      child: Text('Smaller version pending to design'),
+                      child: Text('Smaller screen version pending to design'),
                     );
                   }
                 }),

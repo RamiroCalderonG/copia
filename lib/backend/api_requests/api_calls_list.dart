@@ -596,7 +596,13 @@ Future<dynamic> getStudentsToGrade(String assignature, String group,
 }
 
 Future<dynamic> getStudentsGrades(
-    String? assignature, group, grade, cycle, campus, month) async {
+    //This gets data for grades_per_student.dart
+    String? assignature,
+    group,
+    grade,
+    cycle,
+    campus,
+    month) async {
   try {
     var apiCall = await Requests.get(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student/grades',
@@ -638,7 +644,11 @@ Future<dynamic> getSubjectsAndGradeByStuent(
           "group": group,
           "cycle": cycle,
           "campus": campus,
-          "month": month
+          "month": month,
+          "history":
+              0, //0 means all students, if history : 1 , will return all history from a single student and youll need to send studenID as param
+          "assignature": "null", //Set null to return all subjects
+          "value": "all" //set all to return all students by cycle and
         },
         persistCookies: false);
     apiCall.raiseForStatus();

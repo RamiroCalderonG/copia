@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:oxschool/Modules/grades/grades_by_asignature.dart';
+import 'package:oxschool/constants/User.dart';
 
 import '../../constants/Student.dart';
 import '../../flutter_flow/flutter_flow_theme.dart';
+import '../../reusable_methods/academic_functions.dart';
 import '../../temp/teacher_grades_temp.dart';
 import 'grades_per_student.dart';
 
@@ -31,6 +33,8 @@ class _GradesViewScreenState extends State<GradesViewScreen>
     super.initState();
     // _tabController = TabController(vsync: this, length: nurseryTabs.length);
     _tabController.addListener(onTap);
+
+    loadStartGrading(currentUser!.employeeNumber!, currentCycle!.claCiclo!);
   }
 
   @override

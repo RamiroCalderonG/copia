@@ -40,20 +40,20 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
     super.initState();
   }
 
-  @override
-  void dispose() {
-    oneTeacherGrades.clear();
-    oneTeacherGroups.clear();
-    oneTeacherAssignatures.clear();
-    oneTeacherStudents.clear();
-    oneTeacherStudentID.clear();
-    assignaturesMap.clear();
-    studentList.clear();
-    assignatureRows.clear();
-    assignaturesColumns.clear();
-    studentGradesBodyToUpgrade.clear();
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  // oneTeacherGrades.clear();
+  // oneTeacherGroups.clear();
+  // oneTeacherAssignatures.clear();
+  // oneTeacherStudents.clear();
+  // oneTeacherStudentID.clear();
+  // assignaturesMap.clear();
+  // studentList.clear();
+  // assignatureRows.clear();
+  // assignaturesColumns.clear();
+  // studentGradesBodyToUpgrade.clear();
+  // super.dispose();
+  // }
 
   Future<void> fillGrid(List<StudentEval> evaluationList) async {
     setState(() {
