@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:oxschool/Models/Student_eval.dart';
-import 'package:oxschool/Modules/grades/grades_by_asignature.dart';
+
 import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/constants/date_constants.dart';
 import 'package:oxschool/reusable_methods/academic_functions.dart';
 import 'package:oxschool/reusable_methods/user_functions.dart';
 import 'package:oxschool/temp/teacher_grades_temp.dart';
-import 'package:oxschool/utils/loader_indicator.dart';
+
 import 'package:pluto_grid/pluto_grid.dart';
 
 import '../../constants/Student.dart';
@@ -59,16 +59,16 @@ class _GradesByStudentState extends State<GradesByStudent> {
       rows = evaluationList.map((item) {
         return PlutoRow(
           cells: {
-            'Matricula': PlutoCell(value: item.studentID),
-            'Nombre': PlutoCell(value: item.studentName),
-            'Apellido paterno': PlutoCell(value: item.student1LastName),
-            'Apellido materno': PlutoCell(value: item.student2LastName),
-            'Calif': PlutoCell(value: item.evaluation),
-            'Conducta': PlutoCell(value: item.discipline),
-            'Uniforme': PlutoCell(value: item.outfit),
-            'Ausencia': PlutoCell(value: item.absence),
-            'Tareas': PlutoCell(value: item.homework),
-            'Comentario': PlutoCell(value: item.comment),
+            'studentID': PlutoCell(value: item.studentID),
+            'studentName': PlutoCell(value: item.fulllName),
+            // 'Apellido paterno': PlutoCell(value: item.student1LastName),
+            // 'Apellido materno': PlutoCell(value: item.student2LastName),
+            // 'Calif': PlutoCell(value: item.evaluation),
+            // 'Conducta': PlutoCell(value: item.discipline),
+            // 'Uniforme': PlutoCell(value: item.outfit),
+            // 'Ausencia': PlutoCell(value: item.absence),
+            // 'Tareas': PlutoCell(value: item.homework),
+            // 'Comentario': PlutoCell(value: item.comment),
           },
         );
       }).toList();
@@ -79,17 +79,14 @@ class _GradesByStudentState extends State<GradesByStudent> {
     try {
       studentList = await getSubjectsAndGradesByStudent(gradeInt, groupSelected,
           currentCycle!.claCiclo, currentUser!.claUn, monthNumber);
-      // fillGrid(studentList);
+      fillGrid(studentList);
       setState(() {
         studentEvaluationRows.clear();
         for (var item in studentList) {
           studentEvaluationRows.add(PlutoRow(cells: {
             // 'Matricula': PlutoCell(value: item.studentID),
-            'Nombre Alumno': PlutoCell(
-                value:
-                    '${item.studentName} ${item.student1LastName} ${item.student2LastName}'),
-            'Apellido paterno': PlutoCell(value: item.student1LastName),
-            'Apellido materno': PlutoCell(value: item.student2LastName),
+            'studentID': PlutoCell(value: item.studentID),
+            'studentName': PlutoCell(value: item.fulllName),
             // 'Calif': PlutoCell(value: item.evaluation),
             // 'Conducta': PlutoCell(value: item.discipline),
             // 'Uniforme': PlutoCell(value: item.outfit),
@@ -507,9 +504,8 @@ class _GradesByStudentState extends State<GradesByStudent> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Expanded(
-                              child: Container(
-                                  child: PlutoGrid(
-                            columns: studentsColumns,
+                              child: PlutoGrid(
+                            columns: studentColumnsToEvaluateByStudent,
                             rows: studentEvaluationRows,
                             // onChanged: (event) {
                             //   var newValue = validateNewGradeValue(
@@ -521,7 +517,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
                             //       newValue,
                             //       event.rowIdx);
                             // },
-                          ))),
+                          )),
                           const SizedBox(
                             width: 20,
                           ),

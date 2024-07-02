@@ -11,6 +11,7 @@ import 'package:intl/intl.dart';
 import '../../Models/Student_eval.dart';
 
 import '../../backend/api_requests/api_calls_list.dart';
+import '../../constants/Student.dart';
 import '../../constants/date_constants.dart';
 import '../../flutter_flow/flutter_flow_theme.dart';
 import '../../flutter_flow/flutter_flow_util.dart';
@@ -188,71 +189,71 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
     );
   }
 
-  final List<PlutoColumn> assignaturesColumns = <PlutoColumn>[
-    PlutoColumn(
-        title: 'Matricula',
-        field: 'Matricula',
-        type: PlutoColumnType.number(format: '####'),
-        readOnly: true,
-        width: 100),
-    PlutoColumn(
-      title: 'Nombre del alumno',
-      field: 'Nombre',
-      type: PlutoColumnType.text(),
-      readOnly: true,
-      sort: PlutoColumnSort.ascending,
-    ),
-    PlutoColumn(
-        title: 'Apellido paterno',
-        field: 'Apellido paterno',
-        type: PlutoColumnType.text(),
-        readOnly: true,
-        sort: PlutoColumnSort.ascending,
-        width: 150),
-    PlutoColumn(
-        title: 'Apellido materno',
-        field: 'Apellido materno',
-        type: PlutoColumnType.text(),
-        readOnly: true,
-        sort: PlutoColumnSort.ascending,
-        width: 150),
-    PlutoColumn(
-        title: 'Calif',
-        field: 'Calif',
-        type: PlutoColumnType.number(negative: false),
-        readOnly: false,
-        width: 100),
-    PlutoColumn(
-        title: 'Faltas',
-        field: 'Ausencia',
-        type: PlutoColumnType.number(negative: false, format: '#'),
-        readOnly: false,
-        width: 100),
-    PlutoColumn(
-        title: 'Tareas',
-        field: 'Tareas',
-        type: PlutoColumnType.number(negative: false),
-        readOnly: false,
-        width: 100),
-    PlutoColumn(
-        title: 'Conducta',
-        field: 'Conducta',
-        type: PlutoColumnType.number(negative: false),
-        readOnly: false,
-        width: 100),
-    PlutoColumn(
-        title: 'Uniforme',
-        field: 'Uniforme',
-        type: PlutoColumnType.number(negative: false),
-        readOnly: false,
-        width: 100),
-    PlutoColumn(
-        title: 'Comentarios',
-        field: 'Comentarios',
-        type: PlutoColumnType.number(negative: false),
-        readOnly: false,
-        width: 100),
-  ];
+  // final List<PlutoColumn> assignaturesColumns = <PlutoColumn>[
+  //   PlutoColumn(
+  //       title: 'Matricula',
+  //       field: 'Matricula',
+  //       type: PlutoColumnType.number(format: '####'),
+  //       readOnly: true,
+  //       width: 100),
+  //   PlutoColumn(
+  //     title: 'Nombre del alumno',
+  //     field: 'Nombre',
+  //     type: PlutoColumnType.text(),
+  //     readOnly: true,
+  //     sort: PlutoColumnSort.ascending,
+  //   ),
+  //   PlutoColumn(
+  //       title: 'Apellido paterno',
+  //       field: 'Apellido paterno',
+  //       type: PlutoColumnType.text(),
+  //       readOnly: true,
+  //       sort: PlutoColumnSort.ascending,
+  //       width: 150),
+  //   PlutoColumn(
+  //       title: 'Apellido materno',
+  //       field: 'Apellido materno',
+  //       type: PlutoColumnType.text(),
+  //       readOnly: true,
+  //       sort: PlutoColumnSort.ascending,
+  //       width: 150),
+  //   PlutoColumn(
+  //       title: 'Calif',
+  //       field: 'Calif',
+  //       type: PlutoColumnType.number(negative: false),
+  //       readOnly: false,
+  //       width: 100),
+  //   PlutoColumn(
+  //       title: 'Faltas',
+  //       field: 'Ausencia',
+  //       type: PlutoColumnType.number(negative: false, format: '#'),
+  //       readOnly: false,
+  //       width: 100),
+  //   PlutoColumn(
+  //       title: 'Tareas',
+  //       field: 'Tareas',
+  //       type: PlutoColumnType.number(negative: false),
+  //       readOnly: false,
+  //       width: 100),
+  //   PlutoColumn(
+  //       title: 'Conducta',
+  //       field: 'Conducta',
+  //       type: PlutoColumnType.number(negative: false),
+  //       readOnly: false,
+  //       width: 100),
+  //   PlutoColumn(
+  //       title: 'Uniforme',
+  //       field: 'Uniforme',
+  //       type: PlutoColumnType.number(negative: false),
+  //       readOnly: false,
+  //       width: 100),
+  //   PlutoColumn(
+  //       title: 'Comentarios',
+  //       field: 'Comentarios',
+  //       type: PlutoColumnType.number(negative: false),
+  //       readOnly: false,
+  //       width: 100),
+  // ];
 
   Widget _buildGradesbyAssignature() {
     String dropDownValue = ''; //oneTeacherAssignatures.first;

@@ -1,3 +1,6 @@
+import 'package:flutter/material.dart';
+import 'package:oxschool/Models/Student.dart';
+
 class StudentEval {
   int rateID;
   String studentName;
@@ -14,6 +17,7 @@ class StudentEval {
   int subject;
   int evaluation;
   int? other;
+  String? fulllName;
 
   StudentEval(
       this.rateID,
@@ -30,7 +34,8 @@ class StudentEval {
       this.outfit,
       this.subject,
       this.evaluation,
-      this.other);
+      this.other,
+      this.fulllName);
 }
 
 dynamic getEvalFromJSON(List<dynamic> jsonList, bool isByStudent) {
@@ -70,15 +75,16 @@ dynamic getEvalFromJSON(List<dynamic> jsonList, bool isByStudent) {
             outfit,
             subject,
             evaluation,
-            other));
+            other,
+            '$studentName $student1LastName $student2LastName'));
       }
       return studentEval;
     } else {
       for (var item in jsonList) {
-        String rateID = item['student_ratings_id'];
-        String studentName = item['nombre'];
-        String student1LastName = item['apmaterno'];
-        String student2LastName = item['apmaterno'];
+        // String rateID = item['studentID'];
+        // String studentName = item['nombre'];
+        // String student1LastName = item['apmaterno'];
+        // String student2LastName = item['apmaterno'];
         String studentID = item['studentID'];
         int grades = item['eval_type'];
         int absence = item['absence_eval'];
@@ -90,11 +96,12 @@ dynamic getEvalFromJSON(List<dynamic> jsonList, bool isByStudent) {
         int subject = item['subject'];
         int evaluation = item['evaluation'];
         int? other = item['other'];
+        String fullName = item['studentName'];
         studentEval.add(StudentEval(
-            int.parse(rateID),
-            studentName,
-            student1LastName,
-            student2LastName,
+            0,
+            '',
+            '',
+            '',
             studentID,
             grades,
             absence,
@@ -105,7 +112,8 @@ dynamic getEvalFromJSON(List<dynamic> jsonList, bool isByStudent) {
             outfit,
             subject,
             evaluation,
-            other));
+            other,
+            fullName));
       }
       return studentEval;
     }

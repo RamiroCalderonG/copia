@@ -30,13 +30,32 @@ void clearStudentData() {
   studentAllowedMedicines = null;
 }
 
-final List<PlutoColumn> studentsColumns = <PlutoColumn>[
-  // PlutoColumn(
-  //     title: 'Matricula',
-  //     field: 'Matricula',
-  //     type: PlutoColumnType.number(format: '####'),
-  //     readOnly: true,
-  //     width: 100),
+final List<PlutoColumn> studentColumnsToEvaluateByStudent = <PlutoColumn>[
+  PlutoColumn(
+      title: 'Matricula',
+      field: 'studentID',
+      type: PlutoColumnType.text(),
+      readOnly: true,
+      sort: PlutoColumnSort.ascending,
+      width: 150),
+  PlutoColumn(
+    title: 'Nombre de alumno',
+    field: 'studentName',
+    type: PlutoColumnType.text(),
+    readOnly: true,
+    sort: PlutoColumnSort.ascending,
+  ),
+];
+
+final List<PlutoColumn> evaluationColumnsToEvaluateByStudent = <PlutoColumn>[];
+
+final List<PlutoColumn> assignaturesColumns = <PlutoColumn>[
+  PlutoColumn(
+      title: 'Matricula',
+      field: 'Matricula',
+      type: PlutoColumnType.number(format: '####'),
+      readOnly: true,
+      width: 100),
   PlutoColumn(
     title: 'Nombre del alumno',
     field: 'Nombre',
@@ -57,41 +76,41 @@ final List<PlutoColumn> studentsColumns = <PlutoColumn>[
       type: PlutoColumnType.text(),
       readOnly: true,
       sort: PlutoColumnSort.ascending,
-      width: 150)
-  // PlutoColumn(
-  //     title: 'Calif',
-  //     field: 'Calif',
-  //     type: PlutoColumnType.number(negative: false),
-  //     readOnly: false,
-  //     width: 100),
-  // PlutoColumn(
-  //     title: 'Faltas',
-  //     field: 'Ausencia',
-  //     type: PlutoColumnType.number(negative: false, format: '#'),
-  //     readOnly: false,
-  //     width: 100),
-  // PlutoColumn(
-  //     title: 'Tareas',
-  //     field: 'Tareas',
-  //     type: PlutoColumnType.number(negative: false),
-  //     readOnly: false,
-  //     width: 100),
-  // PlutoColumn(
-  //     title: 'Conducta',
-  //     field: 'Conducta',
-  //     type: PlutoColumnType.number(negative: false),
-  //     readOnly: false,
-  //     width: 100),
-  // PlutoColumn(
-  //     title: 'Uniforme',
-  //     field: 'Uniforme',
-  //     type: PlutoColumnType.number(negative: false),
-  //     readOnly: false,
-  //     width: 100),
-  // PlutoColumn(
-  //     title: 'Comentarios',
-  //     field: 'Comentarios',
-  //     type: PlutoColumnType.number(negative: false),
-  //     readOnly: false,
-  //     width: 100),
+      width: 150),
+  PlutoColumn(
+      title: 'Calif',
+      field: 'Calif',
+      type: PlutoColumnType.number(negative: false),
+      readOnly: false,
+      width: 100),
+  PlutoColumn(
+      title: 'Faltas',
+      field: 'Ausencia',
+      type: PlutoColumnType.number(negative: false, format: '#'),
+      readOnly: false,
+      width: 100),
+  PlutoColumn(
+      title: 'Tareas',
+      field: 'Tareas',
+      type: PlutoColumnType.number(negative: false),
+      readOnly: false,
+      width: 100),
+  PlutoColumn(
+      title: 'Conducta',
+      field: 'Conducta',
+      type: PlutoColumnType.number(negative: false),
+      readOnly: false,
+      width: 100),
+  PlutoColumn(
+      title: 'Uniforme',
+      field: 'Uniforme',
+      type: PlutoColumnType.number(negative: false),
+      readOnly: false,
+      width: 100),
+  PlutoColumn(
+      title: 'Comentarios',
+      field: 'Comentarios',
+      type: PlutoColumnType.number(negative: false),
+      readOnly: false,
+      width: 100),
 ];

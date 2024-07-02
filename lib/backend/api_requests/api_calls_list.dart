@@ -1,6 +1,4 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:get/get.dart';
-import 'package:get/get_connect/http/src/request/request.dart';
 
 import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/constants/connection.dart';

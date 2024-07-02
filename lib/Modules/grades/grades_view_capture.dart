@@ -46,9 +46,13 @@ class _GradesViewScreenState extends State<GradesViewScreen>
     oneTeacherStudentID.clear();
     assignaturesMap.clear();
     studentList.clear();
+    assignatureRows.clear();
     studentEvaluationRows.clear();
-    studentsColumns.clear();
+    // studentEvaluationRows.clear();
+    // assignatureRows.clear();
+    // studentColumnsToEvaluateByStudent.clear();
     studentGradesBodyToUpgrade.clear();
+    // assignaturesColumns.clear();
     super.dispose();
   }
 
