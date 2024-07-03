@@ -48,6 +48,10 @@ class _GradesViewScreenState extends State<GradesViewScreen>
     studentList.clear();
     assignatureRows.clear();
     studentEvaluationRows.clear();
+    uniqueStudents.clear();
+    uniqueStudentsList.clear();
+    selectedStudentList.clear();
+    selectedStudentRows.clear();
     // studentEvaluationRows.clear();
     // assignatureRows.clear();
     // studentColumnsToEvaluateByStudent.clear();

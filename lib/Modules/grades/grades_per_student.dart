@@ -11,6 +11,7 @@ import 'package:oxschool/temp/teacher_grades_temp.dart';
 
 import 'package:pluto_grid/pluto_grid.dart';
 
+import '../../backend/api_requests/api_calls_list.dart';
 import '../../constants/Student.dart';
 import '../../flutter_flow/flutter_flow_theme.dart';
 import '../../reusable_methods/reusable_functions.dart';
@@ -55,12 +56,26 @@ class _GradesByStudentState extends State<GradesByStudent> {
   // }
 
   Future<void> fillGrid(List<StudentEval> evaluationList) async {
+    Set<String> studentSet = {};
+    List<Map<String, String>> uniqueStudents = [];
+
+    for (var student in evaluationList) {
+      if (!studentSet.contains(student.studentID)) {
+        studentSet.add(student.studentID);
+        uniqueStudents.add({
+          'studentID': student.studentID,
+          'studentName': student.fulllName!,
+        });
+
+        // print(uniqueStudents.toString());
+      }
+    }
     setState(() {
-      rows = evaluationList.map((item) {
+      rows = uniqueStudents.map((item) {
         return PlutoRow(
           cells: {
-            'studentID': PlutoCell(value: item.studentID),
-            'studentName': PlutoCell(value: item.fulllName),
+            'studentID': PlutoCell(value: item.containsKey('StudentID')),
+            'studentName': PlutoCell(value: item.containsKey('studentName')),
             // 'Apellido paterno': PlutoCell(value: item.student1LastName),
             // 'Apellido materno': PlutoCell(value: item.student2LastName),
             // 'Calif': PlutoCell(value: item.evaluation),
@@ -80,22 +95,15 @@ class _GradesByStudentState extends State<GradesByStudent> {
       studentList = await getSubjectsAndGradesByStudent(gradeInt, groupSelected,
           currentCycle!.claCiclo, currentUser!.claUn, monthNumber);
       fillGrid(studentList);
+
       setState(() {
         studentEvaluationRows.clear();
-        for (var item in studentList) {
+        for (var item in uniqueStudentsList) {
           studentEvaluationRows.add(PlutoRow(cells: {
-            // 'Matricula': PlutoCell(value: item.studentID),
-            'studentID': PlutoCell(value: item.studentID),
-            'studentName': PlutoCell(value: item.fulllName),
-            // 'Calif': PlutoCell(value: item.evaluation),
-            // 'Conducta': PlutoCell(value: item.discipline),
-            // 'Uniforme': PlutoCell(value: item.outfit),
-            // 'Ausencia': PlutoCell(value: item.absence),
-            // 'Tareas': PlutoCell(value: item.homework),
-            // 'Comentarios': PlutoCell(value: item.comment),
+            'studentID': PlutoCell(value: item['studentID']),
+            'studentName': PlutoCell(value: item['studentName']),
           }));
         }
-//                           // StudentsPlutoGrid(rows: assignatureRows);
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -125,6 +133,17 @@ class _GradesByStudentState extends State<GradesByStudent> {
         ),
       );
     }
+  }
+
+  dynamic patchStudentGradesToDB() async {
+    var response = await patchStudentsGrades(studentGradesBodyToUpgrade);
+    if (response == 200) {
+      return 200;
+    } else {
+      return 400;
+    }
+
+    // return response;
   }
 
   @override
@@ -394,7 +413,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red[400],
                     ),
-                    onPressed: () {
+                    onPressed: () async {
                       if (studentGradesBodyToUpgrade.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -427,49 +446,74 @@ class _GradesByStudentState extends State<GradesByStudent> {
                           ),
                         );
                       } else {
+                        var response;
                         try {
-                          // var response = patchStudentGradesToDB();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              elevation: 20,
-                              content: Text(
-                                'Exito',
-                                // ignore: use_build_context_synchronously
-                                style: FlutterFlowTheme.of(context)
-                                    .labelMedium
-                                    .override(
-                                      fontFamily: 'Sora',
-                                      color: const Color(0xFF130C0D),
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                              ),
-                              duration: const Duration(milliseconds: 6700),
-                              backgroundColor:
-                                  // ignore: use_build_context_synchronously
-                                  Colors.green,
-                            ),
-                          );
+                          response = await patchStudentGradesToDB();
                         } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              elevation: 20,
+                          print(e);
+                        }
+                        if (response == 200) {
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                               content: Text(
-                                e.toString(),
-                                // ignore: use_build_context_synchronously
+                                'Cambios guardados con exito!',
                                 style: FlutterFlowTheme.of(context)
                                     .labelMedium
                                     .override(
-                                      fontFamily: 'Sora',
+                                      fontFamily: 'Roboto',
                                       color: const Color(0xFF130C0D),
                                       fontWeight: FontWeight.w500,
                                     ),
                               ),
-                              duration: const Duration(milliseconds: 6700),
-                              backgroundColor:
-                                  // ignore: use_build_context_synchronously
-                                  Colors.green,
-                            ),
+                              duration: const Duration(milliseconds: 6000),
+                              backgroundColor: Colors.green[200]));
+                          if (studentList.isNotEmpty) {
+                            studentList.clear();
+                          }
+
+                          int? monthNumber;
+
+                          if (groupSelected.isEmpty || groupSelected == '') {
+                            groupSelected = oneTeacherGroups.first.toString();
+                          }
+                          if (gradeSelected.isEmpty || gradeSelected == '') {
+                            gradeSelected = oneTeacherGrades.first;
+                          }
+                          if (dropDownValue.isEmpty || dropDownValue == '') {
+                            dropDownValue = oneTeacherAssignatures.first;
+                          }
+                          if (monthValue.isEmpty) {
+                            monthValue = monthsList.first;
+                          }
+
+                          if (isUserAdmin == true) {
+                            monthNumber =
+                                getKeyFromValue(monthsListMap, monthValue);
+                          } else {
+                            monthNumber =
+                                getKeyFromValue(monthsListMap, currentMonth);
+                          }
+                          var gradeInt =
+                              getKeyFromValue(teacherGradesMap, gradeSelected);
+
+                          searchBUttonAction(
+                            groupSelected,
+                            gradeInt.toString(),
+                            monthNumber.toString(),
                           );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text(
+                                'Error: $response',
+                                style: FlutterFlowTheme.of(context)
+                                    .labelMedium
+                                    .override(
+                                      fontFamily: 'Roboto',
+                                      color: const Color(0xFF130C0D),
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                              ),
+                              duration: const Duration(milliseconds: 6000),
+                              backgroundColor: Colors.green[200]));
                         }
                       }
                     },
@@ -487,7 +531,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
               margin: const EdgeInsets.all(20),
               child: LayoutBuilder(
                   builder: (BuildContext context, BoxConstraints constraints) {
-                if (rows.isEmpty) {
+                if (studentEvaluationRows.isEmpty) {
                   return const Placeholder(
                     child: Column(
                       children: [
@@ -507,6 +551,11 @@ class _GradesByStudentState extends State<GradesByStudent> {
                               child: PlutoGrid(
                             columns: studentColumnsToEvaluateByStudent,
                             rows: studentEvaluationRows,
+                            onRowDoubleTap: (event) {
+                              String studentID =
+                                  event.row.cells['studentID']!.value;
+                              loadSelectedStudent(studentID);
+                            },
                             // onChanged: (event) {
                             //   var newValue = validateNewGradeValue(
                             //       event.value.toString(),
@@ -523,12 +572,32 @@ class _GradesByStudentState extends State<GradesByStudent> {
                           ),
                           Expanded(
                               flex: 3,
-                              child: Container(
-                                decoration: BoxDecoration(color: Colors.blue),
-                                child: Center(
-                                    child:
-                                        Text('Materia, Calif, F, T, H , Con')),
-                              ))
+                              child: LayoutBuilder(builder:
+                                  (BuildContext context,
+                                      BoxConstraints constraints) {
+                                if (selectedStudentRows.isNotEmpty) {
+                                  return PlutoGrid(
+                                    columns: gradesByStudentColumns,
+                                    rows: selectedStudentRows,
+                                    onChanged: (event) {
+                                      var newValue = validateNewGradeValue(
+                                          event.value.toString(),
+                                          event.column.title);
+                                      composeUpdateStudentGradesBody(
+                                          event.column.title,
+                                          newValue,
+                                          event.rowIdx);
+                                    },
+                                  );
+                                } else {
+                                  return const Placeholder(
+                                    child: Center(
+                                      child: Text(
+                                          'Seleccione un alumno dando doble click para evaluar'),
+                                    ),
+                                  );
+                                }
+                              }))
                         ],
                       );
                     },
@@ -538,5 +607,30 @@ class _GradesByStudentState extends State<GradesByStudent> {
         ],
       ),
     );
+  }
+
+  void loadSelectedStudent(String studentID) {
+    selectedStudentList.clear();
+
+    selectedStudentList =
+        studentList.where((student) => student.studentID == studentID).toList();
+
+    setState(() {
+      selectedStudentRows.clear();
+      for (var student in selectedStudentList) {
+        selectedStudentRows.add(PlutoRow(cells: {
+          'subject': PlutoCell(value: student.subject),
+          'evaluation': PlutoCell(value: student.evaluation),
+          // 'eval_type': PlutoCell(value: student.),
+          'absence_eval': PlutoCell(value: student.absence),
+          'homework_eval': PlutoCell(value: student.homework),
+          'discipline_eval': PlutoCell(value: student.discipline),
+          'comment': PlutoCell(value: student.comment),
+          'habit_eval': PlutoCell(value: student.habits_evaluation),
+          'other': PlutoCell(value: student.other),
+          'outfit': PlutoCell(value: student.outfit),
+        }));
+      }
+    });
   }
 }

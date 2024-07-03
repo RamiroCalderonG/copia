@@ -50,6 +50,7 @@ final List<PlutoColumn> studentColumnsToEvaluateByStudent = <PlutoColumn>[
 final List<PlutoColumn> evaluationColumnsToEvaluateByStudent = <PlutoColumn>[];
 
 final List<PlutoColumn> assignaturesColumns = <PlutoColumn>[
+  //TO USE at grades_by_assignature
   PlutoColumn(
       title: 'Matricula',
       field: 'Matricula',
@@ -113,4 +114,42 @@ final List<PlutoColumn> assignaturesColumns = <PlutoColumn>[
       type: PlutoColumnType.number(negative: false),
       readOnly: false,
       width: 100),
+];
+
+final List<PlutoColumn> gradesByStudentColumns = [
+  PlutoColumn(
+    title: 'Materia',
+    field: 'subject',
+    type: PlutoColumnType.text(),
+    readOnly: true,
+  ),
+  PlutoColumn(
+    title: 'Calif',
+    field: 'evaluation',
+    type: PlutoColumnType.number(negative: false),
+  ),
+  PlutoColumn(
+      title: 'Faltas',
+      field: 'absence_eval',
+      type: PlutoColumnType.number(negative: false)),
+  PlutoColumn(
+      title: 'Tareas',
+      field: 'homework_eval',
+      type: PlutoColumnType.number(negative: false)),
+  PlutoColumn(
+      title: 'Conducta',
+      field: 'discipline_eval',
+      type: PlutoColumnType.number(negative: false)),
+  PlutoColumn(
+      title: 'Comentarios',
+      field: 'comment',
+      type: PlutoColumnType.number(negative: false)),
+  PlutoColumn(
+      title: 'Habitos',
+      field: 'habit_eval',
+      type: PlutoColumnType.number(negative: false)),
+  PlutoColumn(
+      title: 'Uniforme',
+      field: 'outfit',
+      type: PlutoColumnType.number(negative: false)),
 ];

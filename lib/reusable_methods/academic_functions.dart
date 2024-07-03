@@ -148,9 +148,45 @@ Future<List<StudentEval>> getSubjectsAndGradesByStudent(
 
     List<dynamic> jsonList = json.decode(subjectsGradesList.body);
     List<StudentEval> evaluations = getEvalFromJSON(jsonList, true);
+
+    for (var student in jsonList) {
+      uniqueStudents[student['studentID']] = student['studentName'];
+      // uniqueStudents[student['studentName']] = student['studentName'];
+    }
+
+    // Convert the map to a list of maps
+    uniqueStudentsList = uniqueStudents.entries
+        .map((entry) => {'studentID': entry.key, 'studentName': entry.value})
+        .toList();
+
+    // print(uniqueStudentsList);
+
     return evaluations;
   } catch (e) {
     return throw FormatException(e.toString());
+  }
+}
+
+void composeBodyToUpdateGradeBySTudent(
+    String key, studentID, dynamic value, int subject, month) {
+  bool idExists = false;
+
+  if (studentGradesBodyToUpgrade.isEmpty) {
+    studentGradesBodyToUpgrade.add({'subject_id': subject, key: value});
+  } else {
+    for (var obj in studentGradesBodyToUpgrade) {
+      if (obj['subject_id'] == subject) {
+        idExists = true;
+        if (obj.containsKey(key)) {
+          obj[key] = value; //Update the existing value
+        } else {
+          obj[key] = value; //Add the new value
+        }
+      }
+    }
+    if (!idExists) {
+      studentGradesBodyToUpgrade.add({'subject_id': subject, key: value});
+    }
   }
 }
 

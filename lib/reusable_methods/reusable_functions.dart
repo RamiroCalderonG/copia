@@ -33,3 +33,10 @@ int? getKeyFromValue(Map<int, String> map, String value) {
           orElse: () => const MapEntry(-1, ''))
       .key;
 }
+
+dynamic getValueFromKey(Map<int, String> map, dynamic key) {
+  return map.entries
+      .firstWhere((element) => element.key == key,
+          orElse: () => const MapEntry(-1, ''))
+      .value;
+}
