@@ -559,10 +559,10 @@ Future<dynamic> getTeacherGradeAndCourses(var employee, var year) async {
     if (apiCall.statusCode == 200) {
       return apiCall.body;
     } else {
-      return throw const FormatException('Usuario no cuenta con horario');
+      return throw FormatException(apiCall.body);
     }
   } catch (e) {
-    return throw const FormatException('Usuario no cuenta con horario');
+    return throw FormatException(e.toString());
   }
 }
 
@@ -657,7 +657,7 @@ Future<dynamic> getSubjectsAndGradeByStuent(
 }
 
 Future<dynamic> patchStudentsGrades(
-    List<Map<String, dynamic>> requestBody) async {
+    List<Map<String, dynamic>> requestBody, bool isByStudent) async {
   try {
     if (requestBody.isEmpty) {
       return throw const FormatException("No data to send");
@@ -668,6 +668,10 @@ Future<dynamic> patchStudentsGrades(
             'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
             'ip_address': deviceIp.toString(),
             'token': currentUser!.token
+          },
+          queryParameters: {
+            "studentEval": isByStudent.toString(),
+            "cycle": currentCycle!.claCiclo
           },
           persistCookies: false,
           timeoutSeconds: 25,

@@ -136,7 +136,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
   }
 
   dynamic patchStudentGradesToDB() async {
-    var response = await patchStudentsGrades(studentGradesBodyToUpgrade);
+    var response = await patchStudentsGrades(studentGradesBodyToUpgrade, false);
     if (response == 200) {
       return 200;
     } else {

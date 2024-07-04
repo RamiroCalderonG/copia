@@ -74,7 +74,10 @@ class _GradesViewScreenState extends State<GradesViewScreen>
                 text: 'Carga por materia',
               ),
               Tab(
-                icon: Icon(Icons.boy),
+                icon: Icon(
+                  Icons.boy,
+                  // size: 40,
+                ),
                 text: 'Carga por alumno',
               ),
             ],

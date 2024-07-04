@@ -5,7 +5,9 @@ import 'package:oxschool/constants/User.dart';
 
 import '../Models/Student.dart';
 import '../backend/api_requests/api_calls_list.dart';
+import '../constants/date_constants.dart';
 import '../temp/teacher_grades_temp.dart';
+import 'reusable_functions.dart';
 
 dynamic loadStartGrading(int employeeNumber, String schoolYear) async {
   try {
@@ -172,10 +174,11 @@ void composeBodyToUpdateGradeBySTudent(
   bool idExists = false;
 
   if (studentGradesBodyToUpgrade.isEmpty) {
-    studentGradesBodyToUpgrade.add({'subject_id': subject, key: value});
+    studentGradesBodyToUpgrade.add(
+        {'student': studentID, key: value, 'subject': subject, 'month': month});
   } else {
     for (var obj in studentGradesBodyToUpgrade) {
-      if (obj['subject_id'] == subject) {
+      if (obj['student'] == studentID && obj['subject'] == subject) {
         idExists = true;
         if (obj.containsKey(key)) {
           obj[key] = value; //Update the existing value
@@ -184,8 +187,14 @@ void composeBodyToUpdateGradeBySTudent(
         }
       }
     }
+
     if (!idExists) {
-      studentGradesBodyToUpgrade.add({'subject_id': subject, key: value});
+      studentGradesBodyToUpgrade.add({
+        'student': studentID,
+        key: value,
+        'subject': subject,
+        'month': month
+      });
     }
   }
 }

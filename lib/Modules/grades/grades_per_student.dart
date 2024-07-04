@@ -28,10 +28,14 @@ String currentMonth = DateFormat.MMMM().format(DateTime.now());
 String? subjectSelected = oneTeacherAssignatures.first;
 bool isUserAdmin = verifyUserAdmin(currentUser!);
 List<PlutoRow> rows = [];
+int? monthNumber;
 
 class _GradesByStudentState extends State<GradesByStudent> {
   String groupSelected = ''; // = oneTeacherGroups.first.toString();
   String gradeSelected = ''; // = oneTeacherAssignatures.first;
+  String monthValue = monthsList.first;
+
+  String? selectedStudentID;
 
   @override
   void initState() {
@@ -136,7 +140,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
   }
 
   dynamic patchStudentGradesToDB() async {
-    var response = await patchStudentsGrades(studentGradesBodyToUpgrade);
+    var response = await patchStudentsGrades(studentGradesBodyToUpgrade, true);
     if (response == 200) {
       return 200;
     } else {
@@ -257,10 +261,9 @@ class _GradesByStudentState extends State<GradesByStudent> {
 
   Widget _buildGradesPerStudent() {
     String dropDownValue = ''; //oneTeacherAssignatures.first;
-    String monthValue = ''; //monthsList.first;
 
     final DropdownMenu monthSelectorButton = DropdownMenu<String>(
-      initialSelection: monthsList.first,
+      initialSelection: monthValue, //monthsList.first,
       onSelected: (String? value) {
         monthValue = value!;
       },
@@ -403,6 +406,9 @@ class _GradesByStudentState extends State<GradesByStudent> {
                         gradeInt.toString(),
                         monthNumber.toString(),
                       );
+                      setState(() {
+                        selectedStudentRows.clear();
+                      });
                     },
                     icon: const Icon(Icons.search),
                     label: const Text('Buscar'),
@@ -419,7 +425,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
                           SnackBar(
                             elevation: 20,
                             content: Text(
-                              'Sin información para enviar, verifique su captura',
+                              'Sin información para actualizar, verifique su captura',
                               // ignore: use_build_context_synchronously
                               style: FlutterFlowTheme.of(context)
                                   .labelMedium
@@ -469,8 +475,6 @@ class _GradesByStudentState extends State<GradesByStudent> {
                           if (studentList.isNotEmpty) {
                             studentList.clear();
                           }
-
-                          int? monthNumber;
 
                           if (groupSelected.isEmpty || groupSelected == '') {
                             groupSelected = oneTeacherGroups.first.toString();
@@ -552,9 +556,9 @@ class _GradesByStudentState extends State<GradesByStudent> {
                             columns: studentColumnsToEvaluateByStudent,
                             rows: studentEvaluationRows,
                             onRowDoubleTap: (event) {
-                              String studentID =
+                              selectedStudentID =
                                   event.row.cells['studentID']!.value;
-                              loadSelectedStudent(studentID);
+                              loadSelectedStudent(selectedStudentID!);
                             },
                             // onChanged: (event) {
                             //   var newValue = validateNewGradeValue(
@@ -583,10 +587,29 @@ class _GradesByStudentState extends State<GradesByStudent> {
                                       var newValue = validateNewGradeValue(
                                           event.value.toString(),
                                           event.column.title);
-                                      composeUpdateStudentGradesBody(
-                                          event.column.title,
-                                          newValue,
-                                          event.rowIdx);
+
+                                      final subjectID =
+                                          event.row.cells['subject']?.value;
+                                      if (isUserAdmin == true) {
+                                        monthNumber = getKeyFromValue(
+                                            monthsListMap, monthValue);
+                                      } else {
+                                        monthNumber = getKeyFromValue(
+                                            monthsListMap, currentMonth);
+                                      }
+
+                                      composeBodyToUpdateGradeBySTudent(
+                                        event.column.title,
+                                        selectedStudentID!,
+                                        newValue,
+                                        subjectID,
+                                        monthNumber,
+                                      );
+
+                                      // composeUpdateStudentGradesBody(
+                                      //     event.column.title,
+                                      //     newValue,
+                                      //     event.rowIdx);
                                     },
                                   );
                                 } else {
