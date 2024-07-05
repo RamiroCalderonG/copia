@@ -153,3 +153,11 @@ final List<PlutoColumn> gradesByStudentColumns = [
       field: 'outfit',
       type: PlutoColumnType.number(negative: false)),
 ];
+
+final List<PlutoColumn> commentsCollumns = [
+  PlutoColumn(
+      title: 'Comentario',
+      field: 'comment',
+      type: PlutoColumnType.text(),
+      readOnly: true)
+];

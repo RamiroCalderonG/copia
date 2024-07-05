@@ -684,6 +684,24 @@ Future<dynamic> patchStudentsGrades(
   }
 }
 
+Future<dynamic> getStudentsGradesComments(int grade) async {
+  try {
+    var apiCall = await Requests.get(
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/school-rating/comments',
+        headers: {
+          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          // 'ip_address': deviceIp.toString(),
+          'token': currentUser!.token
+        },
+        queryParameters: {"grade": grade},
+        persistCookies: false);
+    apiCall.raiseForStatus();
+    return apiCall;
+  } catch (e) {
+    return throw FormatException(e.toString());
+  }
+}
+
 // Future<dynamic> getUserEvents(int userId) async {
 //   var response;
 //   try {

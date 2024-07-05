@@ -34,6 +34,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
   String groupSelected = ''; // = oneTeacherGroups.first.toString();
   String gradeSelected = ''; // = oneTeacherAssignatures.first;
   String monthValue = monthsList.first;
+  List<Map<String, String>>? studentsGradesComments = [];
 
   String? selectedStudentID;
 
@@ -44,20 +45,20 @@ class _GradesByStudentState extends State<GradesByStudent> {
     super.initState();
   }
 
-  // @override
-  // void dispose() {
-  //   oneTeacherGrades.clear();
-  //   oneTeacherGroups.clear();
-  //   oneTeacherAssignatures.clear();
-  //   oneTeacherStudents.clear();
-  //   oneTeacherStudentID.clear();
-  //   assignaturesMap.clear();
-  //   studentList.clear();
-  //   studentEvaluationRows.clear();
-  //   studentsColumns.clear();
-  //   studentGradesBodyToUpgrade.clear();
-  //   super.dispose();
-  // }
+  @override
+  void dispose() {
+       // oneTeacherGrades.clear();
+    // oneTeacherGroups.clear();
+    // oneTeacherAssignatures.clear();
+    // oneTeacherStudents.clear();
+    // oneTeacherStudentID.clear();
+    // assignaturesMap.clear();
+    // studentList.clear();
+    // studentEvaluationRows.clear();
+    // studentsColumns.clear();
+    // studentGradesBodyToUpgrade.clear();
+    super.dispose();
+  }
 
   Future<void> fillGrid(List<StudentEval> evaluationList) async {
     Set<String> studentSet = {};
@@ -98,6 +99,9 @@ class _GradesByStudentState extends State<GradesByStudent> {
     try {
       studentList = await getSubjectsAndGradesByStudent(gradeInt, groupSelected,
           currentCycle!.claCiclo, currentUser!.claUn, monthNumber);
+      
+      studentsGradesComments = getStudentsGradesComments()
+
       fillGrid(studentList);
 
       setState(() {
@@ -406,6 +410,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
                         gradeInt.toString(),
                         monthNumber.toString(),
                       );
+                      
                       setState(() {
                         selectedStudentRows.clear();
                       });
@@ -605,11 +610,9 @@ class _GradesByStudentState extends State<GradesByStudent> {
                                         subjectID,
                                         monthNumber,
                                       );
-
-                                      // composeUpdateStudentGradesBody(
-                                      //     event.column.title,
-                                      //     newValue,
-                                      //     event.rowIdx);
+                                    },
+                                    onRowDoubleTap: (event) {
+                                      
                                     },
                                   );
                                 } else {
@@ -620,7 +623,8 @@ class _GradesByStudentState extends State<GradesByStudent> {
                                     ),
                                   );
                                 }
-                              }))
+                              })),
+                              Expanded(child: PlutoGrid(columns: commentsCollumns, rows: ))
                         ],
                       );
                     },
@@ -656,4 +660,5 @@ class _GradesByStudentState extends State<GradesByStudent> {
       }
     });
   }
+
 }
