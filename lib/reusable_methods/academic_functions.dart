@@ -1,7 +1,9 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:oxschool/Models/Student_eval.dart';
 import 'package:oxschool/constants/User.dart';
+import 'package:pluto_grid/pluto_grid.dart';
 
 import '../backend/api_requests/api_calls_list.dart';
 
@@ -167,6 +169,33 @@ Future<List<StudentEval>> getSubjectsAndGradesByStudent(
   }
 }
 
+Future<void> getCommentsForEvals(int grade) async {
+  List<dynamic> commentsList;
+
+  Map<String, String> currentValue = {};
+
+  try {
+    var response = await getStudentsGradesComments(grade);
+    commentsList = json.decode(response.body);
+    if (studentsGradesCommentsRows.isNotEmpty && commentStringEval.isNotEmpty) {
+      studentsGradesCommentsRows.clear();
+      commentStringEval.clear();
+    }
+
+    for (var item in commentsList) {
+      String id = item['Comment'].toString();
+      String comment = item['Name'];
+      commentStringEval.add(comment);
+
+      currentValue = {'idcomment': id.toString(), 'comentname': comment};
+
+      studentsGradesCommentsRows.add(currentValue);
+    }
+  } catch (e) {
+    throw ErrorDescription(e.toString());
+  }
+}
+
 void composeBodyToUpdateGradeBySTudent(
     String key, studentID, dynamic value, int subject, month) {
   bool idExists = false;
@@ -219,17 +248,6 @@ void composeUpdateStudentGradesBody(String key, dynamic value, int rowIndex) {
     }
   }
 }
-
-// dynamic patchStudentGradesToDB() async {
-//   var response = await patchStudentsGrades(studentGradesBodyToUpgrade);
-//   if (response == 200) {
-//     return 200;
-//   } else {
-//     return 400;
-//   }
-
-//   // return response;
-// }
 
 String validateNewGradeValue(String newValue, String columnNameToFind) {
   //If value < 50 -> returns 50

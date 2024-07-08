@@ -2,6 +2,7 @@
 
 import 'package:oxschool/Models/Family.dart';
 import 'package:oxschool/Models/Student.dart';
+import 'package:oxschool/temp/teacher_grades_temp.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
 late Student? nurseryStudent; //Student data getted from nursery/student
@@ -37,7 +38,7 @@ final List<PlutoColumn> studentColumnsToEvaluateByStudent = <PlutoColumn>[
       type: PlutoColumnType.text(),
       readOnly: true,
       sort: PlutoColumnSort.ascending,
-      width: 150),
+      width: 120),
   PlutoColumn(
     title: 'Nombre de alumno',
     field: 'studentName',
@@ -143,7 +144,8 @@ final List<PlutoColumn> gradesByStudentColumns = [
   PlutoColumn(
       title: 'Comentarios',
       field: 'comment',
-      type: PlutoColumnType.number(negative: false)),
+      type:
+          PlutoColumnType.select(commentStringEval, enableColumnFilter: true)),
   PlutoColumn(
       title: 'Habitos',
       field: 'habit_eval',
@@ -156,8 +158,14 @@ final List<PlutoColumn> gradesByStudentColumns = [
 
 final List<PlutoColumn> commentsCollumns = [
   PlutoColumn(
+      title: 'id',
+      field: 'idcomment',
+      type: PlutoColumnType.number(),
+      width: 50,
+      readOnly: true),
+  PlutoColumn(
       title: 'Comentario',
-      field: 'comment',
+      field: 'comentname',
       type: PlutoColumnType.text(),
       readOnly: true)
 ];
