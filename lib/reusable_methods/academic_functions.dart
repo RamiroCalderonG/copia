@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:oxschool/Models/Student_eval.dart';
 import 'package:oxschool/constants/User.dart';
-import 'package:pluto_grid/pluto_grid.dart';
 
 import '../backend/api_requests/api_calls_list.dart';
 
@@ -150,6 +149,8 @@ Future<List<StudentEval>> getSubjectsAndGradesByStudent(
 
     List<dynamic> jsonList = json.decode(subjectsGradesList.body);
     List<StudentEval> evaluations = getEvalFromJSON(jsonList, true);
+    uniqueStudentsList.clear();
+    uniqueStudents.clear();
 
     for (var student in jsonList) {
       uniqueStudents[student['studentID']] = student['studentName'];
@@ -257,14 +258,27 @@ String validateNewGradeValue(String newValue, String columnNameToFind) {
     'Uniforme',
     'Ausencia',
     'Tareas',
-    'Comentarios'
+    // 'Comentarios'
   ];
+
+  if (columnNameToFind == 'Comentarios') {
+    for (var item in studentsGradesCommentsRows) {
+      if (item['comentname'] == newValue) {
+        // print(item['idcomment'].toString());
+        return item['idcomment'].toString();
+      }
+    }
+  }
 
   bool isContained = columnName.contains(columnNameToFind);
 
   if (isContained) {
     if (int.parse(newValue) <= 50) {
+      //Validate that value can´t be less than 50
       newValue = 50.toString();
+      return newValue;
+    } else if (int.parse(newValue) > 100) {
+      newValue = 100.toString();
       return newValue;
     } else {
       return newValue;

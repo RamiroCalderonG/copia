@@ -4,7 +4,7 @@ import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/Modules/enfermeria/ficha_de_salud.dart';
 import 'package:oxschool/flutter_flow/flutter_flow_util.dart';
 import 'package:oxschool/reusable_methods/temp_data_functions.dart';
-import '../Modules/grades/grades_view_capture.dart';
+import '../Modules/academic/grades_view_capture.dart';
 import '../Modules/services_ticket/processes/services_main_screen.dart';
 
 class DrawerClass extends StatefulWidget {

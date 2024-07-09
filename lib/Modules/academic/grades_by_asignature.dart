@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
 import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/reusable_methods/reusable_functions.dart';
 import 'package:pluto_grid/pluto_grid.dart';
@@ -86,6 +85,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
         assignatureID.toString(),
         monthNumber.toString(),
       );
+      await getCommentsForEvals(int.parse(gradeInt));
       fillGrid(studentList);
       setState(() {
         assignatureRows.clear();
@@ -405,16 +405,16 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
 
                       if (isUserAdmin == true) {
                         monthNumber =
-                            getKeyFromValue(monthsListMap, monthValue!);
+                            getKeyFromValue(monthsListMap, monthValue);
                       } else {
                         monthNumber =
                             getKeyFromValue(monthsListMap, currentMonth);
                       }
                       var gradeInt =
-                          getKeyFromValue(teacherGradesMap, gradeSelected!);
+                          getKeyFromValue(teacherGradesMap, gradeSelected);
 
                       var assignatureID =
-                          getKeyFromValue(assignaturesMap, dropDownValue!);
+                          getKeyFromValue(assignaturesMap, dropDownValue);
 
                       searchBUttonAction(
                         groupSelected,
@@ -506,16 +506,16 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
 
                           if (isUserAdmin == true) {
                             monthNumber =
-                                getKeyFromValue(monthsListMap, monthValue!);
+                                getKeyFromValue(monthsListMap, monthValue);
                           } else {
                             monthNumber =
                                 getKeyFromValue(monthsListMap, currentMonth);
                           }
                           var gradeInt =
-                              getKeyFromValue(teacherGradesMap, gradeSelected!);
+                              getKeyFromValue(teacherGradesMap, gradeSelected);
 
                           var assignatureID =
-                              getKeyFromValue(assignaturesMap, dropDownValue!);
+                              getKeyFromValue(assignaturesMap, dropDownValue);
 
                           searchBUttonAction(
                             groupSelected,
@@ -568,16 +568,21 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                   return StatefulBuilder(
                     builder: (context, setState) {
                       return PlutoGrid(
-                        columns: assignaturesColumns,
-                        rows: assignatureRows,
-                        onChanged: (event) {
-                          var newValue = validateNewGradeValue(
-                              event.value.toString(), event.column.title);
+                          columns: assignaturesColumns,
+                          rows: assignatureRows,
+                          onChanged: (event) {
+                            var newValue = validateNewGradeValue(
+                                event.value.toString(), event.column.title);
 
-                          composeUpdateStudentGradesBody(
-                              event.column.title, newValue, event.rowIdx);
-                        },
-                      );
+                            composeUpdateStudentGradesBody(
+                                event.column.title, newValue, event.rowIdx);
+                          },
+                          configuration: const PlutoGridConfiguration(),
+                          createFooter: (stateManager) {
+                            stateManager.setPageSize(30,
+                                notify: false); // default 40
+                            return PlutoPagination(stateManager);
+                          });
                     },
                   );
                 }

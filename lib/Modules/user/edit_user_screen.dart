@@ -1,8 +1,6 @@
 // ignore_for_file: prefer_typing_uninitialized_variables, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:oxschool/flutter_flow/flutter_flow_util.dart';
 import 'package:oxschool/temp/users_temp_data.dart';
 import 'package:oxschool/utils/loader_indicator.dart';
 
@@ -39,7 +37,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
   var newUserPosition = <String, dynamic>{};
   var newUserBirthDate = <String, dynamic>{};
   var _isUserTeacher = <String, bool>{};
-  var _newUserCampus = <String, dynamic>{};
+  // final _newUserCampus = <String, dynamic>{};
   var _newEmployeeNumber = <String, dynamic>{};
 
   var newUserEmployeeNumber = <String, dynamic>{};

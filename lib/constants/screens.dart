@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:oxschool/Modules/grades/grades_modules_configuration.dart';
+import 'package:oxschool/Modules/academic/grades_modules_configuration.dart';
 import 'package:oxschool/Modules/user/users_dashboard.dart';
 
 import '../Modules/enfermeria/ficha_de_salud.dart';
 import '../Modules/enfermeria/students_with_illness.dart';
-import '../Modules/grades/grades_view_capture.dart';
+import '../Modules/academic/grades_view_capture.dart';
 import '../Modules/services_ticket/processes/services_main_screen.dart';
 import '../login_view/login_view_widget.dart';
 import '../main_window/main_window_widget.dart';

@@ -12,7 +12,7 @@ class _GradesModuleConfigurationState extends State<GradesModuleConfiguration> {
   int _selectedIndex = 0;
 
   static final List<Widget> _widgetOptions = <Widget>[
-    HomeDashboard(),
+    const HomeDashboard(),
     PlaceholderWidget(color: Colors.green),
     PlaceholderWidget(color: Colors.blue),
   ];
@@ -56,7 +56,7 @@ class _GradesModuleConfigurationState extends State<GradesModuleConfiguration> {
 class PlaceholderWidget extends StatelessWidget {
   final Color color;
 
-  PlaceholderWidget({required this.color});
+  PlaceholderWidget({super.key, required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -67,6 +67,8 @@ class PlaceholderWidget extends StatelessWidget {
 }
 
 class HomeDashboard extends StatelessWidget {
+  const HomeDashboard({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -78,7 +80,7 @@ class HomeDashboard extends StatelessWidget {
             'Dashboard',
             style: Theme.of(context).textTheme.headline4,
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -104,7 +106,7 @@ class HomeDashboard extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -131,7 +133,7 @@ class DashboardCard extends StatelessWidget {
   final String label;
   final String value;
 
-  DashboardCard({required this.icon, required this.label, required this.value});
+  DashboardCard({super.key, required this.icon, required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -148,12 +150,12 @@ class DashboardCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon, size: 40, color: Theme.of(context).colorScheme.primary),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
               label,
               style: Theme.of(context).textTheme.bodyText1,
             ),
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             Text(
               value,
               style: Theme.of(context).textTheme.headline6?.copyWith(

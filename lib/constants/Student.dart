@@ -33,6 +33,13 @@ void clearStudentData() {
 
 final List<PlutoColumn> studentColumnsToEvaluateByStudent = <PlutoColumn>[
   PlutoColumn(
+      title: 'No',
+      field: 'No',
+      type: PlutoColumnType.number(),
+      readOnly: true,
+      sort: PlutoColumnSort.ascending,
+      width: 30),
+  PlutoColumn(
       title: 'Matricula',
       field: 'studentID',
       type: PlutoColumnType.text(),
@@ -112,9 +119,9 @@ final List<PlutoColumn> assignaturesColumns = <PlutoColumn>[
   PlutoColumn(
       title: 'Comentarios',
       field: 'Comentarios',
-      type: PlutoColumnType.number(negative: false),
+      type: PlutoColumnType.select(commentStringEval, enableColumnFilter: true),
       readOnly: false,
-      width: 100),
+      width: 200),
 ];
 
 final List<PlutoColumn> gradesByStudentColumns = [

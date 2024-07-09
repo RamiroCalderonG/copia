@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:oxschool/Models/Student.dart';
 
 class StudentEval {
   int rateID;
@@ -11,7 +9,7 @@ class StudentEval {
   int absence;
   int homework;
   int discipline;
-  int comment;
+  String comment;
   int habits_evaluation;
   int outfit;
   int subject;
@@ -54,7 +52,7 @@ dynamic getEvalFromJSON(List<dynamic> jsonList, bool isByStudent) {
         int absence = item['absence_eval'];
         int homework = item['homework_eval'];
         int discipline = item['discipline_eval'];
-        int comment = item['comment'];
+        String comment = item['comment'];
         int habits_evaluation = item['habit_eval'];
         int outfit = item['outfit'];
         int subject = item['subject'];
@@ -90,7 +88,7 @@ dynamic getEvalFromJSON(List<dynamic> jsonList, bool isByStudent) {
         int absence = item['absence_eval'];
         int homework = item['homework_eval'];
         int discipline = item['discipline_eval'];
-        int comment = item['comment'];
+        String comment = item['comment'];
         int habits_evaluation = item['habit_eval'];
         int outfit = item['outfit'];
         int subject = item['subject'];
