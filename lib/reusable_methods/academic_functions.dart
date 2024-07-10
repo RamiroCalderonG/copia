@@ -1,8 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:oxschool/Models/Student_eval.dart';
 import 'package:oxschool/constants/User.dart';
+import 'package:oxschool/reusable_methods/reusable_functions.dart';
 
 import '../backend/api_requests/api_calls_list.dart';
 
@@ -207,11 +209,40 @@ void composeBodyToUpdateGradeBySTudent(
   } else {
     for (var obj in studentGradesBodyToUpgrade) {
       if (obj['student'] == studentID && obj['subject'] == subject) {
+        //If already exist data for selected student
         idExists = true;
-        if (obj.containsKey(key)) {
-          obj[key] = value; //Update the existing value
+        if (key == 'Comentarios') {
+          //Comentarios are stores diferent
+          var oldValue = obj[key];
+          if (oldValue == '') {
+            obj[key] = value;
+          } else {
+            var oldValue = obj[
+                key]; //in case already exist a value, it will add it at the end
+            List<dynamic> numbersList =
+                oldValue.split(',').map(int.parse).toList();
+
+            // Step 2: Convert the list to a set to handle duplicates
+            Set<dynamic> numbersSet = numbersList.toSet();
+            // Step 3: Add the new number if it’s not already present
+            int newNum = int.parse(value);
+            if (!numbersSet.contains(newNum)) {
+              numbersSet.add(newNum);
+            }
+
+            // Step 4: Convert the set back to a string
+            String updatedNumbersString = numbersSet.join(',');
+            commentsIntEval = numbersSet.toList();
+
+            var newValue = updatedNumbersString;
+            obj[key] = newValue;
+          }
         } else {
-          obj[key] = value; //Add the new value
+          if (obj.containsKey(key)) {
+            obj[key] = value; //Update the existing value
+          } else {
+            obj[key] = value; //Add the new value
+          }
         }
       }
     }

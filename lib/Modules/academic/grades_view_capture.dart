@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:oxschool/Modules/academic/fo_dac_27.dart';
 import 'package:oxschool/Modules/academic/grades_by_asignature.dart';
 import 'package:oxschool/constants/User.dart';
 
@@ -27,7 +29,7 @@ class _GradesViewScreenState extends State<GradesViewScreen>
 
   @override
   void initState() {
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
 
     super.initState();
     // _tabController = TabController(vsync: this, length: nurseryTabs.length);
@@ -79,6 +81,12 @@ class _GradesViewScreenState extends State<GradesViewScreen>
                 ),
                 text: 'Carga por alumno',
               ),
+              Tab(
+                icon: FaIcon(
+                  FontAwesomeIcons.sheetPlastic,
+                ),
+                text: 'FO-DAC-27',
+              )
             ],
             indicatorColor: Colors.blueAccent,
           ),
@@ -88,7 +96,11 @@ class _GradesViewScreenState extends State<GradesViewScreen>
         ),
         body: TabBarView(
           controller: _tabController,
-          children: const <Widget>[GradesByAsignature(), GradesByStudent()],
+          children: const <Widget>[
+            GradesByAsignature(),
+            GradesByStudent(),
+            FoDac27()
+          ],
         ));
   }
 }

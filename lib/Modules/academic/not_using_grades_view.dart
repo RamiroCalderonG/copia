@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../flutter_flow/flutter_flow_theme.dart';
 
@@ -22,7 +23,7 @@ class _CaptureGradesScreenState extends State<CaptureGradesScreen>
 
   @override
   void initState() {
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
 
     super.initState();
     // _tabController = TabController(vsync: this, length: nurseryTabs.length);
@@ -45,6 +46,9 @@ class _CaptureGradesScreenState extends State<CaptureGradesScreen>
                 icon: Icon(Icons.contact_emergency),
                 text: 'Carga por materia',
               ),
+              Tab(
+                  icon: FaIcon(FontAwesomeIcons.sheetPlastic),
+                  text: 'FO-DAC-27')
             ],
             indicatorColor: Colors.blueAccent,
           ),

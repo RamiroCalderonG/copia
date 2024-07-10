@@ -550,15 +550,78 @@ class _GradesByStudentState extends State<GradesByStudent> {
                                             context: context,
                                             builder: (BuildContext context) {
                                               return AlertDialog(
-                                                  title: const Text(
-                                                      'Seleccionar Comentario'),
-                                                  content: SingleChildScrollView(
-                                                      child: customMultiSelectorField(
-                                                          context,
-                                                          commentStringEval,
+                                                title: const Text(
+                                                    'Seleccionar Comentario'),
+                                                content: SingleChildScrollView(
+                                                    child: customMultiSelectorField(
+                                                        context,
+                                                        commentStringEval,
+                                                        'Comentarios',
+                                                        'Seleccione comentario',
+                                                        commentsController)),
+                                                actions: [
+                                                  IconButton.outlined(
+                                                    onPressed: () async {
+                                                      List<String>
+                                                          selectedItem =
+                                                          splitAndAddToList(
+                                                              commentsController
+                                                                  .text);
+                                                      String commentsInt;
+                                                      for (var item
+                                                          in selectedItem) {
+                                                        commentsInt =
+                                                            searchValueByKey(
+                                                                studentsGradesCommentsRows,
+                                                                'comentname',
+                                                                'idcomment',
+                                                                item);
+                                                        final subjectID = event
+                                                            .row
+                                                            .cells['subject']
+                                                            ?.value;
+                                                        if (isUserAdmin ==
+                                                            true) {
+                                                          monthNumber =
+                                                              getKeyFromValue(
+                                                                  monthsListMap,
+                                                                  monthValue);
+                                                        } else {
+                                                          monthNumber =
+                                                              getKeyFromValue(
+                                                                  monthsListMap,
+                                                                  currentMonth);
+                                                        }
+                                                        composeBodyToUpdateGradeBySTudent(
                                                           'Comentarios',
-                                                          'Seleccione comentario',
-                                                          commentsController)));
+                                                          selectedStudentID!,
+                                                          commentsInt,
+                                                          subjectID,
+                                                          monthNumber,
+                                                        );
+                                                      } // Update to DB
+                                                      // var response;
+                                                      // try {
+                                                      //   response =
+                                                      //       await patchStudentGradesToDB();
+                                                      // } catch (e) {
+                                                      //   print(e);
+                                                      // }
+
+                                                      print(
+                                                          studentGradesBodyToUpgrade
+                                                              .toString());
+                                                      print(commentsIntEval
+                                                          .toString());
+                                                      Navigator.pop(context);
+                                                    },
+                                                    icon:
+                                                        const Icon(Icons.check),
+                                                    color: Colors.green,
+                                                    hoverColor: Colors.white,
+                                                  )
+                                                ],
+                                              );
                                             });
                                       },
                                       configuration:

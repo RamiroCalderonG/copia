@@ -30,3 +30,4 @@ List<Map<String, String>> uniqueStudentsList = [];
 List<StudentEval> selectedStudentList = [];
 
 List<String> commentStringEval = [];
+List<dynamic> commentsIntEval = [];
