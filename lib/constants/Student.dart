@@ -151,6 +151,7 @@ final List<PlutoColumn> gradesByStudentColumns = [
   PlutoColumn(
       title: 'Comentarios',
       field: 'comment',
+      hide: true,
       type:
           PlutoColumnType.select(commentStringEval, enableColumnFilter: true)),
   PlutoColumn(
@@ -168,11 +169,14 @@ final List<PlutoColumn> commentsCollumns = [
       title: 'id',
       field: 'idcomment',
       type: PlutoColumnType.number(),
-      width: 50,
+      width: 10,
+      hide: true,
+      enableRowChecked: true,
       readOnly: true),
   PlutoColumn(
       title: 'Comentario',
       field: 'comentname',
       type: PlutoColumnType.text(),
+      enableRowChecked: true,
       readOnly: true)
 ];

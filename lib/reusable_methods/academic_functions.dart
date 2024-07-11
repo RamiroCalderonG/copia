@@ -214,7 +214,7 @@ void composeBodyToUpdateGradeBySTudent(
         if (key == 'Comentarios') {
           //Comentarios are stores diferent
           var oldValue = obj[key];
-          if (oldValue == '') {
+          if (oldValue == null) {
             obj[key] = value;
           } else {
             var oldValue = obj[
