@@ -2,6 +2,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/constants/connection.dart';
+import 'package:oxschool/temp/teacher_grades_temp.dart';
 
 import 'package:requests/requests.dart';
 
@@ -552,7 +553,7 @@ Future<dynamic> getTeacherGradeAndCourses(var employee, var year) async {
           'teacher': currentUser!.employeeNumber.toString(),
           "year": currentCycle!.claCiclo
         },
-        persistCookies: false,
+        persistCookies: true,
         timeoutSeconds: 10);
     apiCall.raiseForStatus();
 
@@ -684,19 +685,36 @@ Future<dynamic> patchStudentsGrades(
   }
 }
 
-Future<dynamic> getStudentsGradesComments(int grade) async {
+Future<dynamic> getStudentsGradesComments(
+    int grade, bool searchById, int? id) async {
+  var response;
   try {
-    var apiCall = await Requests.get(
-        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/school-rating/comments',
-        headers: {
-          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
-          // 'ip_address': deviceIp.toString(),
-          'token': currentUser!.token
-        },
-        queryParameters: {"grade": grade},
-        persistCookies: false);
-    apiCall.raiseForStatus();
-    return apiCall;
+    if (searchById) {
+      var apiCall = await Requests.get(
+          '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/school-rating/comments',
+          headers: {
+            'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+            // 'ip_address': deviceIp.toString(),
+            'token': currentUser!.token
+          },
+          queryParameters: {"grade": grade, "eval": id},
+          persistCookies: false);
+      apiCall.raiseForStatus();
+      response = apiCall;
+    } else {
+      var apiCall = await Requests.get(
+          '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/school-rating/comments',
+          headers: {
+            'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+            // 'ip_address': deviceIp.toString(),
+            'token': currentUser!.token
+          },
+          queryParameters: {"grade": grade},
+          persistCookies: false);
+      apiCall.raiseForStatus();
+      response = apiCall;
+    }
+    return response;
   } catch (e) {
     return throw FormatException(e.toString());
   }

@@ -43,6 +43,8 @@ class _GradesByStudentState extends State<GradesByStudent> {
   late PlutoGridStateManager gridAStateManager;
   Key? currentRowKey;
   Timer? _debounce;
+  String? asignatureIDListener;
+  var gradeInt;
 
   String? selectedStudentID;
 
@@ -70,9 +72,9 @@ class _GradesByStudentState extends State<GradesByStudent> {
     if (gridAStateManager.currentRow!.key != currentRowKey) {
       currentRowKey = gridAStateManager.currentRow!.key;
 
-      gridBStateManager.setShowLoading(true);
+      gridBStateManager.setShowLoading(true, notify: true);
 
-      fetchUserActivity();
+      fetchUserActivity(); //Fetch comments stored by assignature
     }
   }
 
@@ -83,13 +85,13 @@ class _GradesByStudentState extends State<GradesByStudent> {
 
     _debounce = Timer(const Duration(milliseconds: 300), () {
       Future.delayed(const Duration(milliseconds: 300), () {
-        setState(() {
-          // gridBStateManager.removeRows(gridBStateManager.rows);
-          // gridBStateManager.resetCurrentState();
-          // gridBStateManager.appendRows(rows);
-        });
+        // setState(() {
+        //   // gridBStateManager.removeRows(gridBStateManager.rows);
+        //   // gridBStateManager.resetCurrentState();
+        //   // gridBStateManager.appendRows(rows);
+        // });
 
-        // gridBStateManager.setShowLoading(false);
+        gridBStateManager.setShowLoading(false);
       });
     });
   }
@@ -371,7 +373,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
                         monthNumber =
                             getKeyFromValue(monthsListMap, currentMonth);
                       }
-                      var gradeInt =
+                      gradeInt =
                           getKeyFromValue(teacherGradesMap, gradeSelected);
 
                       searchBUttonAction(
@@ -561,6 +563,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
                                 if (selectedStudentRows.isNotEmpty) {
                                   return PlutoDualGrid(
                                     gridPropsA: PlutoDualGridProps(
+                                        //Middle grid with eval values
                                         columns: gradesByStudentColumns,
                                         rows: selectedStudentRows,
                                         onChanged: (event) {
@@ -586,6 +589,23 @@ class _GradesByStudentState extends State<GradesByStudent> {
                                             monthNumber,
                                           );
                                         },
+                                        onRowDoubleTap: (event) {
+                                          asignatureIDListener = '';
+                                          asignatureIDListener = event
+                                              .row!.cells['subject']?.value
+                                              .toString();
+                                          print(event
+                                              .row!.cells['subject']!.value
+                                              .toString());
+                                        },
+                                        // onRowChecked:
+                                        //     (PlutoGridOnRowCheckedEvent event) {
+                                        //   asignatureIDListener = event
+                                        //       .row!.cells['subject']?.value;
+                                        //   print(asignatureIDListener);
+                                        //   // print(event
+                                        //   //     .row!.cells['idcomment']?.value);
+                                        // },
                                         onLoaded:
                                             (PlutoGridOnLoadedEvent event) {
                                           gridAStateManager =
@@ -624,130 +644,15 @@ class _GradesByStudentState extends State<GradesByStudent> {
                                       onLoaded: (PlutoGridOnLoadedEvent event) {
                                         gridBStateManager = event.stateManager;
                                       },
+                                      // onRowChecked:
+                                      //     (PlutoGridOnRowCheckedEvent event) {
+                                      //   print(event
+                                      //       .row!.cells['idcomment']?.value);
+                                      // }
                                     ),
                                     display:
                                         PlutoDualGridDisplayRatio(ratio: 0.8),
                                   );
-
-                                  // PlutoGrid(
-                                  //     //Grid for subjects and grades by student
-                                  //     columns: gradesByStudentColumns,
-                                  //     rows: selectedStudentRows,
-                                  //     onChanged: (event) {
-                                  //       var newValue = validateNewGradeValue(
-                                  //           event.value.toString(),
-                                  //           event.column.title);
-
-                                  //       final subjectID =
-                                  //           event.row.cells['subject']?.value;
-                                  //       if (isUserAdmin == true) {
-                                  //         monthNumber = getKeyFromValue(
-                                  //             monthsListMap, monthValue);
-                                  //       } else {
-                                  //         monthNumber = getKeyFromValue(
-                                  //             monthsListMap, currentMonth);
-                                  //       }
-
-                                  //       composeBodyToUpdateGradeBySTudent(
-                                  //         event.column.title,
-                                  //         selectedStudentID!,
-                                  //         newValue,
-                                  //         subjectID,
-                                  //         monthNumber,
-                                  //       );
-                                  //     },
-                                  //     onLoaded: (event) {
-                                  //       event.stateManager.setSelectingMode(
-                                  //           PlutoGridSelectingMode.cell);
-                                  //     },
-                                  //     onRowDoubleTap: (event) {
-                                  //       showDialog(
-                                  //           context: context,
-                                  //           builder: (BuildContext context) {
-                                  //             return AlertDialog(
-                                  //               title: const Text(
-                                  //                   'Seleccionar Comentario'),
-                                  //               content: SingleChildScrollView(
-                                  //                   child: customMultiSelectorField(
-                                  //                       context,
-                                  //                       commentStringEval,
-                                  //                       'Comentarios',
-                                  //                       'Seleccione comentario',
-                                  //                       commentsController)),
-                                  //               actions: [
-                                  //                 IconButton.outlined(
-                                  //                   onPressed: () async {
-                                  //                     List<String>
-                                  //                         selectedItem =
-                                  //                         splitAndAddToList(
-                                  //                             commentsController
-                                  //                                 .text);
-                                  //                     String commentsInt;
-                                  //                     for (var item
-                                  //                         in selectedItem) {
-                                  //                       commentsInt =
-                                  //                           searchValueByKey(
-                                  //                               studentsGradesCommentsRows,
-                                  //                               'comentname',
-                                  //                               'idcomment',
-                                  //                               item);
-                                  //                       final subjectID = event
-                                  //                           .row
-                                  //                           .cells['subject']
-                                  //                           ?.value;
-                                  //                       if (isUserAdmin ==
-                                  //                           true) {
-                                  //                         monthNumber =
-                                  //                             getKeyFromValue(
-                                  //                                 monthsListMap,
-                                  //                                 monthValue);
-                                  //                       } else {
-                                  //                         monthNumber =
-                                  //                             getKeyFromValue(
-                                  //                                 monthsListMap,
-                                  //                                 currentMonth);
-                                  //                       }
-                                  //                       composeBodyToUpdateGradeBySTudent(
-                                  //                         'Comentarios',
-                                  //                         selectedStudentID!,
-                                  //                         commentsInt,
-                                  //                         subjectID,
-                                  //                         monthNumber,
-                                  //                       );
-                                  //                     } // Update to DB
-                                  //                     // var response;
-                                  //                     // try {
-                                  //                     //   response =
-                                  //                     //       await patchStudentGradesToDB();
-                                  //                     // } catch (e) {
-                                  //                     //   print(e);
-                                  //                     // }
-
-                                  //                     print(
-                                  //                         studentGradesBodyToUpgrade
-                                  //                             .toString());
-                                  //                     print(commentsIntEval
-                                  //                         .toString());
-                                  //                     Navigator.pop(context);
-                                  //                   },
-                                  //                   icon:
-                                  //                       const Icon(Icons.check),
-                                  //                   color: Colors.green,
-                                  //                   hoverColor: Colors.white,
-                                  //                 )
-                                  //               ],
-                                  //             );
-                                  //           });
-                                  //     },
-                                  //     configuration:
-                                  //         const PlutoGridConfiguration(),
-                                  //     createFooter: (stateManager) {
-                                  //       stateManager.setPageSize(30,
-                                  //           notify: false); // default 40
-                                  //       return PlutoPagination(stateManager);
-                                  //     }
-                                  //     // mode: PlutoGridMode.select,
-                                  //     );
                                 } else {
                                   return const Placeholder(
                                     child: Center(
@@ -760,18 +665,6 @@ class _GradesByStudentState extends State<GradesByStudent> {
                           const SizedBox(
                             width: 10,
                           ),
-                          // Expanded(
-                          //     child: customMultiSelectorField(
-                          //         context,
-                          //         commentStringEval,
-                          //         'Comentarios',
-                          //         'Seleccione comentario',
-                          //         commentsController))
-                          // Expanded(
-                          //     child: PlutoGrid(
-                          //   columns: commentsCollumns,
-                          //   rows: evaluationComments,
-                          // ))
                         ],
                       );
                     },

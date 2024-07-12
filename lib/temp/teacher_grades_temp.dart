@@ -10,7 +10,8 @@ List<int> oneTeacherStudentID = [];
 List<int> gradesID = [];
 // List<String> oneTeacherGroup = [];
 Map<int, String> assignaturesMap = {};
-Map<int, String> teacherGradesMap = {};
+Map<int, String> teacherGradesMap =
+    {}; //Stores teacher employeeNo, cycle, campus, grade, group, subject_id, subject_name, gradeseq
 
 List<StudentEval> studentList = [];
 List<PlutoRow> assignatureRows = [];

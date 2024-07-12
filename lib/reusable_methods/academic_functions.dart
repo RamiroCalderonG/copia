@@ -178,7 +178,7 @@ Future<void> getCommentsForEvals(int grade) async {
   Map<String, String> currentValue = {};
 
   try {
-    var response = await getStudentsGradesComments(grade);
+    var response = await getStudentsGradesComments(grade, false, null);
     commentsList = json.decode(response.body);
     if (studentsGradesCommentsRows.isNotEmpty && commentStringEval.isNotEmpty) {
       studentsGradesCommentsRows.clear();
