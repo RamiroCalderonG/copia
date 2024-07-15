@@ -32,3 +32,5 @@ List<StudentEval> selectedStudentList = [];
 
 List<String> commentStringEval = [];
 List<dynamic> commentsIntEval = [];
+List<Map<String, dynamic>> mergedData = [];
+List<PlutoRow> commentsAsignatedList = [];

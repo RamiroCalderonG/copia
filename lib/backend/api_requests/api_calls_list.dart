@@ -686,18 +686,22 @@ Future<dynamic> patchStudentsGrades(
 }
 
 Future<dynamic> getStudentsGradesComments(
-    int grade, bool searchById, int? id) async {
+    int grade, bool searchById, String? id, int? month) async {
   var response;
   try {
     if (searchById) {
       var apiCall = await Requests.get(
-          '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/school-rating/comments',
+          '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student/comments',
           headers: {
             'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
             // 'ip_address': deviceIp.toString(),
             'token': currentUser!.token
           },
-          queryParameters: {"grade": grade, "eval": id},
+          queryParameters: {
+            "student": id,
+            "cycle": currentCycle!.claCiclo,
+            "month": month
+          },
           persistCookies: false);
       apiCall.raiseForStatus();
       response = apiCall;

@@ -178,7 +178,7 @@ Future<void> getCommentsForEvals(int grade) async {
   Map<String, String> currentValue = {};
 
   try {
-    var response = await getStudentsGradesComments(grade, false, null);
+    var response = await getStudentsGradesComments(grade, false, null, null);
     commentsList = json.decode(response.body);
     if (studentsGradesCommentsRows.isNotEmpty && commentStringEval.isNotEmpty) {
       studentsGradesCommentsRows.clear();
@@ -197,6 +197,52 @@ Future<void> getCommentsForEvals(int grade) async {
   } catch (e) {
     throw ErrorDescription(e.toString());
   }
+}
+
+Future<List<Map<String, dynamic>>> getCommentsAsignatedToStudent(
+    int grade, bool byStudent, String studentid, int? month) async {
+  List<Map<String, dynamic>> assignatedComments = [];
+  Map<String, dynamic> currentValue = {};
+  try {
+    var response =
+        await getStudentsGradesComments(grade, byStudent, studentid, month);
+    var commentsResponse = json.decode(response.body);
+
+    for (var item in commentsResponse) {
+      int evalId = item['student_rate'];
+      int commentid = item['comment'];
+      // var month = item['month'];
+      bool active = item['active'];
+      currentValue = {
+        'student_rate': evalId,
+        'comment': commentid,
+        'active': active
+      };
+      assignatedComments.add(currentValue);
+    }
+
+    return assignatedComments;
+  } catch (e) {
+    throw ErrorDescription(e.toString());
+  }
+}
+
+//To merge actual comments from DB to all list from comments availables
+List<Map<String, dynamic>> mergeCommentsData(
+    List<Map<String, dynamic>> allItemAvailables,
+    List<Map<String, dynamic>> actualData) {
+  Map<int, bool> isActiveMap = {
+    for (var item in actualData) item['comment']: item['active']
+  };
+
+  return allItemAvailables.map((item) {
+    int id = int.parse(item['idcomment']);
+    bool isActive = isActiveMap[id] ?? false;
+    return {
+      ...item,
+      'is_active': isActive,
+    };
+  }).toList();
 }
 
 void composeBodyToUpdateGradeBySTudent(

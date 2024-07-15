@@ -53,6 +53,12 @@ class _GradesViewScreenState extends State<GradesViewScreen>
     uniqueStudentsList.clear();
     selectedStudentList.clear();
     selectedStudentRows.clear();
+    commentsAsignatedList.clear();
+    mergedData.clear();
+    commentsIntEval.clear();
+    commentStringEval.clear();
+    gradesByStudentBodyToUpgrade.clear();
+    studentsGradesCommentsRows.clear();
     // studentEvaluationRows.clear();
     // assignatureRows.clear();
     // studentColumnsToEvaluateByStudent.clear();

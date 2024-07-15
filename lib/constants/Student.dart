@@ -178,5 +178,6 @@ final List<PlutoColumn> commentsCollumns = [
       field: 'comentname',
       type: PlutoColumnType.text(),
       enableRowChecked: true,
-      readOnly: true)
+      readOnly: true),
+  PlutoColumn(title: 'Selec', field: 'active', type: PlutoColumnType.text())
 ];

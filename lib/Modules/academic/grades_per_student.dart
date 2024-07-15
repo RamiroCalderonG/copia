@@ -14,7 +14,6 @@ import 'package:oxschool/temp/teacher_grades_temp.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
 import '../../backend/api_requests/api_calls_list.dart';
-import '../../components/multiselector_widget.dart';
 import '../../constants/Student.dart';
 import '../../flutter_flow/flutter_flow_theme.dart';
 import '../../reusable_methods/reusable_functions.dart';
@@ -39,8 +38,9 @@ class _GradesByStudentState extends State<GradesByStudent> {
   String monthValue = monthsList.first;
   var commentsController = TextEditingController();
   late PlutoGridStateManager stateManager;
-  late PlutoGridStateManager gridBStateManager;
+  // late PlutoGridStateManager gridBStateManager;
   late PlutoGridStateManager gridAStateManager;
+
   Key? currentRowKey;
   Timer? _debounce;
   String? asignatureIDListener;
@@ -64,37 +64,37 @@ class _GradesByStudentState extends State<GradesByStudent> {
     super.dispose();
   }
 
-  void gridAHandler() {
-    if (gridAStateManager.currentRow == null) {
-      return;
-    }
+  // void gridAHandler() {
+  //   if (gridAStateManager.currentRow == null) {
+  //     return;
+  //   }
 
-    if (gridAStateManager.currentRow!.key != currentRowKey) {
-      currentRowKey = gridAStateManager.currentRow!.key;
+  //   if (gridAStateManager.currentRow!.key != currentRowKey) {
+  //     currentRowKey = gridAStateManager.currentRow!.key;
 
-      gridBStateManager.setShowLoading(true, notify: true);
+  //     gridBStateManager.setShowLoading(true, notify: true);
 
-      fetchUserActivity(); //Fetch comments stored by assignature
-    }
-  }
+  //     fetchUserActivity(); //Fetch comments stored by assignature
+  //   }
+  // }
 
-  void fetchUserActivity() {
-    if (_debounce?.isActive ?? false) {
-      _debounce!.cancel();
-    }
+  // void fetchUserActivity() {
+  //   if (_debounce?.isActive ?? false) {
+  //     _debounce!.cancel();
+  //   }
 
-    _debounce = Timer(const Duration(milliseconds: 300), () {
-      Future.delayed(const Duration(milliseconds: 300), () {
-        // setState(() {
-        //   // gridBStateManager.removeRows(gridBStateManager.rows);
-        //   // gridBStateManager.resetCurrentState();
-        //   // gridBStateManager.appendRows(rows);
-        // });
+  //   _debounce = Timer(const Duration(milliseconds: 300), () {
+  //     Future.delayed(const Duration(milliseconds: 300), () {
+  //       // setState(() {
+  //       //   // gridBStateManager.removeRows(gridBStateManager.rows);
+  //       //   // gridBStateManager.resetCurrentState();
+  //       //   // gridBStateManager.appendRows(rows);
+  //       // });
 
-        gridBStateManager.setShowLoading(false);
-      });
-    });
-  }
+  //       gridBStateManager.setShowLoading(false);
+  //     });
+  //   });
+  // }
 
   Future<void> fillGrid(List<StudentEval> evaluationList) async {
     Set<String> studentSet = {};
@@ -146,7 +146,10 @@ class _GradesByStudentState extends State<GradesByStudent> {
           currentCycle!.claCiclo, currentUser!.claUn, monthNumber);
 
       await getCommentsForEvals(int.parse(gradeInt));
-      await populateCommentsGrid(studentsGradesCommentsRows);
+      // await populateCommentsGrid(studentsGradesCommentsRows); <----WORKING WELL
+
+      // List<Map<String, dynamic>> mergedData =
+      //     mergeCommentsData(apiData1, apiData2);
 
       fillGrid(studentList); //Fill student list by unque values
       var studentNumber = 1;
@@ -532,10 +535,24 @@ class _GradesByStudentState extends State<GradesByStudent> {
                                   //Grid for students name and ID
                                   columns: studentColumnsToEvaluateByStudent,
                                   rows: studentEvaluationRows,
-                                  onRowDoubleTap: (event) {
+                                  onRowDoubleTap: (event) async {
+                                    var gradeInt = getKeyFromValue(
+                                        teacherGradesMap, gradeSelected);
+
+                                    if (isUserAdmin == true) {
+                                      monthNumber = getKeyFromValue(
+                                          monthsListMap, monthValue);
+                                    } else {
+                                      monthNumber = getKeyFromValue(
+                                          monthsListMap, currentMonth);
+                                    }
+
                                     selectedStudentID =
                                         event.row.cells['studentID']!.value;
-                                    loadSelectedStudent(selectedStudentID!);
+                                    await loadSelectedStudent(
+                                        selectedStudentID!,
+                                        gradeInt,
+                                        monthNumber!);
                                   },
                                   onLoaded: (event) {
                                     event.stateManager.setSelectingMode(
@@ -561,74 +578,51 @@ class _GradesByStudentState extends State<GradesByStudent> {
                                   (BuildContext context,
                                       BoxConstraints constraints) {
                                 if (selectedStudentRows.isNotEmpty) {
-                                  return PlutoDualGrid(
-                                    gridPropsA: PlutoDualGridProps(
-                                        //Middle grid with eval values
-                                        columns: gradesByStudentColumns,
-                                        rows: selectedStudentRows,
-                                        onChanged: (event) {
-                                          var newValue = validateNewGradeValue(
-                                              event.value.toString(),
-                                              event.column.title);
+                                  return PlutoGrid(
+                                      columns: gradesByStudentColumns,
+                                      rows: selectedStudentRows,
+                                      onChanged: (event) {
+                                        var newValue = validateNewGradeValue(
+                                            event.value.toString(),
+                                            event.column.title);
 
-                                          final subjectID =
-                                              event.row.cells['subject']?.value;
-                                          if (isUserAdmin == true) {
-                                            monthNumber = getKeyFromValue(
-                                                monthsListMap, monthValue);
-                                          } else {
-                                            monthNumber = getKeyFromValue(
-                                                monthsListMap, currentMonth);
-                                          }
+                                        final subjectID =
+                                            event.row.cells['subject']?.value;
+                                        if (isUserAdmin == true) {
+                                          monthNumber = getKeyFromValue(
+                                              monthsListMap, monthValue);
+                                        } else {
+                                          monthNumber = getKeyFromValue(
+                                              monthsListMap, currentMonth);
+                                        }
 
-                                          composeBodyToUpdateGradeBySTudent(
-                                            event.column.title,
-                                            selectedStudentID!,
-                                            newValue,
-                                            subjectID,
-                                            monthNumber,
-                                          );
-                                        },
-                                        onRowDoubleTap: (event) {
-                                          asignatureIDListener = '';
-                                          asignatureIDListener = event
-                                              .row!.cells['subject']?.value
-                                              .toString();
-                                          print(event
-                                              .row!.cells['subject']!.value
-                                              .toString());
-                                        },
-                                        // onRowChecked:
-                                        //     (PlutoGridOnRowCheckedEvent event) {
-                                        //   asignatureIDListener = event
-                                        //       .row!.cells['subject']?.value;
-                                        //   print(asignatureIDListener);
-                                        //   // print(event
-                                        //   //     .row!.cells['idcomment']?.value);
-                                        // },
-                                        onLoaded:
-                                            (PlutoGridOnLoadedEvent event) {
-                                          gridAStateManager =
-                                              event.stateManager;
-                                          event.stateManager
-                                              .addListener(gridAHandler);
-                                        },
-                                        configuration:
-                                            const PlutoGridConfiguration(
-                                          style: PlutoGridStyleConfig(
-                                            enableColumnBorderVertical: false,
-                                            enableCellBorderVertical: false,
-                                          ),
-                                          columnSize: PlutoGridColumnSizeConfig(
-                                            autoSizeMode:
-                                                PlutoAutoSizeMode.scale,
-                                            resizeMode:
-                                                PlutoResizeMode.pushAndPull,
-                                          ),
-                                        )),
-                                    gridPropsB: PlutoDualGridProps(
-                                      columns: commentsCollumns,
-                                      rows: evaluationComments,
+                                        composeBodyToUpdateGradeBySTudent(
+                                          event.column.title,
+                                          selectedStudentID!,
+                                          newValue,
+                                          subjectID,
+                                          monthNumber,
+                                        );
+                                      },
+                                      onRowDoubleTap: (event) {
+                                        asignatureIDListener = '';
+                                        asignatureIDListener = event
+                                            .row!.cells['subject']?.value
+                                            .toString();
+                                      },
+                                      // onRowChecked:
+                                      //     (PlutoGridOnRowCheckedEvent event) {
+                                      //   asignatureIDListener = event
+                                      //       .row!.cells['subject']?.value;
+                                      //   print(asignatureIDListener);
+                                      //   // print(event
+                                      //   //     .row!.cells['idcomment']?.value);
+                                      // },
+                                      onLoaded: (PlutoGridOnLoadedEvent event) {
+                                        gridAStateManager = event.stateManager;
+                                        // event.stateManager
+                                        //     .addListener(gridAHandler);
+                                      },
                                       configuration:
                                           const PlutoGridConfiguration(
                                         style: PlutoGridStyleConfig(
@@ -640,19 +634,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
                                           resizeMode:
                                               PlutoResizeMode.pushAndPull,
                                         ),
-                                      ),
-                                      onLoaded: (PlutoGridOnLoadedEvent event) {
-                                        gridBStateManager = event.stateManager;
-                                      },
-                                      // onRowChecked:
-                                      //     (PlutoGridOnRowCheckedEvent event) {
-                                      //   print(event
-                                      //       .row!.cells['idcomment']?.value);
-                                      // }
-                                    ),
-                                    display:
-                                        PlutoDualGridDisplayRatio(ratio: 0.8),
-                                  );
+                                      ));
                                 } else {
                                   return const Placeholder(
                                     child: Center(
@@ -665,6 +647,23 @@ class _GradesByStudentState extends State<GradesByStudent> {
                           const SizedBox(
                             width: 10,
                           ),
+                          Expanded(
+                              child: ListView.builder(
+                                  itemCount:
+                                      mergedData.length, //length of comments
+                                  itemBuilder: (context, index) {
+                                    var attribute = mergedData[index];
+                                    return ListTile(
+                                      title: Text(attribute['comment']),
+                                      trailing: Switch(
+                                          value: attribute['active'],
+                                          onChanged: (bool value) {
+                                            setState(() {
+                                              attribute['active'] = value;
+                                            });
+                                          }),
+                                    );
+                                  }))
                         ],
                       );
                     },
@@ -676,7 +675,8 @@ class _GradesByStudentState extends State<GradesByStudent> {
     );
   }
 
-  void loadSelectedStudent(String studentID) {
+  Future<void> loadSelectedStudent(
+      String studentID, int? gradeInt, int month) async {
     selectedStudentList.clear();
 
     selectedStudentList =
@@ -699,5 +699,30 @@ class _GradesByStudentState extends State<GradesByStudent> {
         }));
       }
     });
+
+    commentsAsignatedList =
+        await populateAsignatedComments(gradeInt!, month, true, studentID);
+  }
+
+  Future<List<PlutoRow>> populateAsignatedComments(
+      int grade, month, bool byStudent, String studentid) async {
+    var commentsAsignated =
+        await getCommentsAsignatedToStudent(grade, byStudent, studentid, month);
+
+    // setState(() {
+    mergedData.clear();
+    mergedData =
+        mergeCommentsData(studentsGradesCommentsRows, commentsAsignated);
+
+    List<PlutoRow> rows = mergedData.map((item) {
+      return PlutoRow(cells: {
+        'idcomment': PlutoCell(value: item['idcomment']),
+        'comentname': PlutoCell(value: item['comentname']),
+        'is_active':
+            PlutoCell(value: item['is_active'] ? 'Active' : 'Inactive'),
+      });
+    }).toList();
+    // });
+    return rows;
   }
 }
