@@ -1,4 +1,3 @@
-
 class StudentEval {
   int rateID;
   String studentName;
@@ -13,6 +12,7 @@ class StudentEval {
   int habits_evaluation;
   int outfit;
   int subject;
+  String? subjectName;
   int evaluation;
   int? other;
   String? fulllName;
@@ -31,6 +31,7 @@ class StudentEval {
       this.habits_evaluation,
       this.outfit,
       this.subject,
+      this.subjectName,
       this.evaluation,
       this.other,
       this.fulllName);
@@ -56,6 +57,7 @@ dynamic getEvalFromJSON(List<dynamic> jsonList, bool isByStudent) {
         int habits_evaluation = item['habit_eval'];
         int outfit = item['outfit'];
         int subject = item['subject'];
+        String? subjectName = item['subject_name'];
         int evaluation = item['evaluation'];
         int? other = item['other'];
         studentEval.add(StudentEval(
@@ -72,6 +74,7 @@ dynamic getEvalFromJSON(List<dynamic> jsonList, bool isByStudent) {
             habits_evaluation,
             outfit,
             subject,
+            subjectName,
             evaluation,
             other,
             '$studentName $student1LastName $student2LastName'));
@@ -92,6 +95,7 @@ dynamic getEvalFromJSON(List<dynamic> jsonList, bool isByStudent) {
         int habits_evaluation = item['habit_eval'];
         int outfit = item['outfit'];
         int subject = item['subject'];
+        String? subjectName = item['subject_name'];
         int evaluation = item['evaluation'];
         int? other = item['other'];
         String fullName = item['studentName'];
@@ -109,6 +113,7 @@ dynamic getEvalFromJSON(List<dynamic> jsonList, bool isByStudent) {
             habits_evaluation,
             outfit,
             subject,
+            subjectName,
             evaluation,
             other,
             fullName));

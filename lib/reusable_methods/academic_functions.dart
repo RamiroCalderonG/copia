@@ -213,10 +213,12 @@ Future<List<Map<String, dynamic>>> getCommentsAsignatedToStudent(
       int commentid = item['comment'];
       // var month = item['month'];
       bool active = item['active'];
+      String subject = item['subject'];
       currentValue = {
         'student_rate': evalId,
         'comment': commentid,
-        'active': active
+        'active': active,
+        'subject': subject
       };
       assignatedComments.add(currentValue);
     }
@@ -228,19 +230,40 @@ Future<List<Map<String, dynamic>>> getCommentsAsignatedToStudent(
 }
 
 //To merge actual comments from DB to all list from comments availables
+// List<Map<String, dynamic>> mergeCommentsData(
+//     List<Map<String, dynamic>> allItemAvailables,
+//     List<Map<String, dynamic>> actualData) {
+//   Map<int, bool> isActiveMap = {
+//     for (var item in actualData) item['comment']: item['active']
+//   };
+
+//   return allItemAvailables.map((item) {
+//     int id = int.parse(item['idcomment']);
+//     bool isActive = isActiveMap[id] ?? false;
+//     return {...item, 'is_active': isActive,};
+//   }).toList();
+// }
+
 List<Map<String, dynamic>> mergeCommentsData(
     List<Map<String, dynamic>> allItemAvailables,
     List<Map<String, dynamic>> actualData) {
+  // Create maps for 'active' and 'name2' values keyed by 'comment'
   Map<int, bool> isActiveMap = {
     for (var item in actualData) item['comment']: item['active']
   };
+  Map<int, String> name2Map = {
+    for (var item in actualData) item['comment']: item['subject']
+  };
 
+  // Merge data
   return allItemAvailables.map((item) {
     int id = int.parse(item['idcomment']);
     bool isActive = isActiveMap[id] ?? false;
+    String name2 = name2Map[id] ?? '';
     return {
       ...item,
       'is_active': isActive,
+      'subject': name2,
     };
   }).toList();
 }

@@ -126,9 +126,16 @@ final List<PlutoColumn> assignaturesColumns = <PlutoColumn>[
 
 final List<PlutoColumn> gradesByStudentColumns = [
   PlutoColumn(
+      title: 'Materia',
+      field: 'subject',
+      type: PlutoColumnType.text(),
+      readOnly: true,
+      hide: true),
+  PlutoColumn(
     title: 'Materia',
-    field: 'subject',
+    field: 'subject_name',
     type: PlutoColumnType.text(),
+    frozen: PlutoColumnFrozen.start,
     readOnly: true,
   ),
   PlutoColumn(
