@@ -200,7 +200,7 @@ Future<void> getCommentsForEvals(int grade) async {
 }
 
 Future<List<Map<String, dynamic>>> getCommentsAsignatedToStudent(
-    int grade, bool byStudent, String studentid, int? month) async {
+    int grade, bool byStudent, String? studentid, int? month) async {
   List<Map<String, dynamic>> assignatedComments = [];
   Map<String, dynamic> currentValue = {};
   try {
@@ -214,11 +214,13 @@ Future<List<Map<String, dynamic>>> getCommentsAsignatedToStudent(
       // var month = item['month'];
       bool active = item['active'];
       String subject = item['subject'];
+      String commentName = item['commentName'];
       currentValue = {
         'student_rate': evalId,
         'comment': commentid,
         'active': active,
-        'subject': subject
+        'subject': subject,
+        'commentName': commentName
       };
       assignatedComments.add(currentValue);
     }
@@ -228,21 +230,6 @@ Future<List<Map<String, dynamic>>> getCommentsAsignatedToStudent(
     throw ErrorDescription(e.toString());
   }
 }
-
-//To merge actual comments from DB to all list from comments availables
-// List<Map<String, dynamic>> mergeCommentsData(
-//     List<Map<String, dynamic>> allItemAvailables,
-//     List<Map<String, dynamic>> actualData) {
-//   Map<int, bool> isActiveMap = {
-//     for (var item in actualData) item['comment']: item['active']
-//   };
-
-//   return allItemAvailables.map((item) {
-//     int id = int.parse(item['idcomment']);
-//     bool isActive = isActiveMap[id] ?? false;
-//     return {...item, 'is_active': isActive,};
-//   }).toList();
-// }
 
 List<Map<String, dynamic>> mergeCommentsData(
     List<Map<String, dynamic>> allItemAvailables,

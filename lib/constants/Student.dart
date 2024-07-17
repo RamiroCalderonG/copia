@@ -62,7 +62,7 @@ final List<PlutoColumn> assignaturesColumns = <PlutoColumn>[
   PlutoColumn(
       title: 'Matricula',
       field: 'Matricula',
-      type: PlutoColumnType.number(format: '####'),
+      type: PlutoColumnType.text(),
       readOnly: true,
       width: 100),
   PlutoColumn(

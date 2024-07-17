@@ -23,6 +23,7 @@ List<Map<String, dynamic>> studentGradesBodyToUpgrade =
 List<Map<String, dynamic>> gradesByStudentBodyToUpgrade =
     []; //used at grades_per_student.dart
 List<Map<String, String>> studentsGradesCommentsRows = [];
+List<Map<String, dynamic>> commentsAsignated = [];
 List<PlutoRow> evaluationComments = [];
 
 // Set<Map<String, String>> uniqueStudents = {};

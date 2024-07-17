@@ -724,6 +724,28 @@ Future<dynamic> getStudentsGradesComments(
   }
 }
 
+Future<dynamic> putStudentEvaluationsComments(
+    int evaluationId, commentID, bool ValueToUpdate) async {
+  try {
+    var apiCall = await Requests.patch(
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student/comments',
+      headers: {
+        'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+        'token': currentUser!.token
+      },
+      json: {
+        'comment': commentID,
+        'evaluation': evaluationId,
+        'value': ValueToUpdate,
+      },
+      persistCookies: false,
+    );
+    apiCall.raiseForStatus();
+  } catch (e) {
+    return throw FormatException(e.toString());
+  }
+}
+
 // Future<dynamic> getUserEvents(int userId) async {
 //   var response;
 //   try {

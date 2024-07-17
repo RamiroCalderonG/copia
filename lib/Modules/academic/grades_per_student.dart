@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:intl/intl.dart';
 import 'package:oxschool/Models/Student_eval.dart';
 
@@ -400,8 +401,8 @@ class _GradesByStudentState extends State<GradesByStudent> {
                 Flexible(
                   child: ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red[400],
-                    ),
+                        // backgroundColor: Colors.red[400],
+                        ),
                     onPressed: () async {
                       if (studentGradesBodyToUpgrade.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -511,6 +512,22 @@ class _GradesByStudentState extends State<GradesByStudent> {
               ],
             ),
           ),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Center(
+                child: Text(
+                  'Evaluando a : $selectedStudentName',
+                  style: const TextStyle(
+                      fontFamily: 'Sora',
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue),
+                ),
+              )
+            ],
+          ),
           const Divider(thickness: 1),
           Container(
               width: MediaQuery.of(context).size.width,
@@ -587,14 +604,6 @@ class _GradesByStudentState extends State<GradesByStudent> {
                                   BoxConstraints constraints) {
                                 return Column(
                                   children: [
-                                    Text(
-                                      'Evaluando a : $selectedStudentName',
-                                      style: const TextStyle(
-                                          fontFamily: 'Sora',
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.blue),
-                                    ),
                                     Expanded(
                                       child: selectedStudentRows.isNotEmpty
                                           ? PlutoGrid(
@@ -633,10 +642,9 @@ class _GradesByStudentState extends State<GradesByStudent> {
                                                     .cells['subject_name']
                                                     ?.value
                                                     .toString();
-
                                                 await showCommentsDialog(
                                                     context,
-                                                    mergedData,
+                                                    commentsAsignated,
                                                     asignatureNameListener!);
                                               },
                                               onLoaded: (PlutoGridOnLoadedEvent
@@ -671,114 +679,6 @@ class _GradesByStudentState extends State<GradesByStudent> {
                               },
                             ),
                           ),
-                          // Expanded(
-                          //     flex: 3,
-                          //     child: LayoutBuilder(builder:
-                          //         (BuildContext context,
-                          //             BoxConstraints constraints) {
-                          //       if (selectedStudentRows.isNotEmpty) {
-                          //         return Column(children: [
-                          //           PlutoGrid(
-                          //             columns: gradesByStudentColumns,
-                          //             rows: selectedStudentRows,
-                          //             onChanged: (event) {
-                          //               var newValue = validateNewGradeValue(
-                          //                   event.value.toString(),
-                          //                   event.column.title);
-
-                          //               final subjectID =
-                          //                   event.row.cells['subject']?.value;
-                          //               if (isUserAdmin == true) {
-                          //                 monthNumber = getKeyFromValue(
-                          //                     monthsListMap, monthValue);
-                          //               } else {
-                          //                 monthNumber = getKeyFromValue(
-                          //                     monthsListMap, currentMonth);
-                          //               }
-
-                          //               composeBodyToUpdateGradeBySTudent(
-                          //                 event.column.title,
-                          //                 selectedStudentID!,
-                          //                 newValue,
-                          //                 subjectID,
-                          //                 monthNumber,
-                          //               );
-                          //             },
-                          //             onRowDoubleTap: (event) async {
-                          //               asignatureNameListener = '';
-                          //               asignatureNameListener = event
-                          //                   .row!.cells['subject_name']?.value
-                          //                   .toString();
-                          //               await showDialog(
-                          //                   context: context,
-                          //                   builder: (BuildContext context) {
-                          //                     return AlertDialog(
-                          //                       title: const Text(''),
-                          //                       content: SingleChildScrollView(
-                          //                         child: ListBody(
-                          //                           children: <Widget>[
-                          //                             Text(
-                          //                                 'Subject: $asignatureNameListener'),
-                          //                             Text(
-                          //                                 'Grade: $asignatureNameListener'),
-                          //                           ],
-                          //                         ),
-                          //                       ),
-                          //                       actions: <Widget>[
-                          //                         TextButton(
-                          //                           child: const Text('Close'),
-                          //                           onPressed: () {
-                          //                             Navigator.of(context)
-                          //                                 .pop();
-                          //                           },
-                          //                         ),
-                          //                       ],
-                          //                     );
-                          //                   });
-                          //             },
-
-                          //             // onRowChecked:
-                          //             //     (PlutoGridOnRowCheckedEvent event) {
-                          //             //   asignatureIDListener = event
-                          //             //       .row!.cells['subject']?.value;
-                          //             //   print(asignatureIDListener);
-                          //             //   // print(event
-                          //             //   //     .row!.cells['idcomment']?.value);
-                          //             // },
-                          //             onLoaded: (PlutoGridOnLoadedEvent event) {
-                          //               gridAStateManager = event.stateManager;
-                          //               // event.stateManager
-                          //               //     .addListener(gridAHandler);
-                          //             },
-                          //             configuration:
-                          //                 const PlutoGridConfiguration(
-                          //               style: PlutoGridStyleConfig(
-                          //                 enableColumnBorderVertical: false,
-                          //                 enableCellBorderVertical: false,
-                          //               ),
-                          //               columnSize: PlutoGridColumnSizeConfig(
-                          //                 autoSizeMode: PlutoAutoSizeMode.scale,
-                          //                 resizeMode:
-                          //                     PlutoResizeMode.pushAndPull,
-                          //               ),
-                          //             ),
-                          //           ),
-                          //           Text('data'),
-
-                          //           // Expanded(
-                          //           //   child: Text(
-                          //           //       'Camputra de : $selectedStudentName'),
-                          //           // ),
-                          //         ]);
-                          //       } else {
-                          //         return const Placeholder(
-                          //           child: Center(
-                          //             child: Text(
-                          //                 'Seleccione un alumno dando doble click para evaluar'),
-                          //           ),
-                          //         );
-                          //       }
-                          //     })),
                           const SizedBox(
                             width: 10,
                           ),
@@ -793,58 +693,58 @@ class _GradesByStudentState extends State<GradesByStudent> {
     );
   }
 
-  Widget commentsManagerWidget(List<Map<String, dynamic>> dataList) {
-    return Expanded(
-        child: ListView.builder(
-      itemCount: dataList.length,
-      itemBuilder: (context, index) {
-        final comment = dataList[index];
-        return ListTile(
-          title: Text(comment['commentname']),
-          trailing: Switch(
-            value: comment['is_active'],
-            onChanged: (bool newValue) {
-              // Handle the switch toggle logic here if necessary
-            },
-          ),
-        );
-      },
-    ));
+  List<Map<String, dynamic>> filterCommentsBySubject(
+    List<Map<String, dynamic>> comments,
+    String subjectName,
+  ) {
+    return comments
+        .where((comment) => comment['subject'] == subjectName)
+        .toList();
   }
 
   Future<void> showCommentsDialog(BuildContext context,
       List<Map<String, dynamic>> comments, String subjectName) async {
+    final filteredComments = filterCommentsBySubject(comments, subjectName);
+
     await showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Asigna comentarios'),
+          title: Text(
+              'Asigna comentarios:\nAlumno: $selectedStudentName\nMateria: $subjectName'),
+          titleTextStyle: TextStyle(
+              fontFamily: 'Sora',
+              fontSize: 20,
+              color: FlutterFlowTheme.of(context).primaryText),
           content: SingleChildScrollView(
-            child: Container(
-              width: 400,
-              child: Column(
-                children: comments.map((comment) {
-                  return ListTile(
-                      title: Text(comment['comentname']),
-                      trailing: comment['subject'] == subjectName
-                          ? Checkbox(
-                              value: comment['is_active'],
-                              onChanged: (newValue) {
-                                // Update the value in the original list (if needed)
-                                comment['is_active'] = newValue;
-                              },
-                            )
-                          : Checkbox(
-                              value: comment['is_active'],
-                              onChanged: (newValue) {
-                                // Update the value in the original list (if needed)
-                                comment['is_active'] = newValue;
-                              },
-                            ));
-                }).toList(),
-              ),
+              child: SizedBox(
+            width: MediaQuery.of(context).size.width / 3,
+            child: Column(
+              children: filteredComments.map((comment) {
+                return StatefulBuilder(builder: (context, setState) {
+                  return Column(
+                    children: [
+                      ListTile(
+                        title: Text(comment[
+                            'commentName']), // Assuming 'comment' instead of 'comentname'
+                        trailing: Checkbox(
+                            value: comment['active'],
+                            onChanged: (newValue) async {
+                              var studentRateId = comment['student_rate'];
+                              var commentId = comment['comment'];
+                              var activevalue = newValue;
+
+                              await putStudentEvaluationsComments(
+                                  studentRateId, commentId, activevalue!);
+                              setState(() => comment['active'] = newValue!);
+                            }),
+                      )
+                    ],
+                  );
+                });
+              }).toList(),
             ),
-          ),
+          )),
           actions: <Widget>[
             TextButton(
               child: const Text('Close'),
@@ -890,22 +790,23 @@ class _GradesByStudentState extends State<GradesByStudent> {
 
   Future<List<PlutoRow>> populateAsignatedComments(
       int grade, month, bool byStudent, String studentid) async {
-    var commentsAsignated =
+    commentsAsignated.clear();
+    commentsAsignated =
         await getCommentsAsignatedToStudent(grade, byStudent, studentid, month);
 
     // setState(() {
-    mergedData.clear();
-    mergedData =
-        mergeCommentsData(studentsGradesCommentsRows, commentsAsignated);
+    // mergedData.clear();
+    // mergedData =
+    //     mergeCommentsData(studentsGradesCommentsRows, commentsAsignated);
 
-    List<PlutoRow> rows = mergedData.map((item) {
-      return PlutoRow(cells: {
-        'idcomment': PlutoCell(value: item['idcomment']),
-        'comentname': PlutoCell(value: item['comentname']),
-        'is_active':
-            PlutoCell(value: item['is_active'] ? 'Active' : 'Inactive'),
-      });
-    }).toList();
+    // List<PlutoRow> rows = mergedData.map((item) {
+    //   return PlutoRow(cells: {
+    //     'idcomment': PlutoCell(value: item['idcomment']),
+    //     'comentname': PlutoCell(value: item['comentname']),
+    //     'is_active':
+    //         PlutoCell(value: item['is_active'] ? 'Active' : 'Inactive'),
+    //   });
+    // }).toList();
     // });
     return rows;
   }

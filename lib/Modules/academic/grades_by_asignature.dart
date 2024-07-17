@@ -34,6 +34,10 @@ List<PlutoRow> rows = [];
 class _GradesByAsignatureState extends State<GradesByAsignature> {
   String groupSelected = ''; // = oneTeacherGroups.first.toString();
   String gradeSelected = ''; // = oneTeacherAssignatures.first;
+  String? asignatureNameListener;
+  String? selectedStudentName;
+  var gradeInt;
+  int? monthNumber;
 
   @override
   void initState() {
@@ -64,12 +68,6 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
             'Nombre': PlutoCell(value: item.studentName),
             'Apellido paterno': PlutoCell(value: item.student1LastName),
             'Apellido materno': PlutoCell(value: item.student2LastName),
-            // 'Calif': PlutoCell(value: item.evaluation),
-            // 'Conducta': PlutoCell(value: item.discipline),
-            // 'Uniforme': PlutoCell(value: item.outfit),
-            // 'Ausencia': PlutoCell(value: item.absence),
-            // 'Tareas': PlutoCell(value: item.homework),
-            // 'Comentario': PlutoCell(value: item.comment),
           },
         );
       }).toList();
@@ -188,72 +186,6 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
       },
     );
   }
-
-  // final List<PlutoColumn> assignaturesColumns = <PlutoColumn>[
-  //   PlutoColumn(
-  //       title: 'Matricula',
-  //       field: 'Matricula',
-  //       type: PlutoColumnType.number(format: '####'),
-  //       readOnly: true,
-  //       width: 100),
-  //   PlutoColumn(
-  //     title: 'Nombre del alumno',
-  //     field: 'Nombre',
-  //     type: PlutoColumnType.text(),
-  //     readOnly: true,
-  //     sort: PlutoColumnSort.ascending,
-  //   ),
-  //   PlutoColumn(
-  //       title: 'Apellido paterno',
-  //       field: 'Apellido paterno',
-  //       type: PlutoColumnType.text(),
-  //       readOnly: true,
-  //       sort: PlutoColumnSort.ascending,
-  //       width: 150),
-  //   PlutoColumn(
-  //       title: 'Apellido materno',
-  //       field: 'Apellido materno',
-  //       type: PlutoColumnType.text(),
-  //       readOnly: true,
-  //       sort: PlutoColumnSort.ascending,
-  //       width: 150),
-  //   PlutoColumn(
-  //       title: 'Calif',
-  //       field: 'Calif',
-  //       type: PlutoColumnType.number(negative: false),
-  //       readOnly: false,
-  //       width: 100),
-  //   PlutoColumn(
-  //       title: 'Faltas',
-  //       field: 'Ausencia',
-  //       type: PlutoColumnType.number(negative: false, format: '#'),
-  //       readOnly: false,
-  //       width: 100),
-  //   PlutoColumn(
-  //       title: 'Tareas',
-  //       field: 'Tareas',
-  //       type: PlutoColumnType.number(negative: false),
-  //       readOnly: false,
-  //       width: 100),
-  //   PlutoColumn(
-  //       title: 'Conducta',
-  //       field: 'Conducta',
-  //       type: PlutoColumnType.number(negative: false),
-  //       readOnly: false,
-  //       width: 100),
-  //   PlutoColumn(
-  //       title: 'Uniforme',
-  //       field: 'Uniforme',
-  //       type: PlutoColumnType.number(negative: false),
-  //       readOnly: false,
-  //       width: 100),
-  //   PlutoColumn(
-  //       title: 'Comentarios',
-  //       field: 'Comentarios',
-  //       type: PlutoColumnType.number(negative: false),
-  //       readOnly: false,
-  //       width: 100),
-  // ];
 
   Widget _buildGradesbyAssignature() {
     String dropDownValue = ''; //oneTeacherAssignatures.first;
@@ -430,8 +362,8 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                 Flexible(
                   child: ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red[400],
-                    ),
+                        // backgroundColor: Colors.red[400],
+                        ),
                     onPressed: () async {
                       if (studentGradesBodyToUpgrade.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -489,8 +421,6 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                             studentList.clear();
                           }
 
-                          int? monthNumber;
-
                           if (groupSelected.isEmpty || groupSelected == '') {
                             groupSelected = oneTeacherGroups.first.toString();
                           }
@@ -511,7 +441,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                             monthNumber =
                                 getKeyFromValue(monthsListMap, currentMonth);
                           }
-                          var gradeInt =
+                          gradeInt =
                               getKeyFromValue(teacherGradesMap, gradeSelected);
 
                           var assignatureID =
@@ -577,6 +507,33 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                             composeUpdateStudentGradesBody(
                                 event.column.title, newValue, event.rowIdx);
                           },
+                          onRowSecondaryTap: (event) async {
+                            asignatureNameListener = '';
+                            asignatureNameListener = subjectSelected;
+                            var studentID = event.row.cells['Matricula']?.value;
+                            gradeInt = getKeyFromValue(
+                                teacherGradesMap, gradeSelected);
+                            if (isUserAdmin == true) {
+                              monthNumber =
+                                  getKeyFromValue(monthsListMap, monthValue);
+                            } else {
+                              monthNumber =
+                                  getKeyFromValue(monthsListMap, currentMonth);
+                            }
+                            commentsAsignated.clear();
+                            commentsAsignated =
+                                await getCommentsAsignatedToStudent(
+                                    gradeInt, true, studentID, monthNumber);
+
+                            await showCommentsDialog(context, commentsAsignated,
+                                asignatureNameListener!);
+                          },
+                          // onRowDoubleTap: (event) async {
+                          //   asignatureNameListener = '';
+                          //   asignatureNameListener = subjectSelected;
+                          //   await showCommentsDialog(context, commentsAsignated,
+                          //       asignatureNameListener!);
+                          // },
                           configuration: const PlutoGridConfiguration(),
                           createFooter: (stateManager) {
                             stateManager.setPageSize(30,
@@ -589,6 +546,71 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
               })),
         ],
       ),
+    );
+  }
+
+  List<Map<String, dynamic>> filterCommentsBySubject(
+    List<Map<String, dynamic>> comments,
+    String subjectName,
+  ) {
+    return comments
+        .where((comment) => comment['subject'] == subjectName)
+        .toList();
+  }
+
+  Future<void> showCommentsDialog(BuildContext context,
+      List<Map<String, dynamic>> comments, String subjectName) async {
+    final filteredComments = filterCommentsBySubject(comments, subjectName);
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+              'Asigna comentarios:\nAlumno: $selectedStudentName\nMateria: $subjectName'),
+          titleTextStyle: TextStyle(
+              fontFamily: 'Sora',
+              fontSize: 20,
+              color: FlutterFlowTheme.of(context).primaryText),
+          content: SingleChildScrollView(
+              child: SizedBox(
+            width: MediaQuery.of(context).size.width / 3,
+            child: Column(
+              children: filteredComments.map((comment) {
+                return StatefulBuilder(builder: (context, setState) {
+                  return Column(
+                    children: [
+                      ListTile(
+                        title: Text(comment[
+                            'commentName']), // Assuming 'comment' instead of 'comentname'
+                        trailing: Checkbox(
+                            value: comment['active'],
+                            onChanged: (newValue) async {
+                              var studentRateId = comment['student_rate'];
+                              var commentId = comment['comment'];
+                              var activevalue = newValue;
+
+                              await putStudentEvaluationsComments(
+                                  studentRateId, commentId, activevalue!);
+                              setState(() => comment['active'] = newValue!);
+                            }),
+                      )
+                    ],
+                  );
+                });
+              }).toList(),
+            ),
+          )),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Close'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
