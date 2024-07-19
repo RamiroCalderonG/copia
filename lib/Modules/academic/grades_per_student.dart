@@ -45,8 +45,12 @@ class _GradesByStudentState extends State<GradesByStudent> {
   Key? currentRowKey;
   Timer? _debounce;
   String? asignatureNameListener;
-  String? selectedStudentName;
+  String selectedStudentName = '';
   var gradeInt;
+  int? monthNumber;
+  // int? monthNumber;
+  String dropDownValue = ''; //oneTeacherAssignatures.first;
+  int? assignatureID;
 
   String? selectedStudentID;
 
@@ -252,10 +256,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
   }
 
   Widget _buildGradesPerStudent() {
-    String dropDownValue = ''; //oneTeacherAssignatures.first;
-    final colorScheme = Theme.of(context).colorScheme;
-    final primaryColor = colorScheme.primary;
-    final secondaryColor = colorScheme.secondary;
+    //String dropDownValue = ''; //oneTeacherAssignatures.first;
 
     final DropdownMenu monthSelectorButton = DropdownMenu<String>(
       initialSelection: monthValue, //monthsList.first,
@@ -355,35 +356,8 @@ class _GradesByStudentState extends State<GradesByStudent> {
                 Flexible(
                   child: ElevatedButton.icon(
                     onPressed: () async {
-                      if (studentList.isNotEmpty) {
-                        studentList.clear();
-                      }
-
-                      int? monthNumber;
-
-                      if (groupSelected.isEmpty || groupSelected == '') {
-                        groupSelected = oneTeacherGroups.first.toString();
-                      }
-                      if (gradeSelected.isEmpty || gradeSelected == '') {
-                        gradeSelected = oneTeacherGrades.first;
-                      }
-                      if (dropDownValue.isEmpty || dropDownValue == '') {
-                        dropDownValue = oneTeacherAssignatures.first;
-                      }
-                      if (monthValue.isEmpty) {
-                        monthValue = monthsList.first;
-                      }
-
-                      if (isUserAdmin == true) {
-                        monthNumber =
-                            getKeyFromValue(monthsListMap, monthValue);
-                      } else {
-                        monthNumber =
-                            getKeyFromValue(monthsListMap, currentMonth);
-                      }
-                      gradeInt =
-                          getKeyFromValue(teacherGradesMap, gradeSelected);
-
+                      selectedStudentName = '';
+                      validator();
                       searchBUttonAction(
                         groupSelected,
                         gradeInt.toString(),
@@ -482,7 +456,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
                           }
                           var gradeInt =
                               getKeyFromValue(teacherGradesMap, gradeSelected);
-
+                          // validator();
                           searchBUttonAction(
                             groupSelected,
                             gradeInt.toString(),
@@ -517,14 +491,23 @@ class _GradesByStudentState extends State<GradesByStudent> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Center(
-                child: Text(
-                  'Evaluando a : $selectedStudentName',
-                  style: const TextStyle(
-                      fontFamily: 'Sora',
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.blue),
-                ),
+                child: selectedStudentName.isNotEmpty
+                    ? Text(
+                        'Evaluando a : $selectedStudentName',
+                        style: const TextStyle(
+                            fontFamily: 'Sora',
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue),
+                      )
+                    : const Text(
+                        ' ',
+                        style: TextStyle(
+                            fontFamily: 'Sora',
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue),
+                      ),
               )
             ],
           ),
@@ -567,11 +550,12 @@ class _GradesByStudentState extends State<GradesByStudent> {
                                       monthNumber = getKeyFromValue(
                                           monthsListMap, currentMonth);
                                     }
+                                    // validator();
 
                                     selectedStudentID =
                                         event.row.cells['studentID']!.value;
                                     selectedStudentName = event
-                                        .row!.cells['studentName']?.value
+                                        .row.cells['studentName']!.value
                                         .toString();
 
                                     await loadSelectedStudent(
@@ -617,16 +601,17 @@ class _GradesByStudentState extends State<GradesByStudent> {
 
                                                 final subjectID = event.row
                                                     .cells['subject']?.value;
-                                                if (isUserAdmin == true) {
-                                                  monthNumber = getKeyFromValue(
-                                                      monthsListMap,
-                                                      monthValue);
-                                                } else {
-                                                  monthNumber = getKeyFromValue(
-                                                      monthsListMap,
-                                                      currentMonth);
-                                                }
+                                                // if (isUserAdmin == true) {
+                                                //   monthNumber = getKeyFromValue(
+                                                //       monthsListMap,
+                                                //       monthValue);
+                                                // } else {
+                                                //   monthNumber = getKeyFromValue(
+                                                //       monthsListMap,
+                                                //       currentMonth);
+                                                // }
 
+                                                validator();
                                                 composeBodyToUpdateGradeBySTudent(
                                                   event.column.title,
                                                   selectedStudentID!,
@@ -691,6 +676,34 @@ class _GradesByStudentState extends State<GradesByStudent> {
         ],
       ),
     );
+  }
+
+  void validator() {
+    if (studentList.isNotEmpty) {
+      studentList.clear();
+    }
+
+    if (groupSelected.isEmpty || groupSelected == '') {
+      groupSelected = oneTeacherGroups.first.toString();
+    }
+    if (gradeSelected.isEmpty || gradeSelected == '') {
+      gradeSelected = oneTeacherGrades.first;
+    }
+    if (dropDownValue.isEmpty || dropDownValue == '') {
+      dropDownValue = oneTeacherAssignatures.first;
+    }
+    if (monthValue.isEmpty) {
+      monthValue = monthsList.first;
+    }
+
+    if (isUserAdmin == true) {
+      monthNumber = getKeyFromValue(monthsListMap, monthValue);
+    } else {
+      monthNumber = getKeyFromValue(monthsListMap, currentMonth);
+    }
+    gradeInt = getKeyFromValue(teacherGradesMap, gradeSelected);
+
+    assignatureID = getKeyFromValue(assignaturesMap, dropDownValue);
   }
 
   List<Map<String, dynamic>> filterCommentsBySubject(

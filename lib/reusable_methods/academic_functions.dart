@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:oxschool/Models/Student.dart';
 import 'package:oxschool/Models/Student_eval.dart';
 import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/reusable_methods/reusable_functions.dart';
@@ -85,18 +86,12 @@ Future<void> getSingleTeacherAssignatures(List<dynamic> apiResponse) async {
   }
 }
 
-Future<void> getStudentsByTeacher(List<dynamic> apiResponse) async {
-  List<String> originalList = [];
-  if (apiResponse.isNotEmpty) {
-    if (oneTeacherStudents.isNotEmpty) {
-      oneTeacherStudents.clear();
-    }
-    for (var i = 0; i < apiResponse.length; i++) {
-      String studentName = apiResponse[i]['student_name'];
-      originalList.add(studentName);
-      oneTeacherStudents = originalList.toSet().toList();
-    }
-  }
+Future<List<dynamic>> getStudentsByTeacher(
+    int employeeNumber, String selectedCycle, roleName) async {
+  var response = await getStudentsByRole(employeeNumber, roleName);
+  List<dynamic> jsonList = json.decode(response);
+
+  return jsonList;
 }
 
 Future<void> getStudentsIDByTeacher(List<dynamic> apiResponse) async {

@@ -116,12 +116,12 @@ final List<PlutoColumn> assignaturesColumns = <PlutoColumn>[
       type: PlutoColumnType.number(negative: false),
       readOnly: false,
       width: 100),
-  PlutoColumn(
-      title: 'Comentarios',
-      field: 'Comentarios',
-      type: PlutoColumnType.select(commentStringEval, enableColumnFilter: true),
-      readOnly: false,
-      width: 200),
+  // PlutoColumn(
+  //     title: 'Comentarios',
+  //     field: 'Comentarios',
+  //     type: PlutoColumnType.select(commentStringEval, enableColumnFilter: true),
+  //     readOnly: false,
+  //     width: 200),
 ];
 
 final List<PlutoColumn> gradesByStudentColumns = [

@@ -38,6 +38,10 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
   String? selectedStudentName;
   var gradeInt;
   int? monthNumber;
+  String monthValue = ''; //monthsList.first;
+  // int? monthNumber;
+  String dropDownValue = ''; //oneTeacherAssignatures.first;
+  int? assignatureID;
 
   @override
   void initState() {
@@ -188,9 +192,6 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
   }
 
   Widget _buildGradesbyAssignature() {
-    String dropDownValue = ''; //oneTeacherAssignatures.first;
-    String monthValue = ''; //monthsList.first;
-
     final DropdownMenu monthSelectorButton = DropdownMenu<String>(
       initialSelection: monthsList.first,
       onSelected: (String? value) {
@@ -316,37 +317,36 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                 Flexible(
                   child: ElevatedButton.icon(
                     onPressed: () async {
-                      if (studentList.isNotEmpty) {
-                        studentList.clear();
-                      }
+                      // if (studentList.isNotEmpty) {
+                      //   studentList.clear();
+                      // }
 
-                      int? monthNumber;
+                      // if (groupSelected.isEmpty || groupSelected == '') {
+                      //   groupSelected = oneTeacherGroups.first.toString();
+                      // }
+                      // if (gradeSelected.isEmpty || gradeSelected == '') {
+                      //   gradeSelected = oneTeacherGrades.first;
+                      // }
+                      // if (dropDownValue.isEmpty || dropDownValue == '') {
+                      //   dropDownValue = oneTeacherAssignatures.first;
+                      // }
+                      // if (monthValue.isEmpty) {
+                      //   monthValue = monthsList.first;
+                      // }
 
-                      if (groupSelected.isEmpty || groupSelected == '') {
-                        groupSelected = oneTeacherGroups.first.toString();
-                      }
-                      if (gradeSelected.isEmpty || gradeSelected == '') {
-                        gradeSelected = oneTeacherGrades.first;
-                      }
-                      if (dropDownValue.isEmpty || dropDownValue == '') {
-                        dropDownValue = oneTeacherAssignatures.first;
-                      }
-                      if (monthValue.isEmpty) {
-                        monthValue = monthsList.first;
-                      }
+                      // if (isUserAdmin == true) {
+                      //   monthNumber =
+                      //       getKeyFromValue(monthsListMap, monthValue);
+                      // } else {
+                      //   monthNumber =
+                      //       getKeyFromValue(monthsListMap, currentMonth);
+                      // }
+                      // var gradeInt =
+                      //     getKeyFromValue(teacherGradesMap, gradeSelected);
 
-                      if (isUserAdmin == true) {
-                        monthNumber =
-                            getKeyFromValue(monthsListMap, monthValue);
-                      } else {
-                        monthNumber =
-                            getKeyFromValue(monthsListMap, currentMonth);
-                      }
-                      var gradeInt =
-                          getKeyFromValue(teacherGradesMap, gradeSelected);
-
-                      var assignatureID =
-                          getKeyFromValue(assignaturesMap, dropDownValue);
+                      // var assignatureID =
+                      //     getKeyFromValue(assignaturesMap, dropDownValue);
+                      validator();
 
                       searchBUttonAction(
                         groupSelected,
@@ -417,32 +417,33 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                               ),
                               duration: const Duration(milliseconds: 6000),
                               backgroundColor: Colors.green[200]));
-                          if (studentList.isNotEmpty) {
-                            studentList.clear();
-                          }
+                          // if (studentList.isNotEmpty) {
+                          //   studentList.clear();
+                          // }
 
-                          if (groupSelected.isEmpty || groupSelected == '') {
-                            groupSelected = oneTeacherGroups.first.toString();
-                          }
-                          if (gradeSelected.isEmpty || gradeSelected == '') {
-                            gradeSelected = oneTeacherGrades.first;
-                          }
-                          if (dropDownValue.isEmpty || dropDownValue == '') {
-                            dropDownValue = oneTeacherAssignatures.first;
-                          }
-                          if (monthValue.isEmpty) {
-                            monthValue = monthsList.first;
-                          }
+                          // if (groupSelected.isEmpty || groupSelected == '') {
+                          //   groupSelected = oneTeacherGroups.first.toString();
+                          // }
+                          // if (gradeSelected.isEmpty || gradeSelected == '') {
+                          //   gradeSelected = oneTeacherGrades.first;
+                          // }
+                          // if (dropDownValue.isEmpty || dropDownValue == '') {
+                          //   dropDownValue = oneTeacherAssignatures.first;
+                          // }
+                          // if (monthValue.isEmpty) {
+                          //   monthValue = monthsList.first;
+                          // }
 
-                          if (isUserAdmin == true) {
-                            monthNumber =
-                                getKeyFromValue(monthsListMap, monthValue);
-                          } else {
-                            monthNumber =
-                                getKeyFromValue(monthsListMap, currentMonth);
-                          }
-                          gradeInt =
-                              getKeyFromValue(teacherGradesMap, gradeSelected);
+                          // if (isUserAdmin == true) {
+                          //   monthNumber =
+                          //       getKeyFromValue(monthsListMap, monthValue);
+                          // } else {
+                          //   monthNumber =
+                          //       getKeyFromValue(monthsListMap, currentMonth);
+                          // }
+                          // gradeInt =
+                          //     getKeyFromValue(teacherGradesMap, gradeSelected);
+                          validator();
 
                           var assignatureID =
                               getKeyFromValue(assignaturesMap, dropDownValue);
@@ -511,22 +512,16 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                             asignatureNameListener = '';
                             asignatureNameListener = subjectSelected;
                             var studentID = event.row.cells['Matricula']?.value;
-                            gradeInt = getKeyFromValue(
-                                teacherGradesMap, gradeSelected);
-                            if (isUserAdmin == true) {
-                              monthNumber =
-                                  getKeyFromValue(monthsListMap, monthValue);
-                            } else {
-                              monthNumber =
-                                  getKeyFromValue(monthsListMap, currentMonth);
-                            }
+                            var selectedStudentName =
+                                event.row.cells['Nombre']?.value;
+                            validator();
                             commentsAsignated.clear();
                             commentsAsignated =
                                 await getCommentsAsignatedToStudent(
                                     gradeInt, true, studentID, monthNumber);
 
                             await showCommentsDialog(context, commentsAsignated,
-                                asignatureNameListener!);
+                                asignatureNameListener!, selectedStudentName);
                           },
                           // onRowDoubleTap: (event) async {
                           //   asignatureNameListener = '';
@@ -549,6 +544,34 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
     );
   }
 
+  void validator() {
+    if (studentList.isNotEmpty) {
+      studentList.clear();
+    }
+
+    if (groupSelected.isEmpty || groupSelected == '') {
+      groupSelected = oneTeacherGroups.first.toString();
+    }
+    if (gradeSelected.isEmpty || gradeSelected == '') {
+      gradeSelected = oneTeacherGrades.first;
+    }
+    if (dropDownValue.isEmpty || dropDownValue == '') {
+      dropDownValue = oneTeacherAssignatures.first;
+    }
+    if (monthValue.isEmpty) {
+      monthValue = monthsList.first;
+    }
+
+    if (isUserAdmin == true) {
+      monthNumber = getKeyFromValue(monthsListMap, monthValue);
+    } else {
+      monthNumber = getKeyFromValue(monthsListMap, currentMonth);
+    }
+    gradeInt = getKeyFromValue(teacherGradesMap, gradeSelected);
+
+    assignatureID = getKeyFromValue(assignaturesMap, dropDownValue);
+  }
+
   List<Map<String, dynamic>> filterCommentsBySubject(
     List<Map<String, dynamic>> comments,
     String subjectName,
@@ -558,8 +581,11 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
         .toList();
   }
 
-  Future<void> showCommentsDialog(BuildContext context,
-      List<Map<String, dynamic>> comments, String subjectName) async {
+  Future<void> showCommentsDialog(
+      BuildContext context,
+      List<Map<String, dynamic>> comments,
+      String subjectName,
+      selectedStudentName) async {
     final filteredComments = filterCommentsBySubject(comments, subjectName);
 
     await showDialog(
@@ -567,7 +593,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text(
-              'Asigna comentarios:\nAlumno: $selectedStudentName\nMateria: $subjectName'),
+              'Asigna comentarios\nAlumno: $selectedStudentName\nMateria: $subjectName'),
           titleTextStyle: TextStyle(
               fontFamily: 'Sora',
               fontSize: 20,
@@ -580,6 +606,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                 return StatefulBuilder(builder: (context, setState) {
                   return Column(
                     children: [
+                      const Divider(),
                       ListTile(
                         title: Text(comment[
                             'commentName']), // Assuming 'comment' instead of 'comentname'

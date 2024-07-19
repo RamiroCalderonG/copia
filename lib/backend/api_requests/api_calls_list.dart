@@ -1,4 +1,5 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:get/get_connect/http/src/request/request.dart';
 
 import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/constants/connection.dart';
@@ -741,6 +742,67 @@ Future<dynamic> putStudentEvaluationsComments(
       persistCookies: false,
     );
     apiCall.raiseForStatus();
+  } catch (e) {
+    return throw FormatException(e.toString());
+  }
+}
+
+//NOT USING FOR NOW
+Future<dynamic> validateUserInformation(
+    int employeeNumber, String valueToReturn, keyTovalidate) async {
+  try {
+    var apiCall = await Requests.get(
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/****',
+      headers: {
+        'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+        'token': currentUser!.token
+      },
+      json: {'employee': employeeNumber, '$keyTovalidate': valueToReturn},
+      persistCookies: false,
+    );
+    apiCall.raiseForStatus();
+  } catch (e) {
+    return throw FormatException(e.toString());
+  }
+}
+
+Future<dynamic> getStudentsByRole(int employeeNumber, String userRole) async {
+  try {
+    var apiCall = await Requests.get(
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/student',
+      headers: {
+        'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+        'token': currentUser!.token
+      },
+      queryParameters: {
+        'role': 1,
+        'detail': 'List',
+        'employee': employeeNumber
+      },
+      persistCookies: false,
+    );
+
+    apiCall.raiseForStatus();
+    return apiCall.body;
+  } catch (e) {
+    return throw FormatException(e.toString());
+  }
+}
+
+//Can be used to get more than one student if needed
+Future<dynamic> getFodac27History(
+    String cycle, String? studentID, bool isByStudent) async {
+  try {
+    var apiCall = await Requests.get(
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/fodac27/student',
+      headers: {
+        'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+        'token': currentUser!.token
+      },
+      persistCookies: false,
+    );
+    apiCall.raiseForStatus();
+    return apiCall.body;
   } catch (e) {
     return throw FormatException(e.toString());
   }
