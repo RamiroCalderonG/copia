@@ -4,13 +4,15 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:oxschool/flutter_flow/flutter_flow_theme.dart';
 
-void showEmptyFieldAlertDialog(BuildContext context) {
+void showEmptyFieldAlertDialog(BuildContext context, String contentText) {
   showDialog(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
         title: const Text('Campo vacio'),
-        content: const Text('Por favor ingrese un valor que sea válido.'),
+        content: Text(contentText
+            // 'Por favor ingrese un valor que sea válido.'
+            ),
         actions: [
           TextButton(
             onPressed: () {

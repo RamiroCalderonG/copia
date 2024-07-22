@@ -701,7 +701,8 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
                                 }
                                 // });
                               } else {
-                                showEmptyFieldAlertDialog(context);
+                                showEmptyFieldAlertDialog(
+                                    context, 'Campo vacio, favor de verificar');
                                 setState(() {
                                   isLoading = false;
                                 });

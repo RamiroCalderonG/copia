@@ -282,7 +282,8 @@ class _FichaDeSaludState extends State<FichaDeSalud>
                       ),
                       onFieldSubmitted: (query) async {
                         if (query.trim().isEmpty) {
-                          showEmptyFieldAlertDialog(context);
+                          showEmptyFieldAlertDialog(
+                              context, 'Campo vacio, verificar');
                           // Show an error message or perform any action for empty input
                           return;
                         }

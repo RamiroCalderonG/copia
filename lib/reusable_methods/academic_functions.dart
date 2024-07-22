@@ -1,11 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:oxschool/Models/Student.dart';
+
 import 'package:oxschool/Models/Student_eval.dart';
 import 'package:oxschool/constants/User.dart';
-import 'package:oxschool/reusable_methods/reusable_functions.dart';
 
 import '../backend/api_requests/api_calls_list.dart';
 
@@ -330,6 +328,34 @@ void composeUpdateStudentGradesBody(String key, dynamic value, int rowIndex) {
       studentGradesBodyToUpgrade.add({'id': idToupdate, key: value});
     }
   }
+}
+
+Future<String> createFodac27Record(String date, String studentID, String cycle,
+    String observations, int employeeNumber, int subject) async {
+  var responseCode = await postFodac27Record(
+      date, studentID, cycle, observations, employeeNumber, subject);
+
+  if (responseCode.statusCode == 200) {
+    return 'Succes';
+  } else {
+    return 'Error: ${responseCode.body}';
+  }
+}
+
+Future<Map<String, dynamic>> populateSubjectsDropDownSelector(
+    String studentID, String cycle) async {
+  var subjects = await getStudentSubjects(studentID, cycle);
+
+  var subjectsList = jsonDecode(subjects);
+  Map<String, dynamic> result = {};
+
+  for (var item in subjectsList) {
+    result[item['subject']] = item['subject2'];
+
+    // result.add(item['subject']);
+  }
+
+  return result;
 }
 
 String validateNewGradeValue(String newValue, String columnNameToFind) {
