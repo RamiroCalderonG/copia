@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get_connect/http/src/request/request.dart';
 
@@ -849,6 +851,26 @@ Future<dynamic> postFodac27Record(String date, String studentID, String cycle,
           'employee': employeeNumber,
           'subject': subject
         },
+        persistCookies: false);
+    apiCall.raiseForStatus();
+    return apiCall;
+  } catch (e) {
+    return throw FormatException(e.toString());
+  }
+}
+
+Future<dynamic> editFodac27Record(List<Map<String, dynamic>>? body) async {
+  // var encodedBody = jsonEncode(body);
+  // var encodedBody = jsonEncode(body);
+
+  try {
+    var apiCall = await Requests.put(
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/fodac27',
+        headers: {
+          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'token': currentUser!.token
+        },
+        body: {body},
         persistCookies: false);
     apiCall.raiseForStatus();
     return apiCall;

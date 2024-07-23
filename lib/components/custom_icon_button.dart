@@ -66,3 +66,18 @@ class DeleteItemButton extends StatelessWidget {
     );
   }
 }
+
+class RefreshButton extends StatelessWidget {
+  final VoidCallback onPressed;
+
+  const RefreshButton({super.key, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomIconButton(
+      onPressed: onPressed,
+      icon: const Icon(Icons.refresh),
+      tooltip: 'Actualizar',
+    );
+  }
+}

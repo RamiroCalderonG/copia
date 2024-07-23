@@ -1,17 +1,18 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:oxschool/Models/Student.dart';
+
 import 'package:oxschool/constants/User.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
 import '../../backend/api_requests/api_calls_list.dart';
 import '../../components/confirm_dialogs.dart';
 import '../../components/custom_icon_button.dart';
-import '../../components/custom_scaffold_messenger.dart';
+
+import '../../components/save_and_cancel_buttons.dart';
 import '../../reusable_methods/academic_functions.dart';
 import '../../utils/loader_indicator.dart';
 
@@ -25,45 +26,45 @@ class FoDac27 extends StatefulWidget {
 class _FoDac27State extends State<FoDac27> {
   List<dynamic> simplifiedStudentsList = [];
   List<PlutoRow> fodac27HistoryRows = [];
+  late PlutoGridStateManager stateManager;
 
   final TextEditingController studentSelectorController =
       TextEditingController();
-  final dateController = TextEditingController();
+
   String selectedStudent = '';
+  String? selectedstudentId;
+  String selectedSubjectNameToEdit = '';
+  String selectedStudentIdToEdit = '';
+
   bool isLoading = true;
 
-  String? selectedstudentId;
+  int selectedEvalID = 0;
+  String selectedCommentToEdit = '';
+  String selectedDateToEdit = '';
 
   @override
   void initState() {
-    // isLoading = true;
-    populateStudentsDropDownMenu();
     super.initState();
+    populateStudentsDropDownMenu();
   }
 
   @override
   void dispose() {
-    dateController.clear();
-    studentSelectorController.clear();
-    simplifiedStudentsList.clear();
+    fodac27HistoryRows.clear();
     super.dispose();
   }
 
-  // final addItemButton = IconButton.outlined(
-  //     onPressed: () {},
-  //     icon: const Icon(Icons.add),
-  //     tooltip: 'Agregar registro');
-
-  final editSelecteditemButton = IconButton.outlined(
+  final editSelectedItemButton = IconButton.outlined(
     onPressed: () {},
     icon: const Icon(Icons.edit),
     tooltip: 'Editar registro',
   );
 
-  final deleteSelecteditemButton = IconButton.outlined(
-      onPressed: () {},
-      icon: const Icon(Icons.delete),
-      tooltip: 'Eliminar registro');
+  final deleteSelectedItemButton = IconButton.outlined(
+    onPressed: () {},
+    icon: const Icon(Icons.delete),
+    tooltip: 'Eliminar registro',
+  );
 
   final exportToExcel = IconButton.outlined(
     onPressed: () {},
@@ -73,228 +74,326 @@ class _FoDac27State extends State<FoDac27> {
 
   final List<PlutoColumn> fodac27Columns = [
     PlutoColumn(
-        title: 'Fecha',
-        field: 'date',
-        type: PlutoColumnType.date(),
-        width: 20,
-        readOnly: true),
+        title: 'id',
+        field: 'fodac27',
+        type: PlutoColumnType.number(),
+        readOnly: true,
+        sort: PlutoColumnSort.ascending,
+        enableColumnDrag: true,
+        width: 68),
+    PlutoColumn(
+      title: 'Fecha',
+      field: 'date',
+      type: PlutoColumnType.text(),
+      readOnly: true,
+    ),
     PlutoColumn(
       title: 'Matricula',
       field: 'studentID',
       type: PlutoColumnType.text(),
       readOnly: true,
     ),
-    PlutoColumn(title: 'Obs', field: 'Obs', type: PlutoColumnType.text()),
     PlutoColumn(
-        title: 'Materia', field: 'subject', type: PlutoColumnType.text()),
+        title: 'Obs',
+        field: 'Obs',
+        type: PlutoColumnType.text(),
+        renderer: (rendererContext) {
+          return Tooltip(
+            message: rendererContext.cell.value,
+            child: Container(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                rendererContext.cell.value,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1, // You can adjust this as needed
+                style: const TextStyle(
+                  fontSize: 14, // Adjust font size as needed
+                  color: Colors.black, // Set the text color to black
+                ),
+              ),
+            ),
+          );
+        },
+        readOnly: true),
     PlutoColumn(
-        title: 'Maestro', field: 'teacher', type: PlutoColumnType.text()),
+        title: 'Materia',
+        field: 'subject',
+        type: PlutoColumnType.text(),
+        readOnly: true),
+    PlutoColumn(
+        title: 'Maestro',
+        field: 'teacher',
+        type: PlutoColumnType.text(),
+        readOnly: true),
   ];
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(child: LayoutBuilder(
+    return SafeArea(
+      child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
-      if (isLoading == true) {
-        return CustomLoadingIndicator();
-      } else {
-        return Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 10, right: 10, top: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  // Flexible(
-                  //     // fit: FlexFit.loose,
-                  //     child: TextField(
-                  //   controller: dateController,
-                  //   decoration: const InputDecoration(
-                  //     icon: Icon(Icons.calendar_today),
-                  //     labelText: "Fecha",
-                  //   ),
-                  //   readOnly: true,
-                  //   onTap: () async {
-                  //     // ignore: unused_local_variable
-                  //     DateTime? pickedDate = await showDatePicker(
-                  //             context: context,
-                  //             initialDate: DateTime.now(),
-                  //             firstDate: DateTime(2000),
-                  //             lastDate: DateTime(2101))
-                  //         .then((pickedDate) {
-                  //       if (pickedDate != null) {
-                  //         setState(() {
-                  //           dateController.text =
-                  //               DateFormat('yyyy-MM-dd').format(pickedDate);
-                  //         });
-                  //       }
-                  //       return null;
-                  //     });
-                  //   },
-                  // )),
-                  // const SizedBox(
-                  //   width: 50,
-                  // ),
-                  Flexible(
-                    // flex: 3,
-                    fit: FlexFit.loose,
-                    child: DropdownMenu<String>(
-                      controller: studentSelectorController,
-                      enableFilter: true,
-                      requestFocusOnTap: true,
-                      leadingIcon: const Icon(Icons.search),
-                      trailingIcon: IconButton(
-                        onPressed: () {
-                          studentSelectorController.clear();
-                          // fodac27HistoryRows.clear();
-                        },
-                        icon: const Icon(
-                          Icons.clear,
-                          // size: 33,
-                        ),
-                      ),
-                      label: const Text('Alumno'),
-                      inputDecorationTheme: const InputDecorationTheme(
-                        filled: true,
-                        contentPadding: EdgeInsets.symmetric(vertical: 5.0),
-                      ),
-                      onSelected: (student) {
-                        setState(() {
-                          selectedStudent = student!;
-                          selectedstudentId = simplifiedStudentsList.firstWhere(
-                              (student) =>
-                                  student["name"] ==
-                                  selectedStudent)["studentID"];
-
-                          populateGrid(
-                              selectedstudentId, currentCycle!.claCiclo!, true);
-                        });
-                      },
-                      dropdownMenuEntries:
-                          simplifiedStudentsList.map<DropdownMenuEntry<String>>(
-                        (e) {
-                          return DropdownMenuEntry(
-                            value: e['name'],
-                            label: e['name'],
-                          );
-                        },
-                      ).toList(),
-                    ),
-                  ),
-                  Flexible(
-                      // padding: const EdgeInsets.only(left: 5, right: 5),
-                      // fit: FlexFit.loose,
-                      child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      // addItemButton,
-                      AddItemButton(onPressed: () {
-                        if (selectedStudent.isEmpty) {
-                          return showEmptyFieldAlertDialog(
-                              context, 'Favor de seleccionar un alumno');
-                        } else {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                  title: Text(
-                                      'Observaciones para $selectedStudent'),
-                                  content: CustomDialogContent(
-                                    selectedstudentId: selectedstudentId!,
-                                    employeeNumber:
-                                        currentUser!.employeeNumber!,
-                                  ));
-                            },
-                          );
-                        }
-
-                        //   createFodac27Record(
-                        //   dateController.text,  selectedStudent!, currentCycle!.claCiclo!,
-                        // )
-                      }),
-                      editSelecteditemButton,
-                      deleteSelecteditemButton,
-                      exportToExcel
-                    ],
-                  ))
-                ],
-              ),
-            ),
-            Expanded(
-                child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 15, horizontal: 15),
-                    child: PlutoGrid(
-                        columns: fodac27Columns, rows: fodac27HistoryRows))),
-          ],
-        );
-      }
-    }));
+          if (isLoading) {
+            return CustomLoadingIndicator();
+          } else {
+            return Column(
+              children: [
+                buildStudentSelector(),
+                Expanded(child: buildPlutoGrid()),
+              ],
+            );
+          }
+        },
+      ),
+    );
   }
 
-  void populateGrid(String? studentID, String cycle, bool isByStudent) async {
-    // Retrive from FODAC27 table and display
-    var apiResponse = await getFodac27History(cycle, studentID, isByStudent);
+  Widget buildStudentSelector() {
+    return Padding(
+      padding: const EdgeInsets.only(left: 10, right: 10, top: 20),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Flexible(
+            child: DropdownMenu<String>(
+              controller: studentSelectorController,
+              enableFilter: true,
+              requestFocusOnTap: true,
+              leadingIcon: const Icon(Icons.search),
+              trailingIcon: IconButton(
+                onPressed: studentSelectorController.clear,
+                icon: const Icon(Icons.clear),
+              ),
+              label: const Text('Alumno'),
+              inputDecorationTheme: const InputDecorationTheme(
+                filled: true,
+                contentPadding: EdgeInsets.symmetric(vertical: 5.0),
+              ),
+              onSelected: (student) {
+                if (student != null) {
+                  setState(() {
+                    selectedStudent = student;
+                    selectedstudentId = getStudentIdByName(student);
+                    if (selectedstudentId != null) {
+                      populateGrid(
+                          selectedstudentId!, currentCycle!.claCiclo!, true);
+                    }
+                  });
+                }
+              },
+              dropdownMenuEntries: simplifiedStudentsList
+                  .map<DropdownMenuEntry<String>>((e) => DropdownMenuEntry(
+                        value: e['name'],
+                        label: e['name'],
+                      ))
+                  .toList(),
+            ),
+          ),
+          Flexible(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                AddItemButton(onPressed: handleAddItem),
+                EditItemButton(
+                  onPressed: () {
+                    if (selectedEvalID == 0) {
+                      const AlertDialog(
+                        title: Text('Error'),
+                        content:
+                            Text('Primero selecciona un registro para editar'),
+                      );
+                    } else {
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return EditCommentScreen(
+                              id: selectedEvalID,
+                              comment: selectedCommentToEdit,
+                              date: selectedDateToEdit,
+                              selectedSubject: selectedSubjectNameToEdit,
+                              studentID: selectedStudentIdToEdit,
+                            );
+                          });
+                    }
+                  },
+                ),
+                deleteSelectedItemButton,
+                exportToExcel,
+                RefreshButton(onPressed: handleRefresh),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-    if (apiResponse != null) {
-      var decodedResponse = json.decode(apiResponse);
-      for (var item in decodedResponse) {
-        String date = item['date'];
-        String studentID = item['student'];
-        String cycle = item['cycle'];
-        String observation = item['observation'];
-        String teacher = item['teacher'];
-        String subject = item['subject'];
+  Widget buildPlutoGrid() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+      child: PlutoGrid(
+        mode: PlutoGridMode.selectWithOneTap,
+        columns: fodac27Columns,
+        rows: fodac27HistoryRows,
+        onLoaded: (event) {
+          event.stateManager.setSelectingMode(PlutoGridSelectingMode.cell);
+          stateManager = event.stateManager;
+        },
+        onSelected: handleSelectedCell,
+        configuration: const PlutoGridConfiguration(
+          style: PlutoGridStyleConfig(
+            enableColumnBorderVertical: false,
+            enableCellBorderVertical: false,
+          ),
+        ),
+      ),
+    );
+  }
 
-        setState(() {
-          fodac27HistoryRows.clear();
-
-          fodac27HistoryRows.add(PlutoRow(cells: {
-            'date': PlutoCell(value: date),
-            'studentID': PlutoCell(value: studentID),
-            'Obs': PlutoCell(value: observation),
-            'subject': PlutoCell(value: subject),
-            'teacher': PlutoCell(value: teacher)
-          }));
-        });
-      }
+  void handleAddItem() {
+    if (selectedStudent.isEmpty) {
+      showEmptyFieldAlertDialog(context, 'Favor de seleccionar un alumno');
+    } else {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Observaciones para $selectedStudent'),
+            content: NewFODAC27CommentDialog(
+              selectedstudentId: selectedstudentId!,
+              employeeNumber: currentUser!.employeeNumber!,
+            ),
+          );
+        },
+      );
     }
   }
 
-  void populateStudentsDropDownMenu() async {
+  void handleRefresh() {
+    if (selectedstudentId != null) {
+      populateGrid(selectedstudentId!, currentCycle!.claCiclo!, true);
+    }
+  }
+
+  void handleSelectedCell(PlutoGridOnSelectedEvent event) {
+    var selectedRow = event.row;
+    selectedEvalID = selectedRow?.cells['fodac27']?.value;
+    selectedCommentToEdit = selectedRow?.cells['Obs']?.value;
+    selectedDateToEdit = selectedRow?.cells['date']?.value;
+    selectedSubjectNameToEdit = selectedRow?.cells['subject']?.value;
+    selectedStudentIdToEdit = selectedRow?.cells['studentID']?.value;
+  }
+
+  String? getStudentIdByName(String name) {
+    return simplifiedStudentsList
+        .firstWhere((student) => student["name"] == name)["studentID"];
+  }
+
+  Future<void> populateGrid(
+      String studentID, String cycle, bool isByStudent) async {
+    var apiResponse = await getFodac27History(cycle, studentID, isByStudent);
+    if (apiResponse != null) {
+      var decodedResponse = json.decode(apiResponse) as List;
+      List<PlutoRow> newRows = decodedResponse.map((item) {
+        return PlutoRow(cells: {
+          'date': PlutoCell(value: item['date']),
+          'studentID': PlutoCell(value: item['student']),
+          'Obs': PlutoCell(value: item['observation']),
+          'subject': PlutoCell(value: item['subject']),
+          'teacher': PlutoCell(value: item['teacher']),
+          'fodac27': PlutoCell(value: int.parse(item['fodac27'])),
+        });
+      }).toList();
+
+      setState(() {
+        fodac27HistoryRows = newRows;
+        stateManager.removeAllRows();
+        stateManager.appendRows(newRows);
+      });
+    }
+  }
+
+  Future<void> populateStudentsDropDownMenu() async {
     String userRole = currentUser!.role;
 
     simplifiedStudentsList = await getStudentsByTeacher(
-        currentUser!.employeeNumber!, currentCycle!.claCiclo!, userRole);
+      currentUser!.employeeNumber!,
+      currentCycle!.claCiclo!,
+      userRole,
+    );
+
     if (simplifiedStudentsList.isNotEmpty) {
       setState(() {
         isLoading = false;
       });
-      // isLoading = false;
     }
   }
 }
 
-class CustomDialogContent extends StatefulWidget {
+class EditCellDialog extends StatelessWidget {
+  final PlutoCell cell;
+  final Function(String) onSave;
+
+  const EditCellDialog({
+    Key? key,
+    required this.cell,
+    required this.onSave,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final TextEditingController controller =
+        TextEditingController(text: cell.value);
+
+    return AlertDialog(
+      title: const Text('Editar celda'),
+      content: TextField(
+        controller: controller,
+        decoration: const InputDecoration(
+          labelText: 'Nuevo valor',
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: const Text('Cancelar'),
+        ),
+        TextButton(
+          onPressed: () {
+            onSave(controller.text);
+            Navigator.of(context).pop();
+          },
+          child: const Text('Guardar'),
+        ),
+      ],
+    );
+  }
+}
+
+class NewFODAC27CommentDialog extends StatefulWidget {
   final String selectedstudentId;
   final int employeeNumber;
 
-  const CustomDialogContent(
-      {Key? key,
-      required this.selectedstudentId,
-      required this.employeeNumber});
+  const NewFODAC27CommentDialog({
+    Key? key,
+    required this.selectedstudentId,
+    required this.employeeNumber,
+  });
 
   @override
-  _CustomDialogContentState createState() => _CustomDialogContentState();
+  _NewFODAC27CommentDialogState createState() =>
+      _NewFODAC27CommentDialogState();
 }
 
-class _CustomDialogContentState extends State<CustomDialogContent> {
+class _NewFODAC27CommentDialogState extends State<NewFODAC27CommentDialog> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _observacionesController =
       TextEditingController();
-  String? _selectedMateria;
+  String? _selectedSubject;
   List<String> _materias = [];
+  Map<String, dynamic> subjectsMap = {};
   bool isLoading = false;
 
   Future<void> _selectDate(BuildContext context) async {
@@ -324,9 +423,41 @@ class _CustomDialogContentState extends State<CustomDialogContent> {
   void getSubjects() async {
     Map<String, dynamic> subjects = await populateSubjectsDropDownSelector(
         widget.selectedstudentId, currentCycle!.claCiclo!);
-
     _materias = subjects.keys.toList();
+    subjectsMap = subjects;
     isLoading = false;
+  }
+
+  void _addNewComment() async {
+    if (_formKey.currentState!.validate()) {
+      var subjectID;
+
+      if (subjectsMap.containsKey(_selectedSubject)) {
+        subjectID = subjectsMap[_selectedSubject]!;
+      } else {
+        debugPrint('Does not exists the in the map');
+      }
+
+      var result = await createFodac27Record(
+        _dateController.text,
+        widget.selectedstudentId,
+        currentCycle!.claCiclo!,
+        _observacionesController.text,
+        widget.employeeNumber,
+        subjectID,
+      );
+      if (result == 'Succes') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: const Text('Form submitted successfully!')),
+        );
+        _dateController.clear();
+        _observacionesController.text = '';
+      } else {
+        showErrorFromBackend(context, result);
+      }
+
+      // Show a snackbar notification after function execution
+    }
   }
 
   @override
@@ -365,14 +496,14 @@ class _CustomDialogContentState extends State<CustomDialogContent> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: DropdownButtonFormField<String>(
-                    value: _selectedMateria,
+                    value: _selectedSubject,
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                       contentPadding: EdgeInsets.symmetric(horizontal: 8),
                     ),
                     onChanged: (String? newValue) {
                       setState(() {
-                        _selectedMateria = newValue;
+                        _selectedSubject = newValue;
                       });
                     },
                     items: _materias.map((String materia) {
@@ -479,39 +610,216 @@ class _CustomDialogContentState extends State<CustomDialogContent> {
                 contentPadding:
                     EdgeInsets.symmetric(horizontal: 8, vertical: 8),
               ),
-              maxLines: 4,
+              maxLines: 5,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Por favor, ingrese observaciones generales';
+                  return 'Por favor, ingrese observaciones';
                 }
                 return null;
               },
             ),
             const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  var result = createFodac27Record(
-                    _dateController.text,
-                    widget.selectedstudentId,
-                    currentCycle!.claCiclo!,
-                    _observacionesController.text,
-                    widget.employeeNumber,
-                    1,
-                  );
+            Row(
+              children: [
+                Expanded(child: CustomSaveButton(
+                  onPressed: () {
+                    _addNewComment();
+                  },
+                )
 
-                  //TODO : IMPLEMENT A NOTIFICATION
-                  if (result == 'Succes') {
-                    customScaffoldMesg(context, 'Exito', false);
-                  }
-                  customScaffoldMesg(context, 'Error', true);
-                }
-              },
-              child: const Text('Guardar'),
-            ),
+                    // ElevatedButton(
+                    //   onPressed: () {
+                    //     _addNewComment();
+                    //   },
+                    //   child: const Text('Guardar'),
+                    // ),
+                    ),
+                const SizedBox(
+                  width: 10,
+                ),
+                Expanded(child: CustomCancelButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                )
+
+                    //  ElevatedButton(
+                    //   style: ButtonStyle(backgroundColor: MaterialStateColor.resolveWith((states) => null) ),
+                    //     onPressed: () => Navigator.pop(context),
+                    //     child: const Text('Cancelar'))
+                    )
+              ],
+            )
           ],
         ),
       ),
     );
+  }
+}
+
+class EditCommentScreen extends StatefulWidget {
+  final int id;
+  final String comment;
+  final String date;
+  final String selectedSubject;
+  final String studentID;
+
+  EditCommentScreen({
+    required this.id,
+    required this.comment,
+    required this.date,
+    required this.selectedSubject,
+    required this.studentID,
+  });
+
+  @override
+  _EditCommentScreenState createState() => _EditCommentScreenState();
+}
+
+class _EditCommentScreenState extends State<EditCommentScreen> {
+  late TextEditingController _commentController;
+  late TextEditingController _dateController;
+  DateTime? _selectedDate;
+  DateFormat format = DateFormat("d/M/y");
+  DateTime? date;
+  List<String> _subjects = [];
+  String? _selectedSubject;
+
+  @override
+  void initState() {
+    date = format.parse(widget.date);
+    getSubjects();
+
+    super.initState();
+    _commentController = TextEditingController(text: widget.comment);
+    _dateController = TextEditingController(text: widget.date);
+    _selectedDate = date;
+  }
+
+  @override
+  void dispose() {
+    _commentController.dispose();
+    _dateController.dispose();
+    super.dispose();
+  }
+
+  void _selectDate() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+        _dateController.text = DateFormat.yMd().format(picked);
+      });
+    }
+  }
+
+  void _saveComment() {
+    print('Updated Comment: ${_commentController.text}');
+    print('Updated Date: ${_dateController.text}');
+    Navigator.pop(context);
+  }
+
+  void getSubjects() async {
+    Map<String, dynamic> subjects = await populateSubjectsDropDownSelector(
+        widget.studentID, currentCycle!.claCiclo!);
+    setState(() {
+      _subjects = subjects.keys.toList();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Editar'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Materia'),
+            const SizedBox(height: 8),
+            DropdownButtonFormField<String>(
+              value: _selectedSubject,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.symmetric(horizontal: 8),
+              ),
+              onChanged: (String? newValue) {
+                setState(() {
+                  _selectedSubject = newValue;
+                });
+              },
+              items: _subjects.map((String materia) {
+                return DropdownMenuItem<String>(
+                  value: materia,
+                  child: Text(materia),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 16.0),
+            TextField(
+              controller: _commentController,
+              maxLines: null,
+              decoration: const InputDecoration(
+                labelText: 'Comment',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16.0),
+            TextField(
+              controller: _dateController,
+              readOnly: true,
+              decoration: const InputDecoration(
+                labelText: 'Date',
+                border: OutlineInputBorder(),
+              ),
+              onTap: _selectDate,
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        CustomCancelButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        CustomSaveButton(
+          onPressed: () {
+            var bodyToEdit = validateEditedFields(_commentController.text,
+                _dateController.text, _selectedSubject!);
+            if (bodyToEdit != null) {
+              // TODO : IMPLEMENT UPDATE
+              var itResponded = updateFodac27Record(bodyToEdit);
+            } else {
+              // return null;
+            }
+          },
+        ),
+      ],
+    );
+  }
+
+  List<Map<String, dynamic>>? validateEditedFields(
+      String newComment, String newDate, String newSubject) {
+    if (newComment.isNotEmpty || newDate.isNotEmpty || newSubject.isNotEmpty) {
+      List<Map<String, dynamic>> body = [];
+      if (newComment != widget.comment) {
+        body.add({'observation': newComment});
+      }
+      if (newDate != widget.date) {
+        body.add({'date': newDate});
+      }
+      if (newSubject != widget.selectedSubject) {
+        body.add({'subject': newSubject});
+      }
+      return body;
+    } else {
+      return null;
+    }
   }
 }
