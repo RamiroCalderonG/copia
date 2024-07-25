@@ -859,21 +859,35 @@ Future<dynamic> postFodac27Record(String date, String studentID, String cycle,
   }
 }
 
-Future<dynamic> editFodac27Record(List<Map<String, dynamic>>? body) async {
-  // var encodedBody = jsonEncode(body);
-  // var encodedBody = jsonEncode(body);
-
+Future<int> editFodac27Record(Map<String, dynamic> body) async {
   try {
-    var apiCall = await Requests.put(
-        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/fodac27',
+    var apiCall = await Requests.patch(
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student/fodac27',
         headers: {
           'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
           'token': currentUser!.token
         },
-        body: {body},
+        json: body,
         persistCookies: false);
     apiCall.raiseForStatus();
-    return apiCall;
+    return apiCall.statusCode;
+  } catch (e) {
+    return throw FormatException(e.toString());
+  }
+}
+
+Future<int> deleteFodac27Record(int fodac27ID) async {
+  try {
+    var apiCall = await Requests.delete(
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student/fodac27',
+        headers: {
+          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'token': currentUser!.token
+        },
+        queryParameters: {'observation': fodac27ID},
+        persistCookies: false);
+    apiCall.raiseForStatus();
+    return apiCall.statusCode;
   } catch (e) {
     return throw FormatException(e.toString());
   }

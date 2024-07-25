@@ -342,10 +342,11 @@ Future<String> createFodac27Record(String date, String studentID, String cycle,
   }
 }
 
-Future<void> updateFodac27Record(
-  List<Map<String, dynamic>>? fodac27,
+Future<int> updateFodac27Record(
+  Map<String, dynamic> fodac27,
 ) async {
-  var response = await editFodac27Record(fodac27);
+  int response = await editFodac27Record(fodac27);
+  return response;
 }
 
 Future<Map<String, dynamic>> populateSubjectsDropDownSelector(

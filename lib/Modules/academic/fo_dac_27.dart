@@ -1,17 +1,21 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:oxschool/components/custom_scaffold_messenger.dart';
 
 import 'package:oxschool/constants/User.dart';
+import 'package:oxschool/reusable_methods/user_functions.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
 import '../../backend/api_requests/api_calls_list.dart';
 import '../../components/confirm_dialogs.dart';
 import '../../components/custom_icon_button.dart';
 
+import '../../components/plutogrid_export_options.dart';
 import '../../components/save_and_cancel_buttons.dart';
 import '../../reusable_methods/academic_functions.dart';
 import '../../utils/loader_indicator.dart';
@@ -37,6 +41,7 @@ class _FoDac27State extends State<FoDac27> {
   String selectedStudentIdToEdit = '';
 
   bool isLoading = true;
+  bool isUserAdmin = false;
 
   int selectedEvalID = 0;
   String selectedCommentToEdit = '';
@@ -44,6 +49,7 @@ class _FoDac27State extends State<FoDac27> {
 
   @override
   void initState() {
+    isUserAdmin = verifyUserAdmin(currentUser!);
     super.initState();
     populateStudentsDropDownMenu();
   }
@@ -54,23 +60,11 @@ class _FoDac27State extends State<FoDac27> {
     super.dispose();
   }
 
-  final editSelectedItemButton = IconButton.outlined(
-    onPressed: () {},
-    icon: const Icon(Icons.edit),
-    tooltip: 'Editar registro',
-  );
-
-  final deleteSelectedItemButton = IconButton.outlined(
-    onPressed: () {},
-    icon: const Icon(Icons.delete),
-    tooltip: 'Eliminar registro',
-  );
-
-  final exportToExcel = IconButton.outlined(
-    onPressed: () {},
-    icon: const FaIcon(FontAwesomeIcons.solidFileExcel),
-    tooltip: 'Exportar a Excel',
-  );
+  // final exportToExcel = IconButton.outlined(
+  //   onPressed: () {},
+  //   icon: const FaIcon(FontAwesomeIcons.solidFileExcel),
+  //   tooltip: 'Exportar a Excel',
+  // );
 
   final List<PlutoColumn> fodac27Columns = [
     PlutoColumn(
@@ -216,9 +210,33 @@ class _FoDac27State extends State<FoDac27> {
                     }
                   },
                 ),
-                deleteSelectedItemButton,
-                exportToExcel,
+                // exportToExcel,
                 RefreshButton(onPressed: handleRefresh),
+                if (isUserAdmin)
+                  DeleteItemButton(
+                    onPressed: () async {
+                      if (selectedEvalID == 0) {
+                        const AlertDialog(
+                          title: Text('Error'),
+                          content: Text(
+                              'Primero selecciona un registro para editar'),
+                        );
+                      } else {
+                        int confirmation =
+                            await showDeleteConfirmationAlertDialog(context);
+
+                        if (confirmation == 1) {
+                          int response = await deleteAction(selectedEvalID);
+                          if (response == 200) {
+                            if (mounted) {
+                              await showConfirmationDialog(
+                                  context, 'Registro eliminado');
+                            }
+                          }
+                        }
+                      }
+                    },
+                  ),
               ],
             ),
           ),
@@ -239,6 +257,8 @@ class _FoDac27State extends State<FoDac27> {
           stateManager = event.stateManager;
         },
         onSelected: handleSelectedCell,
+        createHeader: (stateManager) =>
+            PlutoGridHeader(stateManager: stateManager),
         configuration: const PlutoGridConfiguration(
           style: PlutoGridStyleConfig(
             enableColumnBorderVertical: false,
@@ -326,6 +346,11 @@ class _FoDac27State extends State<FoDac27> {
         isLoading = false;
       });
     }
+  }
+
+  Future<int> deleteAction(int fodac27ID) async {
+    var response = await deleteFodac27Record(fodac27ID);
+    return response;
   }
 }
 
@@ -685,21 +710,31 @@ class _EditCommentScreenState extends State<EditCommentScreen> {
   List<String> _subjects = [];
   String? _selectedSubject;
 
+  Map<String, dynamic> subjectsMap = {};
+  Map<String, dynamic> newObservation = {};
+  Map<String, dynamic> newDate = {};
+  Map<String, dynamic> newSubject = {};
+
   @override
   void initState() {
     date = format.parse(widget.date);
     getSubjects();
-
-    super.initState();
+    _selectedSubject = widget.selectedSubject;
     _commentController = TextEditingController(text: widget.comment);
     _dateController = TextEditingController(text: widget.date);
     _selectedDate = date;
+    super.initState();
   }
 
   @override
   void dispose() {
     _commentController.dispose();
     _dateController.dispose();
+
+    subjectsMap.clear();
+    newObservation.clear();
+    newDate.clear();
+    newSubject.clear();
     super.dispose();
   }
 
@@ -714,14 +749,10 @@ class _EditCommentScreenState extends State<EditCommentScreen> {
       setState(() {
         _selectedDate = picked;
         _dateController.text = DateFormat.yMd().format(picked);
+        newDate.clear();
+        newDate = {'date': _dateController.text};
       });
     }
-  }
-
-  void _saveComment() {
-    print('Updated Comment: ${_commentController.text}');
-    print('Updated Date: ${_dateController.text}');
-    Navigator.pop(context);
   }
 
   void getSubjects() async {
@@ -729,6 +760,7 @@ class _EditCommentScreenState extends State<EditCommentScreen> {
         widget.studentID, currentCycle!.claCiclo!);
     setState(() {
       _subjects = subjects.keys.toList();
+      subjectsMap = subjects;
     });
   }
 
@@ -743,6 +775,8 @@ class _EditCommentScreenState extends State<EditCommentScreen> {
             const Text('Materia'),
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
+              hint: const Text('Materia'),
+              disabledHint: const Text('Materia'),
               value: _selectedSubject,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
@@ -750,7 +784,10 @@ class _EditCommentScreenState extends State<EditCommentScreen> {
               ),
               onChanged: (String? newValue) {
                 setState(() {
+                  newSubject.clear();
                   _selectedSubject = newValue;
+                  var subjectID = subjectsMap[newValue];
+                  newSubject = {'subject': subjectID};
                 });
               },
               items: _subjects.map((String materia) {
@@ -765,19 +802,27 @@ class _EditCommentScreenState extends State<EditCommentScreen> {
               controller: _commentController,
               maxLines: null,
               decoration: const InputDecoration(
-                labelText: 'Comment',
+                labelText: 'Observacion',
                 border: OutlineInputBorder(),
               ),
+              onChanged: (value) {
+                newObservation.clear();
+                newObservation = {'observation': value};
+              },
             ),
             const SizedBox(height: 16.0),
             TextField(
               controller: _dateController,
               readOnly: true,
               decoration: const InputDecoration(
-                labelText: 'Date',
+                labelText: 'Fecha',
                 border: OutlineInputBorder(),
               ),
               onTap: _selectDate,
+              onChanged: (value) {
+                newDate.clear();
+                newDate = {'date': _dateController.text};
+              },
             ),
           ],
         ),
@@ -788,38 +833,51 @@ class _EditCommentScreenState extends State<EditCommentScreen> {
             Navigator.pop(context);
           },
         ),
-        CustomSaveButton(
-          onPressed: () {
-            var bodyToEdit = validateEditedFields(_commentController.text,
-                _dateController.text, _selectedSubject!);
-            if (bodyToEdit != null) {
-              // TODO : IMPLEMENT UPDATE
-              var itResponded = updateFodac27Record(bodyToEdit);
-            } else {
-              // return null;
+        CustomSaveButton(onPressed: () async {
+          Map<String, dynamic> id = {'id': widget.id};
+
+          var bodyToEdit = validateEditedFields(
+            id,
+            newObservation,
+            newDate,
+            newSubject,
+          );
+          if (bodyToEdit != null) {
+            int response = await updateFodac27Record(bodyToEdit);
+            if (response == 200) {
+              if (mounted) {
+                int response = await showConfirmationDialog(
+                    context, 'Registro modificado');
+                if (response == 1) {
+                  Navigator.pop(context);
+                }
+              }
             }
-          },
-        ),
+          } else {
+            return null;
+          }
+        }),
       ],
     );
   }
 
-  List<Map<String, dynamic>>? validateEditedFields(
-      String newComment, String newDate, String newSubject) {
-    if (newComment.isNotEmpty || newDate.isNotEmpty || newSubject.isNotEmpty) {
-      List<Map<String, dynamic>> body = [];
-      if (newComment != widget.comment) {
-        body.add({'observation': newComment});
-      }
-      if (newDate != widget.date) {
-        body.add({'date': newDate});
-      }
-      if (newSubject != widget.selectedSubject) {
-        body.add({'subject': newSubject});
-      }
-      return body;
-    } else {
-      return null;
+  Map<String, dynamic>? validateEditedFields(
+      Map<String, dynamic> id,
+      Map<String, dynamic> newObservation,
+      Map<String, dynamic> newDate,
+      Map<String, dynamic> newSubject) {
+    // if (newObservation.isNotEmpty || newDate.isNotEmpty || newSubject.isNotEmpty) {
+    Map<String, dynamic> body = {};
+    body.addEntries(id.entries);
+    if (newObservation.isNotEmpty) {
+      body.addEntries(newObservation.entries);
     }
+    if (newDate.isNotEmpty) {
+      body.addEntries(newDate.entries);
+    }
+    if (newSubject.isNotEmpty) {
+      body.addEntries(newSubject.entries);
+    }
+    return body;
   }
 }

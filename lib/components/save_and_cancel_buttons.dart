@@ -8,9 +8,28 @@ class CustomSaveButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      onPressed: onPressed,
-      child: const Text('Guardar'),
-    );
+        style: ButtonStyle(
+          backgroundColor: MaterialStateProperty.resolveWith<Color>((states) {
+            if (Theme.of(context).brightness == Brightness.dark) {
+              return Colors.white;
+            } else {
+              return Colors.white; // or any color for light mode
+            }
+          }),
+        ),
+        onPressed: onPressed,
+        child: const Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.save,
+              color: Colors.blue,
+            ),
+            Text('Guardar', style: TextStyle(color: Colors.blue)),
+          ],
+        ));
   }
 }
 
@@ -22,11 +41,30 @@ class CustomCancelButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      style: ButtonStyle(
-        backgroundColor: MaterialStateProperty.all<Color>(Colors.red.shade300),
-      ),
-      onPressed: onPressed,
-      child: const Text('Cancelar'),
-    );
+        style: ButtonStyle(
+          backgroundColor: MaterialStateProperty.resolveWith<Color>((states) {
+            if (Theme.of(context).brightness == Brightness.dark) {
+              return Colors.white;
+            } else {
+              return Colors.white; // or any color for light mode
+            }
+          }),
+        ),
+        onPressed: onPressed,
+        child: const Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.cancel,
+              color: Colors.red,
+            ),
+            Text(
+              'Cancelar',
+              style: TextStyle(color: Colors.redAccent),
+            ),
+          ],
+        ));
   }
 }

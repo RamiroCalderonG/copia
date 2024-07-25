@@ -390,7 +390,7 @@ class _UsersTableViewState extends State<UsersTableView> {
                           return Colors.transparent;
                         },
                         createHeader: (stateManager) =>
-                            Header(stateManager: stateManager),
+                            PlutoGridHeader(stateManager: stateManager),
                         createFooter: (stateManager) {
                           stateManager.setPageSize(50,
                               notify: false); // default 40
