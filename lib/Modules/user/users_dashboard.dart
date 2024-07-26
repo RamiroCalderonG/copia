@@ -76,6 +76,11 @@ class _UsersDashboardState extends State<UsersDashboard> {
 
   @override
   void dispose() {
+    tmpRolesList.clear();
+    userRows.clear();
+    // listOfUsersForGrid.clear();
+    isLoading = false;
+
     super.dispose();
   }
 
@@ -114,7 +119,7 @@ class _UsersDashboardState extends State<UsersDashboard> {
                     await getWorkDepartmentList();
                     var response = await getRolesList();
                     tmpRolesList = jsonDecode(response);
-                    // ignore: use_build_context_synchronously
+
                     buildNewUserScreen(context);
                     await getEventsList();
                   },

@@ -4,13 +4,15 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:oxschool/flutter_flow/flutter_flow_theme.dart';
 
-void showEmptyFieldAlertDialog(BuildContext context) {
+void showEmptyFieldAlertDialog(BuildContext context, String contentText) {
   showDialog(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
         title: const Text('Campo vacio'),
-        content: const Text('Por favor ingrese un valor que sea válido.'),
+        content: Text(contentText
+            // 'Por favor ingrese un valor que sea válido.'
+            ),
         actions: [
           TextButton(
             onPressed: () {
@@ -22,6 +24,44 @@ void showEmptyFieldAlertDialog(BuildContext context) {
       );
     },
   );
+}
+
+Future<int> showConfirmationDialog(
+    BuildContext context, String contentText) async {
+  Completer<int> completer = Completer<int>();
+  showDialog(
+    barrierDismissible: false,
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        icon: const Icon(Icons.task_alt),
+        title: const Text('Cambios realizados!',
+            style: TextStyle(fontFamily: 'Sora')),
+        content: Text(contentText
+            // 'Por favor ingrese un valor que sea válido.'
+            ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              completer.complete(1); // User selected 'Yes'
+            },
+            // style: ButtonStyle(
+            //   backgroundColor:
+            //       MaterialStateProperty.all<Color>(Colors.greenAccent),
+            // ),
+            child: Text('Cerrar',
+                style: FlutterFlowTheme.of(context).labelLarge.override(
+                      fontFamily: 'Roboto',
+                      color: const Color(0xFF130C0D),
+                      fontWeight: FontWeight.w500,
+                    )),
+          ),
+        ],
+      );
+    },
+  );
+  return completer.future;
 }
 
 void showErrorFromBackend(BuildContext context, String errorMessage) {

@@ -347,6 +347,10 @@ class _UsersTableViewState extends State<UsersTableView> {
                                     tempUserId =
                                         event.row.cells.values.first.value;
                                     await getSingleUser(null);
+                                    await getWorkDepartmentList();
+                                    var response = await getRolesList();
+                                    tmpRolesList = jsonDecode(response);
+
                                     updateUserScreen(context);
                                   },
                                   enabled: isUserAdmin,
@@ -386,7 +390,7 @@ class _UsersTableViewState extends State<UsersTableView> {
                           return Colors.transparent;
                         },
                         createHeader: (stateManager) =>
-                            Header(stateManager: stateManager),
+                            PlutoGridHeader(stateManager: stateManager),
                         createFooter: (stateManager) {
                           stateManager.setPageSize(50,
                               notify: false); // default 40

@@ -14,6 +14,7 @@ import 'flutter_flow/nav/nav.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   usePathUrlStrategy();
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
     setWindowMinSize(const Size(580, 500));
@@ -73,10 +74,10 @@ class _MyAppState extends State<MyApp> {
       supportedLocales: const [Locale('en', '')],
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        useMaterial3: true,
-        brightness: Brightness.light,
-        scrollbarTheme: const ScrollbarThemeData(),
-      ),
+          useMaterial3: true,
+          brightness: Brightness.light,
+          scrollbarTheme: const ScrollbarThemeData(),
+          colorSchemeSeed: Colors.blue),
       darkTheme: ThemeData(
         brightness: Brightness.dark,
         scrollbarTheme: const ScrollbarThemeData(),

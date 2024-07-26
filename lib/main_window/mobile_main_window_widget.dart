@@ -319,7 +319,7 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
                       builder: (BuildContext context) {
                         return AlertDialog(
                           title: const Text('Crear Ticket de servicio'),
-                          content: CreateServiceTicket(),
+                          content: const CreateServiceTicket(),
                           actions: <Widget>[
                             TextButton(
                               style: TextButton.styleFrom(

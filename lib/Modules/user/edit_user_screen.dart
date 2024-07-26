@@ -1,7 +1,6 @@
 // ignore_for_file: prefer_typing_uninitialized_variables, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:oxschool/flutter_flow/flutter_flow_util.dart';
 import 'package:oxschool/temp/users_temp_data.dart';
 import 'package:oxschool/utils/loader_indicator.dart';
 
@@ -19,8 +18,10 @@ class _EditUserScreenState extends State<EditUserScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _employeeNumberController =
+      TextEditingController();
   var _userRole;
-  var _userDepartment;
+  String? _userDepartment;
   List<String> roleNames = [];
   List<String> departmentsList = [];
 
@@ -32,8 +33,18 @@ class _EditUserScreenState extends State<EditUserScreen> {
   var _emailUpdated = <String, dynamic>{};
   var _passwordUpdated = <String, dynamic>{};
   var _isActive = <String, dynamic>{};
+  var _newUserRole = <String, dynamic>{};
+  var newUserPosition = <String, dynamic>{};
+  var newUserBirthDate = <String, dynamic>{};
+  var _isUserTeacher = <String, bool>{};
+  // final _newUserCampus = <String, dynamic>{};
+  var _newEmployeeNumber = <String, dynamic>{};
+
+  var newUserEmployeeNumber = <String, dynamic>{};
+
   bool isloading = false;
   bool isUserActive = false;
+  bool isUserTeacher = false;
 
   bool _obscureText = true;
 
@@ -41,16 +52,40 @@ class _EditUserScreenState extends State<EditUserScreen> {
   void initState() {
     _emailController.text = tempSelectedUsr!.userEmail.toString();
     _nameController.text = tempSelectedUsr!.employeeName.toString();
+    _employeeNumberController.text = tempSelectedUsr!.employeeNumber.toString();
+
     _userRole = tempSelectedUsr!.role.toString();
     _userDepartment = tempSelectedUsr!.work_area.toString();
-    super.initState();
+
     roleNames = tmpRolesList.map((role) => role["Role"] as String).toList();
-    // departmentsList = areaList.map((e) => e["department"]).toList();
+    // departmentsList = areaList.map((e) => e["work_department"]).toList();
     if (tempSelectedUsr!.isActive == 1) {
       isUserActive = false;
     } else {
       isUserActive = true;
     }
+    if (tempSelectedUsr!.isTeacher == false) {
+      isUserTeacher = false;
+    } else {
+      isUserTeacher = true;
+    }
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _nameController.dispose();
+    _employeeNumberController.dispose();
+    roleNames.clear();
+    departmentsList.clear();
+    dataToUpdate.clear();
+    _userDepartment = null;
+    tempSelectedUsr?.clear();
+    areaList.clear();
+    tmpRolesList.clear();
+    super.dispose();
   }
 
   String? _validateEmail(String? value) {
@@ -65,6 +100,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
 
   @override
   Widget build(BuildContext context) {
+    String dropdownValue = _userDepartment ?? 'Select Department';
     return Stack(
       children: [
         Container(
@@ -115,6 +151,26 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                       .addEntries(_userNameUpdated.entries);
                                 },
                               )),
+                              const SizedBox(width: 15),
+                              Expanded(
+                                  child: TextFormField(
+                                controller: _employeeNumberController,
+                                decoration: const InputDecoration(
+                                  labelText: 'Numero de empleado',
+                                  border: OutlineInputBorder(),
+                                ),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Campo no puede estar vacío';
+                                  }
+                                  return null;
+                                },
+                                onChanged: (value) {
+                                  _newEmployeeNumber = {'noempleado': value};
+                                  dataToUpdate
+                                      .addEntries(_newEmployeeNumber.entries);
+                                },
+                              )),
                             ],
                           ),
                           const SizedBox(height: 16.0),
@@ -154,12 +210,12 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                             : Icons.visibility_off),
                                       )),
                                   obscureText: _obscureText,
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Por favor ingrese una contraseña';
-                                    }
-                                    return null;
-                                  },
+                                  // validator: (value) {
+                                  //   if (value == null || value.isEmpty) {
+                                  //     return 'Por favor ingrese una contraseña';
+                                  //   }
+                                  //   return null;
+                                  // },
                                   onChanged: (value) {
                                     _passwordUpdated = {'user_password': value};
                                     dataToUpdate
@@ -187,10 +243,14 @@ class _EditUserScreenState extends State<EditUserScreen> {
                             children: [
                               Expanded(
                                 child: DropdownButton<String>(
+                                  hint: const Text('Rol de ususario'),
                                   value: _userRole,
                                   onChanged: (String? newValue) {
                                     setState(() {
                                       _userRole = newValue!;
+                                      _newUserRole = {'role_name': newValue};
+                                      dataToUpdate
+                                          .addEntries(_newUserRole.entries);
                                     });
                                   },
                                   items: roleNames
@@ -218,7 +278,8 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                       isloading = true;
                                       tempSelectedUsr!.isActive = value ? 1 : 0;
                                       _isActive = {
-                                        'active': tempSelectedUsr!.isActive
+                                        'bajalogicasino':
+                                            tempSelectedUsr!.isActive
                                       };
                                       dataToUpdate
                                           .addEntries(_isActive.entries);
@@ -232,6 +293,35 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                   controlAffinity:
                                       ListTileControlAffinity.trailing,
                                 ),
+                              ),
+                              const SizedBox(width: 15),
+                              Expanded(
+                                child: SwitchListTile(
+                                  title: Text(
+                                    isUserTeacher
+                                        ? 'Es maestro'
+                                        : 'No es maestro',
+                                    style: const TextStyle(fontFamily: 'Sora'),
+                                  ),
+                                  value: isUserTeacher,
+                                  onChanged: (value) async {
+                                    setState(() {
+                                      isloading = true;
+                                      tempSelectedUsr!.isTeacher =
+                                          value ? true : false;
+                                      _isUserTeacher = {'is_teacher': value};
+                                      dataToUpdate
+                                          .addEntries(_isUserTeacher.entries);
+                                      isUserTeacher = value;
+                                    });
+                                    setState(() {
+                                      isloading = false;
+                                      isUserTeacher = value;
+                                    });
+                                  },
+                                  controlAffinity:
+                                      ListTileControlAffinity.trailing,
+                                ),
                               )
                             ],
                           ),
@@ -240,10 +330,18 @@ class _EditUserScreenState extends State<EditUserScreen> {
                             children: [
                               Expanded(
                                 child: DropdownButton<String>(
-                                  value: _userDepartment,
+                                  value: areaList.contains(dropdownValue)
+                                      ? dropdownValue
+                                      : 'Select Department',
+                                  hint: const Text('Departamento'),
                                   onChanged: (String? newValue) {
                                     setState(() {
                                       _userDepartment = newValue!;
+                                      newUserPosition = {
+                                        'work_department': newValue
+                                      };
+                                      dataToUpdate
+                                          .addEntries(newUserPosition.entries);
                                     });
                                   },
                                   items: areaList.map<DropdownMenuItem<String>>(
@@ -254,7 +352,31 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                     );
                                   }).toList(),
                                 ),
-                              )
+                              ),
+                              const SizedBox(width: 15),
+                              // Expanded(
+                              //   child: DropdownButton<String>(
+                              //     value: areaList.contains(dropdownValue)
+                              //         ? dropdownValue
+                              //         : 'Select Department',
+                              //     hint: const Text('Departamento'),
+                              //     onChanged: (String? newValue) {
+                              //       setState(() {
+                              //         _userDepartment = newValue!;
+                              //         newUserPosition = {'position': newValue};
+                              //         dataToUpdate
+                              //             .addEntries(newUserPosition.entries);
+                              //       });
+                              //     },
+                              //     items: areaList.map<DropdownMenuItem<String>>(
+                              //         (String value) {
+                              //       return DropdownMenuItem<String>(
+                              //         value: value,
+                              //         child: Text(value),
+                              //       );
+                              //     }).toList(),
+                              //   ),
+                              // ),
                             ],
                           ),
                           ElevatedButton(
@@ -269,18 +391,18 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                       TextButton(
                                         onPressed: () async {
                                           Navigator.of(context).pop();
-                                          context.goNamed(
-                                            'UDashboard',
-                                            extra: <String, dynamic>{
-                                              kTransitionInfoKey:
-                                                  const TransitionInfo(
-                                                hasTransition: true,
-                                                transitionType:
-                                                    PageTransitionType
-                                                        .leftToRight,
-                                              ),
-                                            },
-                                          );
+                                          // context.goNamed(
+                                          //   'UDashboard',
+                                          //   extra: <String, dynamic>{
+                                          //     kTransitionInfoKey:
+                                          //         const TransitionInfo(
+                                          //       hasTransition: true,
+                                          //       transitionType:
+                                          //           PageTransitionType
+                                          //               .leftToRight,
+                                          //     ),
+                                          //   },
+                                          // );
                                         },
                                         child: const Text('Cancelar'),
                                       ),
@@ -307,8 +429,8 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                                     ));
                                           } else {
                                             try {
-                                              Navigator.of(context).pop();
-                                              Navigator.of(context).pop();
+                                              // Navigator.of(context).pop();
+                                              // Navigator.of(context).pop();
                                               setState(() {
                                                 isloading = true;
                                               });
@@ -321,6 +443,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                                 setState(() {
                                                   isloading = false;
                                                 });
+                                                Navigator.of(context).pop();
 
                                                 showDialog(
                                                     context: context,
@@ -340,6 +463,8 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                                                 Navigator.of(
                                                                         context)
                                                                     .pop();
+                                                                Navigator.of(
+                                                                    context);
                                                               },
                                                               child: const Text(
                                                                   'Cerrar'),

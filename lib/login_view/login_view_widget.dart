@@ -1123,6 +1123,7 @@ User parseLogedInUserFromJSON(List<dynamic> jsonList) {
       String? position = jsonList[i]['position'];
       String? dateTime = jsonList[i]['createdAt'];
       String? birthdate = jsonList[i]['birthdate'];
+      bool? isTeacher = jsonList[i]['is_teacher'];
       currentUser = User(
           claUn,
           employeeName,
@@ -1136,7 +1137,8 @@ User parseLogedInUserFromJSON(List<dynamic> jsonList) {
           department,
           position,
           dateTime,
-          birthdate);
+          birthdate,
+          isTeacher);
     }
   }
   userToken = currentUser.token;
