@@ -64,6 +64,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
   @override
   void dispose() {
     studentsGradesCommentsRows.clear();
+    // studentGradesBodyToUpgrade.clear();
     evaluationComments.clear();
     commentStringEval.clear();
     _debounce?.cancel();
@@ -356,6 +357,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
                 Flexible(
                   child: ElevatedButton.icon(
                     onPressed: () async {
+                      studentGradesBodyToUpgrade.clear();
                       selectedStudentName = '';
                       validator();
                       searchBUttonAction(
@@ -539,6 +541,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
                                   //Grid for students name and ID
                                   columns: studentColumnsToEvaluateByStudent,
                                   rows: studentEvaluationRows,
+                                  mode: PlutoGridMode.selectWithOneTap,
                                   onRowDoubleTap: (event) async {
                                     var gradeInt = getKeyFromValue(
                                         teacherGradesMap, gradeSelected);

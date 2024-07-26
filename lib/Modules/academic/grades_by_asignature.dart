@@ -317,6 +317,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                 Flexible(
                   child: ElevatedButton.icon(
                     onPressed: () async {
+                      studentGradesBodyToUpgrade.clear();
                       // if (studentList.isNotEmpty) {
                       //   studentList.clear();
                       // }

@@ -78,7 +78,7 @@ class _GradesViewScreenState extends State<GradesViewScreen>
             controller: _tabController,
             tabs: const <Widget>[
               Tab(
-                icon: Icon(Icons.abc, color: Colors.white),
+                icon: Icon(Icons.abc),
                 text: 'Carga por materia',
               ),
               Tab(
