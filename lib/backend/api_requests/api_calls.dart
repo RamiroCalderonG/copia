@@ -18,7 +18,7 @@ class LoginUserCall {
           '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/login/userlogin/',
       callType: ApiCallType.GET,
       headers: {
-        'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+        'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
       },
       body: bodyContent.toString(),
       // params: {'nip': nip},
@@ -64,7 +64,7 @@ class UserPermissionsCall {
       apiUrl:
           '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/user/permissions?idLogin=$idLogin',
       callType: ApiCallType.GET,
-      headers: {'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret},
+      headers: {'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!},
       params: {'idLogin': idLogin},
       returnBody: true,
       encodeBodyUtf8: false,
@@ -81,7 +81,7 @@ class CurrentCicleCall {
       apiUrl: '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/cycles/1',
       callType: ApiCallType.GET,
       headers: {
-        'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+        'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
         'token': currentUser!.token,
         'employeeNum': currentUser!.employeeNumber!.toString()
       },
@@ -103,7 +103,7 @@ class FamilyCall {
             '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/family/$claFam/',
         callType: ApiCallType.GET,
         headers: {
-          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
           'token': currentUser!.token,
           'employeeNum': currentUser!.employeeNumber!.toString()
         },
@@ -125,7 +125,7 @@ class NurseryStudentCall {
           '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/nursery/student',
       callType: ApiCallType.GET,
       headers: {
-        'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+        'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
         'token': currentUser!.token,
         'employeeNum': currentUser!.employeeNumber!.toString()
       },
@@ -152,7 +152,7 @@ class NurseryStudentMedication {
           '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/nursery/medication',
       callType: ApiCallType.GET,
       headers: {
-        'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+        'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
         'token': currentUser!.token,
         'employeeNum': currentUser!.employeeNumber!.toString()
       },
@@ -171,7 +171,7 @@ class NurseryHistoryCall {
           '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/nursery/history',
       callType: ApiCallType.GET,
       headers: {
-        'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+        'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
         'token': currentUser!.token,
         'employeeNum': currentUser!.employeeNumber!.toString()
       },
@@ -191,7 +191,7 @@ class CausesCall {
       apiUrl: '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/causes',
       callType: ApiCallType.GET,
       headers: {
-        'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+        'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
         'token': currentUser!.token,
         'employeeNum': currentUser!.employeeNumber!.toString()
       },
@@ -213,7 +213,7 @@ class NurseryPainListCall {
             '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/nursery-pain-list',
         callType: ApiCallType.GET,
         headers: {
-          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
           'token': currentUser!.token,
           'employeeNum': currentUser!.employeeNumber!.toString()
         },
@@ -233,7 +233,7 @@ class NurseryWoundsCall {
           '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/nursery-wounds',
       callType: ApiCallType.GET,
       headers: {
-        'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+        'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
         'token': currentUser!.token,
         'employeeNum': currentUser!.employeeNumber!.toString()
       },
@@ -258,7 +258,7 @@ class EmployeeCall {
         apiUrl: '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/employee',
         callType: ApiCallType.GET,
         headers: {
-          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
           'token': currentUser!.token,
           'employeeNum': currentUser!.employeeNumber!.toString()
         },
@@ -290,7 +290,7 @@ class TeacherCall {
             '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/Employee/Teacher',
         callType: ApiCallType.GET,
         headers: {
-          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
           'token': currentUser!.token,
           'employeeNum': currentUser!.employeeNumber!.toString()
         },
@@ -319,7 +319,7 @@ class POSTNurseryStudentVisit {
           '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/nursery-visit/',
       callType: ApiCallType.POST,
       headers: {
-        'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+        'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
         'token': currentUser!.token,
         'employeeNum': currentUser!.employeeNumber!.toString()
       },

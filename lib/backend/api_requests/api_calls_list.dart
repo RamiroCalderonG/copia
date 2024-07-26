@@ -1,11 +1,7 @@
-import 'dart:convert';
-
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:get/get_connect/http/src/request/request.dart';
 
 import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/constants/connection.dart';
-import 'package:oxschool/temp/teacher_grades_temp.dart';
 
 import 'package:requests/requests.dart';
 
@@ -19,7 +15,7 @@ Future<dynamic> loginUser(var jsonBody) async {
       '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/login/userlogin/',
       json: jsonBody,
       headers: {
-        'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+        'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
       },
       persistCookies: false,
       timeoutSeconds: 7);
@@ -45,7 +41,7 @@ Future<dynamic> getCycle(
       var apiCall = await Requests.get(
           '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/cycles/1',
           headers: {
-            'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+            'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
             'token': currentUser!.token,
           },
           persistCookies: false,
@@ -61,7 +57,7 @@ Future<dynamic> getCycle(
       var apiCall = await Requests.get(
           '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/cycles/',
           headers: {
-            'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+            'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
             'token': currentUser!.token,
           },
           persistCookies: false,
@@ -83,7 +79,7 @@ Future<dynamic> postNurseryVisit(Map<String, dynamic> jsonBody) async {
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/nursery-visit/',
         json: jsonBody, //We use a json style as body
         headers: {
-          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
           'token': currentUser!.token,
           'employeeNum': currentUser!.employeeNumber!.toString()
         },
@@ -108,7 +104,7 @@ Future<String> searchEmployee(String employeeNumber) async {
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/employee/${employeeNumber.trim()}',
         headers: {
           "Content-Type": "application/json",
-          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
           'token': currentUser!.token,
           'employeeNum': currentUser!.employeeNumber!.toString()
         },
@@ -135,7 +131,7 @@ Future<int> deleteMedicineStudent(var idValue) async {
         // json: jsonBody, //We use a json style as body
         //queryParameters: {'id': idValue},
         headers: {
-          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
           'token': currentUser!.token,
           'employeeNum': currentUser!.employeeNumber!.toString()
         },
@@ -160,7 +156,7 @@ Future<dynamic> getEvents(String? param) async {
       var apiCall = await Requests.get(
           '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/events',
           headers: {
-            'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+            'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
             'token': currentUser!.token
           },
           persistCookies: false,
@@ -177,7 +173,7 @@ Future<dynamic> getEvents(String? param) async {
       var apiCall = await Requests.get(
           '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/events',
           headers: {
-            'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+            'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
             'token': currentUser!.token
           },
           queryParameters: {'detail': param},
@@ -199,7 +195,7 @@ Future<dynamic> modifyActiveOfEventRole(
     var apiCall = await Requests.put(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/event-role/$eventId',
         headers: {
-          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
           'token': currentUser!.token
         },
         json: {
@@ -222,7 +218,7 @@ Future<dynamic> getRolesList() async {
     var apiCall = await Requests.get(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/role',
         headers: {
-          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
           'token': currentUser!.token
         },
         persistCookies: false,
@@ -242,7 +238,7 @@ Future<dynamic> getRole(String roleName) async {
     var apiCall = await Requests.get(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/role',
         headers: {
-          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
           'token': currentUser!.token
         },
         persistCookies: false,
@@ -260,7 +256,7 @@ Future<dynamic> getEventsByRole(int? roleID) async {
     var apiCal = await Requests.get(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/role/events',
         headers: {
-          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
           'token': currentUser!.token
         },
         queryParameters: {'role': roleID},
@@ -279,7 +275,7 @@ Future<dynamic> editRole(int roleID, Map<String, dynamic> bodyObject) async {
     var apiCall = await Requests.put(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/role/$roleID',
         headers: {
-          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
           'token': currentUser!.token
         },
         json: bodyObject,
@@ -299,7 +295,7 @@ Future<dynamic> deleteRole(int roleID) async {
     var apiCall = await Requests.delete(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/role/$roleID',
         headers: {
-          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
           'token': currentUser!.token
         },
         persistCookies: false,
@@ -318,7 +314,7 @@ Future<dynamic> createRole(Map<String, dynamic> bodyObject) async {
     var apiCall = await Requests.post(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/role',
         headers: {
-          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
           'token': currentUser!.token
         },
         json: bodyObject,
@@ -339,7 +335,7 @@ Future<dynamic> createUser(Map<String, dynamic> newUser) async {
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/user/',
         json: newUser,
         headers: {
-          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
           'token': currentUser!.token
         },
         // body: {
@@ -366,7 +362,7 @@ Future<dynamic> editUser(Map<String, dynamic> bodyObject, String userID) async {
     var apiCall = await Requests.put(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/user/$userID',
         headers: {
-          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
           'token': currentUser!.token
         },
         json: bodyObject,
@@ -387,7 +383,7 @@ Future<dynamic> editUserRole(String roleName, int userID) async {
     var apiCall = await Requests.patch(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/user/role',
         headers: {
-          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
           'token': currentUser!.token
         },
         body: {'role': roleName.toString(), 'userID': userID.toString()},
@@ -407,7 +403,7 @@ Future<dynamic> getUsers() async {
     var apiCall = await Requests.get(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/user',
         headers: {
-          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
           'token': currentUser!.token
         },
         persistCookies: false,
@@ -426,7 +422,7 @@ Future<dynamic> deleteUser(String id) async {
     var apiCall = await Requests.delete(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/user/$id',
         headers: {
-          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
           'token': currentUser!.token
         },
         persistCookies: false,
@@ -445,7 +441,7 @@ Future<dynamic> getUserDetail(String userId) async {
     var apiCall = await Requests.get(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/user/detail',
         headers: {
-          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
           'token': currentUser!.token
         },
         queryParameters: {'id': userId},
@@ -464,7 +460,7 @@ Future<dynamic> getAllModules() async {
     var apiCall = await Requests.get(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/modules',
         headers: {
-          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
           'token': currentUser!.token
         },
         persistCookies: false,
@@ -481,7 +477,7 @@ Future<dynamic> getCampuseList() async {
     var apiCall = await Requests.get(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/campus',
         headers: {
-          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
           'token': currentUser!.token
         },
         persistCookies: true,
@@ -498,7 +494,7 @@ Future<dynamic> getWorkDepartments() async {
     var apiCall = await Requests.get(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/departments',
         headers: {
-          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
           'token': currentUser!.token
         },
         persistCookies: false,
@@ -516,7 +512,7 @@ Future<dynamic> sendUserPasswordToMail(
     var apiCall = await Requests.get(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/login/forgot-password/$employeeNumber',
         headers: {
-          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
           'device': deviceInfo,
           'ip_address': deviceIp.toString()
         },
@@ -547,7 +543,7 @@ Future<dynamic> getTeacherGradeAndCourses(var employee, var year) async {
     var apiCall = await Requests.get(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/teacher/start-student-rating',
         headers: {
-          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
           'ip_address': deviceIp.toString(),
           'token': currentUser!.token
         },
@@ -576,7 +572,7 @@ Future<dynamic> getStudentsToGrade(String assignature, String group,
     var apiCall = await Requests.get(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/school-rating/active-students',
         headers: {
-          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
           'ip_address': deviceIp.toString(),
           'token': currentUser!.token
         },
@@ -609,7 +605,7 @@ Future<dynamic> getStudentsGrades(
     var apiCall = await Requests.get(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student/grades',
         headers: {
-          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
           'ip_address': deviceIp.toString(),
           'token': currentUser!.token
         },
@@ -637,7 +633,7 @@ Future<dynamic> getSubjectsAndGradeByStuent(
     var apiCall = await Requests.get(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student/grades',
         headers: {
-          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
           'ip_address': deviceIp.toString(),
           'token': currentUser!.token
         },
@@ -669,7 +665,7 @@ Future<dynamic> patchStudentsGrades(
       var apiCall = await Requests.patch(
           '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student/grades',
           headers: {
-            'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+            'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
             'ip_address': deviceIp.toString(),
             'token': currentUser!.token
           },
@@ -696,7 +692,7 @@ Future<dynamic> getStudentsGradesComments(
       var apiCall = await Requests.get(
           '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student/comments',
           headers: {
-            'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+            'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
             // 'ip_address': deviceIp.toString(),
             'token': currentUser!.token
           },
@@ -712,7 +708,7 @@ Future<dynamic> getStudentsGradesComments(
       var apiCall = await Requests.get(
           '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/school-rating/comments',
           headers: {
-            'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+            'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
             // 'ip_address': deviceIp.toString(),
             'token': currentUser!.token
           },
@@ -733,7 +729,7 @@ Future<dynamic> putStudentEvaluationsComments(
     var apiCall = await Requests.patch(
       '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student/comments',
       headers: {
-        'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+        'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
         'token': currentUser!.token
       },
       json: {
@@ -756,7 +752,7 @@ Future<dynamic> validateUserInformation(
     var apiCall = await Requests.get(
       '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/****',
       headers: {
-        'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+        'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
         'token': currentUser!.token
       },
       json: {'employee': employeeNumber, '$keyTovalidate': valueToReturn},
@@ -773,7 +769,7 @@ Future<dynamic> getStudentsByRole(int employeeNumber, String userRole) async {
     var apiCall = await Requests.get(
       '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/student',
       headers: {
-        'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+        'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
         'token': currentUser!.token
       },
       queryParameters: {
@@ -798,7 +794,7 @@ Future<dynamic> getFodac27History(
     var apiCall = await Requests.get(
       '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/fodac27/student',
       headers: {
-        'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+        'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
         'token': currentUser!.token
       },
       queryParameters: {
@@ -820,7 +816,7 @@ Future<dynamic> getStudentSubjects(String StudentID, String cycle) async {
     var apiCall = await Requests.get(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student/subjects',
         headers: {
-          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
           'token': currentUser!.token
         },
         queryParameters: {
@@ -840,7 +836,7 @@ Future<dynamic> postFodac27Record(String date, String studentID, String cycle,
     var apiCall = await Requests.post(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/fodac27',
         headers: {
-          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
           'token': currentUser!.token
         },
         json: {
@@ -864,7 +860,7 @@ Future<int> editFodac27Record(Map<String, dynamic> body) async {
     var apiCall = await Requests.patch(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student/fodac27',
         headers: {
-          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
           'token': currentUser!.token
         },
         json: body,
@@ -881,7 +877,7 @@ Future<int> deleteFodac27Record(int fodac27ID) async {
     var apiCall = await Requests.delete(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student/fodac27',
         headers: {
-          'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
           'token': currentUser!.token
         },
         queryParameters: {'observation': fodac27ID},
@@ -917,12 +913,12 @@ Future<http.Response> getUserPermissions(int userId) async {
   try {
     Uri address = Uri(
         scheme: 'http',
-        host: 'localhost',
+        host: dotenv.env['HOSTURL']!,
         port: 8080,
         path: '/api/user/events',
         queryParameters: {'id': userId.toString()});
     var response = http.get(address, headers: {
-      'X-Embarcadero-App-Secret': x_Embarcadero_App_Secret,
+      'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
       'token': currentUser!.token
     });
     userEvents = response;
