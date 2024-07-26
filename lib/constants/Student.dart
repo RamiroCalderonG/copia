@@ -17,12 +17,12 @@ var studentsList; //Students to update grades
 late var nurseryCauses; //causes fetched from nursery call
 
 void clearStudentData() {
-  if (nurseryStudent?.claFamilia != null) {
-    nurseryStudent?.clear();
-  }
-  if (studentFamily?.idFamilyDet != null) {
-    studentFamily?.clear();
-  }
+//  if (nurseryStudent?.claFamilia != null) {
+//    nurseryStudent?.clear();
+//  }
+//  if (studentFamily?.idFamilyDet != null) {
+//    studentFamily?.clear();
+//  }
 
   selectedStudent = null;
   nurseryHistoryStudent = null;

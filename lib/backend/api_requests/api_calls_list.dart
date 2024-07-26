@@ -913,7 +913,7 @@ Future<http.Response> getUserPermissions(int userId) async {
   try {
     Uri address = Uri(
         scheme: 'http',
-        host: dotenv.env['HOSTURL']!,
+        host: dotenv.env['HOST'],
         port: 8080,
         path: '/api/user/events',
         queryParameters: {'id': userId.toString()});

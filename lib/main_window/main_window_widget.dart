@@ -489,13 +489,13 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                 // Clear any necessary data or variables
                 // clearStudentData();
                 // clearUserData();
-                setState(() {
+               // setState(() {
                   currentUser?.clear();
                   currentCycle?.clear();
                   eventsList?.clear();
                   deviceIp = '';
                   cleatTempData();
-                });
+               // });
 
                 // Navigate to the initial screen
 
