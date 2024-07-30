@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:intl/intl.dart';
 import 'package:oxschool/Models/Student_eval.dart';
 
@@ -792,7 +791,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
           'absence_eval': PlutoCell(value: student.absence),
           'homework_eval': PlutoCell(value: student.homework),
           'discipline_eval': PlutoCell(value: student.discipline),
-          'comment': PlutoCell(value: student.comment),
+          // 'comment': PlutoCell(value: student.comment),
           'habit_eval': PlutoCell(value: student.habits_evaluation),
           'other': PlutoCell(value: student.other),
           'outfit': PlutoCell(value: student.outfit),
