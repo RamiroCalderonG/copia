@@ -1,12 +1,11 @@
-List<String> monthsList = [
+List<String> academicMonthsList = [
   'Enero',
   'Febrero',
   'Marzo',
   'Abril',
   'Mayo',
   'Junio',
-  'Julio',
-  'Agosto',
+  // 'Agosto',
   'Septiembre',
   'Octubre',
   'Noviembre',
