@@ -159,3 +159,5 @@ dynamic activateUser(String employeeNum, int activeValue) async {
     return ErrorDescription(e.toString());
   }
 }
+
+dynamic isUserCoordinator(int employeeNum) async {}
