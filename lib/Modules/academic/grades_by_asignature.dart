@@ -38,7 +38,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
   String? selectedStudentName;
   var gradeInt;
   int? monthNumber;
-  String monthValue = isUserAdmin ? monthsList.first : currentMonth;
+  String monthValue = isUserAdmin ? academicMonthsList.first : currentMonth;
   // int? monthNumber;
   String dropDownValue = ''; //oneTeacherAssignatures.first;
   int? assignatureID;
@@ -197,7 +197,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
         monthValue = value!;
       },
       dropdownMenuEntries:
-          monthsList.map<DropdownMenuEntry<String>>((String value) {
+          academicMonthsList.map<DropdownMenuEntry<String>>((String value) {
         return DropdownMenuEntry<String>(value: value, label: value);
       }).toList(),
     );
@@ -559,7 +559,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
       dropDownValue = oneTeacherAssignatures.first;
     }
     if (monthValue.isEmpty) {
-      monthValue = monthsList.first;
+      monthValue = academicMonthsList.first;
     }
 
     if (isUserAdmin == true) {
