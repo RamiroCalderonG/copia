@@ -38,7 +38,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
   String? selectedStudentName;
   var gradeInt;
   int? monthNumber;
-  String monthValue = ''; //monthsList.first;
+  String monthValue = isUserAdmin ? academicMonthsList.first : currentMonth;
   // int? monthNumber;
   String dropDownValue = ''; //oneTeacherAssignatures.first;
   int? assignatureID;
@@ -102,7 +102,6 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
             'Uniforme': PlutoCell(value: item.outfit),
             'Ausencia': PlutoCell(value: item.absence),
             'Tareas': PlutoCell(value: item.homework),
-            'Comentarios': PlutoCell(value: item.comment),
           }));
         }
 //                           // StudentsPlutoGrid(rows: assignatureRows);
@@ -193,12 +192,12 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
 
   Widget _buildGradesbyAssignature() {
     final DropdownMenu monthSelectorButton = DropdownMenu<String>(
-      initialSelection: monthsList.first,
+      initialSelection: monthValue,
       onSelected: (String? value) {
         monthValue = value!;
       },
       dropdownMenuEntries:
-          monthsList.map<DropdownMenuEntry<String>>((String value) {
+          academicMonthsList.map<DropdownMenuEntry<String>>((String value) {
         return DropdownMenuEntry<String>(value: value, label: value);
       }).toList(),
     );
@@ -560,7 +559,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
       dropDownValue = oneTeacherAssignatures.first;
     }
     if (monthValue.isEmpty) {
-      monthValue = monthsList.first;
+      monthValue = academicMonthsList.first;
     }
 
     if (isUserAdmin == true) {

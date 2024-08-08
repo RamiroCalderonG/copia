@@ -773,7 +773,7 @@ Future<dynamic> getStudentsByRole(int employeeNumber, String userRole) async {
         'token': currentUser!.token
       },
       queryParameters: {
-        'role': 1,
+        'role': 1, //<--------REMOVE HARDCORED NUMBER
         'detail': 'List',
         'employee': employeeNumber
       },

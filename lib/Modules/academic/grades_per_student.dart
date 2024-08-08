@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:intl/intl.dart';
 import 'package:oxschool/Models/Student_eval.dart';
 
@@ -36,7 +35,7 @@ int? monthNumber;
 class _GradesByStudentState extends State<GradesByStudent> {
   String groupSelected = ''; // = oneTeacherGroups.first.toString();
   String gradeSelected = ''; // = oneTeacherAssignatures.first;
-  String monthValue = monthsList.first;
+  String monthValue = academicMonthsList.first;
   var commentsController = TextEditingController();
   late PlutoGridStateManager stateManager;
   // late PlutoGridStateManager gridBStateManager;
@@ -265,7 +264,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
         monthValue = value!;
       },
       dropdownMenuEntries:
-          monthsList.map<DropdownMenuEntry<String>>((String value) {
+          academicMonthsList.map<DropdownMenuEntry<String>>((String value) {
         return DropdownMenuEntry<String>(value: value, label: value);
       }).toList(),
     );
@@ -446,7 +445,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
                             dropDownValue = oneTeacherAssignatures.first;
                           }
                           if (monthValue.isEmpty) {
-                            monthValue = monthsList.first;
+                            monthValue = academicMonthsList.first;
                           }
 
                           if (isUserAdmin == true) {
@@ -696,7 +695,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
       dropDownValue = oneTeacherAssignatures.first;
     }
     if (monthValue.isEmpty) {
-      monthValue = monthsList.first;
+      monthValue = academicMonthsList.first;
     }
 
     if (isUserAdmin == true) {
@@ -792,7 +791,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
           'absence_eval': PlutoCell(value: student.absence),
           'homework_eval': PlutoCell(value: student.homework),
           'discipline_eval': PlutoCell(value: student.discipline),
-          'comment': PlutoCell(value: student.comment),
+          // 'comment': PlutoCell(value: student.comment),
           'habit_eval': PlutoCell(value: student.habits_evaluation),
           'other': PlutoCell(value: student.other),
           'outfit': PlutoCell(value: student.outfit),

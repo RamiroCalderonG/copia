@@ -8,7 +8,7 @@ class StudentEval {
   int absence;
   int homework;
   int discipline;
-  String comment;
+  // String comment;
   int habits_evaluation;
   int outfit;
   int subject;
@@ -27,7 +27,7 @@ class StudentEval {
       this.absence,
       this.homework,
       this.discipline,
-      this.comment,
+      // this.comment,
       this.habits_evaluation,
       this.outfit,
       this.subject,
@@ -53,7 +53,7 @@ dynamic getEvalFromJSON(List<dynamic> jsonList, bool isByStudent) {
         int absence = item['absence_eval'];
         int homework = item['homework_eval'];
         int discipline = item['discipline_eval'];
-        String comment = item['comment'];
+        // String comment = item['comment'];
         int habits_evaluation = item['habit_eval'];
         int outfit = item['outfit'];
         int subject = item['subject'];
@@ -70,7 +70,7 @@ dynamic getEvalFromJSON(List<dynamic> jsonList, bool isByStudent) {
             absence,
             homework,
             discipline,
-            comment,
+            // comment,
             habits_evaluation,
             outfit,
             subject,
@@ -91,7 +91,7 @@ dynamic getEvalFromJSON(List<dynamic> jsonList, bool isByStudent) {
         int absence = item['absence_eval'];
         int homework = item['homework_eval'];
         int discipline = item['discipline_eval'];
-        String comment = item['comment'];
+        // String comment = item['comment'];
         int habits_evaluation = item['habit_eval'];
         int outfit = item['outfit'];
         int subject = item['subject'];
@@ -109,7 +109,7 @@ dynamic getEvalFromJSON(List<dynamic> jsonList, bool isByStudent) {
             absence,
             homework,
             discipline,
-            comment,
+            // comment,
             habits_evaluation,
             outfit,
             subject,

@@ -1,5 +1,6 @@
 // ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
@@ -12,6 +13,7 @@ import 'package:oxschool/backend/api_requests/api_calls_list.dart';
 import 'package:oxschool/constants/User.dart';
 import 'package:flutter/material.dart';
 import 'package:oxschool/constants/connection.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../components/custom_scaffold_messenger.dart';
 import '../utils/device_information.dart';
@@ -37,6 +39,12 @@ bool isLoading = false;
 class _LoginViewWidgetState extends State<LoginViewWidget> {
   late LoginViewModel _model;
   String currentDeviceData = '';
+  static const int tapLimit = 4;
+  static const int timeLimit = 3 * 60; // 3 minutes in seconds
+
+  List<int> tapTimestamps = [];
+  int remainingTime = 0;
+  Timer? timer;
 
   // late User currentUser;
 
@@ -47,6 +55,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
   @override
   void initState() {
     super.initState();
+    _loadTapTimestamps();
+    _startTimer();
     initPlatformState();
     _model = createModel(context, () => LoginViewModel());
 
@@ -58,7 +68,45 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
   @override
   void dispose() {
     _model.dispose();
+    timer?.cancel();
     super.dispose();
+  }
+
+  _loadTapTimestamps() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String>? timestamps = prefs.getStringList('tapTimestamps');
+    if (timestamps != null) {
+      setState(() {
+        tapTimestamps =
+            timestamps.map((timestamp) => int.parse(timestamp)).toList();
+      });
+      _updateRemainingTime();
+    }
+  }
+
+  void _startTimer() {
+    timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(() {
+        _updateRemainingTime();
+      });
+    });
+  }
+
+  void _updateRemainingTime() {
+    int currentTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    if (tapTimestamps.isNotEmpty) {
+      int oldestTap = tapTimestamps.first;
+      int timeElapsed = currentTime - oldestTap;
+      remainingTime = timeLimit - timeElapsed;
+    } else {
+      remainingTime = 0;
+    }
+  }
+
+  _saveTapTimestamps() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setStringList('tapTimestamps',
+        tapTimestamps.map((timestamp) => timestamp.toString()).toList());
   }
 
   // Custom function to trim spaces
@@ -115,112 +163,121 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
     var apiResponse;
 
     dynamic loginButtonFunction() async {
-      try {
-        var value = trimSpaces(_model.textController2.text);
-        var emplNumberValue = trimSpaces(_model.textController1.text);
-        Map<String, dynamic> nip = {'Nip': value};
-        apiBody.addEntries(nip.entries);
-        Map<String, dynamic> employeeNumber = {
-          'employeeNumber': _model.textController1.text
-        };
-        apiBody.addEntries(employeeNumber.entries);
-        Map<String, dynamic> device = {'device': currentDeviceData};
-        apiBody.addEntries(device.entries);
-        Map<String, dynamic> deviceIp = {'ip_address': deviceIP};
-        apiBody.addEntries(deviceIp.entries);
+      int currentTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      // Remove timestamps older than the time limit
+      tapTimestamps = tapTimestamps
+          .where((timestamp) => currentTime - timestamp <= timeLimit)
+          .toList();
 
-        if (value.isNotEmpty && emplNumberValue.isNotEmpty) {
-          // Log In user
-          // _model.apiResultxgr = await LoginUserCall.call(bodyContent: apiBody)
-          //     .timeout(Duration(seconds: 7));
+      if (tapTimestamps.length < tapLimit) {
+        tapTimestamps.add(currentTime);
+        _saveTapTimestamps();
+        _updateRemainingTime();
+        try {
+          var value = trimSpaces(_model.textController2.text);
+          var emplNumberValue = trimSpaces(_model.textController1.text);
 
-          apiResponse = await loginUser(apiBody);
-          if (apiResponse.statusCode == 200) {
-            List<dynamic> jsonList = json.decode(apiResponse.body);
-            currentUser = parseLogedInUserFromJSON(jsonList);
+          Map<String, dynamic> nip = {'Nip': value};
+          apiBody.addEntries(nip.entries);
+          Map<String, dynamic> employeeNumber = {
+            'employeeNumber': _model.textController1.text
+          };
+          apiBody.addEntries(employeeNumber.entries);
+          Map<String, dynamic> device = {'device': currentDeviceData};
+          apiBody.addEntries(device.entries);
+          Map<String, dynamic> deviceIp = {'ip_address': deviceIP};
+          apiBody.addEntries(deviceIp.entries);
 
-            getUserPermissions(currentUser!.userId);
+          if (value.isNotEmpty && emplNumberValue.isNotEmpty) {
+            apiResponse = await loginUser(apiBody);
+            if (apiResponse.statusCode == 200) {
+              List<dynamic> jsonList = json.decode(apiResponse.body);
+              currentUser = parseLogedInUserFromJSON(jsonList);
 
-            // apiResponse = await getUserEvents(currentUser!.userId);
-            // jsonList = json.decode(apiResponse);
-            // userRoles = jsonList;
+              getUserPermissions(currentUser!.userId);
 
-            apiResponse = await getCycle(
-                0); //CurrentCicleCall.call().timeout(Duration(seconds: 7));
-            if (apiResponse != null) {
-              List<dynamic> jsonList = json.decode(apiResponse);
+              apiResponse = await getCycle(
+                  0); //CurrentCicleCall.call().timeout(Duration(seconds: 7));
+              if (apiResponse != null) {
+                List<dynamic> jsonList = json.decode(apiResponse);
 
-              // jsonList = json.decode(apiResponse);
-              currentCycle = getcurrentCycle(jsonList);
-            }
+                currentCycle = getcurrentCycle(jsonList);
+              }
 
-            if ((currentCycle != null)) {
-              if (Platform.isAndroid || Platform.isIOS) {
-                context.goNamed(
-                  'MobileMainView',
-                  extra: <String, dynamic>{
-                    kTransitionInfoKey: const TransitionInfo(
-                      hasTransition: true,
-                      transitionType: PageTransitionType.fade,
-                    ),
-                  },
-                );
+              if ((currentCycle != null)) {
+                if (Platform.isAndroid || Platform.isIOS) {
+                  context.goNamed(
+                    'MobileMainView',
+                    extra: <String, dynamic>{
+                      kTransitionInfoKey: const TransitionInfo(
+                        hasTransition: true,
+                        transitionType: PageTransitionType.fade,
+                      ),
+                    },
+                  );
+                } else {
+                  context.goNamed(
+                    'MainWindow',
+                    extra: <String, dynamic>{
+                      kTransitionInfoKey: const TransitionInfo(
+                        hasTransition: true,
+                        transitionType: PageTransitionType.fade,
+                      ),
+                    },
+                  );
+                }
               } else {
-                context.goNamed(
-                  'MainWindow',
-                  extra: <String, dynamic>{
-                    kTransitionInfoKey: const TransitionInfo(
-                      hasTransition: true,
-                      transitionType: PageTransitionType.fade,
-                    ),
-                  },
-                );
+                ScaffoldMessenger.of(context).showSnackBar(customScaffoldMesg(
+                    context,
+                    'No se encuentran los datos, favor de verificar',
+                    null));
               }
             } else {
-              ScaffoldMessenger.of(context).showSnackBar(customScaffoldMesg(
-                  context,
-                  'No se encuentran los datos, favor de verificar',
-                  null));
+              Map<String, dynamic> jsonMap = jsonDecode(apiResponse.body);
+              String description = jsonMap['description'];
+              Map<dynamic, String> response = {
+                apiResponse.statusCode: description
+              };
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                  customScaffoldMesg(context, response.toString(), null));
             }
+
+            setState(() {});
           } else {
-            Map<String, dynamic> jsonMap = jsonDecode(apiResponse.body);
-            String description = jsonMap['description'];
-            Map<dynamic, String> response = {
-              apiResponse.statusCode: description
-            };
-
+            _model.textController2.text = '';
             ScaffoldMessenger.of(context).showSnackBar(
-                customScaffoldMesg(context, response.toString(), null)
-                // SnackBar(
-                //   content: Text(
-                //     (apiResponse.toString()).toString(),
-                //     style: FlutterFlowTheme.of(context).labelMedium.override(
-                //           fontFamily: 'Roboto',
-                //           color: Color(0xFF130C0D),
-                //           fontWeight: FontWeight.w500,
-                //         ),
-                //   ),
-                //   action: SnackBarAction(
-                //       label: 'Cerrar mensaje',
-                //       textColor: FlutterFlowTheme.of(context).info,
-                //       backgroundColor: Colors.black12,
-                //       onPressed: () {
-                //         ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                //       }),
-                //   duration: Duration(milliseconds: 9000),
-                //   backgroundColor: FlutterFlowTheme.of(context).secondary,
-                // ),
-                );
+              SnackBar(
+                elevation: 20,
+                content: Text(
+                  'Verificar información, usuario y/o contraseña no pueden estar en blanco',
+                  style: FlutterFlowTheme.of(context).labelMedium.override(
+                        fontFamily: 'Roboto',
+                        color: const Color(0xFF130C0D),
+                        fontWeight: FontWeight.w500,
+                      ),
+                ),
+                action: SnackBarAction(
+                    label: 'Cerrar mensaje',
+                    textColor: FlutterFlowTheme.of(context).info,
+                    backgroundColor: Colors.black12,
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                    }),
+                duration: const Duration(milliseconds: 6000),
+                backgroundColor: FlutterFlowTheme.of(context).secondary,
+              ),
+            );
           }
-
-          setState(() {});
-        } else {
-          _model.textController2.text = '';
+        } catch (e) {
+          setState(() {
+            isLoading = false;
+          });
+          // _model.textController2.text = '';
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              elevation: 20,
               content: Text(
-                'Favor de no dejar campos en blanco',
+                e.toString(),
                 style: FlutterFlowTheme.of(context).labelMedium.override(
                       fontFamily: 'Roboto',
                       color: const Color(0xFF130C0D),
@@ -234,38 +291,23 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                   onPressed: () {
                     ScaffoldMessenger.of(context).hideCurrentSnackBar();
                   }),
-              duration: const Duration(milliseconds: 9000),
+              duration: const Duration(milliseconds: 6000),
               backgroundColor: FlutterFlowTheme.of(context).secondary,
             ),
           );
         }
-      } catch (e) {
-        setState(() {
-          isLoading = false;
-        });
-        // _model.textController2.text = '';
+      } else {
+        // Show a message to the user
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              e.toString(),
-              style: FlutterFlowTheme.of(context).labelMedium.override(
-                    fontFamily: 'Roboto',
-                    color: const Color(0xFF130C0D),
-                    fontWeight: FontWeight.w500,
-                  ),
-            ),
-            action: SnackBarAction(
-                label: 'Cerrar mensaje',
-                textColor: FlutterFlowTheme.of(context).info,
-                backgroundColor: Colors.black12,
-                onPressed: () {
-                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                }),
-            duration: const Duration(milliseconds: 9000),
-            backgroundColor: FlutterFlowTheme.of(context).secondary,
-          ),
+              content: Text(
+            'Por favor espere ${remainingTime ~/ 60}:${(remainingTime % 60).toString().padLeft(2, '0')} minutos antes de volver a intentar',
+            style: const TextStyle(
+                fontSize: 15, fontWeight: FontWeight.bold, fontFamily: 'Sora'),
+          )),
         );
       }
+      setState(() {});
     }
 
     return LayoutBuilder(
@@ -534,6 +576,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                               setState(() {
                                                 isLoading = true;
                                               });
+                                              ScaffoldMessenger.of(context)
+                                                  .hideCurrentSnackBar();
                                               await loginButtonFunction()
                                                   .whenComplete(() {
                                                 setState(() {

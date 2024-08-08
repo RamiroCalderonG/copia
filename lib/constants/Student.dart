@@ -155,12 +155,12 @@ final List<PlutoColumn> gradesByStudentColumns = [
       title: 'Conducta',
       field: 'discipline_eval',
       type: PlutoColumnType.number(negative: false)),
-  PlutoColumn(
-      title: 'Comentarios',
-      field: 'comment',
-      hide: true,
-      type:
-          PlutoColumnType.select(commentStringEval, enableColumnFilter: true)),
+  // PlutoColumn(
+  //     title: 'Comentarios',
+  //     field: 'comment',
+  //     hide: true,
+  //     type:
+  //         PlutoColumnType.select(commentStringEval, enableColumnFilter: true)),
   PlutoColumn(
       title: 'Habitos',
       field: 'habit_eval',
