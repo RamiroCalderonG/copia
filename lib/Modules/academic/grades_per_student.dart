@@ -625,8 +625,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
                                               onRowDoubleTap: (event) async {
                                                 asignatureNameListener = '';
                                                 asignatureNameListener = event
-                                                    .row!
-                                                    .cells['subject_name']
+                                                    .row.cells['subject_name']
                                                     ?.value
                                                     .toString();
                                                 await showCommentsDialog(

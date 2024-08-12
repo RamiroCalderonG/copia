@@ -116,7 +116,10 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                                 Navigator.of(context).push(MaterialPageRoute(
                                     builder: (context) => const UserWindow()));
                               },
-                              icon: const Icon(Icons.person),
+                              icon: const Icon(
+                                Icons.person,
+                                size: 30,
+                              ),
                               color: const Color.fromRGBO(235, 48, 69, 0.988)),
 
                           // Text(
@@ -127,15 +130,17 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                           //       fontSize: 20),
                           // ),
                           Text(
-                              '${currentUser?.employeeName?.toLowerCase().trimRight()}',
+                              ' ${currentUser?.employeeName?.toLowerCase().trimRight()}',
                               textAlign: TextAlign.center,
                               style: FlutterFlowTheme.of(context)
                                   .bodyMedium
                                   .override(
-                                    fontFamily: 'Sora',
-                                    color: FlutterFlowTheme.of(context)
-                                        .primaryText, // FlutterFlowTheme.of(context).bodyMedium,
-                                  )),
+                                      fontFamily: 'Sora',
+                                      color: FlutterFlowTheme.of(context)
+                                          .primaryText,
+                                      fontSize:
+                                          20 // FlutterFlowTheme.of(context).bodyMedium,
+                                      )),
                           const Padding(
                               padding: EdgeInsets.only(left: 15, right: 15)),
                           IconButton(
@@ -489,13 +494,13 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                 // Clear any necessary data or variables
                 // clearStudentData();
                 // clearUserData();
-               // setState(() {
-                  currentUser?.clear();
-                  currentCycle?.clear();
-                  eventsList?.clear();
-                  deviceIp = '';
-                  cleatTempData();
-               // });
+                // setState(() {
+                currentUser?.clear();
+                currentCycle?.clear();
+                eventsList?.clear();
+                deviceIp = '';
+                cleatTempData();
+                // });
 
                 // Navigate to the initial screen
 

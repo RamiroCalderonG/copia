@@ -27,7 +27,7 @@ void showEmptyFieldAlertDialog(BuildContext context, String contentText) {
 }
 
 Future<int> showConfirmationDialog(
-    BuildContext context, String contentText) async {
+    BuildContext context, String titleText, String contentText) async {
   Completer<int> completer = Completer<int>();
   showDialog(
     barrierDismissible: false,
@@ -35,8 +35,7 @@ Future<int> showConfirmationDialog(
     builder: (BuildContext context) {
       return AlertDialog(
         icon: const Icon(Icons.task_alt),
-        title: const Text('Cambios realizados!',
-            style: TextStyle(fontFamily: 'Sora')),
+        title: Text(titleText, style: const TextStyle(fontFamily: 'Sora')),
         content: Text(contentText
             // 'Por favor ingrese un valor que sea válido.'
             ),

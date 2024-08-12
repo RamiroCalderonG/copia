@@ -54,7 +54,7 @@ dynamic getEvalFromJSON(List<dynamic> jsonList, bool isByStudent) {
         int homework = item['homework_eval'];
         int discipline = item['discipline_eval'];
         // String comment = item['comment'];
-        int habits_evaluation = item['habit_eval'];
+        int habitsEvaluation = item['habit_eval'];
         int outfit = item['outfit'];
         int subject = item['subject'];
         String? subjectName = item['subject_name'];
@@ -71,7 +71,7 @@ dynamic getEvalFromJSON(List<dynamic> jsonList, bool isByStudent) {
             homework,
             discipline,
             // comment,
-            habits_evaluation,
+            habitsEvaluation,
             outfit,
             subject,
             subjectName,
@@ -92,7 +92,7 @@ dynamic getEvalFromJSON(List<dynamic> jsonList, bool isByStudent) {
         int homework = item['homework_eval'];
         int discipline = item['discipline_eval'];
         // String comment = item['comment'];
-        int habits_evaluation = item['habit_eval'];
+        int habitsEvaluation = item['habit_eval'];
         int outfit = item['outfit'];
         int subject = item['subject'];
         String? subjectName = item['subject_name'];
@@ -110,7 +110,7 @@ dynamic getEvalFromJSON(List<dynamic> jsonList, bool isByStudent) {
             homework,
             discipline,
             // comment,
-            habits_evaluation,
+            habitsEvaluation,
             outfit,
             subject,
             subjectName,

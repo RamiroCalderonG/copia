@@ -85,7 +85,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
   }
 
   void _startTimer() {
-    timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         _updateRemainingTime();
       });
@@ -238,7 +238,6 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
               Map<dynamic, String> response = {
                 apiResponse.statusCode: description
               };
-
               ScaffoldMessenger.of(context).showSnackBar(
                   customScaffoldMesg(context, response.toString(), null));
             }
