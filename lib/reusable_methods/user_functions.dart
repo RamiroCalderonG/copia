@@ -150,7 +150,7 @@ dynamic RoleFromJSON(List<dynamic> jsonData) {
   }
 }
 
-dynamic activateUser(String employeeNum, int activeValue) async {
+dynamic changeUserActiveStatus(String employeeNum, int activeValue) async {
   var body = {'bajalogicasino': activeValue};
   try {
     var response = await editUser(body, employeeNum);
