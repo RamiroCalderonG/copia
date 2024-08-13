@@ -13,8 +13,8 @@ class _GradesModuleConfigurationState extends State<GradesModuleConfiguration> {
 
   static final List<Widget> _widgetOptions = <Widget>[
     const HomeDashboard(),
-    PlaceholderWidget(color: Colors.green),
-    PlaceholderWidget(color: Colors.blue),
+    const PlaceholderWidget(color: Colors.green),
+    const PlaceholderWidget(color: Colors.blue),
   ];
 
   void _onItemTapped(int index) {
@@ -56,7 +56,7 @@ class _GradesModuleConfigurationState extends State<GradesModuleConfiguration> {
 class PlaceholderWidget extends StatelessWidget {
   final Color color;
 
-  PlaceholderWidget({super.key, required this.color});
+  const PlaceholderWidget({super.key, required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -81,7 +81,7 @@ class HomeDashboard extends StatelessWidget {
             style: Theme.of(context).textTheme.headline4,
           ),
           const SizedBox(height: 16),
-          Row(
+          const Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               DashboardCard(
@@ -107,7 +107,7 @@ class HomeDashboard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          Row(
+          const Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               DashboardCard(
@@ -133,7 +133,7 @@ class DashboardCard extends StatelessWidget {
   final String label;
   final String value;
 
-  DashboardCard({super.key, required this.icon, required this.label, required this.value});
+  const DashboardCard({super.key, required this.icon, required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {

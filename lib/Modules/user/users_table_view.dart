@@ -221,13 +221,21 @@ class _UsersTableViewState extends State<UsersTableView> {
                                                     children: [
                                                       Expanded(
                                                           child: TextButton(
-                                                        onPressed: () {
+                                                        onPressed: () async {
                                                           setState(() {
                                                             confirmation = true;
-                                                            Navigator.of(
-                                                                    context)
-                                                                .pop();
+                                                            isSearching = true;
                                                           });
+                                                          await changeUserActiveStatus(
+                                                              event.row.cells
+                                                                  .values
+                                                                  .elementAt(2)
+                                                                  .value
+                                                                  .toString(),
+                                                              1);
+                                                          isSearching = false;
+                                                          Navigator.of(context)
+                                                              .pop();
                                                         },
                                                         child: const Text('Si'),
                                                       )),
@@ -250,8 +258,13 @@ class _UsersTableViewState extends State<UsersTableView> {
                                               );
                                             });
                                         if (confirmation == true) {
-                                          await deleteUser(event
-                                                  .row.cells.values.first.value)
+                                          await deleteUser(
+                                                  event //NOT BEING USED, REMOVE?
+                                                      .row
+                                                      .cells
+                                                      .values
+                                                      .first
+                                                      .value)
                                               .whenComplete(() {
                                             listOfUsers = null;
                                             listOfUsersForGrid = null;
@@ -283,7 +296,7 @@ class _UsersTableViewState extends State<UsersTableView> {
                                                           });
                                                           if (confirmation ==
                                                               true) {
-                                                            activateUser(
+                                                            changeUserActiveStatus(
                                                                 event.row.cells
                                                                     .values
                                                                     .elementAt(
