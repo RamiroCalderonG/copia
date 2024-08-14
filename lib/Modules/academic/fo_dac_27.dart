@@ -1,11 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:oxschool/components/custom_scaffold_messenger.dart';
 
 import 'package:oxschool/constants/User.dart';
 import 'package:oxschool/reusable_methods/user_functions.dart';
@@ -230,7 +227,7 @@ class _FoDac27State extends State<FoDac27> {
                           if (response == 200) {
                             if (mounted) {
                               await showConfirmationDialog(
-                                  context, 'Registro eliminado');
+                                  context, 'Realizado', 'Registro eliminado');
                             }
                           }
                         }
@@ -277,7 +274,7 @@ class _FoDac27State extends State<FoDac27> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Observaciones para $selectedStudent'),
+            title: Text('Agregar comentario a:\n$selectedStudent'),
             content: NewFODAC27CommentDialog(
               selectedstudentId: selectedstudentId!,
               employeeNumber: currentUser!.employeeNumber!,
@@ -472,9 +469,16 @@ class _NewFODAC27CommentDialogState extends State<NewFODAC27CommentDialog> {
         subjectID,
       );
       if (result == 'Succes') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: const Text('Form submitted successfully!')),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(content: const Text('Form submitted successfully!')),
+        // );
+        if (mounted) {
+          int response = await showConfirmationDialog(
+              context, 'Realizado', 'Comentario agregado!');
+          if (response == 1) {
+            Navigator.pop(context);
+          }
+        }
         _dateController.clear();
         _observacionesController.text = '';
       } else {
@@ -566,11 +570,17 @@ class _NewFODAC27CommentDialogState extends State<NewFODAC27CommentDialog> {
                         child: Column(
                           children: [
                             Container(
-                              color: Colors.grey[300],
-                              padding: EdgeInsets.symmetric(horizontal: 8),
+                              color: Colors.grey[500],
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8),
                               child: const Row(
                                 children: [
-                                  Expanded(child: Text('Descripción')),
+                                  Expanded(
+                                      child: Text(
+                                    'Descripción',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  )),
                                   Text('Sel'),
                                 ],
                               ),
@@ -602,12 +612,17 @@ class _NewFODAC27CommentDialogState extends State<NewFODAC27CommentDialog> {
                         child: Column(
                           children: [
                             Container(
-                              color: Colors.grey[300],
+                              color: Colors.grey[500],
                               padding:
                                   const EdgeInsets.symmetric(horizontal: 8),
                               child: const Row(
                                 children: [
-                                  Expanded(child: Text('Descripción')),
+                                  Expanded(
+                                      child: Text(
+                                    'Descripción',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  )),
                                   Text('Sel'),
                                 ],
                               ),
@@ -689,7 +704,7 @@ class EditCommentScreen extends StatefulWidget {
   final String selectedSubject;
   final String studentID;
 
-  EditCommentScreen({
+  const EditCommentScreen({
     required this.id,
     required this.comment,
     required this.date,
@@ -847,14 +862,14 @@ class _EditCommentScreenState extends State<EditCommentScreen> {
             if (response == 200) {
               if (mounted) {
                 int response = await showConfirmationDialog(
-                    context, 'Registro modificado');
+                    context, 'Realizado', 'Registro modificado exitosamente');
                 if (response == 1) {
                   Navigator.pop(context);
                 }
               }
             }
           } else {
-            return null;
+            return;
           }
         }),
       ],
