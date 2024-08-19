@@ -22,7 +22,7 @@ void cleatTempData() async {
   selectedUser = null;
   tempUserId = null;
   tempSelectedUsr?.clear();
-  userRows.clear();
+  // userRows.clear();
   tmpRolesList.clear();
   userRoles.clear();
   tmpeventsList.clear();

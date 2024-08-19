@@ -17,18 +17,18 @@ void main() async {
 
   usePathUrlStrategy();
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-    setWindowMinSize(const Size(580, 500));
+    setWindowMinSize(const Size(600, 500));
   }
 
   await FlutterFlowTheme.initialize();
   await dotenv.load(fileName: "lib/oxschool.env");
 
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
-// ignore: use_key_in_widget_constructors
 class MyApp extends StatefulWidget {
-  // This widget is the root of your application.
+  const MyApp({super.key});
+
   @override
   State<MyApp> createState() => _MyAppState();
 
