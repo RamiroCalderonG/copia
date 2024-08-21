@@ -22,6 +22,9 @@ class _GradesMainScreenState extends State<GradesMainScreen>
 
   late final TabController _tabController;
   bool isSearching = false; // Add a state variable to track search status
+  bool canEvaluateNow = false;
+  bool userHavePrivileges = false;
+  bool displayEvaluateGrids = false;
 
   onTap() {
     isSearching = false;
@@ -30,7 +33,7 @@ class _GradesMainScreenState extends State<GradesMainScreen>
   @override
   void initState() {
     _tabController = TabController(length: 3, vsync: this);
-
+    initGetDate();
     super.initState();
     // _tabController = TabController(vsync: this, length: nurseryTabs.length);
     _tabController.addListener(onTap);
@@ -68,6 +71,21 @@ class _GradesMainScreenState extends State<GradesMainScreen>
     super.dispose();
   }
 
+  void initGetDate() async {
+    canEvaluateNow = await isDateToEvaluateStudents();
+  }
+
+  void validateDateAndUserPriv() {
+    if (canEvaluateNow) {
+      displayEvaluateGrids = true;
+    } else {
+      if (userHavePrivileges) {
+        displayEvaluateGrids = true;
+      }
+      displayEvaluateGrids = false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -101,13 +119,21 @@ class _GradesMainScreenState extends State<GradesMainScreen>
               style: TextStyle(color: Colors.white)),
           backgroundColor: FlutterFlowTheme.of(context).primary,
         ),
-        body: TabBarView(
-          controller: _tabController,
-          children: const <Widget>[
-            GradesByAsignature(),
-            GradesByStudent(),
-            FoDac27()
-          ],
-        ));
+        body: displayEvaluateGrids
+            ? TabBarView(
+                controller: _tabController,
+                children: const <Widget>[
+                  GradesByAsignature(),
+                  GradesByStudent(),
+                  FoDac27()
+                ],
+              )
+            : const Placeholder(
+                child: Text(
+                  'Fecha para captura de calificaciones no valida',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontFamily: 'Sora', fontSize: 20),
+                ),
+              ));
   }
 }

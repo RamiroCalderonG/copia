@@ -871,6 +871,22 @@ Future<int> editFodac27Record(Map<String, dynamic> body) async {
   }
 }
 
+Future<dynamic> getActualDate() async {
+  try {
+    var apiCall = await Requests.patch(
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/date',
+        headers: {
+          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
+          'token': currentUser!.token
+        },
+        queryParameters: {'field': 1},
+        persistCookies: false);
+    return apiCall.body;
+  } catch (e) {
+    return throw FormatException(e.toString());
+  }
+}
+
 Future<int> deleteFodac27Record(int fodac27ID) async {
   try {
     var apiCall = await Requests.delete(

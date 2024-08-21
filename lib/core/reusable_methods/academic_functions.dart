@@ -402,3 +402,25 @@ String validateNewGradeValue(String newValue, String columnNameToFind) {
     return newValue;
   }
 }
+
+Future<bool> isDateToEvaluateStudents() async {
+  DateTime now = DateTime.now();
+
+  try {
+    var originDate = await getActualDate();
+    String dateString = jsonDecode(originDate)['date'];
+    DateTime apiDate = DateTime.parse(dateString);
+
+    bool isSameDay = now.day == apiDate.day;
+    bool isSameMonth = now.month == apiDate.month;
+    bool isSameYear = now.year == apiDate.year;
+
+    if (isSameDay && isSameMonth && isSameYear) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (e) {
+    return throw FormatException(e.toString());
+  }
+}
