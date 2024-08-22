@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:oxschool/core/constants/connection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../components/confirm_dialogs.dart';
 import '../../components/custom_scaffold_messenger.dart';
 
 import '../../../core/utils/device_information.dart';
@@ -236,44 +237,25 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(customScaffoldMesg(
                     context,
-                    'No se encuentran los datos, favor de verificar',
+                    'Error en conección, vuelva a intentar Code: Cycle',
                     null));
               }
             } else {
               Map<String, dynamic> jsonMap = jsonDecode(apiResponse.body);
               String description = jsonMap['description'];
-              Map<dynamic, String> response = {
-                apiResponse.statusCode: description
-              };
-              ScaffoldMessenger.of(context).showSnackBar(
-                  customScaffoldMesg(context, response.toString(), null));
+              // Map<dynamic, String> response = {
+              //   apiResponse.statusCode: description
+              // };
+              showErrorFromBackend(context, description);
+              // ScaffoldMessenger.of(context).showSnackBar(
+              //     customScaffoldMesg(context, response.toString(), null));
             }
 
             setState(() {});
           } else {
             _model.textController2.text = '';
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                elevation: 20,
-                content: Text(
-                  'Verificar información, usuario y/o contraseña no pueden estar en blanco',
-                  style: FlutterFlowTheme.of(context).labelMedium.override(
-                        fontFamily: 'Roboto',
-                        color: const Color(0xFF130C0D),
-                        fontWeight: FontWeight.w500,
-                      ),
-                ),
-                action: SnackBarAction(
-                    label: 'Cerrar mensaje',
-                    textColor: FlutterFlowTheme.of(context).info,
-                    backgroundColor: Colors.black12,
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                    }),
-                duration: const Duration(milliseconds: 6000),
-                backgroundColor: FlutterFlowTheme.of(context).secondary,
-              ),
-            );
+            showEmptyFieldAlertDialog(context,
+                'Verificar información, usuario y/o contraseña no pueden estar en blanco');
           }
         } catch (e) {
           setState(() {
@@ -297,7 +279,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                   onPressed: () {
                     ScaffoldMessenger.of(context).hideCurrentSnackBar();
                   }),
-              duration: const Duration(milliseconds: 6000),
+              duration: const Duration(milliseconds: 5000),
               backgroundColor: FlutterFlowTheme.of(context).secondary,
             ),
           );
@@ -494,13 +476,6 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                   isLoading = false;
                                                 });
                                               }
-                                              // setState(() {
-                                              //   isLoading = true;
-                                              // });
-                                              // await loginButtonFunction()
-                                              //     .whenComplete(() {
-                                              //   isLoading = false;
-                                              // });
                                             },
                                             controller: _model.textController2,
                                             obscureText:
@@ -938,7 +913,6 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                   isLoading = false;
                                                 });
                                               }
-                                              // loginButtonFunction();
                                             },
                                             text: 'Ingresar',
                                             options: FFButtonOptions(

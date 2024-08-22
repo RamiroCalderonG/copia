@@ -8,8 +8,6 @@ import 'package:requests/requests.dart';
 import 'package:http/http.dart' as http;
 
 Future<dynamic> loginUser(var jsonBody) async {
-  String response;
-
   var apiCall = await Requests.post(
       '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/login/userlogin/',
       json: jsonBody,
@@ -22,12 +20,8 @@ Future<dynamic> loginUser(var jsonBody) async {
     apiCall.raiseForStatus();
     return apiCall;
   } catch (e) {
-    if (apiCall.statusCode == 200) {
-      response = apiCall.body;
-      return response;
-    } else {
-      return apiCall;
-    }
+    return apiCall;
+    // throw FormatException(e.toString());
   }
 }
 
@@ -745,16 +739,18 @@ Future<dynamic> putStudentEvaluationsComments(
 }
 
 //NOT USING FOR NOW
-Future<dynamic> validateUserInformation(
-    int employeeNumber, String valueToReturn, keyTovalidate) async {
+Future<dynamic> validateUser(
+  int employeeNumber,
+  dynamic keyTovalidate,
+) async {
   try {
     var apiCall = await Requests.get(
-      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/****',
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/user/validate',
       headers: {
         'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
         'token': currentUser!.token
       },
-      json: {'employee': employeeNumber, '$keyTovalidate': valueToReturn},
+      json: {'detail': keyTovalidate, 'user': employeeNumber},
       persistCookies: false,
     );
     apiCall.raiseForStatus();
@@ -873,7 +869,7 @@ Future<int> editFodac27Record(Map<String, dynamic> body) async {
 
 Future<dynamic> getActualDate() async {
   try {
-    var apiCall = await Requests.patch(
+    var apiCall = await Requests.get(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/date',
         headers: {
           'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
@@ -881,6 +877,7 @@ Future<dynamic> getActualDate() async {
         },
         queryParameters: {'field': 1},
         persistCookies: false);
+    apiCall.raiseForStatus();
     return apiCall.body;
   } catch (e) {
     return throw FormatException(e.toString());

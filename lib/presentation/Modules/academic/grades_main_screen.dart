@@ -23,7 +23,7 @@ class _GradesMainScreenState extends State<GradesMainScreen>
   late final TabController _tabController;
   bool isSearching = false; // Add a state variable to track search status
   bool canEvaluateNow = false;
-  bool userHavePrivileges = false;
+  bool canUserEvaluate = false;
   bool displayEvaluateGrids = false;
 
   onTap() {
@@ -34,11 +34,12 @@ class _GradesMainScreenState extends State<GradesMainScreen>
   void initState() {
     _tabController = TabController(length: 3, vsync: this);
     initGetDate();
-    super.initState();
+    // validateDateAndUserPriv();
     // _tabController = TabController(vsync: this, length: nurseryTabs.length);
     _tabController.addListener(onTap);
 
     loadStartGrading(currentUser!.employeeNumber!, currentCycle!.claCiclo!);
+    super.initState();
   }
 
   @override
@@ -73,14 +74,26 @@ class _GradesMainScreenState extends State<GradesMainScreen>
 
   void initGetDate() async {
     canEvaluateNow = await isDateToEvaluateStudents();
+
+    setState(() {
+      canUserEvaluate = canEvaluateNow;
+    });
+    debugPrint('initGetDate: $canEvaluateNow');
+    validateDateAndUserPriv();
   }
 
   void validateDateAndUserPriv() {
-    if (canEvaluateNow) {
-      displayEvaluateGrids = true;
-    } else {
-      if (userHavePrivileges) {
+    if (canUserEvaluate && currentUser!.canEditStudentGrades()) {
+      setState(() {
         displayEvaluateGrids = true;
+      });
+      debugPrint('validateUser: $displayEvaluateGrids');
+    } else {
+      if (currentUser!.canEditStudentGrades()) {
+        setState(() {
+          displayEvaluateGrids = true;
+        });
+        debugPrint('validateUser: $displayEvaluateGrids');
       }
       displayEvaluateGrids = false;
     }
@@ -129,11 +142,15 @@ class _GradesMainScreenState extends State<GradesMainScreen>
                 ],
               )
             : const Placeholder(
-                child: Text(
-                  'Fecha para captura de calificaciones no valida',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontFamily: 'Sora', fontSize: 20),
-                ),
+                color: Colors.transparent,
+                child: Center(
+                    child: Center(
+                  child: Text(
+                    'Sin información, consulte con el administrador',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontFamily: 'Sora', fontSize: 20),
+                  ),
+                )),
               ));
   }
 }

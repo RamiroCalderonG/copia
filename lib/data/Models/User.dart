@@ -92,4 +92,14 @@ class User {
     claUn = null;
     token = "";
   }
+
+  dynamic canEditStudentGrades() {
+    if (role == 'Administrador' ||
+        role == 'Director' ||
+        role == 'Coordinador') {
+      return true;
+    } else {
+      return false;
+    }
+  }
 }
