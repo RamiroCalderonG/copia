@@ -7,10 +7,10 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 // ignore: depend_on_referenced_packages
 import 'package:flutter_web_plugins/url_strategy.dart';
 import "package:window_size/window_size.dart";
-import 'flutter_flow/flutter_flow_theme.dart';
-import 'flutter_flow/flutter_flow_util.dart';
-import 'flutter_flow/internationalization.dart';
-import 'flutter_flow/nav/nav.dart';
+import 'core/config/flutter_flow/flutter_flow_theme.dart';
+import 'core/config/flutter_flow/flutter_flow_util.dart';
+import 'core/config/flutter_flow/internationalization.dart';
+import 'core/config/flutter_flow/nav/nav.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,7 +21,7 @@ void main() async {
   }
 
   await FlutterFlowTheme.initialize();
-  await dotenv.load(fileName: "lib/oxschool.env");
+  await dotenv.load(fileName: "lib/core/config/oxschool.env");
 
   runApp(const MyApp());
 }
