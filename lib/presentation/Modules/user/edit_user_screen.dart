@@ -390,19 +390,8 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                     actions: <Widget>[
                                       TextButton(
                                         onPressed: () async {
+                                          areaList.clear();
                                           Navigator.of(context).pop();
-                                          // context.goNamed(
-                                          //   'UDashboard',
-                                          //   extra: <String, dynamic>{
-                                          //     kTransitionInfoKey:
-                                          //         const TransitionInfo(
-                                          //       hasTransition: true,
-                                          //       transitionType:
-                                          //           PageTransitionType
-                                          //               .leftToRight,
-                                          //     ),
-                                          //   },
-                                          // );
                                         },
                                         child: const Text('Cancelar'),
                                       ),

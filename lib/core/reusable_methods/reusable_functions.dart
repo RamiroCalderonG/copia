@@ -17,6 +17,7 @@ Future<dynamic> getAllCampuse() async {
 
 Future<dynamic> getWorkDepartmentList() async {
   // List<String> departments = [];
+  areaList.clear();
   var response = await getWorkDepartments();
   var jsonList = jsonDecode(response);
 

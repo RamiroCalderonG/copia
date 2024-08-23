@@ -80,6 +80,10 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
     userRows.clear();
     // listOfUsersForGrid.clear();
     isLoading = false;
+    areaList.clear();
+    listOfUsers = null;
+    listOfUsersForGrid = null;
+    userRows.clear();
 
     super.dispose();
   }

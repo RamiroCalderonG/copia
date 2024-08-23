@@ -33,8 +33,6 @@ class _UsersTableViewState extends State<UsersTableView> {
 
   @override
   void initState() {
-    super.initState();
-
     for (var line in listOfUsersForGrid) {
       userRows.add(PlutoRow(
         cells: {
@@ -52,6 +50,14 @@ class _UsersTableViewState extends State<UsersTableView> {
         },
       ));
     }
+    areaList.clear();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    areaList.clear();
+    super.dispose();
   }
 
   @override
@@ -112,21 +118,11 @@ class _UsersTableViewState extends State<UsersTableView> {
                               field: 'userRole',
                               type: PlutoColumnType.text(),
                               readOnly: true),
-                          // PlutoColumn(
-                          //     title: 'Fecha de Ingreso',
-                          //     field: 'joinDate',
-                          //     type: PlutoColumnType.date(),
-                          //     readOnly: true),
                           PlutoColumn(
                               title: 'Campus',
                               field: 'campus',
                               type: PlutoColumnType.text(),
                               readOnly: true),
-                          // PlutoColumn(
-                          //     title: 'Departamento',
-                          //     field: 'area',
-                          //     type: PlutoColumnType.text(),
-                          //     readOnly: true),
                           PlutoColumn(
                               title: 'Baja',
                               field: 'isActive',
@@ -149,36 +145,6 @@ class _UsersTableViewState extends State<UsersTableView> {
                               field: 'position',
                               type: PlutoColumnType.text(),
                               readOnly: true)
-
-                          // PlutoColumn(
-                          //   title: 'Foto',
-                          //   field: 'photo',
-                          //   type: PlutoColumnType.text()),
-
-                          // PlutoColumn(
-                          //   title: 'salary',
-                          //   field: 'salary',
-                          //   type: PlutoColumnType.currency(),
-                          //   footerRenderer: (rendererContext) {
-                          //     return PlutoAggregateColumnFooter(
-                          //       rendererContext: rendererContext,
-                          //       formatAsCurrency: true,
-                          //       type: PlutoAggregateColumnType.sum,
-                          //       format: '#,###',
-                          //       alignment: Alignment.center,
-                          //       titleSpanBuilder: (text) {
-                          //         return [
-                          //           const TextSpan(
-                          //             text: 'Sum',
-                          //             style: TextStyle(color: Colors.red),
-                          //           ),
-                          //           const TextSpan(text: ' : '),
-                          //           TextSpan(text: text),
-                          //         ];
-                          //       },
-                          //     );
-                          //   },
-                          // ),
                         ],
                         rows: userRows,
                         onRowSecondaryTap: (event) {
@@ -360,6 +326,7 @@ class _UsersTableViewState extends State<UsersTableView> {
                                     tempUserId =
                                         event.row.cells.values.first.value;
                                     await getSingleUser(null);
+                                    areaList.clear();
                                     await getWorkDepartmentList();
                                     var response = await getRolesList();
                                     tmpRolesList = jsonDecode(response);
@@ -379,6 +346,7 @@ class _UsersTableViewState extends State<UsersTableView> {
                           tempUserId = event.row.cells.values.first.value;
                           tmpRolesList.clear();
                           await getSingleUser(null);
+                          areaList.clear();
                           await getWorkDepartmentList();
                           var response = await getRolesList();
                           tmpRolesList = jsonDecode(response);

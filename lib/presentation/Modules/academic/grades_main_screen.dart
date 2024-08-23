@@ -78,22 +78,20 @@ class _GradesMainScreenState extends State<GradesMainScreen>
     setState(() {
       canUserEvaluate = canEvaluateNow;
     });
-    debugPrint('initGetDate: $canEvaluateNow');
+
     validateDateAndUserPriv();
   }
 
   void validateDateAndUserPriv() {
-    if (canUserEvaluate && currentUser!.canEditStudentGrades()) {
+    if (canUserEvaluate || currentUser!.canEditStudentGrades()) {
       setState(() {
         displayEvaluateGrids = true;
       });
-      debugPrint('validateUser: $displayEvaluateGrids');
     } else {
       if (currentUser!.canEditStudentGrades()) {
         setState(() {
           displayEvaluateGrids = true;
         });
-        debugPrint('validateUser: $displayEvaluateGrids');
       }
       displayEvaluateGrids = false;
     }
