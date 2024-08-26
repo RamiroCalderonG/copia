@@ -53,7 +53,6 @@ class _EditUserScreenState extends State<EditUserScreen> {
     _emailController.text = tempSelectedUsr!.userEmail.toString();
     _nameController.text = tempSelectedUsr!.employeeName.toString();
     _employeeNumberController.text = tempSelectedUsr!.employeeNumber.toString();
-
     _userRole = tempSelectedUsr!.role.toString();
     _userDepartment = tempSelectedUsr!.work_area.toString();
 
@@ -332,7 +331,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                 child: DropdownButton<String>(
                                   value: areaList.contains(dropdownValue)
                                       ? dropdownValue
-                                      : 'Select Department',
+                                      : null,
                                   hint: const Text('Departamento'),
                                   onChanged: (String? newValue) {
                                     setState(() {
@@ -344,8 +343,10 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                           .addEntries(newUserPosition.entries);
                                     });
                                   },
-                                  items: areaList.map<DropdownMenuItem<String>>(
-                                      (String value) {
+                                  items: areaList
+                                      .toSet()
+                                      .map<DropdownMenuItem<String>>(
+                                          (String value) {
                                     return DropdownMenuItem<String>(
                                       value: value,
                                       child: Text(value),
@@ -391,6 +392,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                       TextButton(
                                         onPressed: () async {
                                           areaList.clear();
+                                          dispose();
                                           Navigator.of(context).pop();
                                         },
                                         child: const Text('Cancelar'),

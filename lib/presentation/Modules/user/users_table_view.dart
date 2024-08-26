@@ -325,6 +325,7 @@ class _UsersTableViewState extends State<UsersTableView> {
                                   onTap: () async {
                                     tempUserId =
                                         event.row.cells.values.first.value;
+                                    tempSelectedUsr?.clear();
                                     await getSingleUser(null);
                                     areaList.clear();
                                     await getWorkDepartmentList();
@@ -342,17 +343,18 @@ class _UsersTableViewState extends State<UsersTableView> {
                                 )
                               ]);
                         },
-                        onRowDoubleTap: (event) async {
-                          tempUserId = event.row.cells.values.first.value;
-                          tmpRolesList.clear();
-                          await getSingleUser(null);
-                          areaList.clear();
-                          await getWorkDepartmentList();
-                          var response = await getRolesList();
-                          tmpRolesList = jsonDecode(response);
-                          updateUserScreen(context);
-                        },
-                        mode: PlutoGridMode.readOnly,
+                        // onRowDoubleTap: (event) async {
+                        //   tempUserId = event.row.cells.values.first.value;
+                        //   tmpRolesList.clear();
+                        //   tempSelectedUsr?.clear();
+                        //   await getSingleUser(null);
+                        //   areaList.clear();
+                        //   await getWorkDepartmentList();
+                        //   var response = await getRolesList();
+                        //   tmpRolesList = jsonDecode(response);
+                        //   updateUserScreen(context);
+                        // },
+                        mode: PlutoGridMode.select,
                         configuration: const PlutoGridConfiguration(),
                         rowColorCallback: (rowColorContext) {
                           if (rowColorContext.row.cells.entries
