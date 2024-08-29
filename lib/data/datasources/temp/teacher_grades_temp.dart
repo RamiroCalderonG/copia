@@ -29,6 +29,10 @@ List<PlutoRow> evaluationComments = [];
 Map<String, String> uniqueStudents = {};
 List<Map<String, String>> uniqueStudentsList = [];
 List<StudentEval> selectedStudentList = [];
+//int campusCount = 0; //Count for how many campus does the teacher teaches.
+Set<String> campusesWhereTeacherTeach =
+    {}; //When the teacher teaches in more than one campus, store the name from the campus
+List<dynamic> jsonDataForDropDownMenuClass = [];
 
 List<String> commentStringEval = [];
 List<dynamic> commentsIntEval = [];

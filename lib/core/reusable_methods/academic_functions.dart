@@ -14,15 +14,18 @@ dynamic loadStartGrading(int employeeNumber, String schoolYear) async {
     var startGrading = await getTeacherGradeAndCourses(
         currentUser!.employeeNumber, currentCycle);
     List<dynamic> jsonList = json.decode(startGrading);
+    jsonDataForDropDownMenuClass = jsonList;
 
     try {
+      getTeacherEvalCampuses(jsonList);
       await getSingleTeacherGrades(jsonList);
       await getSingleTeacherGroups(jsonList);
       await getSingleTeacherAssignatures(jsonList);
+
       // await getStudentsByTeacher(jsonList);
       // await getStudentsIDByTeacher(jsonList);
       // await getGroupsByTeacher(jsonList);
-      return 200;
+      return jsonList;
     } catch (e) {
       throw FormatException(e.toString());
     }
@@ -415,5 +418,31 @@ Future<bool> isDateToEvaluateStudents() async {
     }
   } catch (e) {
     return throw FormatException(e.toString());
+  }
+}
+
+void getTeacherEvalCampuses(List<dynamic> jsonData) {
+  if (jsonData.isNotEmpty) {
+    for (var item in jsonData) {
+      // Check if the item has the "campus" key and is a String
+      if (item.containsKey('campus') && item['campus'] is String) {
+        campusesWhereTeacherTeach.add(item['campus']);
+      }
+    }
+  }
+}
+
+void searchGradesBySubjectButton(
+  String grade,
+  String group,
+  String subject,
+  String month,
+  String? campus,
+) async {
+  try {
+    studentList = await getStudentsByAssinature(group, grade, subject, month);
+    await getCommentsForEvals(int.parse(grade));
+  } catch (e) {
+    throw FormatException(e.toString());
   }
 }

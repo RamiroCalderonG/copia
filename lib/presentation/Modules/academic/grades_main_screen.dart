@@ -3,9 +3,11 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:oxschool/presentation/Modules/academic/fo_dac_27.dart';
 import 'package:oxschool/presentation/Modules/academic/grades_by_asignature.dart';
 import 'package:oxschool/core/constants/User.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/config/flutter_flow/flutter_flow_theme.dart';
 import '../../../core/reusable_methods/academic_functions.dart';
+import '../../../core/reusable_methods/user_functions.dart';
 import '../../../data/datasources/temp/teacher_grades_temp.dart';
 import 'grades_per_student.dart';
 
@@ -34,11 +36,13 @@ class _GradesMainScreenState extends State<GradesMainScreen>
   void initState() {
     _tabController = TabController(length: 3, vsync: this);
     initGetDate();
+    initSharedPref();
     // validateDateAndUserPriv();
     // _tabController = TabController(vsync: this, length: nurseryTabs.length);
     _tabController.addListener(onTap);
 
     loadStartGrading(currentUser!.employeeNumber!, currentCycle!.claCiclo!);
+
     super.initState();
   }
 
@@ -68,6 +72,8 @@ class _GradesMainScreenState extends State<GradesMainScreen>
     // assignatureRows.clear();
     // studentColumnsToEvaluateByStudent.clear();
     studentGradesBodyToUpgrade.clear();
+    campusesWhereTeacherTeach.clear();
+    removeSharedPref();
     // assignaturesColumns.clear();
     super.dispose();
   }
@@ -151,4 +157,16 @@ class _GradesMainScreenState extends State<GradesMainScreen>
                 )),
               ));
   }
+}
+
+void initSharedPref() async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  bool isUserAdmin = verifyUserAdmin(currentUser!);
+
+  await prefs.setBool('isUserAdmin', isUserAdmin);
+}
+
+void removeSharedPref() async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.remove('isUserAdmin');
 }

@@ -17,6 +17,7 @@ import '../../../core/config/flutter_flow/flutter_flow_util.dart';
 import '../../../core/reusable_methods/academic_functions.dart';
 import '../../../core/reusable_methods/user_functions.dart';
 import '../../../data/datasources/temp/teacher_grades_temp.dart';
+import '../../components/teacher_eval_dropdownmenu.dart';
 
 class GradesByAsignature extends StatefulWidget {
   const GradesByAsignature({super.key});
@@ -42,6 +43,8 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
   // int? monthNumber;
   String dropDownValue = ''; //oneTeacherAssignatures.first;
   int? assignatureID;
+  String campusSelected = '';
+  bool teacherTeachMultipleCampuses = false;
 
   @override
   void initState() {
@@ -87,6 +90,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
         assignatureID.toString(),
         monthNumber.toString(),
       );
+
       await getCommentsForEvals(int.parse(gradeInt));
       fillGrid(studentList);
       setState(() {
@@ -191,6 +195,22 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
   }
 
   Widget _buildGradesbyAssignature() {
+    campusSelected = campusesWhereTeacherTeach.first;
+    if (campusesWhereTeacherTeach.length != 1) {
+      teacherTeachMultipleCampuses = true;
+    }
+
+    final DropdownMenu campusSelector = DropdownMenu<String>(
+        initialSelection: campusSelected,
+        onSelected: (String? value) {
+          campusSelected = value!;
+        },
+        dropdownMenuEntries: campusesWhereTeacherTeach
+            .toList()
+            .map<DropdownMenuEntry<String>>((String value) {
+          return DropdownMenuEntry<String>(value: value, label: value);
+        }).toList());
+
     final DropdownMenu monthSelectorButton = DropdownMenu<String>(
       initialSelection: monthValue,
       onSelected: (String? value) {
@@ -239,113 +259,103 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
     return Expanded(
       child: Column(
         children: [
+          TeacherEvalDropDownMenu(
+              jsonData: jsonDataForDropDownMenuClass,
+              campusesList: campusesWhereTeacherTeach),
           Padding(
             padding: const EdgeInsets.all(20.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Flexible(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Grado:',
-                        style: TextStyle(
-                          fontFamily: 'Sora',
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      gradeSelectorButton2,
-                    ],
-                  ),
-                ),
-                Flexible(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Grupo:',
-                        style: TextStyle(
-                          fontFamily: 'Sora',
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      groupSelectorButton,
-                    ],
-                  ),
-                ),
-                Flexible(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Mes:',
-                        style: TextStyle(
-                          fontFamily: 'Sora',
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      if (isUserAdmin == false)
-                        Text(
-                          currentMonth,
-                          style: const TextStyle(
-                            fontFamily: 'Sora',
-                            fontWeight: FontWeight.bold,
-                          ),
-                        )
-                      else
-                        monthSelectorButton,
-                    ],
-                  ),
-                ),
-                Flexible(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Materia:',
-                        style: TextStyle(
-                          fontFamily: 'Sora',
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      assignatureSelector,
-                    ],
-                  ),
-                ),
+                // teacherTeachMultipleCampuses
+                //     ? Flexible(
+                //         child: Column(
+                //           crossAxisAlignment: CrossAxisAlignment.start,
+                //           children: [
+                //             const Text(
+                //               'Campus',
+                //               style: TextStyle(
+                //                   fontFamily: 'Sora',
+                //                   fontWeight: FontWeight.bold),
+                //             ),
+                //             campusSelector
+                //           ],
+                //         ),
+                //       )
+                //     : const SizedBox.shrink(),
+                // Flexible(
+                //   child: Column(
+                //     crossAxisAlignment: CrossAxisAlignment.start,
+                //     children: [
+                //       const Text(
+                //         'Grado:',
+                //         style: TextStyle(
+                //           fontFamily: 'Sora',
+                //           fontWeight: FontWeight.bold,
+                //         ),
+                //       ),
+                //       gradeSelectorButton2,
+                //     ],
+                //   ),
+                // ),
+                // Flexible(
+                //   child: Column(
+                //     crossAxisAlignment: CrossAxisAlignment.start,
+                //     children: [
+                //       const Text(
+                //         'Grupo:',
+                //         style: TextStyle(
+                //           fontFamily: 'Sora',
+                //           fontWeight: FontWeight.bold,
+                //         ),
+                //       ),
+                //       groupSelectorButton,
+                //     ],
+                //   ),
+                // ),
+                // Flexible(
+                //   child: Column(
+                //     crossAxisAlignment: CrossAxisAlignment.start,
+                //     children: [
+                //       const Text(
+                //         'Mes:',
+                //         style: TextStyle(
+                //           fontFamily: 'Sora',
+                //           fontWeight: FontWeight.bold,
+                //         ),
+                //       ),
+                //       if (isUserAdmin == false)
+                //         Text(
+                //           currentMonth,
+                //           style: const TextStyle(
+                //             fontFamily: 'Sora',
+                //             fontWeight: FontWeight.bold,
+                //           ),
+                //         )
+                //       else
+                //         monthSelectorButton,
+                //     ],
+                //   ),
+                // ),
+                // Flexible(
+                //   child: Column(
+                //     crossAxisAlignment: CrossAxisAlignment.start,
+                //     children: [
+                //       const Text(
+                //         'Materia:',
+                //         style: TextStyle(
+                //           fontFamily: 'Sora',
+                //           fontWeight: FontWeight.bold,
+                //         ),
+                //       ),
+                //       assignatureSelector,
+                //     ],
+                //   ),
+                // ),
                 Flexible(
                   child: ElevatedButton.icon(
                     onPressed: () async {
                       studentGradesBodyToUpgrade.clear();
-                      // if (studentList.isNotEmpty) {
-                      //   studentList.clear();
-                      // }
-
-                      // if (groupSelected.isEmpty || groupSelected == '') {
-                      //   groupSelected = oneTeacherGroups.first.toString();
-                      // }
-                      // if (gradeSelected.isEmpty || gradeSelected == '') {
-                      //   gradeSelected = oneTeacherGrades.first;
-                      // }
-                      // if (dropDownValue.isEmpty || dropDownValue == '') {
-                      //   dropDownValue = oneTeacherAssignatures.first;
-                      // }
-                      // if (monthValue.isEmpty) {
-                      //   monthValue = monthsList.first;
-                      // }
-
-                      // if (isUserAdmin == true) {
-                      //   monthNumber =
-                      //       getKeyFromValue(monthsListMap, monthValue);
-                      // } else {
-                      //   monthNumber =
-                      //       getKeyFromValue(monthsListMap, currentMonth);
-                      // }
-                      // var gradeInt =
-                      //     getKeyFromValue(teacherGradesMap, gradeSelected);
-
-                      // var assignatureID =
-                      //     getKeyFromValue(assignaturesMap, dropDownValue);
                       validator();
 
                       searchBUttonAction(
@@ -417,32 +427,6 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                               ),
                               duration: const Duration(milliseconds: 6000),
                               backgroundColor: Colors.green[200]));
-                          // if (studentList.isNotEmpty) {
-                          //   studentList.clear();
-                          // }
-
-                          // if (groupSelected.isEmpty || groupSelected == '') {
-                          //   groupSelected = oneTeacherGroups.first.toString();
-                          // }
-                          // if (gradeSelected.isEmpty || gradeSelected == '') {
-                          //   gradeSelected = oneTeacherGrades.first;
-                          // }
-                          // if (dropDownValue.isEmpty || dropDownValue == '') {
-                          //   dropDownValue = oneTeacherAssignatures.first;
-                          // }
-                          // if (monthValue.isEmpty) {
-                          //   monthValue = monthsList.first;
-                          // }
-
-                          // if (isUserAdmin == true) {
-                          //   monthNumber =
-                          //       getKeyFromValue(monthsListMap, monthValue);
-                          // } else {
-                          //   monthNumber =
-                          //       getKeyFromValue(monthsListMap, currentMonth);
-                          // }
-                          // gradeInt =
-                          //     getKeyFromValue(teacherGradesMap, gradeSelected);
                           validator();
 
                           var assignatureID =
