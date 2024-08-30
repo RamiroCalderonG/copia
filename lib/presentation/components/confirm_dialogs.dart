@@ -10,6 +10,10 @@ void showEmptyFieldAlertDialog(BuildContext context, String contentText) {
     builder: (BuildContext context) {
       return AlertDialog(
         title: const Text('Campo vacio'),
+        icon: const Icon(
+          Icons.warning,
+          color: Colors.amber,
+        ),
         content: Text(contentText
             // 'Por favor ingrese un valor que sea válido.'
             ),
@@ -34,7 +38,10 @@ Future<int> showConfirmationDialog(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        icon: const Icon(Icons.task_alt),
+        icon: const Icon(
+          Icons.task_alt,
+          color: Colors.green,
+        ),
         title: Text(titleText, style: const TextStyle(fontFamily: 'Sora')),
         content: Text(contentText
             // 'Por favor ingrese un valor que sea válido.'
@@ -69,6 +76,7 @@ void showErrorFromBackend(BuildContext context, String errorMessage) {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Error'),
+          icon: const Icon(Icons.error, color: Colors.red),
           content: Text(errorMessage),
           actions: [
             TextButton(

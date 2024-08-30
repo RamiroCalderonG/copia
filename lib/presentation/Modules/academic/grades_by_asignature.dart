@@ -1,7 +1,6 @@
 // ignore_for_file: constant_identifier_names, prefer_typing_uninitialized_variables
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:oxschool/core/constants/User.dart';
 import 'package:oxschool/core/reusable_methods/reusable_functions.dart';
 import 'package:pluto_grid/pluto_grid.dart';
@@ -17,7 +16,23 @@ import '../../../core/config/flutter_flow/flutter_flow_util.dart';
 import '../../../core/reusable_methods/academic_functions.dart';
 import '../../../core/reusable_methods/user_functions.dart';
 import '../../../data/datasources/temp/teacher_grades_temp.dart';
+import '../../components/confirm_dialogs.dart';
+import '../../components/student_eval_comments_dialog.dart';
 import '../../components/teacher_eval_dropdownmenu.dart';
+
+/// A widget for displaying grades by assignature.
+///
+/// This widget fetches data from the backend and displays it in a grid.
+/// It also provides functionality for searching, updating, and saving grades.
+///
+/// Example:
+///
+/// ```dart
+/// GradesByAsignature(
+///   // Optional parameters
+///   // ...
+/// )
+/// ```
 
 class GradesByAsignature extends StatefulWidget {
   const GradesByAsignature({super.key});
@@ -26,24 +41,43 @@ class GradesByAsignature extends StatefulWidget {
   State<GradesByAsignature> createState() => _GradesByAsignatureState();
 }
 
+/// The current month.
 String currentMonth = DateFormat.MMMM().format(DateTime.now());
 
+/// The selected subject.
 String? subjectSelected = oneTeacherAssignatures.first;
+
+/// Whether the user is an admin.
 bool isUserAdmin = verifyUserAdmin(currentUser!);
+
+/// The list of rows in the grid.
 List<PlutoRow> rows = [];
 
+/// The selected group.
+String groupSelected = '';
+
+/// The selected grade.
+
+String gradeSelected = '';
+
+/// The selected subject value.
+
+String subjectValue = '';
+
 class _GradesByAsignatureState extends State<GradesByAsignature> {
-  String groupSelected = ''; // = oneTeacherGroups.first.toString();
-  String gradeSelected = ''; // = oneTeacherAssignatures.first;
+  // = oneTeacherGroups.first.toString();
+  // = oneTeacherAssignatures.first;
   String? asignatureNameListener;
   String? selectedStudentName;
   var gradeInt;
   int? monthNumber;
   String monthValue = isUserAdmin ? academicMonthsList.first : currentMonth;
   // int? monthNumber;
-  String dropDownValue = ''; //oneTeacherAssignatures.first;
+  //oneTeacherAssignatures.first;
   int? assignatureID;
   String campusSelected = '';
+
+  /// Whether the teacher teaches multiple campuses.
   bool teacherTeachMultipleCampuses = false;
 
   @override
@@ -66,6 +100,9 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
   // super.dispose();
   // }
 
+  /// Fills the grid with data from the backend.
+  ///
+  /// [//evaluationList] is the list of evaluations to display in the grid.
   Future<void> fillGrid(List<StudentEval> evaluationList) async {
     setState(() {
       rows = evaluationList.map((item) {
@@ -81,15 +118,22 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
     });
   }
 
-  void searchBUttonAction(
-      String groupSelected, gradeInt, assignatureID, monthNumber) async {
+  /// Searches for grades based on the selected parameters.
+  ///
+  /// [groupSelected] is the selected group.
+  /// [gradeInt] is the selected grade.
+  /// [assignatureID] is the selected assignature ID.
+  /// [monthNumber] is the selected month number.
+  /// [campus] is the selected campus.
+  void searchBUttonAction(String groupSelected, gradeInt, assignatureID,
+      monthNumber, campus) async {
     try {
       studentList = await getStudentsByAssinature(
-        groupSelected,
-        gradeInt.toString(),
-        assignatureID.toString(),
-        monthNumber.toString(),
-      );
+          groupSelected,
+          gradeInt.toString(),
+          assignatureID.toString(),
+          monthNumber.toString(),
+          campus);
 
       await getCommentsForEvals(int.parse(gradeInt));
       fillGrid(studentList);
@@ -140,6 +184,9 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
     }
   }
 
+  /// Updates the grades in the backend.
+  ///
+  /// Returns a future that completes with a boolean indicating whether the update was successful.
   dynamic patchStudentGradesToDB() async {
     var response = await patchStudentsGrades(studentGradesBodyToUpgrade, false);
     if (response == 200) {
@@ -200,62 +247,6 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
       teacherTeachMultipleCampuses = true;
     }
 
-    final DropdownMenu campusSelector = DropdownMenu<String>(
-        initialSelection: campusSelected,
-        onSelected: (String? value) {
-          campusSelected = value!;
-        },
-        dropdownMenuEntries: campusesWhereTeacherTeach
-            .toList()
-            .map<DropdownMenuEntry<String>>((String value) {
-          return DropdownMenuEntry<String>(value: value, label: value);
-        }).toList());
-
-    final DropdownMenu monthSelectorButton = DropdownMenu<String>(
-      initialSelection: monthValue,
-      onSelected: (String? value) {
-        monthValue = value!;
-      },
-      dropdownMenuEntries:
-          academicMonthsList.map<DropdownMenuEntry<String>>((String value) {
-        return DropdownMenuEntry<String>(value: value, label: value);
-      }).toList(),
-    );
-
-    final DropdownMenu assignatureSelector = DropdownMenu<String>(
-      initialSelection: subjectSelected,
-      onSelected: (String? value) {
-        dropDownValue = value!;
-        subjectSelected = dropDownValue;
-      },
-      dropdownMenuEntries:
-          oneTeacherAssignatures.map<DropdownMenuEntry<String>>((String value) {
-        return DropdownMenuEntry<String>(value: value, label: value);
-      }).toList(),
-    );
-
-    final DropdownMenu gradeSelectorButton2 = DropdownMenu<String>(
-      initialSelection: oneTeacherGrades.first,
-      onSelected: (String? value) {
-        gradeSelected = value!;
-      },
-      dropdownMenuEntries:
-          oneTeacherGrades.map<DropdownMenuEntry<String>>((String value) {
-        return DropdownMenuEntry<String>(value: value, label: value);
-      }).toList(),
-    );
-
-    final DropdownMenu groupSelectorButton = DropdownMenu<String>(
-      initialSelection: oneTeacherGroups.first,
-      onSelected: (String? value) {
-        groupSelected = value!;
-      },
-      dropdownMenuEntries:
-          oneTeacherGroups.map<DropdownMenuEntry<String>>((String value) {
-        return DropdownMenuEntry<String>(value: value, label: value);
-      }).toList(),
-    );
-
     return Expanded(
       child: Column(
         children: [
@@ -263,95 +254,10 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
               jsonData: jsonDataForDropDownMenuClass,
               campusesList: campusesWhereTeacherTeach),
           Padding(
-            padding: const EdgeInsets.all(20.0),
+            padding: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                // teacherTeachMultipleCampuses
-                //     ? Flexible(
-                //         child: Column(
-                //           crossAxisAlignment: CrossAxisAlignment.start,
-                //           children: [
-                //             const Text(
-                //               'Campus',
-                //               style: TextStyle(
-                //                   fontFamily: 'Sora',
-                //                   fontWeight: FontWeight.bold),
-                //             ),
-                //             campusSelector
-                //           ],
-                //         ),
-                //       )
-                //     : const SizedBox.shrink(),
-                // Flexible(
-                //   child: Column(
-                //     crossAxisAlignment: CrossAxisAlignment.start,
-                //     children: [
-                //       const Text(
-                //         'Grado:',
-                //         style: TextStyle(
-                //           fontFamily: 'Sora',
-                //           fontWeight: FontWeight.bold,
-                //         ),
-                //       ),
-                //       gradeSelectorButton2,
-                //     ],
-                //   ),
-                // ),
-                // Flexible(
-                //   child: Column(
-                //     crossAxisAlignment: CrossAxisAlignment.start,
-                //     children: [
-                //       const Text(
-                //         'Grupo:',
-                //         style: TextStyle(
-                //           fontFamily: 'Sora',
-                //           fontWeight: FontWeight.bold,
-                //         ),
-                //       ),
-                //       groupSelectorButton,
-                //     ],
-                //   ),
-                // ),
-                // Flexible(
-                //   child: Column(
-                //     crossAxisAlignment: CrossAxisAlignment.start,
-                //     children: [
-                //       const Text(
-                //         'Mes:',
-                //         style: TextStyle(
-                //           fontFamily: 'Sora',
-                //           fontWeight: FontWeight.bold,
-                //         ),
-                //       ),
-                //       if (isUserAdmin == false)
-                //         Text(
-                //           currentMonth,
-                //           style: const TextStyle(
-                //             fontFamily: 'Sora',
-                //             fontWeight: FontWeight.bold,
-                //           ),
-                //         )
-                //       else
-                //         monthSelectorButton,
-                //     ],
-                //   ),
-                // ),
-                // Flexible(
-                //   child: Column(
-                //     crossAxisAlignment: CrossAxisAlignment.start,
-                //     children: [
-                //       const Text(
-                //         'Materia:',
-                //         style: TextStyle(
-                //           fontFamily: 'Sora',
-                //           fontWeight: FontWeight.bold,
-                //         ),
-                //       ),
-                //       assignatureSelector,
-                //     ],
-                //   ),
-                // ),
                 Flexible(
                   child: ElevatedButton.icon(
                     onPressed: () async {
@@ -359,11 +265,11 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                       validator();
 
                       searchBUttonAction(
-                        groupSelected,
-                        gradeInt.toString(),
-                        assignatureID.toString(),
-                        monthNumber.toString(),
-                      );
+                          groupSelected,
+                          gradeInt.toString(),
+                          assignatureID.toString(),
+                          monthNumber.toString(),
+                          selectedUnity!);
                     },
                     icon: const Icon(Icons.search),
                     label: const Text('Buscar'),
@@ -375,85 +281,25 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                         // backgroundColor: Colors.red[400],
                         ),
                     onPressed: () async {
-                      if (studentGradesBodyToUpgrade.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            elevation: 20,
-                            content: Text(
-                              'Sin información para enviar, verifique su captura',
-                              // ignore: use_build_context_synchronously
-                              style: FlutterFlowTheme.of(context)
-                                  .labelMedium
-                                  .override(
-                                    fontFamily: 'Sora',
-                                    color: const Color(0xFF130C0D),
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                            ),
-                            action: SnackBarAction(
-                                label: 'Copiar mensaje a portapapeles',
-                                // ignore: use_build_context_synchronously
-                                textColor: FlutterFlowTheme.of(context).info,
-                                backgroundColor: Colors.black12,
-                                onPressed: () {
-                                  Clipboard.setData(const ClipboardData(
-                                      text:
-                                          'Sin información para enviar, verifique su captura '));
-                                }),
-                            duration: const Duration(milliseconds: 6700),
-                            backgroundColor:
-                                // ignore: use_build_context_synchronously
-                                FlutterFlowTheme.of(context).secondary,
-                          ),
-                        );
-                      } else {
-                        var response;
-                        try {
-                          response = await patchStudentGradesToDB();
-                        } catch (e) {
-                          print(e);
-                        }
-                        if (response == 200) {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                              content: Text(
-                                'Cambios guardados con exito!',
-                                style: FlutterFlowTheme.of(context)
-                                    .labelMedium
-                                    .override(
-                                      fontFamily: 'Roboto',
-                                      color: const Color(0xFF130C0D),
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                              ),
-                              duration: const Duration(milliseconds: 6000),
-                              backgroundColor: Colors.green[200]));
+                      updateButtonFunction((success) {
+                        if (success) {
+                          showConfirmationDialog(
+                              context, 'Exito', 'Cambios realizados con exito');
                           validator();
 
                           var assignatureID =
-                              getKeyFromValue(assignaturesMap, dropDownValue);
+                              getKeyFromValue(assignaturesMap, subjectValue);
 
                           searchBUttonAction(
-                            groupSelected,
-                            gradeInt.toString(),
-                            assignatureID.toString(),
-                            monthNumber.toString(),
-                          );
+                              groupSelected,
+                              gradeInt.toString(),
+                              assignatureID.toString(),
+                              monthNumber.toString(),
+                              selectedUnity!);
                         } else {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                              content: Text(
-                                'Error: $response',
-                                style: FlutterFlowTheme.of(context)
-                                    .labelMedium
-                                    .override(
-                                      fontFamily: 'Roboto',
-                                      color: const Color(0xFF130C0D),
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                              ),
-                              duration: const Duration(milliseconds: 6000),
-                              backgroundColor: Colors.green[200]));
+                          showErrorFromBackend(context, 'Error');
                         }
-                      }
+                      });
                     },
                     icon: const Icon(Icons.save),
                     label: const Text('Guardar'),
@@ -496,23 +342,18 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                             asignatureNameListener = '';
                             asignatureNameListener = subjectSelected;
                             var studentID = event.row.cells['Matricula']?.value;
+
                             var selectedStudentName =
                                 event.row.cells['Nombre']?.value;
                             validator();
                             commentsAsignated.clear();
                             commentsAsignated =
-                                await getCommentsAsignatedToStudent(
-                                    gradeInt, true, studentID, monthNumber);
+                                await getCommentsAsignatedToStudent(gradeInt,
+                                    true, studentID.toString(), monthNumber);
 
-                            await showCommentsDialog(context, commentsAsignated,
+                            showCommentsDialog(commentsAsignated,
                                 asignatureNameListener!, selectedStudentName);
                           },
-                          // onRowDoubleTap: (event) async {
-                          //   asignatureNameListener = '';
-                          //   asignatureNameListener = subjectSelected;
-                          //   await showCommentsDialog(context, commentsAsignated,
-                          //       asignatureNameListener!);
-                          // },
                           configuration: const PlutoGridConfiguration(),
                           createFooter: (stateManager) {
                             stateManager.setPageSize(30,
@@ -528,6 +369,27 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
     );
   }
 
+  /// Updates the grid with new data.
+  ///
+  /// [studentList] is the list of students to display in the grid.
+  /// [assignatureRows] is the list of rows to display in the grid.
+  void updateGrid(
+      List<StudentEval> studentList, List<PlutoRow> assignatureRows) {
+    setState(() {
+      rows = studentList.map((item) {
+        return PlutoRow(
+          cells: {
+            'Matricula': PlutoCell(value: item.studentID),
+            'Nombre': PlutoCell(value: item.studentName),
+            'Apellido paterno': PlutoCell(value: item.student1LastName),
+            'Apellido materno': PlutoCell(value: item.student2LastName),
+          },
+        );
+      }).toList();
+      assignatureRows = assignatureRows;
+    });
+  }
+
   void validator() {
     if (studentList.isNotEmpty) {
       studentList.clear();
@@ -539,12 +401,13 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
     if (gradeSelected.isEmpty || gradeSelected == '') {
       gradeSelected = oneTeacherGrades.first;
     }
-    if (dropDownValue.isEmpty || dropDownValue == '') {
-      dropDownValue = oneTeacherAssignatures.first;
+    if (subjectValue.isEmpty || subjectValue == '') {
+      subjectValue = oneTeacherAssignatures.first;
     }
     if (monthValue.isEmpty) {
       monthValue = academicMonthsList.first;
     }
+    selectedUnity ??= campusesWhereTeacherTeach.first;
 
     if (isUserAdmin == true) {
       monthNumber = getKeyFromValue(monthsListMap, monthValue);
@@ -553,75 +416,43 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
     }
     gradeInt = getKeyFromValue(teacherGradesMap, gradeSelected);
 
-    assignatureID = getKeyFromValue(assignaturesMap, dropDownValue);
+    assignatureID = getKeyFromValue(assignaturesMap, subjectValue);
   }
 
-  List<Map<String, dynamic>> filterCommentsBySubject(
-    List<Map<String, dynamic>> comments,
-    String subjectName,
-  ) {
-    return comments
-        .where((comment) => comment['subject'] == subjectName)
-        .toList();
+  /// Updates the grades in the backend and shows a confirmation dialog.
+  ///
+  /// [callback] is a function that is called with a boolean indicating whether the update was successful.
+  void updateButtonFunction(void Function(bool success) callback) async {
+    if (studentGradesBodyToUpgrade.isEmpty) {
+      callback(false);
+    } else {
+      var response;
+      try {
+        response = await patchStudentGradesToDB();
+      } catch (e) {
+        callback(false);
+      }
+      if (response == 200) {
+        callback(true);
+      } else {
+        callback(false);
+      }
+    }
   }
 
-  Future<void> showCommentsDialog(
-      BuildContext context,
+  Future<dynamic> showCommentsDialog(
+      // BuildContext context,
       List<Map<String, dynamic>> comments,
       String subjectName,
-      selectedStudentName) async {
-    final filteredComments = filterCommentsBySubject(comments, subjectName);
-
-    await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(
-              'Asigna comentarios\nAlumno: $selectedStudentName\nMateria: $subjectName'),
-          titleTextStyle: TextStyle(
-              fontFamily: 'Sora',
-              fontSize: 20,
-              color: FlutterFlowTheme.of(context).primaryText),
-          content: SingleChildScrollView(
-              child: SizedBox(
-            width: MediaQuery.of(context).size.width / 3,
-            child: Column(
-              children: filteredComments.map((comment) {
-                return StatefulBuilder(builder: (context, setState) {
-                  return Column(
-                    children: [
-                      const Divider(),
-                      ListTile(
-                        title: Text(comment[
-                            'commentName']), // Assuming 'comment' instead of 'comentname'
-                        trailing: Checkbox(
-                            value: comment['active'],
-                            onChanged: (newValue) async {
-                              var studentRateId = comment['student_rate'];
-                              var commentId = comment['comment'];
-                              var activevalue = newValue;
-
-                              await putStudentEvaluationsComments(
-                                  studentRateId, commentId, activevalue!);
-                              setState(() => comment['active'] = newValue!);
-                            }),
-                      )
-                    ],
-                  );
-                });
-              }).toList(),
-            ),
-          )),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Close'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
+      selectedStudentName) {
+    return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return StudentEvalCommentDialog(
+            studentName: selectedStudentName,
+            comments: comments,
+            subjectName: subjectName,
+          );
+        });
   }
 }

@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:oxschool/core/reusable_methods/reusable_functions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import '../../core/config/flutter_flow/flutter_flow_util.dart';
 import '../../core/constants/date_constants.dart';
-import '../../core/reusable_methods/academic_functions.dart';
 import '../../data/datasources/temp/teacher_grades_temp.dart';
-import 'confirm_dialogs.dart';
+import '../Modules/academic/grades_by_asignature.dart';
 
 class TeacherEvalDropDownMenu extends StatefulWidget {
   final List<dynamic> jsonData;
@@ -26,7 +24,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
   String? selectedGrade;
   String? selectedGroup;
   String? selectedSubject;
-  String? selectedUnity;
+  // String? selectedUnity;
   List<String> unityList = [];
   List<String> filteredGrade = [];
   List<String> filteredGroup = [];
@@ -34,6 +32,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
 
   String monthValue = '';
   bool userStatus = false;
+  bool hasBeenFiltered = false;
 
   @override
   void initState() {
@@ -75,15 +74,16 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
           .toSet()
           .toList();
 
-      // selectedGrade = null;
-      // selectedGroup = null;
-      // selectedSubject = null;
-
-      selectedGrade = filteredGrade.first;
-      selectedGroup = filteredGroup.first;
-      selectedSubject = filteredSubject.first;
+      if (hasBeenFiltered) {
+        selectedGrade = filteredGrade.first;
+        selectedGroup = filteredGroup.first;
+        selectedSubject = filteredSubject.first;
+      } else {
+        selectedGrade = gradeSelected;
+        selectedGroup = groupSelected;
+        selectedSubject = subjectSelected;
+      }
     } else {
-      // Handle the case when no unity is selected or all data should be shown
       filteredGrade = widget.jsonData
           .map<String>((item) => item['grade'].toString())
           .toSet()
@@ -99,20 +99,23 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
           .toSet()
           .toList();
 
-      // selectedGrade = null;
-      // selectedGroup = null;
-      // selectedSubject = null;
-
-      selectedGrade = filteredGrade.first;
-      selectedGroup = filteredGroup.first;
-      selectedSubject = filteredSubject.first;
+      if (hasBeenFiltered) {
+        selectedGrade = filteredGrade.first;
+        selectedGroup = filteredGroup.first;
+        selectedSubject = filteredSubject.first;
+      } else {
+        selectedGrade = gradeSelected;
+        selectedGroup = groupSelected;
+        selectedSubject = subjectSelected;
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-        padding: const EdgeInsets.all(25.0),
+        padding:
+            const EdgeInsets.only(bottom: 20, top: 25, right: 20, left: 20),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
@@ -130,6 +133,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                         setState(() {
                           selectedUnity = value;
                           filterData();
+                          hasBeenFiltered = true;
                         });
                       },
                       dropdownMenuEntries: unityList
@@ -138,24 +142,6 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                         return DropdownMenuEntry<String>(
                             value: value, label: value);
                       }).toList()),
-
-                  // DropdownButton<String>(
-                  //   value: selectedUnity,
-                  //   items: unityList.map((String value) {
-                  //     return DropdownMenuItem<String>(
-                  //       value: value,
-                  //       child: Text(value),
-                  //     );
-                  //   }).toList(),
-                  //   onChanged: (String? newValue) {
-                  //     setState(() {
-                  //       selectedUnity = newValue;
-                  //       filterData();
-                  //     });
-                  //   },
-                  //   hint: const Text("Campus "),
-                  //   icon: const Icon(Icons.business_outlined),
-                  // ),
                 ],
               )),
 
@@ -169,6 +155,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                     initialSelection: selectedGrade,
                     onSelected: (String? value) {
                       selectedGrade = value;
+                      gradeSelected = value!;
                     },
                     dropdownMenuEntries: filteredGrade
                         .toList()
@@ -189,6 +176,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                     initialSelection: selectedGroup,
                     onSelected: (String? value) {
                       selectedGroup = value;
+                      groupSelected = value!;
                     },
                     dropdownMenuEntries: filteredGroup
                         .toList()
@@ -196,20 +184,6 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                       return DropdownMenuEntry<String>(
                           value: value, label: value);
                     }).toList()),
-
-                // DropdownButton<String>(
-                //   items: filteredGroup.map((String value) {
-                //     return DropdownMenuItem<String>(
-                //       value: value,
-                //       child: Text(value),
-                //     );
-                //   }).toList(),
-                //   onChanged: (String? newValue) {
-                //     // Handle the second dropdown selection
-                //   },
-                //   hint: const Text("Grupo "),
-                //   icon: const Icon(Icons.group),
-                // ),
               ],
             )),
             Flexible(
@@ -222,6 +196,8 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                     initialSelection: selectedSubject,
                     onSelected: (String? value) {
                       selectedSubject = value;
+                      subjectValue = value!;
+                      subjectSelected = value;
                     },
                     dropdownMenuEntries: filteredSubject
                         .toList()
@@ -260,19 +236,22 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
               ),
             ),
 
-            Flexible(
-                child: ElevatedButton.icon(
-                    onPressed: () async {
-                      validateEmptryFields();
-                      searchGradesBySubjectButton(
-                          selectedGrade!,
-                          selectedGroup!,
-                          selectedSubject!,
-                          monthValue,
-                          selectedUnity!);
-                    },
-                    icon: const Icon(Icons.search),
-                    label: const Text('Buscar')))
+            // Flexible(
+            //     child: ElevatedButton.icon(
+            //   onPressed: () async {
+            //     // studentGradesBodyToUpgrade.clear();
+            //     // validator();
+
+            //     // searchBUttonAction(
+            //     //     groupSelected,
+            //     //     gradeInt.toString(),
+            //     //     assignatureID.toString(),
+            //     //     monthNumber.toString(),
+            //     //     selectedUnity!);
+            //   },
+            //   icon: const Icon(Icons.search),
+            //   label: const Text('Buscar'),
+            // ))
           ],
         ));
   }
@@ -282,13 +261,14 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
       studentList.clear();
     }
 
-    //TODO: COMPLETE VALIDATION TO EXECUTE BEFORE SENDING THE REQUEST
+    selectedGrade ??= filteredGrade.first;
+    selectedGroup ??= filteredGroup.first;
+    selectedSubject ??= filteredSubject.first;
 
-    if (selectedGrade == null ||
-        selectedGroup == null ||
-        selectedSubject == null ||
-        selectedUnity == null) {
-      showEmptyFieldAlertDialog(context, 'Campo vacio, verificar');
+    if (userStatus == true) {
+      monthValue = getKeyFromValue(monthsListMap, monthValue).toString();
+    } else {
+      monthValue = getKeyFromValue(monthsListMap, currentMonth).toString();
     }
   }
 }

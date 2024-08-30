@@ -125,10 +125,10 @@ Future<void> updateStudentGrades() async {}
 // }
 
 Future<List<StudentEval>> getStudentsByAssinature(
-    String group, gradeSelected, assignature, month) async {
+    String group, gradeSelected, assignature, month, campus) async {
   try {
     var studentsList = await getStudentsToGrade(assignature, group,
-        gradeSelected, currentCycle!.claCiclo, currentUser!.claUn, month);
+        gradeSelected, currentCycle!.claCiclo, campus, month);
     List<dynamic> jsonList = json.decode(studentsList.body);
 
     List<StudentEval> evaluations = getEvalFromJSON(jsonList, false);
@@ -200,8 +200,8 @@ Future<List<Map<String, dynamic>>> getCommentsAsignatedToStudent(
   List<Map<String, dynamic>> assignatedComments = [];
   Map<String, dynamic> currentValue = {};
   try {
-    var response =
-        await getStudentsGradesComments(grade, byStudent, studentid, month);
+    var response = await getStudentsGradesComments(
+        grade, byStudent, studentid!.trim(), month);
     var commentsResponse = json.decode(response.body);
 
     for (var item in commentsResponse) {
@@ -440,9 +440,21 @@ void searchGradesBySubjectButton(
   String? campus,
 ) async {
   try {
-    studentList = await getStudentsByAssinature(group, grade, subject, month);
+    studentList =
+        await getStudentsByAssinature(group, grade, subject, month, campus);
     await getCommentsForEvals(int.parse(grade));
   } catch (e) {
     throw FormatException(e.toString());
   }
+}
+
+List<Map<String, dynamic>> filterCommentsBySubject(
+  List<Map<String, dynamic>> comments,
+  String subjectName,
+) {
+  var returnedComments = comments
+      .where((comment) => comment['subject'].trim() == subjectName)
+      .toList();
+
+  return returnedComments;
 }

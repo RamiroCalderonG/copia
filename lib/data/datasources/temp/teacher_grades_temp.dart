@@ -33,6 +33,7 @@ List<StudentEval> selectedStudentList = [];
 Set<String> campusesWhereTeacherTeach =
     {}; //When the teacher teaches in more than one campus, store the name from the campus
 List<dynamic> jsonDataForDropDownMenuClass = [];
+String? selectedUnity;
 
 List<String> commentStringEval = [];
 List<dynamic> commentsIntEval = [];

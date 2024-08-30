@@ -73,6 +73,7 @@ class _GradesMainScreenState extends State<GradesMainScreen>
     // studentColumnsToEvaluateByStudent.clear();
     studentGradesBodyToUpgrade.clear();
     campusesWhereTeacherTeach.clear();
+    selectedUnity = null;
     removeSharedPref();
     // assignaturesColumns.clear();
     super.dispose();
