@@ -14,11 +14,14 @@ class CustomIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IconButton.outlined(
-      onPressed: onPressed,
-      icon: icon,
-      tooltip: tooltip,
-    );
+    return ElevatedButton.icon(
+        onPressed: onPressed, icon: icon, label: Text(tooltip));
+
+    // IconButton.outlined(
+    //   onPressed: onPressed,
+    //   icon: icon,
+    //   tooltip: tooltip,
+    // );
   }
 }
 

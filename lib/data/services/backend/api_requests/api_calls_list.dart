@@ -901,6 +901,24 @@ Future<int> deleteFodac27Record(int fodac27ID) async {
   }
 }
 
+Future<dynamic> getGlobalGradesAndGroups(String cyle) async {
+  try {
+    var apiCall = await Requests.get(
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/globalg&g',
+      headers: {
+        'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
+        'token': currentUser!.token
+      },
+      queryParameters: {'cycle': cyle},
+      persistCookies: true,
+    );
+    apiCall.raiseForStatus();
+    return apiCall.body;
+  } catch (e) {
+    return throw FormatException(e.toString());
+  }
+}
+
 // Future<dynamic> getUserEvents(int userId) async {
 //   var response;
 //   try {

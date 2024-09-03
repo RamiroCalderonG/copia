@@ -458,3 +458,12 @@ List<Map<String, dynamic>> filterCommentsBySubject(
 
   return returnedComments;
 }
+
+Future<List<Map<String, dynamic>>> getGradesAndGroupsByCampus(
+    String cycle) async {
+  var response = await getGlobalGradesAndGroups(cycle);
+  List<dynamic> data = jsonDecode(response);
+  List<Map<String, dynamic>> items = List<Map<String, dynamic>>.from(data);
+
+  return items;
+}

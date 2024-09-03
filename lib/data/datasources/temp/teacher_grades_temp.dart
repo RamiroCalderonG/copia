@@ -39,3 +39,4 @@ List<String> commentStringEval = [];
 List<dynamic> commentsIntEval = [];
 List<Map<String, dynamic>> mergedData = [];
 List<PlutoRow> commentsAsignatedList = [];
+List<dynamic> simplifiedStudentsList = []; //used at fo_dac_27.dart

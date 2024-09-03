@@ -8,10 +8,11 @@ import 'package:oxschool/core/constants/User.dart';
 import 'package:oxschool/core/reusable_methods/user_functions.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
+import '../../../data/datasources/temp/teacher_grades_temp.dart';
 import '../../../data/services/backend/api_requests/api_calls_list.dart';
 import '../../components/confirm_dialogs.dart';
-import '../../components/custom_icon_button.dart';
 
+import '../../components/fodac_27_dropdownmenu.dart';
 import '../../components/plutogrid_export_options.dart';
 import '../../components/save_and_cancel_buttons.dart';
 import '../../../core/reusable_methods/academic_functions.dart';
@@ -25,7 +26,7 @@ class FoDac27 extends StatefulWidget {
 }
 
 class _FoDac27State extends State<FoDac27> {
-  List<dynamic> simplifiedStudentsList = [];
+  // List<dynamic> simplifiedStudentsList = [];
   List<PlutoRow> fodac27HistoryRows = [];
   late PlutoGridStateManager stateManager;
 
@@ -47,8 +48,8 @@ class _FoDac27State extends State<FoDac27> {
   @override
   void initState() {
     isUserAdmin = verifyUserAdmin(currentUser!);
-    super.initState();
     populateStudentsDropDownMenu();
+    super.initState();
   }
 
   @override
@@ -139,107 +140,116 @@ class _FoDac27State extends State<FoDac27> {
   }
 
   Widget buildStudentSelector() {
-    return Padding(
-      padding: const EdgeInsets.only(left: 10, right: 10, top: 20),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          Flexible(
-            child: DropdownMenu<String>(
-              controller: studentSelectorController,
-              enableFilter: true,
-              requestFocusOnTap: true,
-              leadingIcon: const Icon(Icons.search),
-              trailingIcon: IconButton(
-                onPressed: studentSelectorController.clear,
-                icon: const Icon(Icons.clear),
-              ),
-              label: const Text('Alumno'),
-              inputDecorationTheme: const InputDecorationTheme(
-                filled: true,
-                contentPadding: EdgeInsets.symmetric(vertical: 5.0),
-              ),
-              onSelected: (student) {
-                if (student != null) {
-                  setState(() {
-                    selectedStudent = student;
-                    selectedstudentId = getStudentIdByName(student);
-                    if (selectedstudentId != null) {
-                      populateGrid(
-                          selectedstudentId!, currentCycle!.claCiclo!, true);
-                    }
-                  });
-                }
-              },
-              dropdownMenuEntries: simplifiedStudentsList
-                  .map<DropdownMenuEntry<String>>((e) => DropdownMenuEntry(
-                        value: e['name'],
-                        label: e['name'],
-                      ))
-                  .toList(),
-            ),
-          ),
-          Flexible(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                AddItemButton(onPressed: handleAddItem),
-                EditItemButton(
-                  onPressed: () {
-                    if (selectedEvalID == 0) {
-                      const AlertDialog(
-                        title: Text('Error'),
-                        content:
-                            Text('Primero selecciona un registro para editar'),
-                      );
-                    } else {
-                      showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return EditCommentScreen(
-                              id: selectedEvalID,
-                              comment: selectedCommentToEdit,
-                              date: selectedDateToEdit,
-                              selectedSubject: selectedSubjectNameToEdit,
-                              studentID: selectedStudentIdToEdit,
-                            );
-                          });
-                    }
-                  },
-                ),
-                // exportToExcel,
-                RefreshButton(onPressed: handleRefresh),
-                if (isUserAdmin)
-                  DeleteItemButton(
-                    onPressed: () async {
-                      if (selectedEvalID == 0) {
-                        const AlertDialog(
-                          title: Text('Error'),
-                          content: Text(
-                              'Primero selecciona un registro para editar'),
-                        );
-                      } else {
-                        int confirmation =
-                            await showDeleteConfirmationAlertDialog(context);
+    return const Fodac27MenuSelector();
 
-                        if (confirmation == 1) {
-                          int response = await deleteAction(selectedEvalID);
-                          if (response == 200) {
-                            if (mounted) {
-                              await showConfirmationDialog(
-                                  context, 'Realizado', 'Registro eliminado');
-                            }
-                          }
-                        }
-                      }
-                    },
-                  ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+    //       Padding(
+    //     padding: const EdgeInsets.only(left: 10, right: 10, top: 20),
+    //     child: Row(
+    //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    //       children: [
+    //         Flexible(
+    //           child: DropdownMenu<String>(
+    //             controller: studentSelectorController,
+    //             enableFilter: true,
+    //             requestFocusOnTap: true,
+    //             leadingIcon: const Icon(Icons.search),
+    //             // trailingIcon: IconButton(
+    //             //   onPressed: studentSelectorController.clear,
+    //             //   icon: const Icon(Icons.clear),
+    //             // ),
+    //             label: const Text('Alumno'),
+    //             inputDecorationTheme: const InputDecorationTheme(
+    //               filled: true,
+    //               contentPadding: EdgeInsets.symmetric(vertical: 5.0),
+    //             ),
+    //             onSelected: (student) {
+    //               if (student != null) {
+    //                 setState(() {
+    //                   selectedStudent = student;
+    //                   selectedstudentId = getStudentIdByName(student);
+    //                   if (selectedstudentId != null) {
+    //                     populateGrid(
+    //                         selectedstudentId!, currentCycle!.claCiclo!, true);
+    //                   }
+    //                 });
+    //               }
+    //             },
+    //             dropdownMenuEntries: simplifiedStudentsList
+    //                 .map<DropdownMenuEntry<String>>((e) => DropdownMenuEntry(
+    //                     leadingIcon: const Icon(Icons.circle, size: 5),
+    //                     value: e['name'],
+    //                     label: e['name']
+    //                     // +
+    //                     //     '  |  ' +
+    //                     //     e['grade'].toString() +
+    //                     //     e['group'] +
+    //                     //     '  |  ' +
+    //                     //     e['campus'],
+    //                     ))
+    //                 .toList(),
+    //           ),
+    //         ),
+    //         Flexible(
+    //           child: Row(
+    //             mainAxisAlignment: MainAxisAlignment.end,
+    //             children: [
+    //               AddItemButton(onPressed: handleAddItem),
+    //               EditItemButton(
+    //                 onPressed: () {
+    //                   if (selectedEvalID == 0) {
+    //                     const AlertDialog(
+    //                       title: Text('Error'),
+    //                       content:
+    //                           Text('Primero selecciona un registro para editar'),
+    //                     );
+    //                   } else {
+    //                     showDialog(
+    //                         context: context,
+    //                         builder: (BuildContext context) {
+    //                           return EditCommentScreen(
+    //                             id: selectedEvalID,
+    //                             comment: selectedCommentToEdit,
+    //                             date: selectedDateToEdit,
+    //                             selectedSubject: selectedSubjectNameToEdit,
+    //                             studentID: selectedStudentIdToEdit,
+    //                           );
+    //                         });
+    //                   }
+    //                 },
+    //               ),
+    //               // exportToExcel,
+    //               RefreshButton(onPressed: handleRefresh),
+    //               if (isUserAdmin)
+    //                 DeleteItemButton(
+    //                   onPressed: () async {
+    //                     if (selectedEvalID == 0) {
+    //                       const AlertDialog(
+    //                         title: Text('Error'),
+    //                         content: Text(
+    //                             'Primero selecciona un registro para editar'),
+    //                       );
+    //                     } else {
+    //                       int confirmation =
+    //                           await showDeleteConfirmationAlertDialog(context);
+
+    //                       if (confirmation == 1) {
+    //                         int response = await deleteAction(selectedEvalID);
+    //                         if (response == 200) {
+    //                           if (mounted) {
+    //                             await showConfirmationDialog(
+    //                                 context, 'Realizado', 'Registro eliminado');
+    //                           }
+    //                         }
+    //                       }
+    //                     }
+    //                   },
+    //                 ),
+    //             ],
+    //           ),
+    //         ),
+    //       ],
+    //     ),
+    //   );
   }
 
   Widget buildPlutoGrid() {
