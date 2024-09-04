@@ -6,8 +6,10 @@ import 'package:intl/intl.dart';
 
 import 'package:oxschool/core/constants/User.dart';
 import 'package:oxschool/core/reusable_methods/user_functions.dart';
+import 'package:oxschool/presentation/components/custom_icon_button.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
+import '../../../data/datasources/temp/studens_temp.dart';
 import '../../../data/datasources/temp/teacher_grades_temp.dart';
 import '../../../data/services/backend/api_requests/api_calls_list.dart';
 import '../../components/confirm_dialogs.dart';
@@ -54,6 +56,7 @@ class _FoDac27State extends State<FoDac27> {
 
   @override
   void dispose() {
+    tempStudentMap.clear();
     fodac27HistoryRows.clear();
     super.dispose();
   }
@@ -140,7 +143,47 @@ class _FoDac27State extends State<FoDac27> {
   }
 
   Widget buildStudentSelector() {
-    return const Fodac27MenuSelector();
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Expanded widget to make the Fodac27MenuSelector occupy as much space as needed
+          const Expanded(
+            child: Fodac27MenuSelector(),
+          ),
+          const SizedBox(
+              width: 20), // Space between the dropdowns and the button
+          // A fixed-width button
+          Align(
+              alignment: Alignment.bottomCenter,
+              child: Column(
+                children: [
+                  RefreshButton(onPressed: handleRefresh),
+                  const SizedBox(height: 10),
+                  AddItemButton(onPressed: handleAddItem),
+                ],
+              )),
+        ],
+      ),
+    );
+    // Padding(
+    //   padding: const EdgeInsets.only(left: 2, right: 30, top: 20, bottom: 10),
+    //   child: Row(
+    //     mainAxisAlignment: MainAxisAlignment.spaceAround,
+    //     children: [
+    //       Column
+    //       const Fodac27MenuSelector(),
+    //       const Spacer(), // add a spacer to push the RefreshButton to the end
+    //       Column(
+    //         mainAxisSize: MainAxisSize.min,
+    //         children: [
+    //
+    //         ],
+    //       ),
+    //     ],
+    //   ),
+    // );
 
     //       Padding(
     //     padding: const EdgeInsets.only(left: 10, right: 10, top: 20),
@@ -277,14 +320,14 @@ class _FoDac27State extends State<FoDac27> {
   }
 
   void handleAddItem() {
-    if (selectedStudent.isEmpty) {
+    if (selectedTempStudent == null) {
       showEmptyFieldAlertDialog(context, 'Favor de seleccionar un alumno');
     } else {
       showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Agregar comentario a:\n$selectedStudent'),
+            title: Text('Agregar comentario a:\n$selectedTempStudent'),
             content: NewFODAC27CommentDialog(
               selectedstudentId: selectedstudentId!,
               employeeNumber: currentUser!.employeeNumber!,
@@ -296,6 +339,12 @@ class _FoDac27State extends State<FoDac27> {
   }
 
   void handleRefresh() {
+    for (var map in tempStudentMap) {
+      if (map.containsKey('name') && map['name'] == selectedTempStudent) {
+        selectedstudentId = map['studentID'];
+        break;
+      }
+    }
     if (selectedstudentId != null) {
       populateGrid(selectedstudentId!, currentCycle!.claCiclo!, true);
     }
@@ -455,6 +504,7 @@ class _NewFODAC27CommentDialogState extends State<NewFODAC27CommentDialog> {
   void getSubjects() async {
     Map<String, dynamic> subjects = await populateSubjectsDropDownSelector(
         widget.selectedstudentId, currentCycle!.claCiclo!);
+
     _materias = subjects.keys.toList();
     subjectsMap = subjects;
     isLoading = false;

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:oxschool/data/datasources/temp/studens_temp.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
 import 'package:oxschool/presentation/Modules/academic/fo_dac_27.dart';
 import 'package:oxschool/presentation/Modules/login_view/login_view_widget.dart';
@@ -23,15 +24,17 @@ class Fodac27MenuSelector extends StatefulWidget {
 String selectedCampus = '';
 
 class _Fodac27MenuSelectorState extends State<Fodac27MenuSelector> {
+  TextEditingController selectedStudentController = TextEditingController();
+
   List<Map<String, dynamic>> globalGradesAndGroups = [];
 
   bool isUserAdmin = false;
   List<String> studentsList = [];
-  List<Map<String, String>> parsedStudentsList = [];
+
   String selectedStudent = '';
-  String? selectedCampus = '';
-  String? selectedGrade = '';
-  String? selectedGroup = '';
+  String? selectedCampus;
+  String? selectedGrade;
+  String? selectedGroup;
   String? selectedstudentId;
   String selectedSubjectNameToEdit = '';
   String selectedStudentIdToEdit = '';
@@ -45,18 +48,20 @@ class _Fodac27MenuSelectorState extends State<Fodac27MenuSelector> {
   @override
   void initState() {
     isUserAdmin = verifyUserAdmin(currentUser!);
-    // studentsList =
-    //     simplifiedStudentsList.map((item) => item['name'].toString()).toList();
-    parsedStudentsList = studentsList.map((item) {
-      // Convert each dynamic item to a Map<String, String>
-      return Map<String, String>.from(json.decode(item));
-    }).toList();
 
     populateDropDownMenus();
     super.initState();
   }
 
-  // final CampusSelector =
+  @override
+  void dispose() {
+    studentsList.clear();
+    selectedTempStudent = null;
+    selectedTempCampus = null;
+    selectedTempGrade = null;
+    selectedTempGroup = null;
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,182 +82,114 @@ class _Fodac27MenuSelectorState extends State<Fodac27MenuSelector> {
             .toList()
         : [];
 
-    List<String> studentsValues =
-        selectedGroup != null && selectedGrade != null && selectedCampus != null
-            ? parsedStudentsList
-                .where((item) =>
-                    // item['grade'] == selectedGrade &&
-                    item['group'] == selectedGroup &&
-                    item['campus'] == selectedCampus)
-                .map((item) => item['name']!)
-                .toSet()
-                .toList()
-            : [];
-
-    // List<String> studentsValues = selectedGroup != null
-    //     ? studentsList
-    //         .where((item) =>
-    //             item[2] == selectedGrade &&
-    //             item[3] == selectedGroup &&
-    //             item[4] == selectedCampus)
-    //         .map((item) => item[0])
-    //         .toSet()
-    //         .toList()
-    //     : [];
-
     return Padding(
-      padding: const EdgeInsets.only(left: 10, right: 10, top: 20, bottom: 10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          Flexible(
-              child: DropdownMenu<String>(
-            label: const Text('Campus'),
-            trailingIcon: const Icon(Icons.arrow_drop_down),
-            onSelected: (value) {
-              setState(() {
-                setState(() {
-                  selectedCampus = value!;
-                  selectedGrade = null;
-                  selectedGroup = null;
-                });
-              });
-            },
-            dropdownMenuEntries: campusesList
-                .toList()
-                .map<DropdownMenuEntry<String>>((String value) {
-              return DropdownMenuEntry<String>(value: value, label: value);
-            }).toList(),
-          )),
-          if (selectedCampus != null)
+        padding: const EdgeInsets.only(top: 15),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            const SizedBox(width: 10),
             Flexible(
+                child: DropdownMenu<String>(
+              label: const Text('Campus'),
+              trailingIcon: const Icon(Icons.arrow_drop_down),
+              onSelected: (value) {
+                setState(() {
+                  setState(() {
+                    selectedCampus = value!;
+                    selectedTempCampus = value;
+                    selectedGrade = null;
+                    selectedGroup = null;
+                  });
+                });
+              },
+              dropdownMenuEntries: campusesList
+                  .toList()
+                  .map<DropdownMenuEntry<String>>((String value) {
+                return DropdownMenuEntry<String>(value: value, label: value);
+              }).toList(),
+            )),
+            const SizedBox(width: 10),
+            if (selectedCampus != null)
+              Flexible(
+                  child: DropdownMenu(
+                      label: const Text('Grado'),
+                      trailingIcon: const Icon(Icons.arrow_drop_down),
+                      onSelected: (value) {
+                        setState(() {
+                          selectedGrade = value!;
+                          selectedTempGrade = value;
+                        });
+                      },
+                      dropdownMenuEntries: gradesValues
+                          .toList()
+                          .map<DropdownMenuEntry<String>>((String value) {
+                        return DropdownMenuEntry<String>(
+                            value: value, label: value);
+                      }).toList())),
+            const SizedBox(width: 10),
+            if (selectedGrade != null)
+              Flexible(
                 child: DropdownMenu(
-                    label: const Text('Grado'),
+                    label: const Text('Grupo'),
                     trailingIcon: const Icon(Icons.arrow_drop_down),
-                    onSelected: (value) {
+                    onSelected: (value) async {
                       setState(() {
-                        selectedGrade = value!;
+                        selectedGroup = value;
+                        selectedTempGroup = value;
+                        studentsList.clear();
+                        selectedStudent = '';
+
+                        // print('simplifiedList: ' +
+                        //     simplifiedStudentsList.toString());
+                      });
+                      studentsList = await getStudentsListForFodac27(
+                          selectedCampus!,
+                          currentCycle!.claCiclo!,
+                          selectedGrade!,
+                          selectedGroup!);
+                      setState(() {
+                        selectedStudentController.text = '';
                       });
                     },
-                    dropdownMenuEntries: gradesValues
+                    dropdownMenuEntries: groupsValues
                         .toList()
                         .map<DropdownMenuEntry<String>>((String value) {
                       return DropdownMenuEntry<String>(
                           value: value, label: value);
-                    }).toList())),
-          if (selectedGrade != null)
-            Flexible(
-              child: DropdownMenu(
-                  label: const Text('Grupo'),
-                  trailingIcon: const Icon(Icons.arrow_drop_down),
-                  onSelected: (value) {
-                    setState(() {
-                      selectedGroup = value;
-                      print(studentsValues);
-                    });
-                  },
-                  dropdownMenuEntries: groupsValues
-                      .toList()
-                      .map<DropdownMenuEntry<String>>((String value) {
-                    return DropdownMenuEntry<String>(
-                        value: value, label: value);
-                  }).toList()),
-            ),
+                    }).toList()),
+              ),
+            const SizedBox(width: 10),
+            if (selectedGroup != null)
+              Flexible(
+                flex: 0,
+                child: DropdownMenu<String>(
+                    label: const Text('Alumno'),
+                    width: 350,
+                    trailingIcon: const Icon(Icons.arrow_drop_down),
+                    controller: selectedStudentController,
+                    onSelected: (student) {
+                      if (student != null) {
+                        setState(() {
+                          // selectedStudent = student;
+                          selectedStudentController.text = student;
+                          selectedTempStudent = student;
 
-          Flexible(
-            flex: 1,
-            child: DropdownMenu<String>(
-                label: const Text('Alumno'),
-                width: 200,
-                trailingIcon: const Icon(Icons.arrow_drop_down),
-                onSelected: (student) {
-                  if (student != null) {
-                    setState(() {
-                      selectedStudent = student;
-                      selectedstudentId = getStudentIdByName(student);
-                      if (selectedstudentId != null) {
-                        populateGrid(
-                            selectedstudentId!, currentCycle!.claCiclo!, true);
+                          // if (selectedstudentId != null) {
+                          //   populateGrid(
+                          //       selectedstudentId!, currentCycle!.claCiclo!, true);
+                          // }
+                        });
                       }
-                    });
-                  }
-                },
-                dropdownMenuEntries: studentsValues
-                    .toList()
-                    .map<DropdownMenuEntry<String>>((var value) {
-                  return DropdownMenuEntry<String>(value: value, label: value);
-                }).toList()),
-          ),
-
-          // Flexible(
-          //   flex: 2,
-          //   child: Row(
-          //     mainAxisAlignment: MainAxisAlignment.end,
-          //     children: [
-          //       Flexible(
-          //         child: AddItemButton(onPressed: handleAddItem),
-          //       ),
-          //       const SizedBox(width: 5),
-          //       Flexible(child: EditItemButton(
-          //         onPressed: () {
-          //           if (selectedEvalID == 0) {
-          //             const AlertDialog(
-          //               title: Text('Error'),
-          //               content:
-          //                   Text('Primero selecciona un registro para editar'),
-          //             );
-          //           } else {
-          //             showDialog(
-          //                 context: context,
-          //                 builder: (BuildContext context) {
-          //                   return EditCommentScreen(
-          //                     id: selectedEvalID,
-          //                     comment: selectedCommentToEdit,
-          //                     date: selectedDateToEdit,
-          //                     selectedSubject: selectedSubjectNameToEdit,
-          //                     studentID: selectedStudentIdToEdit,
-          //                   );
-          //                 });
-          //           }
-          //         },
-          //       )),
-          //       const SizedBox(width: 5),
-          //       // const SizedBox(width: 10),
-          //       Flexible(child: RefreshButton(onPressed: handleRefresh)),
-          //       const SizedBox(width: 5),
-          //       if (isUserAdmin)
-          //         Flexible(
-          //           child: DeleteItemButton(
-          //             onPressed: () async {
-          //               if (selectedEvalID == 0) {
-          //                 const AlertDialog(
-          //                   title: Text('Error'),
-          //                   content: Text(
-          //                       'Primero selecciona un registro para editar'),
-          //                 );
-          //               } else {
-          //                 int confirmation =
-          //                     await showDeleteConfirmationAlertDialog(context);
-
-          //                 if (confirmation == 1) {
-          //                   int response = await deleteAction(selectedEvalID);
-          //                   if (response == 200) {
-          //                     if (mounted) {
-          //                       await showConfirmationDialog(
-          //                           context, 'Realizado', 'Registro eliminado');
-          //                     }
-          //                   }
-          //                 }
-          //               }
-          //             },
-          //           ),
-          //         ),
-          //     ],
-          //   ),
-          // ),
-        ],
-      ),
-    );
+                    },
+                    dropdownMenuEntries: studentsList
+                        .toList()
+                        .map<DropdownMenuEntry<String>>((var value) {
+                      return DropdownMenuEntry<String>(
+                          value: value, label: value);
+                    }).toList()),
+              ),
+          ],
+        ));
   }
 
   Future<void> populateStudentsDropDownMenu() async {
@@ -290,20 +227,9 @@ class _Fodac27MenuSelectorState extends State<Fodac27MenuSelector> {
     }
   }
 
-  void handleRefresh() {
-    if (selectedstudentId != null) {
-      // populateGrid(selectedstudentId!, currentCycle!.claCiclo!, true);
-    }
-  }
-
   Future<int> deleteAction(int fodac27ID) async {
     var response = await deleteFodac27Record(fodac27ID);
     return response;
-  }
-
-  String? getStudentIdByName(String name) {
-    return simplifiedStudentsList
-        .firstWhere((student) => student[0] == name)[1];
   }
 
   Future<void> populateGrid(
@@ -348,4 +274,8 @@ class _Fodac27MenuSelectorState extends State<Fodac27MenuSelector> {
 
     globalGradesAndGroups = returnedList;
   }
+}
+
+String? getStudentIdByName(String name) {
+  return simplifiedStudentsList.firstWhere((student) => student[0] == name)[1];
 }

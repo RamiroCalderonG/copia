@@ -762,18 +762,18 @@ Future<dynamic> validateUser(
 Future<dynamic> getStudentsByRole(int employeeNumber, String userRole) async {
   try {
     var apiCall = await Requests.get(
-      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/student',
-      headers: {
-        'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-        'token': currentUser!.token
-      },
-      queryParameters: {
-        'role': 1, //<--------REMOVE HARDCORED NUMBER
-        'detail': 'List',
-        'employee': employeeNumber
-      },
-      persistCookies: false,
-    );
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/student',
+        headers: {
+          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
+          'token': currentUser!.token
+        },
+        queryParameters: {
+          'role': 1, //<--------REMOVE HARDCORED NUMBER
+          'detail': 'List',
+          'employee': employeeNumber
+        },
+        persistCookies: false,
+        timeoutSeconds: 25);
 
     apiCall.raiseForStatus();
     return apiCall.body;
@@ -807,22 +807,18 @@ Future<dynamic> getFodac27History(
 
 //To obtains only subject_name, can be user for more data in future
 Future<dynamic> getStudentSubjects(String StudentID, String cycle) async {
-  try {
-    var apiCall = await Requests.get(
-        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student/subjects',
-        headers: {
-          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-          'token': currentUser!.token
-        },
-        queryParameters: {
-          'student': StudentID.toString(),
-          'cycle': cycle.toString()
-        });
-    apiCall.raiseForStatus();
-    return apiCall.body;
-  } catch (e) {
-    return throw FormatException(e.toString());
-  }
+  var apiCall = await Requests.get(
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student/subjects',
+      headers: {
+        'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
+        'token': currentUser!.token
+      },
+      queryParameters: {
+        'student': StudentID.toString(),
+        'cycle': cycle.toString()
+      });
+  apiCall.raiseForStatus();
+  return apiCall;
 }
 
 Future<dynamic> postFodac27Record(String date, String studentID, String cycle,
@@ -912,6 +908,29 @@ Future<dynamic> getGlobalGradesAndGroups(String cyle) async {
       queryParameters: {'cycle': cyle},
       persistCookies: true,
     );
+    apiCall.raiseForStatus();
+    return apiCall.body;
+  } catch (e) {
+    return throw FormatException(e.toString());
+  }
+}
+
+Future<dynamic> getStudentsForFodac27(
+    String grade, String group, String campus, String cycle) async {
+  try {
+    var apiCall = await Requests.get(
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/fodac27/students-list',
+        headers: {
+          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
+          'token': currentUser!.token
+        },
+        queryParameters: {
+          'grade': grade,
+          'group': group,
+          'campus': campus,
+          'cycle': cycle
+        },
+        persistCookies: false);
     apiCall.raiseForStatus();
     return apiCall.body;
   } catch (e) {

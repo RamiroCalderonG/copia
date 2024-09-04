@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:oxschool/data/Models/Student_eval.dart';
 import 'package:oxschool/core/constants/User.dart';
 
+import '../../data/datasources/temp/studens_temp.dart';
 import '../../data/services/backend/api_requests/api_calls_list.dart';
 
 import '../../data/datasources/temp/teacher_grades_temp.dart';
@@ -354,18 +355,25 @@ Future<int> updateFodac27Record(
 
 Future<Map<String, dynamic>> populateSubjectsDropDownSelector(
     String studentID, String cycle) async {
-  var subjects = await getStudentSubjects(studentID, cycle);
+  try {
+    var subjects = await getStudentSubjects(studentID, cycle);
 
-  var subjectsList = jsonDecode(subjects);
-  Map<String, dynamic> result = {};
+    if (subjects.statusCode != 200) {
+      return {'error': 'Error fetching subjects'};
+    }
+    var subjectsList = jsonDecode(subjects.body);
+    Map<String, dynamic> result = {};
 
-  for (var item in subjectsList) {
-    result[item['subject']] = item['subject2'];
+    for (var item in subjectsList) {
+      result[item['subject']] = item['subject2'];
 
-    // result.add(item['subject']);
+      // result.add(item['subject']);
+    }
+
+    return result;
+  } catch (e) {
+    return throw FormatException(e.toString());
   }
-
-  return result;
 }
 
 String validateNewGradeValue(String newValue, String columnNameToFind) {
@@ -466,4 +474,21 @@ Future<List<Map<String, dynamic>>> getGradesAndGroupsByCampus(
   List<Map<String, dynamic>> items = List<Map<String, dynamic>>.from(data);
 
   return items;
+}
+
+Future<List<String>> getStudentsListForFodac27(
+    String campus, String cycle, String grade, String group) async {
+  var response = await getStudentsForFodac27(grade, group, campus, cycle);
+  var data = jsonDecode(response);
+
+  List<String> resultData = [];
+
+  for (var item in data) {
+    resultData.add(item['name']);
+    Map<String, String> itemMap = {};
+    itemMap['name'] = item['name'];
+    itemMap['studentID'] = item['studentID'];
+    tempStudentMap.add(itemMap);
+  }
+  return resultData;
 }
