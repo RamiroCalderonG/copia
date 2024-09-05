@@ -2,15 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:oxschool/core/reusable_methods/reusable_functions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/constants/date_constants.dart';
+import '../../data/datasources/temp/studens_temp.dart';
 import '../../data/datasources/temp/teacher_grades_temp.dart';
 import '../Modules/academic/grades_by_asignature.dart';
 
 class TeacherEvalDropDownMenu extends StatefulWidget {
   final List<dynamic> jsonData;
   final Set<String> campusesList;
+  final bool byStudent;
 
   const TeacherEvalDropDownMenu(
-      {super.key, required this.jsonData, required this.campusesList});
+      {super.key,
+      required this.jsonData,
+      required this.campusesList,
+      required this.byStudent});
 
   @override
   State<TeacherEvalDropDownMenu> createState() =>
@@ -18,7 +23,6 @@ class TeacherEvalDropDownMenu extends StatefulWidget {
 }
 
 int currentMonthNumber = DateTime.now().month;
-String currentMonth = monthsListMap[currentMonthNumber] ?? 'Unknown month';
 
 class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
   String? selectedGrade;
@@ -29,6 +33,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
   List<String> filteredGrade = [];
   List<String> filteredGroup = [];
   List<String> filteredSubject = [];
+  String currentMonth = monthsListMap[currentMonthNumber] ?? 'Unknown month';
 
   String monthValue = '';
   bool userStatus = false;
@@ -37,9 +42,15 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
   @override
   void initState() {
     _isUserAdminResult();
-    super.initState();
+    if (selectedTempMonth != null) {
+      monthValue = selectedTempMonth!;
+    }
     unityList = widget.campusesList.toList();
+    if (unityList.length == 1) {
+      selectedTempCampus = unityList.first;
+    }
     filterData();
+    super.initState();
   }
 
   _isUserAdminResult() async {
@@ -132,6 +143,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                       onSelected: (String? value) {
                         setState(() {
                           selectedUnity = value;
+                          selectedTempCampus = value;
                           filterData();
                           hasBeenFiltered = true;
                         });
@@ -156,6 +168,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                     onSelected: (String? value) {
                       selectedGrade = value;
                       gradeSelected = value!;
+                      selectedTempGrade = value;
                     },
                     dropdownMenuEntries: filteredGrade
                         .toList()
@@ -177,6 +190,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                     onSelected: (String? value) {
                       selectedGroup = value;
                       groupSelected = value!;
+                      selectedTempGroup = value;
                     },
                     dropdownMenuEntries: filteredGroup
                         .toList()
@@ -186,27 +200,28 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                     }).toList()),
               ],
             )),
-            Flexible(
-                child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                DropdownMenu<String>(
-                    label: const Text(' Materia '),
-                    trailingIcon: const Icon(Icons.arrow_drop_down),
-                    initialSelection: selectedSubject,
-                    onSelected: (String? value) {
-                      selectedSubject = value;
-                      subjectValue = value!;
-                      subjectSelected = value;
-                    },
-                    dropdownMenuEntries: filteredSubject
-                        .toList()
-                        .map<DropdownMenuEntry<String>>((String value) {
-                      return DropdownMenuEntry<String>(
-                          value: value, label: value);
-                    }).toList()),
-              ],
-            )),
+            if (!widget.byStudent)
+              Flexible(
+                  child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  DropdownMenu<String>(
+                      label: const Text(' Materia '),
+                      trailingIcon: const Icon(Icons.arrow_drop_down),
+                      initialSelection: selectedSubject,
+                      onSelected: (String? value) {
+                        selectedSubject = value;
+                        subjectValue = value!;
+                        subjectSelected = value;
+                      },
+                      dropdownMenuEntries: filteredSubject
+                          .toList()
+                          .map<DropdownMenuEntry<String>>((String value) {
+                        return DropdownMenuEntry<String>(
+                            value: value, label: value);
+                      }).toList()),
+                ],
+              )),
 
             Flexible(
               child: Column(
@@ -219,6 +234,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                         initialSelection: monthValue,
                         onSelected: (String? value) {
                           monthValue = value!;
+                          selectedTempMonth = value;
                         },
                         dropdownMenuEntries: academicMonthsList
                             .toList()

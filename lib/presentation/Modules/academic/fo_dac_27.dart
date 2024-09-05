@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 
 import 'package:oxschool/core/constants/User.dart';
 import 'package:oxschool/core/reusable_methods/user_functions.dart';
+import 'package:oxschool/data/datasources/temp/users_temp_data.dart';
 import 'package:oxschool/presentation/components/custom_icon_button.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
@@ -162,6 +163,39 @@ class _FoDac27State extends State<FoDac27> {
                   RefreshButton(onPressed: handleRefresh),
                   const SizedBox(height: 10),
                   AddItemButton(onPressed: handleAddItem),
+                  const SizedBox(height: 10),
+                  if (isUserAdmin)
+                    DeleteItemButton(onPressed: () async {
+                      if (selectedEvalID == 0) {
+                        const AlertDialog(
+                          title: Text('Error'),
+                          content: Text(
+                              'Primero seleccionar un registro para editar'),
+                        );
+                      } else {
+                        int confirmation =
+                            await showDeleteConfirmationAlertDialog(context);
+                        if (confirmation == 1) {
+                          int response = await deleteAction(selectedEvalID);
+                          if (response == 200) {
+                            if (mounted) {
+                              await showConfirmationDialog(
+                                  context, 'Realizado', 'Registro eliminado');
+                              handleRefresh();
+                            }
+                          }
+                        }
+                      }
+                    })
+
+                  //                 DeleteItemButton(
+                  //                   onPressed: () async {
+                  //                     if (selectedEvalID == 0) {
+                  //                       const AlertDialog(
+                  //                         title: Text('Error'),
+                  //                         content: Text(
+                  //                             'Primero selecciona un registro para editar'),
+                  //                       );
                 ],
               )),
         ],
@@ -323,6 +357,7 @@ class _FoDac27State extends State<FoDac27> {
     if (selectedTempStudent == null) {
       showEmptyFieldAlertDialog(context, 'Favor de seleccionar un alumno');
     } else {
+      handleRefresh();
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -366,7 +401,8 @@ class _FoDac27State extends State<FoDac27> {
 
   Future<void> populateGrid(
       String studentID, String cycle, bool isByStudent) async {
-    var apiResponse = await getFodac27History(cycle, studentID, isByStudent);
+    var apiResponse = await getFodac27History(cycle, studentID, isByStudent)
+        .onError((error, stackTrace) => stateManager.removeAllRows());
     if (apiResponse != null) {
       var decodedResponse = json.decode(apiResponse) as List;
       List<PlutoRow> newRows = decodedResponse.map((item) {

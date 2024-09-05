@@ -253,7 +253,7 @@ List<Map<String, dynamic>> mergeCommentsData(
 }
 
 void composeBodyToUpdateGradeBySTudent(
-    String key, studentID, dynamic value, int subject, month) {
+    String key, studentID, int value, int subject, month) {
   bool idExists = false;
 
   if (studentGradesBodyToUpgrade.isEmpty) {
@@ -278,7 +278,7 @@ void composeBodyToUpdateGradeBySTudent(
             // Step 2: Convert the list to a set to handle duplicates
             Set<dynamic> numbersSet = numbersList.toSet();
             // Step 3: Add the new number if it’s not already present
-            int newNum = int.parse(value);
+            int newNum = value;
             if (!numbersSet.contains(newNum)) {
               numbersSet.add(newNum);
             }
@@ -376,7 +376,8 @@ Future<Map<String, dynamic>> populateSubjectsDropDownSelector(
   }
 }
 
-String validateNewGradeValue(String newValue, String columnNameToFind) {
+//Function that validate that value can´t be less than 50
+int validateNewGradeValue(int newValue, String columnNameToFind) {
   //If value < 50 -> returns 50
   List<String> columnName = [
     'Calif',
@@ -387,24 +388,24 @@ String validateNewGradeValue(String newValue, String columnNameToFind) {
     // 'Comentarios'
   ];
 
-  if (columnNameToFind == 'Comentarios') {
-    for (var item in studentsGradesCommentsRows) {
-      if (item['comentname'] == newValue) {
-        // print(item['idcomment'].toString());
-        return item['idcomment'].toString();
-      }
-    }
-  }
+  // if (columnNameToFind == 'Comentarios') {
+  //   for (var item in studentsGradesCommentsRows) {
+  //     if (item['comentname'] == newValue) {
+  //       // print(item['idcomment'].toString());
+  //       return item;
+  //     }
+  //   }
+  // }
 
   bool isContained = columnName.contains(columnNameToFind);
 
   if (isContained) {
-    if (int.parse(newValue) <= 50) {
+    if (newValue <= 50) {
       //Validate that value can´t be less than 50
-      newValue = 50.toString();
+      newValue = 50;
       return newValue;
-    } else if (int.parse(newValue) > 100) {
-      newValue = 100.toString();
+    } else if (newValue > 100) {
+      newValue = 100;
       return newValue;
     } else {
       return newValue;

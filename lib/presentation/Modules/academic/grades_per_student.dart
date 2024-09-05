@@ -13,10 +13,13 @@ import 'package:oxschool/data/datasources/temp/teacher_grades_temp.dart';
 
 import 'package:pluto_grid/pluto_grid.dart';
 
+import '../../../data/datasources/temp/studens_temp.dart';
 import '../../../data/services/backend/api_requests/api_calls_list.dart';
 import '../../../core/constants/Student.dart';
 import '../../../core/config/flutter_flow/flutter_flow_theme.dart';
 import '../../../core/reusable_methods/reusable_functions.dart';
+import '../../components/confirm_dialogs.dart';
+import '../../components/teacher_eval_dropdownmenu.dart';
 
 class GradesByStudent extends StatefulWidget {
   const GradesByStudent({super.key});
@@ -67,6 +70,10 @@ class _GradesByStudentState extends State<GradesByStudent> {
     evaluationComments.clear();
     commentStringEval.clear();
     _debounce?.cancel();
+    selectedTempGrade = null;
+    selectedTempGroup = null;
+    selectedTempStudent = null;
+    selectedTempCampus = null;
     super.dispose();
   }
 
@@ -142,14 +149,15 @@ class _GradesByStudentState extends State<GradesByStudent> {
     }
   }
 
-  void searchBUttonAction(String groupSelected, gradeInt, monthNumber) async {
+  void searchBUttonAction(String groupSelected, String gradeInt,
+      String monthNumber, String campusSelected) async {
     try {
       if (studentList.isNotEmpty && studentsGradesCommentsRows.isNotEmpty) {
         studentList.clear();
         studentsGradesCommentsRows.clear();
       }
       studentList = await getSubjectsAndGradesByStudent(gradeInt, groupSelected,
-          currentCycle!.claCiclo, currentUser!.claUn, monthNumber);
+          currentCycle!.claCiclo, campusSelected, monthNumber);
 
       await getCommentsForEvals(int.parse(gradeInt));
       // await populateCommentsGrid(studentsGradesCommentsRows); <----WORKING WELL
@@ -158,13 +166,13 @@ class _GradesByStudentState extends State<GradesByStudent> {
       //     mergeCommentsData(apiData1, apiData2);
 
       fillGrid(studentList); //Fill student list by unque values
-      var studentNumber = 1;
+      var studentNumber = 0;
 
       setState(() {
         studentEvaluationRows.clear();
         for (var item in uniqueStudentsList) {
           studentEvaluationRows.add(PlutoRow(cells: {
-            'No': PlutoCell(value: studentNumber),
+            'No': PlutoCell(value: studentNumber + 1),
             'studentID': PlutoCell(value: item['studentID']),
             'studentName': PlutoCell(value: item['studentName']),
           }));
@@ -172,32 +180,10 @@ class _GradesByStudentState extends State<GradesByStudent> {
         }
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          elevation: 20,
-          content: Text(
-            e.toString(),
-            // ignore: use_build_context_synchronously
-            style: FlutterFlowTheme.of(context).labelMedium.override(
-                  fontFamily: 'Sora',
-                  color: const Color(0xFF130C0D),
-                  fontWeight: FontWeight.w500,
-                ),
-          ),
-          action: SnackBarAction(
-              label: 'Cerrar mensaje',
-              // ignore: use_build_context_synchronously
-              textColor: FlutterFlowTheme.of(context).info,
-              backgroundColor: Colors.black12,
-              onPressed: () {
-                ScaffoldMessenger.of(context).hideCurrentSnackBar();
-              }),
-          duration: const Duration(milliseconds: 6700),
-          backgroundColor:
-              // ignore: use_build_context_synchronously
-              FlutterFlowTheme.of(context).secondary,
-        ),
-      );
+      if (context.mounted) {
+        // ensures the widget is still part of the widget tree after the await
+        showErrorFromBackend(context, e.toString());
+      }
     }
   }
 
@@ -258,101 +244,106 @@ class _GradesByStudentState extends State<GradesByStudent> {
   Widget _buildGradesPerStudent() {
     //String dropDownValue = ''; //oneTeacherAssignatures.first;
 
-    final DropdownMenu monthSelectorButton = DropdownMenu<String>(
-      initialSelection: monthValue, //monthsList.first,
-      onSelected: (String? value) {
-        monthValue = value!;
-      },
-      dropdownMenuEntries:
-          academicMonthsList.map<DropdownMenuEntry<String>>((String value) {
-        return DropdownMenuEntry<String>(value: value, label: value);
-      }).toList(),
-    );
+    // final DropdownMenu monthSelectorButton = DropdownMenu<String>(
+    //   initialSelection: monthValue, //monthsList.first,
+    //   onSelected: (String? value) {
+    //     monthValue = value!;
+    //   },
+    //   dropdownMenuEntries:
+    //       academicMonthsList.map<DropdownMenuEntry<String>>((String value) {
+    //     return DropdownMenuEntry<String>(value: value, label: value);
+    //   }).toList(),
+    // );
 
-    final DropdownMenu gradeSelectorButton2 = DropdownMenu<String>(
-      initialSelection: oneTeacherGrades.first,
-      onSelected: (String? value) {
-        gradeSelected = value!;
-      },
-      dropdownMenuEntries:
-          oneTeacherGrades.map<DropdownMenuEntry<String>>((String value) {
-        return DropdownMenuEntry<String>(value: value, label: value);
-      }).toList(),
-    );
+    // final DropdownMenu gradeSelectorButton2 = DropdownMenu<String>(
+    //   initialSelection: oneTeacherGrades.first,
+    //   onSelected: (String? value) {
+    //     gradeSelected = value!;
+    //   },
+    //   dropdownMenuEntries:
+    //       oneTeacherGrades.map<DropdownMenuEntry<String>>((String value) {
+    //     return DropdownMenuEntry<String>(value: value, label: value);
+    //   }).toList(),
+    // );
 
-    final DropdownMenu groupSelectorButton = DropdownMenu<String>(
-      initialSelection: oneTeacherGroups.first,
-      onSelected: (String? value) {
-        groupSelected = value!;
-      },
-      dropdownMenuEntries:
-          oneTeacherGroups.map<DropdownMenuEntry<String>>((String value) {
-        return DropdownMenuEntry<String>(value: value, label: value);
-      }).toList(),
-    );
+    // final DropdownMenu groupSelectorButton = DropdownMenu<String>(
+    //   initialSelection: oneTeacherGroups.first,
+    //   onSelected: (String? value) {
+    //     groupSelected = value!;
+    //   },
+    //   dropdownMenuEntries:
+    //       oneTeacherGroups.map<DropdownMenuEntry<String>>((String value) {
+    //     return DropdownMenuEntry<String>(value: value, label: value);
+    //   }).toList(),
+    // );
 
     return Expanded(
       child: Column(
         children: [
+          TeacherEvalDropDownMenu(
+            jsonData: jsonDataForDropDownMenuClass,
+            campusesList: campusesWhereTeacherTeach,
+            byStudent: true,
+          ),
           Padding(
-            padding: const EdgeInsets.all(20.0),
+            padding: const EdgeInsets.only(top: 5, right: 10),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Flexible(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Grado:',
-                        style: TextStyle(
-                          fontFamily: 'Sora',
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      gradeSelectorButton2,
-                    ],
-                  ),
-                ),
-                Flexible(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Grupo:',
-                        style: TextStyle(
-                          fontFamily: 'Sora',
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      groupSelectorButton,
-                    ],
-                  ),
-                ),
-                Flexible(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Mes:',
-                        style: TextStyle(
-                          fontFamily: 'Sora',
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      if (isUserAdmin == false)
-                        Text(
-                          currentMonth,
-                          style: const TextStyle(
-                            fontFamily: 'Sora',
-                            fontWeight: FontWeight.bold,
-                          ),
-                        )
-                      else
-                        monthSelectorButton,
-                    ],
-                  ),
-                ),
+                // Flexible(
+                //   child: Column(
+                //     crossAxisAlignment: CrossAxisAlignment.start,
+                //     children: [
+                //       const Text(
+                //         'Grado:',
+                //         style: TextStyle(
+                //           fontFamily: 'Sora',
+                //           fontWeight: FontWeight.bold,
+                //         ),
+                //       ),
+                //       gradeSelectorButton2,
+                //     ],
+                //   ),
+                // ),
+                // Flexible(
+                //   child: Column(
+                //     crossAxisAlignment: CrossAxisAlignment.start,
+                //     children: [
+                //       const Text(
+                //         'Grupo:',
+                //         style: TextStyle(
+                //           fontFamily: 'Sora',
+                //           fontWeight: FontWeight.bold,
+                //         ),
+                //       ),
+                //       groupSelectorButton,
+                //     ],
+                //   ),
+                // ),
+                // Flexible(
+                //   child: Column(
+                //     crossAxisAlignment: CrossAxisAlignment.start,
+                //     children: [
+                //       const Text(
+                //         'Mes:',
+                //         style: TextStyle(
+                //           fontFamily: 'Sora',
+                //           fontWeight: FontWeight.bold,
+                //         ),
+                //       ),
+                //       if (isUserAdmin == false)
+                //         Text(
+                //           currentMonth,
+                //           style: const TextStyle(
+                //             fontFamily: 'Sora',
+                //             fontWeight: FontWeight.bold,
+                //           ),
+                //         )
+                //       else
+                //         monthSelectorButton,
+                //     ],
+                //   ),
+                // ),
                 Flexible(
                   child: ElevatedButton.icon(
                     onPressed: () async {
@@ -360,9 +351,10 @@ class _GradesByStudentState extends State<GradesByStudent> {
                       selectedStudentName = '';
                       validator();
                       searchBUttonAction(
-                        groupSelected,
+                        selectedTempGroup!,
                         gradeInt.toString(),
                         monthNumber.toString(),
+                        selectedTempCampus!,
                       );
 
                       setState(() {
@@ -462,6 +454,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
                             groupSelected,
                             gradeInt.toString(),
                             monthNumber.toString(),
+                            selectedTempCampus!,
                           );
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -487,14 +480,14 @@ class _GradesByStudentState extends State<GradesByStudent> {
               ],
             ),
           ),
-          const SizedBox(height: 10),
+          // const SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Center(
                 child: selectedStudentName.isNotEmpty
                     ? Text(
-                        'Evaluando a : $selectedStudentName',
+                        'Evaluando a : ${selectedStudentName.trim()}',
                         style: const TextStyle(
                             fontFamily: 'Sora',
                             fontSize: 24,
@@ -516,7 +509,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
           Container(
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.height / 1.5,
-              margin: const EdgeInsets.all(20),
+              margin: const EdgeInsets.only(right: 10, left: 10, bottom: 10),
               child: LayoutBuilder(
                   builder: (BuildContext context, BoxConstraints constraints) {
                 if (studentEvaluationRows.isEmpty) {
@@ -576,7 +569,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
                                     ),
                                   ),
                                   createFooter: (stateManager) {
-                                    stateManager.setPageSize(30,
+                                    stateManager.setPageSize(20,
                                         notify: false); // default 40
                                     return PlutoPagination(stateManager);
                                   })),
@@ -598,7 +591,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
                                               onChanged: (event) {
                                                 var newValue =
                                                     validateNewGradeValue(
-                                                        event.value.toString(),
+                                                        event.value,
                                                         event.column.title);
 
                                                 final subjectID = event.row
@@ -685,16 +678,19 @@ class _GradesByStudentState extends State<GradesByStudent> {
       studentList.clear();
     }
 
-    if (groupSelected.isEmpty || groupSelected == '') {
-      groupSelected = oneTeacherGroups.first.toString();
+    if (selectedTempGroup == null || selectedTempGroup == '') {
+      selectedTempGroup = oneTeacherGroups.first.toString();
     }
-    if (gradeSelected.isEmpty || gradeSelected == '') {
-      gradeSelected = oneTeacherGrades.first;
+    if (selectedTempGrade == null || selectedTempGrade == '') {
+      selectedTempGrade = oneTeacherGrades.first;
     }
-    if (dropDownValue.isEmpty || dropDownValue == '') {
-      dropDownValue = oneTeacherAssignatures.first;
+    if (selectedTempCampus == null || selectedTempCampus == '') {
+      return showEmptyFieldAlertDialog(context, 'Campus no seleccionado');
     }
-    if (monthValue.isEmpty) {
+    // if (dropDownValue.isEmpty || dropDownValue == '') {
+    //   dropDownValue = oneTeacherAssignatures.first;
+    // }
+    if (selectedTempMonth == null) {
       monthValue = academicMonthsList.first;
     }
 
@@ -703,9 +699,9 @@ class _GradesByStudentState extends State<GradesByStudent> {
     } else {
       monthNumber = getKeyFromValue(monthsListMap, currentMonth);
     }
-    gradeInt = getKeyFromValue(teacherGradesMap, gradeSelected);
+    gradeInt = getKeyFromValue(teacherGradesMap, selectedTempGrade!);
 
-    assignatureID = getKeyFromValue(assignaturesMap, dropDownValue);
+    // assignatureID = getKeyFromValue(assignaturesMap, dropDownValue);
   }
 
   List<Map<String, dynamic>> filterCommentsBySubject(

@@ -251,8 +251,10 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
       child: Column(
         children: [
           TeacherEvalDropDownMenu(
-              jsonData: jsonDataForDropDownMenuClass,
-              campusesList: campusesWhereTeacherTeach),
+            jsonData: jsonDataForDropDownMenuClass,
+            campusesList: campusesWhereTeacherTeach,
+            byStudent: false,
+          ),
           Padding(
             padding: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
             child: Row(
@@ -289,6 +291,8 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
 
                           var assignatureID =
                               getKeyFromValue(assignaturesMap, subjectValue);
+
+                          // TODO: PENDING TO FIX MONTH, IS NOT USING THE ONE GIVEN BY USER
 
                           searchBUttonAction(
                               groupSelected,
@@ -333,7 +337,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                           rows: assignatureRows,
                           onChanged: (event) {
                             var newValue = validateNewGradeValue(
-                                event.value.toString(), event.column.title);
+                                event.value, event.column.title);
 
                             composeUpdateStudentGradesBody(
                                 event.column.title, newValue, event.rowIdx);
