@@ -3,11 +3,13 @@
 import 'package:flutter/material.dart';
 import 'package:oxschool/core/constants/User.dart';
 import 'package:oxschool/core/reusable_methods/reusable_functions.dart';
+import 'package:oxschool/presentation/components/custom_icon_button.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:intl/intl.dart';
 
 import '../../../data/Models/Student_eval.dart';
 
+import '../../../data/datasources/temp/studens_temp.dart';
 import '../../../data/services/backend/api_requests/api_calls_list.dart';
 import '../../../core/constants/Student.dart';
 import '../../../core/constants/date_constants.dart';
@@ -54,27 +56,26 @@ bool isUserAdmin = verifyUserAdmin(currentUser!);
 List<PlutoRow> rows = [];
 
 /// The selected group.
-String groupSelected = '';
+// String groupSelected = '';
 
 /// The selected grade.
 
-String gradeSelected = '';
+// String gradeSelected = '';
 
 /// The selected subject value.
 
-String subjectValue = '';
+// String subjectValue = '';
 
 class _GradesByAsignatureState extends State<GradesByAsignature> {
   // = oneTeacherGroups.first.toString();
   // = oneTeacherAssignatures.first;
   String? asignatureNameListener;
   String? selectedStudentName;
-  var gradeInt;
+  // var gradeInt;
   int? monthNumber;
   String monthValue = isUserAdmin ? academicMonthsList.first : currentMonth;
-  // int? monthNumber;
-  //oneTeacherAssignatures.first;
-  int? assignatureID;
+
+  // int? assignatureID;
   String campusSelected = '';
 
   /// Whether the teacher teaches multiple campuses.
@@ -125,15 +126,11 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
   /// [assignatureID] is the selected assignature ID.
   /// [monthNumber] is the selected month number.
   /// [campus] is the selected campus.
-  void searchBUttonAction(String groupSelected, gradeInt, assignatureID,
-      monthNumber, campus) async {
+  void searchBUttonAction(String groupSelected, String gradeInt,
+      String assignatureID, String monthNumber, String campus) async {
     try {
       studentList = await getStudentsByAssinature(
-          groupSelected,
-          gradeInt.toString(),
-          assignatureID.toString(),
-          monthNumber.toString(),
-          campus);
+          groupSelected, gradeInt, assignatureID, monthNumber, campus);
 
       await getCommentsForEvals(int.parse(gradeInt));
       fillGrid(studentList);
@@ -155,32 +152,9 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
 //                           // StudentsPlutoGrid(rows: assignatureRows);
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          elevation: 20,
-          content: Text(
-            e.toString(),
-            // ignore: use_build_context_synchronously
-            style: FlutterFlowTheme.of(context).labelMedium.override(
-                  fontFamily: 'Sora',
-                  color: const Color(0xFF130C0D),
-                  fontWeight: FontWeight.w500,
-                ),
-          ),
-          action: SnackBarAction(
-              label: 'Cerrar mensaje',
-              // ignore: use_build_context_synchronously
-              textColor: FlutterFlowTheme.of(context).info,
-              backgroundColor: Colors.black12,
-              onPressed: () {
-                ScaffoldMessenger.of(context).hideCurrentSnackBar();
-              }),
-          duration: const Duration(milliseconds: 6700),
-          backgroundColor:
-              // ignore: use_build_context_synchronously
-              FlutterFlowTheme.of(context).secondary,
-        ),
-      );
+      if (context.mounted) {
+        showErrorFromBackend(context, e.toString());
+      }
     }
   }
 
@@ -256,27 +230,35 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
             byStudent: false,
           ),
           Padding(
-            padding: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
+            padding: const EdgeInsets.only(bottom: 8, left: 20, right: 20),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Flexible(
-                  child: ElevatedButton.icon(
-                    onPressed: () async {
-                      studentGradesBodyToUpgrade.clear();
-                      validator();
+                  child: RefreshButton(onPressed: () {
+                    var monthNumber;
+                    if (isUserAdmin) {
+                      monthNumber =
+                          getKeyFromValue(monthsListMap, selectedTempMonth!);
+                    } else {
+                      monthNumber = getKeyFromValue(
+                          monthsListMap, selectedCurrentTempMonth!);
+                    }
+                    var assignatureID =
+                        getKeyFromValue(assignaturesMap, selectedTempSubject!);
 
-                      searchBUttonAction(
-                          groupSelected,
-                          gradeInt.toString(),
-                          assignatureID.toString(),
-                          monthNumber.toString(),
-                          selectedUnity!);
-                    },
-                    icon: const Icon(Icons.search),
-                    label: const Text('Buscar'),
-                  ),
+                    var gradeInt =
+                        getKeyFromValue(teacherGradesMap, selectedTempGrade!);
+
+                    searchBUttonAction(
+                        selectedTempGroup!,
+                        gradeInt.toString(),
+                        assignatureID.toString(),
+                        monthNumber.toString(),
+                        selectedTempCampus!);
+                  }),
                 ),
+                const SizedBox(width: 10),
                 Flexible(
                   child: ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
@@ -287,19 +269,27 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                         if (success) {
                           showConfirmationDialog(
                               context, 'Exito', 'Cambios realizados con exito');
-                          validator();
 
-                          var assignatureID =
-                              getKeyFromValue(assignaturesMap, subjectValue);
+                          var assignatureID = getKeyFromValue(
+                              assignaturesMap, selectedTempSubject!);
 
-                          // TODO: PENDING TO FIX MONTH, IS NOT USING THE ONE GIVEN BY USER
+                          var monthNumber;
+                          if (isUserAdmin) {
+                            monthNumber = getKeyFromValue(
+                                monthsListMap, selectedTempMonth!);
+                          } else {
+                            monthNumber = getKeyFromValue(
+                                monthsListMap, selectedCurrentTempMonth!);
+                          }
+                          var gradeInt = getKeyFromValue(
+                              teacherGradesMap, selectedTempGrade!);
 
                           searchBUttonAction(
-                              groupSelected,
+                              selectedTempGroup!,
                               gradeInt.toString(),
                               assignatureID.toString(),
                               monthNumber.toString(),
-                              selectedUnity!);
+                              selectedTempCampus!);
                         } else {
                           showErrorFromBackend(context, 'Error');
                         }
@@ -333,11 +323,14 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                   return StatefulBuilder(
                     builder: (context, setState) {
                       return PlutoGrid(
+                          mode: PlutoGridMode.select,
                           columns: assignaturesColumns,
                           rows: assignatureRows,
                           onChanged: (event) {
                             var newValue = validateNewGradeValue(
-                                event.value, event.column.title);
+                                //Validate values cant be les that 50
+                                event.value,
+                                event.column.title);
 
                             composeUpdateStudentGradesBody(
                                 event.column.title, newValue, event.rowIdx);
@@ -349,10 +342,21 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
 
                             var selectedStudentName =
                                 event.row.cells['Nombre']?.value;
-                            validator();
+                            // validator();
                             commentsAsignated.clear();
+                            var gradeInt = getKeyFromValue(
+                                teacherGradesMap, selectedTempGrade!);
+
+                            if (isUserAdmin == true) {
+                              monthNumber = getKeyFromValue(
+                                  monthsListMap, selectedTempMonth!);
+                            } else {
+                              monthNumber = getKeyFromValue(
+                                  monthsListMap, selectedCurrentTempMonth!);
+                            }
+
                             commentsAsignated =
-                                await getCommentsAsignatedToStudent(gradeInt,
+                                await getCommentsAsignatedToStudent(gradeInt!,
                                     true, studentID.toString(), monthNumber);
 
                             showCommentsDialog(commentsAsignated,
@@ -398,15 +402,20 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
     if (studentList.isNotEmpty) {
       studentList.clear();
     }
-
-    if (groupSelected.isEmpty || groupSelected == '') {
-      groupSelected = oneTeacherGroups.first.toString();
+    if (selectedTempGroup == null || selectedTempGroup == '') {
+      return showEmptyFieldAlertDialog(
+          context, 'Seleccionar un grupo a evaluar');
     }
-    if (gradeSelected.isEmpty || gradeSelected == '') {
-      gradeSelected = oneTeacherGrades.first;
+    if (selectedTempGrade == null || selectedTempGrade == '') {
+      return showEmptyFieldAlertDialog(
+          context, 'Seleccionar un grado a evaluar');
     }
-    if (subjectValue.isEmpty || subjectValue == '') {
-      subjectValue = oneTeacherAssignatures.first;
+    if (selectedTempSubject == null || selectedTempSubject == '') {
+      return showEmptyFieldAlertDialog(context, 'Seleccionar una materia');
+    }
+    if (selectedTempCampus == null || selectedTempCampus == '') {
+      return showEmptyFieldAlertDialog(
+          context, 'Seleccionar un campus a evaluar');
     }
     if (monthValue.isEmpty) {
       monthValue = academicMonthsList.first;
@@ -418,9 +427,9 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
     } else {
       monthNumber = getKeyFromValue(monthsListMap, currentMonth);
     }
-    gradeInt = getKeyFromValue(teacherGradesMap, gradeSelected);
+    // gradeInt = getKeyFromValue(teacherGradesMap, gradeSelected);
 
-    assignatureID = getKeyFromValue(assignaturesMap, subjectValue);
+    // assignatureID = getKeyFromValue(assignaturesMap, subjectValue);
   }
 
   /// Updates the grades in the backend and shows a confirmation dialog.

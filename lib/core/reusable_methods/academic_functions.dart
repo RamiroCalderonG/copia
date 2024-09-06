@@ -126,7 +126,11 @@ Future<void> updateStudentGrades() async {}
 // }
 
 Future<List<StudentEval>> getStudentsByAssinature(
-    String group, gradeSelected, assignature, month, campus) async {
+    String group,
+    String gradeSelected,
+    String assignature,
+    String month,
+    String campus) async {
   try {
     var studentsList = await getStudentsToGrade(assignature, group,
         gradeSelected, currentCycle!.claCiclo, campus, month);
@@ -388,15 +392,6 @@ int validateNewGradeValue(int newValue, String columnNameToFind) {
     // 'Comentarios'
   ];
 
-  // if (columnNameToFind == 'Comentarios') {
-  //   for (var item in studentsGradesCommentsRows) {
-  //     if (item['comentname'] == newValue) {
-  //       // print(item['idcomment'].toString());
-  //       return item;
-  //     }
-  //   }
-  // }
-
   bool isContained = columnName.contains(columnNameToFind);
 
   if (isContained) {
@@ -450,7 +445,7 @@ void searchGradesBySubjectButton(
 ) async {
   try {
     studentList =
-        await getStudentsByAssinature(group, grade, subject, month, campus);
+        await getStudentsByAssinature(group, grade, subject, month, campus!);
     await getCommentsForEvals(int.parse(grade));
   } catch (e) {
     throw FormatException(e.toString());

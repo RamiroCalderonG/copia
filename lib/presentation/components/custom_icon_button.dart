@@ -40,6 +40,21 @@ class AddItemButton extends StatelessWidget {
   }
 }
 
+class SaveItemButton extends StatelessWidget {
+  final VoidCallback onPressed;
+
+  const SaveItemButton({super.key, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomIconButton(
+      onPressed: onPressed,
+      icon: const Icon(Icons.save),
+      tooltip: 'Guardar',
+    );
+  }
+}
+
 class EditItemButton extends StatelessWidget {
   final VoidCallback onPressed;
 

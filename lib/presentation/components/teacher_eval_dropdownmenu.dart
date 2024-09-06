@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/constants/date_constants.dart';
 import '../../data/datasources/temp/studens_temp.dart';
 import '../../data/datasources/temp/teacher_grades_temp.dart';
-import '../Modules/academic/grades_by_asignature.dart';
+// import '../Modules/academic/grades_by_asignature.dart';
 
 class TeacherEvalDropDownMenu extends StatefulWidget {
   final List<dynamic> jsonData;
@@ -42,6 +42,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
   @override
   void initState() {
     _isUserAdminResult();
+    selectedTempMonth = currentMonth;
     if (selectedTempMonth != null) {
       monthValue = selectedTempMonth!;
     }
@@ -56,11 +57,14 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
   _isUserAdminResult() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     bool isUserAdmin = prefs.getBool('isUserAdmin')!;
-    monthValue = isUserAdmin ? academicMonthsList.first : currentMonth;
+    monthValue =
+        currentMonth; //isUserAdmin ? academicMonthsList.first : currentMonth;
     setState(() {
       userStatus = isUserAdmin;
       if (isUserAdmin == false) {
+        selectedCurrentTempMonth = currentMonth;
         monthValue = currentMonth;
+        selectedTempMonth = monthValue;
       }
     });
   }
@@ -90,9 +94,9 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
         selectedGroup = filteredGroup.first;
         selectedSubject = filteredSubject.first;
       } else {
-        selectedGrade = gradeSelected;
-        selectedGroup = groupSelected;
-        selectedSubject = subjectSelected;
+        selectedGrade = null;
+        selectedGroup = null;
+        selectedSubject = null;
       }
     } else {
       filteredGrade = widget.jsonData
@@ -115,9 +119,9 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
         selectedGroup = filteredGroup.first;
         selectedSubject = filteredSubject.first;
       } else {
-        selectedGrade = gradeSelected;
-        selectedGroup = groupSelected;
-        selectedSubject = subjectSelected;
+        selectedGrade = null;
+        selectedGroup = null;
+        selectedSubject = null;
       }
     }
   }
@@ -167,7 +171,6 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                     initialSelection: selectedGrade,
                     onSelected: (String? value) {
                       selectedGrade = value;
-                      gradeSelected = value!;
                       selectedTempGrade = value;
                     },
                     dropdownMenuEntries: filteredGrade
@@ -189,7 +192,6 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                     initialSelection: selectedGroup,
                     onSelected: (String? value) {
                       selectedGroup = value;
-                      groupSelected = value!;
                       selectedTempGroup = value;
                     },
                     dropdownMenuEntries: filteredGroup
@@ -211,8 +213,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                       initialSelection: selectedSubject,
                       onSelected: (String? value) {
                         selectedSubject = value;
-                        subjectValue = value!;
-                        subjectSelected = value;
+                        selectedTempSubject = value;
                       },
                       dropdownMenuEntries: filteredSubject
                           .toList()
@@ -233,8 +234,10 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                         trailingIcon: const Icon(Icons.arrow_drop_down),
                         initialSelection: monthValue,
                         onSelected: (String? value) {
-                          monthValue = value!;
-                          selectedTempMonth = value;
+                          setState(() {
+                            monthValue = value!;
+                            selectedTempMonth = value;
+                          });
                         },
                         dropdownMenuEntries: academicMonthsList
                             .toList()
