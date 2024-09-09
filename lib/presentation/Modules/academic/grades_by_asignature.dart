@@ -132,6 +132,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
       studentList = await getStudentsByAssinature(
           groupSelected, gradeInt, assignatureID, monthNumber, campus);
 
+      // TODO: VALIDATE IF ALL GRADES CAN GET COMMENTS
       await getCommentsForEvals(int.parse(gradeInt));
       fillGrid(studentList);
       setState(() {

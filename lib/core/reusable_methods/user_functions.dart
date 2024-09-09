@@ -160,4 +160,10 @@ dynamic changeUserActiveStatus(String employeeNum, int activeValue) async {
   }
 }
 
-dynamic isUserCoordinator(int employeeNum) async {}
+bool isCurrentUserCoordinator(int employeeNumber) {
+  var isCoordinator;
+  var response;
+  response = validateIfUserIsCoordinator(employeeNumber)
+      .whenComplete(() => isCoordinator = jsonDecode(response));
+  return isCoordinator['value'];
+}

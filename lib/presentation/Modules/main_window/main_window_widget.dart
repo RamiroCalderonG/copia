@@ -118,6 +118,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                                 Navigator.of(context).push(MaterialPageRoute(
                                     builder: (context) => const UserWindow()));
                               },
+                              tooltip: 'Consultar mi información',
                               icon: const Icon(
                                 Icons.person,
                                 size: 30,
@@ -143,24 +144,24 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                                       fontSize:
                                           20 // FlutterFlowTheme.of(context).bodyMedium,
                                       )),
-                          const Padding(
-                              padding: EdgeInsets.only(left: 15, right: 15)),
-                          IconButton(
-                              onPressed: () {},
-                              icon: const FaIcon(FontAwesomeIcons.facebookF),
-                              color: const Color.fromRGBO(235, 48, 69, 0.988)),
-                          const Padding(
-                              padding: EdgeInsets.only(left: 15, right: 15)),
-                          IconButton(
-                              onPressed: () {},
-                              icon: const FaIcon(FontAwesomeIcons.instagram),
-                              color: const Color.fromRGBO(235, 48, 69, 0.988)),
-                          const Padding(
-                              padding: EdgeInsets.only(left: 15, right: 15)),
-                          IconButton(
-                              onPressed: () {},
-                              icon: const FaIcon(FontAwesomeIcons.youtube),
-                              color: const Color.fromRGBO(235, 48, 69, 0.988)),
+                          // const Padding(
+                          //     padding: EdgeInsets.only(left: 15, right: 15)),
+                          // IconButton(
+                          //     onPressed: () {},
+                          //     icon: const FaIcon(FontAwesomeIcons.facebookF),
+                          //     color: const Color.fromRGBO(235, 48, 69, 0.988)),
+                          // const Padding(
+                          //     padding: EdgeInsets.only(left: 15, right: 15)),
+                          // IconButton(
+                          //     onPressed: () {},
+                          //     icon: const FaIcon(FontAwesomeIcons.instagram),
+                          //     color: const Color.fromRGBO(235, 48, 69, 0.988)),
+                          // const Padding(
+                          //     padding: EdgeInsets.only(left: 15, right: 15)),
+                          // IconButton(
+                          //     onPressed: () {},
+                          //     icon: const FaIcon(FontAwesomeIcons.youtube),
+                          //     color: const Color.fromRGBO(235, 48, 69, 0.988)),
 
                           const Padding(
                               padding: EdgeInsets.only(left: 15, right: 5)),

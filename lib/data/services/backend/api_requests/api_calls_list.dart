@@ -938,6 +938,23 @@ Future<dynamic> getStudentsForFodac27(
   }
 }
 
+Future<dynamic> validateIfUserIsCoordinator(int user) async {
+  try {
+    var apiCall = await Requests.get(
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/coordination/validate',
+        headers: {
+          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
+          'token': currentUser!.token
+        },
+        queryParameters: {'user': user.toString()},
+        persistCookies: false);
+    apiCall.raiseForStatus();
+    return apiCall.body;
+  } catch (e) {
+    return throw FormatException(e.toString());
+  }
+}
+
 // Future<dynamic> getUserEvents(int userId) async {
 //   var response;
 //   try {

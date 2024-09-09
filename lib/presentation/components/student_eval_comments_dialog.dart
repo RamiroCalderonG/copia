@@ -28,12 +28,29 @@ class _StudentEvalCommentDialogState extends State<StudentEvalCommentDialog> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     filteredComments =
         filterCommentsBySubject(widget.comments, widget.subjectName);
     return AlertDialog(
-      title: Text(
-          'Asigna comentarios\nAlumno: ${widget.studentName} \nMateria: ${widget.subjectName}'),
+      title: Row(
+        children: [
+          Expanded(
+              child: Container(
+                  decoration: BoxDecoration(
+                      color: FlutterFlowTheme.of(context).alternate,
+                      borderRadius: BorderRadius.circular(20)),
+                  child: Padding(
+                    padding: EdgeInsets.all(10),
+                    child: Text(
+                        'Asigna comentarios\nAlumno: ${widget.studentName} \nMateria: ${widget.subjectName} '),
+                  )))
+        ],
+      ),
       titleTextStyle: TextStyle(
           fontFamily: 'Sora',
           fontSize: 20,
@@ -46,7 +63,6 @@ class _StudentEvalCommentDialogState extends State<StudentEvalCommentDialog> {
             return StatefulBuilder(builder: (context, setState) {
               return Column(
                 children: [
-                  const Divider(),
                   ListTile(
                     title: Text(comment[
                         'commentName']), // Assuming 'comment' instead of 'comentname'
@@ -61,7 +77,8 @@ class _StudentEvalCommentDialogState extends State<StudentEvalCommentDialog> {
                               studentRateId, commentId, activevalue!);
                           setState(() => comment['active'] = newValue!);
                         }),
-                  )
+                  ),
+                  const Divider(),
                 ],
               );
             });

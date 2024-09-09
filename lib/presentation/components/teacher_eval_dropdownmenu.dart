@@ -49,6 +49,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
     unityList = widget.campusesList.toList();
     if (unityList.length == 1) {
       selectedTempCampus = unityList.first;
+      selectedUnity = unityList.first;
     }
     filterData();
     super.initState();
@@ -160,6 +161,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                       }).toList()),
                 ],
               )),
+            if (unityList.length == 1) Flexible(child: Text(unityList.first)),
 
             Flexible(
                 child: Column(
