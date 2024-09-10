@@ -132,26 +132,27 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
       studentList = await getStudentsByAssinature(
           groupSelected, gradeInt, assignatureID, monthNumber, campus);
 
-      // TODO: VALIDATE IF ALL GRADES CAN GET COMMENTS
-      await getCommentsForEvals(int.parse(gradeInt));
-      fillGrid(studentList);
-      setState(() {
-        assignatureRows.clear();
-        for (var item in studentList) {
-          assignatureRows.add(PlutoRow(cells: {
-            'Matricula': PlutoCell(value: item.studentID),
-            'Nombre': PlutoCell(value: item.studentName),
-            'Apellido paterno': PlutoCell(value: item.student1LastName),
-            'Apellido materno': PlutoCell(value: item.student2LastName),
-            'Calif': PlutoCell(value: item.evaluation),
-            'Conducta': PlutoCell(value: item.discipline),
-            'Uniforme': PlutoCell(value: item.outfit),
-            'Ausencia': PlutoCell(value: item.absence),
-            'Tareas': PlutoCell(value: item.homework),
-          }));
-        }
+      if (int.parse(gradeInt) >= 6) {
+        await getCommentsForEvals(int.parse(gradeInt));
+        fillGrid(studentList);
+        setState(() {
+          assignatureRows.clear();
+          for (var item in studentList) {
+            assignatureRows.add(PlutoRow(cells: {
+              'Matricula': PlutoCell(value: item.studentID),
+              'Nombre': PlutoCell(value: item.studentName),
+              'Apellido paterno': PlutoCell(value: item.student1LastName),
+              'Apellido materno': PlutoCell(value: item.student2LastName),
+              'Calif': PlutoCell(value: item.evaluation),
+              'Conducta': PlutoCell(value: item.discipline),
+              'Uniforme': PlutoCell(value: item.outfit),
+              'Ausencia': PlutoCell(value: item.absence),
+              'Tareas': PlutoCell(value: item.homework),
+            }));
+          }
 //                           // StudentsPlutoGrid(rows: assignatureRows);
-      });
+        });
+      }
     } catch (e) {
       if (context.mounted) {
         showErrorFromBackend(context, e.toString());
@@ -356,12 +357,14 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                                   monthsListMap, selectedCurrentTempMonth!);
                             }
 
-                            commentsAsignated =
-                                await getCommentsAsignatedToStudent(gradeInt!,
-                                    true, studentID.toString(), monthNumber);
+                            if (gradeInt! >= 6) {
+                              commentsAsignated =
+                                  await getCommentsAsignatedToStudent(gradeInt!,
+                                      true, studentID.toString(), monthNumber);
 
-                            showCommentsDialog(commentsAsignated,
-                                asignatureNameListener!, selectedStudentName);
+                              showCommentsDialog(commentsAsignated,
+                                  asignatureNameListener!, selectedStudentName);
+                            }
                           },
                           configuration: const PlutoGridConfiguration(),
                           createFooter: (stateManager) {

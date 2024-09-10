@@ -122,22 +122,24 @@ class _GradesByStudentState extends State<GradesByStudent> {
       studentList = await getSubjectsAndGradesByStudent(gradeInt.toString(),
           groupSelected, currentCycle!.claCiclo, campusSelected, monthSelected);
 
-      await getCommentsForEvals(gradeInt!);
+      if (gradeInt! >= 6) {
+        await getCommentsForEvals(gradeInt!);
 
-      fillGrid(studentList); //Fill student list by unque values
-      var studentNumber = 0;
+        fillGrid(studentList); //Fill student list by unque values
+        var studentNumber = 0;
 
-      setState(() {
-        studentEvaluationRows.clear();
-        for (var item in uniqueStudentsList) {
-          studentEvaluationRows.add(PlutoRow(cells: {
-            'No': PlutoCell(value: studentNumber + 1),
-            'studentID': PlutoCell(value: item['studentID']),
-            'studentName': PlutoCell(value: item['studentName']),
-          }));
-          studentNumber++;
-        }
-      });
+        setState(() {
+          studentEvaluationRows.clear();
+          for (var item in uniqueStudentsList) {
+            studentEvaluationRows.add(PlutoRow(cells: {
+              'No': PlutoCell(value: studentNumber + 1),
+              'studentID': PlutoCell(value: item['studentID']),
+              'studentName': PlutoCell(value: item['studentName']),
+            }));
+            studentNumber++;
+          }
+        });
+      }
     } catch (e) {
       if (context.mounted) {
         // ensures the widget is still part of the widget tree after the await
@@ -422,6 +424,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
                                                     .cells['subject_name']
                                                     ?.value
                                                     .toString();
+
                                                 await showCommentsDialog(
                                                     context,
                                                     commentsAsignated,
