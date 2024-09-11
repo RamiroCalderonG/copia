@@ -90,6 +90,30 @@ void showErrorFromBackend(BuildContext context, String errorMessage) {
       });
 }
 
+void showInformationDialog(
+    BuildContext context, String header, String bodyMessage) {
+  showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(header),
+          content: Text(bodyMessage),
+          icon: const Icon(
+            Icons.info_rounded,
+            color: Colors.amber,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cerrar'),
+            )
+          ],
+        );
+      });
+}
+
 Future<int> showDeleteConfirmationAlertDialog(BuildContext context) async {
   Completer<int> completer = Completer<int>();
   showDialog(

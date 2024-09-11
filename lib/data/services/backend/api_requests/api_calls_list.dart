@@ -1,11 +1,13 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:oxschool/core/constants/User.dart';
+import 'package:oxschool/data/Models/Employee.dart';
 
 import 'package:requests/requests.dart';
 
 // ignore: depend_on_referenced_packages
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 Future<dynamic> loginUser(var jsonBody) async {
   var apiCall = await Requests.post(
@@ -23,6 +25,23 @@ Future<dynamic> loginUser(var jsonBody) async {
     return apiCall;
     // throw FormatException(e.toString());
   }
+}
+
+void logOutUser(String token, String employee) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? device = prefs.getString('device');
+  String? ipAddres = prefs.getString('ip');
+
+  var apiCall = await Requests.post(
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/logout',
+      headers: {
+        'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
+        'token': currentUser!.token,
+      },
+      json: {'device': device, 'ip': ipAddres, 'employee': employee},
+      persistCookies: false,
+      timeoutSeconds: 10);
+  apiCall.raiseForStatus();
 }
 
 Future<dynamic> getCycle(

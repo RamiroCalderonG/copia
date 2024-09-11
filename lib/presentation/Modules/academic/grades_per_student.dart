@@ -124,22 +124,22 @@ class _GradesByStudentState extends State<GradesByStudent> {
 
       if (gradeInt! >= 6) {
         await getCommentsForEvals(gradeInt!);
-
-        fillGrid(studentList); //Fill student list by unque values
-        var studentNumber = 0;
-
-        setState(() {
-          studentEvaluationRows.clear();
-          for (var item in uniqueStudentsList) {
-            studentEvaluationRows.add(PlutoRow(cells: {
-              'No': PlutoCell(value: studentNumber + 1),
-              'studentID': PlutoCell(value: item['studentID']),
-              'studentName': PlutoCell(value: item['studentName']),
-            }));
-            studentNumber++;
-          }
-        });
       }
+
+      fillGrid(studentList); //Fill student list by unque values
+      var studentNumber = 0;
+
+      setState(() {
+        studentEvaluationRows.clear();
+        for (var item in uniqueStudentsList) {
+          studentEvaluationRows.add(PlutoRow(cells: {
+            'No': PlutoCell(value: studentNumber + 1),
+            'studentID': PlutoCell(value: item['studentID']),
+            'studentName': PlutoCell(value: item['studentName']),
+          }));
+          studentNumber++;
+        }
+      });
     } catch (e) {
       if (context.mounted) {
         // ensures the widget is still part of the widget tree after the await
@@ -418,6 +418,9 @@ class _GradesByStudentState extends State<GradesByStudent> {
                                                 );
                                               },
                                               onRowSecondaryTap: (event) async {
+                                                var gradeInt = getKeyFromValue(
+                                                    teacherGradesMap,
+                                                    selectedTempGrade!);
                                                 asignatureNameListener = '';
                                                 asignatureNameListener = event
                                                     .row
@@ -425,10 +428,17 @@ class _GradesByStudentState extends State<GradesByStudent> {
                                                     ?.value
                                                     .toString();
 
-                                                await showCommentsDialog(
-                                                    context,
-                                                    commentsAsignated,
-                                                    asignatureNameListener!);
+                                                if (gradeInt! >= 6) {
+                                                  await showCommentsDialog(
+                                                      context,
+                                                      commentsAsignated,
+                                                      asignatureNameListener!);
+                                                } else {
+                                                  showInformationDialog(
+                                                      context,
+                                                      'Aviso',
+                                                      'Sin comentarios disponibles a asignar al alumno seleccionado');
+                                                }
                                               },
                                               onLoaded: (PlutoGridOnLoadedEvent
                                                   event) {
@@ -635,8 +645,10 @@ class _GradesByStudentState extends State<GradesByStudent> {
       }
     });
 
-    commentsAsignatedList =
-        await populateAsignatedComments(gradeInt!, month, true, studentID);
+    if (gradeInt! >= 6) {
+      commentsAsignatedList =
+          await populateAsignatedComments(gradeInt!, month, true, studentID);
+    }
   }
 
   Future<List<PlutoRow>> populateAsignatedComments(

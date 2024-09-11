@@ -167,3 +167,7 @@ bool isCurrentUserCoordinator(int employeeNumber) {
       .whenComplete(() => isCoordinator = jsonDecode(response));
   return isCoordinator['value'];
 }
+
+void logOutCurrentUser(String token, String employee) {
+  logOutUser(token, employee);
+}

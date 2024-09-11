@@ -134,25 +134,25 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
 
       if (int.parse(gradeInt) >= 6) {
         await getCommentsForEvals(int.parse(gradeInt));
-        fillGrid(studentList);
-        setState(() {
-          assignatureRows.clear();
-          for (var item in studentList) {
-            assignatureRows.add(PlutoRow(cells: {
-              'Matricula': PlutoCell(value: item.studentID),
-              'Nombre': PlutoCell(value: item.studentName),
-              'Apellido paterno': PlutoCell(value: item.student1LastName),
-              'Apellido materno': PlutoCell(value: item.student2LastName),
-              'Calif': PlutoCell(value: item.evaluation),
-              'Conducta': PlutoCell(value: item.discipline),
-              'Uniforme': PlutoCell(value: item.outfit),
-              'Ausencia': PlutoCell(value: item.absence),
-              'Tareas': PlutoCell(value: item.homework),
-            }));
-          }
-//                           // StudentsPlutoGrid(rows: assignatureRows);
-        });
       }
+      fillGrid(studentList);
+      setState(() {
+        assignatureRows.clear();
+        for (var item in studentList) {
+          assignatureRows.add(PlutoRow(cells: {
+            'Matricula': PlutoCell(value: item.studentID),
+            'Nombre': PlutoCell(value: item.studentName),
+            'Apellido paterno': PlutoCell(value: item.student1LastName),
+            'Apellido materno': PlutoCell(value: item.student2LastName),
+            'Calif': PlutoCell(value: item.evaluation),
+            'Conducta': PlutoCell(value: item.discipline),
+            'Uniforme': PlutoCell(value: item.outfit),
+            'Ausencia': PlutoCell(value: item.absence),
+            'Tareas': PlutoCell(value: item.homework),
+          }));
+        }
+//                           // StudentsPlutoGrid(rows: assignatureRows);
+      });
     } catch (e) {
       if (context.mounted) {
         showErrorFromBackend(context, e.toString());
@@ -325,7 +325,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                   return StatefulBuilder(
                     builder: (context, setState) {
                       return PlutoGrid(
-                          mode: PlutoGridMode.select,
+                          mode: PlutoGridMode.normal,
                           columns: assignaturesColumns,
                           rows: assignatureRows,
                           onChanged: (event) {
@@ -364,6 +364,9 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
 
                               showCommentsDialog(commentsAsignated,
                                   asignatureNameListener!, selectedStudentName);
+                            } else {
+                              showInformationDialog(context, 'Aviso',
+                                  'Sin comentarios disponibles a asignar al alumno seleccionado');
                             }
                           },
                           configuration: const PlutoGridConfiguration(),

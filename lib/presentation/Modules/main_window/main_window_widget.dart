@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'package:oxschool/core/constants/User.dart';
 import 'package:oxschool/core/constants/url_links.dart';
+import 'package:oxschool/core/reusable_methods/user_functions.dart';
 import 'package:oxschool/core/utils/device_information.dart';
 import 'package:oxschool/presentation/Modules/user/user_view_screen.dart';
 import 'package:http/http.dart' as http;
@@ -494,6 +495,8 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
               title: const Text('Cerrar sesión'),
               leading: const Icon(Icons.exit_to_app),
               onTap: () {
+                logOutCurrentUser(
+                    currentUser!.token, currentUser!.employeeNumber.toString());
                 // Clear any necessary data or variables
                 // clearStudentData();
                 // clearUserData();

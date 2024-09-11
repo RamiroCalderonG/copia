@@ -144,6 +144,9 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
             },
         };
         currentDeviceData = deviceData.toString();
+        SharedPreferences devicePrefs = await SharedPreferences.getInstance();
+        devicePrefs.setString('device', currentDeviceData);
+        devicePrefs.setString('ip', deviceIP);
       }
     } on PlatformException {
       deviceData = <String, dynamic>{
