@@ -146,7 +146,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
         currentDeviceData = deviceData.toString();
         SharedPreferences devicePrefs = await SharedPreferences.getInstance();
         devicePrefs.setString('device', currentDeviceData);
-        devicePrefs.setString('ip', deviceIP);
+        // devicePrefs.setString('ip', deviceIP);
       }
     } on PlatformException {
       deviceData = <String, dynamic>{
@@ -197,6 +197,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
           apiBody.addEntries(device.entries);
           Map<String, dynamic> deviceIp = {'ip_address': deviceIP};
           apiBody.addEntries(deviceIp.entries);
+          SharedPreferences devicePrefs = await SharedPreferences.getInstance();
+          devicePrefs.setString('ip', deviceIP);
 
           if (value.isNotEmpty && emplNumberValue.isNotEmpty) {
             apiResponse = await loginUser(apiBody);
@@ -1142,7 +1144,8 @@ User parseLogedInUserFromJSON(List<dynamic> jsonList) {
       String claUn = jsonList[i]['ClaUn'];
       String role = jsonList[i]['RoleName'];
       int userId = jsonList[i]['id'];
-      String token = jsonList[1]['token'];
+      String token = 'Bearer ';
+      token = token + jsonList[1]['token'];
       String schoolEmail = jsonList[i]['user_email'];
       String usergenre = jsonList[i]['genre'];
       int isActive = jsonList[i]['bajalogicasino'];

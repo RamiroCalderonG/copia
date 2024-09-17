@@ -81,7 +81,7 @@ class CurrentCicleCall {
       callType: ApiCallType.GET,
       headers: {
         'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-        'token': currentUser!.token,
+        'Auth': currentUser!.token,
         'employeeNum': currentUser!.employeeNumber!.toString()
       },
       params: {},
@@ -103,7 +103,7 @@ class FamilyCall {
         callType: ApiCallType.GET,
         headers: {
           'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-          'token': currentUser!.token,
+          'Auth': currentUser!.token,
           'employeeNum': currentUser!.employeeNumber!.toString()
         },
         params: {},
@@ -125,7 +125,7 @@ class NurseryStudentCall {
       callType: ApiCallType.GET,
       headers: {
         'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-        'token': currentUser!.token,
+        'Auth': currentUser!.token,
         'employeeNum': currentUser!.employeeNumber!.toString()
       },
       params: {
@@ -152,7 +152,7 @@ class NurseryStudentMedication {
       callType: ApiCallType.GET,
       headers: {
         'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-        'token': currentUser!.token,
+        'Auth': currentUser!.token,
         'employeeNum': currentUser!.employeeNumber!.toString()
       },
       params: {"matricula": matricula},
@@ -171,7 +171,7 @@ class NurseryHistoryCall {
       callType: ApiCallType.GET,
       headers: {
         'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-        'token': currentUser!.token,
+        'Auth': currentUser!.token,
         'employeeNum': currentUser!.employeeNumber!.toString()
       },
       params: {"matricula": matricula},
@@ -191,7 +191,7 @@ class CausesCall {
       callType: ApiCallType.GET,
       headers: {
         'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-        'token': currentUser!.token,
+        'Auth': currentUser!.token,
         'employeeNum': currentUser!.employeeNumber!.toString()
       },
       params: {"ClaCausa": claCausa},
@@ -213,7 +213,7 @@ class NurseryPainListCall {
         callType: ApiCallType.GET,
         headers: {
           'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-          'token': currentUser!.token,
+          'Auth': currentUser!.token,
           'employeeNum': currentUser!.employeeNumber!.toString()
         },
         params: {},
@@ -233,7 +233,7 @@ class NurseryWoundsCall {
       callType: ApiCallType.GET,
       headers: {
         'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-        'token': currentUser!.token,
+        'Auth': currentUser!.token,
         'employeeNum': currentUser!.employeeNumber!.toString()
       },
       params: {},
@@ -258,7 +258,7 @@ class EmployeeCall {
         callType: ApiCallType.GET,
         headers: {
           'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-          'token': currentUser!.token,
+          'Auth': currentUser!.token,
           'employeeNum': currentUser!.employeeNumber!.toString()
         },
         params: {
@@ -290,7 +290,7 @@ class TeacherCall {
         callType: ApiCallType.GET,
         headers: {
           'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-          'token': currentUser!.token,
+          'Auth': currentUser!.token,
           'employeeNum': currentUser!.employeeNumber!.toString()
         },
         params: {
@@ -319,7 +319,7 @@ class POSTNurseryStudentVisit {
       callType: ApiCallType.POST,
       headers: {
         'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-        'token': currentUser!.token,
+        'Auth': currentUser!.token,
         'employeeNum': currentUser!.employeeNumber!.toString()
       },
       bodyType: BodyType.JSON,
