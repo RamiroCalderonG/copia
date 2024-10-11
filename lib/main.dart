@@ -7,28 +7,28 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 // ignore: depend_on_referenced_packages
 import 'package:flutter_web_plugins/url_strategy.dart';
 import "package:window_size/window_size.dart";
-import 'flutter_flow/flutter_flow_theme.dart';
-import 'flutter_flow/flutter_flow_util.dart';
-import 'flutter_flow/internationalization.dart';
-import 'flutter_flow/nav/nav.dart';
+import 'core/config/flutter_flow/flutter_flow_theme.dart';
+import 'core/config/flutter_flow/flutter_flow_util.dart';
+import 'core/config/flutter_flow/internationalization.dart';
+import 'core/config/flutter_flow/nav/nav.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   usePathUrlStrategy();
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-    setWindowMinSize(const Size(580, 500));
+    setWindowMinSize(const Size(600, 500));
   }
 
   await FlutterFlowTheme.initialize();
-  await dotenv.load(fileName: "lib/oxschool.env");
+  await dotenv.load(fileName: "lib/core/config/oxschool.env");
 
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
-// ignore: use_key_in_widget_constructors
 class MyApp extends StatefulWidget {
-  // This widget is the root of your application.
+  const MyApp({super.key});
+
   @override
   State<MyApp> createState() => _MyAppState();
 
