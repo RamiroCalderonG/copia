@@ -8,6 +8,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:oxschool/data/Models/Cycle.dart';
+import 'package:oxschool/data/Models/Logger.dart';
 import 'package:oxschool/data/Models/User.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
 import 'package:oxschool/core/constants/User.dart';
@@ -15,6 +16,8 @@ import 'package:flutter/material.dart';
 import 'package:oxschool/core/constants/connection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/reusable_methods/logger_actions.dart';
+import '../../../core/reusable_methods/translate_messages.dart';
 import '../../components/confirm_dialogs.dart';
 import '../../components/custom_scaffold_messenger.dart';
 
@@ -248,12 +251,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
             } else {
               Map<String, dynamic> jsonMap = jsonDecode(apiResponse.body);
               String description = jsonMap['description'];
-              // Map<dynamic, String> response = {
-              //   apiResponse.statusCode: description
-              // };
+
               showErrorFromBackend(context, description);
-              // ScaffoldMessenger.of(context).showSnackBar(
-              //     customScaffoldMesg(context, response.toString(), null));
             }
 
             setState(() {});
@@ -266,11 +265,13 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
           setState(() {
             isLoading = false;
           });
-          // _model.textController2.text = '';
+          insertErrorLog(e.toString(), e.toString());
+          var displayMessage = e.toString().split(" ").elementAt(0);
+          displayMessage = getMessageToDisplay(displayMessage.toString());
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                e.toString(),
+                displayMessage,
                 style: FlutterFlowTheme.of(context).labelMedium.override(
                       fontFamily: 'Roboto',
                       color: const Color(0xFF130C0D),
@@ -290,11 +291,12 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
           );
         }
       } else {
+        insertAlertLog('ANTISPAM ACTIVATED ON: LOGIN SCREEN');
         // Show a message to the user
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
               content: Text(
-            'Por favor espere ${remainingTime ~/ 60}:${(remainingTime % 60).toString().padLeft(2, '0')} minutos antes de volver a intentar',
+            'Por favor, espere ${remainingTime ~/ 60}:${(remainingTime % 60).toString().padLeft(2, '0')} minutos antes de volver a intentar, Code: 429',
             style: const TextStyle(
                 fontSize: 15, fontWeight: FontWeight.bold, fontFamily: 'Sora'),
           )),
@@ -469,6 +471,11 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                       '' &&
                                                   _model.textController2.text !=
                                                       '') {
+                                                insertActionIntoLog(
+                                                    'LOG IN BY: ',
+                                                    _model
+                                                        .textController1.text);
+
                                                 setState(() {
                                                   isLoading = true;
                                                 });
@@ -480,6 +487,9 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                 setState(() {
                                                   isLoading = false;
                                                 });
+                                                showEmptyFieldAlertDialog(
+                                                    context,
+                                                    'Verificar información, usuario y/o contraseña no pueden estar en blanco');
                                               }
                                             },
                                             controller: _model.textController2,
@@ -559,17 +569,40 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                               .fromSTEB(0.0, 0.0, 0.0, 16.0),
                                           child: FFButtonWidget(
                                             onPressed: () async {
-                                              setState(() {
-                                                isLoading = true;
-                                              });
-                                              ScaffoldMessenger.of(context)
-                                                  .hideCurrentSnackBar();
-                                              await loginButtonFunction()
-                                                  .whenComplete(() {
+                                              if (_model.textController1.text !=
+                                                      '' &&
+                                                  _model.textController2.text !=
+                                                      '') {
+                                                ScaffoldMessenger.of(context)
+                                                    .hideCurrentSnackBar();
+                                                await loginButtonFunction()
+                                                    .whenComplete(() {
+                                                  setState(() {
+                                                    isLoading = false;
+                                                  });
+                                                });
+                                              } else {
                                                 setState(() {
                                                   isLoading = false;
                                                 });
-                                              });
+                                                showEmptyFieldAlertDialog(
+                                                    context,
+                                                    'Verificar información, usuario y/o contraseña no pueden estar en blanco');
+                                              }
+                                              // setState(() {
+                                              //   isLoading = true;
+                                              // });
+                                              // ScaffoldMessenger.of(context)
+                                              //     .hideCurrentSnackBar();
+                                              // insertActionIntoLog('LOG IN BY: ',
+                                              //     _model.textController1.text);
+                                              // revealLoggerFileLocation();
+                                              // await loginButtonFunction()
+                                              //     .whenComplete(() {
+                                              //   setState(() {
+                                              //     isLoading = false;
+                                              //   });
+                                              // });
                                             },
                                             text: 'Ingresar',
                                             options: FFButtonOptions(
@@ -824,6 +857,10 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                 setState(() {
                                                   isLoading = false;
                                                 });
+                                                insertActionIntoLog(
+                                                    'LOG IN BY: ',
+                                                    _model
+                                                        .textController1.text);
                                               }
                                             },
                                             controller: _model.textController2,

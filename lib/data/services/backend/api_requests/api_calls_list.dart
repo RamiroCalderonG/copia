@@ -1,7 +1,11 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:oxschool/core/constants/User.dart';
-
+import 'package:oxschool/core/reusable_methods/logger_actions.dart';
+import 'package:oxschool/core/reusable_methods/translate_messages.dart';
 import 'package:requests/requests.dart';
 
 // ignore: depend_on_referenced_packages
@@ -573,6 +577,13 @@ Future<dynamic> getTeacherGradeAndCourses(var employee, var year) async {
       return throw FormatException(apiCall.body);
     }
   } catch (e) {
+    if (e is TimeoutException) {
+      var firstWord = e.toString().split(" ").elementAt(0);
+      firstWord = getMessageToDisplay(firstWord);
+      insertErrorLog(e.toString(), 'acad/teacher/start-student-rating');
+      return throw firstWord;
+    }
+
     return throw FormatException(e.toString());
   }
 }
@@ -894,7 +905,26 @@ Future<dynamic> getActualDate() async {
     apiCall.raiseForStatus();
     return apiCall.body;
   } catch (e) {
-    return throw FormatException(e.toString());
+    // Check if error response contains a message
+    if (e is HTTPException) {
+      // If the API returns a JSON error, try to extract the message
+      try {
+        var errorResponse = jsonDecode(e.response.body);
+        if (errorResponse.containsKey('message')) {
+          print(errorResponse);
+          return errorResponse['message']; // Return only the message
+        } else {
+          return 'An unknown error occurred'; // Default message if no 'message' key
+        }
+      } catch (jsonError) {
+        return 'Failed to parse error response';
+      }
+    } else if (e is TimeoutException) {
+      var firstWord = e.toString().split(" ").elementAt(0);
+      firstWord = getMessageToDisplay(firstWord);
+    } else {
+      return 'Request failed: ${e.toString()}'; // General error handling
+    }
   }
 }
 

@@ -5,8 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import 'package:oxschool/core/constants/User.dart';
+import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/core/reusable_methods/user_functions.dart';
-import 'package:oxschool/data/datasources/temp/users_temp_data.dart';
+
 import 'package:oxschool/presentation/components/custom_icon_button.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
@@ -51,7 +52,7 @@ class _FoDac27State extends State<FoDac27> {
   @override
   void initState() {
     isUserAdmin = verifyUserAdmin(currentUser!);
-    populateStudentsDropDownMenu();
+    // populateStudentsDropDownMenu();
     super.initState();
   }
 
@@ -125,11 +126,16 @@ class _FoDac27State extends State<FoDac27> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-          if (isLoading) {
-            return CustomLoadingIndicator();
+    return FutureBuilder(
+        future: populateStudentsDropDownMenu(),
+        builder: ((context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CustomLoadingIndicator());
+          } else if (snapshot.hasError) {
+            insertErrorLog(snapshot.error.toString(), 'LOADING FODAC_27');
+            return Center(child: Text('error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data == null) {
+            return const Center(child: Text('Sin información disponible'));
           } else {
             return Column(
               children: [
@@ -138,9 +144,24 @@ class _FoDac27State extends State<FoDac27> {
               ],
             );
           }
-        },
-      ),
-    );
+        }));
+
+    // SafeArea(
+    //   child: LayoutBuilder(
+    //     builder: (BuildContext context, BoxConstraints constraints) {
+    //       if (isLoading) {
+    //         return CustomLoadingIndicator();
+    //       } else {
+    //         return Column(
+    //           children: [
+    //             buildStudentSelector(),
+    //             Expanded(child: buildPlutoGrid()),
+    //           ],
+    //         );
+    //       }
+    //     },
+    //   ),
+    // );
   }
 
   Widget buildStudentSelector() {
@@ -187,146 +208,11 @@ class _FoDac27State extends State<FoDac27> {
                         }
                       }
                     })
-
-                  //                 DeleteItemButton(
-                  //                   onPressed: () async {
-                  //                     if (selectedEvalID == 0) {
-                  //                       const AlertDialog(
-                  //                         title: Text('Error'),
-                  //                         content: Text(
-                  //                             'Primero selecciona un registro para editar'),
-                  //                       );
                 ],
               )),
         ],
       ),
     );
-    // Padding(
-    //   padding: const EdgeInsets.only(left: 2, right: 30, top: 20, bottom: 10),
-    //   child: Row(
-    //     mainAxisAlignment: MainAxisAlignment.spaceAround,
-    //     children: [
-    //       Column
-    //       const Fodac27MenuSelector(),
-    //       const Spacer(), // add a spacer to push the RefreshButton to the end
-    //       Column(
-    //         mainAxisSize: MainAxisSize.min,
-    //         children: [
-    //
-    //         ],
-    //       ),
-    //     ],
-    //   ),
-    // );
-
-    //       Padding(
-    //     padding: const EdgeInsets.only(left: 10, right: 10, top: 20),
-    //     child: Row(
-    //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-    //       children: [
-    //         Flexible(
-    //           child: DropdownMenu<String>(
-    //             controller: studentSelectorController,
-    //             enableFilter: true,
-    //             requestFocusOnTap: true,
-    //             leadingIcon: const Icon(Icons.search),
-    //             // trailingIcon: IconButton(
-    //             //   onPressed: studentSelectorController.clear,
-    //             //   icon: const Icon(Icons.clear),
-    //             // ),
-    //             label: const Text('Alumno'),
-    //             inputDecorationTheme: const InputDecorationTheme(
-    //               filled: true,
-    //               contentPadding: EdgeInsets.symmetric(vertical: 5.0),
-    //             ),
-    //             onSelected: (student) {
-    //               if (student != null) {
-    //                 setState(() {
-    //                   selectedStudent = student;
-    //                   selectedstudentId = getStudentIdByName(student);
-    //                   if (selectedstudentId != null) {
-    //                     populateGrid(
-    //                         selectedstudentId!, currentCycle!.claCiclo!, true);
-    //                   }
-    //                 });
-    //               }
-    //             },
-    //             dropdownMenuEntries: simplifiedStudentsList
-    //                 .map<DropdownMenuEntry<String>>((e) => DropdownMenuEntry(
-    //                     leadingIcon: const Icon(Icons.circle, size: 5),
-    //                     value: e['name'],
-    //                     label: e['name']
-    //                     // +
-    //                     //     '  |  ' +
-    //                     //     e['grade'].toString() +
-    //                     //     e['group'] +
-    //                     //     '  |  ' +
-    //                     //     e['campus'],
-    //                     ))
-    //                 .toList(),
-    //           ),
-    //         ),
-    //         Flexible(
-    //           child: Row(
-    //             mainAxisAlignment: MainAxisAlignment.end,
-    //             children: [
-    //               AddItemButton(onPressed: handleAddItem),
-    //               EditItemButton(
-    //                 onPressed: () {
-    //                   if (selectedEvalID == 0) {
-    //                     const AlertDialog(
-    //                       title: Text('Error'),
-    //                       content:
-    //                           Text('Primero selecciona un registro para editar'),
-    //                     );
-    //                   } else {
-    //                     showDialog(
-    //                         context: context,
-    //                         builder: (BuildContext context) {
-    //                           return EditCommentScreen(
-    //                             id: selectedEvalID,
-    //                             comment: selectedCommentToEdit,
-    //                             date: selectedDateToEdit,
-    //                             selectedSubject: selectedSubjectNameToEdit,
-    //                             studentID: selectedStudentIdToEdit,
-    //                           );
-    //                         });
-    //                   }
-    //                 },
-    //               ),
-    //               // exportToExcel,
-    //               RefreshButton(onPressed: handleRefresh),
-    //               if (isUserAdmin)
-    //                 DeleteItemButton(
-    //                   onPressed: () async {
-    //                     if (selectedEvalID == 0) {
-    //                       const AlertDialog(
-    //                         title: Text('Error'),
-    //                         content: Text(
-    //                             'Primero selecciona un registro para editar'),
-    //                       );
-    //                     } else {
-    //                       int confirmation =
-    //                           await showDeleteConfirmationAlertDialog(context);
-
-    //                       if (confirmation == 1) {
-    //                         int response = await deleteAction(selectedEvalID);
-    //                         if (response == 200) {
-    //                           if (mounted) {
-    //                             await showConfirmationDialog(
-    //                                 context, 'Realizado', 'Registro eliminado');
-    //                           }
-    //                         }
-    //                       }
-    //                     }
-    //                   },
-    //                 ),
-    //             ],
-    //           ),
-    //         ),
-    //       ],
-    //     ),
-    //   );
   }
 
   Widget buildPlutoGrid() {
@@ -424,7 +310,7 @@ class _FoDac27State extends State<FoDac27> {
     }
   }
 
-  Future<void> populateStudentsDropDownMenu() async {
+  dynamic populateStudentsDropDownMenu() async {
     String userRole = currentUser!.role;
 
     simplifiedStudentsList = await getStudentsByTeacher(

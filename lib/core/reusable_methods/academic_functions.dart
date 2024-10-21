@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 
 import 'package:oxschool/data/Models/Student_eval.dart';
 import 'package:oxschool/core/constants/User.dart';
@@ -31,6 +32,7 @@ dynamic loadStartGrading(int employeeNumber, String schoolYear) async {
       throw FormatException(e.toString());
     }
   } catch (e) {
+    insertErrorLog(e.toString(), ' INIT STUDENT EVALUATION GRID ');
     throw FormatException(e.toString());
   }
 }
@@ -413,15 +415,20 @@ int validateNewGradeValue(int newValue, String columnNameToFind) {
 Future<bool> isDateToEvaluateStudents() async {
   try {
     var originDate = await getActualDate();
-    List<dynamic> parsedJson = json.decode(originDate);
-    bool dateValue = parsedJson[0]['date'];
-    if (dateValue) {
-      return true;
+    if (originDate != null) {
+      List<dynamic> parsedJson = json.decode(originDate);
+      bool dateValue = parsedJson[0]['date'];
+      if (dateValue) {
+        return true;
+      } else {
+        return false;
+      }
     } else {
       return false;
     }
   } catch (e) {
-    return throw FormatException(e.toString());
+    insertErrorLog(e.toString(), 'FETCH DATE FOR STUDENT EVALUATION');
+    return throw e.toString();
   }
 }
 

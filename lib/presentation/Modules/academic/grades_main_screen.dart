@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:oxschool/core/reusable_methods/logger_actions.dart';
+import 'package:oxschool/core/reusable_methods/translate_messages.dart';
 import 'package:oxschool/presentation/Modules/academic/fo_dac_27.dart';
 import 'package:oxschool/presentation/Modules/academic/grades_by_asignature.dart';
 import 'package:oxschool/core/constants/User.dart';
+import 'package:oxschool/presentation/components/confirm_dialogs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/config/flutter_flow/flutter_flow_theme.dart';
@@ -24,9 +27,11 @@ class _GradesMainScreenState extends State<GradesMainScreen>
 
   late final TabController _tabController;
   bool isSearching = false; // Add a state variable to track search status
-  bool canEvaluateNow = false;
-  bool canUserEvaluate = false;
+  // bool canEvaluateNow =
+  //     false; //Evaluate if current dates are available for evaluations
+  bool canUserEvaluate = false; //Evaluate if current user have any data
   bool displayEvaluateGrids = false;
+  bool isUserAdmin = false;
 
   onTap() {
     isSearching = false;
@@ -34,15 +39,11 @@ class _GradesMainScreenState extends State<GradesMainScreen>
 
   @override
   void initState() {
-    _tabController = TabController(length: 3, vsync: this);
-    initGetDate();
     initSharedPref();
-    // validateDateAndUserPriv();
-    // _tabController = TabController(vsync: this, length: nurseryTabs.length);
+    initGetDate();
+    _tabController = TabController(length: 3, vsync: this);
     _tabController.addListener(onTap);
-
     loadStartGrading(currentUser!.employeeNumber!, currentCycle!.claCiclo!);
-
     super.initState();
   }
 
@@ -74,19 +75,27 @@ class _GradesMainScreenState extends State<GradesMainScreen>
     studentGradesBodyToUpgrade.clear();
     campusesWhereTeacherTeach.clear();
     selectedUnity = null;
-    removeSharedPref();
     // assignaturesColumns.clear();
     super.dispose();
   }
 
   void initGetDate() async {
-    canEvaluateNow = await isDateToEvaluateStudents();
+    try {
+      var canEvaluateNow = await isDateToEvaluateStudents();
+      setState(() {
+        canUserEvaluate = canEvaluateNow;
+      });
+      validateDateAndUserPriv();
+    } catch (e) {
+      if (context.mounted) {
+        insertErrorLog(e.toString(), 'VALIDATE DATE FOR STUDENT EVAL');
+        var displayMessage = e.toString().split(" ").elementAt(1);
+        displayMessage = getMessageToDisplay(displayMessage.toString());
 
-    setState(() {
-      canUserEvaluate = canEvaluateNow;
-    });
-
-    validateDateAndUserPriv();
+        // ensures the widget is still part of the widget tree after the await
+        showErrorFromBackend(context, displayMessage.toString());
+      }
+    }
   }
 
   void validateDateAndUserPriv() {
@@ -158,16 +167,11 @@ class _GradesMainScreenState extends State<GradesMainScreen>
                 )),
               ));
   }
-}
 
-void initSharedPref() async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  bool isUserAdmin = verifyUserAdmin(currentUser!);
-
-  await prefs.setBool('isUserAdmin', isUserAdmin);
-}
-
-void removeSharedPref() async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  await prefs.remove('isUserAdmin');
+  void initSharedPref() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      isUserAdmin = prefs.getBool('isUserAdmin')!;
+    });
+  }
 }

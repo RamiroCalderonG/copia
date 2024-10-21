@@ -9,7 +9,9 @@ import 'package:oxschool/core/utils/device_information.dart';
 import 'package:oxschool/presentation/Modules/user/user_view_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/reusable_methods/logger_actions.dart';
 import '../services_ticket/processes/create_service_ticket.dart';
 import '../../../core/constants/screens.dart';
 import '../../components/quality_dialogs.dart';
@@ -41,6 +43,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
     currentUser?.clear();
     eventsList?.clear();
     deviceData.clear();
+    removeSharedPref();
 
     // clearUserData();
 
@@ -53,6 +56,20 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
     _model = createModel(context, () => MainWindowModel());
 
     WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {}));
+    insertAlertLog('USER LOGED IN: ${currentUser!.employeeNumber.toString()}');
+  }
+
+  void removeSharedPref() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('isUserAdmin');
+    await prefs.clear();
+  }
+
+  void saveUserRoleToSharedPref() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var isUserAdmin = verifyUserAdmin(currentUser!); //Retrives user role
+
+    await prefs.setBool('isUserAdmin', isUserAdmin);
   }
 
   final ExpansionTileController controller =

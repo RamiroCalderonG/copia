@@ -12,6 +12,9 @@ import 'package:oxschool/data/datasources/temp/teacher_grades_temp.dart';
 
 import 'package:pluto_grid/pluto_grid.dart';
 
+import '../../../core/reusable_methods/logger_actions.dart';
+import '../../../core/reusable_methods/translate_messages.dart';
+import '../../../core/utils/loader_indicator.dart';
 import '../../../data/datasources/temp/studens_temp.dart';
 import '../../../data/services/backend/api_requests/api_calls_list.dart';
 import '../../../core/constants/Student.dart';
@@ -142,8 +145,12 @@ class _GradesByStudentState extends State<GradesByStudent> {
       });
     } catch (e) {
       if (context.mounted) {
+        insertErrorLog(e.toString(), 'SEARCH STUDENTS');
+        var displayMessage = e.toString().split(" ").elementAt(0);
+        displayMessage = getMessageToDisplay(displayMessage.toString());
+
         // ensures the widget is still part of the widget tree after the await
-        showErrorFromBackend(context, e.toString());
+        showErrorFromBackend(context, displayMessage.toString());
       }
     }
   }
@@ -164,7 +171,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
           currentUser!.employeeNumber!, currentCycle!.toString()),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return Center(child: CustomLoadingIndicator());
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data == null) {

@@ -55,16 +55,17 @@ dynamic searchValueByKey(List<Map<String, dynamic>> list, String key, keytitle,
   return null; // Value not found
 }
 
-List<String> splitAndAddToList(String input) {
-  final List<String> result = [];
-  final List<String> words = input.replaceAll(RegExp(r'[\[\]]'), '').split(',');
+//
+// List<String> splitAndAddToList(String input) {
+//   final List<String> result = [];
+//   final List<String> words = input.replaceAll(RegExp(r'[\[\]]'), '').split(',');
 
-  for (final word in words) {
-    final trimmedWord = word.trim();
-    if (trimmedWord.isNotEmpty) {
-      result.add(trimmedWord);
-    }
-  }
+//   for (final word in words) {
+//     final trimmedWord = word.trim();
+//     if (trimmedWord.isNotEmpty) {
+//       result.add(trimmedWord);
+//     }
+//   }
 
-  return result;
-}
+//   return result;
+// }
