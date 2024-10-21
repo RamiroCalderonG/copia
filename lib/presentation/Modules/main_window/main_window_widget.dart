@@ -43,7 +43,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
     currentUser?.clear();
     eventsList?.clear();
     deviceData.clear();
-    removeSharedPref();
+    
 
     // clearUserData();
 
@@ -54,16 +54,12 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => MainWindowModel());
-
+    saveUserRoleToSharedPref();
     WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {}));
     insertAlertLog('USER LOGED IN: ${currentUser!.employeeNumber.toString()}');
   }
 
-  void removeSharedPref() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove('isUserAdmin');
-    await prefs.clear();
-  }
+
 
   void saveUserRoleToSharedPref() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();

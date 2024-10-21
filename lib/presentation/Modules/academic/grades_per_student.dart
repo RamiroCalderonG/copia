@@ -40,7 +40,6 @@ List<PlutoRow> rows = [];
 class _GradesByStudentState extends State<GradesByStudent> {
   var commentsController = TextEditingController();
   late PlutoGridStateManager stateManager;
-
   late PlutoGridStateManager gridAStateManager;
 
   Key? currentRowKey;
@@ -50,27 +49,29 @@ class _GradesByStudentState extends State<GradesByStudent> {
 
   String dropDownValue = ''; //oneTeacherAssignatures.first;
   int? assignatureID;
+  late Future<dynamic> _fetchedDataFromRequest;
+
 
   String? selectedStudentID;
 
   @override
   void initState() {
-    loadStartGrading(currentUser!.employeeNumber!, currentCycle!.claCiclo!);
+    //loadStartGrading(currentUser!.employeeNumber!, currentCycle!.claCiclo!);
     super.initState();
   }
 
   @override
   void dispose() {
-    studentsGradesCommentsRows.clear();
-    evaluationComments.clear();
-    commentStringEval.clear();
+    //studentsGradesCommentsRows.clear();
+    //evaluationComments.clear();
+    //commentStringEval.clear();
     _debounce?.cancel();
-    selectedTempGrade = null;
-    selectedTempGroup = null;
-    selectedTempStudent = null;
-    selectedTempCampus = null;
-    selectedTempMonth = null;
-    selectedCurrentTempMonth = null;
+    //selectedTempGrade = null;
+    //selectedTempGroup = null;
+    //selectedTempStudent = null;
+    //selectedTempCampus = null;
+    //selectedTempMonth = null;
+    //selectedCurrentTempMonth = null;
     super.dispose();
   }
 
@@ -167,7 +168,8 @@ class _GradesByStudentState extends State<GradesByStudent> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: loadStartGrading(
+      future: 
+      loadStartGrading(
           currentUser!.employeeNumber!, currentCycle!.toString()),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {

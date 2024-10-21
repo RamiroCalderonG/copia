@@ -25,7 +25,7 @@ class _GradesMainScreenState extends State<GradesMainScreen>
     with TickerProviderStateMixin {
   bool showGrid = false; // Flag to control grid visibility
 
-  late final TabController _tabController;
+  TabController? _tabController; 
   bool isSearching = false; // Add a state variable to track search status
   // bool canEvaluateNow =
   //     false; //Evaluate if current dates are available for evaluations
@@ -33,18 +33,17 @@ class _GradesMainScreenState extends State<GradesMainScreen>
   bool displayEvaluateGrids = false;
   bool isUserAdmin = false;
 
+
   onTap() {
     isSearching = false;
   }
 
   @override
   void initState() {
-    initSharedPref();
-    initGetDate();
-    _tabController = TabController(length: 3, vsync: this);
-    _tabController.addListener(onTap);
-    loadStartGrading(currentUser!.employeeNumber!, currentCycle!.claCiclo!);
     super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+    _tabController!.addListener(onTap);
+   fetchData();
   }
 
   @override
@@ -77,6 +76,12 @@ class _GradesMainScreenState extends State<GradesMainScreen>
     selectedUnity = null;
     // assignaturesColumns.clear();
     super.dispose();
+  }
+
+  void fetchData(){
+     initSharedPref();
+    initGetDate();
+    loadStartGrading(currentUser!.employeeNumber!, currentCycle!.claCiclo!);
   }
 
   void initGetDate() async {
@@ -115,6 +120,8 @@ class _GradesMainScreenState extends State<GradesMainScreen>
 
   @override
   Widget build(BuildContext context) {
+  //_tabController = TabController(length: 3, vsync: this);
+  
     return Scaffold(
         appBar: AppBar(
           actions: const [],
@@ -148,6 +155,7 @@ class _GradesMainScreenState extends State<GradesMainScreen>
         ),
         body: displayEvaluateGrids
             ? TabBarView(
+              key: const PageStorageKey('value'),
                 controller: _tabController,
                 children: const <Widget>[
                   GradesByAsignature(),

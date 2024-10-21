@@ -142,7 +142,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   DropdownMenu<String>(
-                      label: const Text(' Campus '),
+                      label: const Text(' Campus ', style: TextStyle(fontSize: 14),),
                       trailingIcon: const Icon(Icons.arrow_drop_down),
                       initialSelection: selectedUnity,
                       onSelected: (String? value) {
@@ -168,7 +168,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 DropdownMenu<String>(
-                    label: const Text(' Grado '),
+                    label: const Text(' Grado ', style: TextStyle(fontSize: 14),),
                     trailingIcon: const Icon(Icons.arrow_drop_down),
                     initialSelection: selectedGrade,
                     onSelected: (String? value) {
@@ -189,7 +189,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 DropdownMenu<String>(
-                    label: const Text(' Grupo '),
+                    label: const Text(' Grupo ', style: TextStyle(fontSize: 14)),
                     trailingIcon: const Icon(Icons.arrow_drop_down),
                     initialSelection: selectedGroup,
                     onSelected: (String? value) {
@@ -210,7 +210,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   DropdownMenu<String>(
-                      label: const Text(' Materia '),
+                      label: const Text(' Materia ', style: TextStyle(fontSize: 14)),
                       trailingIcon: const Icon(Icons.arrow_drop_down),
                       initialSelection: selectedSubject,
                       onSelected: (String? value) {

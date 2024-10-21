@@ -7,6 +7,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 // ignore: depend_on_referenced_packages
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:oxschool/data/Models/Logger.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import "package:window_size/window_size.dart";
 import 'core/config/flutter_flow/flutter_flow_theme.dart';
 import 'core/config/flutter_flow/flutter_flow_util.dart';
@@ -56,6 +57,12 @@ class _MyAppState extends State<MyApp> {
     _router = createRouter(_appStateNotifier);
   }
 
+  @override
+  void dispose(){
+    removeSharedPref();
+    super.dispose();
+  }
+
   void setLocale(String language) {
     setState(() => _locale = createLocale(language));
   }
@@ -64,6 +71,12 @@ class _MyAppState extends State<MyApp> {
         _themeMode = mode;
         FlutterFlowTheme.saveThemeMode(mode);
       });
+
+        void removeSharedPref() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('isUserAdmin');
+    await prefs.clear();
+  }
 
   @override
   Widget build(BuildContext context) {
