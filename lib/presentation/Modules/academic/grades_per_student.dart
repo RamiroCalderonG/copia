@@ -12,6 +12,9 @@ import 'package:oxschool/data/datasources/temp/teacher_grades_temp.dart';
 
 import 'package:pluto_grid/pluto_grid.dart';
 
+import '../../../core/reusable_methods/logger_actions.dart';
+import '../../../core/reusable_methods/translate_messages.dart';
+import '../../../core/utils/loader_indicator.dart';
 import '../../../data/datasources/temp/studens_temp.dart';
 import '../../../data/services/backend/api_requests/api_calls_list.dart';
 import '../../../core/constants/Student.dart';
@@ -37,7 +40,6 @@ List<PlutoRow> rows = [];
 class _GradesByStudentState extends State<GradesByStudent> {
   var commentsController = TextEditingController();
   late PlutoGridStateManager stateManager;
-
   late PlutoGridStateManager gridAStateManager;
 
   Key? currentRowKey;
@@ -47,27 +49,29 @@ class _GradesByStudentState extends State<GradesByStudent> {
 
   String dropDownValue = ''; //oneTeacherAssignatures.first;
   int? assignatureID;
+  late Future<dynamic> _fetchedDataFromRequest;
+
 
   String? selectedStudentID;
 
   @override
   void initState() {
-    loadStartGrading(currentUser!.employeeNumber!, currentCycle!.claCiclo!);
+    //loadStartGrading(currentUser!.employeeNumber!, currentCycle!.claCiclo!);
     super.initState();
   }
 
   @override
   void dispose() {
-    studentsGradesCommentsRows.clear();
-    evaluationComments.clear();
-    commentStringEval.clear();
+    //studentsGradesCommentsRows.clear();
+    //evaluationComments.clear();
+    //commentStringEval.clear();
     _debounce?.cancel();
-    selectedTempGrade = null;
-    selectedTempGroup = null;
-    selectedTempStudent = null;
-    selectedTempCampus = null;
-    selectedTempMonth = null;
-    selectedCurrentTempMonth = null;
+    //selectedTempGrade = null;
+    //selectedTempGroup = null;
+    //selectedTempStudent = null;
+    //selectedTempCampus = null;
+    //selectedTempMonth = null;
+    //selectedCurrentTempMonth = null;
     super.dispose();
   }
 
@@ -142,8 +146,12 @@ class _GradesByStudentState extends State<GradesByStudent> {
       });
     } catch (e) {
       if (context.mounted) {
+        insertErrorLog(e.toString(), 'SEARCH STUDENTS');
+        var displayMessage = e.toString().split(" ").elementAt(0);
+        displayMessage = getMessageToDisplay(displayMessage.toString());
+
         // ensures the widget is still part of the widget tree after the await
-        showErrorFromBackend(context, e.toString());
+        showErrorFromBackend(context, displayMessage.toString());
       }
     }
   }
@@ -160,11 +168,12 @@ class _GradesByStudentState extends State<GradesByStudent> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: loadStartGrading(
+      future: 
+      loadStartGrading(
           currentUser!.employeeNumber!, currentCycle!.toString()),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return Center(child: CustomLoadingIndicator());
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data == null) {
