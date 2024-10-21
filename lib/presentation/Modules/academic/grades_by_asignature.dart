@@ -1,12 +1,17 @@
 // ignore_for_file: constant_identifier_names, prefer_typing_uninitialized_variables
 
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:oxschool/core/constants/User.dart';
 import 'package:oxschool/core/reusable_methods/reusable_functions.dart';
+import 'package:oxschool/core/reusable_methods/translate_messages.dart';
 import 'package:oxschool/presentation/components/custom_icon_button.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/reusable_methods/logger_actions.dart';
+import '../../../core/utils/loader_indicator.dart';
 import '../../../data/Models/Student_eval.dart';
 
 import '../../../data/datasources/temp/studens_temp.dart';
@@ -154,8 +159,11 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
 //                           // StudentsPlutoGrid(rows: assignatureRows);
       });
     } catch (e) {
+      insertErrorLog(e.toString(), 'SEARCH STUDENTS ');
+      var message = e.toString().split(" ").elementAt(0);
+      message = getMessageToDisplay(message);
       if (context.mounted) {
-        showErrorFromBackend(context, e.toString());
+        showErrorFromBackend(context, message.toString());
       }
     }
   }
@@ -181,11 +189,15 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
           currentUser!.employeeNumber!, currentCycle!.toString()),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return Center(child: CustomLoadingIndicator());
         } else if (snapshot.hasError) {
+          // var message = snapshot.error.toString().split(" ").elementAt(1);
+          // var message = getMessageToDisplay(message);
+          insertErrorLog(
+              snapshot.error.toString(), ' INIT GRADES/EVAL SCREEN ');
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data == null) {
-          return const Center(child: Text('No data available'));
+          return const Center(child: Text('Sin información disponible'));
         } else {
           return Stack(
             children: [
