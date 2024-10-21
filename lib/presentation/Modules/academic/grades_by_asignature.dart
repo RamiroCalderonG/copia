@@ -1,12 +1,15 @@
 // ignore_for_file: constant_identifier_names, prefer_typing_uninitialized_variables
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:oxschool/core/constants/User.dart';
 import 'package:oxschool/core/reusable_methods/reusable_functions.dart';
+import 'package:oxschool/core/utils/loader_indicator.dart';
 import 'package:oxschool/presentation/components/custom_icon_button.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/config/flutter_flow/flutter_flow_widgets.dart';
 import '../../../data/Models/Student_eval.dart';
 
 import '../../../data/datasources/temp/studens_temp.dart';
@@ -55,6 +58,8 @@ bool isUserAdmin = verifyUserAdmin(currentUser!);
 /// The list of rows in the grid.
 List<PlutoRow> rows = [];
 
+bool isLoading = false;
+
 /// The selected group.
 // String groupSelected = '';
 
@@ -77,6 +82,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
 
   // int? assignatureID;
   String campusSelected = '';
+  bool isLoading = false;
 
   /// Whether the teacher teaches multiple campuses.
   bool teacherTeachMultipleCampuses = false;
@@ -132,9 +138,6 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
       studentList = await getStudentsByAssinature(
           groupSelected, gradeInt, assignatureID, monthNumber, campus);
 
-      if (int.parse(gradeInt) >= 6) {
-        await getCommentsForEvals(int.parse(gradeInt));
-      }
       fillGrid(studentList);
       setState(() {
         assignatureRows.clear();
@@ -153,6 +156,9 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
         }
 //                           // StudentsPlutoGrid(rows: assignatureRows);
       });
+      if (int.parse(gradeInt) >= 6) {
+        await getCommentsForEvals(int.parse(gradeInt));
+      }
     } catch (e) {
       if (context.mounted) {
         showErrorFromBackend(context, e.toString());
@@ -237,28 +243,71 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Flexible(
-                  child: RefreshButton(onPressed: () {
-                    var monthNumber;
-                    if (isUserAdmin) {
-                      monthNumber =
-                          getKeyFromValue(monthsListMap, selectedTempMonth!);
-                    } else {
-                      monthNumber = getKeyFromValue(
-                          monthsListMap, selectedCurrentTempMonth!);
-                    }
-                    var assignatureID =
-                        getKeyFromValue(assignaturesMap, selectedTempSubject!);
+                  child: FFButtonWidget(
+                    onPressed: () async {
+                      var monthNumber;
 
-                    var gradeInt =
-                        getKeyFromValue(teacherGradesMap, selectedTempGrade!);
+                      if (isUserAdmin) {
+                        monthNumber =
+                            getKeyFromValue(monthsListMap, selectedTempMonth!);
+                      } else {
+                        monthNumber = getKeyFromValue(
+                            monthsListMap, selectedCurrentTempMonth!);
+                      }
+                      var assignatureID = getKeyFromValue(
+                          assignaturesMap, selectedTempSubject!);
 
-                    searchBUttonAction(
-                        selectedTempGroup!,
-                        gradeInt.toString(),
-                        assignatureID.toString(),
-                        monthNumber.toString(),
-                        selectedTempCampus!);
-                  }),
+                      var gradeInt =
+                          getKeyFromValue(teacherGradesMap, selectedTempGrade!);
+
+                      searchBUttonAction(
+                          selectedTempGroup!,
+                          gradeInt.toString(),
+                          assignatureID.toString(),
+                          monthNumber.toString(),
+                          selectedTempCampus!);
+                    },
+                    text: 'Actualizar',
+                    options: FFButtonOptions(
+                      width: 370.0,
+                      height: 44.0,
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 0.0, 0.0, 0.0),
+                      iconPadding: const EdgeInsetsDirectional.fromSTEB(
+                          0.0, 0.0, 0.0, 0.0),
+                      color: FlutterFlowTheme.of(context).primary,
+                      textStyle:
+                          FlutterFlowTheme.of(context).titleSmall.override(
+                                fontFamily: 'Sora',
+                                color: Colors.white,
+                              ),
+                      elevation: 3.0,
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                  ),
+                  // RefreshButton(onPressed: () {
+                  //   var monthNumber;
+
+                  //   if (isUserAdmin) {
+                  //     monthNumber =
+                  //         getKeyFromValue(monthsListMap, selectedTempMonth!);
+                  //   } else {
+                  //     monthNumber = getKeyFromValue(
+                  //         monthsListMap, selectedCurrentTempMonth!);
+                  //   }
+                  //   var assignatureID =
+                  //       getKeyFromValue(assignaturesMap, selectedTempSubject!);
+
+                  //   var gradeInt =
+                  //       getKeyFromValue(teacherGradesMap, selectedTempGrade!);
+
+                  //   searchBUttonAction(
+                  //       selectedTempGroup!,
+                  //       gradeInt.toString(),
+                  //       assignatureID.toString(),
+                  //       monthNumber.toString(),
+                  //       selectedTempCampus!);
+                  // }),
                 ),
                 const SizedBox(width: 10),
                 Flexible(
@@ -311,6 +360,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
               margin: const EdgeInsets.all(20),
               child: LayoutBuilder(
                   builder: (BuildContext context, BoxConstraints constraints) {
+                isLoading ? null : const CustomLoadingIndicator();
                 if (rows.isEmpty) {
                   return const Placeholder(
                     child: Column(

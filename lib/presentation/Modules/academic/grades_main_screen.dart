@@ -23,13 +23,13 @@ class _GradesMainScreenState extends State<GradesMainScreen>
   bool showGrid = false; // Flag to control grid visibility
 
   late final TabController _tabController;
-  bool isSearching = false; // Add a state variable to track search status
+  bool isSearchingGrades = false; // Add a state variable to track search status
   bool canEvaluateNow = false;
   bool canUserEvaluate = false;
   bool displayEvaluateGrids = false;
 
   onTap() {
-    isSearching = false;
+    isSearchingGrades = false;
   }
 
   @override
@@ -81,15 +81,14 @@ class _GradesMainScreenState extends State<GradesMainScreen>
 
   void initGetDate() async {
     canEvaluateNow = await isDateToEvaluateStudents();
-
     setState(() {
       canUserEvaluate = canEvaluateNow;
     });
 
-    validateDateAndUserPriv();
+    await validateDateAndUserPriv();
   }
 
-  void validateDateAndUserPriv() {
+  Future<void> validateDateAndUserPriv() async {
     if (canUserEvaluate || currentUser!.canEditStudentGrades()) {
       setState(() {
         displayEvaluateGrids = true;

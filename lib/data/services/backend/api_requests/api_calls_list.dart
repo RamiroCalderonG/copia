@@ -712,6 +712,7 @@ Future<dynamic> getStudentsGradesComments(
             "cycle": currentCycle!.claCiclo,
             "month": month
           },
+          timeoutSeconds: 15,
           persistCookies: false);
       apiCall.raiseForStatus();
       response = apiCall;
