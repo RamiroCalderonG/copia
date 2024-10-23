@@ -20,7 +20,7 @@ Future<dynamic> loginUser(var jsonBody) async {
         'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
       },
       persistCookies: false,
-      timeoutSeconds: 7);
+      timeoutSeconds: 10);
   try {
     apiCall.raiseForStatus();
     return apiCall;
@@ -674,6 +674,12 @@ Future<dynamic> getSubjectsAndGradeByStuent(
     apiCall.raiseForStatus();
     return apiCall;
   } catch (e) {
+    if (e is TimeoutException) {
+      var firstWord = e.toString().split(" ").elementAt(0);
+      firstWord = getMessageToDisplay(firstWord);
+      insertErrorLog(e.toString(), 'academic/student/grades');
+      return throw firstWord;
+    }
     return throw FormatException(e.toString());
   }
 }
@@ -923,6 +929,8 @@ Future<dynamic> getActualDate() async {
     } else if (e is TimeoutException) {
       var firstWord = e.toString().split(" ").elementAt(0);
       firstWord = getMessageToDisplay(firstWord);
+      insertErrorLog(e.toString(), 'api/date');
+      return throw firstWord;
     } else {
       return 'Request failed: ${e.toString()}'; // General error handling
     }

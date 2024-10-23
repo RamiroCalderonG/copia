@@ -1,10 +1,9 @@
 // ignore_for_file: constant_identifier_names, prefer_typing_uninitialized_variables
 
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+
 import 'package:oxschool/core/constants/User.dart';
+import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/core/reusable_methods/reusable_functions.dart';
 import 'package:oxschool/core/utils/loader_indicator.dart';
 import 'package:oxschool/core/reusable_methods/translate_messages.dart';
@@ -18,7 +17,7 @@ import '../../../data/datasources/temp/studens_temp.dart';
 import '../../../data/services/backend/api_requests/api_calls_list.dart';
 import '../../../core/constants/Student.dart';
 import '../../../core/constants/date_constants.dart';
-import '../../../core/config/flutter_flow/flutter_flow_theme.dart';
+
 import '../../../core/config/flutter_flow/flutter_flow_util.dart';
 import '../../../core/reusable_methods/academic_functions.dart';
 import '../../../core/reusable_methods/user_functions.dart';
@@ -84,7 +83,8 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
 
   // int? assignatureID;
   String campusSelected = '';
-  bool isLoading = false;
+  bool isLoading = true;
+  var fetchedData;
 
   /// Whether the teacher teaches multiple campuses.
   bool teacherTeachMultipleCampuses = false;
@@ -92,22 +92,9 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
   @override
   void initState() {
     super.initState();
+    _fetchData();
+    // isLoading = false;
   }
-
-  // @override
-  // void dispose() {
-  // oneTeacherGrades.clear();
-  // oneTeacherGroups.clear();
-  // oneTeacherAssignatures.clear();
-  // oneTeacherStudents.clear();
-  // oneTeacherStudentID.clear();
-  // assignaturesMap.clear();
-  // studentList.clear();
-  // assignatureRows.clear();
-  // assignaturesColumns.clear();
-  // studentGradesBodyToUpgrade.clear();
-  // super.dispose();
-  // }
 
   /// Fills the grid with data from the backend.
   ///
@@ -124,6 +111,15 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
           },
         );
       }).toList();
+    });
+  }
+
+  void _fetchData() async {
+    var response = await loadStartGrading(
+        currentUser!.employeeNumber!, currentCycle!.toString());
+    fetchedData = response;
+    setState(() {
+      isLoading = false;
     });
   }
 
@@ -187,49 +183,100 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: loadStartGrading(
-          currentUser!.employeeNumber!, currentCycle!.toString()),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CustomLoadingIndicator());
-        } else if (snapshot.hasError) {
-          // var message = snapshot.error.toString().split(" ").elementAt(1);
-          // var message = getMessageToDisplay(message);
-          insertErrorLog(
-              snapshot.error.toString(), ' INIT GRADES/EVAL SCREEN ');
-          return Center(child: Text('Error: ${snapshot.error}'));
-        } else if (!snapshot.hasData || snapshot.data == null) {
-          return const Center(child: Text('Sin información disponible'));
-        } else {
-          return Stack(
-            children: [
-              SizedBox(
-                width: MediaQuery.of(context).size.width,
-                child: LayoutBuilder(builder:
-                    (BuildContext context, BoxConstraints constraints) {
-                  if (constraints.maxWidth > 600) {
-                    return SingleChildScrollView(
-                      child: Column(
+    return isLoading
+        ? const CustomLoadingIndicator()
+        : SizedBox(
+            width: MediaQuery.of(context).size.width,
+            child: LayoutBuilder(
+                builder: (BuildContext context, BoxConstraints constraints) {
+              if (fetchedData is Error) {
+                return const Placeholder(
+                    color: Colors.transparent,
+                    child: Text(
+                        'Error en la conexión, verificar la conectividad: Code: 408'));
+              } else {
+                return SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      Row(
                         children: [
-                          Row(
-                            children: [_buildGradesbyAssignature()],
-                          )
+                          _buildGradesbyAssignature(),
                         ],
-                      ),
-                    );
-                  } else {
-                    return const Placeholder(
-                      child: Text('Smaller version pending to design'),
-                    );
-                  }
-                }),
-              )
-            ],
+                      )
+                    ],
+                  ),
+                );
+              }
+            }),
           );
-        }
-      },
-    );
+
+    // Stack(
+    //   children: [
+    //     SizedBox(
+    //       width: MediaQuery.of(context).size.width,
+    //       child: LayoutBuilder(
+    //           builder: (BuildContext context, BoxConstraints constraints) {
+    //         if (isLoading == false) {
+    //           return SingleChildScrollView(
+    //             child: Column(
+    //               children: [
+    //                 Row(
+    //                   children: [_buildGradesbyAssignature()],
+    //                 )
+    //               ],
+    //             ),
+    //           );
+    //         } else {
+    //           return const CustomLoadingIndicator();
+    //         }
+    //       }),
+    //     )
+    //   ],
+    // );
+
+    // FutureBuilder(
+    //   future: loadStartGrading(
+    //       currentUser!.employeeNumber!, currentCycle!.toString()),
+    //   builder: (context, snapshot) {
+    //     if (snapshot.connectionState == ConnectionState.waiting) {
+    //       return Center(child: CustomLoadingIndicator());
+    //     } else if (snapshot.hasError) {
+    //       // var message = snapshot.error.toString().split(" ").elementAt(1);
+    //       // var message = getMessageToDisplay(message);
+    //       insertErrorLog(
+    //           snapshot.error.toString(), ' INIT GRADES/EVAL SCREEN ');
+    //       return Center(child: Text('Error: ${snapshot.error}'));
+    //     } else if (!snapshot.hasData || snapshot.data == null) {
+    //       return const Center(child: Text('Sin información disponible'));
+    //     } else {
+    //       return Stack(
+    //         children: [
+    //           SizedBox(
+    //             width: MediaQuery.of(context).size.width,
+    //             child: LayoutBuilder(builder:
+    //                 (BuildContext context, BoxConstraints constraints) {
+    //               if (constraints.maxWidth > 600) {
+    //                 return SingleChildScrollView(
+    //                   child: Column(
+    //                     children: [
+    //                       Row(
+    //                         children: [_buildGradesbyAssignature()],
+    //                       )
+    //                     ],
+    //                   ),
+    //                 );
+    //               } else {
+    //                 return const Placeholder(
+    //                   child: Text('Smaller version pending to design'),
+    //                 );
+    //               }
+    //             }),
+    //           )
+    //         ],
+    //       );
+    //     }
+    //   },
+    // );
   }
 
   Widget _buildGradesbyAssignature() {
@@ -252,71 +299,29 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Flexible(
-                  child: FFButtonWidget(
-                    onPressed: () async {
-                      var monthNumber;
+                  child: RefreshButton(onPressed: () {
+                    var monthNumber;
 
-                      if (isUserAdmin) {
-                        monthNumber =
-                            getKeyFromValue(monthsListMap, selectedTempMonth!);
-                      } else {
-                        monthNumber = getKeyFromValue(
-                            monthsListMap, selectedCurrentTempMonth!);
-                      }
-                      var assignatureID = getKeyFromValue(
-                          assignaturesMap, selectedTempSubject!);
+                    if (isUserAdmin) {
+                      monthNumber =
+                          getKeyFromValue(monthsListMap, selectedTempMonth!);
+                    } else {
+                      monthNumber = getKeyFromValue(
+                          monthsListMap, selectedCurrentTempMonth!);
+                    }
+                    var assignatureID =
+                        getKeyFromValue(assignaturesMap, selectedTempSubject!);
 
-                      var gradeInt =
-                          getKeyFromValue(teacherGradesMap, selectedTempGrade!);
+                    var gradeInt =
+                        getKeyFromValue(teacherGradesMap, selectedTempGrade!);
 
-                      searchBUttonAction(
-                          selectedTempGroup!,
-                          gradeInt.toString(),
-                          assignatureID.toString(),
-                          monthNumber.toString(),
-                          selectedTempCampus!);
-                    },
-                    text: 'Actualizar',
-                    options: FFButtonOptions(
-                      width: 370.0,
-                      height: 44.0,
-                      padding: const EdgeInsetsDirectional.fromSTEB(
-                          0.0, 0.0, 0.0, 0.0),
-                      iconPadding: const EdgeInsetsDirectional.fromSTEB(
-                          0.0, 0.0, 0.0, 0.0),
-                      color: FlutterFlowTheme.of(context).primary,
-                      textStyle:
-                          FlutterFlowTheme.of(context).titleSmall.override(
-                                fontFamily: 'Sora',
-                                color: Colors.white,
-                              ),
-                      elevation: 3.0,
-                      borderRadius: BorderRadius.circular(12.0),
-                    ),
-                  ),
-                  // RefreshButton(onPressed: () {
-                  //   var monthNumber;
-
-                  //   if (isUserAdmin) {
-                  //     monthNumber =
-                  //         getKeyFromValue(monthsListMap, selectedTempMonth!);
-                  //   } else {
-                  //     monthNumber = getKeyFromValue(
-                  //         monthsListMap, selectedCurrentTempMonth!);
-                  //   }
-                  //   var assignatureID =
-                  //       getKeyFromValue(assignaturesMap, selectedTempSubject!);
-
-                  //   var gradeInt =
-                  //       getKeyFromValue(teacherGradesMap, selectedTempGrade!);
-
-                  //   searchBUttonAction(
-                  //       selectedTempGroup!,
-                  //       gradeInt.toString(),
-                  //       assignatureID.toString(),
-                  //       monthNumber.toString(),
-                  //       selectedTempCampus!);
-                  // }),
+                    searchBUttonAction(
+                        selectedTempGroup!,
+                        gradeInt.toString(),
+                        assignatureID.toString(),
+                        monthNumber.toString(),
+                        selectedTempCampus!);
+                  }),
                 ),
                 const SizedBox(width: 10),
                 Flexible(

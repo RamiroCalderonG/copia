@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -171,6 +172,7 @@ Future<List<StudentEval>> getSubjectsAndGradesByStudent(
 
     return evaluations;
   } catch (e) {
+    if (e is TimeoutException) {}
     return throw FormatException(e.toString());
   }
 }

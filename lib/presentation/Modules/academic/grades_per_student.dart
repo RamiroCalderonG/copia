@@ -46,17 +46,18 @@ class _GradesByStudentState extends State<GradesByStudent> {
   Timer? _debounce;
   String? asignatureNameListener;
   String selectedStudentName = '';
+  var fetchedData;
+  bool isFetching = true;
 
   String dropDownValue = ''; //oneTeacherAssignatures.first;
   int? assignatureID;
   late Future<dynamic> _fetchedDataFromRequest;
 
-
   String? selectedStudentID;
 
   @override
   void initState() {
-    //loadStartGrading(currentUser!.employeeNumber!, currentCycle!.claCiclo!);
+    _fetchData();
     super.initState();
   }
 
@@ -73,6 +74,15 @@ class _GradesByStudentState extends State<GradesByStudent> {
     //selectedTempMonth = null;
     //selectedCurrentTempMonth = null;
     super.dispose();
+  }
+
+  void _fetchData() async {
+    var response = loadStartGrading(
+        currentUser!.employeeNumber!, currentCycle!.toString());
+    fetchedData = response;
+    setState(() {
+      isFetching = false;
+    });
   }
 
   Future<void> fillGrid(List<StudentEval> evaluationList) async {
@@ -115,7 +125,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
     }
   }
 
-  void searchBUttonAction(String groupSelected, String gradeString,
+  Future<void> searchBUttonAction(String groupSelected, String gradeString,
       int monthSelected, String campusSelected) async {
     try {
       var gradeInt = getKeyFromValue(teacherGradesMap, gradeString!);
@@ -146,12 +156,12 @@ class _GradesByStudentState extends State<GradesByStudent> {
       });
     } catch (e) {
       if (context.mounted) {
-        insertErrorLog(e.toString(), 'SEARCH STUDENTS');
-        var displayMessage = e.toString().split(" ").elementAt(0);
-        displayMessage = getMessageToDisplay(displayMessage.toString());
+        // insertErrorLog(e.toString(), 'SEARCH STUDENTS TO EVAL BY STUDENT');
+        // var displayMessage = e.toString().split(" ").elementAt(0);
+        // displayMessage = getMessageToDisplay(displayMessage.toString());
 
         // ensures the widget is still part of the widget tree after the await
-        showErrorFromBackend(context, displayMessage.toString());
+        showErrorFromBackend(context, e.toString());
       }
     }
   }
@@ -167,46 +177,71 @@ class _GradesByStudentState extends State<GradesByStudent> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: 
-      loadStartGrading(
-          currentUser!.employeeNumber!, currentCycle!.toString()),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CustomLoadingIndicator());
-        } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        } else if (!snapshot.hasData || snapshot.data == null) {
-          return const Center(child: Text('No data available'));
-        } else {
-          return Stack(
-            children: [
-              SizedBox(
-                width: MediaQuery.of(context).size.width,
-                child: LayoutBuilder(builder:
-                    (BuildContext context, BoxConstraints constraints) {
-                  if (constraints.maxWidth > 600) {
-                    return SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [_buildGradesPerStudent()],
-                          )
-                        ],
-                      ),
-                    );
-                  } else {
-                    return const Placeholder(
-                      child: Text('Smaller screen version pending to design'),
-                    );
-                  }
-                }),
-              )
-            ],
+    return isFetching
+        ? const CustomLoadingIndicator()
+        : SizedBox(
+            width: MediaQuery.of(context).size.width,
+            child: LayoutBuilder(
+                builder: (BuildContext context, BoxConstraints constraints) {
+              if (fetchedData is Error || fetchedData is FormatException) {
+                return Placeholder(
+                  color: Colors.transparent,
+                  child: Center(
+                    child: Text('Error en la conección: $fetchedData'),
+                  ),
+                );
+              } else {
+                return SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [_buildGradesPerStudent()],
+                      )
+                    ],
+                  ),
+                );
+              }
+            }),
           );
-        }
-      },
-    );
+    // FutureBuilder(
+    //   future: loadStartGrading(
+    //       currentUser!.employeeNumber!, currentCycle!.toString()),
+    //   builder: (context, snapshot) {
+    //     if (snapshot.connectionState == ConnectionState.waiting) {
+    //       return Center(child: CustomLoadingIndicator());
+    //     } else if (snapshot.hasError) {
+    //       return Center(child: Text('Error: ${snapshot.error}'));
+    //     } else if (!snapshot.hasData || snapshot.data == null) {
+    //       return const Center(child: Text('No data available'));
+    //     } else {
+    //       return Stack(
+    //         children: [
+    //           SizedBox(
+    //             width: MediaQuery.of(context).size.width,
+    //             child: LayoutBuilder(builder:
+    //                 (BuildContext context, BoxConstraints constraints) {
+    //               if (constraints.maxWidth > 600) {
+    //                 return SingleChildScrollView(
+    //                   child: Column(
+    //                     children: [
+    //                       Row(
+    //                         children: [_buildGradesPerStudent()],
+    //                       )
+    //                     ],
+    //                   ),
+    //                 );
+    //               } else {
+    //                 return const Placeholder(
+    //                   child: Text('Smaller screen version pending to design'),
+    //                 );
+    //               }
+    //             }),
+    //           )
+    //         ],
+    //       );
+    //     }
+    //   },
+    // );
   }
 
   Widget _buildGradesPerStudent() {
@@ -223,7 +258,10 @@ class _GradesByStudentState extends State<GradesByStudent> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Flexible(child: RefreshButton(onPressed: () {
+                Flexible(child: RefreshButton(onPressed: () async {
+                  setState(() {
+                    isFetching = true;
+                  });
                   var monthNumber;
                   if (isUserAdmin) {
                     monthNumber =
@@ -248,12 +286,16 @@ class _GradesByStudentState extends State<GradesByStudent> {
                     return showEmptyFieldAlertDialog(
                         context, 'Seleccionar un mes a evaluar');
                   } else {
-                    searchBUttonAction(
+                    await searchBUttonAction(
                       selectedTempGroup!,
                       selectedTempGrade!,
                       monthNumber,
                       selectedTempCampus!,
-                    );
+                    ).whenComplete(() {
+                      setState(() {
+                        isFetching = false;
+                      });
+                    });
                   }
                 })),
                 const SizedBox(

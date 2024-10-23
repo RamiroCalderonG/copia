@@ -27,11 +27,12 @@ class _GradesMainScreenState extends State<GradesMainScreen>
 
   TabController? _tabController;
   bool isSearching = false; // Add a state variable to track search status
-  // bool canEvaluateNow =
-  //     false; //Evaluate if current dates are available for evaluations
+  bool canEvaluateNow =
+      false; //Evaluate if current dates are available for evaluations
   bool canUserEvaluate = false; //Evaluate if current user have any data
   bool displayEvaluateGrids = false;
   bool isUserAdmin = false;
+  bool isSearchingGrades = false;
 
   onTap() {
     isSearchingGrades = false;
