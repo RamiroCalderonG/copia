@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:oxschool/presentation/Modules/user/edit_user_screen.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
 import 'package:oxschool/presentation/components/plutogrid_export_options.dart';
-import 'package:oxschool/core/constants/User.dart';
+import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/presentation/Modules/login_view/login_view_widget.dart';
 import 'package:oxschool/core/reusable_methods/reusable_functions.dart';
 import 'package:oxschool/core/reusable_methods/user_functions.dart';

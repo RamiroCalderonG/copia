@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
-import 'package:oxschool/core/constants/User.dart';
+import 'package:oxschool/core/constants/user_consts.dart';
 
 // DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
 final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();

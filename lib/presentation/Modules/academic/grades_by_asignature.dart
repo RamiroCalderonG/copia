@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 
-import 'package:oxschool/core/constants/User.dart';
+import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/core/reusable_methods/reusable_functions.dart';
 import 'package:oxschool/core/utils/loader_indicator.dart';
@@ -59,8 +59,6 @@ bool isUserAdmin = verifyUserAdmin(currentUser!);
 /// The list of rows in the grid.
 List<PlutoRow> rows = [];
 
-bool isLoading = false;
-
 /// The selected group.
 // String groupSelected = '';
 
@@ -94,6 +92,12 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
     super.initState();
     _fetchData();
     // isLoading = false;
+  }
+
+  @override
+  void dispose() {
+    rows.clear();
+    super.dispose();
   }
 
   /// Fills the grid with data from the backend.
@@ -138,6 +142,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
 
       fillGrid(studentList);
       setState(() {
+        isLoading = true;
         assignatureRows.clear();
         for (var item in studentList) {
           assignatureRows.add(PlutoRow(cells: {
@@ -157,10 +162,16 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
       if (int.parse(gradeInt) >= 6) {
         await getCommentsForEvals(int.parse(gradeInt));
       }
+      setState(() {
+        isLoading = false;
+      });
     } catch (e) {
-      insertErrorLog(e.toString(), 'SEARCH STUDENTS ');
-      var message = e.toString().split(" ").elementAt(0);
-      message = getMessageToDisplay(message);
+      setState(() {
+        isLoading = false;
+      });
+      insertErrorLog(e.toString(), 'SEARCH STUDENTS BY SUBJECTS ');
+
+      var message = getMessageToDisplay(e.toString());
       if (context.mounted) {
         showErrorFromBackend(context, message.toString());
       }
@@ -300,6 +311,9 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
               children: [
                 Flexible(
                   child: RefreshButton(onPressed: () {
+                    // setState(() {
+                    //   isLoading = true;
+                    // });
                     var monthNumber;
 
                     if (isUserAdmin) {

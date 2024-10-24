@@ -9,7 +9,7 @@ import 'package:oxschool/presentation/components/confirm_dialogs.dart';
 
 import 'package:pluto_grid/pluto_grid.dart';
 
-import '../../../core/constants/User.dart';
+import '../../../core/constants/user_consts.dart';
 import '../../../core/reusable_methods/academic_functions.dart';
 import '../../../core/reusable_methods/user_functions.dart';
 import '../../../data/datasources/temp/teacher_grades_temp.dart';

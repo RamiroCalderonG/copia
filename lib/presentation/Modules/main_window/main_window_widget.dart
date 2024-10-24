@@ -2,7 +2,7 @@
 
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-import 'package:oxschool/core/constants/User.dart';
+import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/constants/url_links.dart';
 import 'package:oxschool/core/reusable_methods/user_functions.dart';
 import 'package:oxschool/core/utils/device_information.dart';
@@ -43,7 +43,6 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
     currentUser?.clear();
     eventsList?.clear();
     deviceData.clear();
-    
 
     // clearUserData();
 
@@ -58,8 +57,6 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
     WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {}));
     insertAlertLog('USER LOGED IN: ${currentUser!.employeeNumber.toString()}');
   }
-
-
 
   void saveUserRoleToSharedPref() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -508,8 +505,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
               title: const Text('Cerrar sesión'),
               leading: const Icon(Icons.exit_to_app),
               onTap: () {
-                logOutCurrentUser(
-                    currentUser!.token, currentUser!.employeeNumber.toString());
+                logOutCurrentUser(currentUser!);
                 // Clear any necessary data or variables
                 // clearStudentData();
                 // clearUserData();

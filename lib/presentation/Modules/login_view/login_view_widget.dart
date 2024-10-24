@@ -11,7 +11,7 @@ import 'package:oxschool/data/Models/Cycle.dart';
 import 'package:oxschool/data/Models/Logger.dart';
 import 'package:oxschool/data/Models/User.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
-import 'package:oxschool/core/constants/User.dart';
+import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:flutter/material.dart';
 import 'package:oxschool/core/constants/connection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -252,7 +252,9 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
               Map<String, dynamic> jsonMap = jsonDecode(apiResponse.body);
               String description = jsonMap['description'];
 
-              showErrorFromBackend(context, description);
+              var firstWord = getMessageToDisplay(description);
+
+              showErrorFromBackend(context, firstWord);
             }
 
             setState(() {});
@@ -265,9 +267,9 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
           setState(() {
             isLoading = false;
           });
-          insertErrorLog(e.toString(), e.toString());
-          var displayMessage = e.toString().split(" ").elementAt(0);
-          displayMessage = getMessageToDisplay(displayMessage.toString());
+          insertErrorLog(e.toString(), 'LOGIN BUTTON');
+
+          var displayMessage = getMessageToDisplay(e.toString());
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
@@ -1070,7 +1072,7 @@ Future<void> _displayForgotPassword(BuildContext context) async {
                 ),
           actions: <Widget>[
             TextButton(
-              child: const Text('CANCEL'),
+              child: const Text('CANCELAR'),
               onPressed: () {
                 Navigator.pop(context);
               },

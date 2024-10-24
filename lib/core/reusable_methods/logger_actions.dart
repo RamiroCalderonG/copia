@@ -8,8 +8,8 @@ void insertActionIntoLog(
   var body,
 ) async {
   body.toString();
-  var message = body.split(" ").elementAt(0);
-  message = getMessageToDisplay(message);
+  // var message = body.split(" ").elementAt(0);
+  var message = getMessageToDisplay(body);
 
   await FileLogger.log(tittle + message.toString());
 }

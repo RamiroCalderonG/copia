@@ -3,7 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-import 'package:oxschool/core/constants/User.dart';
+import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/core/reusable_methods/translate_messages.dart';
 import 'package:requests/requests.dart';
@@ -13,18 +13,24 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<dynamic> loginUser(var jsonBody) async {
-  var apiCall = await Requests.post(
-      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/login/userlogin/',
-      json: jsonBody,
-      headers: {
-        'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-      },
-      persistCookies: false,
-      timeoutSeconds: 10);
+  var apiCall;
   try {
+    apiCall = await Requests.post(
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/login/userlogin/',
+        json: jsonBody,
+        headers: {
+          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
+        },
+        persistCookies: false,
+        timeoutSeconds: 25);
+
     apiCall.raiseForStatus();
     return apiCall;
   } catch (e) {
+    insertErrorLog(e.toString(), '/login/userlogin/');
+    if (e is TimeoutException) {
+      return throw TimeoutException(e.toString());
+    }
     return apiCall;
     // throw FormatException(e.toString());
   }
@@ -60,11 +66,12 @@ Future<dynamic> getCycle(
             'Auth': currentUser!.token,
           },
           persistCookies: false,
-          timeoutSeconds: 7);
+          timeoutSeconds: 12);
       apiCall.raiseForStatus();
       response = apiCall.content();
       return response;
     } catch (e) {
+      insertErrorLog(e.toString(), '/api/cycles/1');
       throw FormatException(e.toString());
     }
   } else {
@@ -76,11 +83,12 @@ Future<dynamic> getCycle(
             'Auth': currentUser!.token,
           },
           persistCookies: false,
-          timeoutSeconds: 7);
+          timeoutSeconds: 12);
       apiCall.raiseForStatus();
       response = apiCall.content();
       return response;
     } catch (e) {
+      insertErrorLog(e.toString(), '/api/cycles/$month');
       throw FormatException(e.toString());
     }
   }
@@ -568,19 +576,21 @@ Future<dynamic> getTeacherGradeAndCourses(var employee, var year) async {
           "year": currentCycle!.claCiclo
         },
         persistCookies: true,
-        timeoutSeconds: 10);
+        timeoutSeconds: 20);
     apiCall.raiseForStatus();
 
     if (apiCall.statusCode == 200) {
       return apiCall.body;
     } else {
+      insertErrorLog(
+          ' ${apiCall.statusCode.toString()} ${apiCall.body.toString()}',
+          'acad/teacher/start-student-rating');
       return throw FormatException(apiCall.body);
     }
   } catch (e) {
     if (e is TimeoutException) {
-      var firstWord = e.toString().split(" ").elementAt(0);
-      firstWord = getMessageToDisplay(firstWord);
       insertErrorLog(e.toString(), 'acad/teacher/start-student-rating');
+      var firstWord = getMessageToDisplay(e.toString());
       return throw firstWord;
     }
 
@@ -611,6 +621,11 @@ Future<dynamic> getStudentsToGrade(String assignature, String group,
     apiCall.raiseForStatus();
     return apiCall;
   } catch (e) {
+    insertErrorLog(e.toString(), '/academic/school-rating/active-students');
+    if (e is TimeoutException) {
+      return throw TimeoutException(e.toString());
+    }
+
     return throw FormatException(e.toString());
   }
 }
@@ -675,10 +690,9 @@ Future<dynamic> getSubjectsAndGradeByStuent(
     return apiCall;
   } catch (e) {
     if (e is TimeoutException) {
-      var firstWord = e.toString().split(" ").elementAt(0);
-      firstWord = getMessageToDisplay(firstWord);
       insertErrorLog(e.toString(), 'academic/student/grades');
-      return throw firstWord;
+      var firstWord = getMessageToDisplay(e.toString());
+      return throw TimeoutException(firstWord.toString());
     }
     return throw FormatException(e.toString());
   }
@@ -908,12 +922,15 @@ Future<dynamic> getActualDate() async {
           'Auth': currentUser!.token
         },
         queryParameters: {'field': 1},
+        timeoutSeconds: 20,
         persistCookies: false);
     apiCall.raiseForStatus();
     return apiCall.body;
   } catch (e) {
     // Check if error response contains a message
     if (e is HTTPException) {
+      insertErrorLog(e.toString(), 'api/date');
+      var firstWord = getMessageToDisplay(e.toString());
       // If the API returns a JSON error, try to extract the message
       try {
         var errorResponse = jsonDecode(e.response.body);
@@ -927,9 +944,8 @@ Future<dynamic> getActualDate() async {
         return 'Failed to parse error response';
       }
     } else if (e is TimeoutException) {
-      var firstWord = e.toString().split(" ").elementAt(0);
-      firstWord = getMessageToDisplay(firstWord);
       insertErrorLog(e.toString(), 'api/date');
+      var firstWord = getMessageToDisplay(e.toString());
       return throw firstWord;
     } else {
       return 'Request failed: ${e.toString()}'; // General error handling
@@ -1047,6 +1063,7 @@ Future<http.Response> getUserPermissions(int userId) async {
     userEvents = response;
     return response;
   } catch (e) {
+    insertErrorLog(e.toString(), '/api/user/events');
     return throw FormatException(e.toString());
   }
 }

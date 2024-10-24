@@ -2,9 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:oxschool/core/reusable_methods/logger_actions.dart';
+import 'package:oxschool/core/reusable_methods/translate_messages.dart';
 import 'package:oxschool/data/Models/Student_eval.dart';
 
-import 'package:oxschool/core/constants/User.dart';
+import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/constants/date_constants.dart';
 import 'package:oxschool/core/reusable_methods/academic_functions.dart';
 import 'package:oxschool/core/reusable_methods/user_functions.dart';
@@ -12,8 +14,6 @@ import 'package:oxschool/data/datasources/temp/teacher_grades_temp.dart';
 
 import 'package:pluto_grid/pluto_grid.dart';
 
-import '../../../core/reusable_methods/logger_actions.dart';
-import '../../../core/reusable_methods/translate_messages.dart';
 import '../../../core/utils/loader_indicator.dart';
 import '../../../data/datasources/temp/studens_temp.dart';
 import '../../../data/services/backend/api_requests/api_calls_list.dart';
@@ -155,13 +155,10 @@ class _GradesByStudentState extends State<GradesByStudent> {
         }
       });
     } catch (e) {
+      insertErrorLog(e.toString(), 'SEARCH GRADES BY STUDENT ');
+      var message = getMessageToDisplay(e.toString());
       if (context.mounted) {
-        // insertErrorLog(e.toString(), 'SEARCH STUDENTS TO EVAL BY STUDENT');
-        // var displayMessage = e.toString().split(" ").elementAt(0);
-        // displayMessage = getMessageToDisplay(displayMessage.toString());
-
-        // ensures the widget is still part of the widget tree after the await
-        showErrorFromBackend(context, e.toString());
+        showErrorFromBackend(context, message.toString());
       }
     }
   }
@@ -259,9 +256,6 @@ class _GradesByStudentState extends State<GradesByStudent> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Flexible(child: RefreshButton(onPressed: () async {
-                  setState(() {
-                    isFetching = true;
-                  });
                   var monthNumber;
                   if (isUserAdmin) {
                     monthNumber =
@@ -286,6 +280,9 @@ class _GradesByStudentState extends State<GradesByStudent> {
                     return showEmptyFieldAlertDialog(
                         context, 'Seleccionar un mes a evaluar');
                   } else {
+                    setState(() {
+                      isFetching = true;
+                    });
                     await searchBUttonAction(
                       selectedTempGroup!,
                       selectedTempGrade!,
@@ -664,6 +661,9 @@ class _GradesByStudentState extends State<GradesByStudent> {
         );
       } else {
         if (context.mounted) {
+          setState(() {
+            isFetching = false;
+          });
           showErrorFromBackend(context, response.toString());
         }
       }

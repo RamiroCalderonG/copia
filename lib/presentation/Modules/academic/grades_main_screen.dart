@@ -1,10 +1,12 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/core/reusable_methods/translate_messages.dart';
+import 'package:oxschool/core/utils/loader_indicator.dart';
 import 'package:oxschool/presentation/Modules/academic/fo_dac_27.dart';
 import 'package:oxschool/presentation/Modules/academic/grades_by_asignature.dart';
-import 'package:oxschool/core/constants/User.dart';
+import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/presentation/components/confirm_dialogs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -26,13 +28,15 @@ class _GradesMainScreenState extends State<GradesMainScreen>
   bool showGrid = false; // Flag to control grid visibility
 
   TabController? _tabController;
-  bool isSearching = false; // Add a state variable to track search status
+  bool isSearching = false;
   bool canEvaluateNow =
       false; //Evaluate if current dates are available for evaluations
   bool canUserEvaluate = false; //Evaluate if current user have any data
   bool displayEvaluateGrids = false;
   bool isUserAdmin = false;
   bool isSearchingGrades = false;
+  String? errorMessage;
+  bool displayErrorMessage = false;
 
   onTap() {
     isSearchingGrades = false;
@@ -74,6 +78,7 @@ class _GradesMainScreenState extends State<GradesMainScreen>
     studentGradesBodyToUpgrade.clear();
     campusesWhereTeacherTeach.clear();
     selectedUnity = null;
+    displayErrorMessage = false;
     // assignaturesColumns.clear();
     super.dispose();
   }
@@ -85,32 +90,55 @@ class _GradesMainScreenState extends State<GradesMainScreen>
   }
 
   void initGetDate() async {
-    canEvaluateNow = await isDateToEvaluateStudents();
-
-    setState(() {
-      canUserEvaluate = canEvaluateNow;
-    });
-
-    validateDateAndUserPriv();
+    await validateDateAndUserPriv();
   }
 
   Future<void> validateDateAndUserPriv() async {
-    if (canUserEvaluate || currentUser!.canEditStudentGrades()) {
+    try {
       setState(() {
-        displayEvaluateGrids = true;
+        isSearching = true;
       });
-    } else {
-      if (currentUser!.canEditStudentGrades()) {
+      canEvaluateNow = await isDateToEvaluateStudents();
+
+      setState(() {
+        canUserEvaluate = canEvaluateNow;
+      });
+      if (canUserEvaluate || currentUser!.canEditStudentGrades()) {
         setState(() {
           displayEvaluateGrids = true;
         });
+      } else {
+        if (currentUser!.canEditStudentGrades()) {
+          setState(() {
+            displayEvaluateGrids = true;
+          });
+        }
+        displayEvaluateGrids = false;
       }
-      displayEvaluateGrids = false;
+      setState(() {
+        isSearching = false;
+      });
+    } catch (e) {
+      setState(() {
+        isSearching = false;
+      });
+      insertErrorLog(e.toString(),
+          'FETCHING DATE TO EVALUATE AND USER ROLE ON GRADESMAINSCREEN');
+      setState(() {
+        errorMessage = getMessageToDisplay(e.toString());
+        displayErrorMessage = true;
+      });
+
+      rethrow;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    bool isDesktop = !kIsWeb &&
+        (defaultTargetPlatform == TargetPlatform.macOS ||
+            defaultTargetPlatform == TargetPlatform.windows ||
+            defaultTargetPlatform == TargetPlatform.linux);
     //_tabController = TabController(length: 3, vsync: this);
 
     return Scaffold(
@@ -144,27 +172,42 @@ class _GradesMainScreenState extends State<GradesMainScreen>
               style: TextStyle(color: Colors.white)),
           backgroundColor: FlutterFlowTheme.of(context).primary,
         ),
-        body: displayEvaluateGrids
-            ? TabBarView(
-                key: const PageStorageKey('value'),
-                controller: _tabController,
-                children: const <Widget>[
-                  GradesByAsignature(),
-                  GradesByStudent(),
-                  FoDac27()
-                ],
-              )
-            : const Placeholder(
-                color: Colors.transparent,
-                child: Center(
+        body: isSearching
+            ? const CustomLoadingIndicator()
+            : displayEvaluateGrids
+                ? Container(
+                    constraints: BoxConstraints(
+                      minHeight: isDesktop ? 600 : 0,
+                    ),
+                    child: TabBarView(
+                      key: const PageStorageKey('value'),
+                      controller: _tabController,
+                      children: const <Widget>[
+                        GradesByAsignature(),
+                        GradesByStudent(),
+                        FoDac27()
+                      ],
+                    ),
+                  )
+                : Placeholder(
+                    color: Colors.transparent,
                     child: Center(
-                  child: Text(
-                    'Sin información, consulte con el administrador',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontFamily: 'Sora', fontSize: 20),
-                  ),
-                )),
-              ));
+                        child: Center(
+                      child: displayErrorMessage
+                          ? Text(
+                              errorMessage!,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                  fontFamily: 'Sora', fontSize: 20),
+                            )
+                          : const Text(
+                              'Sin información, consulte con el administrador',
+                              textAlign: TextAlign.center,
+                              style:
+                                  TextStyle(fontFamily: 'Sora', fontSize: 20),
+                            ),
+                    )),
+                  ));
   }
 
   void initSharedPref() async {

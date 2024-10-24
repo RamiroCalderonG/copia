@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:oxschool/presentation/components/pdf_viewer_screen.dart';
 import 'package:oxschool/core/constants/Student.dart';
-import 'package:oxschool/core/constants/User.dart';
+import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/presentation/Modules/enfermeria/new_student_visit.dart';
 import 'package:oxschool/core/reusable_methods/causes_functions.dart';
 import 'package:oxschool/core/reusable_methods/employees_methods.dart';

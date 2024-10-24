@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/data/Models/Role.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
 import 'package:oxschool/data/datasources/temp/users_temp_data.dart';
@@ -168,6 +169,8 @@ bool isCurrentUserCoordinator(int employeeNumber) {
   return isCoordinator['value'];
 }
 
-void logOutCurrentUser(String token, String employee) {
-  logOutUser(token, employee);
+void logOutCurrentUser(User employee) async {
+  insertActionIntoLog('User end session', employee.employeeNumber.toString());
+
+  logOutUser(employee.token, employee.employeeNumber.toString());
 }

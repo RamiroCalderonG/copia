@@ -16,7 +16,7 @@ import 'package:oxschool/core/utils/loader_indicator.dart';
 
 import '../../../data/services/backend/api_requests/api_calls.dart';
 import '../../../data/services/backend/api_requests/api_manager.dart';
-import '../../../core/constants/User.dart';
+import '../../../core/constants/user_consts.dart';
 import '../../../core/reusable_methods/employees_methods.dart';
 import '../../../core/utils/temp_data.dart';
 

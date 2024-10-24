@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 // ignore: depend_on_referenced_packages
 import 'package:http/http.dart' as http;
+import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/core/reusable_methods/user_functions.dart';
 import 'package:oxschool/presentation/Modules/services_ticket/processes/create_service_ticket.dart';
-import 'package:oxschool/core/constants/User.dart';
+import 'package:oxschool/core/constants/user_consts.dart';
 
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_util.dart';
@@ -234,8 +235,7 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
                 title: const Text('Cerrar sesión'),
                 leading: const Icon(Icons.exit_to_app),
                 onTap: () {
-                  logOutCurrentUser(currentUser!.token,
-                      currentUser!.employeeNumber.toString());
+                  logOutCurrentUser(currentUser!);
                   // clearStudentData();
                   // clearUserData();
 

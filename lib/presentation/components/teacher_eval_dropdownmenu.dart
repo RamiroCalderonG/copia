@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/constants/date_constants.dart';
 import '../../data/datasources/temp/studens_temp.dart';
 import '../../data/datasources/temp/teacher_grades_temp.dart';
+import 'package:oxschool/core/extensions/capitalize_strings.dart';
 // import '../Modules/academic/grades_by_asignature.dart';
 
 class TeacherEvalDropDownMenu extends StatefulWidget {
@@ -133,7 +134,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
         padding:
             const EdgeInsets.only(bottom: 20, top: 25, right: 20, left: 20),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             // The Unity Dropdown
             if (unityList.length > 1)
@@ -142,7 +143,10 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   DropdownMenu<String>(
-                      label: const Text(' Campus ', style: TextStyle(fontSize: 14),),
+                      label: const Text(
+                        ' Campus ',
+                        style: TextStyle(fontSize: 14),
+                      ),
                       trailingIcon: const Icon(Icons.arrow_drop_down),
                       initialSelection: selectedUnity,
                       onSelected: (String? value) {
@@ -168,9 +172,12 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 DropdownMenu<String>(
-                    label: const Text(' Grado ', style: TextStyle(fontSize: 14),),
+                    label: const Text(
+                      ' Grado ',
+                      style: TextStyle(fontSize: 14),
+                    ),
                     trailingIcon: const Icon(Icons.arrow_drop_down),
-                    initialSelection: selectedGrade,
+                    initialSelection: filteredGrade.first,
                     onSelected: (String? value) {
                       selectedGrade = value;
                       selectedTempGrade = value;
@@ -189,9 +196,10 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 DropdownMenu<String>(
-                    label: const Text(' Grupo ', style: TextStyle(fontSize: 14)),
+                    label:
+                        const Text(' Grupo ', style: TextStyle(fontSize: 14)),
                     trailingIcon: const Icon(Icons.arrow_drop_down),
-                    initialSelection: selectedGroup,
+                    initialSelection: filteredGroup.first,
                     onSelected: (String? value) {
                       selectedGroup = value;
                       selectedTempGroup = value;
@@ -206,25 +214,28 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
             )),
             if (!widget.byStudent)
               Flexible(
+                  flex: 2,
+                  fit: FlexFit.loose,
                   child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  DropdownMenu<String>(
-                      label: const Text(' Materia ', style: TextStyle(fontSize: 14)),
-                      trailingIcon: const Icon(Icons.arrow_drop_down),
-                      initialSelection: selectedSubject,
-                      onSelected: (String? value) {
-                        selectedSubject = value;
-                        selectedTempSubject = value;
-                      },
-                      dropdownMenuEntries: filteredSubject
-                          .toList()
-                          .map<DropdownMenuEntry<String>>((String value) {
-                        return DropdownMenuEntry<String>(
-                            value: value, label: value);
-                      }).toList()),
-                ],
-              )),
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      DropdownMenu<String>(
+                          label: const Text(' Materia ',
+                              style: TextStyle(fontSize: 14)),
+                          trailingIcon: const Icon(Icons.arrow_drop_down),
+                          initialSelection: filteredSubject.first,
+                          onSelected: (String? value) {
+                            selectedSubject = value;
+                            selectedTempSubject = value;
+                          },
+                          dropdownMenuEntries: filteredSubject
+                              .toList()
+                              .map<DropdownMenuEntry<String>>((String value) {
+                            return DropdownMenuEntry<String>(
+                                value: value, label: value.trim().toTitleCase);
+                          }).toList()),
+                    ],
+                  )),
 
             Flexible(
               child: Column(

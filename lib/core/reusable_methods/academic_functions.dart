@@ -3,9 +3,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
+import 'package:oxschool/core/reusable_methods/translate_messages.dart';
 
 import 'package:oxschool/data/Models/Student_eval.dart';
-import 'package:oxschool/core/constants/User.dart';
+import 'package:oxschool/core/constants/user_consts.dart';
 
 import '../../data/datasources/temp/studens_temp.dart';
 import '../../data/services/backend/api_requests/api_calls_list.dart';
@@ -25,9 +26,6 @@ dynamic loadStartGrading(int employeeNumber, String schoolYear) async {
       await getSingleTeacherGroups(jsonList);
       await getSingleTeacherAssignatures(jsonList);
 
-      // await getStudentsByTeacher(jsonList);
-      // await getStudentsIDByTeacher(jsonList);
-      // await getGroupsByTeacher(jsonList);
       return jsonList;
     } catch (e) {
       throw FormatException(e.toString());
@@ -143,6 +141,9 @@ Future<List<StudentEval>> getStudentsByAssinature(
 
     return evaluations;
   } catch (e) {
+    if (e is TimeoutException) {
+      return throw TimeoutException(e.toString());
+    }
     return throw FormatException(e.toString());
   }
 }
@@ -172,7 +173,9 @@ Future<List<StudentEval>> getSubjectsAndGradesByStudent(
 
     return evaluations;
   } catch (e) {
-    if (e is TimeoutException) {}
+    if (e is TimeoutException) {
+      return throw TimeoutException(e.toString());
+    }
     return throw FormatException(e.toString());
   }
 }
@@ -430,7 +433,7 @@ Future<bool> isDateToEvaluateStudents() async {
     }
   } catch (e) {
     insertErrorLog(e.toString(), 'FETCH DATE FOR STUDENT EVALUATION');
-    return throw e.toString();
+    return throw Exception(e.toString());
   }
 }
 

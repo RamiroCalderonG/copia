@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class CustomIconButton extends StatelessWidget {
@@ -6,22 +9,18 @@ class CustomIconButton extends StatelessWidget {
   final String tooltip;
 
   const CustomIconButton({
-    Key? key,
+    super.key,
     required this.onPressed,
     required this.icon,
     required this.tooltip,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton.icon(
-        onPressed: onPressed, icon: icon, label: Text(tooltip));
-
-    // IconButton.outlined(
-    //   onPressed: onPressed,
-    //   icon: icon,
-    //   tooltip: tooltip,
-    // );
+    return Platform.isIOS
+        ? CupertinoButton(onPressed: onPressed, child: Text(tooltip))
+        : ElevatedButton.icon(
+            onPressed: onPressed, icon: icon, label: Text(tooltip));
   }
 }
 
