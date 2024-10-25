@@ -318,10 +318,10 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
 
                     if (isUserAdmin) {
                       monthNumber =
-                          getKeyFromValue(monthsListMap, selectedTempMonth!);
+                          getKeyFromValue(spanishMonthsMap, selectedTempMonth!);
                     } else {
                       monthNumber = getKeyFromValue(
-                          monthsListMap, selectedCurrentTempMonth!);
+                          spanishMonthsMap, selectedCurrentTempMonth!);
                     }
                     var assignatureID =
                         getKeyFromValue(assignaturesMap, selectedTempSubject!);
@@ -355,10 +355,10 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                           var monthNumber;
                           if (isUserAdmin) {
                             monthNumber = getKeyFromValue(
-                                monthsListMap, selectedTempMonth!);
+                                spanishMonthsMap, selectedTempMonth!);
                           } else {
                             monthNumber = getKeyFromValue(
-                                monthsListMap, selectedCurrentTempMonth!);
+                                spanishMonthsMap, selectedCurrentTempMonth!);
                           }
                           var gradeInt = getKeyFromValue(
                               teacherGradesMap, selectedTempGrade!);
@@ -429,10 +429,10 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
 
                             if (isUserAdmin == true) {
                               monthNumber = getKeyFromValue(
-                                  monthsListMap, selectedTempMonth!);
+                                  spanishMonthsMap, selectedTempMonth!);
                             } else {
                               monthNumber = getKeyFromValue(
-                                  monthsListMap, selectedCurrentTempMonth!);
+                                  spanishMonthsMap, selectedCurrentTempMonth!);
                             }
 
                             if (gradeInt! >= 6) {
@@ -508,9 +508,9 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
     selectedUnity ??= campusesWhereTeacherTeach.first;
 
     if (isUserAdmin == true) {
-      monthNumber = getKeyFromValue(monthsListMap, monthValue);
+      monthNumber = getKeyFromValue(spanishMonthsMap, monthValue);
     } else {
-      monthNumber = getKeyFromValue(monthsListMap, currentMonth);
+      monthNumber = getKeyFromValue(spanishMonthsMap, currentMonth);
     }
     // gradeInt = getKeyFromValue(teacherGradesMap, gradeSelected);
 

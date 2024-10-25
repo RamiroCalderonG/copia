@@ -387,7 +387,7 @@ Future<Map<String, dynamic>> populateSubjectsDropDownSelector(
   }
 }
 
-//Function that validate that value can´t be less than 50
+//Function that validate that value can´t be less than 50 and more than 100
 int validateNewGradeValue(int newValue, String columnNameToFind) {
   //If value < 50 -> returns 50
   List<String> columnName = [

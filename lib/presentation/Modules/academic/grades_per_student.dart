@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
+import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/core/reusable_methods/translate_messages.dart';
 import 'package:oxschool/data/Models/Student_eval.dart';
@@ -31,8 +33,6 @@ class GradesByStudent extends StatefulWidget {
   State<GradesByStudent> createState() => _GradesByStudentState();
 }
 
-String currentMonth = DateFormat.MMMM().format(DateTime.now());
-
 String? subjectSelected = oneTeacherAssignatures.first;
 bool isUserAdmin = verifyUserAdmin(currentUser!);
 List<PlutoRow> rows = [];
@@ -41,6 +41,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
   var commentsController = TextEditingController();
   late PlutoGridStateManager stateManager;
   late PlutoGridStateManager gridAStateManager;
+  String currentMonth = DateFormat.MMMM('es').format(DateTime.now());
 
   Key? currentRowKey;
   Timer? _debounce;
@@ -52,12 +53,14 @@ class _GradesByStudentState extends State<GradesByStudent> {
   String dropDownValue = ''; //oneTeacherAssignatures.first;
   int? assignatureID;
   late Future<dynamic> _fetchedDataFromRequest;
+  DateFormat? dateFormat;
 
   String? selectedStudentID;
 
   @override
   void initState() {
     _fetchData();
+    initializeDateFormatting();
     super.initState();
   }
 
@@ -141,15 +144,16 @@ class _GradesByStudentState extends State<GradesByStudent> {
       }
 
       fillGrid(studentList); //Fill student list by unque values
-      var studentNumber = 0;
+      int studentNumber = 1;
 
       setState(() {
         studentEvaluationRows.clear();
         for (var item in uniqueStudentsList) {
           studentEvaluationRows.add(PlutoRow(cells: {
-            'No': PlutoCell(value: studentNumber + 1),
-            'studentID': PlutoCell(value: item['studentID']),
-            'studentName': PlutoCell(value: item['studentName']),
+            'No': PlutoCell(value: studentNumber),
+            'studentID': PlutoCell(value: item['studentID']!.trim()),
+            'studentName':
+                PlutoCell(value: item['studentName']!.trim().toTitleCase),
           }));
           studentNumber++;
         }
@@ -259,10 +263,10 @@ class _GradesByStudentState extends State<GradesByStudent> {
                   var monthNumber;
                   if (isUserAdmin) {
                     monthNumber =
-                        getKeyFromValue(monthsListMap, selectedTempMonth!);
+                        getKeyFromValue(spanishMonthsMap, selectedTempMonth!);
                   } else {
                     monthNumber = getKeyFromValue(
-                        monthsListMap, selectedCurrentTempMonth!);
+                        spanishMonthsMap, selectedCurrentTempMonth!);
                   }
                   if (selectedTempGroup == null || selectedTempGroup == '') {
                     return showEmptyFieldAlertDialog(
@@ -308,10 +312,10 @@ class _GradesByStudentState extends State<GradesByStudent> {
                         var monthNumber;
                         if (isUserAdmin) {
                           monthNumber = getKeyFromValue(
-                              monthsListMap, selectedTempMonth!);
+                              spanishMonthsMap, selectedTempMonth!);
                         } else {
                           monthNumber = getKeyFromValue(
-                              monthsListMap, selectedCurrentTempMonth!);
+                              spanishMonthsMap, selectedCurrentTempMonth!);
                         }
                         saveButtonAction(monthNumber);
                       }
@@ -383,10 +387,10 @@ class _GradesByStudentState extends State<GradesByStudent> {
 
                                     if (isUserAdmin == true) {
                                       monthNumber = getKeyFromValue(
-                                          monthsListMap, selectedTempMonth!);
+                                          spanishMonthsMap, selectedTempMonth!);
                                     } else {
                                       monthNumber = getKeyFromValue(
-                                          monthsListMap,
+                                          spanishMonthsMap,
                                           selectedCurrentTempMonth!);
                                     }
                                     selectedStudentID =
@@ -448,11 +452,11 @@ class _GradesByStudentState extends State<GradesByStudent> {
                                                 var monthNumber;
                                                 if (isUserAdmin == true) {
                                                   monthNumber = getKeyFromValue(
-                                                      monthsListMap,
+                                                      spanishMonthsMap,
                                                       selectedTempMonth!);
                                                 } else {
                                                   monthNumber = getKeyFromValue(
-                                                      monthsListMap,
+                                                      spanishMonthsMap,
                                                       currentMonth);
                                                 }
 
@@ -682,7 +686,8 @@ class _GradesByStudentState extends State<GradesByStudent> {
       for (var student in selectedStudentList) {
         selectedStudentRows.add(PlutoRow(cells: {
           'subject': PlutoCell(value: student.subject),
-          'subject_name': PlutoCell(value: student.subjectName),
+          'subject_name':
+              PlutoCell(value: student.subjectName!.trim().toTitleCase),
           'evaluation': PlutoCell(value: student.evaluation),
           // 'eval_type': PlutoCell(value: student.),
           'absence_eval': PlutoCell(value: student.absence),

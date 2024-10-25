@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -13,9 +14,8 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<dynamic> loginUser(var jsonBody) async {
-  var apiCall;
   try {
-    apiCall = await Requests.post(
+    var apiCall = await Requests.post(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/login/userlogin/',
         json: jsonBody,
         headers: {
@@ -31,7 +31,10 @@ Future<dynamic> loginUser(var jsonBody) async {
     if (e is TimeoutException) {
       return throw TimeoutException(e.toString());
     }
-    return apiCall;
+    if (e is SocketException) {
+      return throw SocketException(e.toString());
+    }
+    return throw Exception(e.toString());
     // throw FormatException(e.toString());
   }
 }
@@ -685,6 +688,7 @@ Future<dynamic> getSubjectsAndGradeByStuent(
           "assignature": "null", //Set null to return all subjects
           "value": "all" //set all to return all students by cycle and
         },
+        timeoutSeconds: 20,
         persistCookies: false);
     apiCall.raiseForStatus();
     return apiCall;
@@ -743,7 +747,7 @@ Future<dynamic> getStudentsGradesComments(
             "cycle": currentCycle!.claCiclo,
             "month": month
           },
-          timeoutSeconds: 15,
+          timeoutSeconds: 20,
           persistCookies: false);
       apiCall.raiseForStatus();
       response = apiCall;

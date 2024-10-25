@@ -58,7 +58,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   @override
-  void dispose(){
+  void dispose() {
     removeSharedPref();
     super.dispose();
   }
@@ -72,7 +72,7 @@ class _MyAppState extends State<MyApp> {
         FlutterFlowTheme.saveThemeMode(mode);
       });
 
-        void removeSharedPref() async {
+  void removeSharedPref() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove('isUserAdmin');
     await prefs.clear();
@@ -89,7 +89,7 @@ class _MyAppState extends State<MyApp> {
         GlobalCupertinoLocalizations.delegate,
       ],
       locale: _locale,
-      supportedLocales: const [Locale('en', '')],
+      supportedLocales: const [Locale('en'), Locale('es')],
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
           useMaterial3: true,

@@ -37,7 +37,7 @@ final List<PlutoColumn> studentColumnsToEvaluateByStudent = <PlutoColumn>[
       type: PlutoColumnType.number(),
       readOnly: true,
       sort: PlutoColumnSort.ascending,
-      width: 30),
+      width: 28),
   PlutoColumn(
       title: 'Matricula',
       field: 'studentID',

@@ -1,9 +1,9 @@
 Map<String, String> messagesFromBackend = {
-  'TimeoutException': 'Error en conexion, verificar conectividad, Code: 408',
+  'TimeoutException': 'La solicitud expiró, vuelva a intentar, Code: 408',
   'Unavailable': 'Servicio no disponible por el momento, Code: 503',
-  '[FireDAC][Phys][PG][libpq]':
-      'Servicio no disponible por el momento, Code:503',
-  'FormarException': 'Error al intentar procesar la información, Code: 409'
+  'FireDACPhysPGlibpq': 'Servicio no disponible por el momento, Code:503',
+  'FormatException': 'Error al intentar procesar la información, Code: 409',
+  'SocketException': 'Error en conexion, verificar conectividad, Code: 408'
 };
 // Map<int, String> api_status_code = {503: 'Service unavailable'};
 

@@ -34,7 +34,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
   List<String> filteredGrade = [];
   List<String> filteredGroup = [];
   List<String> filteredSubject = [];
-  String currentMonth = monthsListMap[currentMonthNumber] ?? 'Unknown month';
+  String currentMonth = spanishMonthsMap[currentMonthNumber] ?? 'Unknown month';
 
   String monthValue = '';
   bool userStatus = false;
@@ -177,7 +177,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                       style: TextStyle(fontSize: 14),
                     ),
                     trailingIcon: const Icon(Icons.arrow_drop_down),
-                    initialSelection: filteredGrade.first,
+                    initialSelection: selectedGrade,
                     onSelected: (String? value) {
                       selectedGrade = value;
                       selectedTempGrade = value;
@@ -199,7 +199,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                     label:
                         const Text(' Grupo ', style: TextStyle(fontSize: 14)),
                     trailingIcon: const Icon(Icons.arrow_drop_down),
-                    initialSelection: filteredGroup.first,
+                    initialSelection: selectedGroup,
                     onSelected: (String? value) {
                       selectedGroup = value;
                       selectedTempGroup = value;
@@ -223,7 +223,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                           label: const Text(' Materia ',
                               style: TextStyle(fontSize: 14)),
                           trailingIcon: const Icon(Icons.arrow_drop_down),
-                          initialSelection: filteredSubject.first,
+                          initialSelection: selectedSubject,
                           onSelected: (String? value) {
                             selectedSubject = value;
                             selectedTempSubject = value;
@@ -298,9 +298,9 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
     selectedSubject ??= filteredSubject.first;
 
     if (userStatus == true) {
-      monthValue = getKeyFromValue(monthsListMap, monthValue).toString();
+      monthValue = getKeyFromValue(spanishMonthsMap, monthValue).toString();
     } else {
-      monthValue = getKeyFromValue(monthsListMap, currentMonth).toString();
+      monthValue = getKeyFromValue(spanishMonthsMap, currentMonth).toString();
     }
   }
 }
