@@ -449,15 +449,17 @@ class _GradesByStudentState extends State<GradesByStudent> {
 
                                                 final subjectID = event.row
                                                     .cells['subject']?.value;
-                                                var monthNumber;
+                                                int? monthNumber;
                                                 if (isUserAdmin == true) {
                                                   monthNumber = getKeyFromValue(
                                                       spanishMonthsMap,
-                                                      selectedTempMonth!);
+                                                      selectedTempMonth!
+                                                          .toCapitalized);
                                                 } else {
                                                   monthNumber = getKeyFromValue(
                                                       spanishMonthsMap,
-                                                      currentMonth);
+                                                      currentMonth
+                                                          .toCapitalized);
                                                 }
 
                                                 validator();

@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:convert';
+
 import 'dart:io';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -7,6 +7,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/core/reusable_methods/translate_messages.dart';
+import 'package:oxschool/data/services/backend/api_requests/status_code_manager.dart';
 import 'package:requests/requests.dart';
 
 // ignore: depend_on_referenced_packages
@@ -822,7 +823,7 @@ Future<dynamic> getStudentsByRole(int employeeNumber, String userRole) async {
           'Auth': currentUser!.token
         },
         queryParameters: {
-          'role': 1, //<--------REMOVE HARDCORED NUMBER
+          'role': userRole, //<--------REMOVE HARDCORED NUMBER
           'detail': 'List',
           'employee': employeeNumber
         },
@@ -931,22 +932,10 @@ Future<dynamic> getActualDate() async {
     apiCall.raiseForStatus();
     return apiCall.body;
   } catch (e) {
-    // Check if error response contains a message
     if (e is HTTPException) {
-      insertErrorLog(e.toString(), 'api/date');
-      var firstWord = getMessageToDisplay(e.toString());
-      // If the API returns a JSON error, try to extract the message
-      try {
-        var errorResponse = jsonDecode(e.response.body);
-        if (errorResponse.containsKey('message')) {
-          print(errorResponse);
-          return errorResponse['message']; // Return only the message
-        } else {
-          return 'An unknown error occurred'; // Default message if no 'message' key
-        }
-      } catch (jsonError) {
-        return 'Failed to parse error response';
-      }
+      var reasonPhrase = returnsMessageToDisplay(e.response.statusCode);
+      var displayMessage = getMessageToDisplay(reasonPhrase);
+      return throw FormatException(displayMessage);
     } else if (e is TimeoutException) {
       insertErrorLog(e.toString(), 'api/date');
       var firstWord = getMessageToDisplay(e.toString());
@@ -954,6 +943,37 @@ Future<dynamic> getActualDate() async {
     } else {
       return 'Request failed: ${e.toString()}'; // General error handling
     }
+
+    // Check if error response contains a message
+
+    // if (e is HTTPException) {
+    //   var displayMessage;
+    //   insertErrorLog(e.toString(), 'api/date');
+    //   if (e.response.body.contains('Outdated')) {
+    //     displayMessage = getMessageToDisplay('Outdated');
+    //   } else {
+    //     displayMessage =
+    //         getMessageToDisplay(e.response.reasonPhrase.toString());
+    //   }
+
+    //   try {
+    //     var errorResponse = jsonDecode(e.response.body);
+    //     if (errorResponse.containsKey('message')) {
+    //       print(errorResponse);
+    //       return errorResponse['message']; // Return only the message
+    //     } else {
+    //       return throw displayMessage; // Default message if no 'message' key
+    //     }
+    //   } catch (jsonError) {
+    //     return throw Exception(jsonError);
+    //   }
+    // } else if (e is TimeoutException) {
+    //   insertErrorLog(e.toString(), 'api/date');
+    //   var firstWord = getMessageToDisplay(e.toString());
+    //   return throw firstWord;
+    // } else {
+    //   return 'Request failed: ${e.toString()}'; // General error handling
+    // }
   }
 }
 

@@ -83,12 +83,12 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp.router(
       title: 'Oxschool',
       localizationsDelegates: const [
-        FFLocalizationsDelegate(),
+        // FFLocalizationsDelegate(),
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      locale: _locale,
+      // locale: _locale,
       supportedLocales: const [Locale('en'), Locale('es')],
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
