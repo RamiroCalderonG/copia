@@ -192,21 +192,21 @@ class _Fodac27MenuSelectorState extends State<Fodac27MenuSelector> {
         ));
   }
 
-  Future<void> populateStudentsDropDownMenu() async {
-    var response = await getStudentsByTeacher(
-      currentUser!.employeeNumber!,
-      currentCycle!.claCiclo!,
-      currentUser!.role,
-    );
+  // Future<void> populateStudentsDropDownMenu() async {
+  //   var response = await getStudentsByTeacher(
+  //     currentUser!.employeeNumber!,
+  //     currentCycle!.claCiclo!,
+  //     currentUser!.role,
+  //   );
 
-    simplifiedStudentsList = response.map((item) => item.toString()).toList();
+  //   simplifiedStudentsList = response.map((item) => item.toString()).toList();
 
-    if (simplifiedStudentsList.isNotEmpty) {
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
+  //   if (simplifiedStudentsList.isNotEmpty) {
+  //     setState(() {
+  //       isLoading = false;
+  //     });
+  //   }
+  // }
 
   void handleAddItem() {
     if (selectedStudent.isEmpty) {

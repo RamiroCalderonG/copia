@@ -52,7 +52,7 @@ class _FoDac27State extends State<FoDac27> {
   @override
   void initState() {
     isUserAdmin = verifyUserAdmin(currentUser!);
-    // populateStudentsDropDownMenu();
+    populateStudentsDropDownMenu();
     super.initState();
   }
 
@@ -126,31 +126,22 @@ class _FoDac27State extends State<FoDac27> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-        future: populateStudentsDropDownMenu(),
-        builder: ((context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CustomLoadingIndicator());
-          } else if (snapshot.hasError) {
-            insertErrorLog(snapshot.error.toString(), 'LOADING FODAC_27');
-            return Center(child: Text('error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data == null) {
-            return const Center(child: Text('Sin información disponible'));
-          } else {
-            return Column(
-              children: [
-                buildStudentSelector(),
-                Expanded(child: buildPlutoGrid()),
-              ],
-            );
-          }
-        }));
-
-    // SafeArea(
-    //   child: LayoutBuilder(
-    //     builder: (BuildContext context, BoxConstraints constraints) {
-    //       if (isLoading) {
-    //         return CustomLoadingIndicator();
+    return Column(
+      children: [
+        buildStudentSelector(),
+        Expanded(child: buildPlutoGrid()),
+      ],
+    );
+    // FutureBuilder(
+    //     future: populateStudentsDropDownMenu(),
+    //     builder: ((context, snapshot) {
+    //       if (snapshot.connectionState == ConnectionState.waiting) {
+    //         return Center(child: CustomLoadingIndicator());
+    //       } else if (snapshot.hasError) {
+    //         insertErrorLog(snapshot.error.toString(), 'LOADING FODAC_27');
+    //         return Center(child: Text('error: ${snapshot.error}'));
+    //       } else if (!snapshot.hasData || snapshot.data == null) {
+    //         return const Center(child: Text('Sin información disponible'));
     //       } else {
     //         return Column(
     //           children: [
@@ -159,9 +150,7 @@ class _FoDac27State extends State<FoDac27> {
     //           ],
     //         );
     //       }
-    //     },
-    //   ),
-    // );
+    //     }));
   }
 
   Widget buildStudentSelector() {
