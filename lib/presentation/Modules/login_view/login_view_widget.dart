@@ -8,7 +8,6 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:oxschool/data/Models/Cycle.dart';
-import 'package:oxschool/data/Models/Logger.dart';
 import 'package:oxschool/data/Models/User.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
@@ -131,21 +130,34 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
       if (kIsWeb) {
         deviceData = readWebBrowserInfo(await deviceInfoPlugin.webBrowserInfo);
       } else {
-        deviceData = switch (defaultTargetPlatform) {
-          TargetPlatform.android =>
-            readAndroidBuildData(await deviceInfoPlugin.androidInfo),
-          TargetPlatform.iOS =>
-            readIosDeviceInfo(await deviceInfoPlugin.iosInfo),
-          TargetPlatform.linux =>
-            readLinuxDeviceInfo(await deviceInfoPlugin.linuxInfo),
-          TargetPlatform.windows =>
-            readWindowsDeviceInfo(await deviceInfoPlugin.windowsInfo),
-          TargetPlatform.macOS =>
-            readMacOsDeviceInfo(await deviceInfoPlugin.macOsInfo),
-          TargetPlatform.fuchsia => <String, dynamic>{
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.android:
+            // Await the deviceInfoPlugin.androidInfo call
+            var androidInfo = await deviceInfoPlugin.androidInfo;
+            deviceData = await readAndroidBuildData(androidInfo);
+            break;
+          case TargetPlatform.iOS:
+            var iosInfo = await deviceInfoPlugin.iosInfo;
+            deviceData = await readIosDeviceInfo(iosInfo);
+            break;
+          case TargetPlatform.linux:
+            var linuxInfo = await deviceInfoPlugin.linuxInfo;
+            deviceData = await readLinuxDeviceInfo(linuxInfo);
+            break;
+          case TargetPlatform.windows:
+            var windowsInfo = await deviceInfoPlugin.windowsInfo;
+            deviceData = await readWindowsDeviceInfo(windowsInfo);
+            break;
+          case TargetPlatform.macOS:
+            var macOsInfo = await deviceInfoPlugin.macOsInfo;
+            deviceData = await readMacOsDeviceInfo(macOsInfo);
+            break;
+          case TargetPlatform.fuchsia:
+            deviceData = <String, dynamic>{
               'Error:': 'Fuchsia platform isn\'t supported'
-            },
-        };
+            };
+            break;
+        }
         currentDeviceData = deviceData.toString();
         SharedPreferences devicePrefs = await SharedPreferences.getInstance();
         devicePrefs.setString('device', currentDeviceData);

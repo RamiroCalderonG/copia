@@ -1,228 +1,228 @@
-import 'dart:convert';
-import 'dart:io';
-import 'package:file_picker/file_picker.dart';
-import 'package:file_saver/file_saver.dart'; // Ensure you have the correct import for FileSaver
-import 'package:flutter/material.dart';
-import 'package:pluto_grid/pluto_grid.dart';
-import 'package:pluto_grid_export/pluto_grid_export.dart' as pluto_grid_export;
-import 'package:flutter/services.dart';
+// import 'dart:convert';
+// import 'dart:io';
+// import 'package:file_picker/file_picker.dart';
+// import 'package:file_saver/file_saver.dart'; // Ensure you have the correct import for FileSaver
+// import 'package:flutter/material.dart';
+// import 'package:pluto_grid/pluto_grid.dart';
+// import 'package:pluto_grid_export/pluto_grid_export.dart' as pluto_grid_export;
+// import 'package:flutter/services.dart';
 
-class PlutoGridHeader extends StatefulWidget {
-  const PlutoGridHeader({
-    required this.stateManager,
-    super.key,
-  });
+// class PlutoGridHeader extends StatefulWidget {
+//   const PlutoGridHeader({
+//     required this.stateManager,
+//     super.key,
+//   });
 
-  final PlutoGridStateManager stateManager;
+//   final PlutoGridStateManager stateManager;
 
-  @override
-  State<PlutoGridHeader> createState() => _PlutoGridHeaderState();
-}
+//   @override
+//   State<PlutoGridHeader> createState() => _PlutoGridHeaderState();
+// }
 
-class _PlutoGridHeaderState extends State<PlutoGridHeader> {
-  void _printToPdfAndShareOrSave() async {
-    if (widget.stateManager.rows.isEmpty) return;
+// class _PlutoGridHeaderState extends State<PlutoGridHeader> {
+//   void _printToPdfAndShareOrSave() async {
+//     if (widget.stateManager.rows.isEmpty) return;
 
-    final themeData = pluto_grid_export.ThemeData.withFont(
-      base: pluto_grid_export.Font.ttf(
-        await rootBundle.load('assets/fonts/SoraFont/static/Sora-Regular.ttf'),
-      ),
-      bold: pluto_grid_export.Font.ttf(
-        await rootBundle.load('assets/fonts/SoraFont/static/Sora-Regular.ttf'),
-      ),
-    );
+//     final themeData = pluto_grid_export.ThemeData.withFont(
+//       base: pluto_grid_export.Font.ttf(
+//         await rootBundle.load('assets/fonts/SoraFont/static/Sora-Regular.ttf'),
+//       ),
+//       bold: pluto_grid_export.Font.ttf(
+//         await rootBundle.load('assets/fonts/SoraFont/static/Sora-Regular.ttf'),
+//       ),
+//     );
 
-    var plutoGridPdfExport = pluto_grid_export.PlutoGridDefaultPdfExport(
-      title: "PDF",
-      creator: "Ox School",
-      format: pluto_grid_export.PdfPageFormat.a4.portrait,
-      themeData: themeData,
-    );
+//     var plutoGridPdfExport = pluto_grid_export.PlutoGridDefaultPdfExport(
+//       title: "PDF",
+//       creator: "Ox School",
+//       format: pluto_grid_export.PdfPageFormat.a4.portrait,
+//       themeData: themeData,
+//     );
 
-    await pluto_grid_export.Printing.sharePdf(
-      bytes: await plutoGridPdfExport.export(widget.stateManager),
-      filename: plutoGridPdfExport.getFilename(),
-    );
-  }
+//     await pluto_grid_export.Printing.sharePdf(
+//       bytes: await plutoGridPdfExport.export(widget.stateManager),
+//       filename: plutoGridPdfExport.getFilename(),
+//     );
+//   }
 
-  void _defaultExportGridAsCSV() async {
-    if (widget.stateManager.rows.isEmpty) return;
+//   void _defaultExportGridAsCSV() async {
+//     if (widget.stateManager.rows.isEmpty) return;
 
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return ExportDialog(stateManager: widget.stateManager);
-      },
-    );
-  }
+//     showDialog(
+//       context: context,
+//       barrierDismissible: false,
+//       builder: (BuildContext context) {
+//         return ExportDialog(stateManager: widget.stateManager);
+//       },
+//     );
+//   }
 
-  void _defaultExportGridAsCSVCompatibleWithExcel() async {
-    if (widget.stateManager.rows.isEmpty) return;
+//   void _defaultExportGridAsCSVCompatibleWithExcel() async {
+//     if (widget.stateManager.rows.isEmpty) return;
 
-    String title = "pluto_grid_export";
-    var exportCSV =
-        pluto_grid_export.PlutoGridExport.exportCSV(widget.stateManager);
-    var exported =
-        Uint8List.fromList(const Utf8Encoder().convert('\u{FEFF}$exportCSV'));
+//     String title = "pluto_grid_export";
+//     var exportCSV =
+//         pluto_grid_export.PlutoGridExport.exportCSV(widget.stateManager);
+//     var exported =
+//         Uint8List.fromList(const Utf8Encoder().convert('\u{FEFF}$exportCSV'));
 
-    await FileSaver.instance.saveFile(
-      name: "$title.csv",
-      bytes: exported,
-      ext: ".csv",
-      mimeType: MimeType.csv,
-    );
-  }
+//     await FileSaver.instance.saveFile(
+//       name: "$title.csv",
+//       bytes: exported,
+//       ext: ".csv",
+//       mimeType: MimeType.csv,
+//     );
+//   }
 
-  void _defaultExportGridAsCSVFakeExcel() async {
-    if (widget.stateManager.rows.isEmpty) return;
+//   void _defaultExportGridAsCSVFakeExcel() async {
+//     if (widget.stateManager.rows.isEmpty) return;
 
-    String title = "pluto_grid_export";
-    var exportCSV =
-        pluto_grid_export.PlutoGridExport.exportCSV(widget.stateManager);
-    var exported =
-        Uint8List.fromList(const Utf8Encoder().convert('\u{FEFF}$exportCSV'));
+//     String title = "pluto_grid_export";
+//     var exportCSV =
+//         pluto_grid_export.PlutoGridExport.exportCSV(widget.stateManager);
+//     var exported =
+//         Uint8List.fromList(const Utf8Encoder().convert('\u{FEFF}$exportCSV'));
 
-    await FileSaver.instance.saveFile(
-      name: "$title.xls",
-      bytes: exported,
-      ext: ".xls",
-      mimeType: MimeType.csv,
-    );
-  }
+//     await FileSaver.instance.saveFile(
+//       name: "$title.xls",
+//       bytes: exported,
+//       ext: ".xls",
+//       mimeType: MimeType.csv,
+//     );
+//   }
 
-  void _defaultExportGridAsCSVWithSemicolon() async {
-    if (widget.stateManager.rows.isEmpty) return;
+//   void _defaultExportGridAsCSVWithSemicolon() async {
+//     if (widget.stateManager.rows.isEmpty) return;
 
-    String title = "pluto_grid_export";
-    var exported = Uint8List.fromList(const Utf8Encoder().convert(
-      pluto_grid_export.PlutoGridExport.exportCSV(widget.stateManager,
-          fieldDelimiter: ";"),
-    ));
+//     String title = "pluto_grid_export";
+//     var exported = Uint8List.fromList(const Utf8Encoder().convert(
+//       pluto_grid_export.PlutoGridExport.exportCSV(widget.stateManager,
+//           fieldDelimiter: ";"),
+//     ));
 
-    await FileSaver.instance.saveFile(
-      name: "$title.csv",
-      bytes: exported,
-      ext: ".csv",
-      mimeType: MimeType.csv,
-    );
-  }
+//     await FileSaver.instance.saveFile(
+//       name: "$title.csv",
+//       bytes: exported,
+//       ext: ".csv",
+//       mimeType: MimeType.csv,
+//     );
+//   }
 
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: SizedBox(
-        height: widget.stateManager.headerHeight,
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Wrap(
-            spacing: 10,
-            children: [
-              ElevatedButton(
-                onPressed: _printToPdfAndShareOrSave,
-                child: const Text("Print to PDF and Share"),
-              ),
-              ElevatedButton(
-                onPressed: _defaultExportGridAsCSV,
-                child: const Text("Export to CSV"),
-              ),
-              ElevatedButton(
-                onPressed: _defaultExportGridAsCSVWithSemicolon,
-                child: const Text("Export to CSV with Semicolon ';'"),
-              ),
-              ElevatedButton(
-                onPressed: _defaultExportGridAsCSVCompatibleWithExcel,
-                child: const Text("UTF-8 CSV compatible with MS Excel"),
-              ),
-              ElevatedButton(
-                onPressed: _defaultExportGridAsCSVFakeExcel,
-                child: const Text("Fake MS Excel .xls export"),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return SingleChildScrollView(
+//       scrollDirection: Axis.horizontal,
+//       child: SizedBox(
+//         height: widget.stateManager.headerHeight,
+//         child: Padding(
+//           padding: const EdgeInsets.all(8.0),
+//           child: Wrap(
+//             spacing: 10,
+//             children: [
+//               ElevatedButton(
+//                 onPressed: _printToPdfAndShareOrSave,
+//                 child: const Text("Print to PDF and Share"),
+//               ),
+//               ElevatedButton(
+//                 onPressed: _defaultExportGridAsCSV,
+//                 child: const Text("Export to CSV"),
+//               ),
+//               ElevatedButton(
+//                 onPressed: _defaultExportGridAsCSVWithSemicolon,
+//                 child: const Text("Export to CSV with Semicolon ';'"),
+//               ),
+//               ElevatedButton(
+//                 onPressed: _defaultExportGridAsCSVCompatibleWithExcel,
+//                 child: const Text("UTF-8 CSV compatible with MS Excel"),
+//               ),
+//               ElevatedButton(
+//                 onPressed: _defaultExportGridAsCSVFakeExcel,
+//                 child: const Text("Fake MS Excel .xls export"),
+//               ),
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
 
-class ExportDialog extends StatefulWidget {
-  final PlutoGridStateManager stateManager;
+// class ExportDialog extends StatefulWidget {
+//   final PlutoGridStateManager stateManager;
 
-  const ExportDialog({required this.stateManager});
+//   const ExportDialog({required this.stateManager});
 
-  @override
-  _ExportDialogState createState() => _ExportDialogState();
-}
+//   @override
+//   _ExportDialogState createState() => _ExportDialogState();
+// }
 
-class _ExportDialogState extends State<ExportDialog> {
-  bool _isLoading = true;
+// class _ExportDialogState extends State<ExportDialog> {
+//   bool _isLoading = true;
 
-  @override
-  void initState() {
-    super.initState();
-    _exportGridAsCSV();
-  }
+//   @override
+//   void initState() {
+//     super.initState();
+//     _exportGridAsCSV();
+//   }
 
-  Future<void> _exportGridAsCSV() async {
-    try {
-      String title = "grid_export";
-      var exported = Uint8List.fromList(
-        const Utf8Encoder().convert(
-          pluto_grid_export.PlutoGridExport.exportCSV(widget.stateManager),
-        ),
-      );
+//   Future<void> _exportGridAsCSV() async {
+//     try {
+//       String title = "grid_export";
+//       var exported = Uint8List.fromList(
+//         const Utf8Encoder().convert(
+//           pluto_grid_export.PlutoGridExport.exportCSV(widget.stateManager),
+//         ),
+//       );
 
-      String? directoryPath = await FilePicker.platform.getDirectoryPath();
+//       String? directoryPath = await FilePicker.platform.getDirectoryPath();
 
-      if (directoryPath != null) {
-        String filePath = '$directoryPath/$title.csv';
-        File file = File(filePath);
-        await file.writeAsBytes(exported);
-        print('File saved to $filePath');
-      }
-    } catch (e) {
-      print('Error saving file: $e');
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
+//       if (directoryPath != null) {
+//         String filePath = '$directoryPath/$title.csv';
+//         File file = File(filePath);
+//         await file.writeAsBytes(exported);
+//         print('File saved to $filePath');
+//       }
+//     } catch (e) {
+//       print('Error saving file: $e');
+//     } finally {
+//       setState(() {
+//         _isLoading = false;
+//       });
+//     }
+//   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Dialog(
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: _isLoading
-            ? const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  CircularProgressIndicator(),
-                  SizedBox(width: 20),
-                  Text("Exporting ..."),
-                ],
-              )
-            : Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                      "Download complete. Check the selected directory!"),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text("Close"),
-                  ),
-                ],
-              ),
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Dialog(
+//       child: Padding(
+//         padding: const EdgeInsets.all(20.0),
+//         child: _isLoading
+//             ? const Row(
+//                 mainAxisSize: MainAxisSize.min,
+//                 children: [
+//                   CircularProgressIndicator(),
+//                   SizedBox(width: 20),
+//                   Text("Exporting ..."),
+//                 ],
+//               )
+//             : Column(
+//                 mainAxisSize: MainAxisSize.min,
+//                 children: [
+//                   const Text(
+//                       "Download complete. Check the selected directory!"),
+//                   const SizedBox(height: 20),
+//                   ElevatedButton(
+//                     onPressed: () {
+//                       Navigator.of(context).pop();
+//                     },
+//                     child: const Text("Close"),
+//                   ),
+//                 ],
+//               ),
+//       ),
+//     );
+//   }
+// }
 
 /*
 import 'dart:convert';
