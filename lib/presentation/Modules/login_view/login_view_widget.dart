@@ -17,6 +17,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/reusable_methods/logger_actions.dart';
 import '../../../core/reusable_methods/translate_messages.dart';
+import '../../../core/reusable_methods/user_functions.dart';
 import '../../components/confirm_dialogs.dart';
 import '../../components/custom_scaffold_messenger.dart';
 
@@ -134,23 +135,23 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
           case TargetPlatform.android:
             // Await the deviceInfoPlugin.androidInfo call
             var androidInfo = await deviceInfoPlugin.androidInfo;
-            deviceData = await readAndroidBuildData(androidInfo);
+            deviceData = readAndroidBuildData(androidInfo);
             break;
           case TargetPlatform.iOS:
             var iosInfo = await deviceInfoPlugin.iosInfo;
-            deviceData = await readIosDeviceInfo(iosInfo);
+            deviceData = readIosDeviceInfo(iosInfo);
             break;
           case TargetPlatform.linux:
             var linuxInfo = await deviceInfoPlugin.linuxInfo;
-            deviceData = await readLinuxDeviceInfo(linuxInfo);
+            deviceData = readLinuxDeviceInfo(linuxInfo);
             break;
           case TargetPlatform.windows:
             var windowsInfo = await deviceInfoPlugin.windowsInfo;
-            deviceData = await readWindowsDeviceInfo(windowsInfo);
+            deviceData = readWindowsDeviceInfo(windowsInfo);
             break;
           case TargetPlatform.macOS:
             var macOsInfo = await deviceInfoPlugin.macOsInfo;
-            deviceData = await readMacOsDeviceInfo(macOsInfo);
+            deviceData = readMacOsDeviceInfo(macOsInfo);
             break;
           case TargetPlatform.fuchsia:
             deviceData = <String, dynamic>{
@@ -582,27 +583,50 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                           padding: const EdgeInsetsDirectional
                                               .fromSTEB(0.0, 0.0, 0.0, 16.0),
                                           child: FFButtonWidget(
+                                            //
                                             onPressed: () async {
-                                              if (_model.textController1.text !=
-                                                      '' &&
-                                                  _model.textController2.text !=
-                                                      '') {
-                                                ScaffoldMessenger.of(context)
-                                                    .hideCurrentSnackBar();
-                                                await loginButtonFunction()
-                                                    .whenComplete(() {
+                                              if (kDebugMode) {
+                                                setState(() {
+                                                  setUserDataForDebug();
+                                                  isLoading = false;
+                                                });
+                                                context.goNamed(
+                                                  'MainWindow',
+                                                  extra: <String, dynamic>{
+                                                    kTransitionInfoKey:
+                                                        const TransitionInfo(
+                                                      hasTransition: true,
+                                                      transitionType:
+                                                          PageTransitionType
+                                                              .fade,
+                                                    ),
+                                                  },
+                                                );
+                                              } else {
+                                                if (_model.textController1
+                                                            .text !=
+                                                        '' &&
+                                                    _model.textController2
+                                                            .text !=
+                                                        '') {
+                                                  ScaffoldMessenger.of(context)
+                                                      .hideCurrentSnackBar();
+                                                  await loginButtonFunction()
+                                                      .whenComplete(() {
+                                                    setState(() {
+                                                      isLoading = false;
+                                                    });
+                                                  });
+                                                } else {
                                                   setState(() {
                                                     isLoading = false;
                                                   });
-                                                });
-                                              } else {
-                                                setState(() {
-                                                  isLoading = false;
-                                                });
-                                                showEmptyFieldAlertDialog(
-                                                    context,
-                                                    'Verificar información, usuario y/o contraseña no pueden estar en blanco');
+                                                  showEmptyFieldAlertDialog(
+                                                      context,
+                                                      'Verificar información, usuario y/o contraseña no pueden estar en blanco');
+                                                }
                                               }
+
                                               // setState(() {
                                               //   isLoading = true;
                                               // });
@@ -954,20 +978,41 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                               .fromSTEB(0.0, 0.0, 0.0, 16.0),
                                           child: FFButtonWidget(
                                             onPressed: () async {
-                                              if (_model.textController1.text !=
-                                                      '' &&
-                                                  _model.textController2.text !=
-                                                      '') {
-                                                await loginButtonFunction()
-                                                    .whenComplete(() {
+                                              if (kDebugMode) {
+                                                setState(() {
+                                                  setUserDataForDebug();
+                                                  isLoading = false;
+                                                });
+                                                context.goNamed(
+                                                  'MainWindow',
+                                                  extra: <String, dynamic>{
+                                                    kTransitionInfoKey:
+                                                        const TransitionInfo(
+                                                      hasTransition: true,
+                                                      transitionType:
+                                                          PageTransitionType
+                                                              .fade,
+                                                    ),
+                                                  },
+                                                );
+                                              } else {
+                                                if (_model.textController1
+                                                            .text !=
+                                                        '' &&
+                                                    _model.textController2
+                                                            .text !=
+                                                        '') {
+                                                  await loginButtonFunction()
+                                                      .whenComplete(() {
+                                                    setState(() {
+                                                      isLoading = false;
+                                                    });
+                                                  });
+                                                } else {
                                                   setState(() {
                                                     isLoading = false;
                                                   });
-                                                });
-                                              } else {
-                                                setState(() {
-                                                  isLoading = false;
-                                                });
+                                                }
                                               }
                                             },
                                             text: 'Ingresar',

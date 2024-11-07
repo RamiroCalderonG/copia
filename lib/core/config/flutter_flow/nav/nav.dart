@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:oxschool/presentation/Modules/academic/grades_main_screen.dart';
 import 'package:oxschool/presentation/components/pdf_viewer_screen.dart';
 import 'package:oxschool/presentation/Modules/main_window/mobile_main_window_widget.dart';
 import 'package:oxschool/presentation/Modules/user/user_view_screen.dart';
@@ -70,6 +71,10 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
             name: 'UDashboard',
             path: '/udashboard',
             builder: (context, params) => const UsersMainScreen()),
+        FFRoute(
+            name: 'Academic',
+            path: '/academic',
+            builder: (context, params) => const GradesMainScreen()),
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
     );
 
