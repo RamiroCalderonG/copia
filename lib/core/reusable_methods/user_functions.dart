@@ -198,40 +198,40 @@ void setUserDataForDebug() {
   var exampleEvents = [
     {
       'module_name': 'Academico',
-      'screenclass': 'Bajo rendimiento',
+      'screenclass': 'GradesMainScreen()',
       'event_name': 'Capturar calificaciones',
       'is_active': true
     },
     {
       'module_name': 'Academico',
-      'screenclass': 'Bajo rendimiento',
+      'screenclass': 'FoDac27()',
       'event_name': 'Configuracion Academica',
       'is_active': true
     },
     {
       'module_name': 'Academico',
-      'screenclass': 'Bajo rendimiento',
+      'screenclass': 'FoDac27()',
       'event_name': 'Acceder fodac27',
       'is_active': true
     },
-    {
-      'module_name': 'Academico',
-      'screenclass': 'Calificaciones',
-      'event_name': 'Configuracion Academica',
-      'is_active': true
-    },
-    {
-      'module_name': 'Academico',
-      'screenclass': 'Calificaciones',
-      'event_name': 'Capturar calificaciones',
-      'is_active': true
-    },
-    {
-      'module_name': 'Academico',
-      'screenclass': 'Calificaciones',
-      'event_name': '',
-      'is_active': true
-    },
+    // {
+    //   'module_name': 'Academico',
+    //   'screenclass': 'Calificaciones',
+    //   'event_name': 'Configuracion Academica',
+    //   'is_active': true
+    // },
+    // {
+    //   'module_name': 'Academico',
+    //   'screenclass': 'Calificaciones',
+    //   'event_name': 'Capturar calificaciones',
+    //   'is_active': true
+    // },
+    // {
+    //   'module_name': 'Academico',
+    //   'screenclass': 'Calificaciones',
+    //   'event_name': '',
+    //   'is_active': true
+    // },
   ];
 
   var cycle = Cycle('2023-2024', '01/01/2023', '01/01/2024');
