@@ -116,7 +116,7 @@ class _Fodac27MenuSelectorState extends State<Fodac27MenuSelector> {
                       trailingIcon: const Icon(Icons.arrow_drop_down),
                       onSelected: (value) {
                         setState(() {
-                          selectedGrade = value!;
+                          selectedGrade = value as String?;
                           selectedTempGrade = value;
                         });
                       },
@@ -134,7 +134,7 @@ class _Fodac27MenuSelectorState extends State<Fodac27MenuSelector> {
                     trailingIcon: const Icon(Icons.arrow_drop_down),
                     onSelected: (value) async {
                       setState(() {
-                        selectedGroup = value;
+                        selectedGroup = value as String?;
                         selectedTempGroup = value;
                         studentsList.clear();
                         selectedStudent = '';

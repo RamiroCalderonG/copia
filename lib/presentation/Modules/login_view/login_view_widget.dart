@@ -8,7 +8,6 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:oxschool/data/Models/Cycle.dart';
-import 'package:oxschool/data/Models/Logger.dart';
 import 'package:oxschool/data/Models/User.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
@@ -18,6 +17,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/reusable_methods/logger_actions.dart';
 import '../../../core/reusable_methods/translate_messages.dart';
+import '../../../core/reusable_methods/user_functions.dart';
 import '../../components/confirm_dialogs.dart';
 import '../../components/custom_scaffold_messenger.dart';
 
@@ -131,21 +131,34 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
       if (kIsWeb) {
         deviceData = readWebBrowserInfo(await deviceInfoPlugin.webBrowserInfo);
       } else {
-        deviceData = switch (defaultTargetPlatform) {
-          TargetPlatform.android =>
-            readAndroidBuildData(await deviceInfoPlugin.androidInfo),
-          TargetPlatform.iOS =>
-            readIosDeviceInfo(await deviceInfoPlugin.iosInfo),
-          TargetPlatform.linux =>
-            readLinuxDeviceInfo(await deviceInfoPlugin.linuxInfo),
-          TargetPlatform.windows =>
-            readWindowsDeviceInfo(await deviceInfoPlugin.windowsInfo),
-          TargetPlatform.macOS =>
-            readMacOsDeviceInfo(await deviceInfoPlugin.macOsInfo),
-          TargetPlatform.fuchsia => <String, dynamic>{
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.android:
+            // Await the deviceInfoPlugin.androidInfo call
+            var androidInfo = await deviceInfoPlugin.androidInfo;
+            deviceData = readAndroidBuildData(androidInfo);
+            break;
+          case TargetPlatform.iOS:
+            var iosInfo = await deviceInfoPlugin.iosInfo;
+            deviceData = readIosDeviceInfo(iosInfo);
+            break;
+          case TargetPlatform.linux:
+            var linuxInfo = await deviceInfoPlugin.linuxInfo;
+            deviceData = readLinuxDeviceInfo(linuxInfo);
+            break;
+          case TargetPlatform.windows:
+            var windowsInfo = await deviceInfoPlugin.windowsInfo;
+            deviceData = readWindowsDeviceInfo(windowsInfo);
+            break;
+          case TargetPlatform.macOS:
+            var macOsInfo = await deviceInfoPlugin.macOsInfo;
+            deviceData = readMacOsDeviceInfo(macOsInfo);
+            break;
+          case TargetPlatform.fuchsia:
+            deviceData = <String, dynamic>{
               'Error:': 'Fuchsia platform isn\'t supported'
-            },
-        };
+            };
+            break;
+        }
         currentDeviceData = deviceData.toString();
         SharedPreferences devicePrefs = await SharedPreferences.getInstance();
         devicePrefs.setString('device', currentDeviceData);
@@ -570,27 +583,50 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                           padding: const EdgeInsetsDirectional
                                               .fromSTEB(0.0, 0.0, 0.0, 16.0),
                                           child: FFButtonWidget(
+                                            //
                                             onPressed: () async {
-                                              if (_model.textController1.text !=
-                                                      '' &&
-                                                  _model.textController2.text !=
-                                                      '') {
-                                                ScaffoldMessenger.of(context)
-                                                    .hideCurrentSnackBar();
-                                                await loginButtonFunction()
-                                                    .whenComplete(() {
+                                              if (kDebugMode) {
+                                                setState(() {
+                                                  setUserDataForDebug();
+                                                  isLoading = false;
+                                                });
+                                                context.goNamed(
+                                                  'MainWindow',
+                                                  extra: <String, dynamic>{
+                                                    kTransitionInfoKey:
+                                                        const TransitionInfo(
+                                                      hasTransition: true,
+                                                      transitionType:
+                                                          PageTransitionType
+                                                              .fade,
+                                                    ),
+                                                  },
+                                                );
+                                              } else {
+                                                if (_model.textController1
+                                                            .text !=
+                                                        '' &&
+                                                    _model.textController2
+                                                            .text !=
+                                                        '') {
+                                                  ScaffoldMessenger.of(context)
+                                                      .hideCurrentSnackBar();
+                                                  await loginButtonFunction()
+                                                      .whenComplete(() {
+                                                    setState(() {
+                                                      isLoading = false;
+                                                    });
+                                                  });
+                                                } else {
                                                   setState(() {
                                                     isLoading = false;
                                                   });
-                                                });
-                                              } else {
-                                                setState(() {
-                                                  isLoading = false;
-                                                });
-                                                showEmptyFieldAlertDialog(
-                                                    context,
-                                                    'Verificar información, usuario y/o contraseña no pueden estar en blanco');
+                                                  showEmptyFieldAlertDialog(
+                                                      context,
+                                                      'Verificar información, usuario y/o contraseña no pueden estar en blanco');
+                                                }
                                               }
+
                                               // setState(() {
                                               //   isLoading = true;
                                               // });
@@ -942,20 +978,41 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                               .fromSTEB(0.0, 0.0, 0.0, 16.0),
                                           child: FFButtonWidget(
                                             onPressed: () async {
-                                              if (_model.textController1.text !=
-                                                      '' &&
-                                                  _model.textController2.text !=
-                                                      '') {
-                                                await loginButtonFunction()
-                                                    .whenComplete(() {
+                                              if (kDebugMode) {
+                                                setState(() {
+                                                  setUserDataForDebug();
+                                                  isLoading = false;
+                                                });
+                                                context.goNamed(
+                                                  'MainWindow',
+                                                  extra: <String, dynamic>{
+                                                    kTransitionInfoKey:
+                                                        const TransitionInfo(
+                                                      hasTransition: true,
+                                                      transitionType:
+                                                          PageTransitionType
+                                                              .fade,
+                                                    ),
+                                                  },
+                                                );
+                                              } else {
+                                                if (_model.textController1
+                                                            .text !=
+                                                        '' &&
+                                                    _model.textController2
+                                                            .text !=
+                                                        '') {
+                                                  await loginButtonFunction()
+                                                      .whenComplete(() {
+                                                    setState(() {
+                                                      isLoading = false;
+                                                    });
+                                                  });
+                                                } else {
                                                   setState(() {
                                                     isLoading = false;
                                                   });
-                                                });
-                                              } else {
-                                                setState(() {
-                                                  isLoading = false;
-                                                });
+                                                }
                                               }
                                             },
                                             text: 'Ingresar',
