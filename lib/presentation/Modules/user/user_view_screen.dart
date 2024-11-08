@@ -23,25 +23,7 @@ class _UserWindowState extends State<UserWindow> {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-      if (constraints.maxWidth < 600) {
-        return _smallScreenUserDisplay();
-      } else {
-        return _largerScreenUserDisplay();
-      }
-    });
-  }
-
-  Widget _smallScreenUserDisplay() {
-    return Scaffold(
-        appBar: AppBar(
-          title: const Text('Mi perfil', style: TextStyle(color: Colors.white)),
-          backgroundColor: FlutterFlowTheme.of(context).primary,
-        ),
-        body: Stack(
-          children: [_formContentsFields()],
-        ));
+    return _largerScreenUserDisplay();
   }
 
   Widget _largerScreenUserDisplay() {
@@ -50,9 +32,20 @@ class _UserWindowState extends State<UserWindow> {
           title:
               const Text('Mi  perfil', style: TextStyle(color: Colors.white)),
           backgroundColor: FlutterFlowTheme.of(context).primary,
+          actions: [
+            IconButton(
+              onPressed: () {},
+              icon: Icon(
+                Icons.notifications,
+                color: Colors.white,
+              ),
+              tooltip: 'Notificaciones',
+            )
+          ],
         ),
         body: Stack(
           children: [
+            // Background with blur effect
             Container(
               decoration: const BoxDecoration(
                 image: DecorationImage(
@@ -67,174 +60,241 @@ class _UserWindowState extends State<UserWindow> {
                 ),
               ),
             ),
-            Center(
-              child: Container(
-                margin: const EdgeInsets.all(30),
-                width: MediaQuery.of(context).size.width / 2,
-                height: MediaQuery.of(context).size.height,
-                decoration: BoxDecoration(
-                  color: FlutterFlowTheme.of(context).primaryBackground,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Center(child: _formContentsFields()),
-              ),
-            ),
-          ],
-        ));
-  }
-
-  Widget _formContentsFields() {
-    return LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-      if (constraints.maxWidth > 600) {
-        return Center(
-            child: Column(
-          children: <Widget>[
-            Container(
-              decoration: BoxDecoration(
-                border:
-                    Border.all(color: FlutterFlowTheme.of(context).primaryText),
-                // color: Colors.cyan,
-                borderRadius: BorderRadius.circular(100),
-              ),
-              width: 200,
-              height: 200,
-              margin: const EdgeInsets.all(15),
-              child: Center(
-                child: Text(
-                  currentUser!.employeeName![0],
-                  style: const TextStyle(fontFamily: 'Sora', fontSize: 20),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-            Row(
-              children: <Widget>[
-                Expanded(
-                    child: Container(
-                  margin: const EdgeInsets.only(top: 20, left: 20, right: 20),
-                  width: MediaQuery.of(context).size.width,
-                  height: 50,
-                  decoration: BoxDecoration(
-                      border: Border.all(
-                          color: FlutterFlowTheme.of(context).primaryText),
-                      // color: Colors.blue.shade300,
-                      borderRadius: BorderRadius.circular(60)),
-                  child: Center(
-                    child: Text(
-                      'Nombre: ${currentUser!.employeeName}',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontFamily: 'Sora',
-                        fontSize: 20,
+            // Rounded container at the top
+            SizedBox(
+              height: MediaQuery.of(context).size.height,
+              width: MediaQuery.of(context).size.width,
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: 40,
+                  ),
+                  CircleAvatar(
+                    radius: 100,
+                    backgroundImage:
+                        AssetImage('assets/images/profile-picture.jpg'),
+                    child: Text(currentUser!.employeeName!),
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    height: 30,
+                  ),
+                  Padding(
+                    padding: EdgeInsets.all(20),
+                    child: Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(20),
+                        child: Column(
+                          children: [
+                            if (MediaQuery.of(context).size.width > 600) ...[
+                              SizedBox(
+                                width: 400,
+                                child: TextField(
+                                  controller: TextEditingController(
+                                      text: '${currentUser!.employeeName}'),
+                                  style: TextStyle(color: Colors.white),
+                                  readOnly: true,
+                                  decoration: InputDecoration(
+                                    label: Text(
+                                      'Nombre',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                    // labelText: 'Nombre',
+                                    icon:
+                                        Icon(Icons.person, color: Colors.white),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: 10),
+                              SizedBox(
+                                width:
+                                    400, // Set a fixed width for the TextFields
+                                child: TextField(
+                                  controller: TextEditingController(
+                                      text: '${currentUser!.employeeNumber}'),
+                                  style: TextStyle(color: Colors.white),
+                                  readOnly: true,
+                                  decoration: InputDecoration(
+                                    label: Text(
+                                      'Número de empleado',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                    // labelText: 'Numero de empleado',
+                                    icon: Icon(Icons.numbers,
+                                        color: Colors.white),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: 10),
+                              SizedBox(
+                                width:
+                                    400, // Set a fixed width for the TextFields
+                                child: TextField(
+                                  controller: TextEditingController(
+                                      text: '${currentUser!.claUn}'),
+                                  style: TextStyle(color: Colors.white),
+                                  readOnly: true,
+                                  decoration: InputDecoration(
+                                    label: Text(
+                                      'Campus',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                    icon:
+                                        Icon(Icons.house, color: Colors.white),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                height: 20,
+                              ),
+                              FittedBox(
+                                  fit: BoxFit.fitWidth,
+                                  child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      children: <Widget>[
+                                        ElevatedButton.icon(
+                                            style: const ButtonStyle(
+                                                // backgroundColor:
+                                                // MaterialStatePropertyAll<Color>(Colors.green),
+                                                ),
+                                            onPressed: () {},
+                                            icon: const Icon(
+                                                Icons.attach_money_outlined),
+                                            label: const Text(
+                                                'Consulta  recibo nomina')),
+                                        const SizedBox(
+                                          width: 5,
+                                        ),
+                                        ElevatedButton.icon(
+                                            onPressed: () {},
+                                            icon: const Icon(Icons.abc),
+                                            label: const Text('Otra consulta')),
+                                        const SizedBox(
+                                          width: 5,
+                                        ),
+                                        ElevatedButton.icon(
+                                            style: const ButtonStyle(
+                                                // backgroundColor:
+                                                //     MaterialStatePropertyAll<Color>(Colors.orange),
+                                                ),
+                                            onPressed: () {
+                                              _changeMyPassword(context);
+                                            },
+                                            icon: const Icon(Icons.create),
+                                            label: const Text(
+                                                'Cambiar contraseña')),
+                                      ]))
+                            ] else ...[
+                              // For smaller screens, use full width
+                              TextField(
+                                controller: TextEditingController(
+                                    text: '${currentUser!.employeeName}'),
+                                style: TextStyle(color: Colors.white),
+                                readOnly: true,
+                                decoration: InputDecoration(
+                                  label: Text(
+                                    'Nombre',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  icon: Icon(Icons.person, color: Colors.white),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: 10),
+                              TextField(
+                                controller: TextEditingController(
+                                    text: '${currentUser!.employeeNumber}'),
+                                style: TextStyle(color: Colors.white),
+                                readOnly: true,
+                                decoration: InputDecoration(
+                                  label: Text(
+                                    'Número de empleado',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  icon:
+                                      Icon(Icons.numbers, color: Colors.white),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: 10),
+                              TextField(
+                                controller: TextEditingController(
+                                    text: '${currentUser!.claUn}'),
+                                style: TextStyle(color: Colors.white),
+                                readOnly: true,
+                                decoration: InputDecoration(
+                                  label: Text(
+                                    'Campus',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  icon: Icon(Icons.house, color: Colors.white),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                height: 20,
+                              ),
+                              FittedBox(
+                                  fit: BoxFit.fitWidth,
+                                  child: Row(
+                                      // mainAxisAlignment:
+                                      // MainAxisAlignment.spaceEvenly,
+                                      children: <Widget>[
+                                        IconButton.outlined(
+                                          color: Colors.white,
+                                          onPressed: () {},
+                                          icon: const Icon(
+                                              Icons.attach_money_outlined),
+                                          tooltip: 'Consulta  recibo nómina',
+                                        ),
+                                        SizedBox(
+                                          width: 5,
+                                        ),
+                                        IconButton.outlined(
+                                          color: Colors.white,
+                                          onPressed: () {},
+                                          icon: const Icon(Icons.abc),
+                                          tooltip: 'Otra consulta',
+                                        ),
+                                        SizedBox(
+                                          width: 5,
+                                        ),
+                                        IconButton.outlined(
+                                          color: Colors.white,
+                                          onPressed: () {
+                                            _changeMyPassword(context);
+                                          },
+                                          icon: const Icon(Icons.create),
+                                          tooltip: 'Cambiar contraseña',
+                                        )
+                                      ])),
+                            ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                )),
-              ],
+                ],
+              ),
             ),
-            Row(
-              children: <Widget>[
-                Expanded(
-                    child: Container(
-                  margin: const EdgeInsets.only(
-                      top: 8, left: 20, right: 20, bottom: 8),
-                  width: MediaQuery.of(context).size.width,
-                  height: 50,
-                  decoration: BoxDecoration(
-                      border: Border.all(
-                          color: FlutterFlowTheme.of(context).primaryText),
-                      // color: Colors.purple.shade300,
-                      borderRadius: BorderRadius.circular(60)),
-                  child: Center(
-                    child: Text(
-                      'Numero de empleado: ${currentUser!.employeeNumber}',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(fontFamily: 'Sora', fontSize: 20),
-                    ),
-                  ),
-                )),
-              ],
-            ),
-            Row(
-              children: <Widget>[
-                Expanded(
-                    child: Container(
-                  margin: const EdgeInsets.only(
-                      top: 8, left: 20, right: 20, bottom: 8),
-                  width: MediaQuery.of(context).size.width,
-                  height: 50,
-                  decoration: BoxDecoration(
-                      border: Border.all(
-                          color: FlutterFlowTheme.of(context).primaryText),
-                      // color: Colors.green.shade300,
-                      borderRadius: BorderRadius.circular(60)),
-                  child: Center(
-                    child: Text(
-                      'Rol de ususario: ${currentUser!.role}',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(fontFamily: 'Sora', fontSize: 20),
-                    ),
-                  ),
-                )),
-              ],
-            ),
-            Row(
-              children: <Widget>[
-                Expanded(
-                    child: Container(
-                  margin: const EdgeInsets.only(
-                      top: 8, left: 20, right: 20, bottom: 30),
-                  width: MediaQuery.of(context).size.width,
-                  height: 50,
-                  decoration: BoxDecoration(
-                      border: Border.all(
-                          color: FlutterFlowTheme.of(context).primaryText),
-                      // color: Colors.red.shade300,
-                      borderRadius: BorderRadius.circular(60)),
-                  child: Center(
-                    child: Text(
-                      'Campus: ${currentUser!.claUn}',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(fontFamily: 'Sora', fontSize: 20),
-                    ),
-                  ),
-                )),
-              ],
-            ),
-            Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: <Widget>[
-                  ElevatedButton.icon(
-                      style: const ButtonStyle(
-                          // backgroundColor:
-                          // MaterialStatePropertyAll<Color>(Colors.green),
-                          ),
-                      onPressed: () {},
-                      icon: const Icon(Icons.attach_money_outlined),
-                      label: const Text('Consulta  recibo nomina')),
-                  ElevatedButton.icon(
-                      onPressed: () {},
-                      icon: const Icon(Icons.abc),
-                      label: const Text('Otra consulta')),
-                  ElevatedButton.icon(
-                      style: const ButtonStyle(
-                          // backgroundColor:
-                          //     MaterialStatePropertyAll<Color>(Colors.orange),
-                          ),
-                      onPressed: () {
-                        _changeMyPassword(context);
-                      },
-                      icon: const Icon(Icons.create),
-                      label: const Text('Cambiar contraseña')),
-                ])
           ],
         ));
-      }
-      return const SingleChildScrollView(
-        child: Placeholder(),
-      );
-    });
   }
 
   Future<void> _changeMyPassword(BuildContext context) async {
@@ -247,22 +307,24 @@ class _UserWindowState extends State<UserWindow> {
               style: TextStyle(fontFamily: 'Sora'),
             ),
             content: TextField(
+              // obscureText: true,
               controller: _newPassword,
               decoration: const InputDecoration(
                   hintText: "Nueva Contraseña",
-                  helperText:
-                      "1 mayuscula, caracteres especiales, minimo 8 caracteres",
+                  // helperText:
+                  //     "1 mayuscula, caracteres especiales, minimo 8 caracteres",
                   icon: Icon(Icons.password)),
             ),
             actions: <Widget>[
               TextButton(
                   child: const Text('Cancelar'),
                   onPressed: () {
+                    _newPassword.clear();
                     Navigator.pop(context);
                   }),
               TextButton(
                   onPressed: () {
-                    //TODO: ADD EDIT USER SCREEN
+                    _newPassword.clear();
                   },
                   child: const Text('OK'))
             ],
