@@ -17,7 +17,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 Future<dynamic> loginUser(var jsonBody) async {
   try {
     var apiCall = await Requests.post(
-        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/login/userlogin/',
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/auth/login',
         json: jsonBody,
         headers: {
           'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
@@ -1047,6 +1047,22 @@ Future<dynamic> validateIfUserIsCoordinator(int user) async {
         persistCookies: false);
     apiCall.raiseForStatus();
     return apiCall.body;
+  } catch (e) {
+    return throw FormatException(e.toString());
+  }
+}
+
+Future<dynamic> getCurrentUserData(String token) async {
+  try {
+    var apiCall = await Requests.get(
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/users/me',
+        headers: {
+          //'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
+          'Authorization': 'Bearer $token'
+        },
+        persistCookies: false);
+    apiCall.raiseForStatus();
+    return apiCall;
   } catch (e) {
     return throw FormatException(e.toString());
   }

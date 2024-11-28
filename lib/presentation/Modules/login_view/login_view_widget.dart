@@ -50,6 +50,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
   List<int> tapTimestamps = [];
   int remainingTime = 0;
   Timer? timer;
+  bool isDebugging = false;
 
   // late User currentUser;
 
@@ -201,27 +202,35 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
         _updateRemainingTime();
         try {
           var value = trimSpaces(_model.textController2.text);
-          var emplNumberValue = trimSpaces(_model.textController1.text);
+          var emailValue = trimSpaces(_model.textController1.text);
 
-          Map<String, dynamic> nip = {'Nip': value};
+          Map<String, dynamic> nip = {'password': value};
           apiBody.addEntries(nip.entries);
           Map<String, dynamic> employeeNumber = {
-            'employeeNumber': _model.textController1.text
+            'email': _model.textController1.text
           };
           apiBody.addEntries(employeeNumber.entries);
           Map<String, dynamic> device = {'device': currentDeviceData};
           apiBody.addEntries(device.entries);
-          Map<String, dynamic> deviceIp = {'ip_address': deviceIP};
+          Map<String, dynamic> deviceIp = {'local': deviceIP};
           apiBody.addEntries(deviceIp.entries);
           SharedPreferences devicePrefs = await SharedPreferences.getInstance();
           devicePrefs.setString('ip', deviceIP);
 
-          if (value.isNotEmpty && emplNumberValue.isNotEmpty) {
+          if (value.isNotEmpty && emailValue.isNotEmpty) {
             apiResponse = await loginUser(apiBody);
             if (apiResponse.statusCode == 200) {
-              List<dynamic> jsonList = json.decode(apiResponse.body);
-              currentUser = parseLogedInUserFromJSON(jsonList);
+              List<dynamic> jsonList;
+              Map<String, dynamic> jsonData = jsonDecode(apiResponse.body);
+              //= json.decode(apiResponse.body['token']);
 
+              var token = jsonData['token'];
+
+              apiResponse = await getCurrentUserData(token);
+              jsonData = json.decode(apiResponse.body);
+
+              currentUser = parseLogedInUserFromJSON(jsonData, token);
+              //TOO: CONTINUE PROCESS TO VERIFY USER EVENTS
               getUserPermissions(currentUser!.userId);
 
               apiResponse = await getCycle(
@@ -425,10 +434,11 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                             enableSuggestions: true,
                                             controller: _model.textController1,
                                             obscureText: false,
-                                            keyboardType: TextInputType.number,
-                                            maxLength: 8,
+                                            keyboardType:
+                                                TextInputType.emailAddress,
+                                            maxLength: 50,
                                             decoration: InputDecoration(
-                                              labelText: 'Numero de empleado',
+                                              labelText: 'E-mail',
                                               hintStyle:
                                                   FlutterFlowTheme.of(context)
                                                       .bodyLarge,
@@ -585,8 +595,13 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                           child: FFButtonWidget(
                                             //
                                             onPressed: () async {
-                                              if (kDebugMode) {
+                                              if (kDebugMode &&
+                                                  _model.textController1.text
+                                                      .isEmpty &&
+                                                  _model.textController2.text
+                                                      .isEmpty) {
                                                 setState(() {
+                                                  isDebugging = true;
                                                   setUserDataForDebug();
                                                   isLoading = false;
                                                 });
@@ -824,10 +839,11 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                             enableSuggestions: true,
                                             controller: _model.textController1,
                                             obscureText: false,
-                                            keyboardType: TextInputType.number,
-                                            maxLength: 8,
+                                            keyboardType:
+                                                TextInputType.emailAddress,
+                                            maxLength: 50,
                                             decoration: InputDecoration(
-                                              labelText: 'Numero de empleado',
+                                              labelText: 'E-mail',
                                               hintStyle:
                                                   FlutterFlowTheme.of(context)
                                                       .bodySmall,
@@ -978,8 +994,13 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                               .fromSTEB(0.0, 0.0, 0.0, 16.0),
                                           child: FFButtonWidget(
                                             onPressed: () async {
-                                              if (kDebugMode) {
+                                              if (kDebugMode &&
+                                                  _model.textController1.text
+                                                      .isEmpty &&
+                                                  _model.textController2.text
+                                                      .isEmpty) {
                                                 setState(() {
+                                                  isDebugging = true;
                                                   setUserDataForDebug();
                                                   isLoading = false;
                                                 });
@@ -1229,44 +1250,44 @@ Future<void> _displayForgotPassword(BuildContext context) async {
   );
 }
 
-User parseLogedInUserFromJSON(List<dynamic> jsonList) {
+User parseLogedInUserFromJSON(Map<String, dynamic> jsonList, String userToken) {
   late User currentUser;
   // late List<dynamic> events = [];
 
-  for (var i = 0; i < jsonList.length; i++) {
-    if (i == 0) {
-      int employeeNumber = jsonList[i]['NoEmpleado'];
-      String employeeName = jsonList[i]['Nombre_Gafete'];
-      String claUn = jsonList[i]['ClaUn'];
-      String role = jsonList[i]['RoleName'];
-      int userId = jsonList[i]['id'];
-      String token = 'Bearer ';
-      token = token + jsonList[1]['token'];
-      String schoolEmail = jsonList[i]['user_email'];
-      String usergenre = jsonList[i]['genre'];
-      int isActive = jsonList[i]['bajalogicasino'];
-      String? department = jsonList[i]['department'];
-      String? position = jsonList[i]['position'];
-      String? dateTime = jsonList[i]['createdAt'];
-      String? birthdate = jsonList[i]['birthdate'];
-      bool? isTeacher = jsonList[i]['is_teacher'];
-      currentUser = User(
-          claUn,
-          employeeName,
-          employeeNumber,
-          role,
-          userId,
-          token,
-          schoolEmail,
-          usergenre,
-          isActive,
-          department,
-          position,
-          dateTime,
-          birthdate,
-          isTeacher);
-    }
-  }
+  // for (var i = 0; i < jsonList.length; i++) {
+  // if (i == 0) {
+  int employeeNumber = jsonList['employeeNumber'];
+  String employeeName = jsonList['userFullName'];
+  String claUn = jsonList['userCampus'];
+  String role = jsonList['userRole']['name'];
+  int userId = jsonList['id'];
+  String token = 'Bearer ';
+  token = token + userToken;
+  String schoolEmail = jsonList['userMail'];
+  String? usergenre = jsonList['genre'];
+  int isActive = jsonList['status'];
+  String? department = jsonList['userDept'];
+  String? position = jsonList['userPosition'];
+  //String? dateTime = jsonList[i]['createdAt'];
+  //String? birthdate = jsonList[i]['birthdate'];
+  bool? isTeacher = jsonList['userTeacher'];
+  currentUser = User(
+      claUn,
+      employeeName,
+      employeeNumber,
+      role,
+      userId,
+      token,
+      schoolEmail,
+      //usergenre,
+      isActive,
+      department,
+      position,
+      null,
+      null,
+      isTeacher);
+  // }
+  // }
   userToken = currentUser.token;
   return currentUser;
 }
