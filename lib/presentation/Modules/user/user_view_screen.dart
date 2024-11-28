@@ -71,8 +71,8 @@ class _UserWindowState extends State<UserWindow> {
                   ),
                   CircleAvatar(
                     radius: 100,
-                    backgroundImage:
-                        AssetImage('assets/images/profile-picture.jpg'),
+                    // backgroundImage:
+                    //     AssetImage('assets/images/logoRedondoOx.png'),
                     child: Text(currentUser!.employeeName!),
                   ),
                   const SizedBox(height: 8),
