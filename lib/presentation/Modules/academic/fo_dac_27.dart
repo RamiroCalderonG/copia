@@ -216,8 +216,8 @@ class _FoDac27State extends State<FoDac27> {
           stateManager = event.stateManager;
         },
         onSelected: handleSelectedCell,
-        createHeader: (stateManager) =>
-            PlutoGridHeader(stateManager: stateManager),
+        // createHeader: (stateManager) =>
+        //     PlutoGridHeader(stateManager: stateManager),
         configuration: const PlutoGridConfiguration(
           style: PlutoGridStyleConfig(
             enableColumnBorderVertical: false,

@@ -1,10 +1,13 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
+import 'package:oxschool/data/Models/Cycle.dart';
 import 'package:oxschool/data/Models/Role.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
 import 'package:oxschool/data/datasources/temp/users_temp_data.dart';
+import 'package:http/http.dart' as http;
 
 import '../../data/Models/Event.dart';
 import '../../data/Models/User.dart';
@@ -173,4 +176,76 @@ void logOutCurrentUser(User employee) async {
   insertActionIntoLog('User end session', employee.employeeNumber.toString());
 
   logOutUser(employee.token, employee.employeeNumber.toString());
+}
+
+void setUserDataForDebug() {
+  var user = User(
+      'Campus_Test',
+      'User_test',
+      12345678,
+      'Administrador',
+      202,
+      '123456_Token',
+      'correo@mail.com',
+      'Male',
+      1,
+      'Technology',
+      'Developer',
+      '01/01/1999',
+      '01/01/2000',
+      false);
+  currentUser = user;
+  var exampleEvents = [
+    {
+      'module_name': 'Academico',
+      'screenclass': 'GradesMainScreen()',
+      'event_name': 'Capturar calificaciones',
+      'is_active': true
+    },
+    {
+      'module_name': 'Academico',
+      'screenclass': 'FoDac27()',
+      'event_name': 'Configuracion Academica',
+      'is_active': true
+    },
+    {
+      'module_name': 'Academico',
+      'screenclass': 'FoDac27()',
+      'event_name': 'Acceder fodac27',
+      'is_active': true
+    },
+    // {
+    //   'module_name': 'Academico',
+    //   'screenclass': 'Calificaciones',
+    //   'event_name': 'Configuracion Academica',
+    //   'is_active': true
+    // },
+    // {
+    //   'module_name': 'Academico',
+    //   'screenclass': 'Calificaciones',
+    //   'event_name': 'Capturar calificaciones',
+    //   'is_active': true
+    // },
+    // {
+    //   'module_name': 'Academico',
+    //   'screenclass': 'Calificaciones',
+    //   'event_name': '',
+    //   'is_active': true
+    // },
+  ];
+
+  var cycle = Cycle('2023-2024', '01/01/2023', '01/01/2024');
+
+  Future<http.Response> populateExampleUserEvents() async {
+    return http.Response(jsonEncode(exampleEvents), 200, headers: {
+      'Content-Type': 'application/json',
+    });
+  }
+
+  userEvents = populateExampleUserEvents();
+  currentCycle = cycle;
+
+  // (jsonEncode(exampleEvents), 200, headers : {
+  //   'Content-Type': 'application/json',
+  // });
 }
