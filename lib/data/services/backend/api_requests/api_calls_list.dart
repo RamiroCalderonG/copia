@@ -536,7 +536,7 @@ Future<dynamic> getWorkDepartments() async {
 Future<dynamic> sendUserPasswordToMail(
     String employeeNumber, String deviceInfo, String deviceIP) async {
   try {
-    var apiCall = await Requests.get(
+    var apiCall = await Requests.post(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/login/forgot-password/$employeeNumber',
         headers: {
           'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
@@ -549,6 +549,27 @@ Future<dynamic> sendUserPasswordToMail(
     return 200;
   } catch (e) {
     return e;
+  }
+}
+
+Future<dynamic> sendRecoveryToken(String userMail, String deviceInfo) async {
+  var apiCall;
+  try {
+    apiCall = await Requests.post(
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/auth/lost-password',
+        headers: {
+          "Content-Type": "application/json"
+          // 'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
+          // 'device': deviceInfo,
+          // 'ip_address': deviceIp.toString()
+        },
+        json: {"email": userMail, "device": deviceInfo},
+        persistCookies: false,
+        timeoutSeconds: 10);
+    apiCall.raiseForStatus();
+    return apiCall;
+  } catch (e) {
+    return apiCall;
   }
 }
 

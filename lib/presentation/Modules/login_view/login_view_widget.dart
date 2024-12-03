@@ -13,6 +13,7 @@ import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart'
 import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:flutter/material.dart';
 import 'package:oxschool/core/constants/connection.dart';
+import 'package:oxschool/presentation/Modules/login_view/recover_password_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/reusable_methods/logger_actions.dart';
@@ -1115,6 +1116,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
 }
 
 TextEditingController _textFieldController = TextEditingController();
+bool displayTokenGenerator = true;
 
 Future<void> _displayForgotPassword(BuildContext context) async {
   _textFieldController.text = '';
@@ -1124,131 +1126,144 @@ Future<void> _displayForgotPassword(BuildContext context) async {
     context: context,
     builder: (context) {
       return StatefulBuilder(builder: (context, setState) {
-        return AlertDialog(
-          title: const Text(
-            'Recuperar contraseña',
-            style: TextStyle(fontFamily: 'Sora'),
-          ),
-          content: isLoading
-              ? const Center(
-                  child: CircularProgressIndicator(),
-                )
-              : TextFormField(
-                  autofocus: true,
-                  controller: _textFieldController,
-                  decoration: const InputDecoration(
-                    hintText: "Numero de empleado",
-                    helperText: 'Ingrese su numero de empleado',
-                    icon: Icon(Icons.numbers),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Por favor, ingrese un número de empleado válido';
-                    }
-                    return null;
-                  },
-                ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('CANCELAR'),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-            TextButton(
-              onPressed: isLoading
-                  ? null // Disable the button when loading
-                  : () async {
-                      setState(() {
-                        isLoading = true; // Start loading animation
-                      });
-
-                      if (_textFieldController.text.isNotEmpty ||
-                          _textFieldController.text != '') {
-                        var responseCode = await sendUserPasswordToMail(
-                            _textFieldController.text,
-                            deviceInformation.toString(),
-                            deviceIP);
-                        if (responseCode == 200) {
-                          Navigator.pop(context);
-                          showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: const Text(
-                                    "Solicitud enviada",
-                                    style: TextStyle(fontFamily: 'Sora'),
-                                  ),
-                                  content: const Text(
-                                      "Si los resultados coinciden, recibirá en su correo su contraseña"),
-                                  icon: (const Icon(Icons.beenhere_outlined)),
-                                  actions: [
-                                    TextButton(
-                                        onPressed: () {
-                                          Navigator.pop(context);
-                                        },
-                                        child: const Text('OK'))
-                                  ],
-                                );
-                              });
-                        } else {
-                          showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: const Text(
-                                    "Error",
-                                    style: TextStyle(fontFamily: 'Sora'),
-                                  ),
-                                  content: Text(responseCode.toString()),
-                                  icon: (const Icon(Icons.error_outline)),
-                                  actions: [
-                                    TextButton(
-                                        onPressed: () {
-                                          Navigator.pop(context);
-                                        },
-                                        child: const Text('OK'))
-                                  ],
-                                );
-                              });
-                        }
-                      } else {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              icon: const Icon(Icons.error_outline),
-                              title: const Text(
-                                "Error",
-                                style: TextStyle(fontFamily: 'Sora'),
-                              ),
-                              content: const Text(
-                                "Por favor, ingrese un número de empleado válido",
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                  child: const Text('OK'),
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      }
-                      setState(() {
-                        isLoading = false; // Stop loading animation
-                      });
-                    },
-              child: const Text('OK'),
-            ),
-          ],
-        );
+        return RecoverPasswordScreen();
       });
     },
   );
 }
+
+// Widget generateTokenScreen(BuildContext context){
+//   return AlertDialog(
+//           title: const Text(
+//             'Recuperar contraseña',
+//             style: TextStyle(fontFamily: 'Sora'),
+//           ),
+//           content: isLoading
+//               ? const Center(
+//                   child: CircularProgressIndicator(),
+//                 )
+//               : TextFormField(
+//                   autofocus: true,
+//                   controller: _textFieldController,
+//                   decoration: const InputDecoration(
+//                     hintText: "Email",
+//                     helperText: 'Ingrese su correo electrónico',
+//                     icon: Icon(Icons.numbers),
+//                   ),
+//                   validator: (value) {
+//                     if (value == null || value.isEmpty) {
+//                       return 'Por favor, ingrese un correo válido';
+//                     }
+//                     return null;
+//                   },
+//                 ),
+//           actions: <Widget>[
+//             TextButton(
+//               child: const Text('CANCELAR'),
+//               onPressed: () {
+//                 Navigator.pop(context);
+//               },
+//             ),
+//             TextButton(
+//               onPressed: isLoading
+//                   ? null // Disable the button when loading
+//                   : () async {
+//                       setState(() {
+//                         isLoading = true; // Start loading animation
+//                       });
+
+//                       if (_textFieldController.text.isNotEmpty ||
+//                           _textFieldController.text != '') {
+//                         var response = await sendRecoveryToken(
+//                             _textFieldController.text,
+//                             deviceInformation.toString());
+//                         if (response.statusCode == 200) {
+//                           setState (() {
+
+//                           })
+//                         }
+
+//                         var responseCode = await sendUserPasswordToMail(
+//                             _textFieldController.text,
+//                             deviceInformation.toString(),
+//                             deviceIP);
+//                         if (responseCode == 200) {
+//                           Navigator.pop(context);
+//                           showDialog(
+//                               context: context,
+//                               builder: (BuildContext context) {
+//                                 return AlertDialog(
+//                                   title: const Text(
+//                                     "Solicitud enviada",
+//                                     style: TextStyle(fontFamily: 'Sora'),
+//                                   ),
+//                                   content: const Text(
+//                                       "Si los resultados coinciden, recibirá en su correo su contraseña"),
+//                                   icon: (const Icon(Icons.beenhere_outlined)),
+//                                   actions: [
+//                                     TextButton(
+//                                         onPressed: () {
+//                                           Navigator.pop(context);
+//                                         },
+//                                         child: const Text('OK'))
+//                                   ],
+//                                 );
+//                               });
+//                         } else {
+//                           showDialog(
+//                               context: context,
+//                               builder: (BuildContext context) {
+//                                 return AlertDialog(
+//                                   title: const Text(
+//                                     "Error",
+//                                     style: TextStyle(fontFamily: 'Sora'),
+//                                   ),
+//                                   content: Text(responseCode.toString()),
+//                                   icon: (const Icon(Icons.error_outline)),
+//                                   actions: [
+//                                     TextButton(
+//                                         onPressed: () {
+//                                           Navigator.pop(context);
+//                                         },
+//                                         child: const Text('OK'))
+//                                   ],
+//                                 );
+//                               });
+//                         }
+//                       } else {
+//                         showDialog(
+//                           context: context,
+//                           builder: (BuildContext context) {
+//                             return AlertDialog(
+//                               icon: const Icon(Icons.error_outline),
+//                               title: const Text(
+//                                 "Error",
+//                                 style: TextStyle(fontFamily: 'Sora'),
+//                               ),
+//                               content: const Text(
+//                                 "Por favor, ingrese un número de empleado válido",
+//                               ),
+//                               actions: [
+//                                 TextButton(
+//                                   onPressed: () {
+//                                     Navigator.pop(context);
+//                                   },
+//                                   child: const Text('OK'),
+//                                 ),
+//                               ],
+//                             );
+//                           },
+//                         );
+//                       }
+//                       setState(() {
+//                         isLoading = false; // Stop loading animation
+//                       });
+//                     },
+//               child: const Text('OK'),
+//             ),
+//           ],
+//         );
+// }
 
 User parseLogedInUserFromJSON(Map<String, dynamic> jsonList, String userToken) {
   late User currentUser;

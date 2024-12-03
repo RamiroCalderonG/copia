@@ -23,3 +23,8 @@ String getMessageToDisplay(String currentMessage) {
     return currentMessage;
   }
 }
+
+Map<int, String> apiStatusCodes = {
+  404: 'Not Found',
+  408: 'Request Timeout',
+};
