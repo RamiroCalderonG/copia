@@ -575,9 +575,8 @@ Future<dynamic> sendRecoveryToken(String userMail, String deviceInfo) async {
 
 Future<dynamic> updateUserPasswordByToken(
     String token, String newPassword) async {
-  var apiCall;
   try {
-    apiCall = await Requests.put(
+    var apiCall = await Requests.put(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/auth/password',
         headers: {"Content-Type": "application/json"},
         json: {"token": token, "password": newPassword},
@@ -610,7 +609,7 @@ Future<dynamic> validateToken(
     return apiCall;
   } catch (e) {
     insertErrorLog(e.toString(), '/auth/recovery-token');
-    return throw e;
+    return throw Exception(e.toString());
   }
 }
 

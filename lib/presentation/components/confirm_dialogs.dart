@@ -107,7 +107,11 @@ void showInformationDialog(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text('Cerrar'),
+              child: Text('Cerrar',
+                  style: TextStyle(
+                    fontFamily: 'Sora',
+                    backgroundColor: Colors.blue[50],
+                  )),
             )
           ],
         );
@@ -151,7 +155,7 @@ Future<int> showDeleteConfirmationAlertDialog(BuildContext context) async {
               },
               style: ButtonStyle(
                 backgroundColor:
-                    MaterialStateProperty.all<Color>(Colors.greenAccent),
+                    WidgetStateProperty.all<Color>(Colors.greenAccent),
               ),
               child: Text('Si',
                   style: FlutterFlowTheme.of(context).labelLarge.override(

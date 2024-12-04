@@ -62,7 +62,7 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
         title: const Text('Recuperar contraseña'),
       ),
       body: Padding(
-          padding: EdgeInsets.all(150),
+          padding: EdgeInsets.only(left: 100, right: 100),
           child: PageView(
             controller: _pageController,
             children: [
@@ -81,6 +81,7 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
+        // crossAxisAlignment: CrossAxisAlignment.baseline,
         children: [
           Text(
             'Instrucciones: ',
@@ -107,54 +108,66 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
           ),
           isLoading
               ? const CircularProgressIndicator()
-              : TextFormField(
-                  autofocus: true,
-                  maxLength: 40,
-                  controller: _textFieldController,
-                  decoration: const InputDecoration(
-                    hintText: "Email",
-                    helperText: 'Ingrese su correo electrónico',
-                    icon: Icon(Icons.email),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Por favor, ingrese un correo válido';
-                    }
-                    return null;
-                  },
-                ),
-          const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: isLoading
-                ? null // Disable the button when loading
-                : () async {
-                    setState(() {
-                      isLoading = true; // Start loading animation
-                    });
-                    if (_textFieldController.text.isNotEmpty) {
-                      var response = await sendRecoveryToken(
-                          _textFieldController.text, deviceData);
-                      if (response.statusCode != 200) {
-                        setState(() {
-                          isLoading = false;
-                        });
-                        showErrorFromBackend(context, response.body);
-                      } else {
-                        setState(() {
-                          isLoading = false;
-                        });
-                        _pageController.nextPage(
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeIn,
-                        );
-                      }
-                    } else {
-                      // Show error dialog for empty email
-                      _showErrorDialog("Por favor, ingrese un email válido");
-                    }
-                  },
-            child: const Text('Siguiente'),
-          ),
+              : Row(
+                  children: [
+                    Flexible(
+                        flex: 4,
+                        child: TextFormField(
+                          autofocus: true,
+                          maxLength: 40,
+                          controller: _textFieldController,
+                          decoration: const InputDecoration(
+                            hintText: "Email",
+                            helperText: 'Ingrese su correo electrónico',
+                            icon: Icon(Icons.email),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Por favor, ingrese un correo válido';
+                            }
+                            return null;
+                          },
+                        )),
+                    const SizedBox(width: 20),
+                    Flexible(
+                      flex: 2,
+                      child: ElevatedButton(
+                        onPressed: isLoading
+                            ? null // Disable the button when loading
+                            : () async {
+                                setState(() {
+                                  isLoading = true; // Start loading animation
+                                });
+                                if (_textFieldController.text.isNotEmpty) {
+                                  var response = await sendRecoveryToken(
+                                      _textFieldController.text, deviceData);
+                                  if (response.statusCode != 200) {
+                                    setState(() {
+                                      isLoading = false;
+                                    });
+                                    showErrorFromBackend(
+                                        context, response.body);
+                                  } else {
+                                    setState(() {
+                                      isLoading = false;
+                                    });
+                                    _pageController.nextPage(
+                                      duration:
+                                          const Duration(milliseconds: 300),
+                                      curve: Curves.easeIn,
+                                    );
+                                  }
+                                } else {
+                                  // Show error dialog for empty email
+                                  _showErrorDialog(
+                                      "Por favor, ingrese un email válido");
+                                }
+                              },
+                        child: const Text('Enviar'),
+                      ),
+                    ),
+                  ],
+                )
         ],
       ),
     );
@@ -188,18 +201,20 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
           const SizedBox(height: 20),
           ElevatedButton(
             onPressed: () async {
-              var response = await validateToken(_tokenFieldController.text,
-                      _textFieldController.text, deviceData)
-                  .catchError((error) {
-                showErrorFromBackend(context, error);
-              });
-              if (response.statusCode == 200) {
-                _pageController.nextPage(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeIn,
-                );
-              } else {
-                showErrorFromBackend(context, response.body);
+              var response;
+              try {
+                response = await validateToken(_tokenFieldController.text,
+                    _textFieldController.text, deviceData);
+                if (response.statusCode == 200) {
+                  _pageController.nextPage(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeIn,
+                  );
+                } else {
+                  showErrorFromBackend(context, response.body);
+                }
+              } catch (e) {
+                showErrorFromBackend(context, e.toString());
               }
             },
             child: const Text('Enviar'),
@@ -235,7 +250,7 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
                     TextFormField(
                       autofocus: true,
                       controller: _passwordController,
-                      obscureText: _isPasswordVisible,
+                      obscureText: !_isPasswordVisible,
                       decoration: InputDecoration(
                           // hintText: "Contraseña",
                           helperText: 'Ingrese su contraseña',
@@ -259,7 +274,7 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
                     ),
                     TextFormField(
                       controller: _passwordVerifierController,
-                      obscureText: _isPasswordVerifierVisible,
+                      obscureText: !_isPasswordVerifierVisible,
                       decoration: InputDecoration(
                           // hintText: "Verifiue Contraseña",
                           helperText: 'Verifique su contraseña',
@@ -297,14 +312,34 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
                 var response = await updateUserPasswordByToken(
                   _tokenFieldController.text,
                   _passwordController.text,
-                );
+                ).catchError((error) {
+                  showErrorFromBackend(context, error);
+                });
                 if (response.statusCode == 200) {
-                  _pageController.nextPage(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeIn,
-                  );
+                  showDialog(
+                      barrierDismissible: false,
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: const Text('Exito'),
+                          content:
+                              const Text('Contraseña actualizada con exito'),
+                          actions: [
+                            TextButton(
+                                onPressed: () {
+                                  Navigator.defaultRouteName;
+                                },
+                                child: const Text('OK'))
+                          ],
+                        );
+                      });
+                  // _pageController.nextPage(
+                  //   duration: const Duration(milliseconds: 300),
+                  //   curve: Curves.easeIn,
+                  // );
+                } else {
+                  _showErrorDialog(response);
                 }
-                showErrorFromBackend(context, response.body);
               }
             },
             child: const Text('Enviar'),
