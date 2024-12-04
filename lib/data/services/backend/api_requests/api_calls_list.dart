@@ -573,6 +573,47 @@ Future<dynamic> sendRecoveryToken(String userMail, String deviceInfo) async {
   }
 }
 
+Future<dynamic> updateUserPasswordByToken(
+    String token, String newPassword) async {
+  var apiCall;
+  try {
+    apiCall = await Requests.put(
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/auth/password',
+        headers: {"Content-Type": "application/json"},
+        json: {"token": token, "password": newPassword},
+        persistCookies: false,
+        timeoutSeconds: 10);
+    apiCall.raiseForStatus();
+    return apiCall;
+  } catch (e) {
+    insertErrorLog(e.toString(), '/auth/password');
+    if (e is TimeoutException) {
+      var firstWord = getMessageToDisplay(e.toString());
+      return throw firstWord;
+    } else {
+      return throw e;
+    }
+  }
+}
+
+Future<dynamic> validateToken(
+    String token, String userMail, String devivce) async {
+  try {
+    var apiCall = await Requests.post(
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/auth/recovery-token',
+        headers: {"Content-Type": "application/json"},
+        json: {"email": userMail, "device": devivce},
+        queryParameters: {"token": token},
+        persistCookies: false,
+        timeoutSeconds: 15);
+    apiCall.raiseForStatus();
+    return apiCall;
+  } catch (e) {
+    insertErrorLog(e.toString(), '/auth/recovery-token');
+    return throw e;
+  }
+}
+
 // TODO: CONTINUE PATCH FOR STUDENT-GRADES
 // Future<dynamic> updateStudentsGrades(
 //   dynamic body
