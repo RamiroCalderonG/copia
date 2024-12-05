@@ -437,7 +437,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
 
                             if (gradeInt! >= 6) {
                               commentsAsignated =
-                                  await getCommentsAsignatedToStudent(gradeInt!,
+                                  await getCommentsAsignatedToStudent(gradeInt,
                                       true, studentID.toString(), monthNumber);
 
                               showCommentsDialog(commentsAsignated,

@@ -12,7 +12,6 @@ import 'package:oxschool/data/Models/User.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:flutter/material.dart';
-import 'package:oxschool/core/constants/connection.dart';
 import 'package:oxschool/presentation/Modules/login_view/recover_password_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -231,8 +230,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
               jsonData = json.decode(apiResponse.body);
 
               currentUser = parseLogedInUserFromJSON(jsonData, token);
-              //TOO: CONTINUE PROCESS TO VERIFY USER EVENTS
-              getUserPermissions(currentUser!.userId);
+
+              getUserRoleAndAcces(currentUser!.userId);
 
               apiResponse = await getCycle(
                   0); //CurrentCicleCall.call().timeout(Duration(seconds: 7));

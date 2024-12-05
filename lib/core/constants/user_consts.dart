@@ -10,7 +10,7 @@ late Cycle? currentCycle;
 
 // ignore: unused_element
 late List<String>? _grades = [];
-late Future<http.Response> userEvents;
+late http.Response userEvents;
 late List<dynamic>? eventsList = [];
 
 var deviceInformation = <String, dynamic>{};

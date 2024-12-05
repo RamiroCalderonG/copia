@@ -314,12 +314,12 @@ class _EnfermeriaWidgetState extends State<EnfermeriaWidget>
                                           ].map((c) => DataCell(c)).toList())
                                       .map((e) => DataRow(cells: e))
                                       .toList(),
-                                  headingRowColor: MaterialStateProperty.all(
+                                  headingRowColor: WidgetStateProperty.all(
                                     FlutterFlowTheme.of(context)
                                         .primaryBackground,
                                   ),
                                   headingRowHeight: 56.0,
-                                  dataRowColor: MaterialStateProperty.all(
+                                  dataRowColor: WidgetStateProperty.all(
                                     FlutterFlowTheme.of(context)
                                         .secondaryBackground,
                                   ),

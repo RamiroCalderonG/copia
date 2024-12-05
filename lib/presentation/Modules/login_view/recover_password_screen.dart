@@ -17,12 +17,13 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
   var deviceIp;
   bool isLoading = false;
   //bool displaySecondScren = false;
-  TextEditingController _textFieldController = TextEditingController();
-  TextEditingController _tokenFieldController = TextEditingController();
-  TextEditingController _passwordController = TextEditingController();
-  TextEditingController _passwordVerifierController = TextEditingController();
+  final TextEditingController _textFieldController = TextEditingController();
+  final TextEditingController _tokenFieldController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _passwordVerifierController =
+      TextEditingController();
   String deviceData = '';
-  PageController _pageController = PageController();
+  final PageController _pageController = PageController();
   bool _isPasswordVisible = false;
   bool _isPasswordVerifierVisible = false;
 
@@ -78,99 +79,134 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
   }
 
   Widget _buildEmailInputStep() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        // crossAxisAlignment: CrossAxisAlignment.baseline,
-        children: [
-          Text(
-            'Instrucciones: ',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-            ),
-            textAlign: TextAlign.start,
+    return
+        // Center(
+        // child:
+        Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      // crossAxisAlignment: CrossAxisAlignment.baseline,
+      children: [
+        Text(
+          'Instrucciones: ',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
           ),
-          Text(
-            '1.- Ingrese su correo',
-            style: TextStyle(fontSize: 18),
-            textAlign: TextAlign.start,
-          ),
-          Text(
-            '2.- Se le enviará un token a su correo',
-            style: TextStyle(fontSize: 18),
-            textAlign: TextAlign.start,
-          ),
-          Text(
-            '3.- Ingrese el token y su contraseña',
-            style: TextStyle(fontSize: 18),
-            textAlign: TextAlign.start,
-          ),
-          isLoading
-              ? const CircularProgressIndicator()
-              : Row(
-                  children: [
-                    Flexible(
-                        flex: 4,
-                        child: TextFormField(
-                          autofocus: true,
-                          maxLength: 40,
-                          controller: _textFieldController,
-                          decoration: const InputDecoration(
-                            hintText: "Email",
-                            helperText: 'Ingrese su correo electrónico',
-                            icon: Icon(Icons.email),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Por favor, ingrese un correo válido';
+          textAlign: TextAlign.start,
+        ),
+        Text(
+          '1.- Ingrese su correo y presione enviar.',
+          style: TextStyle(fontSize: 18, fontStyle: FontStyle.italic),
+          textAlign: TextAlign.start,
+        ),
+        Text(
+          '2.- Revise su correo electrónico para obtener un token de recuperación de contraseña.',
+          style: TextStyle(fontSize: 18, fontStyle: FontStyle.italic),
+          textAlign: TextAlign.start,
+        ),
+        Text(
+          '3.- Ingrese el token y su nueva contraseña.',
+          style: TextStyle(fontSize: 18, fontStyle: FontStyle.italic),
+          textAlign: TextAlign.start,
+        ),
+        SizedBox(height: 30),
+        isLoading
+            ? Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [const CircularProgressIndicator()],
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Flexible(
+                      flex: 4,
+                      child: TextFormField(
+                        autofocus: true,
+                        maxLength: 40,
+                        controller: _textFieldController,
+                        decoration: const InputDecoration(
+                          hintText: "Email",
+                          helperText: 'Ingrese su correo electrónico',
+                          icon: Icon(Icons.email),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Por favor, ingrese un correo válido';
+                          }
+                          return null;
+                        },
+                        onFieldSubmitted: (value) async {
+                          setState(() {
+                            isLoading = true; // Start loading animation
+                          });
+                          if (_textFieldController.text.isNotEmpty) {
+                            var response = await sendRecoveryToken(
+                                _textFieldController.text, deviceData);
+                            if (response.statusCode != 200) {
+                              setState(() {
+                                isLoading = false;
+                              });
+                              showErrorFromBackend(context, response.body);
+                            } else {
+                              setState(() {
+                                isLoading = false;
+                              });
+                              _pageController.nextPage(
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeIn,
+                              );
                             }
-                            return null;
-                          },
-                        )),
-                    const SizedBox(width: 20),
-                    Flexible(
-                      flex: 2,
-                      child: ElevatedButton(
-                        onPressed: isLoading
-                            ? null // Disable the button when loading
-                            : () async {
-                                setState(() {
-                                  isLoading = true; // Start loading animation
-                                });
-                                if (_textFieldController.text.isNotEmpty) {
-                                  var response = await sendRecoveryToken(
-                                      _textFieldController.text, deviceData);
-                                  if (response.statusCode != 200) {
-                                    setState(() {
-                                      isLoading = false;
-                                    });
-                                    showErrorFromBackend(
-                                        context, response.body);
-                                  } else {
-                                    setState(() {
-                                      isLoading = false;
-                                    });
-                                    _pageController.nextPage(
-                                      duration:
-                                          const Duration(milliseconds: 300),
-                                      curve: Curves.easeIn,
-                                    );
-                                  }
+                          } else {
+                            // Show error dialog for empty email
+                            _showErrorDialog(
+                                "Por favor, ingrese un email válido");
+                          }
+                        },
+                      )),
+                  const SizedBox(width: 20),
+                  Flexible(
+                    flex: 3,
+                    child: ElevatedButton(
+                      onPressed: isLoading
+                          ? null // Disable the button when loading
+                          : () async {
+                              setState(() {
+                                isLoading = true; // Start loading animation
+                              });
+                              if (_textFieldController.text.isNotEmpty) {
+                                var response = await sendRecoveryToken(
+                                    _textFieldController.text, deviceData);
+                                if (response.statusCode != 200) {
+                                  setState(() {
+                                    isLoading = false;
+                                  });
+                                  showErrorFromBackend(context, response.body);
                                 } else {
-                                  // Show error dialog for empty email
-                                  _showErrorDialog(
-                                      "Por favor, ingrese un email válido");
+                                  setState(() {
+                                    isLoading = false;
+                                  });
+                                  _pageController.nextPage(
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeIn,
+                                  );
                                 }
-                              },
-                        child: const Text('Enviar'),
-                      ),
+                              } else {
+                                // Show error dialog for empty email
+                                _showErrorDialog(
+                                    "Por favor, ingrese un email válido");
+                              }
+                            },
+                      child: const Text('Enviar'),
                     ),
-                  ],
-                )
-        ],
-      ),
+                  ),
+                ],
+              )
+      ],
     );
+    // );
   }
 
   Widget _buildTokenInputStep() {

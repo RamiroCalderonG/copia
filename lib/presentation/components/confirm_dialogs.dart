@@ -138,7 +138,7 @@ Future<int> showDeleteConfirmationAlertDialog(BuildContext context) async {
               },
               style: ButtonStyle(
                   backgroundColor:
-                      MaterialStateProperty.all<Color>(Colors.red)),
+                      WidgetStateProperty.all<Color>(Colors.red)),
               child: Text(
                 'No',
                 style: FlutterFlowTheme.of(context).labelLarge.override(
