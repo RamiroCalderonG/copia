@@ -363,7 +363,8 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
                           actions: [
                             TextButton(
                                 onPressed: () {
-                                  Navigator.defaultRouteName;
+                                  Navigator.pop(context);
+                                  Navigator.pop(context);
                                 },
                                 child: const Text('OK'))
                           ],

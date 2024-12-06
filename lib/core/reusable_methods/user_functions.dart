@@ -242,7 +242,7 @@ void setUserDataForDebug() {
     });
   }
 
-  userEvents = populateExampleUserEvents();
+  userEvents = populateExampleUserEvents() as http.Response;
   currentCycle = cycle;
 
   // (jsonEncode(exampleEvents), 200, headers : {

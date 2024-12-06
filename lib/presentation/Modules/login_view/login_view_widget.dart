@@ -7,6 +7,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get_connect/http/src/response/response.dart';
 import 'package:oxschool/data/Models/Cycle.dart';
 import 'package:oxschool/data/Models/User.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
@@ -218,23 +219,24 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
           devicePrefs.setString('ip', deviceIP);
 
           if (value.isNotEmpty && emailValue.isNotEmpty) {
+            //Attempt login
             apiResponse = await loginUser(apiBody);
-            if (apiResponse.statusCode == 200) {
+            if (apiResponse != Exception) {
               List<dynamic> jsonList;
               Map<String, dynamic> jsonData = jsonDecode(apiResponse.body);
-              //= json.decode(apiResponse.body['token']);
-
               var token = jsonData['token'];
 
+              //GET user data
               apiResponse = await getCurrentUserData(token);
               jsonData = json.decode(apiResponse.body);
 
               currentUser = parseLogedInUserFromJSON(jsonData, token);
 
-              getUserRoleAndAcces(currentUser!.userId);
+              //GET USER ROLE AND PERMISSIONS
+              await getUserRoleAndAcces(currentUser!.role);
 
               apiResponse = await getCycle(
-                  0); //CurrentCicleCall.call().timeout(Duration(seconds: 7));
+                  1); //CurrentCicleCall.call().timeout(Duration(seconds: 7));
               if (apiResponse != null) {
                 List<dynamic> jsonList = json.decode(apiResponse);
 
@@ -291,28 +293,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
           });
           insertErrorLog(e.toString(), 'LOGIN BUTTON');
 
-          var displayMessage = getMessageToDisplay(e.toString());
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                displayMessage,
-                style: FlutterFlowTheme.of(context).labelMedium.override(
-                      fontFamily: 'Roboto',
-                      color: const Color(0xFF130C0D),
-                      fontWeight: FontWeight.w500,
-                    ),
-              ),
-              action: SnackBarAction(
-                  label: 'Cerrar mensaje',
-                  textColor: FlutterFlowTheme.of(context).info,
-                  backgroundColor: Colors.black12,
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                  }),
-              duration: const Duration(milliseconds: 5000),
-              backgroundColor: FlutterFlowTheme.of(context).secondary,
-            ),
-          );
+          // var displayMessage = getMessageToDisplay(e.toString());
+          showErrorFromBackend(context, e.toString());
         }
       } else {
         insertAlertLog('ANTISPAM ACTIVATED ON: LOGIN SCREEN');
@@ -446,7 +428,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                 borderSide: BorderSide(
                                                   color: FlutterFlowTheme.of(
                                                           context)
-                                                      .primaryBackground,
+                                                      .secondaryBackground,
                                                   width: 2.0,
                                                 ),
                                                 borderRadius:
@@ -454,7 +436,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                               ),
                                               focusedBorder: OutlineInputBorder(
                                                 borderSide: const BorderSide(
-                                                  color: Color(0x00000000),
+                                                  color: Color.fromARGB(
+                                                      206, 1, 58, 203),
                                                   width: 2.0,
                                                 ),
                                                 borderRadius:
@@ -529,7 +512,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                 borderSide: BorderSide(
                                                   color: FlutterFlowTheme.of(
                                                           context)
-                                                      .primaryBackground,
+                                                      .secondaryBackground,
                                                   width: 2.0,
                                                 ),
                                                 borderRadius:
@@ -537,7 +520,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                               ),
                                               focusedBorder: OutlineInputBorder(
                                                 borderSide: const BorderSide(
-                                                  color: Color(0x00000000),
+                                                  color: Color.fromARGB(
+                                                      206, 1, 58, 203),
                                                   width: 2.0,
                                                 ),
                                                 borderRadius:
@@ -641,21 +625,6 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                       'Verificar información, usuario y/o contraseña no pueden estar en blanco');
                                                 }
                                               }
-
-                                              // setState(() {
-                                              //   isLoading = true;
-                                              // });
-                                              // ScaffoldMessenger.of(context)
-                                              //     .hideCurrentSnackBar();
-                                              // insertActionIntoLog('LOG IN BY: ',
-                                              //     _model.textController1.text);
-                                              // revealLoggerFileLocation();
-                                              // await loginButtonFunction()
-                                              //     .whenComplete(() {
-                                              //   setState(() {
-                                              //     isLoading = false;
-                                              //   });
-                                              // });
                                             },
                                             text: 'Ingresar',
                                             options: FFButtonOptions(
@@ -851,7 +820,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                 borderSide: BorderSide(
                                                   color: FlutterFlowTheme.of(
                                                           context)
-                                                      .primaryBackground,
+                                                      .secondaryBackground,
                                                   width: 2.0,
                                                 ),
                                                 borderRadius:
@@ -859,7 +828,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                               ),
                                               focusedBorder: OutlineInputBorder(
                                                 borderSide: const BorderSide(
-                                                  color: Color(0x00000000),
+                                                  color: Color.fromARGB(
+                                                      206, 1, 58, 203),
                                                   width: 2.0,
                                                 ),
                                                 borderRadius:
@@ -867,7 +837,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                               ),
                                               errorBorder: OutlineInputBorder(
                                                 borderSide: const BorderSide(
-                                                  color: Color(0x00000000),
+                                                  color: Color.fromARGB(
+                                                      225, 255, 0, 0),
                                                   width: 2.0,
                                                 ),
                                                 borderRadius:
@@ -929,7 +900,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                 borderSide: BorderSide(
                                                   color: FlutterFlowTheme.of(
                                                           context)
-                                                      .primaryBackground,
+                                                      .secondaryBackground,
                                                   width: 2.0,
                                                 ),
                                                 borderRadius:
@@ -937,7 +908,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                               ),
                                               focusedBorder: OutlineInputBorder(
                                                 borderSide: const BorderSide(
-                                                  color: Color(0x00000000),
+                                                  color: Color.fromARGB(
+                                                      206, 1, 58, 203),
                                                   width: 2.0,
                                                 ),
                                                 borderRadius:

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/data/datasources/temp/users_temp_data.dart';
 
 import '../../data/services/backend/api_requests/api_calls_list.dart';
@@ -17,7 +18,7 @@ void clearTempData() {
 
 Future getEventsList() async {
   try {
-    var apiResponse = await getEvents(null);
+    var apiResponse = await getUserRoleAndAcces(currentUser!.role);
     List<dynamic> jsonList = json.decode(apiResponse);
     tmpeventsList = jsonList;
     eventsLisToShow =

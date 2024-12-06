@@ -265,7 +265,8 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         drawer: Opacity(
             opacity: 1,
-            child: _createDrawer(context, userEvents) //DrawerClass()
+            child: _createDrawer(
+                context, userEvents as Future<http.Response>) //DrawerClass()
             ),
         body: NestedScrollView(
           headerSliverBuilder: (context, _) => [

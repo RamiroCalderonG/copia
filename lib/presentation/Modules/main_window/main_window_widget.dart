@@ -267,7 +267,8 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         drawer: Opacity(
             opacity: 1,
-            child: _createDrawer(context, userEvents) //DrawerClass()
+            child: _createDrawer(
+                context, userEvents as Future<http.Response>) //DrawerClass()
             ),
         body: NestedScrollView(
           // physics: NeverScrollableScrollPhysics(),

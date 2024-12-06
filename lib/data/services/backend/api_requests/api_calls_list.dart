@@ -1,13 +1,17 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:oxschool/core/constants/user_consts.dart';
+import 'package:oxschool/core/extensions/api_call_error_message.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/core/reusable_methods/translate_messages.dart';
 import 'package:oxschool/data/services/backend/api_requests/status_code_manager.dart';
+import 'package:provider/provider.dart';
 import 'package:requests/requests.dart';
 
 // ignore: depend_on_referenced_packages
@@ -15,28 +19,26 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<dynamic> loginUser(var jsonBody) async {
+  var response;
   try {
     var apiCall = await Requests.post(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/auth/login',
         json: jsonBody,
-        headers: {
-          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-        },
         persistCookies: false,
         timeoutSeconds: 25);
 
     apiCall.raiseForStatus();
+    response = apiCall;
     return apiCall;
   } catch (e) {
+    String errorMessage;
     insertErrorLog(e.toString(), '/login/userlogin/');
-    if (e is TimeoutException) {
-      return throw TimeoutException(e.toString());
+    if (e is Exception) {
+      errorMessage = e.getErrorMessage();
+      return Future.error(errorMessage);
+    } else {
+      e;
     }
-    if (e is SocketException) {
-      return throw SocketException(e.toString());
-    }
-    return throw Exception(e.toString());
-    // throw FormatException(e.toString());
   }
 }
 
@@ -60,13 +62,26 @@ void logOutUser(String token, String employee) async {
 Future<dynamic> getCycle(int month) async {
   try {
     var apiCall = await Requests.get(
-      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/cycle/status',
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/cycles/status',
       headers: {
         'Authorization': currentUser!.token,
         'Content-Type': 'application/json',
       },
+      queryParameters: {"status": month},
+      timeoutSeconds: 10,
     );
-  } catch (e) {}
+    apiCall.raiseForStatus();
+    return apiCall;
+  } catch (e) {
+    insertErrorLog(e.toString(), '/cycle/status/');
+    String errorMessage;
+    if (e is Exception) {
+      errorMessage = e.getErrorMessage();
+      return Future.error(errorMessage);
+    } else {
+      e;
+    }
+  }
 }
 
 // Future<dynamic> getCycle(
@@ -1137,15 +1152,22 @@ Future<dynamic> getCurrentUserData(String token) async {
     apiCall.raiseForStatus();
     return apiCall;
   } catch (e) {
-    return throw FormatException(e.toString());
+    String errorMessage;
+    insertErrorLog(e.toString(), '/users/me/');
+    if (e is Exception) {
+      errorMessage = e.getErrorMessage();
+      return Future.error(errorMessage);
+    } else {
+      e;
+    }
   }
 }
 
-Future<dynamic> getUserRoleAndAcces(int roleId) async {
+Future<dynamic> getUserRoleAndAcces(String role) async {
   try {
     var apiCall = await Requests.get(
       '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/roles/me',
-      queryParameters: {"role": roleId},
+      queryParameters: {"role": role},
       headers: {
         "Content-Type": "application/json",
         'Authorization': currentUser!.token
@@ -1158,7 +1180,13 @@ Future<dynamic> getUserRoleAndAcces(int roleId) async {
     return apiCall;
   } catch (e) {
     insertErrorLog(e.toString(), '/roles/me');
-    return throw FormatException(e.toString());
+    String errorMessage;
+    if (e is Exception) {
+      errorMessage = e.getErrorMessage();
+      return Future.error(errorMessage);
+    } else {
+      e;
+    }
   }
 }
 
