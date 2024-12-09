@@ -8,6 +8,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get_connect/http/src/response/response.dart';
+import 'package:http/src/response.dart';
 import 'package:oxschool/data/Models/Cycle.dart';
 import 'package:oxschool/data/Models/User.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
@@ -202,13 +203,14 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
         _saveTapTimestamps();
         _updateRemainingTime();
         try {
-          var value = trimSpaces(_model.textController2.text);
-          var emailValue = trimSpaces(_model.textController1.text);
+          var value = trimSpaces(_model.textController2.text).toLowerCase();
+          var emailValue =
+              trimSpaces(_model.textController1.text).toLowerCase();
 
           Map<String, dynamic> nip = {'password': value};
           apiBody.addEntries(nip.entries);
           Map<String, dynamic> employeeNumber = {
-            'email': _model.textController1.text
+            'email': _model.textController1.text.toLowerCase()
           };
           apiBody.addEntries(employeeNumber.entries);
           Map<String, dynamic> device = {'device': currentDeviceData};
@@ -238,7 +240,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
               apiResponse = await getCycle(
                   1); //CurrentCicleCall.call().timeout(Duration(seconds: 7));
               if (apiResponse != null) {
-                List<dynamic> jsonList = json.decode(apiResponse);
+                Map<String, dynamic> jsonList = json.decode(apiResponse.body);
 
                 currentCycle = getcurrentCycle(jsonList);
               }
@@ -1278,15 +1280,14 @@ User parseLogedInUserFromJSON(Map<String, dynamic> jsonList, String userToken) {
   return currentUser;
 }
 
-Cycle getcurrentCycle(List<dynamic> jsonList) {
+Cycle getcurrentCycle(Map<String, dynamic> jsonList) {
   late Cycle currentCycle;
 
-  for (var item in jsonList) {
-    String claCiclo = item['ClaCiclo'];
-    String fecIniCiclo = item['FecIniCiclo'];
-    String fecFinCiclo = item['FecFinCiclo'];
-    currentCycle = Cycle(claCiclo, fecIniCiclo, fecFinCiclo);
-  }
+  String claCiclo = jsonList['cycle'];
+  String fecIniCiclo = jsonList['initialDate'];
+  String fecFinCiclo = jsonList['finalDate'];
+
+  currentCycle = Cycle(claCiclo, fecIniCiclo, fecFinCiclo);
 
   return currentCycle;
 }

@@ -1,5 +1,6 @@
 // ignore_for_file: file_names, unnecessary_late
 
+import 'package:get/get_connect/http/src/response/response.dart';
 import 'package:oxschool/data/Models/Cycle.dart';
 import 'package:oxschool/data/Models/User.dart';
 // ignore: depend_on_referenced_packages
@@ -10,7 +11,7 @@ late Cycle? currentCycle;
 
 // ignore: unused_element
 late List<String>? _grades = [];
-late http.Response userEvents;
+late Future<http.Response> userEvents;
 late List<dynamic>? eventsList = [];
 
 var deviceInformation = <String, dynamic>{};

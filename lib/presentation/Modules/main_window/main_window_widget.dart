@@ -142,7 +142,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                           //       fontSize: 20),
                           // ),
                           Text(
-                              ' ${currentUser?.employeeName?.toLowerCase().trimRight()}',
+                              ' ${currentUser?.employeeName?.trimRight().capitalize}',
                               textAlign: TextAlign.center,
                               style: FlutterFlowTheme.of(context)
                                   .bodyMedium
@@ -267,8 +267,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         drawer: Opacity(
             opacity: 1,
-            child: _createDrawer(
-                context, userEvents as Future<http.Response>) //DrawerClass()
+            child: _createDrawer(context, userEvents) //DrawerClass()
             ),
         body: NestedScrollView(
           // physics: NeverScrollableScrollPhysics(),
@@ -461,63 +460,52 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
               accountName: Text(
                 currentUser!.employeeName!,
                 style: TextStyle(
-                    fontFamily: 'Sora',
-                    fontSize: 18,
-                    color: FlutterFlowTheme.of(context).primaryText),
+                  fontFamily: 'Sora',
+                  fontSize: 18,
+                  color: FlutterFlowTheme.of(context).primaryText,
+                ),
               ),
               accountEmail: Text(
                 currentUser!.employeeNumber!.toString(),
                 style: TextStyle(
-                    fontFamily: 'Sora',
-                    fontSize: 16,
-                    color: FlutterFlowTheme.of(context).primaryText),
+                  fontFamily: 'Sora',
+                  fontSize: 16,
+                  color: FlutterFlowTheme.of(context).primaryText,
+                ),
               ),
               currentAccountPicture: CircleAvatar(
                 backgroundColor: FlutterFlowTheme.of(context).accent4,
                 child: const Image(
-                    image: AssetImage('assets/images/logoRedondoOx.png')),
-                // Text(currentUser!.employeeName![0],
-                //     style: TextStyle(fontFamily: 'Sora', fontSize: 20)),
+                  image: AssetImage('assets/images/logoRedondoOx.png'),
+                ),
               ),
               decoration: BoxDecoration(
-                  color: FlutterFlowTheme.of(context).primaryBackground),
+                color: FlutterFlowTheme.of(context).primaryBackground,
+              ),
             ),
             FutureBuilder(
-                future: userEvents,
-                builder: (BuildContext context,
-                    AsyncSnapshot<http.Response> response) {
-                  if (!response.hasData) {
-                    return const Center(
-                      child: Text('Loading...'),
-                    );
-                  } else if (response.data!.statusCode != 200) {
-                    return const Center(
-                      child: Text('Error Loading'),
-                    );
-                  } else {
-                    List<dynamic> json = jsonDecode(response.data!.body);
-                    return MyExpansionTileList(elementList: json);
-                  }
-                }),
+              future: userEvents,
+              builder: (BuildContext context,
+                  AsyncSnapshot<http.Response> snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                } else if (!snapshot.hasData ||
+                    snapshot.data!.statusCode != 200) {
+                  return const Center(child: Text('Error Loading Data'));
+                } else {
+                  List<dynamic> json = jsonDecode(snapshot.data!.body);
+                  return MyExpansionTileList(elementList: json);
+                }
+              },
+            ),
             const Divider(thickness: 3),
             ListTile(
               title: const Text('Cerrar sesión'),
               leading: const Icon(Icons.exit_to_app),
               onTap: () {
                 logOutCurrentUser(currentUser!);
-                // Clear any necessary data or variables
-                // clearStudentData();
-                // clearUserData();
-                // setState(() {
-                // currentUser?.clear();
-                // currentCycle?.clear();
-                // eventsList?.clear();
-                // deviceIp = '';
-                // cleatTempData();
-                // });
-
-                // Navigate to the initial screen
-
                 context.goNamed(
                   '_initialize',
                   extra: <String, dynamic>{
@@ -527,16 +515,106 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                     ),
                   },
                 );
-                // Navigator.pop(context);
-                // Navigator.pushReplacement(context,
-                //     MaterialPageRoute(builder: (context) => LoginViewWidget()));
               },
-            )
+            ),
           ],
         ),
       ),
     );
   }
+
+  // Widget _createDrawer(BuildContext context, Future<Response> userEvents) {
+  //   final controller = ScrollController();
+
+  //   return Drawer(
+  //     child: SingleChildScrollView(
+  //       controller: controller,
+  //       child: Column(
+  //         children: <Widget>[
+  //           UserAccountsDrawerHeader(
+  //             accountName: Text(
+  //               currentUser!.employeeName!,
+  //               style: TextStyle(
+  //                   fontFamily: 'Sora',
+  //                   fontSize: 18,
+  //                   color: FlutterFlowTheme.of(context).primaryText),
+  //             ),
+  //             accountEmail: Text(
+  //               currentUser!.employeeNumber!.toString(),
+  //               style: TextStyle(
+  //                   fontFamily: 'Sora',
+  //                   fontSize: 16,
+  //                   color: FlutterFlowTheme.of(context).primaryText),
+  //             ),
+  //             currentAccountPicture: CircleAvatar(
+  //               backgroundColor: FlutterFlowTheme.of(context).accent4,
+  //               child: const Image(
+  //                   image: AssetImage('assets/images/logoRedondoOx.png')),
+  //               // Text(currentUser!.employeeName![0],
+  //               //     style: TextStyle(fontFamily: 'Sora', fontSize: 20)),
+  //             ),
+  //             decoration: BoxDecoration(
+  //                 color: FlutterFlowTheme.of(context).primaryBackground),
+  //           ),
+  //           FutureBuilder(
+  //       future: userEvents,
+  //       builder: (BuildContext context, AsyncSnapshot<http.Response> snapshot) {
+  //   if (snapshot.connectionState == ConnectionState.waiting) {
+  //     return const Center(
+  //       child: CircularProgressIndicator(),
+  //     );
+  //   } else if (snapshot.hasError) {
+  //     return Center(
+  //       child: Text('Error: ${snapshot.error}'),
+  //     );
+  //   } else if (!snapshot.hasData || snapshot.data!.statusCode != 200) {
+  //     return const Center(
+  //       child: Text('Error Loading Data'),
+  //     );
+  //   } else {
+  //     List<dynamic> json = jsonDecode(snapshot.data!.body);
+  //     return MyExpansionTileList(elementList: json);
+  //   }
+  //        },
+  //       ),
+  //           const Divider(thickness: 3),
+  //           ListTile(
+  //             title: const Text('Cerrar sesión'),
+  //             leading: const Icon(Icons.exit_to_app),
+  //             onTap: () {
+  //               logOutCurrentUser(currentUser!);
+  //               // Clear any necessary data or variables
+  //               // clearStudentData();
+  //               // clearUserData();
+  //               // setState(() {
+  //               // currentUser?.clear();
+  //               // currentCycle?.clear();
+  //               // eventsList?.clear();
+  //               // deviceIp = '';
+  //               // cleatTempData();
+  //               // });
+
+  //               // Navigate to the initial screen
+
+  //               context.goNamed(
+  //                 '_initialize',
+  //                 extra: <String, dynamic>{
+  //                   kTransitionInfoKey: const TransitionInfo(
+  //                     hasTransition: true,
+  //                     transitionType: PageTransitionType.leftToRight,
+  //                   ),
+  //                 },
+  //               );
+  //               // Navigator.pop(context);
+  //               // Navigator.pushReplacement(context,
+  //               //     MaterialPageRoute(builder: (context) => LoginViewWidget()));
+  //             },
+  //           )
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 }
 
 class HoverCard extends StatefulWidget {
@@ -717,14 +795,28 @@ class _DrawerState extends State<MyExpansionTileList> {
     // Iterate over userEvents to populate modulesMap
 
     userEvents.forEach((element) {
-      element.forEach((module, screens) {
-        if (!modulesMap.containsKey(module)) {
-          modulesMap[module] = [];
-        }
-        screens.forEach((screenClass, description) {
-          modulesMap[module]!.add('$screenClass');
-        });
-      });
+      // element.forEach((module, screens) {
+      if (!modulesMap.containsKey(element['module'])) {
+        modulesMap[element['module']] = [];
+      }
+      if (!modulesMap[element['module']]!.contains(element['screenclass'])) {
+        modulesMap[element['module']]!.add(element['screenclass']);
+      }
+      // eventsList?.add(element['event_name']);
+      // // eventsList ??= element['screenclass'];
+
+      // if (eventsList!.isNotEmpty) {
+      //   if (!eventsList!.contains(element['event_name'])) {
+      //     eventsList?.add(element['event_name']);
+      //   }
+      // }
+      // if (!modulesMap.containsKey(module)) {
+      //   modulesMap[module] = [];
+      // }
+      // screens.forEach((screenClass, description) {
+      //   modulesMap[module]!.add('$screenClass');
+      // });
+      // });
     });
 
     // Iterate over modulesMap to create ExpansionTiles for each module

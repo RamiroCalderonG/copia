@@ -48,10 +48,10 @@ void logOutUser(String token, String employee) async {
   String? ipAddres = prefs.getString('ip');
 
   var apiCall = await Requests.post(
-      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/logout',
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/auth/logout',
       headers: {
-        'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-        'Auth': currentUser!.token,
+        //'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
+        'Authorization': currentUser!.token,
       },
       json: {'device': device, 'ip': ipAddres, 'employee': employee},
       persistCookies: false,
@@ -1163,29 +1163,40 @@ Future<dynamic> getCurrentUserData(String token) async {
   }
 }
 
-Future<dynamic> getUserRoleAndAcces(String role) async {
+Future<http.Response> getUserRoleAndAcces(String role) async {
   try {
-    var apiCall = await Requests.get(
-      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/roles/me',
-      queryParameters: {"role": role},
-      headers: {
-        "Content-Type": "application/json",
-        'Authorization': currentUser!.token
-      },
-      persistCookies: false,
-      timeoutSeconds: 15,
-    );
-    apiCall.raiseForStatus();
-    userEvents = apiCall;
-    return apiCall;
+    Uri address = Uri(
+        scheme: 'http',
+        host: dotenv.env['HOST'],
+        port: int.parse(dotenv.env['PORT']!),
+        path: '/roles/me',
+        queryParameters: {'role': role});
+    var response = http.get(address, headers: {
+      "Content-Type": "application/json",
+      'Authorization': currentUser!.token,
+    });
+    userEvents = response;
+    return response;
+    // var apiCall = await Requests.get(
+    //   '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/roles/me',
+    //   queryParameters: {"role": role},
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //     'Authorization': currentUser!.token
+    //   },
+    //   persistCookies: false,
+    //   timeoutSeconds: 15,
+    // );
+    // apiCall.raiseForStatus();
+    // return http.Response(apiCall.content(), apiCall.statusCode);
   } catch (e) {
     insertErrorLog(e.toString(), '/roles/me');
-    String errorMessage;
+    // String errorMessage;
     if (e is Exception) {
-      errorMessage = e.getErrorMessage();
+      final errorMessage = e.getErrorMessage();
       return Future.error(errorMessage);
     } else {
-      e;
+      return Future.error(e.toString());
     }
   }
 }
