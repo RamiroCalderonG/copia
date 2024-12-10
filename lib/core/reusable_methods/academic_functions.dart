@@ -27,7 +27,7 @@ dynamic loadStartGrading(int employeeNumber, String schoolYear) async {
 
       return jsonList;
     } catch (e) {
-      throw FormatException(e.toString());
+      rethrow;
     }
   } catch (e) {
     insertErrorLog(e.toString(), ' INIT STUDENT EVALUATION GRID ');
@@ -416,23 +416,17 @@ int validateNewGradeValue(int newValue, String columnNameToFind) {
   }
 }
 
-Future<bool> isDateToEvaluateStudents() async {
+Future<dynamic> isDateToEvaluateStudents() async {
   try {
-    var originDate = await getActualDate();
-    if (originDate != null) {
-      List<dynamic> parsedJson = json.decode(originDate);
-      bool dateValue = parsedJson[0]['date'];
-      if (dateValue) {
-        return true;
-      } else {
-        return false;
-      }
-    } else {
-      return false;
-    }
+    var originDate = await getActualDate().catchError((error) {
+      return error;
+    });
+    var originResponse = jsonDecode(originDate);
+    var response = originResponse['Value'];
+    return response;
   } catch (e) {
     insertErrorLog(e.toString(), 'FETCH DATE FOR STUDENT EVALUATION');
-    return throw Exception(e.toString());
+    return throw Future.error(e);
   }
 }
 

@@ -7,6 +7,7 @@ import 'package:oxschool/core/utils/loader_indicator.dart';
 import 'package:oxschool/presentation/Modules/academic/fo_dac_27.dart';
 import 'package:oxschool/presentation/Modules/academic/grades_by_asignature.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
+import 'package:oxschool/presentation/components/confirm_dialogs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/config/flutter_flow/flutter_flow_theme.dart';
@@ -84,11 +85,13 @@ class _GradesMainScreenState extends State<GradesMainScreen>
   void fetchData() {
     initSharedPref();
     initGetDate();
-    loadStartGrading(currentUser!.employeeNumber!, currentCycle!.claCiclo!);
   }
 
   void initGetDate() async {
     await validateDateAndUserPriv();
+    if (canEvaluateNow) {
+      loadStartGrading(currentUser!.employeeNumber!, currentCycle!.claCiclo!);
+    }
   }
 
   Future<void> validateDateAndUserPriv() async {
@@ -96,23 +99,25 @@ class _GradesMainScreenState extends State<GradesMainScreen>
       setState(() {
         isSearching = true;
       });
-      canEvaluateNow = await isDateToEvaluateStudents();
+      canEvaluateNow = await isDateToEvaluateStudents().catchError((onError) {
+        showErrorFromBackend(context, onError);
+      });
 
       setState(() {
         canUserEvaluate = canEvaluateNow;
       });
-      if (canUserEvaluate || currentUser!.canEditStudentGrades()) {
-        setState(() {
-          displayEvaluateGrids = true;
-        });
-      } else {
-        if (currentUser!.canEditStudentGrades()) {
-          setState(() {
-            displayEvaluateGrids = true;
-          });
-        }
-        displayEvaluateGrids = false;
-      }
+      // if (canUserEvaluate || currentUser!.canEditStudentGrades()) {
+      //   setState(() {
+      //     displayEvaluateGrids = true;
+      //   });
+      // } else {
+      //   if (currentUser!.canEditStudentGrades()) {
+      //     setState(() {
+      //       displayEvaluateGrids = true;
+      //     });
+      //   }
+      //   displayEvaluateGrids = false;
+      // }
       setState(() {
         isSearching = false;
       });

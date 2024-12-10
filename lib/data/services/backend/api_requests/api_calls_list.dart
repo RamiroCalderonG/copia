@@ -1009,12 +1009,9 @@ Future<int> editFodac27Record(Map<String, dynamic> body) async {
 Future<dynamic> getActualDate() async {
   try {
     var apiCall = await Requests.get(
-        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/date',
-        headers: {
-          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-          'Auth': currentUser!.token
-        },
-        queryParameters: {'field': 1},
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/evaluation-date',
+        headers: {'Authorization': currentUser!.token},
+        //queryParameters: {'field': 1},
         timeoutSeconds: 20,
         persistCookies: false);
     apiCall.raiseForStatus();
@@ -1029,7 +1026,7 @@ Future<dynamic> getActualDate() async {
       var firstWord = getMessageToDisplay(e.toString());
       return throw firstWord;
     } else {
-      return 'Request failed: ${e.toString()}'; // General error handling
+      return Future.error(e);
     }
 
     // Check if error response contains a message
