@@ -14,6 +14,7 @@ import '../../data/datasources/temp/teacher_grades_temp.dart';
 
 dynamic loadStartGrading(int employeeNumber, String schoolYear) async {
   try {
+    //FETCH FOR TEACHER DATA
     var startGrading = await getTeacherGradeAndCourses(
         currentUser!.employeeNumber, currentCycle);
     List<dynamic> jsonList = json.decode(startGrading);
@@ -434,8 +435,8 @@ void getTeacherEvalCampuses(List<dynamic> jsonData) {
   if (jsonData.isNotEmpty) {
     for (var item in jsonData) {
       // Check if the item has the "campus" key and is a String
-      if (item.containsKey('campus') && item['campus'] is String) {
-        campusesWhereTeacherTeach.add(item['campus']);
+      if (item.containsKey('Campus') && item['Campus'] is String) {
+        campusesWhereTeacherTeach.add(item['Campus']);
       }
     }
   }

@@ -43,10 +43,10 @@ class _GradesMainScreenState extends State<GradesMainScreen>
 
   @override
   void initState() {
-    super.initState();
     _tabController = TabController(length: 3, vsync: this);
     _tabController!.addListener(onTap);
     fetchData();
+    super.initState();
   }
 
   @override
@@ -78,6 +78,8 @@ class _GradesMainScreenState extends State<GradesMainScreen>
     campusesWhereTeacherTeach.clear();
     selectedUnity = null;
     displayErrorMessage = false;
+    canEvaluateNow = false;
+    canUserEvaluate = false;
     // assignaturesColumns.clear();
     super.dispose();
   }

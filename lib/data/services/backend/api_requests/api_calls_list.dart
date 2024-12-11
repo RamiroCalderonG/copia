@@ -656,17 +656,20 @@ Future<dynamic> validateToken(
 Future<dynamic> getTeacherGradeAndCourses(var employee, var year) async {
   try {
     var apiCall = await Requests.get(
-        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/teacher/start-student-rating',
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/teacher-grades',
         headers: {
-          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-          'ip_address': deviceIp.toString(),
-          'Auth': currentUser!.token
+          // 'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
+          // 'ip_address': deviceIp.toString(),
+          'Authorization': currentUser!.token
         },
-        // json: {"teacherNumber": employee},
-        queryParameters: {
-          'teacher': currentUser!.employeeNumber.toString(),
-          "year": currentCycle!.claCiclo
+        json: {
+          'employee': currentUser!.employeeNumber.toString(),
+          "cycle": currentCycle!.claCiclo
         },
+        // queryParameters: {
+        //   'employee': currentUser!.employeeNumber.toString(),
+        //   "cycle": currentCycle!.claCiclo
+        // },
         persistCookies: true,
         timeoutSeconds: 20);
     apiCall.raiseForStatus();
