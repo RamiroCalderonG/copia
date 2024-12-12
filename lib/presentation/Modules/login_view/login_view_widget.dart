@@ -53,6 +53,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
   int remainingTime = 0;
   Timer? timer;
   bool isDebugging = false;
+  final List<String> _suggestedDomains = ['oxschool.edu.mx'];
+  String? _suggestedDomain;
 
   // late User currentUser;
 
@@ -70,6 +72,29 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
 
     _model.textController1 ??= TextEditingController();
     _model.textController2 ??= TextEditingController();
+    _model.textController1!.addListener(() {
+      final text = _model.textController1.text;
+      if (text.contains('@')) {
+        final atIndex = text.indexOf('@');
+        final localPart = text.substring(0, atIndex);
+        final domainPart = text.substring(atIndex + 1);
+
+        if (domainPart.isEmpty) {
+          setState(() {
+            _suggestedDomain = _suggestedDomains.first;
+          });
+        } else if (!_suggestedDomains.any((d) => d.startsWith(domainPart))) {
+          setState(() {
+            _suggestedDomain = null;
+          });
+        }
+      } else {
+        setState(() {
+          _suggestedDomain = null;
+        });
+      }
+    });
+
     WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {}));
   }
 
@@ -77,7 +102,24 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
   void dispose() {
     _model.dispose();
     timer?.cancel();
+    // _model.textController1!.dispose();
+    // _model.textController2!.dispose();
     super.dispose();
+  }
+
+  void _applySuggestion() {
+    if (_suggestedDomain != null) {
+      final atIndex = _model.textController1.text.indexOf('@');
+      if (atIndex != -1) {
+        final localPart = _model.textController1.text.substring(0, atIndex);
+        setState(() {
+          _model.textController1.text = '$localPart@$_suggestedDomain';
+          _model.textController1!.selection = TextSelection.fromPosition(
+            TextPosition(offset: _model.textController1.text.length),
+          );
+        });
+      }
+    }
   }
 
   _loadTapTimestamps() async {
@@ -423,6 +465,16 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                             maxLength: 50,
                                             decoration: InputDecoration(
                                               labelText: 'E-mail',
+                                              suffix: _suggestedDomain != null
+                                                  ? GestureDetector(
+                                                      onTap: _applySuggestion,
+                                                      child: Text(
+                                                        '@$_suggestedDomain',
+                                                        style: TextStyle(
+                                                            color: Colors.blue),
+                                                      ),
+                                                    )
+                                                  : null,
                                               hintStyle:
                                                   FlutterFlowTheme.of(context)
                                                       .bodyLarge,
@@ -815,6 +867,16 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                             maxLength: 50,
                                             decoration: InputDecoration(
                                               labelText: 'E-mail',
+                                              suffix: _suggestedDomain != null
+                                                  ? GestureDetector(
+                                                      onTap: _applySuggestion,
+                                                      child: Text(
+                                                        '@$_suggestedDomain',
+                                                        style: TextStyle(
+                                                            color: Colors.blue),
+                                                      ),
+                                                    )
+                                                  : null,
                                               hintStyle:
                                                   FlutterFlowTheme.of(context)
                                                       .bodySmall,

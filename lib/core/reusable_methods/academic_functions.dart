@@ -14,9 +14,11 @@ import '../../data/datasources/temp/teacher_grades_temp.dart';
 
 dynamic loadStartGrading(int employeeNumber, String schoolYear) async {
   try {
+    DateTime now = DateTime.now();
+    int month = now.month;
     //FETCH FOR TEACHER DATA
     var startGrading = await getTeacherGradeAndCourses(
-        currentUser!.employeeNumber, currentCycle);
+        currentUser!.employeeNumber, currentCycle, month);
     List<dynamic> jsonList = json.decode(startGrading);
     jsonDataForDropDownMenuClass = jsonList;
 
@@ -43,8 +45,8 @@ Future<void> getSingleTeacherGrades(List<dynamic> apiResponse) async {
       oneTeacherGrades.clear();
     }
     for (var i = 0; i < apiResponse.length; i++) {
-      String grade = apiResponse[i]['grade'];
-      int gradeSequence = apiResponse[i]['gradeseq'];
+      String grade = apiResponse[i]['Grade'];
+      int gradeSequence = apiResponse[i]['Sequence'];
       originalList.add(grade);
       oneTeacherGrades = originalList.toSet().toList();
 
@@ -62,7 +64,7 @@ Future<void> getSingleTeacherGroups(List<dynamic> apiResponse) async {
       oneTeacherGroups.clear();
     }
     for (var i = 0; i < apiResponse.length; i++) {
-      String group = apiResponse[i]['school_group'];
+      String group = apiResponse[i]['School_group'];
 
       originalList.add(group);
       oneTeacherGroups = originalList.toSet().toList();
@@ -77,8 +79,8 @@ Future<void> getSingleTeacherAssignatures(List<dynamic> apiResponse) async {
       oneTeacherAssignatures.clear();
     }
     for (var i = 0; i < apiResponse.length; i++) {
-      String assignature = apiResponse[i]['assignature_name'];
-      int assignatureID = int.parse(apiResponse[i]['assignature_id']);
+      String assignature = apiResponse[i]['Subject'];
+      int assignatureID = apiResponse[i]['Subject_id'];
       originalList.add(assignature);
 
       oneTeacherAssignatures = originalList.toSet().toList();

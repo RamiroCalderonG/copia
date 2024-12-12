@@ -54,7 +54,7 @@ String currentMonth = DateFormat.MMMM().format(DateTime.now());
 String? subjectSelected = oneTeacherAssignatures.first;
 
 /// Whether the user is an admin.
-bool isUserAdmin = verifyUserAdmin(currentUser!);
+bool isUserAdmin = currentUser!.canEditStudentGrades();
 
 /// The list of rows in the grid.
 List<PlutoRow> rows = [];
@@ -119,12 +119,12 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
   }
 
   void _fetchData() async {
-    var response = await loadStartGrading(
-        currentUser!.employeeNumber!, currentCycle!.toString());
-    fetchedData = response;
-    setState(() {
-      isLoading = false;
-    });
+    // var response = await loadStartGrading(
+    //     currentUser!.employeeNumber!, currentCycle!.toString());
+    // fetchedData = response;
+    // setState(() {
+    //   isLoading = false;
+    // });
   }
 
   /// Searches for grades based on the selected parameters.

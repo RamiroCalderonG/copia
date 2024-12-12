@@ -80,6 +80,7 @@ class _GradesMainScreenState extends State<GradesMainScreen>
     displayErrorMessage = false;
     canEvaluateNow = false;
     canUserEvaluate = false;
+    displayEvaluateGrids = false;
     // assignaturesColumns.clear();
     super.dispose();
   }
@@ -91,9 +92,6 @@ class _GradesMainScreenState extends State<GradesMainScreen>
 
   void initGetDate() async {
     await validateDateAndUserPriv();
-    if (canEvaluateNow) {
-      loadStartGrading(currentUser!.employeeNumber!, currentCycle!.claCiclo!);
-    }
   }
 
   Future<void> validateDateAndUserPriv() async {
@@ -104,25 +102,17 @@ class _GradesMainScreenState extends State<GradesMainScreen>
       canEvaluateNow = await isDateToEvaluateStudents().catchError((onError) {
         showErrorFromBackend(context, onError);
       });
-
+      if (canEvaluateNow) {
+        loadStartGrading(currentUser!.employeeNumber!, currentCycle!.claCiclo!);
+      }
       setState(() {
         canUserEvaluate = canEvaluateNow;
-      });
-      // if (canUserEvaluate || currentUser!.canEditStudentGrades()) {
-      //   setState(() {
-      //     displayEvaluateGrids = true;
-      //   });
-      // } else {
-      //   if (currentUser!.canEditStudentGrades()) {
-      //     setState(() {
-      //       displayEvaluateGrids = true;
-      //     });
-      //   }
-      //   displayEvaluateGrids = false;
-      // }
-      setState(() {
         isSearching = false;
+        displayEvaluateGrids = true;
       });
+      // setState(() {
+      //   isSearching = false;
+      // });
     } catch (e) {
       setState(() {
         isSearching = false;

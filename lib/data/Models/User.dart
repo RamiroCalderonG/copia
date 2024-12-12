@@ -93,10 +93,14 @@ class User {
     token = "";
   }
 
-  dynamic canEditStudentGrades() {
+  bool canEditStudentGrades() {
     if (role == 'Administrador' ||
         role == 'Director' ||
-        role == 'Coordinador') {
+        role == 'Coordinador' ||
+        role == 'ADMIN' ||
+        role == 'SUPERADMIN' ||
+        role == 'TEACHER' ||
+        role == 'ADMINISTRATOR') {
       return true;
     } else {
       return false;

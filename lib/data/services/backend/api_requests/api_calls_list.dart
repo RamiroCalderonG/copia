@@ -653,7 +653,8 @@ Future<dynamic> validateToken(
 //   }
 // }
 
-Future<dynamic> getTeacherGradeAndCourses(var employee, var year) async {
+Future<dynamic> getTeacherGradeAndCourses(
+    var employee, var year, int month) async {
   try {
     var apiCall = await Requests.get(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/teacher-grades',
@@ -662,16 +663,17 @@ Future<dynamic> getTeacherGradeAndCourses(var employee, var year) async {
           // 'ip_address': deviceIp.toString(),
           'Authorization': currentUser!.token
         },
-        json: {
-          'employee': currentUser!.employeeNumber.toString(),
-          "cycle": currentCycle!.claCiclo
-        },
-        // queryParameters: {
+        // body: {
         //   'employee': currentUser!.employeeNumber.toString(),
         //   "cycle": currentCycle!.claCiclo
         // },
-        persistCookies: true,
-        timeoutSeconds: 20);
+        queryParameters: {
+          'employee': currentUser!.employeeNumber,
+          "cycle": currentCycle!.claCiclo,
+          "month": 10
+        },
+        persistCookies: false,
+        timeoutSeconds: 40);
     apiCall.raiseForStatus();
 
     if (apiCall.statusCode == 200) {
@@ -689,7 +691,7 @@ Future<dynamic> getTeacherGradeAndCourses(var employee, var year) async {
       return throw firstWord;
     }
 
-    return throw FormatException(e.toString());
+    return Future.error(e);
   }
 }
 
@@ -1140,6 +1142,17 @@ Future<dynamic> validateIfUserIsCoordinator(int user) async {
   }
 }
 
+// Future<dynamic> checkForUpdates(){
+//   try {
+//     var apiCall = await Requests.get(
+//       '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/updates'
+
+//     );
+//   } catch (e) {
+
+//   }
+// }
+
 Future<dynamic> getCurrentUserData(String token) async {
   try {
     var apiCall = await Requests.get(
@@ -1177,18 +1190,6 @@ Future<http.Response> getUserRoleAndAcces(String role) async {
     });
     userEvents = response;
     return response;
-    // var apiCall = await Requests.get(
-    //   '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/roles/me',
-    //   queryParameters: {"role": role},
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //     'Authorization': currentUser!.token
-    //   },
-    //   persistCookies: false,
-    //   timeoutSeconds: 15,
-    // );
-    // apiCall.raiseForStatus();
-    // return http.Response(apiCall.content(), apiCall.statusCode);
   } catch (e) {
     insertErrorLog(e.toString(), '/roles/me');
     // String errorMessage;
@@ -1200,6 +1201,9 @@ Future<http.Response> getUserRoleAndAcces(String role) async {
     }
   }
 }
+
+
+
 
 // Future<dynamic> getUserEvents(int userId) async {
 //   var response;
