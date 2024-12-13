@@ -106,4 +106,17 @@ class User {
       return false;
     }
   }
+
+  bool isCurrentUserAdmin() {
+    if (role == 'Administrador' ||
+        role == 'Director' ||
+        role == 'Coordinador' ||
+        role == 'ADMIN' ||
+        role == 'SUPERADMIN' ||
+        role == 'ADMINISTRATOR') {
+      return true;
+    } else {
+      return false;
+    }
+  }
 }

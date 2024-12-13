@@ -21,6 +21,7 @@ dynamic loadStartGrading(int employeeNumber, String schoolYear) async {
         currentUser!.employeeNumber, currentCycle, month);
     List<dynamic> jsonList = json.decode(startGrading);
     jsonDataForDropDownMenuClass = jsonList;
+    fetchedDataFromloadStartGrading = jsonList;
 
     try {
       getTeacherEvalCampuses(jsonList);

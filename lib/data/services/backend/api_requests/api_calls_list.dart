@@ -699,16 +699,12 @@ Future<dynamic> getStudentsToGrade(String assignature, String group,
     String grade, String? cycle, String? campus, String month) async {
   try {
     var apiCall = await Requests.get(
-        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/school-rating/active-students',
-        headers: {
-          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-          'ip_address': deviceIp.toString(),
-          'Auth': currentUser!.token
-        },
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/students-evaluation',
+        headers: {'Authorization': currentUser!.token},
         queryParameters: {
           "grade": grade,
           "group": group,
-          "assignature": assignature,
+          "subject": assignature,
           "cycle": cycle,
           "campus": campus,
           "month": month
@@ -718,11 +714,10 @@ Future<dynamic> getStudentsToGrade(String assignature, String group,
     apiCall.raiseForStatus();
     return apiCall;
   } catch (e) {
-    insertErrorLog(e.toString(), '/academic/school-rating/active-students');
+    insertErrorLog(e.toString(), '/academic/students-evaluation');
     if (e is TimeoutException) {
       return throw TimeoutException(e.toString());
     }
-
     return throw FormatException(e.toString());
   }
 }
@@ -1142,16 +1137,20 @@ Future<dynamic> validateIfUserIsCoordinator(int user) async {
   }
 }
 
-// Future<dynamic> checkForUpdates(){
-//   try {
-//     var apiCall = await Requests.get(
-//       '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/updates'
-
-//     );
-//   } catch (e) {
-
-//   }
-// }
+Future<dynamic> checkForUpdates() async {
+  try {
+    var apiCall = await Requests.get(
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/updates',
+      persistCookies: false,
+      timeoutSeconds: 20,
+    );
+    apiCall.raiseForStatus();
+    return apiCall;
+  } catch (e) {
+    insertErrorLog(e.toString(), "UPDATER CALL ERROR: ");
+    return Future.error(e.toString());
+  }
+}
 
 Future<dynamic> getCurrentUserData(String token) async {
   try {

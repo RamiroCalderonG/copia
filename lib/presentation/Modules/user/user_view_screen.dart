@@ -5,6 +5,8 @@ import 'package:oxschool/data/Models/User.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
 
+import 'cafeteria_user_consumption.dart';
+
 class UserWindow extends StatefulWidget {
   const UserWindow({super.key});
 
@@ -176,9 +178,15 @@ class _UserWindowState extends State<UserWindow> {
                                           width: 5,
                                         ),
                                         ElevatedButton.icon(
-                                            onPressed: () {},
-                                            icon: const Icon(Icons.abc),
-                                            label: const Text('Otra consulta')),
+                                            onPressed: () {
+                                              Navigator.of(context).push(
+                                                  MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          CafeteriaUserConsumption()));
+                                            },
+                                            icon: const Icon(Icons.fastfood),
+                                            label: const Text(
+                                                'Consumos de cafetería')),
                                         const SizedBox(
                                           width: 5,
                                         ),
@@ -269,8 +277,8 @@ class _UserWindowState extends State<UserWindow> {
                                         IconButton.outlined(
                                           color: Colors.white,
                                           onPressed: () {},
-                                          icon: const Icon(Icons.abc),
-                                          tooltip: 'Otra consulta',
+                                          icon: const Icon(Icons.fastfood),
+                                          tooltip: 'Consumo de cafetería',
                                         ),
                                         SizedBox(
                                           width: 5,

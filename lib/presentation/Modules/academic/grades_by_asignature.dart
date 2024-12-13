@@ -89,9 +89,8 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
 
   @override
   void initState() {
-    super.initState();
     _fetchData();
-    // isLoading = false;
+    super.initState();
   }
 
   @override
@@ -121,10 +120,11 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
   void _fetchData() async {
     // var response = await loadStartGrading(
     //     currentUser!.employeeNumber!, currentCycle!.toString());
-    // fetchedData = response;
-    // setState(() {
-    //   isLoading = false;
-    // });
+
+    setState(() {
+      fetchedData = fetchedDataFromloadStartGrading;
+      isLoading = false;
+    });
   }
 
   /// Searches for grades based on the selected parameters.

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:oxschool/core/reusable_methods/reusable_functions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/constants/date_constants.dart';
+import '../../core/constants/user_consts.dart';
 import '../../data/datasources/temp/studens_temp.dart';
 import '../../data/datasources/temp/teacher_grades_temp.dart';
 import 'package:oxschool/core/extensions/capitalize_strings.dart';
@@ -57,8 +58,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
   }
 
   _isUserAdminResult() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool isUserAdmin = prefs.getBool('isUserAdmin')!;
+    bool isUserAdmin = currentUser!.isCurrentUserAdmin();
     monthValue =
         currentMonth; //isUserAdmin ? academicMonthsList.first : currentMonth;
     setState(() {
@@ -74,20 +74,24 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
   void filterData() {
     if (selectedUnity != null) {
       filteredGrade = widget.jsonData
-          .where((item) => item['campus'] == selectedUnity)
-          .map<String>((item) => item['grade'].toString())
+          .where((item) => item['Campus'] == selectedUnity)
+          .map<String>((item) => item['Grade'].toString())
           .toSet()
           .toList();
 
       filteredGroup = widget.jsonData
-          .where((item) => item['campus'] == selectedUnity)
-          .map<String>((item) => item['school_group'].toString())
+          .where((item) =>
+              item['Campus'] == selectedUnity && item['Grade'] == selectedGrade)
+          .map<String>((item) => item['School_group'].toString())
           .toSet()
           .toList();
 
       filteredSubject = widget.jsonData
-          .where((item) => item['campus'] == selectedUnity)
-          .map<String>((item) => item['assignature_name'].toString())
+          .where((item) =>
+              item['Campus'] == selectedUnity &&
+              item['Grade'] == selectedGrade &&
+              item['School_group'] == selectedGroup)
+          .map<String>((item) => item['Subject'].toString())
           .toSet()
           .toList();
 
@@ -102,17 +106,17 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
       }
     } else {
       filteredGrade = widget.jsonData
-          .map<String>((item) => item['grade'].toString())
+          .map<String>((item) => item['Grade'].toString())
           .toSet()
           .toList();
 
       filteredGroup = widget.jsonData
-          .map<String>((item) => item['group'].toString())
+          .map<String>((item) => item['Group'].toString())
           .toSet()
           .toList();
 
       filteredSubject = widget.jsonData
-          .map<String>((item) => item['assignature_name'].toString())
+          .map<String>((item) => item['Subject'].toString())
           .toSet()
           .toList();
 

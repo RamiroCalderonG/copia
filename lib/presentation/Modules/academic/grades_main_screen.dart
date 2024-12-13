@@ -27,7 +27,7 @@ class _GradesMainScreenState extends State<GradesMainScreen>
   bool showGrid = false; // Flag to control grid visibility
 
   TabController? _tabController;
-  bool isSearching = false;
+  bool isSearching = true;
   bool canEvaluateNow =
       false; //Evaluate if current dates are available for evaluations
   bool canUserEvaluate = false; //Evaluate if current user have any data
@@ -86,7 +86,8 @@ class _GradesMainScreenState extends State<GradesMainScreen>
   }
 
   void fetchData() {
-    initSharedPref();
+    isUserAdmin = currentUser!.isCurrentUserAdmin();
+    // initSharedPref();
     initGetDate();
   }
 
@@ -103,13 +104,15 @@ class _GradesMainScreenState extends State<GradesMainScreen>
         showErrorFromBackend(context, onError);
       });
       if (canEvaluateNow) {
-        loadStartGrading(currentUser!.employeeNumber!, currentCycle!.claCiclo!);
+        await loadStartGrading(
+            currentUser!.employeeNumber!, currentCycle!.claCiclo!);
+        setState(() {
+          canUserEvaluate = canEvaluateNow;
+          isSearching = false;
+          displayEvaluateGrids = true;
+        });
       }
-      setState(() {
-        canUserEvaluate = canEvaluateNow;
-        isSearching = false;
-        displayEvaluateGrids = true;
-      });
+
       // setState(() {
       //   isSearching = false;
       // });
@@ -205,10 +208,10 @@ class _GradesMainScreenState extends State<GradesMainScreen>
                   ));
   }
 
-  void initSharedPref() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      isUserAdmin = prefs.getBool('isUserAdmin')!;
-    });
-  }
+  // void initSharedPref() async {
+  //   final SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   setState(() {
+  //     isUserAdmin = prefs.getBool('isUserAdmin')!;
+  //   });
+  // }
 }

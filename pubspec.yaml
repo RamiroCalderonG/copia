@@ -85,6 +85,7 @@ dependencies:
   file_selector: ^1.0.3
   file_picker: ^8.0.0+1
   package_info_plus: ^8.1.2
+  process_run: ^1.2.2+1
       #ref: 927f8cbc09b35d85245c095f2db8f9b186f6618
 
 dev_dependencies:
