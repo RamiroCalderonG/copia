@@ -13,7 +13,7 @@ class StudentEval {
   int outfit;
   int subject;
   String? subjectName;
-  int evaluation;
+  double evaluation;
   int? other;
   String? fulllName;
 
@@ -44,21 +44,21 @@ dynamic getEvalFromJSON(List<dynamic> jsonList, bool isByStudent) {
   } else {
     if (isByStudent == false) {
       for (var item in jsonList) {
-        String rateID = item['id'];
+        String rateID = item['idCicloEscolar'].toString();
         String studentName = item['student'];
         String student1LastName = item['1lastName'];
         String student2LastName = item['2lastName'];
         String studentID = item['studentID'];
-        int grades = item['eval_type'];
+        //int grades = item['eval_type'];
         int absence = item['absence_eval'];
         int homework = item['homework_eval'];
         int discipline = item['discipline_eval'];
         // String comment = item['comment'];
         int habitsEvaluation = item['habit_eval'];
-        int outfit = item['outfit'];
-        int subject = item['subject'];
+        //int outfit = item['outfit'];
+        int subject = item['subjectId'];
         String? subjectName = item['subject_name'];
-        int evaluation = item['evaluation'];
+        double evaluation = item['evaluation'];
         int? other = item['other'];
         studentEval.add(StudentEval(
             int.parse(rateID),
@@ -66,13 +66,13 @@ dynamic getEvalFromJSON(List<dynamic> jsonList, bool isByStudent) {
             student1LastName,
             student2LastName,
             studentID,
-            grades,
+            0,
             absence,
             homework,
             discipline,
             // comment,
             habitsEvaluation,
-            outfit,
+            0,
             subject,
             subjectName,
             evaluation,
@@ -96,7 +96,7 @@ dynamic getEvalFromJSON(List<dynamic> jsonList, bool isByStudent) {
         int outfit = item['outfit'];
         int subject = item['subject'];
         String? subjectName = item['subject_name'];
-        int evaluation = item['evaluation'];
+        double evaluation = item['evaluation'];
         int? other = item['other'];
         String fullName = item['studentName'];
         studentEval.add(StudentEval(

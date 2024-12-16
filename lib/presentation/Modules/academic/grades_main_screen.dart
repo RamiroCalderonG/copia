@@ -100,9 +100,14 @@ class _GradesMainScreenState extends State<GradesMainScreen>
       setState(() {
         isSearching = true;
       });
-      canEvaluateNow = await isDateToEvaluateStudents().catchError((onError) {
-        showErrorFromBackend(context, onError);
-      });
+      if (isUserAdmin) {
+        canEvaluateNow = true;
+      } else {
+        canEvaluateNow = await isDateToEvaluateStudents().catchError((onError) {
+          showErrorFromBackend(context, onError);
+        });
+      }
+
       if (canEvaluateNow) {
         await loadStartGrading(
             currentUser!.employeeNumber!, currentCycle!.claCiclo!);
@@ -113,9 +118,9 @@ class _GradesMainScreenState extends State<GradesMainScreen>
         });
       }
 
-      // setState(() {
-      //   isSearching = false;
-      // });
+      setState(() {
+        isSearching = false;
+      });
     } catch (e) {
       setState(() {
         isSearching = false;

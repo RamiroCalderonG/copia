@@ -151,17 +151,17 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
             'Apellido paterno': PlutoCell(value: item.student1LastName),
             'Apellido materno': PlutoCell(value: item.student2LastName),
             'Calif': PlutoCell(value: item.evaluation),
-            'Conducta': PlutoCell(value: item.discipline),
-            'Uniforme': PlutoCell(value: item.outfit),
-            'Ausencia': PlutoCell(value: item.absence),
-            'Tareas': PlutoCell(value: item.homework),
+            // 'Conducta': PlutoCell(value: item.discipline),
+            // 'Uniforme': PlutoCell(value: item.outfit),
+            // 'Ausencia': PlutoCell(value: item.absence),
+            // 'Tareas': PlutoCell(value: item.homework),
           }));
         }
 //                           // StudentsPlutoGrid(rows: assignatureRows);
       });
-      if (int.parse(gradeInt) >= 6) {
-        await getCommentsForEvals(int.parse(gradeInt));
-      }
+      // if (int.parse(gradeInt) >= 6) {
+      //   await getCommentsForEvals(int.parse(gradeInt));
+      // }
       setState(() {
         isLoading = false;
       });
@@ -207,6 +207,8 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                         'Error en la conexión, verificar la conectividad: Code: 408'));
               } else {
                 return SingleChildScrollView(
+                    child: Padding(
+                  padding: EdgeInsets.all(10),
                   child: Column(
                     children: [
                       Row(
@@ -216,7 +218,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                       )
                     ],
                   ),
-                );
+                ));
               }
             }),
           );
@@ -311,9 +313,6 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
               children: [
                 Flexible(
                   child: RefreshButton(onPressed: () {
-                    // setState(() {
-                    //   isLoading = true;
-                    // });
                     var monthNumber;
 
                     if (isUserAdmin) {
@@ -384,7 +383,8 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
           const Divider(thickness: 1),
           Container(
               width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height / 1.5,
+              height: MediaQuery.of(context).size.height / 1.8,
+              // padding: const EdgeInsets.all(10),
               margin: const EdgeInsets.all(20),
               child: LayoutBuilder(
                   builder: (BuildContext context, BoxConstraints constraints) {
@@ -415,38 +415,38 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                             composeUpdateStudentGradesBody(
                                 event.column.title, newValue, event.rowIdx);
                           },
-                          onRowSecondaryTap: (event) async {
-                            asignatureNameListener = '';
-                            asignatureNameListener = subjectSelected;
-                            var studentID = event.row.cells['Matricula']?.value;
+                          // onRowSecondaryTap: (event) async {
+                          //   asignatureNameListener = '';
+                          //   asignatureNameListener = subjectSelected;
+                          //   var studentID = event.row.cells['Matricula']?.value;
 
-                            var selectedStudentName =
-                                event.row.cells['Nombre']?.value;
-                            // validator();
-                            commentsAsignated.clear();
-                            var gradeInt = getKeyFromValue(
-                                teacherGradesMap, selectedTempGrade!);
+                          //   var selectedStudentName =
+                          //       event.row.cells['Nombre']?.value;
+                          //   // validator();
+                          //   commentsAsignated.clear();
+                          //   var gradeInt = getKeyFromValue(
+                          //       teacherGradesMap, selectedTempGrade!);
 
-                            if (isUserAdmin == true) {
-                              monthNumber = getKeyFromValue(
-                                  spanishMonthsMap, selectedTempMonth!);
-                            } else {
-                              monthNumber = getKeyFromValue(
-                                  spanishMonthsMap, selectedCurrentTempMonth!);
-                            }
+                          //   if (isUserAdmin == true) {
+                          //     monthNumber = getKeyFromValue(
+                          //         spanishMonthsMap, selectedTempMonth!);
+                          //   } else {
+                          //     monthNumber = getKeyFromValue(
+                          //         spanishMonthsMap, selectedCurrentTempMonth!);
+                          //   }
 
-                            if (gradeInt! >= 6) {
-                              commentsAsignated =
-                                  await getCommentsAsignatedToStudent(gradeInt,
-                                      true, studentID.toString(), monthNumber);
+                          //   if (gradeInt! >= 6) {
+                          //     commentsAsignated =
+                          //         await getCommentsAsignatedToStudent(gradeInt,
+                          //             true, studentID.toString(), monthNumber);
 
-                              showCommentsDialog(commentsAsignated,
-                                  asignatureNameListener!, selectedStudentName);
-                            } else {
-                              showInformationDialog(context, 'Aviso',
-                                  'Sin comentarios disponibles a asignar al alumno seleccionado');
-                            }
-                          },
+                          //     showCommentsDialog(commentsAsignated,
+                          //         asignatureNameListener!, selectedStudentName);
+                          //   } else {
+                          //     showInformationDialog(context, 'Aviso',
+                          //         'Sin comentarios disponibles a asignar al alumno seleccionado');
+                          //   }
+                          // },
                           configuration: const PlutoGridConfiguration(),
                           createFooter: (stateManager) {
                             stateManager.setPageSize(30,
