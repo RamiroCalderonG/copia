@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
+import 'package:loading_indicator/loading_indicator.dart';
 import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/core/reusable_methods/translate_messages.dart';
@@ -347,7 +348,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
                             fontWeight: FontWeight.bold,
                             color: Colors.blue),
                       ),
-              )
+              ),
             ],
           ),
           const Divider(thickness: 1),

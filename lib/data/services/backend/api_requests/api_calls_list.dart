@@ -815,7 +815,7 @@ Future<dynamic> patchStudentsGrades(
       return apiCall.statusCode;
     }
   } catch (e) {
-    return throw FormatException(e.toString());
+    return Future.error(e.toString());
   }
 }
 

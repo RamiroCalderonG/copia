@@ -1,6 +1,7 @@
 // ignore_for_file: constant_identifier_names, prefer_typing_uninitialized_variables
 
 import 'package:flutter/material.dart';
+import 'package:loading_indicator/loading_indicator.dart';
 
 import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
@@ -140,7 +141,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
       studentList = await getStudentsByAssinature(
           groupSelected, gradeInt, assignatureID, monthNumber, campus);
 
-      fillGrid(studentList);
+      await fillGrid(studentList);
       setState(() {
         isLoading = true;
         assignatureRows.clear();
@@ -150,18 +151,10 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
             'Nombre': PlutoCell(value: item.studentName),
             'Apellido paterno': PlutoCell(value: item.student1LastName),
             'Apellido materno': PlutoCell(value: item.student2LastName),
-            'Calif': PlutoCell(value: item.evaluation),
-            // 'Conducta': PlutoCell(value: item.discipline),
-            // 'Uniforme': PlutoCell(value: item.outfit),
-            // 'Ausencia': PlutoCell(value: item.absence),
-            // 'Tareas': PlutoCell(value: item.homework),
+            'Calif': PlutoCell(value: item.evaluation)
           }));
         }
-//                           // StudentsPlutoGrid(rows: assignatureRows);
       });
-      // if (int.parse(gradeInt) >= 6) {
-      //   await getCommentsForEvals(int.parse(gradeInt));
-      // }
       setState(() {
         isLoading = false;
       });
@@ -206,90 +199,26 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                     child: Text(
                         'Error en la conexión, verificar la conectividad: Code: 408'));
               } else {
-                return SingleChildScrollView(
-                    child: Padding(
-                  padding: EdgeInsets.all(10),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          _buildGradesbyAssignature(),
-                        ],
-                      )
-                    ],
-                  ),
-                ));
+                if (isLoading) {
+                  return const CustomLoadingIndicator();
+                } else {
+                  return SingleChildScrollView(
+                      child: Padding(
+                    padding: EdgeInsets.all(10),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            _buildGradesbyAssignature(),
+                          ],
+                        )
+                      ],
+                    ),
+                  ));
+                }
               }
             }),
           );
-
-    // Stack(
-    //   children: [
-    //     SizedBox(
-    //       width: MediaQuery.of(context).size.width,
-    //       child: LayoutBuilder(
-    //           builder: (BuildContext context, BoxConstraints constraints) {
-    //         if (isLoading == false) {
-    //           return SingleChildScrollView(
-    //             child: Column(
-    //               children: [
-    //                 Row(
-    //                   children: [_buildGradesbyAssignature()],
-    //                 )
-    //               ],
-    //             ),
-    //           );
-    //         } else {
-    //           return const CustomLoadingIndicator();
-    //         }
-    //       }),
-    //     )
-    //   ],
-    // );
-
-    // FutureBuilder(
-    //   future: loadStartGrading(
-    //       currentUser!.employeeNumber!, currentCycle!.toString()),
-    //   builder: (context, snapshot) {
-    //     if (snapshot.connectionState == ConnectionState.waiting) {
-    //       return Center(child: CustomLoadingIndicator());
-    //     } else if (snapshot.hasError) {
-    //       // var message = snapshot.error.toString().split(" ").elementAt(1);
-    //       // var message = getMessageToDisplay(message);
-    //       insertErrorLog(
-    //           snapshot.error.toString(), ' INIT GRADES/EVAL SCREEN ');
-    //       return Center(child: Text('Error: ${snapshot.error}'));
-    //     } else if (!snapshot.hasData || snapshot.data == null) {
-    //       return const Center(child: Text('Sin información disponible'));
-    //     } else {
-    //       return Stack(
-    //         children: [
-    //           SizedBox(
-    //             width: MediaQuery.of(context).size.width,
-    //             child: LayoutBuilder(builder:
-    //                 (BuildContext context, BoxConstraints constraints) {
-    //               if (constraints.maxWidth > 600) {
-    //                 return SingleChildScrollView(
-    //                   child: Column(
-    //                     children: [
-    //                       Row(
-    //                         children: [_buildGradesbyAssignature()],
-    //                       )
-    //                     ],
-    //                   ),
-    //                 );
-    //               } else {
-    //                 return const Placeholder(
-    //                   child: Text('Smaller version pending to design'),
-    //                 );
-    //               }
-    //             }),
-    //           )
-    //         ],
-    //       );
-    //     }
-    //   },
-    // );
   }
 
   Widget _buildGradesbyAssignature() {
@@ -313,27 +242,42 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
               children: [
                 Flexible(
                   child: RefreshButton(onPressed: () {
-                    var monthNumber;
+                    setState(() {
+                      isLoading = true;
+                    });
+                    try {
+                      var monthNumber;
 
-                    if (isUserAdmin) {
-                      monthNumber =
-                          getKeyFromValue(spanishMonthsMap, selectedTempMonth!);
-                    } else {
-                      monthNumber = getKeyFromValue(
-                          spanishMonthsMap, selectedCurrentTempMonth!);
+                      if (isUserAdmin) {
+                        monthNumber = getKeyFromValue(
+                            spanishMonthsMap, selectedTempMonth!);
+                      } else {
+                        monthNumber = getKeyFromValue(
+                            spanishMonthsMap, selectedCurrentTempMonth!);
+                      }
+                      var assignatureID = getKeyFromValue(
+                          assignaturesMap, selectedTempSubject!);
+
+                      var gradeInt =
+                          getKeyFromValue(teacherGradesMap, selectedTempGrade!);
+
+                      searchBUttonAction(
+                          selectedTempGroup!,
+                          gradeInt.toString(),
+                          assignatureID.toString(),
+                          monthNumber.toString(),
+                          selectedTempCampus!);
+                      // setState(() {
+                      //   isLoading = false;
+                      // });
+                    } catch (e) {
+                      insertErrorLog(
+                          e.toString(), 'SEARCH STUDENTS BY SUBJECTS ');
+                      var message = getMessageToDisplay(e.toString());
+                      if (context.mounted) {
+                        showErrorFromBackend(context, message.toString());
+                      }
                     }
-                    var assignatureID =
-                        getKeyFromValue(assignaturesMap, selectedTempSubject!);
-
-                    var gradeInt =
-                        getKeyFromValue(teacherGradesMap, selectedTempGrade!);
-
-                    searchBUttonAction(
-                        selectedTempGroup!,
-                        gradeInt.toString(),
-                        assignatureID.toString(),
-                        monthNumber.toString(),
-                        selectedTempCampus!);
                   }),
                 ),
                 const SizedBox(width: 10),
@@ -403,56 +347,29 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                   return StatefulBuilder(
                     builder: (context, setState) {
                       return PlutoGrid(
-                          mode: PlutoGridMode.normal,
-                          columns: assignaturesColumns,
-                          rows: assignatureRows,
-                          onChanged: (event) {
-                            var newValue = validateNewGradeValue(
-                                //Validate values cant be les that 50
-                                event.value,
-                                event.column.title);
-
-                            composeUpdateStudentGradesBody(
-                                event.column.title, newValue, event.rowIdx);
-                          },
-                          // onRowSecondaryTap: (event) async {
-                          //   asignatureNameListener = '';
-                          //   asignatureNameListener = subjectSelected;
-                          //   var studentID = event.row.cells['Matricula']?.value;
-
-                          //   var selectedStudentName =
-                          //       event.row.cells['Nombre']?.value;
-                          //   // validator();
-                          //   commentsAsignated.clear();
-                          //   var gradeInt = getKeyFromValue(
-                          //       teacherGradesMap, selectedTempGrade!);
-
-                          //   if (isUserAdmin == true) {
-                          //     monthNumber = getKeyFromValue(
-                          //         spanishMonthsMap, selectedTempMonth!);
-                          //   } else {
-                          //     monthNumber = getKeyFromValue(
-                          //         spanishMonthsMap, selectedCurrentTempMonth!);
-                          //   }
-
-                          //   if (gradeInt! >= 6) {
-                          //     commentsAsignated =
-                          //         await getCommentsAsignatedToStudent(gradeInt,
-                          //             true, studentID.toString(), monthNumber);
-
-                          //     showCommentsDialog(commentsAsignated,
-                          //         asignatureNameListener!, selectedStudentName);
-                          //   } else {
-                          //     showInformationDialog(context, 'Aviso',
-                          //         'Sin comentarios disponibles a asignar al alumno seleccionado');
-                          //   }
-                          // },
-                          configuration: const PlutoGridConfiguration(),
-                          createFooter: (stateManager) {
-                            stateManager.setPageSize(30,
-                                notify: false); // default 40
-                            return PlutoPagination(stateManager);
-                          });
+                        mode: PlutoGridMode.normal,
+                        columns: assignaturesColumns,
+                        rows: assignatureRows,
+                        onChanged: (event) {
+                          var newValue = validateNewGradeValue(
+                              //Validate values cant be les that 50
+                              event.value,
+                              event.column.title);
+                          composeUpdateStudentGradesBody(
+                              event.column.title, newValue, event.rowIdx);
+                        },
+                        configuration: PlutoGridConfiguration(
+                            columnSize: PlutoGridColumnSizeConfig(
+                                autoSizeMode: PlutoAutoSizeMode.scale),
+                            scrollbar: PlutoGridScrollbarConfig(
+                                isAlwaysShown: true,
+                                scrollBarColor: Colors.red)),
+                        createFooter: (stateManager) {
+                          stateManager.setPageSize(30,
+                              notify: false); // default 40
+                          return PlutoPagination(stateManager);
+                        },
+                      );
                     },
                   );
                 }
