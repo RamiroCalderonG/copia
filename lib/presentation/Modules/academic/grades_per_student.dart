@@ -140,9 +140,9 @@ class _GradesByStudentState extends State<GradesByStudent> {
       studentList = await getSubjectsAndGradesByStudent(gradeInt.toString(),
           groupSelected, currentCycle!.claCiclo, campusSelected, monthSelected);
 
-      if (gradeInt! >= 6) {
-        await getCommentsForEvals(gradeInt!);
-      }
+      // if (gradeInt! >= 6) {
+      //   await getCommentsForEvals(gradeInt!);
+      // }
 
       fillGrid(studentList); //Fill student list by unque values
       int studentNumber = 1;

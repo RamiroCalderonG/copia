@@ -6,6 +6,7 @@ import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 
 import 'package:oxschool/data/Models/Student_eval.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
+import 'package:pluto_grid/pluto_grid.dart';
 
 import '../../data/datasources/temp/studens_temp.dart';
 import '../../data/services/backend/api_requests/api_calls_list.dart';
@@ -325,15 +326,18 @@ void composeBodyToUpdateGradeBySTudent(
   }
 }
 
-void composeUpdateStudentGradesBody(String key, dynamic value, int rowIndex) {
-  var idToupdate = studentList[rowIndex].rateID;
+void composeUpdateStudentGradesBody(String key, dynamic value, int idEval) {
   bool idExists = false;
 
+  if (key == 'Calif') {
+    key = 'eval';
+  }
+
   if (studentGradesBodyToUpgrade.isEmpty) {
-    studentGradesBodyToUpgrade.add({'id': idToupdate, key: value});
+    studentGradesBodyToUpgrade.add({'idEval': idEval, key: value});
   } else {
     for (var obj in studentGradesBodyToUpgrade) {
-      if (obj['id'] == idToupdate) {
+      if (obj['idEval'] == idEval) {
         idExists = true;
         if (obj.containsKey(key)) {
           obj[key] = value; // Update the existing value
@@ -343,7 +347,7 @@ void composeUpdateStudentGradesBody(String key, dynamic value, int rowIndex) {
       }
     }
     if (!idExists) {
-      studentGradesBodyToUpgrade.add({'id': idToupdate, key: value});
+      studentGradesBodyToUpgrade.add({'idEval': idEval, key: value});
     }
   }
 }

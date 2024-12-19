@@ -44,10 +44,10 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
   @override
   void initState() {
     _isUserAdminResult();
-    selectedTempMonth = currentMonth;
-    if (selectedTempMonth != null) {
-      monthValue = selectedTempMonth!;
-    }
+    // selectedTempMonth = currentMonth;
+    // if (selectedTempMonth != null) {
+    //   monthValue = selectedTempMonth!;
+    // }
     unityList = widget.campusesList.toList();
     if (unityList.length == 1) {
       selectedTempCampus = unityList.first;
@@ -59,14 +59,20 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
 
   _isUserAdminResult() async {
     bool isUserAdmin = currentUser!.isCurrentUserAdmin();
-    monthValue =
-        currentMonth; //isUserAdmin ? academicMonthsList.first : currentMonth;
+    // monthValue =
+    //     currentMonth; //isUserAdmin ? academicMonthsList.first : currentMonth;
     setState(() {
       userStatus = isUserAdmin;
       if (isUserAdmin == false) {
         selectedCurrentTempMonth = currentMonth;
         monthValue = currentMonth;
-        selectedTempMonth = monthValue;
+        //selectedTempMonth = monthValue;
+      } else {
+        if (selectedTempMonth != null) {
+          monthValue = selectedTempMonth!;
+        } else {
+          monthValue = currentMonth;
+        }
       }
     });
   }
@@ -138,65 +144,6 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
 
     setState(() {});
   }
-  // void filterData() {
-  //   if (selectedUnity != null) {
-  //     filteredGrade = widget.jsonData
-  //         .where((item) => item['Campus'] == selectedUnity)
-  //         .map<String>((item) => item['Grade'].toString())
-  //         .toSet()
-  //         .toList();
-
-  //     filteredGroup = widget.jsonData
-  //         .where((item) =>
-  //             item['Campus'] == selectedUnity && item['Grade'] == selectedGrade)
-  //         .map<String>((item) => item['School_group'].toString())
-  //         .toSet()
-  //         .toList();
-
-  //     filteredSubject = widget.jsonData
-  //         .where((item) =>
-  //             item['Campus'] == selectedUnity &&
-  //             item['School_group'] == selectedGroup)
-  //         .map<String>((item) => item['Subject'].toString())
-  //         .toSet()
-  //         .toList();
-
-  //     if (hasBeenFiltered) {
-  //       selectedGrade = filteredGrade.first;
-  //       selectedGroup = filteredGroup.first;
-  //       selectedSubject = filteredSubject.first;
-  //     } else {
-  //       selectedGrade = null;
-  //       selectedGroup = null;
-  //       selectedSubject = null;
-  //     }
-  //   } else {
-  //     filteredGrade = widget.jsonData
-  //         .map<String>((item) => item['Grade'].toString())
-  //         .toSet()
-  //         .toList();
-
-  //     filteredGroup = widget.jsonData
-  //         .map<String>((item) => item['School_group'].toString())
-  //         .toSet()
-  //         .toList();
-
-  //     filteredSubject = widget.jsonData
-  //         .map<String>((item) => item['Subject'].toString())
-  //         .toSet()
-  //         .toList();
-
-  //     if (hasBeenFiltered) {
-  //       selectedGrade = filteredGrade.first;
-  //       selectedGroup = filteredGroup.first;
-  //       selectedSubject = filteredSubject.first;
-  //     } else {
-  //       selectedGrade = null;
-  //       selectedGroup = null;
-  //       selectedSubject = null;
-  //     }
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -234,27 +181,6 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                           value: value, label: value);
                     }).toList(),
                   ),
-                  // DropdownMenu<String>(
-                  //     label: const Text(
-                  //       ' Campus ',
-                  //       style: TextStyle(fontSize: 14),
-                  //     ),
-                  //     trailingIcon: const Icon(Icons.arrow_drop_down),
-                  //     initialSelection: selectedUnity,
-                  //     onSelected: (String? value) {
-                  //       setState(() {
-                  //         selectedUnity = value;
-                  //         selectedTempCampus = value;
-                  //         filterData();
-                  //         hasBeenFiltered = true;
-                  //       });
-                  //     },
-                  //     dropdownMenuEntries: unityList
-                  //         .toList()
-                  //         .map<DropdownMenuEntry<String>>((String value) {
-                  //       return DropdownMenuEntry<String>(
-                  //           value: value, label: value);
-                  //     }).toList()),
                 ],
               )),
             if (unityList.length == 1) Flexible(child: Text(unityList.first)),
@@ -285,44 +211,6 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                         value: value, label: value);
                   }).toList(),
                 ),
-                // DropdownMenu<String>(
-                //   label: const Text(
-                //     ' Grado ',
-                //     style: TextStyle(fontSize: 14),
-                //   ),
-                //   trailingIcon: const Icon(Icons.arrow_drop_down),
-                //   initialSelection: selectedGrade,
-                //   onSelected: (String? value) {
-                //     setState(() {
-                //       selectedGrade = value;
-                //       filterData();
-                //     });
-                //   },
-                //   dropdownMenuEntries: filteredGrade
-                //       .map<DropdownMenuEntry<String>>((String value) {
-                //     return DropdownMenuEntry<String>(
-                //         value: value, label: value);
-                //   }).toList(),
-                // ),
-                // DropdownMenu<String>(
-                //     label: const Text(
-                //       ' Grado ',
-                //       style: TextStyle(fontSize: 14),
-                //     ),
-                //     trailingIcon: const Icon(Icons.arrow_drop_down),
-                //     initialSelection: selectedGrade,
-                //     onSelected: (String? value) {
-                //       selectedGrade = value;
-                //       selectedTempGrade = value;
-                //       filterData();
-                //       hasBeenFiltered = true;
-                //     },
-                //     dropdownMenuEntries: filteredGrade
-                //         .toList()
-                //         .map<DropdownMenuEntry<String>>((String value) {
-                //       return DropdownMenuEntry<String>(
-                //           value: value, label: value);
-                //     }).toList()),
               ],
             )),
 
@@ -351,23 +239,6 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                         value: value, label: value);
                   }).toList(),
                 ),
-                // DropdownMenu<String>(
-                //     label:
-                //         const Text(' Grupo ', style: TextStyle(fontSize: 14)),
-                //     trailingIcon: const Icon(Icons.arrow_drop_down),
-                //     initialSelection: selectedGroup,
-                //     onSelected: (String? value) {
-                //       selectedGroup = value;
-                //       selectedTempGroup = value;
-                //       filterData();
-                //       hasBeenFiltered = true;
-                //     },
-                //     dropdownMenuEntries: filteredGroup
-                //         .toList()
-                //         .map<DropdownMenuEntry<String>>((String value) {
-                //       return DropdownMenuEntry<String>(
-                //           value: value, label: value);
-                //     }).toList()),
               ],
             )),
             if (!widget.byStudent)
@@ -396,21 +267,6 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                               value: value, label: value);
                         }).toList(),
                       ),
-                      // DropdownMenu<String>(
-                      //     label: const Text(' Materia ',
-                      //         style: TextStyle(fontSize: 14)),
-                      //     trailingIcon: const Icon(Icons.arrow_drop_down),
-                      //     initialSelection: selectedSubject,
-                      //     onSelected: (String? value) {
-                      //       selectedSubject = value;
-                      //       selectedTempSubject = value;
-                      //     },
-                      //     dropdownMenuEntries: filteredSubject
-                      //         .toList()
-                      //         .map<DropdownMenuEntry<String>>((String value) {
-                      //       return DropdownMenuEntry<String>(
-                      //           value: value, label: value.trim().toTitleCase);
-                      //     }).toList()),
                     ],
                   )),
 

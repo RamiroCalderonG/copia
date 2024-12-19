@@ -800,14 +800,14 @@ Future<dynamic> patchStudentsGrades(
       var apiCall = await Requests.patch(
           '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student/grades',
           headers: {
-            'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-            'ip_address': deviceIp.toString(),
-            'Auth': currentUser!.token
+            //'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
+            //'ip_address': deviceIp.toString(),
+            'Authorization': currentUser!.token
           },
-          queryParameters: {
-            "studentEval": isByStudent.toString(),
-            "cycle": currentCycle!.claCiclo
-          },
+          // queryParameters: {
+          //   "studentEval": isByStudent.toString(),
+          //   "cycle": currentCycle!.claCiclo
+          // },
           persistCookies: false,
           timeoutSeconds: 25,
           json: requestBody);

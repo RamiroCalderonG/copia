@@ -44,7 +44,7 @@ dynamic getEvalFromJSON(List<dynamic> jsonList, bool isByStudent) {
   } else {
     if (isByStudent == false) {
       for (var item in jsonList) {
-        String rateID = item['idCicloEscolar'].toString();
+        int rateID = item['idCicloEscolar'];
         String studentName = item['student'];
         String student1LastName = item['1lastName'];
         String student2LastName = item['2lastName'];
@@ -61,7 +61,7 @@ dynamic getEvalFromJSON(List<dynamic> jsonList, bool isByStudent) {
         double evaluation = item['evaluation'];
         int? other = item['other'];
         studentEval.add(StudentEval(
-            int.parse(rateID),
+            rateID,
             studentName,
             student1LastName,
             student2LastName,

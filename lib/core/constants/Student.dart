@@ -69,7 +69,7 @@ final List<PlutoColumn> assignaturesColumns = <PlutoColumn>[
     field: 'Nombre',
     type: PlutoColumnType.text(),
     readOnly: true,
-    sort: PlutoColumnSort.ascending,
+    //sort: PlutoColumnSort.ascending,
   ),
   PlutoColumn(
       title: 'Apellido paterno',
@@ -83,7 +83,7 @@ final List<PlutoColumn> assignaturesColumns = <PlutoColumn>[
       field: 'Apellido materno',
       type: PlutoColumnType.text(),
       readOnly: true,
-      sort: PlutoColumnSort.ascending,
+      //sort: PlutoColumnSort.ascending,
       width: 150),
   PlutoColumn(
       title: 'Calif',
@@ -91,6 +91,11 @@ final List<PlutoColumn> assignaturesColumns = <PlutoColumn>[
       type: PlutoColumnType.number(negative: false),
       readOnly: false,
       width: 100),
+  PlutoColumn(
+      title: 'idCalif',
+      field: 'idCalif',
+      type: PlutoColumnType.number(negative: false),
+      hide: true)
   // PlutoColumn(
   //     hide: true,
   //     title: 'Faltas',

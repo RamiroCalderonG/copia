@@ -112,6 +112,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
             'Nombre': PlutoCell(value: item.studentName),
             'Apellido paterno': PlutoCell(value: item.student1LastName),
             'Apellido materno': PlutoCell(value: item.student2LastName),
+            'idCalif': PlutoCell(value: item.rateID),
           },
         );
       }).toList();
@@ -151,7 +152,8 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
             'Nombre': PlutoCell(value: item.studentName),
             'Apellido paterno': PlutoCell(value: item.student1LastName),
             'Apellido materno': PlutoCell(value: item.student2LastName),
-            'Calif': PlutoCell(value: item.evaluation)
+            'Calif': PlutoCell(value: item.evaluation),
+            'idCalif': PlutoCell(value: item.rateID),
           }));
         }
       });
@@ -287,6 +289,9 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                         // backgroundColor: Colors.red[400],
                         ),
                     onPressed: () async {
+                      setState(() {
+                        isLoading = true;
+                      });
                       updateButtonFunction((success) {
                         if (success) {
                           showConfirmationDialog(
@@ -305,6 +310,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                           }
                           var gradeInt = getKeyFromValue(
                               teacherGradesMap, selectedTempGrade!);
+                          assignatureRows.clear();
 
                           searchBUttonAction(
                               selectedTempGroup!,
@@ -312,6 +318,9 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                               assignatureID.toString(),
                               monthNumber.toString(),
                               selectedTempCampus!);
+                          setState(() {
+                            isLoading = false;
+                          });
                         } else {
                           showErrorFromBackend(context, 'Error');
                         }
@@ -351,12 +360,15 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                         columns: assignaturesColumns,
                         rows: assignatureRows,
                         onChanged: (event) {
+                          final idEval =
+                              event.row.cells['idCalif']?.value as int;
+
                           var newValue = validateNewGradeValue(
                               //Validate values cant be les that 50
                               event.value,
                               event.column.title);
                           composeUpdateStudentGradesBody(
-                              event.column.title, newValue, event.rowIdx);
+                              event.column.title, newValue, idEval);
                         },
                         configuration: PlutoGridConfiguration(
                             columnSize: PlutoGridColumnSizeConfig(
