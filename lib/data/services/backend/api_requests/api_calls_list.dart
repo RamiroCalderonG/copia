@@ -699,7 +699,7 @@ Future<dynamic> getStudentsToGrade(String assignature, String group,
     String grade, String? cycle, String? campus, String month) async {
   try {
     var apiCall = await Requests.get(
-        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/students-evaluation',
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/students-evaluation-subject',
         headers: {'Authorization': currentUser!.token},
         queryParameters: {
           "grade": grade,
@@ -732,7 +732,7 @@ Future<dynamic> getStudentsGrades(
     month) async {
   try {
     var apiCall = await Requests.get(
-        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student/grades',
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student/grades-subject',
         headers: {
           'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
           'ip_address': deviceIp.toString(),
@@ -760,18 +760,14 @@ Future<dynamic> getSubjectsAndGradeByStuent(
     String? group, grade, cycle, campus, month) async {
   try {
     var apiCall = await Requests.get(
-        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student/grades',
-        headers: {
-          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-          'ip_address': deviceIp.toString(),
-          'Auth': currentUser!.token
-        },
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student-evaluation-student',
+        headers: {'Authorization': currentUser!.token},
         queryParameters: {
-          "grade": grade,
+          "grade": int.parse(grade),
           "group": group,
           "cycle": cycle,
           "campus": campus,
-          "month": month,
+          "month": int.parse(month),
           "history":
               0, //0 means all students, if history : 1 , will return all history from a single student and youll need to send studenID as param
           "assignature": "null", //Set null to return all subjects
@@ -783,11 +779,11 @@ Future<dynamic> getSubjectsAndGradeByStuent(
     return apiCall;
   } catch (e) {
     if (e is TimeoutException) {
-      insertErrorLog(e.toString(), 'academic/student/grades');
+      insertErrorLog(e.toString(), 'academic/student-evaluation-student');
       var firstWord = getMessageToDisplay(e.toString());
       return throw TimeoutException(firstWord.toString());
     }
-    return throw FormatException(e.toString());
+    return Future.error(e.toString());
   }
 }
 

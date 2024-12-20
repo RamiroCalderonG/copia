@@ -98,7 +98,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
         studentSet.add(student.studentID);
         uniqueStudents.add({
           'studentID': student.studentID,
-          'studentName': student.fulllName!,
+          'student': student.fulllName!,
         });
 
         // print(uniqueStudents.toString());
@@ -139,10 +139,6 @@ class _GradesByStudentState extends State<GradesByStudent> {
       }
       studentList = await getSubjectsAndGradesByStudent(gradeInt.toString(),
           groupSelected, currentCycle!.claCiclo, campusSelected, monthSelected);
-
-      // if (gradeInt! >= 6) {
-      //   await getCommentsForEvals(gradeInt!);
-      // }
 
       fillGrid(studentList); //Fill student list by unque values
       int studentNumber = 1;
@@ -205,45 +201,6 @@ class _GradesByStudentState extends State<GradesByStudent> {
               }
             }),
           );
-    // FutureBuilder(
-    //   future: loadStartGrading(
-    //       currentUser!.employeeNumber!, currentCycle!.toString()),
-    //   builder: (context, snapshot) {
-    //     if (snapshot.connectionState == ConnectionState.waiting) {
-    //       return Center(child: CustomLoadingIndicator());
-    //     } else if (snapshot.hasError) {
-    //       return Center(child: Text('Error: ${snapshot.error}'));
-    //     } else if (!snapshot.hasData || snapshot.data == null) {
-    //       return const Center(child: Text('No data available'));
-    //     } else {
-    //       return Stack(
-    //         children: [
-    //           SizedBox(
-    //             width: MediaQuery.of(context).size.width,
-    //             child: LayoutBuilder(builder:
-    //                 (BuildContext context, BoxConstraints constraints) {
-    //               if (constraints.maxWidth > 600) {
-    //                 return SingleChildScrollView(
-    //                   child: Column(
-    //                     children: [
-    //                       Row(
-    //                         children: [_buildGradesPerStudent()],
-    //                       )
-    //                     ],
-    //                   ),
-    //                 );
-    //               } else {
-    //                 return const Placeholder(
-    //                   child: Text('Smaller screen version pending to design'),
-    //                 );
-    //               }
-    //             }),
-    //           )
-    //         ],
-    //       );
-    //     }
-    //   },
-    // );
   }
 
   Widget _buildGradesPerStudent() {

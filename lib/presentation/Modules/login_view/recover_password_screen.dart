@@ -6,6 +6,23 @@ import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart'
 import 'package:oxschool/presentation/components/confirm_dialogs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// A screen that allows users to recover their password by following a series of steps.
+///
+/// This screen consists of three steps:
+/// 1. Email Input: Users enter their email to receive a recovery token.
+/// 2. Token Input: Users enter the token received via email.
+/// 3. Password Input: Users enter and verify their new password.
+///
+/// The screen uses a [PageView] to navigate between the steps.
+///
+/// The [RecoverPasswordScreen] is a [StatefulWidget] that manages the state of the recovery process.
+///
+/// The [_RecoverPasswordScreenState] class handles the logic for each step, including:
+/// - Sending the recovery token to the user's email.
+/// - Validating the recovery token.
+/// - Updating the user's password.
+///
+/// The screen also includes loading indicators and error dialogs to provide feedback to the user.
 class RecoverPasswordScreen extends StatefulWidget {
   const RecoverPasswordScreen({super.key});
 
