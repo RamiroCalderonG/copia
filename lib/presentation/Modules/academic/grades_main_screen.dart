@@ -27,6 +27,8 @@ class _GradesMainScreenState extends State<GradesMainScreen>
     with TickerProviderStateMixin {
   bool showGrid = false; // Flag to control grid visibility
 
+  late Future<void> _initializationFuture;
+
   TabController? _tabController;
   bool isSearching = true;
   bool canEvaluateNow =
@@ -48,6 +50,7 @@ class _GradesMainScreenState extends State<GradesMainScreen>
     _tabController!.addListener(onTap);
     fetchData();
     super.initState();
+    _initializationFuture = validateDateAndUserPriv();
   }
 
   @override
@@ -89,7 +92,7 @@ class _GradesMainScreenState extends State<GradesMainScreen>
   void fetchData() {
     isUserAdmin = currentUser!.isCurrentUserAdmin();
     // initSharedPref();
-    initGetDate();
+    // initGetDate();
   }
 
   void initGetDate() async {
@@ -145,73 +148,107 @@ class _GradesMainScreenState extends State<GradesMainScreen>
             defaultTargetPlatform == TargetPlatform.linux);
     //_tabController = TabController(length: 3, vsync: this);
 
-    return Scaffold(
-        appBar: AppBar(
-          actions: const [],
-          bottom: TabBar(
-            labelColor: Colors.white,
-            controller: _tabController,
-            tabs: const <Widget>[
-              Tab(
-                icon: Icon(Icons.abc),
-                text: 'Carga por materia',
-              ),
-              Tab(
-                icon: Icon(
-                  Icons.boy,
-                  // size: 40,
+    return FutureBuilder<void>(
+      future: _initializationFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(
+              child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Flexible(
+                child: Text(
+                  'Por favor espere mientras se cargan los datos',
+                  style: TextStyle(
+                      fontFamily: 'Sora',
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      fontStyle: FontStyle.italic,
+                      color: FlutterFlowTheme.of(context).primaryText),
                 ),
-                text: 'Carga por alumno',
               ),
-              Tab(
-                icon: FaIcon(
-                  FontAwesomeIcons.sheetPlastic,
-                ),
-                text: 'FO-DAC-27',
+              Flexible(
+                child: CustomLoadingIndicator(),
               )
             ],
-            indicatorColor: Colors.blueAccent,
-          ),
-          title: const Text('Calificaciones',
-              style: TextStyle(color: Colors.white)),
-          backgroundColor: FlutterFlowTheme.of(context).primary,
-        ),
-        body: isSearching
-            ? const CustomLoadingIndicator()
-            : displayEvaluateGrids
-                ? Container(
-                    constraints: BoxConstraints(
-                      minHeight: isDesktop ? 600 : 0,
+          ));
+        } else if (snapshot.hasError) {
+          return Center(
+            child: Text(
+              'Error: ${snapshot.error.toString()}',
+            ),
+          );
+        } else {
+          return Scaffold(
+              appBar: AppBar(
+                actions: const [],
+                bottom: TabBar(
+                  labelColor: Colors.white,
+                  controller: _tabController,
+                  tabs: const <Widget>[
+                    Tab(
+                      icon: Icon(Icons.abc),
+                      text: 'Carga por materia',
                     ),
-                    child: TabBarView(
-                      key: const PageStorageKey('value'),
-                      controller: _tabController,
-                      children: const <Widget>[
-                        GradesByAsignature(),
-                        GradesByStudent(),
-                        FoDac27()
-                      ],
+                    Tab(
+                      icon: Icon(
+                        Icons.boy,
+                        // size: 40,
+                      ),
+                      text: 'Carga por alumno',
                     ),
-                  )
-                : Placeholder(
-                    color: Colors.transparent,
-                    child: Center(
-                        child: Center(
-                      child: displayErrorMessage
-                          ? Text(
-                              errorMessage!,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                  fontFamily: 'Sora', fontSize: 20),
-                            )
-                          : const Text(
-                              'Sin información, consulte con el administrador',
-                              textAlign: TextAlign.center,
-                              style:
-                                  TextStyle(fontFamily: 'Sora', fontSize: 20),
-                            ),
-                    )),
-                  ));
+                    Tab(
+                      icon: FaIcon(
+                        FontAwesomeIcons.sheetPlastic,
+                      ),
+                      text: 'FO-DAC-27',
+                    )
+                  ],
+                  indicatorColor: Colors.blueAccent,
+                ),
+                title: const Text('Calificaciones',
+                    style: TextStyle(color: Colors.white)),
+                backgroundColor: FlutterFlowTheme.of(context).primary,
+              ),
+              body: isSearching
+                  ? const CustomLoadingIndicator()
+                  : displayEvaluateGrids
+                      ? Container(
+                          constraints: BoxConstraints(
+                            minHeight: isDesktop ? 600 : 0,
+                          ),
+                          child: TabBarView(
+                            key: const PageStorageKey('value'),
+                            controller: _tabController,
+                            children: const <Widget>[
+                              GradesByAsignature(),
+                              GradesByStudent(),
+                              FoDac27()
+                            ],
+                          ),
+                        )
+                      : Placeholder(
+                          color: Colors.transparent,
+                          child: Center(
+                              child: Center(
+                            child: displayErrorMessage
+                                ? Text(
+                                    errorMessage!,
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                        fontFamily: 'Sora', fontSize: 20),
+                                  )
+                                : const Text(
+                                    'Sin información, consulte con el administrador',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        fontFamily: 'Sora', fontSize: 20),
+                                  ),
+                          )),
+                        ));
+        }
+      },
+    );
   }
 
   // void initSharedPref() async {

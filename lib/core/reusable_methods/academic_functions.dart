@@ -153,7 +153,7 @@ Future<List<StudentEval>> getStudentsByAssinature(
 }
 
 Future<List<StudentEval>> getSubjectsAndGradesByStudent(
-    String grade, group, cycle, campus, month) async {
+    int grade, String group, String cycle, String campus, int month) async {
   try {
     var subjectsGradesList =
         await getSubjectsAndGradeByStuent(group, grade, cycle, campus, month);
@@ -164,7 +164,11 @@ Future<List<StudentEval>> getSubjectsAndGradesByStudent(
     uniqueStudents.clear();
 
     for (var student in jsonList) {
-      uniqueStudents[student['studentID']] = student['studentName'];
+      uniqueStudents[student['studentID']] = student['student'] +
+          ' ' +
+          student['1lastName'] +
+          ' ' +
+          student['2lastName'];
       // uniqueStudents[student['studentName']] = student['studentName'];
     }
 

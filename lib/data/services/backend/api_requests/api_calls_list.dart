@@ -763,11 +763,11 @@ Future<dynamic> getSubjectsAndGradeByStuent(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student-evaluation-student',
         headers: {'Authorization': currentUser!.token},
         queryParameters: {
-          "grade": int.parse(grade),
+          "grade": grade,
           "group": group,
           "cycle": cycle,
           "campus": campus,
-          "month": int.parse(month),
+          "month": month,
           "history":
               0, //0 means all students, if history : 1 , will return all history from a single student and youll need to send studenID as param
           "assignature": "null", //Set null to return all subjects

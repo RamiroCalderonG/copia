@@ -35,10 +35,11 @@ class GradesByStudent extends StatefulWidget {
 }
 
 String? subjectSelected = oneTeacherAssignatures.first;
-bool isUserAdmin = verifyUserAdmin(currentUser!);
+
 List<PlutoRow> rows = [];
 
 class _GradesByStudentState extends State<GradesByStudent> {
+  bool isUserAdmin = currentUser!.isCurrentUserAdmin();
   var commentsController = TextEditingController();
   late PlutoGridStateManager stateManager;
   late PlutoGridStateManager gridAStateManager;
@@ -100,8 +101,6 @@ class _GradesByStudentState extends State<GradesByStudent> {
           'studentID': student.studentID,
           'student': student.fulllName!,
         });
-
-        // print(uniqueStudents.toString());
       }
     }
     setState(() {
@@ -137,8 +136,12 @@ class _GradesByStudentState extends State<GradesByStudent> {
         studentList.clear();
         studentsGradesCommentsRows.clear();
       }
-      studentList = await getSubjectsAndGradesByStudent(gradeInt.toString(),
-          groupSelected, currentCycle!.claCiclo, campusSelected, monthSelected);
+      studentList = await getSubjectsAndGradesByStudent(
+          gradeInt!,
+          groupSelected,
+          currentCycle!.claCiclo!,
+          campusSelected,
+          monthSelected);
 
       fillGrid(studentList); //Fill student list by unque values
       int studentNumber = 1;
@@ -190,6 +193,8 @@ class _GradesByStudentState extends State<GradesByStudent> {
                 );
               } else {
                 return SingleChildScrollView(
+                    child: Padding(
+                  padding: EdgeInsets.all(10),
                   child: Column(
                     children: [
                       Row(
@@ -197,7 +202,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
                       )
                     ],
                   ),
-                );
+                ));
               }
             }),
           );
@@ -429,29 +434,29 @@ class _GradesByStudentState extends State<GradesByStudent> {
                                                   monthNumber,
                                                 );
                                               },
-                                              onRowSecondaryTap: (event) async {
-                                                var gradeInt = getKeyFromValue(
-                                                    teacherGradesMap,
-                                                    selectedTempGrade!);
-                                                asignatureNameListener = '';
-                                                asignatureNameListener = event
-                                                    .row
-                                                    .cells['subject_name']
-                                                    ?.value
-                                                    .toString();
+                                              // onRowSecondaryTap: (event) async {
+                                              //   var gradeInt = getKeyFromValue(
+                                              //       teacherGradesMap,
+                                              //       selectedTempGrade!);
+                                              //   asignatureNameListener = '';
+                                              //   asignatureNameListener = event
+                                              //       .row
+                                              //       .cells['subject_name']
+                                              //       ?.value
+                                              //       .toString();
 
-                                                if (gradeInt! >= 6) {
-                                                  await showCommentsDialog(
-                                                      context,
-                                                      commentsAsignated,
-                                                      asignatureNameListener!);
-                                                } else {
-                                                  showInformationDialog(
-                                                      context,
-                                                      'Aviso',
-                                                      'Sin comentarios disponibles a asignar al alumno seleccionado');
-                                                }
-                                              },
+                                              //   if (gradeInt! >= 6) {
+                                              //     await showCommentsDialog(
+                                              //         context,
+                                              //         commentsAsignated,
+                                              //         asignatureNameListener!);
+                                              //   } else {
+                                              //     showInformationDialog(
+                                              //         context,
+                                              //         'Aviso',
+                                              //         'Sin comentarios disponibles a asignar al alumno seleccionado');
+                                              //   }
+                                              // },
                                               onLoaded: (PlutoGridOnLoadedEvent
                                                   event) {
                                                 gridAStateManager =
@@ -657,14 +662,15 @@ class _GradesByStudentState extends State<GradesByStudent> {
           'habit_eval': PlutoCell(value: student.habits_evaluation),
           'other': PlutoCell(value: student.other),
           'outfit': PlutoCell(value: student.outfit),
+          'idCicloEscolar': PlutoCell(value: student.rateID),
         }));
       }
     });
 
-    if (gradeInt! >= 6) {
-      commentsAsignatedList =
-          await populateAsignatedComments(gradeInt!, month, true, studentID);
-    }
+    // if (gradeInt! >= 6) {
+    //   commentsAsignatedList =
+    //       await populateAsignatedComments(gradeInt!, month, true, studentID);
+    // }
   }
 
   Future<List<PlutoRow>> populateAsignatedComments(
