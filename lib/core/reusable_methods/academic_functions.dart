@@ -272,15 +272,15 @@ List<Map<String, dynamic>> mergeCommentsData(
 }
 
 void composeBodyToUpdateGradeBySTudent(
-    String key, studentID, int value, int subject, month) {
+    String key, studentID, int value, int evalId, month) {
   bool idExists = false;
 
   if (studentGradesBodyToUpgrade.isEmpty) {
     studentGradesBodyToUpgrade.add(
-        {'student': studentID, key: value, 'subject': subject, 'month': month});
+        {'student': studentID, key: value, 'evalId': evalId, 'month': month});
   } else {
     for (var obj in studentGradesBodyToUpgrade) {
-      if (obj['student'] == studentID && obj['subject'] == subject) {
+      if (obj['student'] == studentID && obj['evalId'] == evalId) {
         //If already exist data for selected student
         idExists = true;
         if (key == 'Comentarios') {
@@ -320,12 +320,8 @@ void composeBodyToUpdateGradeBySTudent(
     }
 
     if (!idExists) {
-      studentGradesBodyToUpgrade.add({
-        'student': studentID,
-        key: value,
-        'subject': subject,
-        'month': month
-      });
+      studentGradesBodyToUpgrade.add(
+          {'student': studentID, key: value, 'evalId': evalId, 'month': month});
     }
   }
 }

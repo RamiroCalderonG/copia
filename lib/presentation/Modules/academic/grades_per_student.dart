@@ -412,6 +412,10 @@ class _GradesByStudentState extends State<GradesByStudent> {
 
                                                 final subjectID = event.row
                                                     .cells['subject']?.value;
+                                                final evalId = event
+                                                    .row
+                                                    .cells['idCicloEscolar']
+                                                    ?.value;
                                                 int? monthNumber;
                                                 if (isUserAdmin == true) {
                                                   monthNumber = getKeyFromValue(
@@ -430,7 +434,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
                                                   event.column.title,
                                                   selectedStudentID!,
                                                   newValue,
-                                                  subjectID,
+                                                  evalId,
                                                   monthNumber,
                                                 );
                                               },
