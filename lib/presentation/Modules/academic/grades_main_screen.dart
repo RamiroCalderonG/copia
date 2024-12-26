@@ -173,9 +173,42 @@ class _GradesMainScreenState extends State<GradesMainScreen>
             ],
           ));
         } else if (snapshot.hasError) {
-          return Center(
-            child: Text(
-              'Error: ${snapshot.error.toString()}',
+          return Scaffold(
+            appBar: AppBar(
+              leading: IconButton(
+                icon: Icon(Icons.arrow_back),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              automaticallyImplyLeading: false,
+              title: const Text('Error'),
+              backgroundColor: FlutterFlowTheme.of(context).primary,
+              foregroundColor: FlutterFlowTheme.of(context).primaryText,
+            ),
+            body: Placeholder(
+              child: Center(
+                  child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    ' ${snapshot.error.toString()}',
+                    style: TextStyle(
+                      fontFamily: 'Sora',
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        _initializationFuture = validateDateAndUserPriv();
+                      });
+                    },
+                    child: Text('Reintentar'),
+                  )
+                ],
+              )),
             ),
           );
         } else {

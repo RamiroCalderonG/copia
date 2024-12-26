@@ -131,6 +131,13 @@ class _GradesByStudentState extends State<GradesByStudent> {
   Future<void> searchBUttonAction(String groupSelected, String gradeString,
       int monthSelected, String campusSelected) async {
     try {
+      setState(() {
+        studentList.clear();
+        studentEvaluationRows.clear();
+        selectedStudentName = '';
+        selectedStudentID = null;
+        selectedStudentRows.clear();
+      });
       var gradeInt = getKeyFromValue(teacherGradesMap, gradeString!);
       if (studentList.isNotEmpty && studentsGradesCommentsRows.isNotEmpty) {
         studentList.clear();
@@ -280,7 +287,18 @@ class _GradesByStudentState extends State<GradesByStudent> {
                           monthNumber = getKeyFromValue(
                               spanishMonthsMap, selectedCurrentTempMonth!);
                         }
-                        saveButtonAction(monthNumber);
+                        saveButtonAction(monthNumber).whenComplete(() async {
+                          await searchBUttonAction(
+                            selectedTempGroup!,
+                            selectedTempGrade!,
+                            monthNumber,
+                            selectedTempCampus!,
+                          ).whenComplete(() {
+                            setState(() {
+                              isFetching = false;
+                            });
+                          });
+                        });
                       }
                     },
                   ),
@@ -619,7 +637,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
     );
   }
 
-  void saveButtonAction(int? monthNumber) async {
+  Future<void> saveButtonAction(int? monthNumber) async {
     var response = await patchStudentGradesToDB();
 
     if (response == 200) {
@@ -636,6 +654,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
         if (context.mounted) {
           setState(() {
             isFetching = false;
+            studentGradesBodyToUpgrade.clear();
           });
           showErrorFromBackend(context, response.toString());
         }

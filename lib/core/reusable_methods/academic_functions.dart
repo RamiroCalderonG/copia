@@ -276,11 +276,15 @@ void composeBodyToUpdateGradeBySTudent(
   bool idExists = false;
 
   if (studentGradesBodyToUpgrade.isEmpty) {
-    studentGradesBodyToUpgrade.add(
-        {'student': studentID, key: value, 'evalId': evalId, 'month': month});
+    studentGradesBodyToUpgrade.add({
+      'student': studentID,
+      'eval': value,
+      'idEval': evalId,
+      'month': month
+    });
   } else {
     for (var obj in studentGradesBodyToUpgrade) {
-      if (obj['student'] == studentID && obj['evalId'] == evalId) {
+      if (obj['student'] == studentID && obj['idEval'] == evalId) {
         //If already exist data for selected student
         idExists = true;
         if (key == 'Comentarios') {
@@ -310,18 +314,22 @@ void composeBodyToUpdateGradeBySTudent(
             obj[key] = newValue;
           }
         } else {
-          if (obj.containsKey(key)) {
-            obj[key] = value; //Update the existing value
+          if (obj.containsKey('eval')) {
+            obj['eval'] = value; //Update the existing value
           } else {
-            obj[key] = value; //Add the new value
+            obj['eval'] = value; //Add the new value
           }
         }
       }
     }
 
     if (!idExists) {
-      studentGradesBodyToUpgrade.add(
-          {'student': studentID, key: value, 'evalId': evalId, 'month': month});
+      studentGradesBodyToUpgrade.add({
+        'student': studentID,
+        'eval': value,
+        'idEval': evalId,
+        'month': month
+      });
     }
   }
 }

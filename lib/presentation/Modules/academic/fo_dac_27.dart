@@ -51,7 +51,7 @@ class _FoDac27State extends State<FoDac27> {
 
   @override
   void initState() {
-    isUserAdmin = verifyUserAdmin(currentUser!);
+    isUserAdmin = currentUser!.isCurrentUserAdmin();
     populateStudentsDropDownMenu();
     super.initState();
   }
