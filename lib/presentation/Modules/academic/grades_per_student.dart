@@ -259,7 +259,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
                     });
                     await searchBUttonAction(
                       selectedTempGroup!,
-                      selectedTempGrade!,
+                      selectedTempGrade!.toString(),
                       monthNumber,
                       selectedTempCampus!,
                     ).whenComplete(() {
@@ -290,7 +290,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
                         saveButtonAction(monthNumber).whenComplete(() async {
                           await searchBUttonAction(
                             selectedTempGroup!,
-                            selectedTempGrade!,
+                            selectedTempGrade!.toString(),
                             monthNumber,
                             selectedTempCampus!,
                           ).whenComplete(() {
@@ -362,7 +362,8 @@ class _GradesByStudentState extends State<GradesByStudent> {
                                   mode: PlutoGridMode.select,
                                   onRowDoubleTap: (event) async {
                                     var gradeInt = getKeyFromValue(
-                                        teacherGradesMap, selectedTempGrade!);
+                                        teacherGradesMap,
+                                        selectedTempGrade!.toString());
                                     var selectedmonth;
                                     int? monthNumber;
 
@@ -646,7 +647,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
             context, 'Actualizado', 'Cambios realizados con exito');
         searchBUttonAction(
           selectedTempGroup!,
-          selectedTempGrade!,
+          selectedTempGrade!.toString(),
           monthNumber!,
           selectedTempCampus!,
         );

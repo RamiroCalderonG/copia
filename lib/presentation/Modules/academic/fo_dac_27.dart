@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 import 'package:intl/intl.dart';
 
@@ -30,7 +31,7 @@ class FoDac27 extends StatefulWidget {
 }
 
 class _FoDac27State extends State<FoDac27> {
-  // List<dynamic> simplifiedStudentsList = [];
+  late Future<dynamic> _studentsFuture;
   List<PlutoRow> fodac27HistoryRows = [];
   late PlutoGridStateManager stateManager;
 
@@ -52,7 +53,7 @@ class _FoDac27State extends State<FoDac27> {
   @override
   void initState() {
     isUserAdmin = currentUser!.isCurrentUserAdmin();
-    populateStudentsDropDownMenu();
+    _studentsFuture = populateStudentsDropDownMenu();
     super.initState();
   }
 
@@ -60,6 +61,9 @@ class _FoDac27State extends State<FoDac27> {
   void dispose() {
     tempStudentMap.clear();
     fodac27HistoryRows.clear();
+    teacherGradesListFODAC27.clear();
+    teacherGroupsListFODAC27.clear();
+    teacherCampusListFODAC27.clear();
     super.dispose();
   }
 
@@ -126,31 +130,23 @@ class _FoDac27State extends State<FoDac27> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        buildStudentSelector(),
-        Expanded(child: buildPlutoGrid()),
-      ],
-    );
-    // FutureBuilder(
-    //     future: populateStudentsDropDownMenu(),
-    //     builder: ((context, snapshot) {
-    //       if (snapshot.connectionState == ConnectionState.waiting) {
-    //         return Center(child: CustomLoadingIndicator());
-    //       } else if (snapshot.hasError) {
-    //         insertErrorLog(snapshot.error.toString(), 'LOADING FODAC_27');
-    //         return Center(child: Text('error: ${snapshot.error}'));
-    //       } else if (!snapshot.hasData || snapshot.data == null) {
-    //         return const Center(child: Text('Sin información disponible'));
-    //       } else {
-    //         return Column(
-    //           children: [
-    //             buildStudentSelector(),
-    //             Expanded(child: buildPlutoGrid()),
-    //           ],
-    //         );
-    //       }
-    //     }));
+    return FutureBuilder(
+        future: _studentsFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CustomLoadingIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else {
+            // List<dynamic> json = jsonDecode(snapshot.data!.toString());
+            return Column(
+              children: [
+                buildStudentSelector(),
+                Expanded(child: buildPlutoGrid()),
+              ],
+            );
+          }
+        });
   }
 
   Widget buildStudentSelector() {
@@ -299,8 +295,11 @@ class _FoDac27State extends State<FoDac27> {
     }
   }
 
-  dynamic populateStudentsDropDownMenu() async {
-    String userRole = currentUser!.role;
+  Future<dynamic> populateStudentsDropDownMenu() async {
+    // String userRole = currentUser!.role;
+
+    // var response = await getStudentsByRole(currentCycle!.claCiclo!);
+    // List<dynamic> simplifiedStudentsList = json.decode(response);
 
     simplifiedStudentsList =
         await getStudentsByTeacher(currentCycle!.claCiclo!);

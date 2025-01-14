@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ffi';
 
 import 'package:flutter/material.dart';
+import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 
 import 'package:oxschool/data/Models/Student_eval.dart';
@@ -96,6 +98,22 @@ Future<void> getSingleTeacherAssignatures(List<dynamic> apiResponse) async {
 Future<List<dynamic>> getStudentsByTeacher(String selectedCycle) async {
   var response = await getStudentsByRole(selectedCycle);
   List<dynamic> jsonList = json.decode(response);
+
+  for (var item in jsonList) {
+    String campus = item['Claun'];
+    String grade = item['GradoSecuencia'].toString();
+    String group = item['Grupo'];
+
+    if (!teacherCampusListFODAC27.contains(campus)) {
+      teacherCampusListFODAC27.add(campus);
+    }
+    if (!teacherGradesListFODAC27.contains(grade)) {
+      teacherGradesListFODAC27.add(grade);
+    }
+    if (!teacherGroupsListFODAC27.contains(group)) {
+      teacherGroupsListFODAC27.add(group);
+    }
+  }
 
   return jsonList;
 }

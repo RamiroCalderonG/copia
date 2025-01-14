@@ -921,8 +921,8 @@ Future<dynamic> getFodac27History(
     var apiCall = await Requests.get(
       '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/fodac27/student',
       headers: {
-        'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-        'Auth': currentUser!.token
+        // 'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
+        'Authorization': currentUser!.token
       },
       queryParameters: {
         'cycle': cycle.toString(),

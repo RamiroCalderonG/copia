@@ -203,7 +203,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                       selectedGrade = value;
                       selectedGroup = null; // Clear dependent selections
                       selectedSubject = null;
-                      selectedTempGrade = value;
+                      selectedTempGrade = int.parse(value!);
                       filterData();
                     });
                   },

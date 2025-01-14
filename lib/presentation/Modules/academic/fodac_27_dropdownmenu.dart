@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:oxschool/core/constants/screens.dart';
+import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/data/datasources/temp/studens_temp.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
 import 'package:oxschool/presentation/Modules/academic/fo_dac_27.dart';
@@ -25,14 +27,14 @@ String selectedCampus = '';
 class _Fodac27MenuSelectorState extends State<Fodac27MenuSelector> {
   TextEditingController selectedStudentController = TextEditingController();
 
-  List<Map<String, dynamic>> globalGradesAndGroups = [];
+  // List<Map<String, dynamic>> globalGradesAndGroups = [];
 
   bool isUserAdmin = false;
   List<String> studentsList = [];
 
   String selectedStudent = '';
   String? selectedCampus;
-  String? selectedGrade;
+  int? selectedGrade;
   String? selectedGroup;
   String? selectedstudentId;
   String selectedSubjectNameToEdit = '';
@@ -46,7 +48,7 @@ class _Fodac27MenuSelectorState extends State<Fodac27MenuSelector> {
 
   @override
   void initState() {
-    isUserAdmin = verifyUserAdmin(currentUser!);
+    isUserAdmin = currentUser!.isCurrentUserAdmin();
 
     populateDropDownMenus();
     super.initState();
@@ -64,19 +66,29 @@ class _Fodac27MenuSelectorState extends State<Fodac27MenuSelector> {
 
   @override
   Widget build(BuildContext context) {
-    List<String> gradesValues = selectedCampus != null
-        ? globalGradesAndGroups
-            .where((item) => item['campus'] == selectedCampus)
-            .map((item) => item['grade'] as String)
+    List<int> gradesValues = selectedCampus != null
+        ? simplifiedStudentsList
+            .where((item) => item['Claun'] == selectedCampus)
+            .map((item) => item['GradoSecuencia'] as int)
             .toSet()
             .toList()
         : [];
     List<String> groupsValues = selectedGrade != null
-        ? globalGradesAndGroups
+        ? simplifiedStudentsList
             .where((item) =>
-                item['campus'] == selectedCampus &&
-                item['grade'] == selectedGrade)
-            .map((item) => item['group'] as String)
+                item['Claun'] == selectedCampus &&
+                item['GradoSecuencia'] == selectedGrade)
+            .map((item) => item['Grupo'] as String)
+            .toSet()
+            .toList()
+        : [];
+    List<String> studentsValues = selectedGroup != null
+        ? simplifiedStudentsList
+            .where((item) =>
+                item['Claun'] == selectedCampus &&
+                item['GradoSecuencia'] == selectedGrade &&
+                item['Grupo'] == selectedGroup)
+            .map((item) => item['student_name'] as String)
             .toSet()
             .toList()
         : [];
@@ -101,7 +113,7 @@ class _Fodac27MenuSelectorState extends State<Fodac27MenuSelector> {
                   });
                 });
               },
-              dropdownMenuEntries: campusesList
+              dropdownMenuEntries: teacherCampusListFODAC27
                   .toList()
                   .map<DropdownMenuEntry<String>>((String value) {
                 return DropdownMenuEntry<String>(value: value, label: value);
@@ -115,15 +127,15 @@ class _Fodac27MenuSelectorState extends State<Fodac27MenuSelector> {
                       trailingIcon: const Icon(Icons.arrow_drop_down),
                       onSelected: (value) {
                         setState(() {
-                          selectedGrade = value as String?;
+                          selectedGrade = value as int;
                           selectedTempGrade = value;
                         });
                       },
                       dropdownMenuEntries: gradesValues
                           .toList()
-                          .map<DropdownMenuEntry<String>>((String value) {
-                        return DropdownMenuEntry<String>(
-                            value: value, label: value);
+                          .map<DropdownMenuEntry<int>>((int value) {
+                        return DropdownMenuEntry<int>(
+                            value: value, label: value.toString());
                       }).toList())),
             const SizedBox(width: 10),
             if (selectedGrade != null)
@@ -135,17 +147,17 @@ class _Fodac27MenuSelectorState extends State<Fodac27MenuSelector> {
                       setState(() {
                         selectedGroup = value as String?;
                         selectedTempGroup = value;
-                        studentsList.clear();
+                        // studentsList.clear();
                         selectedStudent = '';
 
                         // print('simplifiedList: ' +
                         //     simplifiedStudentsList.toString());
                       });
-                      studentsList = await getStudentsListForFodac27(
-                          selectedCampus!,
-                          currentCycle!.claCiclo!,
-                          selectedGrade!,
-                          selectedGroup!);
+                      // studentsList = await getStudentsListForFodac27(
+                      //     selectedCampus!,
+                      //     currentCycle!.claCiclo!,
+                      //     selectedGrade.toString(),
+                      //     selectedGroup!);
                       setState(() {
                         selectedStudentController.text = '';
                       });
@@ -172,19 +184,14 @@ class _Fodac27MenuSelectorState extends State<Fodac27MenuSelector> {
                           // selectedStudent = student;
                           selectedStudentController.text = student;
                           selectedTempStudent = student;
-
-                          // if (selectedstudentId != null) {
-                          //   populateGrid(
-                          //       selectedstudentId!, currentCycle!.claCiclo!, true);
-                          // }
                         });
                       }
                     },
-                    dropdownMenuEntries: studentsList
+                    dropdownMenuEntries: studentsValues
                         .toList()
                         .map<DropdownMenuEntry<String>>((var value) {
                       return DropdownMenuEntry<String>(
-                          value: value, label: value);
+                          value: value, label: value.toTitleCase);
                     }).toList()),
               ),
           ],
@@ -262,17 +269,17 @@ class _Fodac27MenuSelectorState extends State<Fodac27MenuSelector> {
     } else {
       campusesList = campusesWhereTeacherTeach.toList();
       selectedCampus = campusesWhereTeacherTeach.first;
-      selectedGrade = oneTeacherGrades.first;
+      selectedGrade = int.parse(oneTeacherGrades.first);
     }
-    getGradesandGroupByCycle(currentCycle!.claCiclo!);
+    // getGradesandGroupByCycle(currentCycle!.claCiclo!);
   }
 
-  void getGradesandGroupByCycle(String cycle) async {
-    var list = await getGradesAndGroupsByCampus(cycle);
-    List<Map<String, dynamic>> returnedList = list;
+  // void getGradesandGroupByCycle(String cycle) async {
+  //   var list = await getGradesAndGroupsByCampus(cycle);
+  //   List<Map<String, dynamic>> returnedList = list;
 
-    globalGradesAndGroups = returnedList;
-  }
+  //   globalGradesAndGroups = returnedList;
+  // }
 }
 
 String? getStudentIdByName(String name) {

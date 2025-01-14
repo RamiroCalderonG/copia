@@ -169,7 +169,7 @@ class _GradesMainScreenState extends State<GradesMainScreen>
             children: [
               Flexible(
                 child: Text(
-                  'Por favor espere mientras se cargan los datos',
+                  'Por favor, espere mientras se cargan los datos',
                   style: TextStyle(
                       fontFamily: 'Sora',
                       fontSize: 20,

@@ -260,8 +260,8 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                       var assignatureID = getKeyFromValue(
                           assignaturesMap, selectedTempSubject!);
 
-                      var gradeInt =
-                          getKeyFromValue(teacherGradesMap, selectedTempGrade!);
+                      var gradeInt = getKeyFromValue(
+                          teacherGradesMap, selectedTempGrade!.toString());
 
                       searchBUttonAction(
                           selectedTempGroup!,
@@ -309,7 +309,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                                 spanishMonthsMap, selectedCurrentTempMonth!);
                           }
                           var gradeInt = getKeyFromValue(
-                              teacherGradesMap, selectedTempGrade!);
+                              teacherGradesMap, selectedTempGrade!.toString());
                           assignatureRows.clear();
 
                           searchBUttonAction(
