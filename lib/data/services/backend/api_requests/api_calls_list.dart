@@ -898,26 +898,19 @@ Future<dynamic> validateUser(
   }
 }
 
-Future<dynamic> getStudentsByRole(int employeeNumber, String userRole) async {
+Future<dynamic> getStudentsByRole(String cycle) async {
   try {
     var apiCall = await Requests.get(
-        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/student',
-        headers: {
-          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-          'Auth': currentUser!.token
-        },
-        queryParameters: {
-          // 'role': userRole, //<--------REMOVE HARDCORED NUMBER
-          'detail': 'List',
-          'employee': employeeNumber
-        },
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/fodac27/students',
+        headers: {'Authorization': currentUser!.token},
+        queryParameters: {'cycle': cycle},
         persistCookies: false,
         timeoutSeconds: 25);
 
     apiCall.raiseForStatus();
     return apiCall.body;
   } catch (e) {
-    return throw FormatException(e.toString());
+    return Future.error(e);
   }
 }
 

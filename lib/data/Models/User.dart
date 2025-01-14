@@ -15,6 +15,7 @@ class User {
   String? creationDate;
   String? birthdate;
   bool? isTeacher;
+  bool? isAdmin;
 
   // late final notActive;
 
@@ -32,7 +33,8 @@ class User {
       this.work_position,
       this.creationDate,
       this.birthdate,
-      this.isTeacher);
+      this.isTeacher,
+      this.isAdmin);
 
   Map<dynamic, dynamic> toJson() => {
         "employeeNumber": employeeNumber,
@@ -48,7 +50,8 @@ class User {
         "position": work_position,
         "creationDate": creationDate.toString(),
         "birthdate": birthdate,
-        "is_Teacher": isTeacher
+        "is_Teacher": isTeacher,
+        "isAdmin": isAdmin
 
         // "notActive": notActive
       };
@@ -68,6 +71,7 @@ class User {
       creationDate = jsonUser[item]['creation_date'];
       birthdate = jsonUser[item]['birthdate'];
       isTeacher = jsonUser[item]['is_Teacher'];
+      isAdmin = jsonUser[item]['userRole']['isAdmin'];
     }
     return User(
         claUn,
@@ -83,7 +87,8 @@ class User {
         work_position,
         creationDate,
         birthdate,
-        isTeacher);
+        isTeacher,
+        isAdmin);
   }
 
   void clear() {
@@ -91,32 +96,14 @@ class User {
     employeeNumber = null;
     claUn = null;
     token = "";
+    isAdmin = null;
   }
 
   bool canEditStudentGrades() {
-    if (role == 'Administrador' ||
-        role == 'Director' ||
-        role == 'Coordinador' ||
-        role == 'ADMIN' ||
-        role == 'SUPERADMIN' ||
-        role == 'TEACHER' ||
-        role == 'ADMINISTRATOR') {
-      return true;
-    } else {
-      return false;
-    }
+    return isTeacher!;
   }
 
   bool isCurrentUserAdmin() {
-    if (role == 'Administrador' ||
-        role == 'Director' ||
-        role == 'Coordinador' ||
-        role == 'ADMIN' ||
-        role == 'SUPERADMIN' ||
-        role == 'ADMINISTRATOR') {
-      return true;
-    } else {
-      return false;
-    }
+    return isAdmin!;
   }
 }

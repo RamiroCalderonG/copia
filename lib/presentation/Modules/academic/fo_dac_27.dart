@@ -302,11 +302,8 @@ class _FoDac27State extends State<FoDac27> {
   dynamic populateStudentsDropDownMenu() async {
     String userRole = currentUser!.role;
 
-    simplifiedStudentsList = await getStudentsByTeacher(
-      currentUser!.employeeNumber!,
-      currentCycle!.claCiclo!,
-      userRole,
-    );
+    simplifiedStudentsList =
+        await getStudentsByTeacher(currentCycle!.claCiclo!);
 
     if (simplifiedStudentsList.isNotEmpty) {
       setState(() {

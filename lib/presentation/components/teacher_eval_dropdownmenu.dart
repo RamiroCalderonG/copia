@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:oxschool/core/reusable_methods/reusable_functions.dart';
+import 'package:oxschool/presentation/Modules/academic/grades_main_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/constants/date_constants.dart';
 import '../../core/constants/user_consts.dart';
@@ -58,12 +59,12 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
   }
 
   _isUserAdminResult() async {
-    bool isUserAdmin = currentUser!.isCurrentUserAdmin();
+    // bool isUserAdmin = currentUser!.isCurrentUserAdmin();
     // monthValue =
     //     currentMonth; //isUserAdmin ? academicMonthsList.first : currentMonth;
     setState(() {
-      userStatus = isUserAdmin;
-      if (isUserAdmin == false) {
+      // userStatus = isUserAdmin;
+      if (currentUser!.isCurrentUserAdmin() == false) {
         selectedCurrentTempMonth = currentMonth;
         monthValue = currentMonth;
         //selectedTempMonth = monthValue;
@@ -195,9 +196,10 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                     style: TextStyle(fontSize: 14),
                   ),
                   trailingIcon: const Icon(Icons.arrow_drop_down),
-                  initialSelection: selectedGrade,
+                  initialSelection: preSelectedGrade ?? selectedGrade,
                   onSelected: (String? value) {
                     setState(() {
+                      preSelectedGrade = value;
                       selectedGrade = value;
                       selectedGroup = null; // Clear dependent selections
                       selectedSubject = null;
@@ -224,9 +226,10 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                     style: TextStyle(fontSize: 14),
                   ),
                   trailingIcon: const Icon(Icons.arrow_drop_down),
-                  initialSelection: selectedGroup,
+                  initialSelection: preSelectedGroup ?? selectedGroup,
                   onSelected: (String? value) {
                     setState(() {
+                      preSelectedGroup = value;
                       selectedGroup = value;
                       selectedSubject = null; // Clear dependent selections
                       selectedTempGroup = value;
@@ -254,9 +257,10 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                           style: TextStyle(fontSize: 14),
                         ),
                         trailingIcon: const Icon(Icons.arrow_drop_down),
-                        initialSelection: selectedSubject,
+                        initialSelection: preSelectedSubject ?? selectedSubject,
                         onSelected: (String? value) {
                           setState(() {
+                            preSelectedSubject = value;
                             selectedSubject = value;
                             selectedTempSubject = value;
                           });

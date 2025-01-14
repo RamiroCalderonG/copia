@@ -23,6 +23,11 @@ class GradesMainScreen extends StatefulWidget {
   State<GradesMainScreen> createState() => _GradesMainScreenState();
 }
 
+String? preSelectedGrade;
+String? preSelectedGroup;
+String? preSelectedSubject;
+String? preSelectedUnity;
+
 class _GradesMainScreenState extends State<GradesMainScreen>
     with TickerProviderStateMixin {
   bool showGrid = false; // Flag to control grid visibility
@@ -85,6 +90,11 @@ class _GradesMainScreenState extends State<GradesMainScreen>
     canEvaluateNow = false;
     canUserEvaluate = false;
     displayEvaluateGrids = false;
+    preSelectedGrade = null;
+    preSelectedGroup = null;
+    preSelectedSubject = null;
+    preSelectedUnity = null;
+
     // assignaturesColumns.clear();
     super.dispose();
   }
@@ -95,17 +105,18 @@ class _GradesMainScreenState extends State<GradesMainScreen>
     // initGetDate();
   }
 
-  void initGetDate() async {
-    await validateDateAndUserPriv();
-  }
+  // void initGetDate() async {
+  //   await validateDateAndUserPriv();
+  // }
 
   Future<void> validateDateAndUserPriv() async {
     try {
       setState(() {
         isSearching = true;
       });
-      if (isUserAdmin) {
+      if (currentUser!.isCurrentUserAdmin()) {
         canEvaluateNow = true;
+        //TODO: FETCH ALL DATA BASED ON ROLE
       } else {
         canEvaluateNow = await isDateToEvaluateStudents().catchError((onError) {
           showErrorFromBackend(context, onError);

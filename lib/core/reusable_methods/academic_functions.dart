@@ -93,9 +93,8 @@ Future<void> getSingleTeacherAssignatures(List<dynamic> apiResponse) async {
   }
 }
 
-Future<List<dynamic>> getStudentsByTeacher(
-    int employeeNumber, String selectedCycle, roleName) async {
-  var response = await getStudentsByRole(employeeNumber, roleName);
+Future<List<dynamic>> getStudentsByTeacher(String selectedCycle) async {
+  var response = await getStudentsByRole(selectedCycle);
   List<dynamic> jsonList = json.decode(response);
 
   return jsonList;

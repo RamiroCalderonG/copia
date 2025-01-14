@@ -30,6 +30,7 @@ List<User> parseUsersFromJSON(List<dynamic> jsonList) {
     String? creationDate = item['creation_date'];
     String? birthdate = item['birthdate'];
     bool? isTeacher = item['is_teacher'];
+    bool? isAdmin = item['is_admin'];
 
     User currentUser = User(
         claUn,
@@ -45,7 +46,8 @@ List<User> parseUsersFromJSON(List<dynamic> jsonList) {
         workPosition,
         creationDate,
         birthdate,
-        isTeacher);
+        isTeacher,
+        isAdmin);
 
     users.add(currentUser);
   }
@@ -54,11 +56,7 @@ List<User> parseUsersFromJSON(List<dynamic> jsonList) {
 }
 
 bool verifyUserAdmin(User currentUser) {
-  if (currentUser.role == "Administrador") {
-    return true;
-  } else {
-    return false;
-  }
+  return currentUser.isCurrentUserAdmin();
 }
 
 dynamic getSingleUser(String? userId) async {
@@ -71,7 +69,7 @@ dynamic getSingleUser(String? userId) async {
         var claUn = jsonList[i]['claun'];
         var employeeName = jsonList[i]['nombre_gafete'];
         var employeeNumber = jsonList[i]['noempleado'];
-        var role = jsonList[i]['role_name'];
+        var role = jsonList[i]['userRole']['name'];
         // var nwuserId = jsonList[i]['role_name'];
         var token = '';
         var userEmail = jsonList[i]['user_email'];
@@ -83,6 +81,7 @@ dynamic getSingleUser(String? userId) async {
         String? creationDate = jsonList[i]['createdAt'];
         String? birthdate = jsonList[i]['birthdate'];
         bool isTeacher = jsonList[i]['is_teacher'];
+        bool isAdmin = jsonList[i]['userRole']['isAdmin'];
 
         tempSelectedUsr = User(
             claUn,
@@ -98,7 +97,8 @@ dynamic getSingleUser(String? userId) async {
             workPosition,
             creationDate,
             birthdate,
-            isTeacher);
+            isTeacher,
+            isAdmin);
       }
       return tempSelectedUsr;
     } catch (e) {
@@ -193,7 +193,8 @@ void setUserDataForDebug() {
       'Developer',
       '01/01/1999',
       '01/01/2000',
-      false);
+      false,
+      true);
   currentUser = user;
   var exampleEvents = [
     {
