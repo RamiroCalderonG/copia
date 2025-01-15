@@ -915,42 +915,41 @@ Future<dynamic> getStudentsByRole(String cycle) async {
 }
 
 //Can be used to get more than one student if needed
-Future<dynamic> getFodac27History(
+Future<dynamic> getStudentFodac27History(
     String cycle, String? studentID, bool isByStudent) async {
   try {
     var apiCall = await Requests.get(
-      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/fodac27/student',
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/fodac27/history',
       headers: {
         // 'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-        'Authorization': currentUser!.token
+        'Authorization': currentUser!.token,
       },
       queryParameters: {
         'cycle': cycle.toString(),
-        'student': studentID.toString()
+        'student': studentID!.trim()
       },
       persistCookies: false,
     );
     apiCall.raiseForStatus();
     return apiCall.body;
   } catch (e) {
-    return throw FormatException(e.toString());
+    return Future.error(e.toString());
   }
 }
 
 //To obtains only subject_name, can be user for more data in future
-Future<dynamic> getStudentSubjects(String StudentID, String cycle) async {
-  var apiCall = await Requests.get(
-      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student/subjects',
-      headers: {
-        'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-        'Auth': currentUser!.token
-      },
-      queryParameters: {
-        'student': StudentID.toString(),
-        'cycle': cycle.toString()
-      });
-  apiCall.raiseForStatus();
-  return apiCall;
+Future<dynamic> getStudentSubjects(String studentID, String cycle) async {
+  try {
+    var apiCall = await Requests.get(
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student/subjects',
+        headers: {'Authorization': currentUser!.token},
+        withCredentials: true,
+        queryParameters: {'student': studentID, 'cycle': cycle});
+    apiCall.raiseForStatus();
+    return apiCall;
+  } catch (e) {
+    return Future.error(e.toString());
+  }
 }
 
 Future<dynamic> postFodac27Record(String date, String studentID, String cycle,

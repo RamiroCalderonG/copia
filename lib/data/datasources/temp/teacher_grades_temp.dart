@@ -44,3 +44,6 @@ List<dynamic> fetchedDataFromloadStartGrading = [];
 List<String> teacherCampusListFODAC27 = [];
 List<String> teacherGradesListFODAC27 = [];
 List<String> teacherGroupsListFODAC27 = [];
+List<String> teacherGradeNamesListFODAC27 = [];
+Map<String, int> gradesMapFODAC27 =
+    {}; //Stores gradeName : gradeSequence from teacher 

@@ -64,6 +64,8 @@ class _FoDac27State extends State<FoDac27> {
     teacherGradesListFODAC27.clear();
     teacherGroupsListFODAC27.clear();
     teacherCampusListFODAC27.clear();
+    gradesMapFODAC27.clear();
+    selectedTempStudent = null;
     super.dispose();
   }
 
@@ -81,7 +83,7 @@ class _FoDac27State extends State<FoDac27> {
         readOnly: true,
         sort: PlutoColumnSort.ascending,
         enableColumnDrag: true,
-        width: 68),
+        enableRowDrag: true),
     PlutoColumn(
       title: 'Fecha',
       field: 'date',
@@ -228,7 +230,7 @@ class _FoDac27State extends State<FoDac27> {
     if (selectedTempStudent == null) {
       showEmptyFieldAlertDialog(context, 'Favor de seleccionar un alumno');
     } else {
-      handleRefresh();
+      // handleRefresh();
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -245,9 +247,10 @@ class _FoDac27State extends State<FoDac27> {
   }
 
   void handleRefresh() {
-    for (var map in tempStudentMap) {
-      if (map.containsKey('name') && map['name'] == selectedTempStudent) {
-        selectedstudentId = map['studentID'];
+    for (var map in simplifiedStudentsList) {
+      if (map.containsKey('student_name') &&
+          map['student_name'] == selectedTempStudent) {
+        selectedstudentId = map['matricula'];
         break;
       }
     }
@@ -272,10 +275,12 @@ class _FoDac27State extends State<FoDac27> {
 
   Future<void> populateGrid(
       String studentID, String cycle, bool isByStudent) async {
-    var apiResponse = await getFodac27History(cycle, studentID, isByStudent)
-        .onError((error, stackTrace) => stateManager.removeAllRows());
+    var apiResponse =
+        await getStudentFodac27History(cycle, studentID, isByStudent)
+            .onError((error, stackTrace) => stateManager.removeAllRows());
     if (apiResponse != null) {
-      var decodedResponse = json.decode(apiResponse) as List;
+      var decodedResponse =
+          json.decode(utf8.decode(apiResponse.codeUnits)) as List;
       List<PlutoRow> newRows = decodedResponse.map((item) {
         return PlutoRow(cells: {
           'date': PlutoCell(value: item['date']),
@@ -283,7 +288,7 @@ class _FoDac27State extends State<FoDac27> {
           'Obs': PlutoCell(value: item['observation']),
           'subject': PlutoCell(value: item['subject']),
           'teacher': PlutoCell(value: item['teacher']),
-          'fodac27': PlutoCell(value: int.parse(item['fodac27'])),
+          'fodac27': PlutoCell(value: item['fodac27']),
         });
       }).toList();
 
@@ -383,6 +388,7 @@ class _NewFODAC27CommentDialogState extends State<NewFODAC27CommentDialog> {
   List<String> _materias = [];
   Map<String, dynamic> subjectsMap = {};
   bool isLoading = false;
+  late Future<dynamic> loadingDone;
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -401,14 +407,14 @@ class _NewFODAC27CommentDialogState extends State<NewFODAC27CommentDialog> {
   @override
   void initState() {
     isLoading = true;
-    getSubjects();
+    loadingDone = getSubjects();
     // isLoading = false;
 
     super.initState();
     //_dateController.text = "22/07/2024"; // Initial date
   }
 
-  void getSubjects() async {
+  Future<void> getSubjects() async {
     Map<String, dynamic> subjects = await populateSubjectsDropDownSelector(
         widget.selectedstudentId, currentCycle!.claCiclo!);
 
@@ -458,209 +464,212 @@ class _NewFODAC27CommentDialogState extends State<NewFODAC27CommentDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Text('Fecha'),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: TextFormField(
-                    controller: _dateController,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 8),
-                    ),
-                    readOnly: true,
-                    onTap: () {
-                      _selectDate(context);
-                    },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Por favor, seleccione una fecha';
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-                const SizedBox(width: 16),
-                const Text('Materia'),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    value: _selectedSubject,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 8),
-                    ),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        _selectedSubject = newValue;
-                      });
-                    },
-                    items: _materias.map((String materia) {
-                      return DropdownMenuItem<String>(
-                        value: materia,
-                        child: Text(materia),
-                      );
-                    }).toList(),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Por favor, seleccione una materia';
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('Habitos',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 8),
-                      Container(
-                        height: 200,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.black),
+    return FutureBuilder(
+        future: loadingDone,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CustomLoadingIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else {
+            return SingleChildScrollView(
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Text('Fecha'),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextFormField(
+                            controller: _dateController,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              contentPadding:
+                                  EdgeInsets.symmetric(horizontal: 8),
+                            ),
+                            readOnly: true,
+                            onTap: () {
+                              _selectDate(context);
+                            },
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Por favor, seleccione una fecha';
+                              }
+                              return null;
+                            },
+                          ),
                         ),
-                        child: Column(
-                          children: [
-                            Container(
-                              color: Colors.grey[500],
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 8),
-                              child: const Row(
-                                children: [
-                                  Expanded(
-                                      child: Text(
-                                    'Descripción',
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                  )),
-                                  Text('Sel'),
-                                ],
+                        const SizedBox(width: 16),
+                        const Text('Materia'),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: DropdownButtonFormField<String>(
+                            value: _selectedSubject,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              contentPadding:
+                                  EdgeInsets.symmetric(horizontal: 8),
+                            ),
+                            onChanged: (String? newValue) {
+                              setState(() {
+                                _selectedSubject = newValue;
+                              });
+                            },
+                            items: _materias.map((String materia) {
+                              return DropdownMenuItem<String>(
+                                value: materia,
+                                child: Text(materia),
+                              );
+                            }).toList(),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Por favor, seleccione una materia';
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('Habitos',
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold)),
+                              const SizedBox(height: 8),
+                              Container(
+                                height: 200,
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.black),
+                                ),
+                                child: Column(
+                                  children: [
+                                    Container(
+                                      color: Colors.grey[500],
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8),
+                                      child: const Row(
+                                        children: [
+                                          Expanded(
+                                              child: Text(
+                                            'Descripción',
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold),
+                                          )),
+                                          Text('Sel'),
+                                        ],
+                                      ),
+                                    ),
+                                    const Expanded(
+                                      child: Center(
+                                          child:
+                                              Text('< No existen Habitos >')),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                            const Expanded(
-                              child:
-                                  Center(child: Text('< No existen Habitos >')),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('Conductas',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 8),
-                      Container(
-                        height: 200,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.black),
-                        ),
-                        child: Column(
-                          children: [
-                            Container(
-                              color: Colors.grey[500],
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 8),
-                              child: const Row(
-                                children: [
-                                  Expanded(
-                                      child: Text(
-                                    'Descripción',
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                  )),
-                                  Text('Sel'),
-                                ],
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('Conductas',
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold)),
+                              const SizedBox(height: 8),
+                              Container(
+                                height: 200,
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.black),
+                                ),
+                                child: Column(
+                                  children: [
+                                    Container(
+                                      color: Colors.grey[500],
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8),
+                                      child: const Row(
+                                        children: [
+                                          Expanded(
+                                              child: Text(
+                                            'Descripción',
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold),
+                                          )),
+                                          Text('Sel'),
+                                        ],
+                                      ),
+                                    ),
+                                    const Expanded(
+                                      child: Center(
+                                          child:
+                                              Text('< No existen Conductas >')),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                            const Expanded(
-                              child: Center(
-                                  child: Text('< No existen Conductas >')),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            const Text('Observaciones Generales',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            TextFormField(
-              controller: _observacionesController,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                contentPadding:
-                    EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-              ),
-              maxLines: 5,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Por favor, ingrese observaciones';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(child: CustomSaveButton(
-                  onPressed: () {
-                    _addNewComment();
-                  },
-                )
-
-                    // ElevatedButton(
-                    //   onPressed: () {
-                    //     _addNewComment();
-                    //   },
-                    //   child: const Text('Guardar'),
-                    // ),
+                      ],
                     ),
-                const SizedBox(
-                  width: 10,
-                ),
-                Expanded(child: CustomCancelButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                )
-
-                    //  ElevatedButton(
-                    //   style: ButtonStyle(backgroundColor: MaterialStateColor.resolveWith((states) => null) ),
-                    //     onPressed: () => Navigator.pop(context),
-                    //     child: const Text('Cancelar'))
+                    const SizedBox(height: 16),
+                    const Text('Observaciones Generales',
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _observacionesController,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                      ),
+                      maxLines: 8,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Por favor, ingrese observaciones';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(child: CustomSaveButton(
+                          onPressed: () {
+                            _addNewComment();
+                          },
+                        )),
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        Expanded(child: CustomCancelButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                        ))
+                      ],
                     )
-              ],
-            )
-          ],
-        ),
-      ),
-    );
+                  ],
+                ),
+              ),
+            );
+          }
+        });
   }
 }
 

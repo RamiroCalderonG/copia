@@ -103,6 +103,7 @@ Future<List<dynamic>> getStudentsByTeacher(String selectedCycle) async {
     String campus = item['Claun'];
     String grade = item['GradoSecuencia'].toString();
     String group = item['Grupo'];
+    String gradeName = item['gradeName'];
 
     if (!teacherCampusListFODAC27.contains(campus)) {
       teacherCampusListFODAC27.add(campus);
@@ -110,9 +111,15 @@ Future<List<dynamic>> getStudentsByTeacher(String selectedCycle) async {
     if (!teacherGradesListFODAC27.contains(grade)) {
       teacherGradesListFODAC27.add(grade);
     }
-    if (!teacherGroupsListFODAC27.contains(group)) {
-      teacherGroupsListFODAC27.add(group);
+    if (!gradesMapFODAC27.containsKey(gradeName.trim())) {
+      gradesMapFODAC27[gradeName.trim()] = int.parse(grade);
     }
+    // if (!teacherGroupsListFODAC27.contains(group)) {
+    //   teacherGroupsListFODAC27.add(group);
+    // }
+    // if (!teacherGradeNamesListFODAC27.contains(gradeName)) {
+    //   teacherGradeNamesListFODAC27.add(gradeName);
+    // }
   }
 
   return jsonList;
@@ -399,23 +406,22 @@ Future<int> updateFodac27Record(
 Future<Map<String, dynamic>> populateSubjectsDropDownSelector(
     String studentID, String cycle) async {
   try {
-    var subjects = await getStudentSubjects(studentID, cycle);
-
-    if (subjects.statusCode != 200) {
-      return {'error': 'Error fetching subjects'};
-    }
-    var subjectsList = jsonDecode(subjects.body);
+    var subjects = await getStudentSubjects(studentID, cycle).catchError((e) {
+      return {'error': 'Error fetching subjects ${e.tosString()}'};
+    });
+    // if (subjects.statusCode != 200) {
+    //   return {'error': 'Error fetching subjects'};
+    // }
+    var subjectsList = json.decode(utf8.decode(subjects.body.codeUnits));
     Map<String, dynamic> result = {};
 
     for (var item in subjectsList) {
-      result[item['subject']] = item['subject2'];
-
-      // result.add(item['subject']);
+      result[item['subject'].trim()] = item['subject2'];
     }
 
     return result;
   } catch (e) {
-    return throw FormatException(e.toString());
+    return Future.error(e.toString());
   }
 }
 

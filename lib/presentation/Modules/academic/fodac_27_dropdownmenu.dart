@@ -35,6 +35,7 @@ class _Fodac27MenuSelectorState extends State<Fodac27MenuSelector> {
   String selectedStudent = '';
   String? selectedCampus;
   int? selectedGrade;
+  String? selectedGradeName;
   String? selectedGroup;
   String? selectedstudentId;
   String selectedSubjectNameToEdit = '';
@@ -66,10 +67,10 @@ class _Fodac27MenuSelectorState extends State<Fodac27MenuSelector> {
 
   @override
   Widget build(BuildContext context) {
-    List<int> gradesValues = selectedCampus != null
+    List<String> gradesValues = selectedCampus != null
         ? simplifiedStudentsList
             .where((item) => item['Claun'] == selectedCampus)
-            .map((item) => item['GradoSecuencia'] as int)
+            .map((item) => item['gradeName'].trim() as String)
             .toSet()
             .toList()
         : [];
@@ -127,14 +128,15 @@ class _Fodac27MenuSelectorState extends State<Fodac27MenuSelector> {
                       trailingIcon: const Icon(Icons.arrow_drop_down),
                       onSelected: (value) {
                         setState(() {
-                          selectedGrade = value as int;
-                          selectedTempGrade = value;
+                          selectedGradeName = value as String?;
+                          selectedGrade = gradesMapFODAC27[selectedGradeName];
+                          selectedTempGrade = selectedGrade;
                         });
                       },
                       dropdownMenuEntries: gradesValues
                           .toList()
-                          .map<DropdownMenuEntry<int>>((int value) {
-                        return DropdownMenuEntry<int>(
+                          .map<DropdownMenuEntry<String>>((String value) {
+                        return DropdownMenuEntry<String>(
                             value: value, label: value.toString());
                       }).toList())),
             const SizedBox(width: 10),
@@ -198,22 +200,6 @@ class _Fodac27MenuSelectorState extends State<Fodac27MenuSelector> {
         ));
   }
 
-  // Future<void> populateStudentsDropDownMenu() async {
-  //   var response = await getStudentsByTeacher(
-  //     currentUser!.employeeNumber!,
-  //     currentCycle!.claCiclo!,
-  //     currentUser!.role,
-  //   );
-
-  //   simplifiedStudentsList = response.map((item) => item.toString()).toList();
-
-  //   if (simplifiedStudentsList.isNotEmpty) {
-  //     setState(() {
-  //       isLoading = false;
-  //     });
-  //   }
-  // }
-
   void handleAddItem() {
     if (selectedStudent.isEmpty) {
       showEmptyFieldAlertDialog(context, 'Favor de seleccionar un alumno');
@@ -238,48 +224,16 @@ class _Fodac27MenuSelectorState extends State<Fodac27MenuSelector> {
     return response;
   }
 
-  Future<void> populateGrid(
-      String studentID, String cycle, bool isByStudent) async {
-    var apiResponse = await getFodac27History(cycle, studentID, isByStudent);
-    if (apiResponse != null) {
-      var decodedResponse = json.decode(apiResponse) as List;
-      List<PlutoRow> newRows = decodedResponse.map((item) {
-        return PlutoRow(cells: {
-          'date': PlutoCell(value: item['date']),
-          'studentID': PlutoCell(value: item['student']),
-          'Obs': PlutoCell(value: item['observation']),
-          'subject': PlutoCell(value: item['subject']),
-          'teacher': PlutoCell(value: item['teacher']),
-          'fodac27': PlutoCell(value: int.parse(item['fodac27'])),
-        });
-      }).toList();
-
-      // setState(() {
-      //   fodac27HistoryRows = newRows;
-      //   stateManager.removeAllRows();
-      //   stateManager.appendRows(newRows);
-      // });
-    }
-  }
-
   void populateDropDownMenus() {
     if (isUserAdmin) {
-      campusesList = ['ANAHUAC', 'BARRAGAN', 'CONCORDIA', 'SENDERO'];
+      campusesList = teacherCampusListFODAC27;
       selectedCampus = campusesList.first;
     } else {
       campusesList = campusesWhereTeacherTeach.toList();
       selectedCampus = campusesWhereTeacherTeach.first;
       selectedGrade = int.parse(oneTeacherGrades.first);
     }
-    // getGradesandGroupByCycle(currentCycle!.claCiclo!);
   }
-
-  // void getGradesandGroupByCycle(String cycle) async {
-  //   var list = await getGradesAndGroupsByCampus(cycle);
-  //   List<Map<String, dynamic>> returnedList = list;
-
-  //   globalGradesAndGroups = returnedList;
-  // }
 }
 
 String? getStudentIdByName(String name) {
