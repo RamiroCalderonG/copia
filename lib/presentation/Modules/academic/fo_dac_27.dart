@@ -79,7 +79,10 @@ class _FoDac27State extends State<FoDac27> {
     PlutoColumn(
         title: 'id',
         field: 'fodac27',
-        type: PlutoColumnType.number(),
+        type: PlutoColumnType.number(
+          format: '####',
+          negative: false,
+        ),
         readOnly: true,
         sort: PlutoColumnSort.ascending,
         enableColumnDrag: true,
@@ -140,13 +143,19 @@ class _FoDac27State extends State<FoDac27> {
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else {
-            // List<dynamic> json = jsonDecode(snapshot.data!.toString());
-            return Column(
-              children: [
-                buildStudentSelector(),
-                Expanded(child: buildPlutoGrid()),
-              ],
-            );
+            return LayoutBuilder(
+                builder: (BuildContext context, BoxConstraints constraints) {
+              if (isLoading) {
+                return const Center(child: CustomLoadingIndicator());
+              } else {
+                return Column(
+                  children: [
+                    buildStudentSelector(),
+                    Expanded(child: buildPlutoGrid())
+                  ],
+                );
+              }
+            });
           }
         });
   }
@@ -168,7 +177,15 @@ class _FoDac27State extends State<FoDac27> {
               alignment: Alignment.bottomCenter,
               child: Column(
                 children: [
-                  RefreshButton(onPressed: handleRefresh),
+                  RefreshButton(onPressed: () {
+                    setState(() {
+                      isLoading = true;
+                    });
+                    handleRefresh();
+                    setState(() {
+                      isLoading = false;
+                    });
+                  }),
                   const SizedBox(height: 10),
                   AddItemButton(onPressed: handleAddItem),
                   const SizedBox(height: 10),
@@ -230,7 +247,6 @@ class _FoDac27State extends State<FoDac27> {
     if (selectedTempStudent == null) {
       showEmptyFieldAlertDialog(context, 'Favor de seleccionar un alumno');
     } else {
-      // handleRefresh();
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -275,6 +291,10 @@ class _FoDac27State extends State<FoDac27> {
 
   Future<void> populateGrid(
       String studentID, String cycle, bool isByStudent) async {
+    setState(() {
+      isLoading = true;
+    });
+
     var apiResponse =
         await getStudentFodac27History(cycle, studentID, isByStudent)
             .onError((error, stackTrace) => stateManager.removeAllRows());
@@ -284,11 +304,11 @@ class _FoDac27State extends State<FoDac27> {
       List<PlutoRow> newRows = decodedResponse.map((item) {
         return PlutoRow(cells: {
           'date': PlutoCell(value: item['date']),
-          'studentID': PlutoCell(value: item['student']),
+          'studentID': PlutoCell(value: item['studentId']),
           'Obs': PlutoCell(value: item['observation']),
-          'subject': PlutoCell(value: item['subject']),
-          'teacher': PlutoCell(value: item['teacher']),
-          'fodac27': PlutoCell(value: item['fodac27']),
+          'subject': PlutoCell(value: item['subjectName']),
+          'teacher': PlutoCell(value: item['teacherName']),
+          'fodac27': PlutoCell(value: item['fodacId']),
         });
       }).toList();
 
@@ -296,6 +316,7 @@ class _FoDac27State extends State<FoDac27> {
         fodac27HistoryRows = newRows;
         stateManager.removeAllRows();
         stateManager.appendRows(newRows);
+        isLoading = false;
       });
     }
   }
@@ -389,6 +410,7 @@ class _NewFODAC27CommentDialogState extends State<NewFODAC27CommentDialog> {
   Map<String, dynamic> subjectsMap = {};
   bool isLoading = false;
   late Future<dynamic> loadingDone;
+  DateTime? _selectedDate;
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -399,6 +421,7 @@ class _NewFODAC27CommentDialogState extends State<NewFODAC27CommentDialog> {
     );
     if (picked != null && picked != DateTime.now()) {
       setState(() {
+        _selectedDate = picked;
         _dateController.text = "${picked.day}/${picked.month}/${picked.year}";
       });
     }
@@ -425,40 +448,36 @@ class _NewFODAC27CommentDialogState extends State<NewFODAC27CommentDialog> {
 
   void _addNewComment() async {
     if (_formKey.currentState!.validate()) {
-      var subjectID;
+      var subjectID = subjectsMap[_selectedSubject];
 
-      if (subjectsMap.containsKey(_selectedSubject)) {
-        subjectID = subjectsMap[_selectedSubject]!;
-      } else {
-        debugPrint('Does not exists the in the map');
+      if (subjectID == null) {
+        debugPrint('Subject does not exist in the map');
+        return;
       }
 
-      var result = await createFodac27Record(
-        _dateController.text,
-        widget.selectedstudentId,
-        currentCycle!.claCiclo!,
-        _observacionesController.text,
-        widget.employeeNumber,
-        subjectID,
-      );
-      if (result == 'Succes') {
-        // ScaffoldMessenger.of(context).showSnackBar(
-        //   SnackBar(content: const Text('Form submitted successfully!')),
-        // );
-        if (mounted) {
-          int response = await showConfirmationDialog(
-              context, 'Realizado', 'Comentario agregado!');
-          if (response == 1) {
-            Navigator.pop(context);
-          }
+      try {
+        var result = await createFodac27Record(
+          _selectedDate!,
+          widget.selectedstudentId,
+          currentCycle!.claCiclo!,
+          _observacionesController.text,
+          widget.employeeNumber,
+          subjectID,
+        ).catchError((e) {
+          return showErrorFromBackend(context, e.toString());
+        });
+        if (result == 200) {
+          setState(() {
+            if (!mounted) {
+              Navigator.pop(context);
+              showConfirmationDialog(context, 'FODAC 27 created successfully',
+                  'FODAC 27 created successfully');
+            }
+          });
         }
-        _dateController.clear();
-        _observacionesController.text = '';
-      } else {
-        showErrorFromBackend(context, result);
+      } catch (error) {
+        showErrorFromBackend(context, error.toString());
       }
-
-      // Show a snackbar notification after function execution
     }
   }
 
@@ -739,9 +758,10 @@ class _EditCommentScreenState extends State<EditCommentScreen> {
     if (picked != null && picked != _selectedDate) {
       setState(() {
         _selectedDate = picked;
-        _dateController.text = DateFormat.yMd().format(picked);
+        _dateController.text =
+            picked as String; //DateFormat.yMd().format(picked);
         newDate.clear();
-        newDate = {'date': _dateController.text};
+        newDate = {'date': picked};
       });
     }
   }

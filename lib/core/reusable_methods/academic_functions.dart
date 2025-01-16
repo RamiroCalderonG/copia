@@ -384,16 +384,25 @@ void composeUpdateStudentGradesBody(String key, dynamic value, int idEval) {
   }
 }
 
-Future<String> createFodac27Record(String date, String studentID, String cycle,
-    String observations, int employeeNumber, int subject) async {
-  var responseCode = await postFodac27Record(
-      date, studentID, cycle, observations, employeeNumber, subject);
-
-  if (responseCode.statusCode == 200) {
-    return 'Succes';
-  } else {
-    return 'Error: ${responseCode.body}';
+Future<dynamic> createFodac27Record(DateTime date, String studentID,
+    String cycle, String observations, int employeeNumber, int subject) async {
+  // var responseCode =
+  try {
+    var result = await postFodac27Record(
+            date, studentID, cycle, observations, employeeNumber, subject)
+        .catchError((error) {
+      return Future.error('Error: ${error.toString()}');
+    });
+    return result;
+  } catch (e) {
+    Future.error(e.toString());
   }
+
+  // if (responseCode.statusCode == 200) {
+  //   return 'Succes';
+  // } else {
+  //   return 'Error: ${responseCode.body}';
+  // }
 }
 
 Future<int> updateFodac27Record(
@@ -407,7 +416,7 @@ Future<Map<String, dynamic>> populateSubjectsDropDownSelector(
     String studentID, String cycle) async {
   try {
     var subjects = await getStudentSubjects(studentID, cycle).catchError((e) {
-      return {'error': 'Error fetching subjects ${e.tosString()}'};
+      return {'error': 'Error fetching subjects ${e.toString()}'};
     });
     // if (subjects.statusCode != 200) {
     //   return {'error': 'Error fetching subjects'};
