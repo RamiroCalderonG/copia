@@ -1052,16 +1052,13 @@ Future<int> deleteFodac27Record(int fodac27ID) async {
   try {
     var apiCall = await Requests.delete(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student/fodac27',
-        headers: {
-          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-          'Auth': currentUser!.token
-        },
-        queryParameters: {'observation': fodac27ID},
+        headers: {'Authorization': currentUser!.token},
+        queryParameters: {'fodac27': fodac27ID},
         persistCookies: false);
     apiCall.raiseForStatus();
     return apiCall.statusCode;
   } catch (e) {
-    return throw FormatException(e.toString());
+    return Future.error(e);
   }
 }
 

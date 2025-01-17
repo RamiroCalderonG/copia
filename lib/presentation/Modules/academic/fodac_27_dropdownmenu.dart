@@ -211,13 +211,30 @@ class _Fodac27MenuSelectorState extends State<Fodac27MenuSelector> {
             title: Text('Agregar comentario a:\n$selectedStudent'),
             content: NewFODAC27CommentDialog(
               selectedstudentId: selectedstudentId!,
-              employeeNumber: currentUser!.employeeNumber!,
+              employeeNumber: currentUser!.employeeNumber!, ,
             ),
           );
         },
       );
     }
   }
+
+  // void _handleRefreshWithLoading() {
+  //   setState(() {
+  //     isLoading = true;
+  //   });
+
+  //   handleRefresh().then((_) {
+  //     setState(() {
+  //       isLoading = false;
+  //     });
+  //   }).catchError((error) {
+  //     setState(() {
+  //       isLoading = false;
+  //     });
+  //     showErrorFromBackend(context, error.toString());
+  //   });
+  // }
 
   Future<int> deleteAction(int fodac27ID) async {
     var response = await deleteFodac27Record(fodac27ID);

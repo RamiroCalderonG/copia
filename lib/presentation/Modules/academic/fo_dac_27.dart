@@ -45,6 +45,7 @@ class _FoDac27State extends State<FoDac27> {
 
   bool isLoading = true;
   bool isUserAdmin = false;
+  bool displayLoading = false;
 
   int selectedEvalID = 0;
   String selectedCommentToEdit = '';
@@ -143,19 +144,12 @@ class _FoDac27State extends State<FoDac27> {
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else {
-            return LayoutBuilder(
-                builder: (BuildContext context, BoxConstraints constraints) {
-              if (isLoading) {
-                return const Center(child: CustomLoadingIndicator());
-              } else {
-                return Column(
-                  children: [
-                    buildStudentSelector(),
-                    Expanded(child: buildPlutoGrid())
-                  ],
-                );
-              }
-            });
+            return Column(
+              children: [
+                buildStudentSelector(),
+                Expanded(child: buildPlutoGrid())
+              ],
+            );
           }
         });
   }
@@ -187,7 +181,14 @@ class _FoDac27State extends State<FoDac27> {
                     });
                   }),
                   const SizedBox(height: 10),
-                  AddItemButton(onPressed: handleAddItem),
+                  AddItemButton(onPressed: () {
+                    handleAddItem();
+
+                    handleRefresh();
+                    // if (mounted) {
+
+                    // }
+                  }),
                   const SizedBox(height: 10),
                   if (isUserAdmin)
                     DeleteItemButton(onPressed: () async {
@@ -201,12 +202,24 @@ class _FoDac27State extends State<FoDac27> {
                         int confirmation =
                             await showDeleteConfirmationAlertDialog(context);
                         if (confirmation == 1) {
-                          int response = await deleteAction(selectedEvalID);
-                          if (response == 200) {
+                          try {
+                            setState(() {
+                              isLoading = true;
+                            });
+                            int response = await deleteAction(selectedEvalID);
+                            if (response == 200) {
+                              if (mounted) {
+                                await showConfirmationDialog(
+                                    context, 'Realizado', 'Registro eliminado');
+                                handleRefresh();
+                                setState(() {
+                                  isLoading = false;
+                                });
+                              }
+                            }
+                          } catch (e) {
                             if (mounted) {
-                              await showConfirmationDialog(
-                                  context, 'Realizado', 'Registro eliminado');
-                              handleRefresh();
+                              showErrorFromBackend(context, e.toString());
                             }
                           }
                         }
@@ -255,6 +268,7 @@ class _FoDac27State extends State<FoDac27> {
             content: NewFODAC27CommentDialog(
               selectedstudentId: selectedstudentId!,
               employeeNumber: currentUser!.employeeNumber!,
+              onDialogClose: _handleRefreshWithLoading,
             ),
           );
         },
@@ -262,7 +276,28 @@ class _FoDac27State extends State<FoDac27> {
     }
   }
 
-  void handleRefresh() {
+  void _handleRefreshWithLoading() {
+    setState(() {
+      isLoading = true;
+    });
+
+    handleRefresh().then((_) {
+      setState(() {
+        isLoading = false;
+      });
+    }).catchError((error) {
+      setState(() {
+        isLoading = false;
+      });
+      showErrorFromBackend(context, error.toString());
+    });
+  }
+
+  Future<dynamic> handleRefresh() async {
+    setState(() {
+      fodac27HistoryRows.clear();
+    });
+
     for (var map in simplifiedStudentsList) {
       if (map.containsKey('student_name') &&
           map['student_name'] == selectedTempStudent) {
@@ -271,7 +306,7 @@ class _FoDac27State extends State<FoDac27> {
       }
     }
     if (selectedstudentId != null) {
-      populateGrid(selectedstudentId!, currentCycle!.claCiclo!, true);
+      await populateGrid(selectedstudentId!, currentCycle!.claCiclo!, true);
     }
   }
 
@@ -337,9 +372,13 @@ class _FoDac27State extends State<FoDac27> {
     }
   }
 
-  Future<int> deleteAction(int fodac27ID) async {
-    var response = await deleteFodac27Record(fodac27ID);
-    return response;
+  Future<dynamic> deleteAction(int fodac27ID) async {
+    try {
+      var response = await deleteFodac27Record(fodac27ID);
+      return response;
+    } catch (e) {
+      return Future.error(e);
+    }
   }
 }
 
@@ -388,11 +427,13 @@ class EditCellDialog extends StatelessWidget {
 class NewFODAC27CommentDialog extends StatefulWidget {
   final String selectedstudentId;
   final int employeeNumber;
+  final VoidCallback onDialogClose;
 
   const NewFODAC27CommentDialog({
     Key? key,
     required this.selectedstudentId,
     required this.employeeNumber,
+    required this.onDialogClose,
   });
 
   @override
@@ -446,7 +487,7 @@ class _NewFODAC27CommentDialogState extends State<NewFODAC27CommentDialog> {
     isLoading = false;
   }
 
-  void _addNewComment() async {
+  Future<void> _addNewComment() async {
     if (_formKey.currentState!.validate()) {
       var subjectID = subjectsMap[_selectedSubject];
 
@@ -454,7 +495,6 @@ class _NewFODAC27CommentDialogState extends State<NewFODAC27CommentDialog> {
         debugPrint('Subject does not exist in the map');
         return;
       }
-
       try {
         var result = await createFodac27Record(
           _selectedDate!,
@@ -465,18 +505,14 @@ class _NewFODAC27CommentDialogState extends State<NewFODAC27CommentDialog> {
           subjectID,
         ).catchError((e) {
           return showErrorFromBackend(context, e.toString());
+        }).whenComplete(() {
+          return;
         });
-        if (result == 200) {
-          setState(() {
-            if (!mounted) {
-              Navigator.pop(context);
-              showConfirmationDialog(context, 'FODAC 27 created successfully',
-                  'FODAC 27 created successfully');
-            }
-          });
-        }
       } catch (error) {
-        showErrorFromBackend(context, error.toString());
+        setState(() {
+          isLoading = false;
+        });
+        return Future.error(error);
       }
     }
   }
@@ -670,7 +706,22 @@ class _NewFODAC27CommentDialogState extends State<NewFODAC27CommentDialog> {
                       children: [
                         Expanded(child: CustomSaveButton(
                           onPressed: () {
-                            _addNewComment();
+                            _addNewComment().then((_) {
+                              if (mounted) {
+                                Navigator.pop(context);
+                                showConfirmationDialog(
+                                  context,
+                                  'Éxito',
+                                  'Registro agregado exitosamente',
+                                ).then((response) {
+                                  if (response == 1) {
+                                    return;
+                                  }
+                                });
+                              }
+                            }).onError((error, stackTrace) {
+                              showErrorFromBackend(context, error.toString());
+                            });
                           },
                         )),
                         const SizedBox(
