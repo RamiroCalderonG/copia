@@ -206,17 +206,24 @@ class _FoDac27State extends State<FoDac27> {
                             setState(() {
                               isLoading = true;
                             });
-                            int response = await deleteAction(selectedEvalID);
-                            if (response == 200) {
-                              if (mounted) {
-                                await showConfirmationDialog(
-                                    context, 'Realizado', 'Registro eliminado');
-                                handleRefresh();
-                                setState(() {
-                                  isLoading = false;
-                                });
-                              }
+                            int response = await deleteAction(selectedEvalID)
+                                .catchError((onError) {
+                              showErrorFromBackend(context, onError.toString());
+                            }).whenComplete(() {
+                              setState(() {
+                                isLoading = false;
+                              });
+                            });
+                            // if (response == 200) {
+                            if (mounted) {
+                              await showConfirmationDialog(
+                                  context, 'Realizado', 'Registro eliminado');
+                              handleRefresh();
+                              setState(() {
+                                isLoading = false;
+                              });
                             }
+                            // }
                           } catch (e) {
                             if (mounted) {
                               showErrorFromBackend(context, e.toString());

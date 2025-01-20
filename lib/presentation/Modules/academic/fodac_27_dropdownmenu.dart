@@ -200,24 +200,24 @@ class _Fodac27MenuSelectorState extends State<Fodac27MenuSelector> {
         ));
   }
 
-  void handleAddItem() {
-    if (selectedStudent.isEmpty) {
-      showEmptyFieldAlertDialog(context, 'Favor de seleccionar un alumno');
-    } else {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Agregar comentario a:\n$selectedStudent'),
-            content: NewFODAC27CommentDialog(
-              selectedstudentId: selectedstudentId!,
-              employeeNumber: currentUser!.employeeNumber!, ,
-            ),
-          );
-        },
-      );
-    }
-  }
+  // void handleAddItem() {
+  //   if (selectedStudent.isEmpty) {
+  //     showEmptyFieldAlertDialog(context, 'Favor de seleccionar un alumno');
+  //   } else {
+  //     showDialog(
+  //       context: context,
+  //       builder: (BuildContext context) {
+  //         return AlertDialog(
+  //           title: Text('Agregar comentario a:\n$selectedStudent'),
+  //           content: NewFODAC27CommentDialog(
+  //             selectedstudentId: selectedstudentId!,
+  //             employeeNumber: currentUser!.employeeNumber!, ,
+  //           ),
+  //         );
+  //       },
+  //     );
+  //   }
+  // }
 
   // void _handleRefreshWithLoading() {
   //   setState(() {
@@ -236,10 +236,10 @@ class _Fodac27MenuSelectorState extends State<Fodac27MenuSelector> {
   //   });
   // }
 
-  Future<int> deleteAction(int fodac27ID) async {
-    var response = await deleteFodac27Record(fodac27ID);
-    return response;
-  }
+  // Future<int> deleteAction(int fodac27ID) async {
+  //   var response = await deleteFodac27Record(fodac27ID);
+  //   return response;
+  // }
 
   void populateDropDownMenus() {
     if (isUserAdmin) {
