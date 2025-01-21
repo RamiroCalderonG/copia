@@ -175,7 +175,7 @@ class _GradesMainScreenState extends State<GradesMainScreen>
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                       fontStyle: FontStyle.italic,
-                      color: FlutterFlowTheme.of(context).primaryText),
+                      color: FlutterFlowTheme.of(context).secondary),
                 ),
               ),
               Flexible(

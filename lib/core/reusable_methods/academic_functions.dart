@@ -114,12 +114,6 @@ Future<List<dynamic>> getStudentsByTeacher(String selectedCycle) async {
     if (!gradesMapFODAC27.containsKey(gradeName.trim())) {
       gradesMapFODAC27[gradeName.trim()] = int.parse(grade);
     }
-    // if (!teacherGroupsListFODAC27.contains(group)) {
-    //   teacherGroupsListFODAC27.add(group);
-    // }
-    // if (!teacherGradeNamesListFODAC27.contains(gradeName)) {
-    //   teacherGradeNamesListFODAC27.add(gradeName);
-    // }
   }
 
   return jsonList;
@@ -163,7 +157,7 @@ Future<List<StudentEval>> getStudentsByAssinature(
   try {
     var studentsList = await getStudentsToGrade(assignature, group,
         gradeSelected, currentCycle!.claCiclo, campus, month);
-    List<dynamic> jsonList = json.decode(studentsList.body);
+    List<dynamic> jsonList = json.decode(utf8.decode(studentsList.body));
 
     List<StudentEval> evaluations = getEvalFromJSON(jsonList, false);
 

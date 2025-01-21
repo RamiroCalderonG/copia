@@ -55,7 +55,7 @@ String currentMonth = DateFormat.MMMM().format(DateTime.now());
 String? subjectSelected = oneTeacherAssignatures.first;
 
 /// Whether the user is an admin.
-bool isUserAdmin = currentUser!.canEditStudentGrades();
+bool isUserAdmin = false; //currentUser!.isCurrentUserAdmin();
 
 /// The list of rows in the grid.
 List<PlutoRow> rows = [];
@@ -249,6 +249,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                     });
                     try {
                       var monthNumber;
+                      isUserAdmin = currentUser!.isCurrentUserAdmin();
 
                       if (isUserAdmin) {
                         monthNumber = getKeyFromValue(
@@ -278,6 +279,9 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                       var message = getMessageToDisplay(e.toString());
                       if (context.mounted) {
                         showErrorFromBackend(context, message.toString());
+                        setState(() {
+                          isLoading = false;
+                        });
                       }
                     }
                   }),

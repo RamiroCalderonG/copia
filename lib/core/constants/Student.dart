@@ -139,7 +139,6 @@ final List<PlutoColumn> gradesByStudentColumns = [
       title: 'Materia',
       field: 'subject',
       type: PlutoColumnType.text(),
-      sort: PlutoColumnSort.ascending,
       readOnly: true,
       hide: true),
   PlutoColumn(
@@ -148,6 +147,7 @@ final List<PlutoColumn> gradesByStudentColumns = [
     type: PlutoColumnType.text(),
     width: 80,
     frozen: PlutoColumnFrozen.start,
+    sort: PlutoColumnSort.ascending,
     readOnly: true,
   ),
   PlutoColumn(
