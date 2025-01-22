@@ -1,9 +1,13 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:oxschool/core/reusable_methods/logger_actions.dart';
+import 'package:oxschool/core/reusable_methods/user_functions.dart';
 import 'package:oxschool/data/Models/User.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
+import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
+import 'package:oxschool/presentation/components/confirm_dialogs.dart';
 
 import 'cafeteria_user_consumption.dart';
 
@@ -305,6 +309,11 @@ class _UserWindowState extends State<UserWindow> {
         ));
   }
 
+  dynamic _updateUserPasswordFn(String newPassword) {
+    var response = updateUserPassword(newPassword);
+    return response;
+  }
+
   Future<void> _changeMyPassword(BuildContext context) async {
     return showDialog(
         context: context,
@@ -332,7 +341,30 @@ class _UserWindowState extends State<UserWindow> {
                   }),
               TextButton(
                   onPressed: () {
-                    _newPassword.clear();
+                    if (_newPassword.text.length < 8) {
+                      showErrorFromBackend(context,
+                          'La contraseña debe tener al menos 8 caracteres');
+                    }
+                    if (_newPassword.text.startsWith(' ') ||
+                        _newPassword.text.endsWith(' ') ||
+                        _newPassword.text.contains(' ')) {
+                      showErrorFromBackend(context,
+                          'Su contraseña no puede contener espacios en blanco');
+                    } else {
+                      bool response = _updateUserPasswordFn(_newPassword.text);
+                      if (response) {
+                        _newPassword.clear();
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(const SnackBar(
+                          content: Text('Contraseña cambiada con éxito'),
+                          backgroundColor: Colors.green,
+                        ));
+                      } else {
+                        showErrorFromBackend(
+                            context, 'Error al cambiar contraseña');
+                      }
+                    }
                   },
                   child: const Text('OK'))
             ],

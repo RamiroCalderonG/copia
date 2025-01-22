@@ -178,6 +178,23 @@ void logOutCurrentUser(User employee) async {
   logOutUser(employee.token, employee.employeeNumber.toString());
 }
 
+Future<bool> updateUserPassword(String newPassword) async {
+  try {
+    bool finalVlue = false;
+    var response = await updateUserPasswordCall(newPassword);
+    if (response) {
+      finalVlue = true;
+    } else {
+      finalVlue = false;
+      // showErrorFromBackend(context, 'Error al actualizar la contraseña');
+    }
+    return finalVlue;
+  } catch (e) {
+    insertErrorLog(e.toString(), 'updateUserPassword() @user_view_screen');
+    rethrow;
+  }
+}
+
 void setUserDataForDebug() {
   var user = User(
       'Campus_Test',

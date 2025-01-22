@@ -561,7 +561,10 @@ Future<dynamic> getWorkDepartments() async {
 }
 
 Future<dynamic> sendUserPasswordToMail(
-    String employeeNumber, String deviceInfo, String deviceIP) async {
+    //This was the old way to send a recovery password
+    String employeeNumber,
+    String deviceInfo,
+    String deviceIP) async {
   try {
     var apiCall = await Requests.post(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/login/forgot-password/$employeeNumber',
@@ -601,7 +604,9 @@ Future<dynamic> sendRecoveryToken(String userMail, String deviceInfo) async {
 }
 
 Future<dynamic> updateUserPasswordByToken(
-    String token, String newPassword) async {
+    //This is for the recovery password at login screen (when user click on forgot password)
+    String token,
+    String newPassword) async {
   try {
     var apiCall = await Requests.put(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/auth/password',
@@ -621,6 +626,28 @@ Future<dynamic> updateUserPasswordByToken(
     }
   }
 }
+
+Future<dynamic> updateUserPasswordCall(String password) async {
+  try {
+    var apiCall = await Requests.put(
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/user/password',
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer ${currentUser!.token}",
+          "User-Agent": "$deviceInformation",
+        },
+        json: {
+          "password": password,
+        },
+        persistCookies: false,
+        timeoutSeconds: 20);
+    apiCall.raiseForStatus();
+    return apiCall.success;
+  } catch (e) {
+    insertErrorLog(e.toString(), '/api/user/password');
+    Future.error(e);
+  }
+} //This is for the user to change his password
 
 Future<dynamic> validateToken(
     String token, String userMail, String devivce) async {
@@ -1158,6 +1185,24 @@ Future<dynamic> getCurrentUserData(String token) async {
   }
 }
 
+Future<dynamic> getUserCafeteriaConsumptionHistory() async {
+  try {
+    var apiCall = await Requests.get(
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/cafeteria/user/history',
+      headers: {'Authorization': currentUser!.token},
+      queryParameters: {
+        'employee': currentUser!.employeeNumber,
+      },
+      persistCookies: false,
+    );
+    apiCall.raiseForStatus();
+    return apiCall;
+  } catch (e) {
+    insertErrorLog(e.toString(), "CAFETERIA HISTORY CALL ERROR: ");
+    return Future.error(e.toString());
+  }
+}
+
 Future<http.Response> getUserRoleAndAcces(String role) async {
   try {
     Uri address = Uri(
@@ -1183,9 +1228,6 @@ Future<http.Response> getUserRoleAndAcces(String role) async {
     }
   }
 }
-
-
-
 
 // Future<dynamic> getUserEvents(int userId) async {
 //   var response;
