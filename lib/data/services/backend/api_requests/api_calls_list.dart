@@ -455,13 +455,10 @@ Future<dynamic> getUsers() async {
   String response;
   try {
     var apiCall = await Requests.get(
-        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/user',
-        headers: {
-          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-          'Auth': currentUser!.token
-        },
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/users/all',
+        headers: {'Authorization': currentUser!.token},
         persistCookies: false,
-        timeoutSeconds: 20);
+        timeoutSeconds: 30);
     apiCall.raiseForStatus();
     response = apiCall.content();
     return response;
@@ -628,13 +625,14 @@ Future<dynamic> updateUserPasswordByToken(
 }
 
 Future<dynamic> updateUserPasswordCall(String password) async {
+  //To use when the current user logged in can be switched
   try {
     var apiCall = await Requests.put(
-        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/user/password',
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/users/password',
         headers: {
           "Content-Type": "application/json",
-          "Authorization": "Bearer ${currentUser!.token}",
-          "User-Agent": "$deviceInformation",
+          "Authorization": currentUser!.token,
+          // "User-Agent": "$deviceInformation",
         },
         json: {
           "password": password,

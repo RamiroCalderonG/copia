@@ -1,7 +1,6 @@
 // ignore_for_file: constant_identifier_names, prefer_typing_uninitialized_variables
 
 import 'package:flutter/material.dart';
-import 'package:loading_indicator/loading_indicator.dart';
 
 import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
@@ -21,7 +20,6 @@ import '../../../core/constants/date_constants.dart';
 
 import '../../../core/config/flutter_flow/flutter_flow_util.dart';
 import '../../../core/reusable_methods/academic_functions.dart';
-import '../../../core/reusable_methods/user_functions.dart';
 import '../../../data/datasources/temp/teacher_grades_temp.dart';
 import '../../components/confirm_dialogs.dart';
 import '../../components/student_eval_comments_dialog.dart';

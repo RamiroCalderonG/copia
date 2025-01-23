@@ -232,7 +232,7 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            'Verifique su correo electronico e ingrese el token de recuperación',
+            'Verifique su correo electronico e ingrese el token de recuperación \nNota: el token dura 3 minutos antes de expirar',
             style: TextStyle(fontFamily: 'Sora', fontStyle: FontStyle.italic),
           ),
           isLoading

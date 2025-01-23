@@ -9,11 +9,12 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:oxschool/presentation/Modules/enfermeria/no_data_avalibre.dart';
 import 'package:oxschool/presentation/Modules/user/create_user.dart';
 import 'package:oxschool/presentation/Modules/user/roles_screen.dart';
-import 'package:oxschool/presentation/Modules/user/users_table_view.dart';
+import 'package:oxschool/presentation/Modules/admin/users_table_view.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/reusable_methods/reusable_functions.dart';
 import 'package:oxschool/data/datasources/temp/users_temp_data.dart';
 import 'package:oxschool/core/utils/loader_indicator.dart';
+import 'package:oxschool/presentation/components/custom_icon_button.dart';
 
 import '../../../data/services/backend/api_requests/api_calls_list.dart';
 import '../../../core/config/flutter_flow/flutter_flow_theme.dart';
@@ -129,12 +130,15 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
                   },
                   icon: const FaIcon(FontAwesomeIcons.addressCard),
                   label: const Text('Nuevo usuario')),
-              TextButton.icon(
-                  onPressed: () async {
-                    refreshButton();
-                  },
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Refresca')),
+              RefreshButton(
+                onPressed: refreshButton,
+              ),
+              // TextButton.icon(
+              //     onPressed: () async {
+              //       refreshButton();
+              //     },
+              //     icon: const Icon(Icons.refresh),
+              //     label: const Text('Refresca')),
               // TextButton.icon(
               //     onPressed: () {},
               //     icon: FaIcon(FontAwesomeIcons.download),

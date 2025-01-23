@@ -6,7 +6,7 @@ import 'package:oxschool/presentation/components/pdf_viewer_screen.dart';
 import 'package:oxschool/presentation/Modules/main_window/mobile_main_window_widget.dart';
 import 'package:oxschool/presentation/Modules/user/user_view_screen.dart';
 
-import '../../../../presentation/Modules/user/users_main_screen.dart';
+import '../../../../presentation/Modules/admin/users_main_screen.dart';
 import '../flutter_flow_util.dart';
 import '/index.dart';
 

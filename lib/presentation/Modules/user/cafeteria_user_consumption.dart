@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
 import 'package:oxschool/core/constants/screens.dart';
 import 'package:oxschool/core/extensions/capitalize_strings.dart';
@@ -23,7 +24,7 @@ List<DataCell> cells = [];
 class _CafeteriaUserConsumptionState extends State<CafeteriaUserConsumption> {
   late Future<dynamic> cafeteriaConsumption;
   late List<CafeteriaconsumptionDto> _cafeteriaConsumptionList = [];
-
+  double total = 0;
   List<DataRow> dataRows = [];
 
   @override
@@ -51,6 +52,7 @@ class _CafeteriaUserConsumptionState extends State<CafeteriaUserConsumption> {
             DateTime.parse(item['date']),
             item['total'],
           );
+          total = total + item['total'];
           _cafeteriaConsumptionList.add(cafe);
         }
         responseData = _cafeteriaConsumptionList;
@@ -129,6 +131,7 @@ class _CafeteriaUserConsumptionState extends State<CafeteriaUserConsumption> {
                     child: CafeteriaUserHistoryTable(
                       cafeteriaConsumptionList: _cafeteriaConsumptionList,
                       dataRows: dataRows,
+                      total: total,
                     )));
           }
         });
@@ -138,10 +141,12 @@ class _CafeteriaUserConsumptionState extends State<CafeteriaUserConsumption> {
 class CafeteriaUserHistoryTable extends StatelessWidget {
   final List<CafeteriaconsumptionDto> cafeteriaConsumptionList;
   final List<DataRow> dataRows;
+  final double total;
   const CafeteriaUserHistoryTable({
     super.key,
     required this.cafeteriaConsumptionList,
     required this.dataRows,
+    required this.total,
   });
 
   @override
@@ -164,7 +169,7 @@ class CafeteriaUserHistoryTable extends StatelessWidget {
                         showBottomBorder: true,
                         dividerThickness: 2,
                         columns: <DataColumn>[
-                          DataColumn(
+                          const DataColumn(
                             label: Expanded(
                               child: Text(
                                 'Articulo',
@@ -172,7 +177,7 @@ class CafeteriaUserHistoryTable extends StatelessWidget {
                               ),
                             ),
                           ),
-                          DataColumn(
+                          const DataColumn(
                             label: Expanded(
                               child: Text(
                                 'Fecha',
@@ -180,7 +185,7 @@ class CafeteriaUserHistoryTable extends StatelessWidget {
                               ),
                             ),
                           ),
-                          DataColumn(
+                          const DataColumn(
                             numeric: true,
                             label: Expanded(
                               child: Text(
@@ -194,10 +199,10 @@ class CafeteriaUserHistoryTable extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(width: 40),
+                  const SizedBox(width: 40),
                   Flexible(
                     child: Text(
-                      '* Nota: Valores solo con estatus 0',
+                      'Total: $total \n  \t* Nota: Valores solo con estatus 0',
                       style: TextStyle(color: Colors.white),
                     ),
                   ),

@@ -3,7 +3,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:oxschool/presentation/Modules/user/edit_user_screen.dart';
+import 'package:oxschool/presentation/Modules/admin/edit_user_screen.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/presentation/Modules/login_view/login_view_widget.dart';
