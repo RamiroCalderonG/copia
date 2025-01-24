@@ -1150,11 +1150,11 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
   }
 }
 
-TextEditingController _textFieldController = TextEditingController();
+// TextEditingController _textFieldController = TextEditingController();
 bool displayTokenGenerator = true;
 
 Future<void> _displayForgotPassword(BuildContext context) async {
-  _textFieldController.text = '';
+  // _textFieldController.text = '';
   bool isLoading = false; // Flag to track loading state
 
   return showDialog(

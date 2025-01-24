@@ -63,6 +63,7 @@ class _FoDac27State extends State<FoDac27> {
     teacherGroupsListFODAC27.clear();
     teacherCampusListFODAC27.clear();
     gradesMapFODAC27.clear();
+    studentSelectorController.dispose();
     selectedTempStudent = null;
     super.dispose();
   }
@@ -412,6 +413,7 @@ class EditCellDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () {
+            controller.dispose();
             Navigator.of(context).pop();
           },
           child: const Text('Cancelar'),
@@ -480,6 +482,14 @@ class _NewFODAC27CommentDialogState extends State<NewFODAC27CommentDialog> {
 
     super.initState();
     //_dateController.text = "22/07/2024"; // Initial date
+  }
+
+  @override
+  void dispose() {
+    tempStudentMap.clear();
+    _dateController.dispose();
+    _observacionesController.dispose();
+    super.dispose();
   }
 
   Future<void> getSubjects() async {
@@ -795,7 +805,6 @@ class _EditCommentScreenState extends State<EditCommentScreen> {
   void dispose() {
     _commentController.dispose();
     _dateController.dispose();
-
     subjectsMap.clear();
     newObservation.clear();
     newDate.clear();

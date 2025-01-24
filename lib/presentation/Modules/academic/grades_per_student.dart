@@ -72,6 +72,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
     //evaluationComments.clear();
     //commentStringEval.clear();
     _debounce?.cancel();
+    commentsController.dispose();
     //selectedTempGrade = null;
     //selectedTempGroup = null;
     //selectedTempStudent = null;

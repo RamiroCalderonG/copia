@@ -54,6 +54,9 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
   void dispose() {
     isLoading = false;
     _textFieldController.clear();
+    _tokenFieldController.clear();
+    _passwordController.clear();
+    _passwordVerifierController.clear();
     //displaySecondScren = false;
     super.dispose();
   }

@@ -42,7 +42,6 @@ class _EnfermeriaWidgetState extends State<EnfermeriaWidget>
   @override
   void dispose() {
     _model.dispose();
-
     super.dispose();
   }
 

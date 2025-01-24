@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/presentation/Modules/enfermeria/no_data_avalibre.dart';
 import 'package:oxschool/presentation/Modules/user/create_user.dart';
 import 'package:oxschool/presentation/Modules/user/roles_screen.dart';
@@ -14,6 +15,7 @@ import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/reusable_methods/reusable_functions.dart';
 import 'package:oxschool/data/datasources/temp/users_temp_data.dart';
 import 'package:oxschool/core/utils/loader_indicator.dart';
+import 'package:oxschool/presentation/components/confirm_dialogs.dart';
 import 'package:oxschool/presentation/components/custom_icon_button.dart';
 
 import '../../../data/services/backend/api_requests/api_calls_list.dart';
@@ -53,11 +55,14 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
         });
       } else {
         if (kDebugMode) {
+          insertErrorLog(
+              'Cant fetch data from server, getUsers()', 'users_main_screen');
           print('Cant fetch  data from server');
         }
       }
     } catch (e) {
       isLoading = false;
+      insertErrorLog(e.toString(), 'UsersMainScreen() , refreshButton');
       AlertDialog(
         title: const Text("Error"),
         content: Text(e.toString()),
@@ -71,6 +76,7 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
 
   @override
   void initState() {
+    isLoading = false;
     // refreshButton();
     super.initState();
   }
@@ -95,24 +101,44 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
         appBar: AppBar(
             bottom: AppBar(automaticallyImplyLeading: false, actions: [
               TextButton.icon(
-                  onPressed: () async {
+                  onPressed: () {
                     setState(() {
                       isLoading = true;
                     });
 
-                    await getEventsList();
+                    try {
+                      getEventsList().catchError((onError) {
+                        setState(() {
+                          isLoading = false;
+                        });
+                        insertActionIntoLog(onError.toString(),
+                            'getEventsList() @users_main_screen');
+                      });
+                      var response = getRolesList().catchError((onError) {
+                        setState(() {
+                          isLoading = false;
+                        });
+                        showErrorFromBackend(context, onError.toString());
+                        insertErrorLog(
+                            onError, 'getRolesList() @users_main_screen');
+                      });
+                      tmpRolesList = jsonDecode(response);
+                      setState(() {
+                        isLoading = false;
+                      });
 
-                    var response = await getRolesList();
-                    tmpRolesList = jsonDecode(response);
-                    setState(() {
-                      isLoading = false;
-                    });
-                    // ignore: use_build_context_synchronously
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                const RolesAndProfilesScreen()));
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  const RolesAndProfilesScreen()));
+                    } catch (e) {
+                      setState(() {
+                        isLoading = false;
+                      });
+                      insertErrorLog(e.toString(), 'UsersMainScreen()');
+                      showErrorFromBackend(context, e.toString());
+                    }
                   },
                   icon: const Icon(Icons.verified_user),
                   label: const Text('Administrar roles de usuarios')),

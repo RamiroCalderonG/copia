@@ -78,10 +78,12 @@ class UserWindow extends StatelessWidget {
                             if (MediaQuery.of(context).size.width > 600) ...[
                               SizedBox(
                                 width: 400,
-                                child: TextField(
-                                  controller: TextEditingController(
-                                      text: currentUser!
-                                          .employeeName!.toTitleCase),
+                                child: TextFormField(
+                                  initialValue:
+                                      currentUser!.employeeName!.toTitleCase,
+                                  // controller: TextEditingController(
+                                  //     text: currentUser!
+                                  //         .employeeName!.toTitleCase),
                                   style: TextStyle(color: Colors.white),
                                   readOnly: true,
                                   decoration: InputDecoration(
@@ -102,10 +104,12 @@ class UserWindow extends StatelessWidget {
                               SizedBox(
                                 width:
                                     400, // Set a fixed width for the TextFields
-                                child: TextField(
-                                  controller: TextEditingController(
-                                      text: '${currentUser!.employeeNumber}'),
+                                child: TextFormField(
+                                  // controller: TextEditingController(
+                                  //     text: '${currentUser!.employeeNumber}'),
                                   style: TextStyle(color: Colors.white),
+                                  initialValue:
+                                      currentUser!.employeeNumber.toString(),
                                   readOnly: true,
                                   decoration: InputDecoration(
                                     label: Text(
@@ -125,9 +129,10 @@ class UserWindow extends StatelessWidget {
                               SizedBox(
                                 width:
                                     400, // Set a fixed width for the TextFields
-                                child: TextField(
-                                  controller: TextEditingController(
-                                      text: currentUser!.claUn!.toTitleCase),
+                                child: TextFormField(
+                                  initialValue: currentUser!.claUn!.toTitleCase,
+                                  // controller: TextEditingController(
+                                  //     text: currentUser!.claUn!.toTitleCase),
                                   style: TextStyle(color: Colors.white),
                                   readOnly: true,
                                   decoration: InputDecoration(

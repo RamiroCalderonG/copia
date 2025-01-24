@@ -62,6 +62,7 @@ class _Fodac27MenuSelectorState extends State<Fodac27MenuSelector> {
     selectedTempCampus = null;
     selectedTempGrade = null;
     selectedTempGroup = null;
+    selectedStudentController.dispose();
     super.dispose();
   }
 

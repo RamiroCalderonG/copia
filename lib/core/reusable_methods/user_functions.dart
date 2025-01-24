@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
+import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/data/Models/Cycle.dart';
 import 'package:oxschool/data/Models/Role.dart';
@@ -16,34 +17,34 @@ List<User> parseUsersFromJSON(List<dynamic> jsonList) {
   List<User> users = [];
 
   for (var item in jsonList) {
-    int employeeNumber = item['noempleado'];
-    String employeeName = item['nombre_gafete'];
-    String claUn = item['claun'];
-    String role = item['role_name'];
-    int userId = item['id'];
-    String token = 'null';
-    String schoolEmail = item['user_email'];
-    String usergenre = item['genre'];
-    int isActive = item['bajalogicasino'];
-    String? workArea = item['work_department'];
-    String? workPosition = item['work_position'];
-    String? creationDate = item['creation_date'];
+    int employeeNumber = item['employeeNumber'];
+    String employeeName = item['name'];
+    String claUn = item['campus'];
+    String? role = item['roleName'];
+    int? userId = item['id'];
+    String? token = 'null';
+    String? schoolEmail = item['email'];
+    String? usergenre = item['genre'];
+    int isActive = item['isActive'];
+    String? workArea = item['department'];
+    String? workPosition = item['position'];
+    String? creationDate = item['creationDate'];
     String? birthdate = item['birthdate'];
-    bool? isTeacher = item['is_teacher'];
-    bool? isAdmin = item['is_admin'];
+    bool? isTeacher = item['isTeacher'];
+    bool? isAdmin = item['admin'];
 
     User currentUser = User(
-        claUn,
+        claUn.toTitleCase,
         employeeName,
         employeeNumber,
-        role,
-        userId,
+        role!.toTitleCase,
+        userId!,
         token,
         schoolEmail,
         //usergenre,
         isActive,
-        workArea,
-        workPosition,
+        workArea?.toTitleCase,
+        workPosition?.toTitleCase,
         creationDate,
         birthdate,
         isTeacher,

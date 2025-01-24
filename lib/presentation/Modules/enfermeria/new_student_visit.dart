@@ -70,6 +70,22 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
   String? selectedAccidentType;
 
   @override
+  void dispose() {
+    _date.dispose();
+    _studentId.dispose();
+    _studentname.dispose();
+    _visitMotive.dispose();
+    _tx.dispose();
+    _valoration.dispose();
+    _kindOfPain.dispose();
+    _kindOfWound.dispose();
+    _otherCauses.dispose();
+    _observations.dispose();
+    _accidentTypes.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     Color getColor(Set<WidgetState> states) {
       const Set<WidgetState> interactiveStates = <WidgetState>{

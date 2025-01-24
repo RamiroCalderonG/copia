@@ -23,7 +23,7 @@ class _UsersTableViewState extends State<UsersTableView> {
   List<PlutoRow> userRows = [];
   // ignore: prefer_typing_uninitialized_variables
   var toSee;
-  bool isUserAdmin = verifyUserAdmin(currentUser!);
+  bool isUserAdmin = currentUser!.isCurrentUserAdmin();
   bool confirmation = false;
   bool isSearching = true;
   late final PlutoGridStateManager stateManager;
@@ -55,6 +55,7 @@ class _UsersTableViewState extends State<UsersTableView> {
 
   @override
   void dispose() {
+    stateManager.dispose();
     areaList.clear();
     super.dispose();
   }

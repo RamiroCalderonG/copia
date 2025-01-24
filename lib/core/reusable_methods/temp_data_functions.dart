@@ -16,7 +16,7 @@ void clearTempData() {
   userRoles.clear();
 }
 
-Future getEventsList() async {
+Future<void> getEventsList() async {
   try {
     var apiResponse = await getUserRoleAndAcces(currentUser!.role);
     List<dynamic> jsonList = json.decode(apiResponse.body);
@@ -24,7 +24,7 @@ Future getEventsList() async {
     eventsLisToShow =
         tmpeventsList.map((item) => Map<String, dynamic>.from(item)).toList();
   } catch (e) {
-    throw FormatException(e.toString());
+    throw Future.error(e.toString());
   }
 }
 
