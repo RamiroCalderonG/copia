@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:oxschool/core/constants/user_consts.dart';
+import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/data/datasources/temp/users_temp_data.dart';
 
 import '../../data/services/backend/api_requests/api_calls_list.dart';
@@ -37,4 +38,14 @@ int getEventIDbyName(String eventName) {
     }
   }
   return idValue;
+}
+
+Future<void> getRolesTempList() async {
+  try {
+    var response = await getRolesList();
+    tmpRolesList = json.decode(response.body);
+  } catch (e) {
+    insertErrorLog(e.toString(), 'getRolesList()');
+    throw Future.error(e.toString());
+  }
 }

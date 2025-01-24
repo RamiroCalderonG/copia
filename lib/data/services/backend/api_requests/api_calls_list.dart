@@ -270,14 +270,13 @@ Future<dynamic> getRolesList() async {
   String response;
   try {
     var apiCall = await Requests.get(
-        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/role',
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/roles/all',
         headers: {
-          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-          'Auth': currentUser!.token
+          'Authorization': currentUser!.token,
+          'Content-Type': 'application/json',
         },
         persistCookies: false,
-        timeoutSeconds: 8);
-
+        timeoutSeconds: 20);
     apiCall.raiseForStatus();
     response = apiCall.content();
     return response;

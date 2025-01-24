@@ -105,24 +105,11 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
                     setState(() {
                       isLoading = true;
                     });
-
                     try {
-                      getEventsList().catchError((onError) {
-                        setState(() {
-                          isLoading = false;
-                        });
-                        insertActionIntoLog(onError.toString(),
-                            'getEventsList() @users_main_screen');
-                      });
-                      var response = getRolesList().catchError((onError) {
-                        setState(() {
-                          isLoading = false;
-                        });
-                        showErrorFromBackend(context, onError.toString());
-                        insertErrorLog(
-                            onError, 'getRolesList() @users_main_screen');
-                      });
-                      tmpRolesList = jsonDecode(response);
+                      //TODO: WHY DOES IT NEED TO BE IN TWO SEPARATE CALLS?
+                      getEventsList();
+                      getRolesTempList();
+
                       setState(() {
                         isLoading = false;
                       });
