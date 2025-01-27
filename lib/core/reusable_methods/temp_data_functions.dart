@@ -19,7 +19,7 @@ void clearTempData() {
 
 Future<void> getEventsList() async {
   try {
-    var apiResponse = await getUserRoleAndAcces(currentUser!.role);
+    var apiResponse = await getUserRoleAndAcces(currentUser!.roleID!);
     List<dynamic> jsonList = json.decode(apiResponse.body);
     tmpeventsList = jsonList;
     eventsLisToShow =
@@ -44,8 +44,19 @@ Future<void> getRolesTempList() async {
   try {
     var response = await getRolesList();
     tmpRolesList = json.decode(response.body);
+    return;
   } catch (e) {
     insertErrorLog(e.toString(), 'getRolesList()');
+    throw Future.error(e.toString());
+  }
+}
+
+Future<void> getEventsTempList() async {
+  try {
+    var response = await getEventsListRequest();
+    tmpeventsList = json.decode(response.body);
+  } catch (e) {
+    insertErrorLog(e.toString(), 'getEventsList()');
     throw Future.error(e.toString());
   }
 }

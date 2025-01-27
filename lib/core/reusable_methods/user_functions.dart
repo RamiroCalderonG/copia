@@ -32,6 +32,7 @@ List<User> parseUsersFromJSON(List<dynamic> jsonList) {
     String? birthdate = item['birthdate'];
     bool? isTeacher = item['isTeacher'];
     bool? isAdmin = item['admin'];
+    int roleId = item['userRole']['id'];
 
     User currentUser = User(
         claUn.toTitleCase,
@@ -48,7 +49,8 @@ List<User> parseUsersFromJSON(List<dynamic> jsonList) {
         creationDate,
         birthdate,
         isTeacher,
-        isAdmin);
+        isAdmin,
+        roleId);
 
     users.add(currentUser);
   }
@@ -83,6 +85,7 @@ dynamic getSingleUser(String? userId) async {
         String? birthdate = jsonList[i]['birthdate'];
         bool isTeacher = jsonList[i]['is_teacher'];
         bool isAdmin = jsonList[i]['userRole']['isAdmin'];
+        int roleId = jsonList[i]['userRole']['id'];
 
         tempSelectedUsr = User(
             claUn,
@@ -99,7 +102,8 @@ dynamic getSingleUser(String? userId) async {
             creationDate,
             birthdate,
             isTeacher,
-            isAdmin);
+            isAdmin,
+            roleId);
       }
       return tempSelectedUsr;
     } catch (e) {
@@ -212,7 +216,8 @@ void setUserDataForDebug() {
       '01/01/1999',
       '01/01/2000',
       false,
-      true);
+      true,
+      1);
   currentUser = user;
   var exampleEvents = [
     {

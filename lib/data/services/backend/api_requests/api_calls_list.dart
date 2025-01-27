@@ -267,7 +267,7 @@ Future<dynamic> modifyActiveOfEventRole(
 }
 
 Future<dynamic> getRolesList() async {
-  String response;
+  // String response;
   try {
     var apiCall = await Requests.get(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/roles/all',
@@ -278,8 +278,8 @@ Future<dynamic> getRolesList() async {
         persistCookies: false,
         timeoutSeconds: 20);
     apiCall.raiseForStatus();
-    response = apiCall.content();
-    return response;
+    // response = apiCall.content();
+    return apiCall;
   } catch (e) {
     throw FormatException(e.toString());
   }
@@ -1200,14 +1200,33 @@ Future<dynamic> getUserCafeteriaConsumptionHistory() async {
   }
 }
 
-Future<http.Response> getUserRoleAndAcces(String role) async {
+//*
+//To retrive all events from the server
+// */
+Future<dynamic> getEventsListRequest() async {
+  try {
+    var apiCall = await Requests.get(
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/events/all',
+        headers: {'Authorization': currentUser!.token},
+        queryParameters: {'filter': 'true'},
+        persistCookies: true,
+        timeoutSeconds: 20);
+    apiCall.raiseForStatus();
+    return apiCall;
+  } catch (e) {
+    insertErrorLog(e.toString(), "EVENTS LIST CALL ERROR: ");
+    return Future.error(e.toString());
+  }
+}
+
+Future<http.Response> getUserRoleAndAcces(int roleId) async {
   try {
     Uri address = Uri(
         scheme: 'http',
         host: dotenv.env['HOST'],
         port: int.parse(dotenv.env['PORT']!),
         path: '/roles/me',
-        queryParameters: {'role': role});
+        queryParameters: {'role': roleId.toString()});
     var response = http.get(address, headers: {
       "Content-Type": "application/json",
       'Authorization': currentUser!.token,

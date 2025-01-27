@@ -277,7 +277,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
               currentUser = parseLogedInUserFromJSON(jsonData, token);
 
               //GET USER ROLE AND PERMISSIONS
-              await getUserRoleAndAcces(currentUser!.role);
+              await getUserRoleAndAcces(currentUser!.roleID!);
 
               apiResponse = await getCycle(
                   1); //CurrentCicleCall.call().timeout(Duration(seconds: 7));
@@ -1322,6 +1322,7 @@ User parseLogedInUserFromJSON(Map<String, dynamic> jsonList, String userToken) {
   //String? birthdate = jsonList[i]['birthdate'];
   bool? isTeacher = jsonList['userTeacher'];
   bool? isAdmin = jsonList['userRole']['isAdmin'];
+  int roleId = jsonList['userRole']['id'];
 
   currentUser = User(
       claUn,
@@ -1338,7 +1339,8 @@ User parseLogedInUserFromJSON(Map<String, dynamic> jsonList, String userToken) {
       null,
       null,
       isTeacher,
-      isAdmin);
+      isAdmin,
+      roleId);
   // }
   // }
   userToken = currentUser.token;

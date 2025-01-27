@@ -16,6 +16,7 @@ class User {
   String? birthdate;
   bool? isTeacher;
   bool? isAdmin;
+  int? roleID;
 
   // late final notActive;
 
@@ -34,7 +35,8 @@ class User {
       this.creationDate,
       this.birthdate,
       this.isTeacher,
-      this.isAdmin);
+      this.isAdmin,
+      this.roleID);
 
   Map<dynamic, dynamic> toJson() => {
         "employeeNumber": employeeNumber,
@@ -51,7 +53,8 @@ class User {
         "creationDate": creationDate.toString(),
         "birthdate": birthdate,
         "is_Teacher": isTeacher,
-        "isAdmin": isAdmin
+        "isAdmin": isAdmin,
+        "roleID": roleID
 
         // "notActive": notActive
       };
@@ -72,6 +75,7 @@ class User {
       birthdate = jsonUser[item]['birthdate'];
       isTeacher = jsonUser[item]['is_Teacher'];
       isAdmin = jsonUser[item]['userRole']['isAdmin'];
+      roleID = jsonUser[item]['userRole']['id'];
     }
     return User(
         claUn,
@@ -88,7 +92,8 @@ class User {
         creationDate,
         birthdate,
         isTeacher,
-        isAdmin);
+        isAdmin,
+        roleID);
   }
 
   void clear() {
@@ -99,7 +104,7 @@ class User {
     isAdmin = null;
   }
 
-  bool canEditStudentGrades() {
+  bool isUserTeacher() {
     return isTeacher!;
   }
 

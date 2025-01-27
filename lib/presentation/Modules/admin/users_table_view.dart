@@ -55,7 +55,7 @@ class _UsersTableViewState extends State<UsersTableView> {
 
   @override
   void dispose() {
-    stateManager.dispose();
+    //stateManager.dispose();
     areaList.clear();
     super.dispose();
   }

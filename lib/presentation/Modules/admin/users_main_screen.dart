@@ -77,7 +77,7 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
   @override
   void initState() {
     isLoading = false;
-    // refreshButton();
+    //refreshButton();
     super.initState();
   }
 
@@ -107,18 +107,30 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
                     });
                     try {
                       //TODO: WHY DOES IT NEED TO BE IN TWO SEPARATE CALLS?
-                      getEventsList();
-                      getRolesTempList();
-
-                      setState(() {
-                        isLoading = false;
+                      // getEventsList();
+                      getEventsTempList().whenComplete(() {
+                        getRolesTempList().then((context) {
+                          setState(() {
+                            isLoading = false;
+                          });
+                        });
                       });
-
                       Navigator.push(
                           context,
                           MaterialPageRoute(
                               builder: (context) =>
                                   const RolesAndProfilesScreen()));
+                      // getRolesTempList();
+
+                      // setState(() {
+                      //   isLoading = false;
+                      // });
+
+                      // Navigator.push(
+                      //     context,
+                      //     MaterialPageRoute(
+                      //         builder: (context) =>
+                      //             const RolesAndProfilesScreen()));
                     } catch (e) {
                       setState(() {
                         isLoading = false;
