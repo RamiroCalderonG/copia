@@ -40,11 +40,11 @@ int getEventIDbyName(String eventName) {
   return idValue;
 }
 
-Future<void> getRolesTempList() async {
+Future<dynamic> getRolesTempList() async {
   try {
     var response = await getRolesList();
     tmpRolesList = json.decode(response.body);
-    return;
+    return tmpRolesList;
   } catch (e) {
     insertErrorLog(e.toString(), 'getRolesList()');
     throw Future.error(e.toString());
