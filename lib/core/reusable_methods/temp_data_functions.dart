@@ -30,10 +30,9 @@ Future<void> getEventsList() async {
 }
 
 int getEventIDbyName(String eventName) {
-  // ignore: prefer_typing_uninitialized_variables
   var idValue;
   for (var item in tmpeventsList) {
-    if ((item['EventName'] as String).compareTo(eventName) == 0) {
+    if ((item['name']).compareTo(eventName) == 0) {
       idValue = item['id'];
     }
   }
@@ -54,7 +53,8 @@ Future<dynamic> getRolesTempList() async {
 Future<void> getEventsTempList() async {
   try {
     var response = await getEventsListRequest();
-    tmpeventsList = json.decode(response.body);
+    //TODO : REPACE tmpeventsList with eventsList to use it in the future
+    here replace ----------  tmpeventsList = json.decode(response.body);
   } catch (e) {
     insertErrorLog(e.toString(), 'getEventsList()');
     throw Future.error(e.toString());

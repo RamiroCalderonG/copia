@@ -206,6 +206,7 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                       MaterialPageRoute(
                           builder: (context) => PoliciesScreen(
                                 roleID: tmpRolesList[index]['id'],
+                                roleName: tmpRolesList[index]['softName'],
                               )));
                 },
                 icon: const Icon(Icons.add),

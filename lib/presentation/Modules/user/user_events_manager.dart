@@ -9,7 +9,9 @@ import '../../../core/reusable_methods/temp_data_functions.dart';
 
 class PoliciesScreen extends StatefulWidget {
   final int roleID;
-  const PoliciesScreen({super.key, required this.roleID});
+  final String roleName;
+  const PoliciesScreen(
+      {super.key, required this.roleID, required this.roleName});
 
   @override
   State<PoliciesScreen> createState() => _PoliciesScreenState();
@@ -29,7 +31,7 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Eventos : '),
+        title: Text('Permisos asignados al rol: ${widget.roleName}'),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
@@ -91,15 +93,19 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
   }
 
   Future<void> refreshEvents(int? idRole) async {
-    var response = await getEventsByRole(idRole);
-    var policyList = jsonDecode(response);
+    var response = await getEventsByRole(idRole); //Get events by role
+    var policyList = jsonDecode(response); //Decode the response
 
     // Map to group events by moduleName
     Map<String, List<Event>> groupedEvents = {};
 
     for (var jsonItem in policyList) {
-      Event event = Event(0, jsonItem['event'], jsonItem['is_active'],
-          jsonItem['module'], true);
+      Event event = Event(
+          jsonItem['event_id'],
+          jsonItem['event_name'],
+          jsonItem['event_active'],
+          jsonItem['module_name'],
+          jsonItem['can_acces']);
 
       // Check if the moduleName already exists in the map
       if (groupedEvents.containsKey(event.moduleName)) {
@@ -133,59 +139,18 @@ class PolicyCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Text(
-            //   policy.eventName,
-            //   style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
-            // ),
             SwitchListTile(
               title: Text(policy.eventName),
               value: policy.isActive,
               onChanged: (value) async {
-                onToggle(policy); // Call the callback function
-                // print(policy.eventName);
-                // print(value.toString() + ' ' + roleID.toString());
+                onToggle(policy);
                 var idValue = getEventIDbyName(policy.eventName);
                 await modifyActiveOfEventRole(idValue, value, roleID);
               },
             ),
             const Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // TextButton(
-                //   onPressed: () {
-                //     // navigate to view policy details screen
-                //   },
-                //   child: Text('View'),
-                // ),
-                // TextButton(
-                //   onPressed: () {
-                //     // navigate to edit policy screen
-                //   },
-                //   child: Text('Edit'),
-                // ),
-                // conditionally render buttons based on permissions
-                // if (/* has permission to contact radiologist */)
-                //   TextButton(
-                //     onPressed: () {
-                //       // navigate to contact radiologist screen
-                //     },
-                //     child: Text('Contact Radiologist'),
-                //   ),
-                // if (/* has permission to approve requests */)
-                //   TextButton(
-                //     onPressed: () {
-                //       // navigate to approve request screen
-                //     },
-                //     child: Text('Approve Request'),
-                //   ),
-                // if (/* has permission to add permissions */)
-                //   TextButton(
-                //     onPressed: () {
-                //       // navigate to add permission screen
-                //     },
-                //     child: Text('Add Permission'),
-                //   ),
-              ],
+              children: [],
             ),
           ],
         ),

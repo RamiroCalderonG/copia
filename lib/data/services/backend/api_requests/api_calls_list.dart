@@ -247,18 +247,14 @@ Future<dynamic> modifyActiveOfEventRole(
     int eventId, bool roleEventValue, int roleSelected) async {
   try {
     var apiCall = await Requests.put(
-        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/event-role/$eventId',
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/events/role-auth/$eventId',
         headers: {
-          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-          'Auth': currentUser!.token
+          'Authorization': currentUser!.token,
+          'Content-Type': 'application/json',
         },
-        json: {
-          'type': eventId,
-          'role_event_active': roleEventValue,
-          'role': roleSelected
-        },
+        json: {'value': roleEventValue, 'role': roleSelected},
         persistCookies: false,
-        timeoutSeconds: 10);
+        timeoutSeconds: 20);
     apiCall.raiseForStatus();
     return apiCall.content();
   } catch (e) {
@@ -307,12 +303,12 @@ Future<dynamic> getRole(String roleName) async {
 Future<dynamic> getEventsByRole(int? roleID) async {
   try {
     var apiCal = await Requests.get(
-        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/roles/events',
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/events/roles/$roleID',
         headers: {
           'Authorization': currentUser!.token,
           'Content-Type': 'application/json',
         },
-        queryParameters: {'role': roleID},
+        //queryParameters: {'role': roleID},
         persistCookies: false,
         timeoutSeconds: 20);
     apiCal.raiseForStatus();
