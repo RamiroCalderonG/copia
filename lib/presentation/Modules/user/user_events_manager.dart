@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/data/Models/Event.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
@@ -23,8 +24,15 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
 
   @override
   void initState() {
+    //Download events and roles to populate the list
     _refreshEventsFuture = refreshEvents(widget.roleID);
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    eventsToDisplay.clear();
+    super.dispose();
   }
 
   @override
@@ -93,32 +101,35 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
   }
 
   Future<void> refreshEvents(int? idRole) async {
-    var response = await getEventsByRole(idRole); //Get events by role
-    var policyList = jsonDecode(response); //Decode the response
+    var eventsByRoleResponse =
+        await fetchEventsByRole(idRole!); //Get events by role
+    try {
+      // Map to group events by moduleName
+      Map<String, List<Event>> groupedEvents = {};
 
-    // Map to group events by moduleName
-    Map<String, List<Event>> groupedEvents = {};
+      for (var jsonItem in eventsByRoleResponse) {
+        Event event = Event(
+            jsonItem['event_id'],
+            jsonItem['event_name'],
+            jsonItem['event_active'],
+            jsonItem['module_description'],
+            jsonItem['can_acces']);
 
-    for (var jsonItem in policyList) {
-      Event event = Event(
-          jsonItem['event_id'],
-          jsonItem['event_name'],
-          jsonItem['event_active'],
-          jsonItem['module_name'],
-          jsonItem['can_acces']);
-
-      // Check if the moduleName already exists in the map
-      if (groupedEvents.containsKey(event.moduleName)) {
-        groupedEvents[event.moduleName]!.add(event);
-      } else {
-        groupedEvents[event.moduleName] = [event];
+        // Check if the moduleName already exists in the map
+        if (groupedEvents.containsKey(event.moduleName)) {
+          groupedEvents[event.moduleName]!.add(event);
+        } else {
+          groupedEvents[event.moduleName] = [event];
+        }
       }
+      setState(() {
+        eventsToDisplay =
+            groupedEvents.values.expand((events) => events).toList();
+      });
+    } catch (e) {
+      insertErrorLog(e.toString(), 'refreshEvents()');
+      return Future.error(e.toString());
     }
-
-    setState(() {
-      eventsToDisplay =
-          groupedEvents.values.expand((events) => events).toList();
-    });
   }
 }
 
@@ -144,8 +155,8 @@ class PolicyCard extends StatelessWidget {
               value: policy.isActive,
               onChanged: (value) async {
                 onToggle(policy);
-                var idValue = getEventIDbyName(policy.eventName);
-                await modifyActiveOfEventRole(idValue, value, roleID);
+                //var idValue = getEventIDbyName(policy.eventName);
+                await modifyActiveOfEventRole(policy.eventID, value, roleID);
               },
             ),
             const Row(

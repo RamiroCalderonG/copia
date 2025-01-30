@@ -308,13 +308,47 @@ Future<dynamic> getEventsByRole(int? roleID) async {
           'Authorization': currentUser!.token,
           'Content-Type': 'application/json',
         },
-        //queryParameters: {'role': roleID},
         persistCookies: false,
         timeoutSeconds: 20);
     apiCal.raiseForStatus();
-    return apiCal.content();
+    return apiCal;
   } catch (e) {
     throw Future.error(e.toString());
+  }
+}
+
+Future<dynamic> getModulesListDetailed() async {
+  try {
+    var apiCall = await Requests.get(
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/modules/detail',
+        headers: {
+          'Authorization': currentUser!.token,
+          'Content-Type': 'application/json',
+        },
+        persistCookies: true);
+    apiCall.raiseForStatus();
+    return apiCall.body;
+  } catch (e) {
+    insertErrorLog(e.toString(), 'getModulesAndEvents() apiCall');
+    return Future.error(e.toString());
+  }
+}
+
+Future<dynamic> getEventsAndModulesCall() async {
+  try {
+    var apiCall = await Requests.get(
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/events/modules/detail',
+      headers: {
+        'Authorization': currentUser!.token,
+        'Content-Type': 'application/json',
+      },
+      persistCookies: true,
+    );
+    apiCall.raiseForStatus();
+    return apiCall.body;
+  } catch (e) {
+    insertErrorLog(e.toString(), 'getEventsAndModulesCall() apiCall');
+    return Future.error(e.toString());
   }
 }
 

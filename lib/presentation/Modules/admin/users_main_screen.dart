@@ -102,9 +102,6 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
             bottom: AppBar(automaticallyImplyLeading: false, actions: [
               TextButton.icon(
                   onPressed: () {
-                    // setState(() {
-                    //   isLoading = true;
-                    // });
                     try {
                       //TODO: WHY DOES IT NEED TO BE IN TWO SEPARATE CALLS?
                       getEventsTempList().whenComplete(() async {
@@ -116,22 +113,6 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
                                       const RolesAndProfilesScreen()));
                         });
                       });
-                      // Navigator.push(
-                      //     context,
-                      //     MaterialPageRoute(
-                      //         builder: (context) =>
-                      //             const RolesAndProfilesScreen()));
-                      // getRolesTempList();
-
-                      // setState(() {
-                      //   isLoading = false;
-                      // });
-
-                      // Navigator.push(
-                      //     context,
-                      //     MaterialPageRoute(
-                      //         builder: (context) =>
-                      //             const RolesAndProfilesScreen()));
                     } catch (e) {
                       setState(() {
                         isLoading = false;

@@ -99,6 +99,9 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
             isActive.add(item['isActive']);
           }
         });
+      }).catchError((onError) {
+        insertErrorLog(onError.toString(), 'getRolesTempList()');
+        showErrorFromBackend(context, onError.toString());
       });
     });
   }
@@ -132,7 +135,7 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
         for (var event in events)
           SwitchListTile(
             title: Text(event['name']),
-            value: event['event_active'],
+            value: event['role_event_active'],
             onChanged: (value) async {
               setState(() {
                 _isloading = true;
@@ -209,8 +212,8 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                                 roleName: tmpRolesList[index]['softName'],
                               )));
                 },
-                icon: const Icon(Icons.add),
-                tooltip: 'Agregar evento a Rol',
+                icon: const Icon(Icons.security),
+                tooltip: 'Administrar Políticas',
               ),
             ],
           ),
@@ -320,8 +323,8 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                   const SizedBox(height: 16),
                   const Divider(thickness: 1),
                   const Text(
-                    'Listado de roles',
-                    style: TextStyle(fontFamily: 'Sora'),
+                    'Lista rápida de roles',
+                    style: TextStyle(fontFamily: 'Sora', fontSize: 18),
                   ),
                   Expanded(
                     child: SingleChildScrollView(
