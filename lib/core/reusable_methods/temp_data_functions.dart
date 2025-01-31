@@ -77,40 +77,45 @@ Future<dynamic> fetchEventsByRole(int roleId) async {
   }
 }
 
-Future<dynamic> fetchModulesAndEventsDetailed() async {
+Future<List<Module>> fetchModulesAndEventsDetailed() async {
+  List<Module> sortedModuleList = [];
   try {
+    List<Module> moduleList = [];
     List<Event> eventsList = [];
-    getEventsAndModulesCall().then((apiResponse) {
+    await getEventsAndModulesCall().then((apiResponse) {
       var eventsModule = json.decode(apiResponse);
       for (var item in eventsModule) {
         Event event = Event(item["event_id"], item["event_name"],
-            item["event_active"], item['module_name'], true);
+            item["event_active"], item['module_name'], item["role_id"]);
         eventsList.add(event);
       }
+
+      return getModulesListDetailed().then((apiResponse) {
+        var jsonList = json.decode(apiResponse);
+        for (var item in jsonList) {
+          Module module = Module.fromJsonWithoutEvents(item);
+          moduleList.add(module);
+        }
+
+        if (moduleList.isNotEmpty && eventsList.isNotEmpty) {
+          for (var moduleItem in moduleList) {
+            for (var eventItem in eventsList) {
+              if (moduleItem.name == eventItem.moduleName) {
+                moduleItem.eventsList?.add(eventItem);
+                sortedModuleList.add(moduleItem);
+              }
+            }
+          }
+        }
+        return sortedModuleList;
+      });
     }).catchError((error) {
       insertErrorLog(error.toString(), 'getEventsAndModulesCall()');
-      Future.error(error);
+      throw Future.error(error);
     });
-
-    List<Module> moduleList = [];
-    await getModulesListDetailed().then((apiResponse) {
-      var jsonList = json.decode(apiResponse);
-      for (var item in jsonList) {
-        Module module = Module.fromJson(item);
-        moduleList.add(module);
-      }
-    }).catchError((onError) {
-      insertErrorLog(onError.toString(), 'getModulesListDetailed()');
-      Future.error(onError);
-    });
-
-    if (moduleList.isNotEmpty) {
-      for (var item in moduleList) {
-        //TODO: INSERT EVENTS INTO MODULE BY ID
-      }
-    }
   } catch (e) {
     insertErrorLog(e.toString(), 'fetchModulesAndEventsDetailed()');
-    return Future.error(e);
+    throw Future.error(e);
   }
+  return sortedModuleList;
 }

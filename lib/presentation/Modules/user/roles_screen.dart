@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 
 import 'package:oxschool/data/Models/Event.dart';
+import 'package:oxschool/data/Models/Module.dart';
+import 'package:oxschool/data/Models/Role.dart';
 import 'package:oxschool/presentation/Modules/user/user_events_manager.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
 
@@ -26,38 +28,21 @@ class RolesAndProfilesScreen extends StatefulWidget {
 bool _isloading = false;
 
 class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
-  List<String> roles = [];
-  List<String> description = [];
+  // List<String> roles = [];
+  // List<String> description = [];
   // List<int> role_id = [];
-  List<bool> isActive = [];
+  // List<bool> isActive = [];
   List<bool> roleCanAcces = [];
 
   List<bool> checkboxValues = [];
   int selectedCardIndex = -1;
   late Future<dynamic> rolesList;
+  List<Module> modulesList = [];
+  List<Role> rolesListData = [];
 
   @override
   void initState() {
-    // rolesList = getRolesTempList();
-    setState(() {
-      Map<dynamic, dynamic> eventsAreActive = {};
-      for (var item in tmpeventsList) {
-        var eventName = item['name'];
-        var isEventActive = item['event_active'];
-
-        eventsAreActive[eventName] = isEventActive;
-
-        checkboxValues.add(isEventActive);
-        roleCanAcces.add(item['role_event_active']);
-      }
-
-      for (var item in tmpRolesList) {
-        roles.add(item['softName']);
-        description.add(item['description']);
-        isActive.add(item['isActive']);
-      }
-    });
-
+    _fetchData();
     super.initState();
   }
 
@@ -65,6 +50,9 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
   void dispose() {
     tmpeventsList.clear();
     checkboxValues.clear();
+    roleCanAcces.clear();
+    tmpRolesList.clear();
+    rolesListData.clear();
     super.dispose();
   }
 
@@ -75,40 +63,56 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
       checkboxValues.clear();
       roleCanAcces.clear();
       tmpRolesList.clear();
-      roles.clear();
-      description.clear();
-      isActive.clear();
+      rolesListData.clear();
     });
-    getEventsTempList().whenComplete(() async {
-      await getRolesTempList().whenComplete(() {
-        setState(() {
-          Map<dynamic, dynamic> eventsAreActive = {};
-          for (var item in tmpeventsList) {
-            var eventName = item['name'];
-            var isEventActive = item['event_active'];
+    getRolesTempList().whenComplete(() {}).catchError((onError) {
+      insertErrorLog(onError.toString(), 'getRolesTempList()');
+      showErrorFromBackend(context, onError.toString());
+    });
+  }
 
-            eventsAreActive[eventName] = isEventActive;
-
-            checkboxValues.add(isEventActive);
-            roleCanAcces.add(item['role_event_active']);
+  void _fetchData() async {
+    setState(() {
+      isLoading = true;
+    });
+    modulesList = await fetchModulesAndEventsDetailed();
+    getRolesTempList().whenComplete(() {
+      setState(() {
+        for (var item in tmpRolesList) {
+          Role role = Role.fromJson(item);
+          rolesListData.add(role);
+        }
+        for (var jsonevent in tmpeventsList) {
+          Event event = Event(
+              jsonevent['event_id'],
+              jsonevent['event_name'],
+              jsonevent['event_active'],
+              jsonevent['module_name'],
+              jsonevent['role_id']);
+          for (var i = 0; i < rolesListData.length; i++) {
+            if (rolesListData[i].roleID == event.roleID) {
+              rolesListData[i].events?.add(event);
+            }
           }
-
-          for (var item in tmpRolesList) {
-            roles.add(item['softName']);
-            description.add(item['description']);
-            isActive.add(item['isActive']);
-          }
-        });
-      }).catchError((onError) {
-        insertErrorLog(onError.toString(), 'getRolesTempList()');
-        showErrorFromBackend(context, onError.toString());
+        }
       });
+    }).catchError((onError) {
+      insertErrorLog(onError.toString(), 'getRolesTempList()');
+      showErrorFromBackend(context, onError.toString());
     });
   }
 
   Widget roleContainerCard(String role, String desc, int index) {
-    List events =
-        tmpeventsList.where((event) => event['soft_name'] == role).toList();
+    // List events = [];
+
+    // for (var item in rolesListData) {
+    //   if (item.roleName == role) {
+    //     item.events?.forEach((action) {
+    //       events.add(action);
+    //     });
+    //   }
+    // }
+    // rolesListData.where((event) => event['name'] == role).toList();
 
     return ExpansionTile(
       title: Row(
@@ -118,7 +122,7 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
             style: const TextStyle(
                 fontFamily: 'Sora', fontWeight: FontWeight.bold),
           ),
-          if (!isActive[index]) // Conditionally show red dot
+          if (!rolesListData[index].isActive) // Conditionally show red dot
             Container(
               margin: const EdgeInsets.only(left: 5), // Adjust margin as needed
               width: 10,
@@ -132,9 +136,10 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
       ),
       subtitle: Text(desc),
       children: [
-        for (var event in events)
+            for (var i = 0; i < rolesListData.length; i++) 
+        // for (var event in rolesListData)
           SwitchListTile(
-            title: Text(event['name']),
+            title: Text(rolesListData[i].events![].eventName),
             value: event['role_event_active'],
             onChanged: (value) async {
               setState(() {
@@ -161,13 +166,13 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                   //TODO: VERIFY IF ITS NEEDED, OR ONLY LOGIC
                 },
               ),
-              if (tmpRolesList[index]['isActive'] == false)
+              if (!rolesListData[index].isActive)
                 IconButton(
                   onPressed: () async {
                     setState(() {
                       isLoading = true;
                     });
-                    var roleId = tmpRolesList[index]['id'];
+                    var roleId = rolesListData[index].roleID;
                     var bodyEdit = {'isActive': true};
                     await editRole(roleId, bodyEdit, 3);
                     setState(() {
@@ -178,13 +183,13 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                   icon: const Icon(Icons.arrow_circle_up),
                   tooltip: 'Activar Rol',
                 ),
-              if (tmpRolesList[index]['isActive'] == true)
+              if (rolesListData[index].isActive)
                 IconButton(
                     onPressed: () async {
                       setState(() {
                         isLoading = true;
                       });
-                      var roleId = tmpRolesList[index]['id'];
+                      var roleId = rolesListData[index].roleID;
                       var bodyEdit = {'isActive': false};
                       await editRole(roleId, bodyEdit, 3);
                       setState(() {
@@ -199,7 +204,8 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                 icon: const Icon(Icons.edit),
                 tooltip: 'Editar Rol',
                 onPressed: () async {
-                  await _showEditRoleScreen(context, index, isActive[index]);
+                  await _showEditRoleScreen(
+                      context, index, rolesListData[index].isActive);
                 },
               ),
               IconButton(
@@ -208,8 +214,8 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                       context,
                       MaterialPageRoute(
                           builder: (context) => PoliciesScreen(
-                                roleID: tmpRolesList[index]['id'],
-                                roleName: tmpRolesList[index]['softName'],
+                                roleID: rolesListData[index].roleID,
+                                roleName: rolesListData[index].roleName,
                               )));
                 },
                 icon: const Icon(Icons.security),
@@ -227,8 +233,8 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
     final result = await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => AddEditRoleScreen(
-            role: roles[index],
-            description: description[index],
+            role: rolesListData[index].roleName,
+            description: rolesListData[index].roleDescription,
             isActive: isActive, // Pass the isActive value
             roleCanAcces: roleCanAcces[index]),
       ),
@@ -237,8 +243,8 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
         result.containsKey('softName') &&
         result.containsKey('description')) {
       setState(() {
-        roles[index] = result['softName'];
-        description[index] = result['description'];
+        rolesListData[index].roleName = result['softName'];
+        rolesListData[index].roleDescription = result['description'];
         // role_id[index] = result['role_id'];
       });
     }
@@ -253,12 +259,12 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
     if (result != null &&
         result.containsKey('softName') &&
         result.containsKey('description')) {
-      setState(() {
-        roles.add(result['softName']);
-        description.add(result['description']);
-        isActive.add(result['isActive']);
-        // role_id.add(result['role_id']);
-      });
+      // setState(() {
+      //   roles.add(result['softName']);
+      //   description.add(result['description']);
+      //   isActive.add(result['isActive']);
+      //   // role_id.add(result['role_id']);
+      // });
     }
   }
 
@@ -330,7 +336,7 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                     child: SingleChildScrollView(
                       child: Column(
                         children: List.generate(
-                          roles.length,
+                          rolesListData.length,
                           (index) => Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Container(
@@ -341,7 +347,9 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                               // height: 150,
                               width: MediaQuery.of(context).size.width,
                               child: roleContainerCard(
-                                  roles[index], description[index], index),
+                                  rolesListData[index].roleName,
+                                  rolesListData[index].roleDescription,
+                                  index),
                             ),
                           ),
                         ),
@@ -355,7 +363,7 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Text(
-                        description[selectedCardIndex],
+                        rolesListData[selectedCardIndex].roleDescription,
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -461,7 +469,7 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
           .map((e) => {
                 'id': e.eventID,
                 'EventName': e.eventName,
-                'role_event_active': e.eventCanAccesModule,
+                'role_event_active': e.roleID,
                 'moduleName': e.moduleName,
               })
           .toList(),

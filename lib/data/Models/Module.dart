@@ -21,4 +21,11 @@ class Module {
         description = json['description'],
         eventsList = json['eventsList'] ? null : null,
         isModuleActive = json['active'];
+
+  Module.fromJsonWithoutEvents(Map<String, dynamic> json)
+      : id = json['number'],
+        name = json['name'],
+        description = json['description'],
+        eventsList = [],
+        isModuleActive = json['active'];
 }

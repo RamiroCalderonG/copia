@@ -142,22 +142,22 @@ dynamic EventFromJSON(List<dynamic> jsonData) {
 }
 
 // ignore: non_constant_identifier_names
-dynamic RoleFromJSON(List<dynamic> jsonData) {
-  List<Role> roleList = [];
-  if (jsonData.isEmpty) {
-    return null;
-  } else {
-    for (var item in jsonData) {
-      int roleID = item['role_id'];
-      String roleName = item['role_name'];
-      String roleDescription = item['role_description'];
-      bool isActive = item['is_active'];
+// dynamic RoleFromJSON(List<dynamic> jsonData) {
+//   List<Role> roleList = [];
+//   if (jsonData.isEmpty) {
+//     return null;
+//   } else {
+//     for (var item in jsonData) {
+//       int roleID = item['role_id'];
+//       String roleName = item['role_name'];
+//       String roleDescription = item['role_description'];
+//       bool isActive = item['is_active'];
 
-      roleList.add(Role(roleID, roleName, roleDescription, isActive, null));
-    }
-    return roleList;
-  }
-}
+//       roleList.add(Role(roleID, roleName, roleDescription, isActive, ));
+//     }
+//     return roleList;
+//   }
+// }
 
 dynamic changeUserActiveStatus(String employeeNum, int activeValue) async {
   var body = {'bajalogicasino': activeValue};
