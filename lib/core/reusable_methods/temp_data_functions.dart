@@ -66,6 +66,7 @@ Future<dynamic> fetchEventsByRole(int roleId) async {
   try {
     var eventsByRole = await getEventsByRole(roleId);
     if (eventsByRole != null) {
+      // var evenntsList = eventsByRole.body;
       var jsonList = json.decode(eventsByRole.body);
       return jsonList;
     } else {

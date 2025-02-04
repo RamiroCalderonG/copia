@@ -120,26 +120,25 @@ dynamic getSingleUser(String? userId) async {
 }
 
 // ignore: non_constant_identifier_names
-dynamic EventFromJSON(List<dynamic> jsonData) {
-  List<Event> eventList = [];
-  if (jsonData.isEmpty) {
-    return null;
-  } else {
-    for (var item in jsonData) {
-      int idEvento = item['id'];
-      String eventName = item['event_name'];
-      bool isActive = item['active'];
-      String moduleName = item['module_name'];
-      // int moduleID = item['module_id'];
-      bool eventCanAccesModule = item['event_can_acces_module'];
-      // int roleID = item['role_id'];
+// dynamic EventFromJSON(List<dynamic> jsonData) {
+//   List<Event> eventList = [];
+//   if (jsonData.isEmpty) {
+//     return null;
+//   } else {
+//     for (var item in jsonData) {
+//       int idEvento = item['id'];
+//       String eventName = item['event_name'];
+//       bool isActive = item['active'];
+//       String moduleName = item['module_name'];
+//       // int moduleID = item['module_id'];
+//       bool eventCanAccesModule = item['event_can_acces_module'];
+//       int roleID = item['role_id'];
 
-      eventList.add(Event(
-          idEvento, eventName, isActive, moduleName, eventCanAccesModule));
-    }
-    return eventList;
-  }
-}
+//       eventList.add(Event(idEvento, eventName, isActive, moduleName, roleID));
+//     }
+//     return eventList;
+//   }
+// }
 
 // ignore: non_constant_identifier_names
 // dynamic RoleFromJSON(List<dynamic> jsonData) {

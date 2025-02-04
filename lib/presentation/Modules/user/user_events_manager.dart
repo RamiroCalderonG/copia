@@ -41,11 +41,19 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
       appBar: AppBar(
         title: Text('Permisos asignados al rol: ${widget.roleName}'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () {
-              // navigate to create new policy screen
-            },
+          ElevatedButton.icon(
+            onPressed: () {},
+            label: Text(
+              'Agregar permisos',
+              style: TextStyle(color: Colors.white),
+            ),
+            icon: Icon(
+              Icons.add,
+              color: Colors.white,
+            ),
+            style: ButtonStyle(
+              backgroundColor: WidgetStateProperty.all(Colors.transparent),
+            ),
           ),
         ],
         backgroundColor: FlutterFlowTheme.of(context).primary,
@@ -58,42 +66,54 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
               child: CircularProgressIndicator(),
             );
           } else {
-            return ListView.builder(
-              itemCount: eventsToDisplay.length,
-              itemBuilder: (context, index) {
-                final currentEvent = eventsToDisplay[index];
-                final previousEvent =
-                    index > 0 ? eventsToDisplay[index - 1] : null;
+            if (eventsToDisplay.isNotEmpty) {
+              return ListView.builder(
+                itemCount: eventsToDisplay.length,
+                itemBuilder: (context, index) {
+                  final currentEvent = eventsToDisplay[index];
+                  final previousEvent =
+                      index > 0 ? eventsToDisplay[index - 1] : null;
 
-                final showModuleName = previousEvent == null ||
-                    currentEvent.moduleName != previousEvent.moduleName;
+                  final showModuleName = previousEvent == null ||
+                      currentEvent.moduleName != previousEvent.moduleName;
 
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (showModuleName)
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          'Modulo: ${currentEvent.moduleName}',
-                          style:
-                              const TextStyle(fontSize: 20, fontFamily: 'Sora'),
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (showModuleName)
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            'Modulo: ${currentEvent.moduleName}',
+                            style: const TextStyle(
+                                fontSize: 20, fontFamily: 'Sora'),
+                          ),
                         ),
+                      PolicyCard(
+                        policy: currentEvent,
+                        roleID: widget.roleID,
+                        onToggle: (event) {
+                          setState(() {
+                            event.isActive =
+                                !event.isActive; // Toggle the isActive status
+                          });
+                        },
                       ),
-                    PolicyCard(
-                      policy: currentEvent,
-                      roleID: widget.roleID,
-                      onToggle: (event) {
-                        setState(() {
-                          event.isActive =
-                              !event.isActive; // Toggle the isActive status
-                        });
-                      },
-                    ),
-                  ],
-                );
-              },
-            );
+                    ],
+                  );
+                },
+              );
+            } else {
+              return const Center(
+                child: Text(
+                  'No se encuentran eventos para el rol seleccionado',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontFamily: 'Sora',
+                  ),
+                ),
+              );
+            }
           }
         },
       ),
@@ -108,12 +128,8 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
       Map<String, List<Event>> groupedEvents = {};
 
       for (var jsonItem in eventsByRoleResponse) {
-        Event event = Event(
-            jsonItem['event_id'],
-            jsonItem['event_name'],
-            jsonItem['event_active'],
-            jsonItem['module_description'],
-            jsonItem['can_acces']);
+        Event event = Event(jsonItem['event_id'], jsonItem['event_name'],
+            jsonItem['event_active'], jsonItem['module_description'], idRole);
 
         // Check if the moduleName already exists in the map
         if (groupedEvents.containsKey(event.moduleName)) {

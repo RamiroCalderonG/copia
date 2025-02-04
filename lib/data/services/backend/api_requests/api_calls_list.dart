@@ -308,6 +308,7 @@ Future<dynamic> getEventsByRole(int? roleID) async {
           'Authorization': currentUser!.token,
           'Content-Type': 'application/json',
         },
+        bodyEncoding: RequestBodyEncoding.JSON,
         persistCookies: false,
         timeoutSeconds: 20);
     apiCal.raiseForStatus();
