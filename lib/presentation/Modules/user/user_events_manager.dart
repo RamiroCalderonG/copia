@@ -1,18 +1,25 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/data/Models/Event.dart';
+import 'package:oxschool/data/Models/Role.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
+import 'package:oxschool/presentation/Modules/admin/roles_events_admin.dart';
 
 import '../../../core/reusable_methods/temp_data_functions.dart';
 
 class PoliciesScreen extends StatefulWidget {
   final int roleID;
   final String roleName;
+  final List<Role> roleListData;
   const PoliciesScreen(
-      {super.key, required this.roleID, required this.roleName});
+      {super.key,
+      required this.roleID,
+      required this.roleName,
+      required this.roleListData});
 
   @override
   State<PoliciesScreen> createState() => _PoliciesScreenState();
@@ -41,20 +48,25 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
       appBar: AppBar(
         title: Text('Permisos asignados al rol: ${widget.roleName}'),
         actions: [
-          ElevatedButton.icon(
-            onPressed: () {},
-            label: Text(
-              'Agregar permisos',
-              style: TextStyle(color: Colors.white),
+          if (currentUser!.isAdmin!)
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => RolesEventsAdministration(
+                        roleName: widget.roleName, roleId: widget.roleID)));
+              },
+              label: Text(
+                'Agregar permisos',
+                style: TextStyle(color: Colors.white),
+              ),
+              icon: Icon(
+                Icons.add,
+                color: Colors.white,
+              ),
+              style: ButtonStyle(
+                backgroundColor: WidgetStateProperty.all(Colors.indigo),
+              ),
             ),
-            icon: Icon(
-              Icons.add,
-              color: Colors.white,
-            ),
-            style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all(Colors.transparent),
-            ),
-          ),
         ],
         backgroundColor: FlutterFlowTheme.of(context).primary,
       ),
@@ -104,15 +116,45 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
                 },
               );
             } else {
-              return const Center(
-                child: Text(
-                  'No se encuentran eventos para el rol seleccionado',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontFamily: 'Sora',
+              return Center(
+                  child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.all(10),
+                    child: const Text(
+                      'No se encuentran eventos para el rol seleccionado',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontFamily: 'Sora',
+                      ),
+                    ),
                   ),
-                ),
-              );
+                  Padding(
+                    padding: EdgeInsets.all(10),
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => RolesEventsAdministration(
+                                roleName: widget.roleName,
+                                roleId: widget.roleID)));
+                      },
+                      label: Text(
+                        'Agregar permisos',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      icon: Icon(
+                        Icons.add,
+                        color: Colors.white,
+                      ),
+                      style: ButtonStyle(
+                        backgroundColor: WidgetStateProperty.all(Colors.indigo),
+                      ),
+                    ),
+                  )
+                ],
+              ));
             }
           }
         },

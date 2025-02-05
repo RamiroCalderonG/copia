@@ -65,7 +65,7 @@ Future<void> getEventsTempList() async {
 Future<dynamic> fetchEventsByRole(int roleId) async {
   try {
     var eventsByRole = await getEventsByRole(roleId);
-    if (eventsByRole != null) {
+    if (eventsByRole != null && eventsByRole.body != '[]') {
       // var evenntsList = eventsByRole.body;
       var jsonList = json.decode(eventsByRole.body);
       return jsonList;
@@ -80,9 +80,10 @@ Future<dynamic> fetchEventsByRole(int roleId) async {
 
 Future<List<Module>> fetchModulesAndEventsDetailed() async {
   List<Module> sortedModuleList = [];
+  List<Module> moduleList = [];
+  List<Event> eventsList = [];
+  List<Module> preSortedModuleList = [];
   try {
-    List<Module> moduleList = [];
-    List<Event> eventsList = [];
     await getEventsAndModulesCall().then((apiResponse) {
       var eventsModule = json.decode(apiResponse);
       for (var item in eventsModule) {
@@ -103,7 +104,16 @@ Future<List<Module>> fetchModulesAndEventsDetailed() async {
             for (var eventItem in eventsList) {
               if (moduleItem.name == eventItem.moduleName) {
                 moduleItem.eventsList?.add(eventItem);
-                sortedModuleList.add(moduleItem);
+                if (sortedModuleList.isEmpty) {
+                  sortedModuleList.add(moduleItem);
+                } else {
+                  bool exists = sortedModuleList
+                      .any((element) => element.name == moduleItem.name);
+
+                  if (!exists) {
+                    sortedModuleList.add(moduleItem);
+                  }
+                }
               }
             }
           }

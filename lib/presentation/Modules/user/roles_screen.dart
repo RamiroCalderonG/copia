@@ -28,13 +28,6 @@ class RolesAndProfilesScreen extends StatefulWidget {
 bool _isloading = false;
 
 class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
-  // List<String> roles = [];
-  // List<String> description = [];
-  // List<int> role_id = [];
-  // List<bool> isActive = [];
-  // List<bool> roleCanAcces = [];
-
-  // List<bool> checkboxValues = [];
   int selectedCardIndex = -1;
   late Future<dynamic> rolesList;
   List<Module> modulesList = [];
@@ -54,22 +47,6 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
     tmpRolesList.clear();
     rolesListData.clear();
     super.dispose();
-  }
-
-  void _handleRefresh() async {
-    // setState(() {
-    // // isLoading = true;
-    // tmpeventsList.clear();
-    // // checkboxValues.clear();
-    // roleCanAcces.clear();
-    // tmpRolesList.clear();
-    // rolesListData.clear();
-    // });
-    // _fetchData();
-    // getRolesTempList().whenComplete(() {}).catchError((onError) {
-    //   insertErrorLog(onError.toString(), 'getRolesTempList()');
-    //   showErrorFromBackend(context, onError.toString());
-    // });
   }
 
   void _fetchData() async {
@@ -343,6 +320,8 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                                                                 rolesListData[
                                                                         index]
                                                                     .roleName,
+                                                            roleListData:
+                                                                rolesListData,
                                                           )));
                                             },
                                             icon: const Icon(Icons.security),

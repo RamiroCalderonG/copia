@@ -8,8 +8,6 @@ import 'package:oxschool/presentation/Modules/academic/fo_dac_27.dart';
 import 'package:oxschool/presentation/Modules/academic/grades_by_asignature.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/presentation/components/confirm_dialogs.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:oxschool/data/datasources/temp/studens_temp.dart';
 
 import '../../../core/config/flutter_flow/flutter_flow_theme.dart';
 import '../../../core/reusable_methods/academic_functions.dart';
@@ -94,6 +92,7 @@ class _GradesMainScreenState extends State<GradesMainScreen>
     preSelectedGroup = null;
     preSelectedSubject = null;
     preSelectedUnity = null;
+    _tabController?.dispose();
 
     // assignaturesColumns.clear();
     super.dispose();
@@ -101,8 +100,6 @@ class _GradesMainScreenState extends State<GradesMainScreen>
 
   void fetchData() {
     isUserAdmin = currentUser!.isCurrentUserAdmin();
-    // initSharedPref();
-    // initGetDate();
   }
 
   // void initGetDate() async {

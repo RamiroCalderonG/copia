@@ -58,20 +58,7 @@ bool isUserAdmin = false; //currentUser!.isCurrentUserAdmin();
 /// The list of rows in the grid.
 List<PlutoRow> rows = [];
 
-/// The selected group.
-// String groupSelected = '';
-
-/// The selected grade.
-
-// String gradeSelected = '';
-
-/// The selected subject value.
-
-// String subjectValue = '';
-
 class _GradesByAsignatureState extends State<GradesByAsignature> {
-  // = oneTeacherGroups.first.toString();
-  // = oneTeacherAssignatures.first;
   String? asignatureNameListener;
   String? selectedStudentName;
   // var gradeInt;
@@ -118,9 +105,6 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
   }
 
   void _fetchData() async {
-    // var response = await loadStartGrading(
-    //     currentUser!.employeeNumber!, currentCycle!.toString());
-
     setState(() {
       fetchedData = fetchedDataFromloadStartGrading;
       isLoading = false;

@@ -1,9 +1,5 @@
 import 'dart:async';
-import 'dart:convert';
 
-import 'dart:io';
-
-import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:oxschool/core/constants/user_consts.dart';
@@ -11,7 +7,7 @@ import 'package:oxschool/core/extensions/api_call_error_message.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/core/reusable_methods/translate_messages.dart';
 import 'package:oxschool/data/services/backend/api_requests/status_code_manager.dart';
-import 'package:provider/provider.dart';
+
 import 'package:requests/requests.dart';
 
 // ignore: depend_on_referenced_packages
