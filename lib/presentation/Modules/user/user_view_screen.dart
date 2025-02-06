@@ -1,32 +1,21 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:oxschool/data/Models/User.dart';
+import 'package:oxschool/core/extensions/capitalize_strings.dart';
+import 'package:oxschool/core/reusable_methods/logger_actions.dart';
+import 'package:oxschool/core/reusable_methods/user_functions.dart';
+// import 'package:oxschool/data/Models/User.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
+import 'package:oxschool/presentation/components/confirm_dialogs.dart';
 
-class UserWindow extends StatefulWidget {
+import 'cafeteria_user_consumption.dart';
+
+class UserWindow extends StatelessWidget {
   const UserWindow({super.key});
 
   @override
-  State<UserWindow> createState() => _UserWindowState();
-}
-
-class _UserWindowState extends State<UserWindow> {
-  late Future<User> userFuture; // Future to hold the user data
-  final TextEditingController _newPassword = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return _largerScreenUserDisplay();
-  }
-
-  Widget _largerScreenUserDisplay() {
     return Scaffold(
         appBar: AppBar(
           title:
@@ -73,7 +62,7 @@ class _UserWindowState extends State<UserWindow> {
                     radius: 100,
                     // backgroundImage:
                     //     AssetImage('assets/images/logoRedondoOx.png'),
-                    child: Text(currentUser!.employeeName!),
+                    child: Text(currentUser!.employeeName!.toTitleCase),
                   ),
                   const SizedBox(height: 8),
                   SizedBox(
@@ -89,9 +78,12 @@ class _UserWindowState extends State<UserWindow> {
                             if (MediaQuery.of(context).size.width > 600) ...[
                               SizedBox(
                                 width: 400,
-                                child: TextField(
-                                  controller: TextEditingController(
-                                      text: '${currentUser!.employeeName}'),
+                                child: TextFormField(
+                                  initialValue:
+                                      currentUser!.employeeName!.toTitleCase,
+                                  // controller: TextEditingController(
+                                  //     text: currentUser!
+                                  //         .employeeName!.toTitleCase),
                                   style: TextStyle(color: Colors.white),
                                   readOnly: true,
                                   decoration: InputDecoration(
@@ -112,10 +104,12 @@ class _UserWindowState extends State<UserWindow> {
                               SizedBox(
                                 width:
                                     400, // Set a fixed width for the TextFields
-                                child: TextField(
-                                  controller: TextEditingController(
-                                      text: '${currentUser!.employeeNumber}'),
+                                child: TextFormField(
+                                  // controller: TextEditingController(
+                                  //     text: '${currentUser!.employeeNumber}'),
                                   style: TextStyle(color: Colors.white),
+                                  initialValue:
+                                      currentUser!.employeeNumber.toString(),
                                   readOnly: true,
                                   decoration: InputDecoration(
                                     label: Text(
@@ -135,9 +129,10 @@ class _UserWindowState extends State<UserWindow> {
                               SizedBox(
                                 width:
                                     400, // Set a fixed width for the TextFields
-                                child: TextField(
-                                  controller: TextEditingController(
-                                      text: '${currentUser!.claUn}'),
+                                child: TextFormField(
+                                  initialValue: currentUser!.claUn!.toTitleCase,
+                                  // controller: TextEditingController(
+                                  //     text: currentUser!.claUn!.toTitleCase),
                                   style: TextStyle(color: Colors.white),
                                   readOnly: true,
                                   decoration: InputDecoration(
@@ -171,14 +166,20 @@ class _UserWindowState extends State<UserWindow> {
                                             icon: const Icon(
                                                 Icons.attach_money_outlined),
                                             label: const Text(
-                                                'Consulta  recibo nomina')),
+                                                'Consulta  recibo nómina (Proximamente)')),
                                         const SizedBox(
                                           width: 5,
                                         ),
                                         ElevatedButton.icon(
-                                            onPressed: () {},
-                                            icon: const Icon(Icons.abc),
-                                            label: const Text('Otra consulta')),
+                                            onPressed: () {
+                                              Navigator.of(context).push(
+                                                  MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          CafeteriaUserConsumption()));
+                                            },
+                                            icon: const Icon(Icons.fastfood),
+                                            label: const Text(
+                                                'Consumos de cafetería')),
                                         const SizedBox(
                                           width: 5,
                                         ),
@@ -188,7 +189,12 @@ class _UserWindowState extends State<UserWindow> {
                                                 //     MaterialStatePropertyAll<Color>(Colors.orange),
                                                 ),
                                             onPressed: () {
-                                              _changeMyPassword(context);
+                                              showDialog(
+                                                  context: context,
+                                                  builder:
+                                                      (BuildContext context) {
+                                                    return UpdateUserPasswordScreen();
+                                                  });
                                             },
                                             icon: const Icon(Icons.create),
                                             label: const Text(
@@ -198,7 +204,8 @@ class _UserWindowState extends State<UserWindow> {
                               // For smaller screens, use full width
                               TextField(
                                 controller: TextEditingController(
-                                    text: '${currentUser!.employeeName}'),
+                                    text:
+                                        '${currentUser!.employeeName?.toTitleCase}'),
                                 style: TextStyle(color: Colors.white),
                                 readOnly: true,
                                 decoration: InputDecoration(
@@ -261,16 +268,8 @@ class _UserWindowState extends State<UserWindow> {
                                           onPressed: () {},
                                           icon: const Icon(
                                               Icons.attach_money_outlined),
-                                          tooltip: 'Consulta  recibo nómina',
-                                        ),
-                                        SizedBox(
-                                          width: 5,
-                                        ),
-                                        IconButton.outlined(
-                                          color: Colors.white,
-                                          onPressed: () {},
-                                          icon: const Icon(Icons.abc),
-                                          tooltip: 'Otra consulta',
+                                          tooltip:
+                                              'Consulta  recibo nómina (Proximamente)',
                                         ),
                                         SizedBox(
                                           width: 5,
@@ -278,7 +277,26 @@ class _UserWindowState extends State<UserWindow> {
                                         IconButton.outlined(
                                           color: Colors.white,
                                           onPressed: () {
-                                            _changeMyPassword(context);
+                                            Navigator.of(context).push(
+                                                MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        CafeteriaUserConsumption()));
+                                          },
+                                          icon: const Icon(Icons.fastfood),
+                                          tooltip: 'Consumo de cafetería',
+                                        ),
+                                        SizedBox(
+                                          width: 5,
+                                        ),
+                                        IconButton.outlined(
+                                          color: Colors.white,
+                                          onPressed: () {
+                                            showDialog(
+                                                context: context,
+                                                builder:
+                                                    (BuildContext context) {
+                                                  return UpdateUserPasswordScreen();
+                                                });
                                           },
                                           icon: const Icon(Icons.create),
                                           tooltip: 'Cambiar contraseña',
@@ -296,39 +314,111 @@ class _UserWindowState extends State<UserWindow> {
           ],
         ));
   }
+}
 
-  Future<void> _changeMyPassword(BuildContext context) async {
-    return showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text(
-              'Cambiar mi contraseña',
-              style: TextStyle(fontFamily: 'Sora'),
+class UpdateUserPasswordScreen extends StatefulWidget {
+  const UpdateUserPasswordScreen({super.key});
+
+  @override
+  State<UpdateUserPasswordScreen> createState() =>
+      _UpdateUserPasswordScreenState();
+}
+
+class _UpdateUserPasswordScreenState extends State<UpdateUserPasswordScreen> {
+  final TextEditingController _newPassword = TextEditingController();
+  bool _obscureText = true;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _newPassword.dispose();
+    super.dispose();
+  }
+
+  Future<dynamic> updateUserPasswordFn(String newPassword) async {
+    var response = await updateUserPassword(newPassword);
+    return response;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text(
+        'Cambiar mi contraseña',
+        style: TextStyle(fontFamily: 'Sora'),
+      ),
+      content: TextField(
+        obscureText: _obscureText,
+        autofocus: true,
+        autocorrect: false,
+        maxLength: 20,
+        controller: _newPassword,
+        decoration: InputDecoration(
+          hintText: "Nueva Contraseña",
+          icon: const Icon(Icons.password),
+          suffix: IconButton(
+            onPressed: () {
+              setState(() {
+                _obscureText = !_obscureText;
+              });
+            },
+            icon: Icon(
+              _obscureText ? Icons.visibility : Icons.visibility_off,
             ),
-            content: TextField(
-              // obscureText: true,
-              controller: _newPassword,
-              decoration: const InputDecoration(
-                  hintText: "Nueva Contraseña",
-                  // helperText:
-                  //     "1 mayuscula, caracteres especiales, minimo 8 caracteres",
-                  icon: Icon(Icons.password)),
-            ),
-            actions: <Widget>[
-              TextButton(
-                  child: const Text('Cancelar'),
-                  onPressed: () {
-                    _newPassword.clear();
+          ),
+        ),
+      ),
+      actions: <Widget>[
+        TextButton(
+            child: const Text('Cancelar'),
+            onPressed: () {
+              _newPassword.clear();
+              Navigator.pop(context);
+            }),
+        TextButton(
+            onPressed: () {
+              if (_newPassword.text.length < 8) {
+                showErrorFromBackend(
+                    context, 'La contraseña debe tener al menos 8 caracteres');
+              }
+              if (_newPassword.text.startsWith(' ') ||
+                  _newPassword.text.endsWith(' ') ||
+                  _newPassword.text.contains(' ')) {
+                showErrorFromBackend(context,
+                    'Su contraseña no puede contener espacios en blanco');
+              } else {
+                try {
+                  setState(() {
+                    _isLoading = true;
+                  });
+                  var response = updateUserPasswordFn(_newPassword.text.trim())
+                      .whenComplete(() {
+                    setState(() {
+                      _isLoading = false;
+                    });
                     Navigator.pop(context);
-                  }),
-              TextButton(
-                  onPressed: () {
-                    _newPassword.clear();
-                  },
-                  child: const Text('OK'))
-            ],
-          );
-        });
+                    showConfirmationDialog(
+                        context, 'Éxito', 'Contraseña cambiada con éxito');
+                  });
+                } catch (e) {
+                  setState(() {
+                    _isLoading = false;
+                  });
+                  insertErrorLog(
+                      e.toString(), 'updateUserPassword() @user_view_screen');
+                  showErrorFromBackend(context, e.toString());
+                }
+              }
+            },
+            child: _isLoading
+                ? const CircularProgressIndicator()
+                : const Text('Cambiar'))
+      ],
+    );
   }
 }

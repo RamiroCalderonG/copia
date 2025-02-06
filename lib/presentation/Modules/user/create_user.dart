@@ -60,6 +60,11 @@ class _NewUserScreenState extends State<NewUserScreen> {
 
   @override
   void dispose() {
+    _userName.dispose();
+    _userEmail.dispose();
+    _userCampus.dispose();
+    _employeeNumber.dispose();
+    _isTeacher.dispose();
     _pageController.dispose();
     super.dispose();
   }

@@ -38,6 +38,8 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
     _requirementController.dispose();
     _date.dispose();
     _employeeNameController.dispose();
+    _descriptionController.dispose();
+    _observationsController.dispose();
     super.dispose();
   }
 

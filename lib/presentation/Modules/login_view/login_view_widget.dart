@@ -7,12 +7,14 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get_connect/http/src/response/response.dart';
+import 'package:http/src/response.dart';
 import 'package:oxschool/data/Models/Cycle.dart';
 import 'package:oxschool/data/Models/User.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:flutter/material.dart';
-import 'package:oxschool/core/constants/connection.dart';
+import 'package:oxschool/presentation/Modules/login_view/recover_password_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/reusable_methods/logger_actions.dart';
@@ -50,6 +52,9 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
   List<int> tapTimestamps = [];
   int remainingTime = 0;
   Timer? timer;
+  bool isDebugging = false;
+  final List<String> _suggestedDomains = ['oxschool.edu.mx'];
+  String? _suggestedDomain;
 
   // late User currentUser;
 
@@ -67,6 +72,29 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
 
     _model.textController1 ??= TextEditingController();
     _model.textController2 ??= TextEditingController();
+    _model.textController1!.addListener(() {
+      final text = _model.textController1.text;
+      if (text.contains('@')) {
+        final atIndex = text.indexOf('@');
+        final localPart = text.substring(0, atIndex);
+        final domainPart = text.substring(atIndex + 1);
+
+        if (domainPart.isEmpty) {
+          setState(() {
+            _suggestedDomain = _suggestedDomains.first;
+          });
+        } else if (!_suggestedDomains.any((d) => d.startsWith(domainPart))) {
+          setState(() {
+            _suggestedDomain = null;
+          });
+        }
+      } else {
+        setState(() {
+          _suggestedDomain = null;
+        });
+      }
+    });
+
     WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {}));
   }
 
@@ -74,7 +102,24 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
   void dispose() {
     _model.dispose();
     timer?.cancel();
+    // _model.textController1!.dispose();
+    // _model.textController2!.dispose();
     super.dispose();
+  }
+
+  void _applySuggestion() {
+    if (_suggestedDomain != null) {
+      final atIndex = _model.textController1.text.indexOf('@');
+      if (atIndex != -1) {
+        final localPart = _model.textController1.text.substring(0, atIndex);
+        setState(() {
+          _model.textController1.text = '$localPart@$_suggestedDomain';
+          _model.textController1!.selection = TextSelection.fromPosition(
+            TextPosition(offset: _model.textController1.text.length),
+          );
+        });
+      }
+    }
   }
 
   _loadTapTimestamps() async {
@@ -200,34 +245,44 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
         _saveTapTimestamps();
         _updateRemainingTime();
         try {
-          var value = trimSpaces(_model.textController2.text);
-          var emplNumberValue = trimSpaces(_model.textController1.text);
+          var value = trimSpaces(_model.textController2.text).toLowerCase();
+          var emailValue =
+              trimSpaces(_model.textController1.text).toLowerCase();
 
-          Map<String, dynamic> nip = {'Nip': value};
+          Map<String, dynamic> nip = {'password': value};
           apiBody.addEntries(nip.entries);
           Map<String, dynamic> employeeNumber = {
-            'employeeNumber': _model.textController1.text
+            'email': _model.textController1.text.toLowerCase()
           };
           apiBody.addEntries(employeeNumber.entries);
           Map<String, dynamic> device = {'device': currentDeviceData};
           apiBody.addEntries(device.entries);
-          Map<String, dynamic> deviceIp = {'ip_address': deviceIP};
+          Map<String, dynamic> deviceIp = {'local': deviceIP};
           apiBody.addEntries(deviceIp.entries);
           SharedPreferences devicePrefs = await SharedPreferences.getInstance();
           devicePrefs.setString('ip', deviceIP);
 
-          if (value.isNotEmpty && emplNumberValue.isNotEmpty) {
+          if (value.isNotEmpty && emailValue.isNotEmpty) {
+            //Attempt login
             apiResponse = await loginUser(apiBody);
-            if (apiResponse.statusCode == 200) {
-              List<dynamic> jsonList = json.decode(apiResponse.body);
-              currentUser = parseLogedInUserFromJSON(jsonList);
+            if (apiResponse != Exception) {
+              List<dynamic> jsonList;
+              Map<String, dynamic> jsonData = jsonDecode(apiResponse.body);
+              var token = jsonData['token'];
 
-              getUserPermissions(currentUser!.userId);
+              //GET user data
+              apiResponse = await getCurrentUserData(token);
+              jsonData = json.decode(apiResponse.body);
+
+              currentUser = parseLogedInUserFromJSON(jsonData, token);
+
+              //GET USER ROLE AND PERMISSIONS
+              await getUserRoleAndAcces(currentUser!.roleID!);
 
               apiResponse = await getCycle(
-                  0); //CurrentCicleCall.call().timeout(Duration(seconds: 7));
+                  1); //CurrentCicleCall.call().timeout(Duration(seconds: 7));
               if (apiResponse != null) {
-                List<dynamic> jsonList = json.decode(apiResponse);
+                Map<String, dynamic> jsonList = json.decode(apiResponse.body);
 
                 currentCycle = getcurrentCycle(jsonList);
               }
@@ -282,28 +337,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
           });
           insertErrorLog(e.toString(), 'LOGIN BUTTON');
 
-          var displayMessage = getMessageToDisplay(e.toString());
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                displayMessage,
-                style: FlutterFlowTheme.of(context).labelMedium.override(
-                      fontFamily: 'Roboto',
-                      color: const Color(0xFF130C0D),
-                      fontWeight: FontWeight.w500,
-                    ),
-              ),
-              action: SnackBarAction(
-                  label: 'Cerrar mensaje',
-                  textColor: FlutterFlowTheme.of(context).info,
-                  backgroundColor: Colors.black12,
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                  }),
-              duration: const Duration(milliseconds: 5000),
-              backgroundColor: FlutterFlowTheme.of(context).secondary,
-            ),
-          );
+          // var displayMessage = getMessageToDisplay(e.toString());
+          showErrorFromBackend(context, e.toString());
         }
       } else {
         insertAlertLog('ANTISPAM ACTIVATED ON: LOGIN SCREEN');
@@ -425,10 +460,21 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                             enableSuggestions: true,
                                             controller: _model.textController1,
                                             obscureText: false,
-                                            keyboardType: TextInputType.number,
-                                            maxLength: 8,
+                                            keyboardType:
+                                                TextInputType.emailAddress,
+                                            maxLength: 50,
                                             decoration: InputDecoration(
-                                              labelText: 'Numero de empleado',
+                                              labelText: 'E-mail',
+                                              suffix: _suggestedDomain != null
+                                                  ? GestureDetector(
+                                                      onTap: _applySuggestion,
+                                                      child: Text(
+                                                        '@$_suggestedDomain',
+                                                        style: TextStyle(
+                                                            color: Colors.blue),
+                                                      ),
+                                                    )
+                                                  : null,
                                               hintStyle:
                                                   FlutterFlowTheme.of(context)
                                                       .bodyLarge,
@@ -436,7 +482,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                 borderSide: BorderSide(
                                                   color: FlutterFlowTheme.of(
                                                           context)
-                                                      .primaryBackground,
+                                                      .secondaryBackground,
                                                   width: 2.0,
                                                 ),
                                                 borderRadius:
@@ -444,7 +490,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                               ),
                                               focusedBorder: OutlineInputBorder(
                                                 borderSide: const BorderSide(
-                                                  color: Color(0x00000000),
+                                                  color: Color.fromARGB(
+                                                      206, 1, 58, 203),
                                                   width: 2.0,
                                                 ),
                                                 borderRadius:
@@ -519,7 +566,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                 borderSide: BorderSide(
                                                   color: FlutterFlowTheme.of(
                                                           context)
-                                                      .primaryBackground,
+                                                      .secondaryBackground,
                                                   width: 2.0,
                                                 ),
                                                 borderRadius:
@@ -527,7 +574,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                               ),
                                               focusedBorder: OutlineInputBorder(
                                                 borderSide: const BorderSide(
-                                                  color: Color(0x00000000),
+                                                  color: Color.fromARGB(
+                                                      206, 1, 58, 203),
                                                   width: 2.0,
                                                 ),
                                                 borderRadius:
@@ -585,8 +633,13 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                           child: FFButtonWidget(
                                             //
                                             onPressed: () async {
-                                              if (kDebugMode) {
+                                              if (kDebugMode &&
+                                                  _model.textController1.text
+                                                      .isEmpty &&
+                                                  _model.textController2.text
+                                                      .isEmpty) {
                                                 setState(() {
+                                                  isDebugging = true;
                                                   setUserDataForDebug();
                                                   isLoading = false;
                                                 });
@@ -626,21 +679,6 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                       'Verificar información, usuario y/o contraseña no pueden estar en blanco');
                                                 }
                                               }
-
-                                              // setState(() {
-                                              //   isLoading = true;
-                                              // });
-                                              // ScaffoldMessenger.of(context)
-                                              //     .hideCurrentSnackBar();
-                                              // insertActionIntoLog('LOG IN BY: ',
-                                              //     _model.textController1.text);
-                                              // revealLoggerFileLocation();
-                                              // await loginButtonFunction()
-                                              //     .whenComplete(() {
-                                              //   setState(() {
-                                              //     isLoading = false;
-                                              //   });
-                                              // });
                                             },
                                             text: 'Ingresar',
                                             options: FFButtonOptions(
@@ -824,10 +862,21 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                             enableSuggestions: true,
                                             controller: _model.textController1,
                                             obscureText: false,
-                                            keyboardType: TextInputType.number,
-                                            maxLength: 8,
+                                            keyboardType:
+                                                TextInputType.emailAddress,
+                                            maxLength: 50,
                                             decoration: InputDecoration(
-                                              labelText: 'Numero de empleado',
+                                              labelText: 'E-mail',
+                                              suffix: _suggestedDomain != null
+                                                  ? GestureDetector(
+                                                      onTap: _applySuggestion,
+                                                      child: Text(
+                                                        '@$_suggestedDomain',
+                                                        style: TextStyle(
+                                                            color: Colors.blue),
+                                                      ),
+                                                    )
+                                                  : null,
                                               hintStyle:
                                                   FlutterFlowTheme.of(context)
                                                       .bodySmall,
@@ -835,7 +884,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                 borderSide: BorderSide(
                                                   color: FlutterFlowTheme.of(
                                                           context)
-                                                      .primaryBackground,
+                                                      .secondaryBackground,
                                                   width: 2.0,
                                                 ),
                                                 borderRadius:
@@ -843,7 +892,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                               ),
                                               focusedBorder: OutlineInputBorder(
                                                 borderSide: const BorderSide(
-                                                  color: Color(0x00000000),
+                                                  color: Color.fromARGB(
+                                                      206, 1, 58, 203),
                                                   width: 2.0,
                                                 ),
                                                 borderRadius:
@@ -851,7 +901,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                               ),
                                               errorBorder: OutlineInputBorder(
                                                 borderSide: const BorderSide(
-                                                  color: Color(0x00000000),
+                                                  color: Color.fromARGB(
+                                                      225, 255, 0, 0),
                                                   width: 2.0,
                                                 ),
                                                 borderRadius:
@@ -913,7 +964,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                 borderSide: BorderSide(
                                                   color: FlutterFlowTheme.of(
                                                           context)
-                                                      .primaryBackground,
+                                                      .secondaryBackground,
                                                   width: 2.0,
                                                 ),
                                                 borderRadius:
@@ -921,7 +972,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                               ),
                                               focusedBorder: OutlineInputBorder(
                                                 borderSide: const BorderSide(
-                                                  color: Color(0x00000000),
+                                                  color: Color.fromARGB(
+                                                      206, 1, 58, 203),
                                                   width: 2.0,
                                                 ),
                                                 borderRadius:
@@ -978,8 +1030,13 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                               .fromSTEB(0.0, 0.0, 0.0, 16.0),
                                           child: FFButtonWidget(
                                             onPressed: () async {
-                                              if (kDebugMode) {
+                                              if (kDebugMode &&
+                                                  _model.textController1.text
+                                                      .isEmpty &&
+                                                  _model.textController2.text
+                                                      .isEmpty) {
                                                 setState(() {
+                                                  isDebugging = true;
                                                   setUserDataForDebug();
                                                   isLoading = false;
                                                 });
@@ -1093,193 +1150,211 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
   }
 }
 
-TextEditingController _textFieldController = TextEditingController();
+// TextEditingController _textFieldController = TextEditingController();
+bool displayTokenGenerator = true;
 
 Future<void> _displayForgotPassword(BuildContext context) async {
-  _textFieldController.text = '';
+  // _textFieldController.text = '';
   bool isLoading = false; // Flag to track loading state
 
   return showDialog(
     context: context,
     builder: (context) {
       return StatefulBuilder(builder: (context, setState) {
-        return AlertDialog(
-          title: const Text(
-            'Recuperar contraseña',
-            style: TextStyle(fontFamily: 'Sora'),
-          ),
-          content: isLoading
-              ? const Center(
-                  child: CircularProgressIndicator(),
-                )
-              : TextFormField(
-                  autofocus: true,
-                  controller: _textFieldController,
-                  decoration: const InputDecoration(
-                    hintText: "Numero de empleado",
-                    helperText: 'Ingrese su numero de empleado',
-                    icon: Icon(Icons.numbers),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Por favor, ingrese un número de empleado válido';
-                    }
-                    return null;
-                  },
-                ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('CANCELAR'),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-            TextButton(
-              onPressed: isLoading
-                  ? null // Disable the button when loading
-                  : () async {
-                      setState(() {
-                        isLoading = true; // Start loading animation
-                      });
-
-                      if (_textFieldController.text.isNotEmpty ||
-                          _textFieldController.text != '') {
-                        var responseCode = await sendUserPasswordToMail(
-                            _textFieldController.text,
-                            deviceInformation.toString(),
-                            deviceIP);
-                        if (responseCode == 200) {
-                          Navigator.pop(context);
-                          showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: const Text(
-                                    "Solicitud enviada",
-                                    style: TextStyle(fontFamily: 'Sora'),
-                                  ),
-                                  content: const Text(
-                                      "Si los resultados coinciden, recibirá en su correo su contraseña"),
-                                  icon: (const Icon(Icons.beenhere_outlined)),
-                                  actions: [
-                                    TextButton(
-                                        onPressed: () {
-                                          Navigator.pop(context);
-                                        },
-                                        child: const Text('OK'))
-                                  ],
-                                );
-                              });
-                        } else {
-                          showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: const Text(
-                                    "Error",
-                                    style: TextStyle(fontFamily: 'Sora'),
-                                  ),
-                                  content: Text(responseCode.toString()),
-                                  icon: (const Icon(Icons.error_outline)),
-                                  actions: [
-                                    TextButton(
-                                        onPressed: () {
-                                          Navigator.pop(context);
-                                        },
-                                        child: const Text('OK'))
-                                  ],
-                                );
-                              });
-                        }
-                      } else {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              icon: const Icon(Icons.error_outline),
-                              title: const Text(
-                                "Error",
-                                style: TextStyle(fontFamily: 'Sora'),
-                              ),
-                              content: const Text(
-                                "Por favor, ingrese un número de empleado válido",
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                  child: const Text('OK'),
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      }
-                      setState(() {
-                        isLoading = false; // Stop loading animation
-                      });
-                    },
-              child: const Text('OK'),
-            ),
-          ],
-        );
+        return RecoverPasswordScreen();
       });
     },
   );
 }
 
-User parseLogedInUserFromJSON(List<dynamic> jsonList) {
+// Widget generateTokenScreen(BuildContext context){
+//   return AlertDialog(
+//           title: const Text(
+//             'Recuperar contraseña',
+//             style: TextStyle(fontFamily: 'Sora'),
+//           ),
+//           content: isLoading
+//               ? const Center(
+//                   child: CircularProgressIndicator(),
+//                 )
+//               : TextFormField(
+//                   autofocus: true,
+//                   controller: _textFieldController,
+//                   decoration: const InputDecoration(
+//                     hintText: "Email",
+//                     helperText: 'Ingrese su correo electrónico',
+//                     icon: Icon(Icons.numbers),
+//                   ),
+//                   validator: (value) {
+//                     if (value == null || value.isEmpty) {
+//                       return 'Por favor, ingrese un correo válido';
+//                     }
+//                     return null;
+//                   },
+//                 ),
+//           actions: <Widget>[
+//             TextButton(
+//               child: const Text('CANCELAR'),
+//               onPressed: () {
+//                 Navigator.pop(context);
+//               },
+//             ),
+//             TextButton(
+//               onPressed: isLoading
+//                   ? null // Disable the button when loading
+//                   : () async {
+//                       setState(() {
+//                         isLoading = true; // Start loading animation
+//                       });
+
+//                       if (_textFieldController.text.isNotEmpty ||
+//                           _textFieldController.text != '') {
+//                         var response = await sendRecoveryToken(
+//                             _textFieldController.text,
+//                             deviceInformation.toString());
+//                         if (response.statusCode == 200) {
+//                           setState (() {
+
+//                           })
+//                         }
+
+//                         var responseCode = await sendUserPasswordToMail(
+//                             _textFieldController.text,
+//                             deviceInformation.toString(),
+//                             deviceIP);
+//                         if (responseCode == 200) {
+//                           Navigator.pop(context);
+//                           showDialog(
+//                               context: context,
+//                               builder: (BuildContext context) {
+//                                 return AlertDialog(
+//                                   title: const Text(
+//                                     "Solicitud enviada",
+//                                     style: TextStyle(fontFamily: 'Sora'),
+//                                   ),
+//                                   content: const Text(
+//                                       "Si los resultados coinciden, recibirá en su correo su contraseña"),
+//                                   icon: (const Icon(Icons.beenhere_outlined)),
+//                                   actions: [
+//                                     TextButton(
+//                                         onPressed: () {
+//                                           Navigator.pop(context);
+//                                         },
+//                                         child: const Text('OK'))
+//                                   ],
+//                                 );
+//                               });
+//                         } else {
+//                           showDialog(
+//                               context: context,
+//                               builder: (BuildContext context) {
+//                                 return AlertDialog(
+//                                   title: const Text(
+//                                     "Error",
+//                                     style: TextStyle(fontFamily: 'Sora'),
+//                                   ),
+//                                   content: Text(responseCode.toString()),
+//                                   icon: (const Icon(Icons.error_outline)),
+//                                   actions: [
+//                                     TextButton(
+//                                         onPressed: () {
+//                                           Navigator.pop(context);
+//                                         },
+//                                         child: const Text('OK'))
+//                                   ],
+//                                 );
+//                               });
+//                         }
+//                       } else {
+//                         showDialog(
+//                           context: context,
+//                           builder: (BuildContext context) {
+//                             return AlertDialog(
+//                               icon: const Icon(Icons.error_outline),
+//                               title: const Text(
+//                                 "Error",
+//                                 style: TextStyle(fontFamily: 'Sora'),
+//                               ),
+//                               content: const Text(
+//                                 "Por favor, ingrese un número de empleado válido",
+//                               ),
+//                               actions: [
+//                                 TextButton(
+//                                   onPressed: () {
+//                                     Navigator.pop(context);
+//                                   },
+//                                   child: const Text('OK'),
+//                                 ),
+//                               ],
+//                             );
+//                           },
+//                         );
+//                       }
+//                       setState(() {
+//                         isLoading = false; // Stop loading animation
+//                       });
+//                     },
+//               child: const Text('OK'),
+//             ),
+//           ],
+//         );
+// }
+
+User parseLogedInUserFromJSON(Map<String, dynamic> jsonList, String userToken) {
   late User currentUser;
   // late List<dynamic> events = [];
 
-  for (var i = 0; i < jsonList.length; i++) {
-    if (i == 0) {
-      int employeeNumber = jsonList[i]['NoEmpleado'];
-      String employeeName = jsonList[i]['Nombre_Gafete'];
-      String claUn = jsonList[i]['ClaUn'];
-      String role = jsonList[i]['RoleName'];
-      int userId = jsonList[i]['id'];
-      String token = 'Bearer ';
-      token = token + jsonList[1]['token'];
-      String schoolEmail = jsonList[i]['user_email'];
-      String usergenre = jsonList[i]['genre'];
-      int isActive = jsonList[i]['bajalogicasino'];
-      String? department = jsonList[i]['department'];
-      String? position = jsonList[i]['position'];
-      String? dateTime = jsonList[i]['createdAt'];
-      String? birthdate = jsonList[i]['birthdate'];
-      bool? isTeacher = jsonList[i]['is_teacher'];
-      currentUser = User(
-          claUn,
-          employeeName,
-          employeeNumber,
-          role,
-          userId,
-          token,
-          schoolEmail,
-          usergenre,
-          isActive,
-          department,
-          position,
-          dateTime,
-          birthdate,
-          isTeacher);
-    }
-  }
+  // for (var i = 0; i < jsonList.length; i++) {
+  // if (i == 0) {
+  int employeeNumber = jsonList['employeeNumber'];
+  String employeeName = jsonList['userFullName'];
+  String claUn = jsonList['userCampus'];
+  String role = jsonList['userRole']['name'];
+  int userId = jsonList['id'];
+  String token = 'Bearer ';
+  token = token + userToken;
+  String schoolEmail = jsonList['userMail'];
+  String? usergenre = jsonList['genre'];
+  int isActive = jsonList['status'];
+  String? department = jsonList['userDept'];
+  String? position = jsonList['userPosition'];
+  //String? dateTime = jsonList[i]['createdAt'];
+  //String? birthdate = jsonList[i]['birthdate'];
+  bool? isTeacher = jsonList['userTeacher'];
+  bool? isAdmin = jsonList['userRole']['isAdmin'];
+  int roleId = jsonList['userRole']['id'];
+
+  currentUser = User(
+      claUn,
+      employeeName,
+      employeeNumber,
+      role,
+      userId,
+      token,
+      schoolEmail,
+      //usergenre,
+      isActive,
+      department,
+      position,
+      null,
+      null,
+      isTeacher,
+      isAdmin,
+      roleId);
+  // }
+  // }
   userToken = currentUser.token;
   return currentUser;
 }
 
-Cycle getcurrentCycle(List<dynamic> jsonList) {
+Cycle getcurrentCycle(Map<String, dynamic> jsonList) {
   late Cycle currentCycle;
 
-  for (var item in jsonList) {
-    String claCiclo = item['ClaCiclo'];
-    String fecIniCiclo = item['FecIniCiclo'];
-    String fecFinCiclo = item['FecFinCiclo'];
-    currentCycle = Cycle(claCiclo, fecIniCiclo, fecFinCiclo);
-  }
+  String claCiclo = jsonList['cycle'];
+  String fecIniCiclo = jsonList['initialDate'];
+  String fecFinCiclo = jsonList['finalDate'];
+
+  currentCycle = Cycle(claCiclo, fecIniCiclo, fecFinCiclo);
 
   return currentCycle;
 }

@@ -1,15 +1,25 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:oxschool/core/constants/user_consts.dart';
+import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/data/Models/Event.dart';
+import 'package:oxschool/data/Models/Role.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
+import 'package:oxschool/presentation/Modules/admin/roles_events_admin.dart';
 
 import '../../../core/reusable_methods/temp_data_functions.dart';
 
 class PoliciesScreen extends StatefulWidget {
   final int roleID;
-  const PoliciesScreen({super.key, required this.roleID});
+  final String roleName;
+  final List<Role> roleListData;
+  const PoliciesScreen(
+      {super.key,
+      required this.roleID,
+      required this.roleName,
+      required this.roleListData});
 
   @override
   State<PoliciesScreen> createState() => _PoliciesScreenState();
@@ -21,22 +31,42 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
 
   @override
   void initState() {
+    //Download events and roles to populate the list
     _refreshEventsFuture = refreshEvents(widget.roleID);
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    eventsToDisplay.clear();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Eventos : '),
+        title: Text('Permisos asignados al rol: ${widget.roleName}'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () {
-              // navigate to create new policy screen
-            },
-          ),
+          if (currentUser!.isAdmin!)
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => RolesEventsAdministration(
+                        roleName: widget.roleName, roleId: widget.roleID)));
+              },
+              label: Text(
+                'Agregar permisos',
+                style: TextStyle(color: Colors.white),
+              ),
+              icon: Icon(
+                Icons.add,
+                color: Colors.white,
+              ),
+              style: ButtonStyle(
+                backgroundColor: WidgetStateProperty.all(Colors.indigo),
+              ),
+            ),
         ],
         backgroundColor: FlutterFlowTheme.of(context).primary,
       ),
@@ -48,42 +78,84 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
               child: CircularProgressIndicator(),
             );
           } else {
-            return ListView.builder(
-              itemCount: eventsToDisplay.length,
-              itemBuilder: (context, index) {
-                final currentEvent = eventsToDisplay[index];
-                final previousEvent =
-                    index > 0 ? eventsToDisplay[index - 1] : null;
+            if (eventsToDisplay.isNotEmpty) {
+              return ListView.builder(
+                itemCount: eventsToDisplay.length,
+                itemBuilder: (context, index) {
+                  final currentEvent = eventsToDisplay[index];
+                  final previousEvent =
+                      index > 0 ? eventsToDisplay[index - 1] : null;
 
-                final showModuleName = previousEvent == null ||
-                    currentEvent.moduleName != previousEvent.moduleName;
+                  final showModuleName = previousEvent == null ||
+                      currentEvent.moduleName != previousEvent.moduleName;
 
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (showModuleName)
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          'Modulo: ${currentEvent.moduleName}',
-                          style:
-                              const TextStyle(fontSize: 20, fontFamily: 'Sora'),
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (showModuleName)
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            'Modulo: ${currentEvent.moduleName}',
+                            style: const TextStyle(
+                                fontSize: 20, fontFamily: 'Sora'),
+                          ),
                         ),
+                      PolicyCard(
+                        policy: currentEvent,
+                        roleID: widget.roleID,
+                        onToggle: (event) {
+                          setState(() {
+                            event.isActive =
+                                !event.isActive; // Toggle the isActive status
+                          });
+                        },
                       ),
-                    PolicyCard(
-                      policy: currentEvent,
-                      roleID: widget.roleID,
-                      onToggle: (event) {
-                        setState(() {
-                          event.isActive =
-                              !event.isActive; // Toggle the isActive status
-                        });
-                      },
+                    ],
+                  );
+                },
+              );
+            } else {
+              return Center(
+                  child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.all(10),
+                    child: const Text(
+                      'No se encuentran eventos para el rol seleccionado',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontFamily: 'Sora',
+                      ),
                     ),
-                  ],
-                );
-              },
-            );
+                  ),
+                  Padding(
+                    padding: EdgeInsets.all(10),
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => RolesEventsAdministration(
+                                roleName: widget.roleName,
+                                roleId: widget.roleID)));
+                      },
+                      label: Text(
+                        'Agregar permisos',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      icon: Icon(
+                        Icons.add,
+                        color: Colors.white,
+                      ),
+                      style: ButtonStyle(
+                        backgroundColor: WidgetStateProperty.all(Colors.indigo),
+                      ),
+                    ),
+                  )
+                ],
+              ));
+            }
           }
         },
       ),
@@ -91,28 +163,31 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
   }
 
   Future<void> refreshEvents(int? idRole) async {
-    var response = await getEventsByRole(idRole);
-    var policyList = jsonDecode(response);
+    var eventsByRoleResponse =
+        await fetchEventsByRole(idRole!); //Get events by role
+    try {
+      // Map to group events by moduleName
+      Map<String, List<Event>> groupedEvents = {};
 
-    // Map to group events by moduleName
-    Map<String, List<Event>> groupedEvents = {};
+      for (var jsonItem in eventsByRoleResponse) {
+        Event event = Event(jsonItem['event_id'], jsonItem['event_name'],
+            jsonItem['event_active'], jsonItem['module_description'], idRole);
 
-    for (var jsonItem in policyList) {
-      Event event = Event(0, jsonItem['event'], jsonItem['is_active'],
-          jsonItem['module'], true);
-
-      // Check if the moduleName already exists in the map
-      if (groupedEvents.containsKey(event.moduleName)) {
-        groupedEvents[event.moduleName]!.add(event);
-      } else {
-        groupedEvents[event.moduleName] = [event];
+        // Check if the moduleName already exists in the map
+        if (groupedEvents.containsKey(event.moduleName)) {
+          groupedEvents[event.moduleName]!.add(event);
+        } else {
+          groupedEvents[event.moduleName] = [event];
+        }
       }
+      setState(() {
+        eventsToDisplay =
+            groupedEvents.values.expand((events) => events).toList();
+      });
+    } catch (e) {
+      insertErrorLog(e.toString(), 'refreshEvents()');
+      return Future.error(e.toString());
     }
-
-    setState(() {
-      eventsToDisplay =
-          groupedEvents.values.expand((events) => events).toList();
-    });
   }
 }
 
@@ -133,59 +208,18 @@ class PolicyCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Text(
-            //   policy.eventName,
-            //   style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
-            // ),
             SwitchListTile(
               title: Text(policy.eventName),
               value: policy.isActive,
               onChanged: (value) async {
-                onToggle(policy); // Call the callback function
-                // print(policy.eventName);
-                // print(value.toString() + ' ' + roleID.toString());
-                var idValue = getEventIDbyName(policy.eventName);
-                await modifyActiveOfEventRole(idValue, value, roleID);
+                onToggle(policy);
+                //var idValue = getEventIDbyName(policy.eventName);
+                await modifyActiveOfEventRole(policy.eventID, value, roleID);
               },
             ),
             const Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // TextButton(
-                //   onPressed: () {
-                //     // navigate to view policy details screen
-                //   },
-                //   child: Text('View'),
-                // ),
-                // TextButton(
-                //   onPressed: () {
-                //     // navigate to edit policy screen
-                //   },
-                //   child: Text('Edit'),
-                // ),
-                // conditionally render buttons based on permissions
-                // if (/* has permission to contact radiologist */)
-                //   TextButton(
-                //     onPressed: () {
-                //       // navigate to contact radiologist screen
-                //     },
-                //     child: Text('Contact Radiologist'),
-                //   ),
-                // if (/* has permission to approve requests */)
-                //   TextButton(
-                //     onPressed: () {
-                //       // navigate to approve request screen
-                //     },
-                //     child: Text('Approve Request'),
-                //   ),
-                // if (/* has permission to add permissions */)
-                //   TextButton(
-                //     onPressed: () {
-                //       // navigate to add permission screen
-                //     },
-                //     child: Text('Add Permission'),
-                //   ),
-              ],
+              children: [],
             ),
           ],
         ),

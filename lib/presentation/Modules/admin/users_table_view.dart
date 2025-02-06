@@ -3,9 +3,8 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:oxschool/presentation/Modules/user/edit_user_screen.dart';
+import 'package:oxschool/presentation/Modules/admin/edit_user_screen.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
-import 'package:oxschool/presentation/components/plutogrid_export_options.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/presentation/Modules/login_view/login_view_widget.dart';
 import 'package:oxschool/core/reusable_methods/reusable_functions.dart';
@@ -24,7 +23,7 @@ class _UsersTableViewState extends State<UsersTableView> {
   List<PlutoRow> userRows = [];
   // ignore: prefer_typing_uninitialized_variables
   var toSee;
-  bool isUserAdmin = verifyUserAdmin(currentUser!);
+  bool isUserAdmin = currentUser!.isCurrentUserAdmin();
   bool confirmation = false;
   bool isSearching = true;
   late final PlutoGridStateManager stateManager;
@@ -56,6 +55,7 @@ class _UsersTableViewState extends State<UsersTableView> {
 
   @override
   void dispose() {
+    //stateManager.dispose();
     areaList.clear();
     super.dispose();
   }

@@ -6,14 +6,17 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/presentation/Modules/enfermeria/no_data_avalibre.dart';
 import 'package:oxschool/presentation/Modules/user/create_user.dart';
 import 'package:oxschool/presentation/Modules/user/roles_screen.dart';
-import 'package:oxschool/presentation/Modules/user/users_table_view.dart';
+import 'package:oxschool/presentation/Modules/admin/users_table_view.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/reusable_methods/reusable_functions.dart';
 import 'package:oxschool/data/datasources/temp/users_temp_data.dart';
 import 'package:oxschool/core/utils/loader_indicator.dart';
+import 'package:oxschool/presentation/components/confirm_dialogs.dart';
+import 'package:oxschool/presentation/components/custom_icon_button.dart';
 
 import '../../../data/services/backend/api_requests/api_calls_list.dart';
 import '../../../core/config/flutter_flow/flutter_flow_theme.dart';
@@ -52,11 +55,14 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
         });
       } else {
         if (kDebugMode) {
+          insertErrorLog(
+              'Cant fetch data from server, getUsers()', 'users_main_screen');
           print('Cant fetch  data from server');
         }
       }
     } catch (e) {
       isLoading = false;
+      insertErrorLog(e.toString(), 'UsersMainScreen() , refreshButton');
       AlertDialog(
         title: const Text("Error"),
         content: Text(e.toString()),
@@ -70,7 +76,8 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
 
   @override
   void initState() {
-    // refreshButton();
+    isLoading = false;
+    //refreshButton();
     super.initState();
   }
 
@@ -94,24 +101,25 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
         appBar: AppBar(
             bottom: AppBar(automaticallyImplyLeading: false, actions: [
               TextButton.icon(
-                  onPressed: () async {
-                    setState(() {
-                      isLoading = true;
-                    });
-
-                    await getEventsList();
-
-                    var response = await getRolesList();
-                    tmpRolesList = jsonDecode(response);
-                    setState(() {
-                      isLoading = false;
-                    });
-                    // ignore: use_build_context_synchronously
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                const RolesAndProfilesScreen()));
+                  onPressed: () {
+                    try {
+                      //TODO: WHY DOES IT NEED TO BE IN TWO SEPARATE CALLS?
+                      getEventsTempList().whenComplete(() async {
+                        await getRolesTempList().whenComplete(() {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      const RolesAndProfilesScreen()));
+                        });
+                      });
+                    } catch (e) {
+                      setState(() {
+                        isLoading = false;
+                      });
+                      insertErrorLog(e.toString(), 'UsersMainScreen()');
+                      showErrorFromBackend(context, e.toString());
+                    }
                   },
                   icon: const Icon(Icons.verified_user),
                   label: const Text('Administrar roles de usuarios')),
@@ -129,12 +137,15 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
                   },
                   icon: const FaIcon(FontAwesomeIcons.addressCard),
                   label: const Text('Nuevo usuario')),
-              TextButton.icon(
-                  onPressed: () async {
-                    refreshButton();
-                  },
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Refresca')),
+              RefreshButton(
+                onPressed: refreshButton,
+              ),
+              // TextButton.icon(
+              //     onPressed: () async {
+              //       refreshButton();
+              //     },
+              //     icon: const Icon(Icons.refresh),
+              //     label: const Text('Refresca')),
               // TextButton.icon(
               //     onPressed: () {},
               //     icon: FaIcon(FontAwesomeIcons.download),
