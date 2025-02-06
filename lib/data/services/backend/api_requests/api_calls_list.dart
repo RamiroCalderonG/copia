@@ -707,43 +707,30 @@ Future<dynamic> validateToken(
 // }
 
 Future<dynamic> getTeacherGradeAndCourses(
-    var employee, var year, int month) async {
+    var employee, var year, int month, bool isAdmin) async {
   try {
     var apiCall = await Requests.get(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/teacher-grades',
         headers: {
-          // 'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-          // 'ip_address': deviceIp.toString(),
-          'Authorization': currentUser!.token
+          'Authorization': currentUser!.token,
+          'Content-Type': 'application/json',
         },
-        // body: {
-        //   'employee': currentUser!.employeeNumber.toString(),
-        //   "cycle": currentCycle!.claCiclo
-        // },
         queryParameters: {
           'employee': currentUser!.employeeNumber,
           "cycle": currentCycle!.claCiclo,
-          "month": 10
+          "month": month,
+          "flag": isAdmin
         },
         persistCookies: false,
         timeoutSeconds: 40);
     apiCall.raiseForStatus();
-
-    if (apiCall.statusCode == 200) {
-      return apiCall.body;
-    } else {
-      insertErrorLog(
-          ' ${apiCall.statusCode.toString()} ${apiCall.body.toString()}',
-          'acad/teacher/start-student-rating');
-      return throw FormatException(apiCall.body);
-    }
+    return apiCall.body;
   } catch (e) {
     if (e is TimeoutException) {
       insertErrorLog(e.toString(), 'acad/teacher/start-student-rating');
       var firstWord = getMessageToDisplay(e.toString());
       return throw firstWord;
     }
-
     return Future.error(e);
   }
 }

@@ -15,27 +15,33 @@ import '../../data/services/backend/api_requests/api_calls_list.dart';
 
 import '../../data/datasources/temp/teacher_grades_temp.dart';
 
-dynamic loadStartGrading(int employeeNumber, String schoolYear) async {
+dynamic loadStartGrading(
+    int employeeNumber, String schoolYear, bool isAdmin) async {
   try {
     DateTime now = DateTime.now();
     int month = now.month;
+    List<dynamic> jsonList;
     //FETCH FOR TEACHER DATA
-    var startGrading = await getTeacherGradeAndCourses(
-        currentUser!.employeeNumber, currentCycle, month);
-    List<dynamic> jsonList = json.decode(startGrading);
-    jsonDataForDropDownMenuClass = jsonList;
-    fetchedDataFromloadStartGrading = jsonList;
-
-    try {
-      getTeacherEvalCampuses(jsonList);
-      await getSingleTeacherGrades(jsonList);
-      await getSingleTeacherGroups(jsonList);
-      await getSingleTeacherAssignatures(jsonList);
-
-      return jsonList;
-    } catch (e) {
-      rethrow;
-    }
+    await getTeacherGradeAndCourses(
+            currentUser!.employeeNumber, currentCycle, month, isAdmin)
+        .then((onValue) {
+      jsonList = json.decode(onValue);
+      jsonDataForDropDownMenuClass = jsonList;
+      fetchedDataFromloadStartGrading = jsonList;
+      try {
+        getTeacherEvalCampuses(jsonList);
+        getSingleTeacherGrades(jsonList);
+        getSingleTeacherGroups(jsonList);
+        getSingleTeacherAssignatures(jsonList);
+        return jsonList;
+      } catch (e) {
+        rethrow;
+      }
+    }).catchError((onError) {
+      insertErrorLog('Error fetching start grading data', onError);
+      throw FormatException(onError);
+    });
+    // List<dynamic> jsonList = json.decode(startGrading);
   } catch (e) {
     insertErrorLog(e.toString(), ' INIT STUDENT EVALUATION GRID ');
     throw FormatException(e.toString());

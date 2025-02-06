@@ -83,8 +83,8 @@ class _GradesByStudentState extends State<GradesByStudent> {
   }
 
   void _fetchData() async {
-    var response = loadStartGrading(
-        currentUser!.employeeNumber!, currentCycle!.toString());
+    var response = loadStartGrading(currentUser!.employeeNumber!,
+        currentCycle!.toString(), currentUser!.isCurrentUserAdmin());
     fetchedData = response;
     setState(() {
       isFetching = false;

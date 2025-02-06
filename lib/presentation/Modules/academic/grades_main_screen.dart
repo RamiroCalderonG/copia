@@ -112,8 +112,8 @@ class _GradesMainScreenState extends State<GradesMainScreen>
       }
 
       if (canEvaluateNow) {
-        await loadStartGrading(
-            currentUser!.employeeNumber!, currentCycle!.claCiclo!);
+        await loadStartGrading(currentUser!.employeeNumber!,
+            currentCycle!.claCiclo!, currentUser!.isCurrentUserAdmin());
         setState(() {
           canUserEvaluate = canEvaluateNow;
           isSearching = false;
