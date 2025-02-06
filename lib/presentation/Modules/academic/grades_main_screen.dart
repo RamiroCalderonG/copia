@@ -52,8 +52,8 @@ class _GradesMainScreenState extends State<GradesMainScreen>
     _tabController = TabController(length: 3, vsync: this);
     _tabController!.addListener(onTap);
     fetchData();
-    super.initState();
     _initializationFuture = validateDateAndUserPriv();
+    super.initState();
   }
 
   @override
@@ -78,9 +78,6 @@ class _GradesMainScreenState extends State<GradesMainScreen>
     gradesByStudentBodyToUpgrade.clear();
     studentsGradesCommentsRows.clear();
     commentsAsignated.clear();
-    // studentEvaluationRows.clear();
-    // assignatureRows.clear();
-    // studentColumnsToEvaluateByStudent.clear();
     studentGradesBodyToUpgrade.clear();
     campusesWhereTeacherTeach.clear();
     selectedUnity = null;
@@ -93,18 +90,12 @@ class _GradesMainScreenState extends State<GradesMainScreen>
     preSelectedSubject = null;
     preSelectedUnity = null;
     _tabController?.dispose();
-
-    // assignaturesColumns.clear();
     super.dispose();
   }
 
   void fetchData() {
     isUserAdmin = currentUser!.isCurrentUserAdmin();
   }
-
-  // void initGetDate() async {
-  //   await validateDateAndUserPriv();
-  // }
 
   Future<void> validateDateAndUserPriv() async {
     try {
