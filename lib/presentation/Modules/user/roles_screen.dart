@@ -1,16 +1,20 @@
 // ignore_for_file: use_build_context_synchronously, library_private_types_in_public_api
 
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
+import 'package:oxschool/core/reusable_methods/logger_actions.dart';
+
 import 'package:oxschool/data/Models/Event.dart';
+import 'package:oxschool/data/Models/Module.dart';
+import 'package:oxschool/data/Models/Role.dart';
 import 'package:oxschool/presentation/Modules/user/user_events_manager.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
-import 'package:oxschool/core/config/flutter_flow/flutter_flow_util.dart';
+
 import 'package:oxschool/presentation/Modules/login_view/login_view_widget.dart';
 import 'package:oxschool/core/reusable_methods/temp_data_functions.dart';
 import 'package:oxschool/data/datasources/temp/users_temp_data.dart';
 import 'package:oxschool/core/utils/loader_indicator.dart';
+import 'package:oxschool/presentation/components/confirm_dialogs.dart';
+import 'package:oxschool/presentation/components/custom_icon_button.dart';
 
 import '../../../data/services/backend/api_requests/api_calls_list.dart';
 
@@ -24,171 +28,88 @@ class RolesAndProfilesScreen extends StatefulWidget {
 bool _isloading = false;
 
 class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
-  List<String> roles = [];
-  List<String> description = [];
-  // List<int> role_id = [];
-  List<bool> isActive = [];
-  List<bool> roleCanAcces = [];
-
-  List<bool> checkboxValues = [];
   int selectedCardIndex = -1;
+  late Future<dynamic> rolesList;
+  List<Module> modulesList = [];
+  List<Role> rolesListData = [];
 
   @override
   void initState() {
-    Map<dynamic, dynamic> eventsAreActive = {};
-    for (var item in tmpeventsList) {
-      var eventName = item['EventName'];
-      var isEventActive = item['role_event_active'];
-
-      eventsAreActive[eventName] = isEventActive;
-
-      checkboxValues.add(isEventActive);
-      roleCanAcces.add(item['role_event_active']);
-    }
-
-    for (var item in tmpRolesList) {
-      roles.add(item['Role']);
-      description.add(item['Description']);
-      isActive.add(item['Active']);
-      // roleCanAcces.add(item['role_event_active']);
-
-      // roleCanAcces.add(item['event_can_acces']);
-      // role_id.add(item['role_id']);
-    }
-
+    _fetchData();
     super.initState();
   }
 
-  Widget roleContainerCard(String role, String desc, int index) {
-    List events =
-        tmpeventsList.where((event) => event['RoleName'] == role).toList();
+  @override
+  void dispose() {
+    tmpeventsList.clear();
+    // checkboxValues.clear();
+    // roleCanAcces.clear();
+    tmpRolesList.clear();
+    rolesListData.clear();
+    super.dispose();
+  }
 
-    return ExpansionTile(
-      title: Row(
-        children: [
-          Text(
-            role,
-            style: const TextStyle(
-                fontFamily: 'Sora', fontWeight: FontWeight.bold),
-          ),
-          if (!isActive[index]) // Conditionally show red dot
-            Container(
-              margin: const EdgeInsets.only(left: 5), // Adjust margin as needed
-              width: 10,
-              height: 10,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.red,
-              ),
-            ),
-        ],
-      ),
-      subtitle: Text(desc),
-      children: [
-        for (var event in events)
-          SwitchListTile(
-            title: Text(event['EventName']),
-            value: event['role_event_active'],
-            onChanged: (value) async {
-              setState(() {
-                _isloading = true;
-              });
-              await modifyActiveOfEventRole(
-                  event['id'], value, event['role_id']);
-              setState(() {
-                _isloading = false;
-                event['role_event_active'] = value;
-              });
-            },
-            controlAffinity: ListTileControlAffinity.trailing,
-          ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              const SizedBox(width: 5),
-              IconButton(
-                icon: const Icon(Icons.delete_outline),
-                tooltip: 'Eliminar Rol',
-                onPressed: () async {
-                  //TODO: VERIFY IF ITS NEEDED, OR ONLY LOGIC
-                },
-              ),
-              if (tmpRolesList[index]['Active'] == false)
-                IconButton(
-                  onPressed: () async {
-                    setState(() {
-                      isLoading = true;
-                    });
-                    var roleId = tmpRolesList[index]['Roleid'];
-                    var bodyEdit = {'isActive': true};
-                    await editRole(roleId, bodyEdit);
-                    setState(() {
-                      isLoading = false;
-                    });
-                    var response = await getRolesList();
-                    tmpRolesList = jsonDecode(response);
-                    Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute<void>(
-                          builder: (BuildContext context) =>
-                              const RolesAndProfilesScreen(),
-                        ));
-                  },
-                  icon: const Icon(Icons.arrow_circle_up),
-                  tooltip: 'Activar Rol',
-                ),
-              if (tmpRolesList[index]['Active'] == true)
-                IconButton(
-                    onPressed: () async {
-                      setState(() {
-                        isLoading = true;
-                      });
-                      var roleId = tmpRolesList[index]['Roleid'];
-                      var bodyEdit = {'isActive': false};
-                      await editRole(roleId, bodyEdit);
-                      setState(() {
-                        isLoading = false;
-                      });
-                      await getEventsList();
+  void _fetchData() async {
+    setState(() {
+      isLoading = true;
+      rolesListData.clear();
+    });
+    modulesList = await fetchModulesAndEventsDetailed();
+    getRolesTempList().whenComplete(() {
+      setState(() {
+        for (var item in tmpRolesList) {
+          Role role = Role.fromJson(item);
+          rolesListData.add(role);
+        }
+        for (var jsonevent in tmpeventsList) {
+          Event event = Event(
+              jsonevent['event_id'],
+              jsonevent['event_name'],
+              jsonevent['event_active'],
+              jsonevent['module_name'],
+              jsonevent['role_id']);
+          for (var i = 0; i < rolesListData.length; i++) {
+            if (rolesListData[i].roleID == event.roleID) {
+              rolesListData[i].events?.add(event);
+            }
+          }
+        }
+      });
+    }).catchError((onError) {
+      insertErrorLog(onError.toString(), 'getRolesTempList()');
+      showErrorFromBackend(context, onError.toString());
+    });
+  }
 
-                      var response = await getRolesList();
-                      tmpRolesList = jsonDecode(response);
-                      Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute<void>(
-                            builder: (BuildContext context) =>
-                                const RolesAndProfilesScreen(),
-                          ));
-                    },
-                    tooltip: 'Desactivar rol',
-                    icon: const Icon(Icons.arrow_circle_down_outlined)),
-              const SizedBox(width: 5),
-              IconButton(
-                icon: const Icon(Icons.edit),
-                tooltip: 'Editar Rol',
-                onPressed: () async {
-                  await _showEditRoleScreen(context, index, isActive[index]);
-                },
-              ),
-              IconButton(
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => PoliciesScreen(
-                                roleID: tmpRolesList[index]['Roleid'],
-                              )));
-                },
-                icon: const Icon(Icons.add),
-                tooltip: 'Agregar evento a Rol',
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
+  Widget roleContainerCard(int index) {
+    ListView resultItems = ListView();
+    if (rolesListData[index].events != null) {
+      return ListView.builder(
+          shrinkWrap: true,
+          itemCount: rolesListData[index].events!.length,
+          itemBuilder: (context, eventIndex) {
+            return SwitchListTile(
+              title: Text(rolesListData[index].events![eventIndex].eventName),
+              value: rolesListData[index].events![eventIndex].isActive,
+              onChanged: (value) async {
+                setState(() {
+                  _isloading = true;
+                });
+                await modifyActiveOfEventRole(
+                    rolesListData[index].events![eventIndex].eventID,
+                    value,
+                    rolesListData[index].events![eventIndex].roleID);
+                setState(() {
+                  _isloading = false;
+                  rolesListData[index].events![eventIndex].isActive = value;
+                });
+              },
+              controlAffinity: ListTileControlAffinity.trailing,
+            );
+          });
+    } else {
+      return resultItems;
+    }
   }
 
   Future<void> _showEditRoleScreen(
@@ -196,18 +117,18 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
     final result = await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => AddEditRoleScreen(
-            role: roles[index],
-            description: description[index],
+            role: rolesListData[index].roleName,
+            description: rolesListData[index].roleDescription,
             isActive: isActive, // Pass the isActive value
-            roleCanAcces: roleCanAcces[index]),
+            roleCanAcces: rolesListData[index].isActive),
       ),
     );
     if (result != null &&
-        result.containsKey('role') &&
-        result.containsKey('desc')) {
+        result.containsKey('softName') &&
+        result.containsKey('description')) {
       setState(() {
-        roles[index] = result['role'];
-        description[index] = result['desc'];
+        rolesListData[index].roleName = result['softName'];
+        rolesListData[index].roleDescription = result['description'];
         // role_id[index] = result['role_id'];
       });
     }
@@ -220,14 +141,14 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
       ),
     );
     if (result != null &&
-        result.containsKey('role') &&
-        result.containsKey('desc')) {
-      setState(() {
-        roles.add(result['role']);
-        description.add(result['desc']);
-        isActive.add(result['active']);
-        // role_id.add(result['role_id']);
-      });
+        result.containsKey('softName') &&
+        result.containsKey('description')) {
+      // setState(() {
+      //   roles.add(result['softName']);
+      //   description.add(result['description']);
+      //   isActive.add(result['isActive']);
+      //   // role_id.add(result['role_id']);
+      // });
     }
   }
 
@@ -256,96 +177,24 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       const SizedBox(width: 20),
-                      // TextButton(
-                      //   onPressed: () {
-                      //     _showAddRoleScreen(context);
-                      //   },
-                      //   child: Text('Nuevo'),
-                      //   style: ButtonStyle(
-                      //     foregroundColor:
-                      //         MaterialStateProperty.all<Color>(Colors.black),
-                      //     backgroundColor:
-                      //         MaterialStateProperty.all<Color>(Colors.blue),
-                      //     padding:
-                      //         MaterialStateProperty.all<EdgeInsetsGeometry>(
-                      //             EdgeInsets.all(10)),
-                      //     shape: MaterialStateProperty.all<OutlinedBorder>(
-                      //       RoundedRectangleBorder(
-                      //         borderRadius: BorderRadius.circular(8),
-                      //       ),
-                      //     ),
-                      //   ),
-                      // ),
-                      TextButton.icon(
-                          onPressed: () {
-                            _showAddRoleScreen(context);
-                          },
-                          icon: const Icon(Icons.add),
-                          label: const Text('Nuevo Rol')),
+                      AddItemButton(onPressed: () {
+                        _showAddRoleScreen(context);
+                      }),
                       const SizedBox(width: 20),
-                      TextButton.icon(
-                          onPressed: () async {
-                            setState(() {
-                              isLoading = true;
-                            });
-
-                            await getEventsList();
-
-                            var response = await getRolesList();
-                            tmpRolesList = jsonDecode(response);
-                            setState(() {
-                              isLoading = false;
-                            });
-                            Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const RolesAndProfilesScreen()));
-                          },
-                          icon: const Icon(Icons.refresh),
-                          label: const Text('Refrescar'))
-
-                      // TextButton(
-                      //   onPressed: () {
-                      //     Navigator.push(
-                      //         context,
-                      //         MaterialPageRoute(
-                      //             builder: (context) =>
-                      //                 PoliciesScreen(roleID: ,) // UserEventsManagerDataTable(
-                      //             //   eventsList: eventsLisToShow,
-                      //             // )
-
-                      //             ));
-                      //   },
-                      //   child: Text('Administrar eventos'),
-                      //   style: ButtonStyle(
-                      //     foregroundColor:
-                      //         MaterialStateProperty.all<Color>(Colors.black),
-                      //     backgroundColor:
-                      //         MaterialStateProperty.all<Color>(Colors.blue),
-                      //     padding:
-                      //         MaterialStateProperty.all<EdgeInsetsGeometry>(
-                      //             EdgeInsets.all(10)),
-                      //     shape: MaterialStateProperty.all<OutlinedBorder>(
-                      //       RoundedRectangleBorder(
-                      //         borderRadius: BorderRadius.circular(8),
-                      //       ),
-                      //     ),
-                      //   ),
-                      // ),
+                      RefreshButton(onPressed: _fetchData)
                     ],
                   ),
                   const SizedBox(height: 16),
                   const Divider(thickness: 1),
                   const Text(
-                    'Listado de roles',
-                    style: TextStyle(fontFamily: 'Sora'),
+                    'Lista rápida de roles',
+                    style: TextStyle(fontFamily: 'Sora', fontSize: 18),
                   ),
                   Expanded(
                     child: SingleChildScrollView(
                       child: Column(
                         children: List.generate(
-                          roles.length,
+                          rolesListData.length,
                           (index) => Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Container(
@@ -355,8 +204,140 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                                       Border.all(color: Colors.grey.shade300)),
                               // height: 150,
                               width: MediaQuery.of(context).size.width,
-                              child: roleContainerCard(
-                                  roles[index], description[index], index),
+                              child: ExpansionTile(
+                                  title: Row(
+                                    children: [
+                                      Text(
+                                        rolesListData[index].roleName,
+                                        style: const TextStyle(
+                                            fontFamily: 'Sora',
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      if (!rolesListData[index]
+                                          .isActive) // Conditionally show red dot
+                                        Container(
+                                          margin: const EdgeInsets.only(
+                                              left:
+                                                  5), // Adjust margin as needed
+                                          width: 10,
+                                          height: 10,
+                                          decoration: const BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: Colors.red,
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                  subtitle: Text(
+                                      rolesListData[index].roleDescription),
+                                  children: [
+                                    roleContainerCard(index),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 16.0),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          const SizedBox(width: 5),
+                                          IconButton(
+                                            icon: const Icon(
+                                                Icons.delete_outline),
+                                            tooltip:
+                                                'Eliminar Rol (Proximamente)',
+                                            onPressed: () async {
+                                              //TODO: VERIFY IF ITS NEEDED, OR ONLY LOGIC
+                                            },
+                                          ),
+                                          if (!rolesListData[index].isActive)
+                                            IconButton(
+                                              onPressed: () async {
+                                                setState(() {
+                                                  isLoading = true;
+                                                });
+                                                var roleId =
+                                                    rolesListData[index].roleID;
+                                                var bodyEdit = {
+                                                  'isActive': true
+                                                };
+                                                await editRole(
+                                                    roleId, bodyEdit, 3);
+                                                setState(() {
+                                                  isLoading = false;
+                                                });
+                                                _fetchData();
+                                              },
+                                              icon: const Icon(
+                                                  Icons.arrow_circle_up),
+                                              tooltip: 'Activar Rol',
+                                            ),
+                                          if (rolesListData[index].isActive)
+                                            IconButton(
+                                                onPressed: () async {
+                                                  setState(() {
+                                                    isLoading = true;
+                                                  });
+                                                  var roleId =
+                                                      rolesListData[index]
+                                                          .roleID;
+                                                  var bodyEdit = {
+                                                    'isActive': false
+                                                  };
+                                                  await editRole(
+                                                      roleId, bodyEdit, 3);
+                                                  setState(() {
+                                                    isLoading = false;
+                                                  });
+                                                  _fetchData();
+                                                },
+                                                tooltip: 'Desactivar rol',
+                                                icon: const Icon(Icons
+                                                    .arrow_circle_down_outlined)),
+                                          const SizedBox(width: 5),
+                                          IconButton(
+                                            icon: const Icon(Icons.edit),
+                                            tooltip: 'Editar Rol',
+                                            onPressed: () async {
+                                              await _showEditRoleScreen(
+                                                  context,
+                                                  index,
+                                                  rolesListData[index]
+                                                      .isActive);
+                                            },
+                                          ),
+                                          IconButton(
+                                            onPressed: () {
+                                              Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          PoliciesScreen(
+                                                            roleID:
+                                                                rolesListData[
+                                                                        index]
+                                                                    .roleID,
+                                                            roleName:
+                                                                rolesListData[
+                                                                        index]
+                                                                    .roleName,
+                                                            roleListData:
+                                                                rolesListData,
+                                                          )));
+                                            },
+                                            icon: const Icon(Icons.security),
+                                            tooltip: 'Administrar Políticas',
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ]
+
+                                  // ],
+                                  ),
+                              // roleContainerCard(
+                              //     rolesListData[index].roleName,
+                              //     rolesListData[index].roleDescription,
+                              //     index),
                             ),
                           ),
                         ),
@@ -370,7 +351,7 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Text(
-                        description[selectedCardIndex],
+                        rolesListData[selectedCardIndex].roleDescription,
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -410,6 +391,7 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
   late bool _isActive;
   List<Event> _events = [];
   Map<int, bool> roleEventActive = {};
+  bool isRoleAdmin = false;
 
   @override
   void initState() {
@@ -419,9 +401,9 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
         TextEditingController(text: widget.description ?? '');
     _isActive = widget.isActive ?? false;
     _events = tmpeventsList.map((e) {
-      bool isActive = e['RoleName'] == widget.role && e['isActive'];
-      return Event(e['id'], e['EventName'], isActive, e['moduleName'],
-          e['role_event_active']);
+      bool isActive = e['event_name'] == widget.role && e['event_active'];
+      return Event(e['event_id'], e['event_name'], isActive, e['module_name'],
+          e['role_id']);
     }).toList();
   }
 
@@ -438,14 +420,7 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
       'name': _roleController.text,
       'description': _descriptionController.text,
       'isActive': _isActive,
-      'events': _events
-          .map((e) => {
-                'id': e.eventID,
-                'EventName': e.eventName,
-                'role_event_active': e.eventCanAccesModule,
-                'moduleName': e.moduleName,
-              })
-          .toList(),
+      'admin': isRoleAdmin
     };
     var updatedRole = [
       _roleController.text,
@@ -456,7 +431,7 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
       isLoading = true;
     });
 
-    await editRole(roleID, jsonData);
+    await editRole(roleID, jsonData, 4);
     setState(() {
       tmpRolesList.removeAt(roleID);
       tmpRolesList.add(updatedRole);
@@ -474,7 +449,7 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
           .map((e) => {
                 'id': e.eventID,
                 'EventName': e.eventName,
-                'role_event_active': e.eventCanAccesModule,
+                'role_event_active': e.roleID,
                 'moduleName': e.moduleName,
               })
           .toList(),
@@ -553,78 +528,45 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                // Display the grouped events
-                // Expanded(
-                //   child: ListView.builder(
-                //     itemCount: groupedEvents.length,
-                //     itemBuilder: (context, index) {
-                //       String moduleName = groupedEvents.keys.elementAt(index);
-                //       List<Event> events = groupedEvents[moduleName]!;
-                //       Set<String> uniqueEventNames =
-                //           events.map((e) => e.eventName).toSet();
-                //       return Column(
-                //         crossAxisAlignment: CrossAxisAlignment.start,
-                //         children: [
-                //           Padding(
-                //             padding: const EdgeInsets.symmetric(vertical: 8.0),
-                //             child: Text(
-                //               moduleName,
-                //               style: TextStyle(
-                //                 fontSize: 18,
-                //                 fontWeight: FontWeight.bold,
-                //               ),
-                //             ),
-                //           ),
-                //           for (var eventName in uniqueEventNames)
-
-                //           // ListTile(
-                //           //   title: Text(eventName),
-                //           //   subtitle: Text('Module: $moduleName'),
-                //           //   // trailing: Checkbox(
-                //           //   //   value: events.any((e) =>
-                //           //   //       e.eventName == eventName &&
-                //           //   //       e.eventCanAccesModule),
-                //           //   //   onChanged: (value) {
-                //           //   //     setState(() {
-                //           //   //       events
-                //           //   //           .where((e) => e.eventName == eventName)
-                //           //   //           .forEach((e) => e.eventCanAccesModule =
-                //           //   //               value ?? false);
-                //           //   //     });
-                //           //   //   },
-                //           //   // ),
-                //           // ),
-                //           Divider(
-                //             thickness: 1,
-                //           )
-                //         ],
-                //       );
-                //     },
-                //   ),
-                // ),
+                Text('Rol es administrador ?'),
+                Switch(
+                    value: isRoleAdmin,
+                    onChanged: (bool value) {
+                      setState(() {
+                        isRoleAdmin = value;
+                      });
+                    }),
+                const SizedBox(height: 16),
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () async {
-                    // setState(() {
-                    //   _isloading = true;
-                    // });
-                    if (widget.role != null) {
-                      String roleName = widget.role!;
-                      int roleId = getRoleIdValue(tmpRolesList, roleName);
-                      if (roleId != 0) {
-                        // setState(() {
-                        //   _isloading = true;
-                        // });
-                        await _updateRole(context, roleId);
+                    try {
+                      if (widget.role != null) {
+                        String roleName = widget.role!;
+                        int roleId = getRoleIdValue(tmpRolesList, roleName);
+                        if (roleId != 0) {
+                          await _updateRole(context, roleId).whenComplete(() {
+                            showConfirmationDialog(context, 'Éxito',
+                                'Rol actualizado correctamente');
+                          });
+                        }
+                        setState(() {
+                          _isloading = false;
+                        });
+                        Navigator.of(context).pop();
+                      } else {
+                        if (_roleController.text.isNotEmpty &&
+                            _descriptionController.text.isNotEmpty) {
+                          _addRole(context);
+                          _isloading = false;
+                        } else {
+                          showEmptyFieldAlertDialog(
+                              context, 'Favor de no dejar ningun campo vacio');
+                        }
                       }
-                      setState(() {
-                        _isloading = false;
-                      });
-
-                      Navigator.of(context).pop();
-                    } else {
-                      _addRole(context);
-                      _isloading = false;
+                    } catch (e) {
+                      insertErrorLog(
+                          e.toString(), 'roles_screen when: ${widget.role}');
                     }
                   },
                   child: Text(
@@ -642,8 +584,8 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
 
 int getRoleIdValue(List<dynamic> rolesList, String roleName) {
   for (var role in rolesList) {
-    if (role["Role"] == roleName) {
-      return role["Roleid"];
+    if (role["softName"] == roleName) {
+      return role["id"];
     }
   }
   return 0; // Role not found

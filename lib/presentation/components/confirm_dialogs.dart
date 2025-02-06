@@ -59,7 +59,8 @@ Future<int> showConfirmationDialog(
             child: Text('Cerrar',
                 style: FlutterFlowTheme.of(context).labelLarge.override(
                       fontFamily: 'Roboto',
-                      color: const Color(0xFF130C0D),
+                      color: FlutterFlowTheme.of(context)
+                          .primaryText, // const Color(0xFF130C0D),
                       fontWeight: FontWeight.w500,
                     )),
           ),
@@ -107,7 +108,11 @@ void showInformationDialog(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text('Cerrar'),
+              child: Text('Cerrar',
+                  style: TextStyle(
+                    fontFamily: 'Sora',
+                    backgroundColor: Colors.blue[50],
+                  )),
             )
           ],
         );
@@ -133,8 +138,7 @@ Future<int> showDeleteConfirmationAlertDialog(BuildContext context) async {
                 completer.complete(0); // User selected 'No'
               },
               style: ButtonStyle(
-                  backgroundColor:
-                      MaterialStateProperty.all<Color>(Colors.red)),
+                  backgroundColor: WidgetStateProperty.all<Color>(Colors.red)),
               child: Text(
                 'No',
                 style: FlutterFlowTheme.of(context).labelLarge.override(
@@ -151,7 +155,7 @@ Future<int> showDeleteConfirmationAlertDialog(BuildContext context) async {
               },
               style: ButtonStyle(
                 backgroundColor:
-                    MaterialStateProperty.all<Color>(Colors.greenAccent),
+                    WidgetStateProperty.all<Color>(Colors.greenAccent),
               ),
               child: Text('Si',
                   style: FlutterFlowTheme.of(context).labelLarge.override(

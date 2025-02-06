@@ -1,13 +1,13 @@
 import 'dart:async';
 
-import 'dart:io';
-
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:oxschool/core/constants/user_consts.dart';
+import 'package:oxschool/core/extensions/api_call_error_message.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/core/reusable_methods/translate_messages.dart';
 import 'package:oxschool/data/services/backend/api_requests/status_code_manager.dart';
+
 import 'package:requests/requests.dart';
 
 // ignore: depend_on_referenced_packages
@@ -15,28 +15,26 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<dynamic> loginUser(var jsonBody) async {
+  var response;
   try {
     var apiCall = await Requests.post(
-        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/login/userlogin/',
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/auth/login',
         json: jsonBody,
-        headers: {
-          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-        },
         persistCookies: false,
         timeoutSeconds: 25);
 
     apiCall.raiseForStatus();
+    response = apiCall;
     return apiCall;
   } catch (e) {
+    String errorMessage;
     insertErrorLog(e.toString(), '/login/userlogin/');
-    if (e is TimeoutException) {
-      return throw TimeoutException(e.toString());
+    if (e is Exception) {
+      errorMessage = e.getErrorMessage();
+      return Future.error(errorMessage);
+    } else {
+      e;
     }
-    if (e is SocketException) {
-      return throw SocketException(e.toString());
-    }
-    return throw Exception(e.toString());
-    // throw FormatException(e.toString());
   }
 }
 
@@ -46,10 +44,10 @@ void logOutUser(String token, String employee) async {
   String? ipAddres = prefs.getString('ip');
 
   var apiCall = await Requests.post(
-      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/logout',
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/auth/logout',
       headers: {
-        'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-        'Auth': currentUser!.token,
+        //'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
+        'Authorization': currentUser!.token,
       },
       json: {'device': device, 'ip': ipAddres, 'employee': employee},
       persistCookies: false,
@@ -57,46 +55,71 @@ void logOutUser(String token, String employee) async {
   apiCall.raiseForStatus();
 }
 
-Future<dynamic> getCycle(
-  int month,
-) async {
-  String response;
-  if (month == 0) {
-    try {
-      var apiCall = await Requests.get(
-          '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/cycles/1',
-          headers: {
-            'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-            'Auth': currentUser!.token,
-          },
-          persistCookies: false,
-          timeoutSeconds: 12);
-      apiCall.raiseForStatus();
-      response = apiCall.content();
-      return response;
-    } catch (e) {
-      insertErrorLog(e.toString(), '/api/cycles/1');
-      throw FormatException(e.toString());
-    }
-  } else {
-    try {
-      var apiCall = await Requests.get(
-          '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/cycles/',
-          headers: {
-            'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-            'Auth': currentUser!.token,
-          },
-          persistCookies: false,
-          timeoutSeconds: 12);
-      apiCall.raiseForStatus();
-      response = apiCall.content();
-      return response;
-    } catch (e) {
-      insertErrorLog(e.toString(), '/api/cycles/$month');
-      throw FormatException(e.toString());
+Future<dynamic> getCycle(int month) async {
+  try {
+    var apiCall = await Requests.get(
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/cycles/status',
+      headers: {
+        'Authorization': currentUser!.token,
+        'Content-Type': 'application/json',
+      },
+      queryParameters: {"status": month},
+      timeoutSeconds: 10,
+    );
+    apiCall.raiseForStatus();
+    return apiCall;
+  } catch (e) {
+    insertErrorLog(e.toString(), '/cycle/status/');
+    String errorMessage;
+    if (e is Exception) {
+      errorMessage = e.getErrorMessage();
+      return Future.error(errorMessage);
+    } else {
+      e;
     }
   }
 }
+
+// Future<dynamic> getCycle(
+//   int month,
+// ) async {
+//   String response;
+//   if (month == 0) {
+//     try {
+//       var apiCall = await Requests.get(
+//           '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/cycles/1',
+//           headers: {
+//             //'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
+//             'Authorization': currentUser!.token,
+//           },
+//           persistCookies: false,
+//           timeoutSeconds: 12);
+//       apiCall.raiseForStatus();
+//       response = apiCall.content();
+//       return response;
+//     } catch (e) {
+//       insertErrorLog(e.toString(), '/api/cycles/1');
+//       throw FormatException(e.toString());
+//     }
+//   } else {
+//     try {
+//       var apiCall = await Requests.get(
+//           '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/cycles/',
+//           headers: {
+//             'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
+//             'Auth': currentUser!.token,
+//           },
+//           persistCookies: false,
+//           timeoutSeconds: 12);
+//       apiCall.raiseForStatus();
+//       response = apiCall.content();
+//       return response;
+//     } catch (e) {
+//       insertErrorLog(e.toString(), '/api/cycles/$month');
+//       throw FormatException(e.toString());
+//     }
+//   }
+// }
 
 //Function to post new visit from a student to nursery
 Future<dynamic> postNurseryVisit(Map<String, dynamic> jsonBody) async {
@@ -175,63 +198,59 @@ Future<int> deleteMedicineStudent(var idValue) async {
   // return responseCode;
 }
 
-Future<dynamic> getEvents(String? param) async {
-  String responseCode;
+// Future<dynamic> getEvents(String? param) async {
+//   String responseCode;
 
-  if (param == null) {
-    try {
-      var apiCall = await Requests.get(
-          '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/events',
-          headers: {
-            'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-            'Auth': currentUser!.token
-          },
-          persistCookies: false,
-          timeoutSeconds: 8);
+//   if (param == null) {
+//     try {
+//       var apiCall = await Requests.get(
+//           '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/events',
+//           headers: {
+//             'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
+//             'Auth': currentUser!.token
+//           },
+//           persistCookies: false,
+//           timeoutSeconds: 8);
 
-      apiCall.raiseForStatus();
-      responseCode = apiCall.content();
-      return responseCode;
-    } catch (e) {
-      throw FormatException(e.toString());
-    }
-  } else {
-    try {
-      var apiCall = await Requests.get(
-          '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/events',
-          headers: {
-            'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-            'Auth': currentUser!.token
-          },
-          queryParameters: {'detail': param},
-          persistCookies: false,
-          timeoutSeconds: 8);
+//       apiCall.raiseForStatus();
+//       responseCode = apiCall.content();
+//       return responseCode;
+//     } catch (e) {
+//       throw FormatException(e.toString());
+//     }
+//   } else {
+//     try {
+//       var apiCall = await Requests.get(
+//           '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/events',
+//           headers: {
+//             'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
+//             'Auth': currentUser!.token
+//           },
+//           queryParameters: {'detail': param},
+//           persistCookies: false,
+//           timeoutSeconds: 8);
 
-      apiCall.raiseForStatus();
-      responseCode = apiCall.content();
-      return responseCode;
-    } catch (e) {
-      throw FormatException(e.toString());
-    }
-  }
-}
+//       apiCall.raiseForStatus();
+//       responseCode = apiCall.content();
+//       return responseCode;
+//     } catch (e) {
+//       throw FormatException(e.toString());
+//     }
+//   }
+// }
 
 Future<dynamic> modifyActiveOfEventRole(
     int eventId, bool roleEventValue, int roleSelected) async {
   try {
     var apiCall = await Requests.put(
-        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/event-role/$eventId',
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/events/role-auth/$eventId',
         headers: {
-          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-          'Auth': currentUser!.token
+          'Authorization': currentUser!.token,
+          'Content-Type': 'application/json',
         },
-        json: {
-          'type': eventId,
-          'role_event_active': roleEventValue,
-          'role': roleSelected
-        },
+        json: {'value': roleEventValue, 'role': roleSelected},
         persistCookies: false,
-        timeoutSeconds: 10);
+        timeoutSeconds: 20);
     apiCall.raiseForStatus();
     return apiCall.content();
   } catch (e) {
@@ -240,20 +259,19 @@ Future<dynamic> modifyActiveOfEventRole(
 }
 
 Future<dynamic> getRolesList() async {
-  String response;
+  // String response;
   try {
     var apiCall = await Requests.get(
-        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/role',
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/roles/all',
         headers: {
-          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-          'Auth': currentUser!.token
+          'Authorization': currentUser!.token,
+          'Content-Type': 'application/json',
         },
         persistCookies: false,
-        timeoutSeconds: 8);
-
+        timeoutSeconds: 20);
     apiCall.raiseForStatus();
-    response = apiCall.content();
-    return response;
+    // response = apiCall.content();
+    return apiCall;
   } catch (e) {
     throw FormatException(e.toString());
   }
@@ -281,30 +299,67 @@ Future<dynamic> getRole(String roleName) async {
 Future<dynamic> getEventsByRole(int? roleID) async {
   try {
     var apiCal = await Requests.get(
-        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/role/events',
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/events/roles/$roleID',
         headers: {
-          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-          'Auth': currentUser!.token
+          'Authorization': currentUser!.token,
+          'Content-Type': 'application/json',
         },
-        queryParameters: {'role': roleID},
+        bodyEncoding: RequestBodyEncoding.JSON,
         persistCookies: false,
-        timeoutSeconds: 8);
+        timeoutSeconds: 20);
     apiCal.raiseForStatus();
-    return apiCal.content();
+    return apiCal;
   } catch (e) {
-    throw FormatException(e.toString());
+    throw Future.error(e.toString());
   }
 }
 
-Future<dynamic> editRole(int roleID, Map<String, dynamic> bodyObject) async {
+Future<dynamic> getModulesListDetailed() async {
+  try {
+    var apiCall = await Requests.get(
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/modules/detail',
+        headers: {
+          'Authorization': currentUser!.token,
+          'Content-Type': 'application/json',
+        },
+        persistCookies: true);
+    apiCall.raiseForStatus();
+    return apiCall.body;
+  } catch (e) {
+    insertErrorLog(e.toString(), 'getModulesAndEvents() apiCall');
+    return Future.error(e.toString());
+  }
+}
+
+Future<dynamic> getEventsAndModulesCall() async {
+  try {
+    var apiCall = await Requests.get(
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/events/modules/detail',
+      headers: {
+        'Authorization': currentUser!.token,
+        'Content-Type': 'application/json',
+      },
+      persistCookies: true,
+    );
+    apiCall.raiseForStatus();
+    return apiCall.body;
+  } catch (e) {
+    insertErrorLog(e.toString(), 'getEventsAndModulesCall() apiCall');
+    return Future.error(e.toString());
+  }
+}
+
+Future<dynamic> editRole(
+    int roleID, Map<String, dynamic> bodyObject, int? type) async {
   String response;
   try {
     var apiCall = await Requests.put(
-        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/role/$roleID',
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/roles/$roleID',
         headers: {
-          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-          'Auth': currentUser!.token
+          'Authorization': currentUser!.token,
+          'Content-Type': 'application/json',
         },
+        queryParameters: {'type': type},
         json: bodyObject,
         persistCookies: false,
         timeoutSeconds: 8);
@@ -312,7 +367,7 @@ Future<dynamic> editRole(int roleID, Map<String, dynamic> bodyObject) async {
     response = apiCall.content();
     return response;
   } catch (e) {
-    throw FormatException(e.toString());
+    throw Future.error(e.toString());
   }
 }
 
@@ -428,13 +483,10 @@ Future<dynamic> getUsers() async {
   String response;
   try {
     var apiCall = await Requests.get(
-        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/user',
-        headers: {
-          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-          'Auth': currentUser!.token
-        },
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/users/all',
+        headers: {'Authorization': currentUser!.token},
         persistCookies: false,
-        timeoutSeconds: 20);
+        timeoutSeconds: 30);
     apiCall.raiseForStatus();
     response = apiCall.content();
     return response;
@@ -534,9 +586,12 @@ Future<dynamic> getWorkDepartments() async {
 }
 
 Future<dynamic> sendUserPasswordToMail(
-    String employeeNumber, String deviceInfo, String deviceIP) async {
+    //This was the old way to send a recovery password
+    String employeeNumber,
+    String deviceInfo,
+    String deviceIP) async {
   try {
-    var apiCall = await Requests.get(
+    var apiCall = await Requests.post(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/login/forgot-password/$employeeNumber',
         headers: {
           'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
@@ -549,6 +604,92 @@ Future<dynamic> sendUserPasswordToMail(
     return 200;
   } catch (e) {
     return e;
+  }
+}
+
+Future<dynamic> sendRecoveryToken(String userMail, String deviceInfo) async {
+  http.Response apiCall;
+  try {
+    apiCall = await Requests.post(
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/auth/lost-password',
+        headers: {
+          "Content-Type": "application/json"
+          // 'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
+          // 'device': deviceInfo,
+          // 'ip_address': deviceIp.toString()
+        },
+        json: {"email": userMail, "device": deviceInfo},
+        persistCookies: false,
+        timeoutSeconds: 10);
+    apiCall.raiseForStatus();
+    return apiCall;
+  } catch (e) {
+    return e;
+  }
+}
+
+Future<dynamic> updateUserPasswordByToken(
+    //This is for the recovery password at login screen (when user click on forgot password)
+    String token,
+    String newPassword) async {
+  try {
+    var apiCall = await Requests.put(
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/auth/password',
+        headers: {"Content-Type": "application/json"},
+        json: {"token": token, "password": newPassword},
+        persistCookies: false,
+        timeoutSeconds: 10);
+    apiCall.raiseForStatus();
+    return apiCall;
+  } catch (e) {
+    insertErrorLog(e.toString(), '/auth/password');
+    if (e is TimeoutException) {
+      var firstWord = getMessageToDisplay(e.toString());
+      return throw firstWord;
+    } else {
+      return throw e;
+    }
+  }
+}
+
+Future<dynamic> updateUserPasswordCall(String password) async {
+  //To use when the current user logged in can be switched
+  try {
+    var apiCall = await Requests.put(
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/users/password',
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": currentUser!.token,
+          // "User-Agent": "$deviceInformation",
+        },
+        json: {
+          "password": password,
+        },
+        persistCookies: false,
+        timeoutSeconds: 20);
+    apiCall.raiseForStatus();
+    return apiCall.success;
+  } catch (e) {
+    insertErrorLog(e.toString(), '/api/user/password');
+    Future.error(e);
+  }
+} //This is for the user to change his password
+
+Future<dynamic> validateToken(
+    String token, String userMail, String devivce) async {
+  try {
+    var apiCall = await Requests.post(
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/auth/recovery-token',
+        headers: {"Content-Type": "application/json"},
+        json: {"email": userMail, "device": devivce},
+        queryParameters: {"token": token},
+        persistCookies: false,
+        timeoutSeconds: 15);
+    apiCall.raiseForStatus();
+    return apiCall;
+  } catch (e) {
+    insertErrorLog(e.toString(), '/auth/recovery-token');
+    return throw Exception(e.toString());
   }
 }
 
@@ -565,22 +706,27 @@ Future<dynamic> sendUserPasswordToMail(
 //   }
 // }
 
-Future<dynamic> getTeacherGradeAndCourses(var employee, var year) async {
+Future<dynamic> getTeacherGradeAndCourses(
+    var employee, var year, int month) async {
   try {
     var apiCall = await Requests.get(
-        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/teacher/start-student-rating',
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/teacher-grades',
         headers: {
-          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-          'ip_address': deviceIp.toString(),
-          'Auth': currentUser!.token
+          // 'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
+          // 'ip_address': deviceIp.toString(),
+          'Authorization': currentUser!.token
         },
-        // json: {"teacherNumber": employee},
+        // body: {
+        //   'employee': currentUser!.employeeNumber.toString(),
+        //   "cycle": currentCycle!.claCiclo
+        // },
         queryParameters: {
-          'teacher': currentUser!.employeeNumber.toString(),
-          "year": currentCycle!.claCiclo
+          'employee': currentUser!.employeeNumber,
+          "cycle": currentCycle!.claCiclo,
+          "month": 10
         },
-        persistCookies: true,
-        timeoutSeconds: 20);
+        persistCookies: false,
+        timeoutSeconds: 40);
     apiCall.raiseForStatus();
 
     if (apiCall.statusCode == 200) {
@@ -598,7 +744,7 @@ Future<dynamic> getTeacherGradeAndCourses(var employee, var year) async {
       return throw firstWord;
     }
 
-    return throw FormatException(e.toString());
+    return Future.error(e);
   }
 }
 
@@ -606,16 +752,12 @@ Future<dynamic> getStudentsToGrade(String assignature, String group,
     String grade, String? cycle, String? campus, String month) async {
   try {
     var apiCall = await Requests.get(
-        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/school-rating/active-students',
-        headers: {
-          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-          'ip_address': deviceIp.toString(),
-          'Auth': currentUser!.token
-        },
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/students-evaluation-subject',
+        headers: {'Authorization': currentUser!.token},
         queryParameters: {
           "grade": grade,
           "group": group,
-          "assignature": assignature,
+          "subject": assignature,
           "cycle": cycle,
           "campus": campus,
           "month": month
@@ -625,11 +767,10 @@ Future<dynamic> getStudentsToGrade(String assignature, String group,
     apiCall.raiseForStatus();
     return apiCall;
   } catch (e) {
-    insertErrorLog(e.toString(), '/academic/school-rating/active-students');
+    insertErrorLog(e.toString(), '/academic/students-evaluation');
     if (e is TimeoutException) {
       return throw TimeoutException(e.toString());
     }
-
     return throw FormatException(e.toString());
   }
 }
@@ -644,7 +785,7 @@ Future<dynamic> getStudentsGrades(
     month) async {
   try {
     var apiCall = await Requests.get(
-        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student/grades',
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student/grades-subject',
         headers: {
           'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
           'ip_address': deviceIp.toString(),
@@ -672,12 +813,8 @@ Future<dynamic> getSubjectsAndGradeByStuent(
     String? group, grade, cycle, campus, month) async {
   try {
     var apiCall = await Requests.get(
-        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student/grades',
-        headers: {
-          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-          'ip_address': deviceIp.toString(),
-          'Auth': currentUser!.token
-        },
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student-evaluation-student',
+        headers: {'Authorization': currentUser!.token},
         queryParameters: {
           "grade": grade,
           "group": group,
@@ -695,11 +832,11 @@ Future<dynamic> getSubjectsAndGradeByStuent(
     return apiCall;
   } catch (e) {
     if (e is TimeoutException) {
-      insertErrorLog(e.toString(), 'academic/student/grades');
+      insertErrorLog(e.toString(), 'academic/student-evaluation-student');
       var firstWord = getMessageToDisplay(e.toString());
       return throw TimeoutException(firstWord.toString());
     }
-    return throw FormatException(e.toString());
+    return Future.error(e.toString());
   }
 }
 
@@ -712,14 +849,14 @@ Future<dynamic> patchStudentsGrades(
       var apiCall = await Requests.patch(
           '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student/grades',
           headers: {
-            'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-            'ip_address': deviceIp.toString(),
-            'Auth': currentUser!.token
+            //'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
+            //'ip_address': deviceIp.toString(),
+            'Authorization': currentUser!.token
           },
-          queryParameters: {
-            "studentEval": isByStudent.toString(),
-            "cycle": currentCycle!.claCiclo
-          },
+          // queryParameters: {
+          //   "studentEval": isByStudent.toString(),
+          //   "cycle": currentCycle!.claCiclo
+          // },
           persistCookies: false,
           timeoutSeconds: 25,
           json: requestBody);
@@ -727,13 +864,13 @@ Future<dynamic> patchStudentsGrades(
       return apiCall.statusCode;
     }
   } catch (e) {
-    return throw FormatException(e.toString());
+    return Future.error(e.toString());
   }
 }
 
 Future<dynamic> getStudentsGradesComments(
     int grade, bool searchById, String? id, int? month) async {
-  var response;
+  http.Response response;
   try {
     if (searchById) {
       var apiCall = await Requests.get(
@@ -814,79 +951,69 @@ Future<dynamic> validateUser(
   }
 }
 
-Future<dynamic> getStudentsByRole(int employeeNumber, String userRole) async {
+Future<dynamic> getStudentsByRole(String cycle) async {
   try {
     var apiCall = await Requests.get(
-        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/student',
-        headers: {
-          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-          'Auth': currentUser!.token
-        },
-        queryParameters: {
-          // 'role': userRole, //<--------REMOVE HARDCORED NUMBER
-          'detail': 'List',
-          'employee': employeeNumber
-        },
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/fodac27/students',
+        headers: {'Authorization': currentUser!.token},
+        queryParameters: {'cycle': cycle},
         persistCookies: false,
         timeoutSeconds: 25);
 
     apiCall.raiseForStatus();
     return apiCall.body;
   } catch (e) {
-    return throw FormatException(e.toString());
+    return Future.error(e);
   }
 }
 
 //Can be used to get more than one student if needed
-Future<dynamic> getFodac27History(
+Future<dynamic> getStudentFodac27History(
     String cycle, String? studentID, bool isByStudent) async {
   try {
     var apiCall = await Requests.get(
-      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/fodac27/student',
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/fodac27/history',
       headers: {
-        'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-        'Auth': currentUser!.token
+        // 'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
+        'Authorization': currentUser!.token,
       },
       queryParameters: {
         'cycle': cycle.toString(),
-        'student': studentID.toString()
+        'student': studentID!.trim()
       },
       persistCookies: false,
     );
     apiCall.raiseForStatus();
     return apiCall.body;
   } catch (e) {
-    return throw FormatException(e.toString());
+    return Future.error(e.toString());
   }
 }
 
 //To obtains only subject_name, can be user for more data in future
-Future<dynamic> getStudentSubjects(String StudentID, String cycle) async {
-  var apiCall = await Requests.get(
-      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student/subjects',
-      headers: {
-        'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-        'Auth': currentUser!.token
-      },
-      queryParameters: {
-        'student': StudentID.toString(),
-        'cycle': cycle.toString()
-      });
-  apiCall.raiseForStatus();
-  return apiCall;
+Future<dynamic> getStudentSubjects(String studentID, String cycle) async {
+  try {
+    var apiCall = await Requests.get(
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student/subjects',
+        headers: {'Authorization': currentUser!.token},
+        timeoutSeconds: 18,
+        persistCookies: false,
+        queryParameters: {'student': studentID, 'cycle': cycle});
+    apiCall.raiseForStatus();
+    return apiCall;
+  } catch (e) {
+    return Future.error(e.toString());
+  }
 }
 
-Future<dynamic> postFodac27Record(String date, String studentID, String cycle,
+Future<dynamic> postFodac27Record(DateTime date, String studentID, String cycle,
     String observations, int employeeNumber, int subject) async {
   try {
     var apiCall = await Requests.post(
-        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/fodac27',
-        headers: {
-          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-          'Auth': currentUser!.token
-        },
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student/fodac27',
+        headers: {'Authorization': currentUser!.token},
         json: {
-          'date': date,
+          'date': date.toIso8601String(),
           'student': studentID.toString(),
           'cycle': cycle.toString(),
           'observation': observations.toString(),
@@ -895,9 +1022,9 @@ Future<dynamic> postFodac27Record(String date, String studentID, String cycle,
         },
         persistCookies: false);
     apiCall.raiseForStatus();
-    return apiCall;
+    return apiCall.statusCode;
   } catch (e) {
-    return throw FormatException(e.toString());
+    return Future.error(e.toString());
   }
 }
 
@@ -921,12 +1048,9 @@ Future<int> editFodac27Record(Map<String, dynamic> body) async {
 Future<dynamic> getActualDate() async {
   try {
     var apiCall = await Requests.get(
-        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/date',
-        headers: {
-          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-          'Auth': currentUser!.token
-        },
-        queryParameters: {'field': 1},
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/evaluation-date',
+        headers: {'Authorization': currentUser!.token},
+        //queryParameters: {'field': 1},
         timeoutSeconds: 20,
         persistCookies: false);
     apiCall.raiseForStatus();
@@ -941,7 +1065,7 @@ Future<dynamic> getActualDate() async {
       var firstWord = getMessageToDisplay(e.toString());
       return throw firstWord;
     } else {
-      return 'Request failed: ${e.toString()}'; // General error handling
+      return Future.error(e);
     }
 
     // Check if error response contains a message
@@ -981,16 +1105,13 @@ Future<int> deleteFodac27Record(int fodac27ID) async {
   try {
     var apiCall = await Requests.delete(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student/fodac27',
-        headers: {
-          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-          'Auth': currentUser!.token
-        },
-        queryParameters: {'observation': fodac27ID},
+        headers: {'Authorization': currentUser!.token},
+        queryParameters: {'fodac27': fodac27ID},
         persistCookies: false);
     apiCall.raiseForStatus();
     return apiCall.statusCode;
   } catch (e) {
-    return throw FormatException(e.toString());
+    return Future.error(e);
   }
 }
 
@@ -1052,6 +1173,107 @@ Future<dynamic> validateIfUserIsCoordinator(int user) async {
   }
 }
 
+Future<dynamic> checkForUpdates() async {
+  try {
+    var apiCall = await Requests.get(
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/updates',
+      persistCookies: false,
+      timeoutSeconds: 20,
+    );
+    apiCall.raiseForStatus();
+    return apiCall;
+  } catch (e) {
+    insertErrorLog(e.toString(), "UPDATER CALL ERROR: ");
+    return Future.error(e.toString());
+  }
+}
+
+Future<dynamic> getCurrentUserData(String token) async {
+  try {
+    var apiCall = await Requests.get(
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/users/me',
+        headers: {
+          //'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
+          'Authorization': 'Bearer $token'
+        },
+        persistCookies: false);
+    apiCall.raiseForStatus();
+    return apiCall;
+  } catch (e) {
+    String errorMessage;
+    insertErrorLog(e.toString(), '/users/me/');
+    if (e is Exception) {
+      errorMessage = e.getErrorMessage();
+      return Future.error(errorMessage);
+    } else {
+      e;
+    }
+  }
+}
+
+Future<dynamic> getUserCafeteriaConsumptionHistory() async {
+  try {
+    var apiCall = await Requests.get(
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/cafeteria/user/history',
+      headers: {'Authorization': currentUser!.token},
+      queryParameters: {
+        'employee': currentUser!.employeeNumber,
+      },
+      persistCookies: false,
+    );
+    apiCall.raiseForStatus();
+    return apiCall;
+  } catch (e) {
+    insertErrorLog(e.toString(), "CAFETERIA HISTORY CALL ERROR: ");
+    return Future.error(e.toString());
+  }
+}
+
+//*
+//To retrive all events from the server
+// */
+Future<dynamic> getEventsListRequest() async {
+  try {
+    var apiCall = await Requests.get(
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/events/all',
+        headers: {'Authorization': currentUser!.token},
+        queryParameters: {'filter': 'true'},
+        persistCookies: true,
+        timeoutSeconds: 20);
+    apiCall.raiseForStatus();
+    return apiCall;
+  } catch (e) {
+    insertErrorLog(e.toString(), "EVENTS LIST CALL ERROR: ");
+    return Future.error(e.toString());
+  }
+}
+
+Future<http.Response> getUserRoleAndAcces(int roleId) async {
+  try {
+    Uri address = Uri(
+        scheme: 'http',
+        host: dotenv.env['HOST'],
+        port: int.parse(dotenv.env['PORT']!),
+        path: '/roles/me',
+        queryParameters: {'role': roleId.toString()});
+    var response = http.get(address, headers: {
+      "Content-Type": "application/json",
+      'Authorization': currentUser!.token,
+    });
+    userEvents = response;
+    return response;
+  } catch (e) {
+    insertErrorLog(e.toString(), '/roles/me');
+    // String errorMessage;
+    if (e is Exception) {
+      final errorMessage = e.getErrorMessage();
+      return Future.error(errorMessage);
+    } else {
+      return Future.error(e.toString());
+    }
+  }
+}
+
 // Future<dynamic> getUserEvents(int userId) async {
 //   var response;
 //   try {
@@ -1072,22 +1294,22 @@ Future<dynamic> validateIfUserIsCoordinator(int user) async {
 //   }
 // }
 
-Future<http.Response> getUserPermissions(int userId) async {
-  try {
-    Uri address = Uri(
-        scheme: 'http',
-        host: dotenv.env['HOST'],
-        port: 8080,
-        path: '/api/user/events',
-        queryParameters: {'user': userId.toString()});
-    var response = http.get(address, headers: {
-      'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-      'Auth': currentUser!.token
-    });
-    userEvents = response;
-    return response;
-  } catch (e) {
-    insertErrorLog(e.toString(), '/api/user/events');
-    return throw FormatException(e.toString());
-  }
-}
+// Future<http.Response> getUserPermissions(int userId) async {
+//   try {
+//     Uri address = Uri(
+//         scheme: 'http',
+//         host: dotenv.env['HOST'],
+//         port: 8080,
+//         path: '/api/user/events',
+//         queryParameters: {'user': userId.toString()});
+//     var response = http.get(address, headers: {
+//       'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
+//       'Auth': currentUser!.token
+//     });
+//     userEvents = response;
+//     return response;
+//   } catch (e) {
+//     insertErrorLog(e.toString(), '/api/user/events');
+//     return throw FormatException(e.toString());
+//   }
+// }

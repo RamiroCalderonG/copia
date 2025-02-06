@@ -8,6 +8,7 @@
         android:label="OXSCHOOL"
         tools:replace="android:label"
         android:icon="@mipmap/launcher_icon"
+        android:enableOnBackInvokedCallback="true"
         android:requestLegacyExternalStorage="true">
 
         <activity

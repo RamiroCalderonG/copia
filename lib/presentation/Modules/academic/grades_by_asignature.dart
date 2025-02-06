@@ -20,7 +20,6 @@ import '../../../core/constants/date_constants.dart';
 
 import '../../../core/config/flutter_flow/flutter_flow_util.dart';
 import '../../../core/reusable_methods/academic_functions.dart';
-import '../../../core/reusable_methods/user_functions.dart';
 import '../../../data/datasources/temp/teacher_grades_temp.dart';
 import '../../components/confirm_dialogs.dart';
 import '../../components/student_eval_comments_dialog.dart';
@@ -54,25 +53,12 @@ String currentMonth = DateFormat.MMMM().format(DateTime.now());
 String? subjectSelected = oneTeacherAssignatures.first;
 
 /// Whether the user is an admin.
-bool isUserAdmin = verifyUserAdmin(currentUser!);
+bool isUserAdmin = false; //currentUser!.isCurrentUserAdmin();
 
 /// The list of rows in the grid.
 List<PlutoRow> rows = [];
 
-/// The selected group.
-// String groupSelected = '';
-
-/// The selected grade.
-
-// String gradeSelected = '';
-
-/// The selected subject value.
-
-// String subjectValue = '';
-
 class _GradesByAsignatureState extends State<GradesByAsignature> {
-  // = oneTeacherGroups.first.toString();
-  // = oneTeacherAssignatures.first;
   String? asignatureNameListener;
   String? selectedStudentName;
   // var gradeInt;
@@ -89,9 +75,8 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
 
   @override
   void initState() {
-    super.initState();
     _fetchData();
-    // isLoading = false;
+    super.initState();
   }
 
   @override
@@ -112,6 +97,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
             'Nombre': PlutoCell(value: item.studentName),
             'Apellido paterno': PlutoCell(value: item.student1LastName),
             'Apellido materno': PlutoCell(value: item.student2LastName),
+            'idCalif': PlutoCell(value: item.rateID),
           },
         );
       }).toList();
@@ -119,10 +105,8 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
   }
 
   void _fetchData() async {
-    var response = await loadStartGrading(
-        currentUser!.employeeNumber!, currentCycle!.toString());
-    fetchedData = response;
     setState(() {
+      fetchedData = fetchedDataFromloadStartGrading;
       isLoading = false;
     });
   }
@@ -140,7 +124,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
       studentList = await getStudentsByAssinature(
           groupSelected, gradeInt, assignatureID, monthNumber, campus);
 
-      fillGrid(studentList);
+      await fillGrid(studentList);
       setState(() {
         isLoading = true;
         assignatureRows.clear();
@@ -151,17 +135,10 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
             'Apellido paterno': PlutoCell(value: item.student1LastName),
             'Apellido materno': PlutoCell(value: item.student2LastName),
             'Calif': PlutoCell(value: item.evaluation),
-            'Conducta': PlutoCell(value: item.discipline),
-            'Uniforme': PlutoCell(value: item.outfit),
-            'Ausencia': PlutoCell(value: item.absence),
-            'Tareas': PlutoCell(value: item.homework),
+            'idCalif': PlutoCell(value: item.rateID),
           }));
         }
-//                           // StudentsPlutoGrid(rows: assignatureRows);
       });
-      if (int.parse(gradeInt) >= 6) {
-        await getCommentsForEvals(int.parse(gradeInt));
-      }
       setState(() {
         isLoading = false;
       });
@@ -206,88 +183,26 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                     child: Text(
                         'Error en la conexión, verificar la conectividad: Code: 408'));
               } else {
-                return SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          _buildGradesbyAssignature(),
-                        ],
-                      )
-                    ],
-                  ),
-                );
+                if (isLoading) {
+                  return const CustomLoadingIndicator();
+                } else {
+                  return SingleChildScrollView(
+                      child: Padding(
+                    padding: EdgeInsets.all(10),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            _buildGradesbyAssignature(),
+                          ],
+                        )
+                      ],
+                    ),
+                  ));
+                }
               }
             }),
           );
-
-    // Stack(
-    //   children: [
-    //     SizedBox(
-    //       width: MediaQuery.of(context).size.width,
-    //       child: LayoutBuilder(
-    //           builder: (BuildContext context, BoxConstraints constraints) {
-    //         if (isLoading == false) {
-    //           return SingleChildScrollView(
-    //             child: Column(
-    //               children: [
-    //                 Row(
-    //                   children: [_buildGradesbyAssignature()],
-    //                 )
-    //               ],
-    //             ),
-    //           );
-    //         } else {
-    //           return const CustomLoadingIndicator();
-    //         }
-    //       }),
-    //     )
-    //   ],
-    // );
-
-    // FutureBuilder(
-    //   future: loadStartGrading(
-    //       currentUser!.employeeNumber!, currentCycle!.toString()),
-    //   builder: (context, snapshot) {
-    //     if (snapshot.connectionState == ConnectionState.waiting) {
-    //       return Center(child: CustomLoadingIndicator());
-    //     } else if (snapshot.hasError) {
-    //       // var message = snapshot.error.toString().split(" ").elementAt(1);
-    //       // var message = getMessageToDisplay(message);
-    //       insertErrorLog(
-    //           snapshot.error.toString(), ' INIT GRADES/EVAL SCREEN ');
-    //       return Center(child: Text('Error: ${snapshot.error}'));
-    //     } else if (!snapshot.hasData || snapshot.data == null) {
-    //       return const Center(child: Text('Sin información disponible'));
-    //     } else {
-    //       return Stack(
-    //         children: [
-    //           SizedBox(
-    //             width: MediaQuery.of(context).size.width,
-    //             child: LayoutBuilder(builder:
-    //                 (BuildContext context, BoxConstraints constraints) {
-    //               if (constraints.maxWidth > 600) {
-    //                 return SingleChildScrollView(
-    //                   child: Column(
-    //                     children: [
-    //                       Row(
-    //                         children: [_buildGradesbyAssignature()],
-    //                       )
-    //                     ],
-    //                   ),
-    //                 );
-    //               } else {
-    //                 return const Placeholder(
-    //                   child: Text('Smaller version pending to design'),
-    //                 );
-    //               }
-    //             }),
-    //           )
-    //         ],
-    //       );
-    //     }
-    //   },
-    // );
   }
 
   Widget _buildGradesbyAssignature() {
@@ -311,30 +226,46 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
               children: [
                 Flexible(
                   child: RefreshButton(onPressed: () {
-                    // setState(() {
-                    //   isLoading = true;
-                    // });
-                    var monthNumber;
+                    setState(() {
+                      isLoading = true;
+                    });
+                    try {
+                      var monthNumber;
+                      isUserAdmin = currentUser!.isCurrentUserAdmin();
 
-                    if (isUserAdmin) {
-                      monthNumber =
-                          getKeyFromValue(spanishMonthsMap, selectedTempMonth!);
-                    } else {
-                      monthNumber = getKeyFromValue(
-                          spanishMonthsMap, selectedCurrentTempMonth!);
+                      if (isUserAdmin) {
+                        monthNumber = getKeyFromValue(
+                            spanishMonthsMap, selectedTempMonth!);
+                      } else {
+                        monthNumber = getKeyFromValue(
+                            spanishMonthsMap, selectedCurrentTempMonth!);
+                      }
+                      var assignatureID = getKeyFromValue(
+                          assignaturesMap, selectedTempSubject!);
+
+                      var gradeInt = getKeyFromValue(
+                          teacherGradesMap, selectedTempGrade!.toString());
+
+                      searchBUttonAction(
+                          selectedTempGroup!,
+                          gradeInt.toString(),
+                          assignatureID.toString(),
+                          monthNumber.toString(),
+                          selectedTempCampus!);
+                      // setState(() {
+                      //   isLoading = false;
+                      // });
+                    } catch (e) {
+                      insertErrorLog(
+                          e.toString(), 'SEARCH STUDENTS BY SUBJECTS ');
+                      var message = getMessageToDisplay(e.toString());
+                      if (context.mounted) {
+                        showErrorFromBackend(context, message.toString());
+                        setState(() {
+                          isLoading = false;
+                        });
+                      }
                     }
-                    var assignatureID =
-                        getKeyFromValue(assignaturesMap, selectedTempSubject!);
-
-                    var gradeInt =
-                        getKeyFromValue(teacherGradesMap, selectedTempGrade!);
-
-                    searchBUttonAction(
-                        selectedTempGroup!,
-                        gradeInt.toString(),
-                        assignatureID.toString(),
-                        monthNumber.toString(),
-                        selectedTempCampus!);
                   }),
                 ),
                 const SizedBox(width: 10),
@@ -344,6 +275,9 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                         // backgroundColor: Colors.red[400],
                         ),
                     onPressed: () async {
+                      setState(() {
+                        isLoading = true;
+                      });
                       updateButtonFunction((success) {
                         if (success) {
                           showConfirmationDialog(
@@ -361,7 +295,8 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                                 spanishMonthsMap, selectedCurrentTempMonth!);
                           }
                           var gradeInt = getKeyFromValue(
-                              teacherGradesMap, selectedTempGrade!);
+                              teacherGradesMap, selectedTempGrade!.toString());
+                          assignatureRows.clear();
 
                           searchBUttonAction(
                               selectedTempGroup!,
@@ -369,6 +304,9 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                               assignatureID.toString(),
                               monthNumber.toString(),
                               selectedTempCampus!);
+                          setState(() {
+                            isLoading = false;
+                          });
                         } else {
                           showErrorFromBackend(context, 'Error');
                         }
@@ -384,7 +322,8 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
           const Divider(thickness: 1),
           Container(
               width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height / 1.5,
+              height: MediaQuery.of(context).size.height / 1.8,
+              // padding: const EdgeInsets.all(10),
               margin: const EdgeInsets.all(20),
               child: LayoutBuilder(
                   builder: (BuildContext context, BoxConstraints constraints) {
@@ -403,56 +342,32 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                   return StatefulBuilder(
                     builder: (context, setState) {
                       return PlutoGrid(
-                          mode: PlutoGridMode.normal,
-                          columns: assignaturesColumns,
-                          rows: assignatureRows,
-                          onChanged: (event) {
-                            var newValue = validateNewGradeValue(
-                                //Validate values cant be les that 50
-                                event.value,
-                                event.column.title);
+                        mode: PlutoGridMode.normal,
+                        columns: assignaturesColumns,
+                        rows: assignatureRows,
+                        onChanged: (event) {
+                          final idEval =
+                              event.row.cells['idCalif']?.value as int;
 
-                            composeUpdateStudentGradesBody(
-                                event.column.title, newValue, event.rowIdx);
-                          },
-                          onRowSecondaryTap: (event) async {
-                            asignatureNameListener = '';
-                            asignatureNameListener = subjectSelected;
-                            var studentID = event.row.cells['Matricula']?.value;
-
-                            var selectedStudentName =
-                                event.row.cells['Nombre']?.value;
-                            // validator();
-                            commentsAsignated.clear();
-                            var gradeInt = getKeyFromValue(
-                                teacherGradesMap, selectedTempGrade!);
-
-                            if (isUserAdmin == true) {
-                              monthNumber = getKeyFromValue(
-                                  spanishMonthsMap, selectedTempMonth!);
-                            } else {
-                              monthNumber = getKeyFromValue(
-                                  spanishMonthsMap, selectedCurrentTempMonth!);
-                            }
-
-                            if (gradeInt! >= 6) {
-                              commentsAsignated =
-                                  await getCommentsAsignatedToStudent(gradeInt!,
-                                      true, studentID.toString(), monthNumber);
-
-                              showCommentsDialog(commentsAsignated,
-                                  asignatureNameListener!, selectedStudentName);
-                            } else {
-                              showInformationDialog(context, 'Aviso',
-                                  'Sin comentarios disponibles a asignar al alumno seleccionado');
-                            }
-                          },
-                          configuration: const PlutoGridConfiguration(),
-                          createFooter: (stateManager) {
-                            stateManager.setPageSize(30,
-                                notify: false); // default 40
-                            return PlutoPagination(stateManager);
-                          });
+                          var newValue = validateNewGradeValue(
+                              //Validate values cant be les that 50
+                              event.value,
+                              event.column.title);
+                          composeUpdateStudentGradesBody(
+                              event.column.title, newValue, idEval);
+                        },
+                        configuration: PlutoGridConfiguration(
+                            columnSize: PlutoGridColumnSizeConfig(
+                                autoSizeMode: PlutoAutoSizeMode.scale),
+                            scrollbar: PlutoGridScrollbarConfig(
+                                isAlwaysShown: true,
+                                scrollBarColor: Colors.red)),
+                        createFooter: (stateManager) {
+                          stateManager.setPageSize(30,
+                              notify: false); // default 40
+                          return PlutoPagination(stateManager);
+                        },
+                      );
                     },
                   );
                 }

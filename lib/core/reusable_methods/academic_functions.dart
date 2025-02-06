@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ffi';
 
 import 'package:flutter/material.dart';
+import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
-import 'package:oxschool/core/reusable_methods/translate_messages.dart';
 
 import 'package:oxschool/data/Models/Student_eval.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
+import 'package:pluto_grid/pluto_grid.dart';
 
 import '../../data/datasources/temp/studens_temp.dart';
 import '../../data/services/backend/api_requests/api_calls_list.dart';
@@ -15,10 +17,14 @@ import '../../data/datasources/temp/teacher_grades_temp.dart';
 
 dynamic loadStartGrading(int employeeNumber, String schoolYear) async {
   try {
+    DateTime now = DateTime.now();
+    int month = now.month;
+    //FETCH FOR TEACHER DATA
     var startGrading = await getTeacherGradeAndCourses(
-        currentUser!.employeeNumber, currentCycle);
+        currentUser!.employeeNumber, currentCycle, month);
     List<dynamic> jsonList = json.decode(startGrading);
     jsonDataForDropDownMenuClass = jsonList;
+    fetchedDataFromloadStartGrading = jsonList;
 
     try {
       getTeacherEvalCampuses(jsonList);
@@ -28,7 +34,7 @@ dynamic loadStartGrading(int employeeNumber, String schoolYear) async {
 
       return jsonList;
     } catch (e) {
-      throw FormatException(e.toString());
+      rethrow;
     }
   } catch (e) {
     insertErrorLog(e.toString(), ' INIT STUDENT EVALUATION GRID ');
@@ -43,8 +49,8 @@ Future<void> getSingleTeacherGrades(List<dynamic> apiResponse) async {
       oneTeacherGrades.clear();
     }
     for (var i = 0; i < apiResponse.length; i++) {
-      String grade = apiResponse[i]['grade'];
-      int gradeSequence = apiResponse[i]['gradeseq'];
+      String grade = apiResponse[i]['Grade'];
+      int gradeSequence = apiResponse[i]['Sequence'];
       originalList.add(grade);
       oneTeacherGrades = originalList.toSet().toList();
 
@@ -62,7 +68,7 @@ Future<void> getSingleTeacherGroups(List<dynamic> apiResponse) async {
       oneTeacherGroups.clear();
     }
     for (var i = 0; i < apiResponse.length; i++) {
-      String group = apiResponse[i]['school_group'];
+      String group = apiResponse[i]['School_group'];
 
       originalList.add(group);
       oneTeacherGroups = originalList.toSet().toList();
@@ -77,8 +83,8 @@ Future<void> getSingleTeacherAssignatures(List<dynamic> apiResponse) async {
       oneTeacherAssignatures.clear();
     }
     for (var i = 0; i < apiResponse.length; i++) {
-      String assignature = apiResponse[i]['assignature_name'];
-      int assignatureID = int.parse(apiResponse[i]['assignature_id']);
+      String assignature = apiResponse[i]['Subject'];
+      int assignatureID = apiResponse[i]['Subject_id'];
       originalList.add(assignature);
 
       oneTeacherAssignatures = originalList.toSet().toList();
@@ -89,10 +95,26 @@ Future<void> getSingleTeacherAssignatures(List<dynamic> apiResponse) async {
   }
 }
 
-Future<List<dynamic>> getStudentsByTeacher(
-    int employeeNumber, String selectedCycle, roleName) async {
-  var response = await getStudentsByRole(employeeNumber, roleName);
+Future<List<dynamic>> getStudentsByTeacher(String selectedCycle) async {
+  var response = await getStudentsByRole(selectedCycle);
   List<dynamic> jsonList = json.decode(response);
+
+  for (var item in jsonList) {
+    String campus = item['Claun'];
+    String grade = item['GradoSecuencia'].toString();
+    String group = item['Grupo'];
+    String gradeName = item['gradeName'];
+
+    if (!teacherCampusListFODAC27.contains(campus)) {
+      teacherCampusListFODAC27.add(campus);
+    }
+    if (!teacherGradesListFODAC27.contains(grade)) {
+      teacherGradesListFODAC27.add(grade);
+    }
+    if (!gradesMapFODAC27.containsKey(gradeName.trim())) {
+      gradesMapFODAC27[gradeName.trim()] = int.parse(grade);
+    }
+  }
 
   return jsonList;
 }
@@ -135,7 +157,7 @@ Future<List<StudentEval>> getStudentsByAssinature(
   try {
     var studentsList = await getStudentsToGrade(assignature, group,
         gradeSelected, currentCycle!.claCiclo, campus, month);
-    List<dynamic> jsonList = json.decode(studentsList.body);
+    List<dynamic> jsonList = json.decode(utf8.decode(studentsList.body));
 
     List<StudentEval> evaluations = getEvalFromJSON(jsonList, false);
 
@@ -149,7 +171,7 @@ Future<List<StudentEval>> getStudentsByAssinature(
 }
 
 Future<List<StudentEval>> getSubjectsAndGradesByStudent(
-    String grade, group, cycle, campus, month) async {
+    int grade, String group, String cycle, String campus, int month) async {
   try {
     var subjectsGradesList =
         await getSubjectsAndGradeByStuent(group, grade, cycle, campus, month);
@@ -160,7 +182,11 @@ Future<List<StudentEval>> getSubjectsAndGradesByStudent(
     uniqueStudents.clear();
 
     for (var student in jsonList) {
-      uniqueStudents[student['studentID']] = student['studentName'];
+      uniqueStudents[student['studentID']] = student['student'] +
+          ' ' +
+          student['1lastName'] +
+          ' ' +
+          student['2lastName'];
       // uniqueStudents[student['studentName']] = student['studentName'];
     }
 
@@ -264,15 +290,19 @@ List<Map<String, dynamic>> mergeCommentsData(
 }
 
 void composeBodyToUpdateGradeBySTudent(
-    String key, studentID, int value, int subject, month) {
+    String key, studentID, int value, int evalId, month) {
   bool idExists = false;
 
   if (studentGradesBodyToUpgrade.isEmpty) {
-    studentGradesBodyToUpgrade.add(
-        {'student': studentID, key: value, 'subject': subject, 'month': month});
+    studentGradesBodyToUpgrade.add({
+      'student': studentID,
+      'eval': value,
+      'idEval': evalId,
+      'month': month
+    });
   } else {
     for (var obj in studentGradesBodyToUpgrade) {
-      if (obj['student'] == studentID && obj['subject'] == subject) {
+      if (obj['student'] == studentID && obj['idEval'] == evalId) {
         //If already exist data for selected student
         idExists = true;
         if (key == 'Comentarios') {
@@ -302,10 +332,10 @@ void composeBodyToUpdateGradeBySTudent(
             obj[key] = newValue;
           }
         } else {
-          if (obj.containsKey(key)) {
-            obj[key] = value; //Update the existing value
+          if (obj.containsKey('eval')) {
+            obj['eval'] = value; //Update the existing value
           } else {
-            obj[key] = value; //Add the new value
+            obj['eval'] = value; //Add the new value
           }
         }
       }
@@ -314,23 +344,26 @@ void composeBodyToUpdateGradeBySTudent(
     if (!idExists) {
       studentGradesBodyToUpgrade.add({
         'student': studentID,
-        key: value,
-        'subject': subject,
+        'eval': value,
+        'idEval': evalId,
         'month': month
       });
     }
   }
 }
 
-void composeUpdateStudentGradesBody(String key, dynamic value, int rowIndex) {
-  var idToupdate = studentList[rowIndex].rateID;
+void composeUpdateStudentGradesBody(String key, dynamic value, int idEval) {
   bool idExists = false;
 
+  if (key == 'Calif') {
+    key = 'eval';
+  }
+
   if (studentGradesBodyToUpgrade.isEmpty) {
-    studentGradesBodyToUpgrade.add({'id': idToupdate, key: value});
+    studentGradesBodyToUpgrade.add({'idEval': idEval, key: value});
   } else {
     for (var obj in studentGradesBodyToUpgrade) {
-      if (obj['id'] == idToupdate) {
+      if (obj['idEval'] == idEval) {
         idExists = true;
         if (obj.containsKey(key)) {
           obj[key] = value; // Update the existing value
@@ -340,21 +373,30 @@ void composeUpdateStudentGradesBody(String key, dynamic value, int rowIndex) {
       }
     }
     if (!idExists) {
-      studentGradesBodyToUpgrade.add({'id': idToupdate, key: value});
+      studentGradesBodyToUpgrade.add({'idEval': idEval, key: value});
     }
   }
 }
 
-Future<String> createFodac27Record(String date, String studentID, String cycle,
-    String observations, int employeeNumber, int subject) async {
-  var responseCode = await postFodac27Record(
-      date, studentID, cycle, observations, employeeNumber, subject);
-
-  if (responseCode.statusCode == 200) {
-    return 'Succes';
-  } else {
-    return 'Error: ${responseCode.body}';
+Future<dynamic> createFodac27Record(DateTime date, String studentID,
+    String cycle, String observations, int employeeNumber, int subject) async {
+  // var responseCode =
+  try {
+    var result = await postFodac27Record(
+            date, studentID, cycle, observations, employeeNumber, subject)
+        .catchError((error) {
+      return Future.error('Error: ${error.toString()}');
+    });
+    return result;
+  } catch (e) {
+    Future.error(e.toString());
   }
+
+  // if (responseCode.statusCode == 200) {
+  //   return 'Succes';
+  // } else {
+  //   return 'Error: ${responseCode.body}';
+  // }
 }
 
 Future<int> updateFodac27Record(
@@ -367,23 +409,22 @@ Future<int> updateFodac27Record(
 Future<Map<String, dynamic>> populateSubjectsDropDownSelector(
     String studentID, String cycle) async {
   try {
-    var subjects = await getStudentSubjects(studentID, cycle);
-
-    if (subjects.statusCode != 200) {
-      return {'error': 'Error fetching subjects'};
-    }
-    var subjectsList = jsonDecode(subjects.body);
+    var subjects = await getStudentSubjects(studentID, cycle).catchError((e) {
+      return {'error': 'Error fetching subjects ${e.toString()}'};
+    });
+    // if (subjects.statusCode != 200) {
+    //   return {'error': 'Error fetching subjects'};
+    // }
+    var subjectsList = json.decode(utf8.decode(subjects.body.codeUnits));
     Map<String, dynamic> result = {};
 
     for (var item in subjectsList) {
-      result[item['subject']] = item['subject2'];
-
-      // result.add(item['subject']);
+      result[item['subject'].trim()] = item['subject2'];
     }
 
     return result;
   } catch (e) {
-    return throw FormatException(e.toString());
+    return Future.error(e.toString());
   }
 }
 
@@ -417,23 +458,17 @@ int validateNewGradeValue(int newValue, String columnNameToFind) {
   }
 }
 
-Future<bool> isDateToEvaluateStudents() async {
+Future<dynamic> isDateToEvaluateStudents() async {
   try {
-    var originDate = await getActualDate();
-    if (originDate != null) {
-      List<dynamic> parsedJson = json.decode(originDate);
-      bool dateValue = parsedJson[0]['date'];
-      if (dateValue) {
-        return true;
-      } else {
-        return false;
-      }
-    } else {
-      return false;
-    }
+    var originDate = await getActualDate().catchError((error) {
+      return error;
+    });
+    var originResponse = jsonDecode(originDate);
+    var response = originResponse['Value'];
+    return response;
   } catch (e) {
     insertErrorLog(e.toString(), 'FETCH DATE FOR STUDENT EVALUATION');
-    return throw Exception(e.toString());
+    return throw Future.error(e);
   }
 }
 
@@ -441,8 +476,8 @@ void getTeacherEvalCampuses(List<dynamic> jsonData) {
   if (jsonData.isNotEmpty) {
     for (var item in jsonData) {
       // Check if the item has the "campus" key and is a String
-      if (item.containsKey('campus') && item['campus'] is String) {
-        campusesWhereTeacherTeach.add(item['campus']);
+      if (item.containsKey('Campus') && item['Campus'] is String) {
+        campusesWhereTeacherTeach.add(item['Campus']);
       }
     }
   }

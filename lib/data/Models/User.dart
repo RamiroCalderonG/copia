@@ -8,13 +8,15 @@ class User {
   int userId;
   String token;
   String? userEmail;
-  String? usergenre;
+  //String? usergenre;
   int? isActive;
   String? work_area;
   String? work_position;
   String? creationDate;
   String? birthdate;
   bool? isTeacher;
+  bool? isAdmin;
+  int? roleID;
 
   // late final notActive;
 
@@ -26,13 +28,15 @@ class User {
       this.userId,
       this.token,
       this.userEmail,
-      this.usergenre,
+      //this.usergenre,
       this.isActive,
       this.work_area,
       this.work_position,
       this.creationDate,
       this.birthdate,
-      this.isTeacher);
+      this.isTeacher,
+      this.isAdmin,
+      this.roleID);
 
   Map<dynamic, dynamic> toJson() => {
         "employeeNumber": employeeNumber,
@@ -42,13 +46,15 @@ class User {
         "id": userId,
         "role": role,
         'useremail': userEmail,
-        'genre': usergenre,
+        //'genre': usergenre,
         "bajalogicasino": isActive,
         "department": work_area,
         "position": work_position,
         "creationDate": creationDate.toString(),
         "birthdate": birthdate,
-        "is_Teacher": isTeacher
+        "is_Teacher": isTeacher,
+        "isAdmin": isAdmin,
+        "roleID": roleID
 
         // "notActive": notActive
       };
@@ -61,13 +67,15 @@ class User {
       userId = jsonUser[item]['role_name'];
       token = '';
       userEmail = jsonUser[item]['user_email'];
-      usergenre = jsonUser[item]['genre'];
+      //usergenre = jsonUser[item]['genre'];
       isActive = jsonUser[item]['bajalogicasino'];
       work_area = jsonUser[item]['work_area'];
       work_position = jsonUser[item]['work_position'];
       creationDate = jsonUser[item]['creation_date'];
       birthdate = jsonUser[item]['birthdate'];
       isTeacher = jsonUser[item]['is_Teacher'];
+      isAdmin = jsonUser[item]['userRole']['isAdmin'];
+      roleID = jsonUser[item]['userRole']['id'];
     }
     return User(
         claUn,
@@ -77,13 +85,15 @@ class User {
         userId,
         token,
         userEmail,
-        usergenre,
+        //usergenre,
         isActive,
         work_area,
         work_position,
         creationDate,
         birthdate,
-        isTeacher);
+        isTeacher,
+        isAdmin,
+        roleID);
   }
 
   void clear() {
@@ -91,15 +101,14 @@ class User {
     employeeNumber = null;
     claUn = null;
     token = "";
+    isAdmin = null;
   }
 
-  dynamic canEditStudentGrades() {
-    if (role == 'Administrador' ||
-        role == 'Director' ||
-        role == 'Coordinador') {
-      return true;
-    } else {
-      return false;
-    }
+  bool isUserTeacher() {
+    return isTeacher!;
+  }
+
+  bool isCurrentUserAdmin() {
+    return isAdmin!;
   }
 }

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 // ignore: depend_on_referenced_packages
 import 'package:http/http.dart' as http;
-import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/core/reusable_methods/user_functions.dart';
 import 'package:oxschool/presentation/Modules/services_ticket/processes/create_service_ticket.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
@@ -107,20 +107,28 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
                               Navigator.of(context).push(MaterialPageRoute(
                                   builder: (context) => const UserWindow()));
                             },
+                            style: ButtonStyle(
+                              backgroundColor: WidgetStateProperty.all(
+                                  const Color.fromARGB(248, 226, 230, 250)),
+                              shape: WidgetStateProperty.all(
+                                  RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(30))),
+                            ),
+                            tooltip: 'Perfil de usuario',
                             icon: const Icon(Icons.person),
                             iconSize: 30.2,
                             color: const Color.fromRGBO(235, 48, 69, 0.988),
                           ),
-                          Text(
-                              '${currentUser?.employeeName?.toLowerCase().trimRight()}',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  fontFamily: 'Sora',
-                                  fontSize: 18,
-                                  color: FlutterFlowTheme.of(context)
-                                      .primaryText) // FlutterFlowTheme.of(context).bodyMedium,
-                              ),
-                          // Padding(padding: EdgeInsets.only(left: 5, right: 5)),
+                          // Text(
+                          //     '${currentUser?.employeeName?.trim().capitalize}',
+                          //     textAlign: TextAlign.center,
+                          //     style: TextStyle(
+                          //         fontFamily: 'Sora',
+                          //         fontSize: 18,
+                          //         color: FlutterFlowTheme.of(context)
+                          //             .primaryText) // FlutterFlowTheme.of(context).bodyMedium,
+                          //     ),
+                          Padding(padding: EdgeInsets.only(left: 5, right: 5)),
                         ],
                       ),
                     ),
@@ -135,11 +143,15 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
         backgroundColor: FlutterFlowTheme.of(context).primary,
         leading: IconButton(
           hoverColor: Colors.black12,
-          icon: const Icon(
-            Icons.menu,
+          icon: const FaIcon(
+            FontAwesomeIcons.barsStaggered,
             size: 30,
-            // size: 40.5,
           ),
+          // Icon(
+          //   Icons.menu,
+          //   size: 30,
+          //   // size: 40.5,
+          // ),
           onPressed: () async {
             scaffoldKey.currentState!.openDrawer();
           },
@@ -266,7 +278,8 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         drawer: Opacity(
             opacity: 1,
-            child: _createDrawer(context, userEvents) //DrawerClass()
+            child: _createDrawer(
+                context, userEvents as Future<http.Response>) //DrawerClass()
             ),
         body: NestedScrollView(
           headerSliverBuilder: (context, _) => [
@@ -317,26 +330,28 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
             onSelected: (value) {
               switch (value) {
                 case 1:
-                  showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: const Text('Crear Ticket de servicio'),
-                          content: const CreateServiceTicket(),
-                          actions: <Widget>[
-                            TextButton(
-                              style: TextButton.styleFrom(
-                                textStyle:
-                                    Theme.of(context).textTheme.labelLarge,
-                              ),
-                              child: const Text(''),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                          ],
-                        );
-                      });
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => const CreateServiceTicket()));
+                  // showDialog(
+                  //     context: context,
+                  //     builder: (BuildContext context) {
+                  //       return AlertDialog(
+                  //         title: const Text('Crear Ticket de servicio'),
+                  //         content: const CreateServiceTicket(),
+                  //         actions: <Widget>[
+                  //           TextButton(
+                  //             style: TextButton.styleFrom(
+                  //               textStyle:
+                  //                   Theme.of(context).textTheme.labelLarge,
+                  //             ),
+                  //             child: const Text(''),
+                  //             onPressed: () {
+                  //               Navigator.of(context).pop();
+                  //             },
+                  //           ),
+                  //         ],
+                  //       );
+                  //     });
 
                   break;
                 default:
