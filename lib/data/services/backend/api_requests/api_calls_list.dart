@@ -707,7 +707,7 @@ Future<dynamic> validateToken(
 // }
 
 Future<dynamic> getTeacherGradeAndCourses(
-    var employee, var year, int month, bool isAdmin) async {
+    var employee, var year, int month, bool isAdmin, String? campus) async {
   try {
     var apiCall = await Requests.get(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/teacher-grades',
@@ -719,7 +719,8 @@ Future<dynamic> getTeacherGradeAndCourses(
           'employee': currentUser!.employeeNumber,
           "cycle": currentCycle!.claCiclo,
           "month": month,
-          "flag": isAdmin
+          "flag": isAdmin,
+          "campus": campus
         },
         persistCookies: false,
         timeoutSeconds: 40);

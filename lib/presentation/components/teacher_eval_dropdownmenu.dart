@@ -33,6 +33,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
   String? selectedSubject;
   // String? selectedUnity;
   List<String> unityList = [];
+  List<String> unityAdminList = ['ANAHUAC', 'BARRAGAN', 'CONCORDIA', 'SENDERO'];
   List<String> filteredGrade = [];
   List<String> filteredGroup = [];
   List<String> filteredSubject = [];
@@ -177,6 +178,35 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                       });
                     },
                     dropdownMenuEntries: unityList
+                        .map<DropdownMenuEntry<String>>((String value) {
+                      return DropdownMenuEntry<String>(
+                          value: value, label: value);
+                    }).toList(),
+                  ),
+                ],
+              )),
+            if (currentUser!.isCurrentUserAdmin())
+              Flexible(
+                  child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  DropdownMenu<String>(
+                    label: const Text(
+                      ' Campus ',
+                      style: TextStyle(fontSize: 14),
+                    ),
+                    trailingIcon: const Icon(Icons.arrow_drop_down),
+                    initialSelection: selectedUnity,
+                    onSelected: (String? value) {
+                      setState(() {
+                        selectedUnity = value;
+                        selectedGrade = null; // Clear dependent selections
+                        selectedGroup = null;
+                        selectedSubject = null;
+                        filterData();
+                      });
+                    },
+                    dropdownMenuEntries: unityAdminList
                         .map<DropdownMenuEntry<String>>((String value) {
                       return DropdownMenuEntry<String>(
                           value: value, label: value);

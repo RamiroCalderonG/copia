@@ -1,14 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:ffi';
 
 import 'package:flutter/material.dart';
-import 'package:oxschool/core/extensions/capitalize_strings.dart';
+
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 
 import 'package:oxschool/data/Models/Student_eval.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
-import 'package:pluto_grid/pluto_grid.dart';
 
 import '../../data/datasources/temp/studens_temp.dart';
 import '../../data/services/backend/api_requests/api_calls_list.dart';
@@ -16,14 +14,14 @@ import '../../data/services/backend/api_requests/api_calls_list.dart';
 import '../../data/datasources/temp/teacher_grades_temp.dart';
 
 dynamic loadStartGrading(
-    int employeeNumber, String schoolYear, bool isAdmin) async {
+    int employeeNumber, String schoolYear, bool isAdmin, String? campus) async {
   try {
     DateTime now = DateTime.now();
     int month = now.month;
     List<dynamic> jsonList;
     //FETCH FOR TEACHER DATA
     await getTeacherGradeAndCourses(
-            currentUser!.employeeNumber, currentCycle, month, isAdmin)
+            currentUser!.employeeNumber, currentCycle, month, isAdmin, campus)
         .then((onValue) {
       jsonList = json.decode(onValue);
       jsonDataForDropDownMenuClass = jsonList;
@@ -55,12 +53,14 @@ Future<void> getSingleTeacherGrades(List<dynamic> apiResponse) async {
       oneTeacherGrades.clear();
     }
     for (var i = 0; i < apiResponse.length; i++) {
-      String grade = apiResponse[i]['Grade'];
-      int gradeSequence = apiResponse[i]['Sequence'];
-      originalList.add(grade);
+      // String grade = apiResponse[i]['Grade'];
+      // int gradeSequence = apiResponse[i]['Sequence'];
+      originalList.add(apiResponse[i]['Grade']);
       oneTeacherGrades = originalList.toSet().toList();
 
-      Map<int, String> currentMapValue = {gradeSequence: grade};
+      Map<int, String> currentMapValue = {
+        apiResponse[i]['Sequence']: apiResponse[i]['Grade']
+      };
 
       teacherGradesMap.addEntries(currentMapValue.entries);
     }
@@ -74,9 +74,9 @@ Future<void> getSingleTeacherGroups(List<dynamic> apiResponse) async {
       oneTeacherGroups.clear();
     }
     for (var i = 0; i < apiResponse.length; i++) {
-      String group = apiResponse[i]['School_group'];
+      // String group = apiResponse[i]['School_group'];
 
-      originalList.add(group);
+      originalList.add(apiResponse[i]['School_group']);
       oneTeacherGroups = originalList.toSet().toList();
     }
   }
@@ -89,13 +89,15 @@ Future<void> getSingleTeacherAssignatures(List<dynamic> apiResponse) async {
       oneTeacherAssignatures.clear();
     }
     for (var i = 0; i < apiResponse.length; i++) {
-      String assignature = apiResponse[i]['Subject'];
-      int assignatureID = apiResponse[i]['Subject_id'];
-      originalList.add(assignature);
+      // String assignature = apiResponse[i]['Subject'];
+      // int assignatureID = apiResponse[i]['Subject_id'];
+      originalList.add(apiResponse[i]['Subject']);
 
       oneTeacherAssignatures = originalList.toSet().toList();
 
-      Map<int, String> currentMapValue = {assignatureID: assignature};
+      Map<int, String> currentMapValue = {
+        apiResponse[i]['Subject_id']: apiResponse[i]['Subject']
+      };
       assignaturesMap.addEntries(currentMapValue.entries);
     }
   }

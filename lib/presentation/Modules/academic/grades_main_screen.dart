@@ -99,21 +99,24 @@ class _GradesMainScreenState extends State<GradesMainScreen>
 
   Future<void> validateDateAndUserPriv() async {
     try {
+      String? campus;
       setState(() {
         isSearching = true;
       });
-      if (currentUser!.isCurrentUserAdmin()) {
+      if (isUserAdmin) {
         canEvaluateNow = true;
-        //TODO: FETCH ALL DATA BASED ON ROLE
+        campus = currentUser!.claUn;
+        //TODO : FETCH DATA FROM ADMIN USER
       } else {
+        //Fetch dates for evaluations, if not current date will not fetch student data
         canEvaluateNow = await isDateToEvaluateStudents().catchError((onError) {
           showErrorFromBackend(context, onError);
         });
       }
-
       if (canEvaluateNow) {
+        //If user can evaluate now, or admin, will fetch students current data from calif
         await loadStartGrading(currentUser!.employeeNumber!,
-            currentCycle!.claCiclo!, currentUser!.isCurrentUserAdmin());
+            currentCycle!.claCiclo!, currentUser!.isCurrentUserAdmin(), campus);
         setState(() {
           canUserEvaluate = canEvaluateNow;
           isSearching = false;
