@@ -5,12 +5,10 @@ import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/data/Models/Cycle.dart';
-import 'package:oxschool/data/Models/Role.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
 import 'package:oxschool/data/datasources/temp/users_temp_data.dart';
 import 'package:http/http.dart' as http;
 
-import '../../data/Models/Event.dart';
 import '../../data/Models/User.dart';
 
 List<User> parseUsersFromJSON(List<dynamic> jsonList) {

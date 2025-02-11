@@ -7,8 +7,6 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get_connect/http/src/response/response.dart';
-import 'package:http/src/response.dart';
 import 'package:oxschool/data/Models/Cycle.dart';
 import 'package:oxschool/data/Models/User.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';

@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
-import 'package:loading_indicator/loading_indicator.dart';
 import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/core/reusable_methods/translate_messages.dart';
@@ -12,7 +11,6 @@ import 'package:oxschool/data/Models/Student_eval.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/constants/date_constants.dart';
 import 'package:oxschool/core/reusable_methods/academic_functions.dart';
-import 'package:oxschool/core/reusable_methods/user_functions.dart';
 import 'package:oxschool/data/datasources/temp/teacher_grades_temp.dart';
 
 import 'package:pluto_grid/pluto_grid.dart';
@@ -83,11 +81,14 @@ class _GradesByStudentState extends State<GradesByStudent> {
   }
 
   void _fetchData() async {
-    var response = loadStartGrading(
-        currentUser!.employeeNumber!,
-        currentCycle!.toString(),
-        currentUser!.isCurrentUserAdmin(),
-        currentUser!.claUn);
+    var response = currentUser!.isCurrentUserAdmin()
+        ? loadStartGradingAsAdmin(
+            currentCycle!.claCiclo!, null, true, null, null)
+        : loadStartGrading(
+            currentUser!.employeeNumber!,
+            currentCycle!.toString(),
+            currentUser!.isCurrentUserAdmin(),
+            currentUser!.claUn);
     fetchedData = response;
     setState(() {
       isFetching = false;
@@ -142,7 +143,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
         selectedStudentID = null;
         selectedStudentRows.clear();
       });
-      var gradeInt = getKeyFromValue(teacherGradesMap, gradeString!);
+      var gradeInt = getKeyFromValue(teacherGradesMap, gradeString);
       if (studentList.isNotEmpty && studentsGradesCommentsRows.isNotEmpty) {
         studentList.clear();
         studentsGradesCommentsRows.clear();

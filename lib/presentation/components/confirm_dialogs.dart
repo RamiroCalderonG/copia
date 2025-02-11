@@ -111,7 +111,7 @@ void showInformationDialog(
               child: Text('Cerrar',
                   style: TextStyle(
                     fontFamily: 'Sora',
-                    backgroundColor: Colors.blue[50],
+                    // backgroundColor: Colors.blue[50],
                   )),
             )
           ],

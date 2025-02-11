@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -733,6 +734,34 @@ Future<dynamic> getTeacherGradeAndCourses(
       return throw firstWord;
     }
     return Future.error(e);
+  }
+}
+
+Future<dynamic> getTeacherGradeAndCoursesAsAdmin(
+    int month, bool isAdmin, String? campus, String? cycle) async {
+  try {
+    var apiCall = await Requests.get(
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/teacher-grades',
+      headers: {
+        'Authorization': currentUser!.token,
+        'Content-Type': 'application/json',
+      },
+      queryParameters: {
+        "cycle": cycle,
+        "month": month,
+        "flag": isAdmin,
+        "campus": campus,
+        "employee": currentUser!.employeeNumber
+      },
+      bodyEncoding: RequestBodyEncoding.JSON,
+      persistCookies: true,
+      timeoutSeconds: 25,
+    );
+    apiCall.raiseForStatus();
+    return apiCall;
+  } catch (e) {
+    insertErrorLog(e.toString(), 'getTeacherGradeAndCoursesAsAdmin()');
+    throw Future.error(e.toString());
   }
 }
 

@@ -1,11 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
-import 'package:oxschool/core/constants/screens.dart';
 import 'package:oxschool/core/extensions/capitalize_strings.dart';
-import 'package:oxschool/core/reusable_methods/academic_functions.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/core/utils/loader_indicator.dart';
 import 'package:oxschool/data/Data%20Transfer%20Objects/CafeteriaConsumptionDto.dart';

@@ -82,6 +82,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
   @override
   void dispose() {
     rows.clear();
+    selectedCurrentTempMonth = null;
     super.dispose();
   }
 
@@ -231,9 +232,9 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                     });
                     try {
                       var monthNumber;
-                      isUserAdmin = currentUser!.isCurrentUserAdmin();
+                      // isUserAdmin = currentUser!.isCurrentUserAdmin();
 
-                      if (isUserAdmin) {
+                      if (currentUser!.isCurrentUserAdmin()) {
                         monthNumber = getKeyFromValue(
                             spanishMonthsMap, selectedTempMonth!);
                       } else {
@@ -243,15 +244,22 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                       var assignatureID = getKeyFromValue(
                           assignaturesMap, selectedTempSubject!);
 
-                      var gradeInt = getKeyFromValue(
-                          teacherGradesMap, selectedTempGrade!.toString());
+                      // var gradeInt = getKeyFromValue(
+                      //     teacherGradesMap, selectedTempGrade!.toString());
 
-                      searchBUttonAction(
-                          selectedTempGroup!,
-                          gradeInt.toString(),
-                          assignatureID.toString(),
-                          monthNumber.toString(),
-                          selectedTempCampus!);
+                      if (assignatureID != null && assignatureID > 0) {
+                        searchBUttonAction(
+                            selectedTempGroup!,
+                            selectedTempGrade.toString(),
+                            assignatureID.toString(),
+                            monthNumber.toString(),
+                            selectedTempCampus!);
+                      } else {
+                        isLoading = false;
+                        showInformationDialog(context, 'Alerta!',
+                            'No se detectó una asignatura, vuelva a intentar.');
+                      }
+
                       // setState(() {
                       //   isLoading = false;
                       // });

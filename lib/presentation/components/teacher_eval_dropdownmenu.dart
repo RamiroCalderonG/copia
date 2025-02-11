@@ -1,12 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:oxschool/core/reusable_methods/reusable_functions.dart';
 import 'package:oxschool/presentation/Modules/academic/grades_main_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/constants/date_constants.dart';
 import '../../core/constants/user_consts.dart';
 import '../../data/datasources/temp/studens_temp.dart';
 import '../../data/datasources/temp/teacher_grades_temp.dart';
-import 'package:oxschool/core/extensions/capitalize_strings.dart';
 // import '../Modules/academic/grades_by_asignature.dart';
 
 class TeacherEvalDropDownMenu extends StatefulWidget {
@@ -33,14 +33,14 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
   String? selectedSubject;
   // String? selectedUnity;
   List<String> unityList = [];
-  List<String> unityAdminList = ['ANAHUAC', 'BARRAGAN', 'CONCORDIA', 'SENDERO'];
+  // List<String> unityAdminList = ['ANAHUAC', 'BARRAGAN', 'CONCORDIA', 'SENDERO'];
   List<String> filteredGrade = [];
   List<String> filteredGroup = [];
   List<String> filteredSubject = [];
   String currentMonth = spanishMonthsMap[currentMonthNumber] ?? 'Unknown month';
 
   String monthValue = '';
-  bool userStatus = false;
+  // bool userStatus = false;
   bool hasBeenFiltered = false;
 
   @override
@@ -83,8 +83,9 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
     if (selectedUnity != null) {
       // Filter grades based on Campus
       filteredGrade = widget.jsonData
-          .where((item) => item['Campus'] == selectedUnity)
-          .map<String>((item) => item['Grade'].toString())
+          .where((item) => (item['Campus'] ?? item['campus']) == selectedUnity)
+          .map<String>(
+              (item) => (item['Grade'] ?? item['grade'])?.toString() ?? '')
           .toSet()
           .toList();
 
@@ -98,9 +99,11 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
       // Filter groups based on Campus and Grade
       filteredGroup = widget.jsonData
           .where((item) =>
-              item['Campus'] == selectedUnity &&
-              (selectedGrade == null || item['Grade'] == selectedGrade))
-          .map<String>((item) => item['School_group'].toString())
+              (item['Campus'] ?? item['campus']) == selectedUnity &&
+              (selectedGrade == null ||
+                  (item['Grade'] ?? item['grade']) == selectedGrade))
+          .map<String>((item) =>
+              (item['School_group'] ?? item['school_group'])?.toString() ?? '')
           .toSet()
           .toList();
 
@@ -113,10 +116,14 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
       // Filter subjects based on Campus, Grade, and Group
       filteredSubject = widget.jsonData
           .where((item) =>
-              item['Campus'] == selectedUnity &&
-              (selectedGrade == null || item['Grade'] == selectedGrade) &&
-              (selectedGroup == null || item['School_group'] == selectedGroup))
-          .map<String>((item) => item['Subject'].toString())
+              (item['Campus'] ?? item['campus']) == selectedUnity &&
+              (selectedGrade == null ||
+                  (item['Grade'] ?? item['grade']) == selectedGrade) &&
+              (selectedGroup == null ||
+                  (item['School_group'] ?? item['school_group']) ==
+                      selectedGroup))
+          .map<String>(
+              (item) => (item['Subject'] ?? item['subject'])?.toString() ?? '')
           .toSet()
           .toList();
 
@@ -127,15 +134,18 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
     } else {
       // Reset to full lists if no Campus is selected
       filteredGrade = widget.jsonData
-          .map<String>((item) => item['Grade'].toString())
+          .map<String>(
+              (item) => (item['Grade'] ?? item['grade'])?.toString() ?? '')
           .toSet()
           .toList();
       filteredGroup = widget.jsonData
-          .map<String>((item) => item['School_group'].toString())
+          .map<String>((item) =>
+              (item['School_group'] ?? item['school_group'])?.toString() ?? '')
           .toSet()
           .toList();
       filteredSubject = widget.jsonData
-          .map<String>((item) => item['Subject'].toString())
+          .map<String>(
+              (item) => (item['Subject'] ?? item['subject'])?.toString() ?? '')
           .toSet()
           .toList();
 
@@ -143,7 +153,6 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
       selectedGroup = null;
       selectedSubject = null;
     }
-
     setState(() {});
   }
 
@@ -174,39 +183,11 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                         selectedGrade = null; // Clear dependent selections
                         selectedGroup = null;
                         selectedSubject = null;
+                        selectedTempCampus = value;
                         filterData();
                       });
                     },
                     dropdownMenuEntries: unityList
-                        .map<DropdownMenuEntry<String>>((String value) {
-                      return DropdownMenuEntry<String>(
-                          value: value, label: value);
-                    }).toList(),
-                  ),
-                ],
-              )),
-            if (currentUser!.isCurrentUserAdmin())
-              Flexible(
-                  child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  DropdownMenu<String>(
-                    label: const Text(
-                      ' Campus ',
-                      style: TextStyle(fontSize: 14),
-                    ),
-                    trailingIcon: const Icon(Icons.arrow_drop_down),
-                    initialSelection: selectedUnity,
-                    onSelected: (String? value) {
-                      setState(() {
-                        selectedUnity = value;
-                        selectedGrade = null; // Clear dependent selections
-                        selectedGroup = null;
-                        selectedSubject = null;
-                        filterData();
-                      });
-                    },
-                    dropdownMenuEntries: unityAdminList
                         .map<DropdownMenuEntry<String>>((String value) {
                       return DropdownMenuEntry<String>(
                           value: value, label: value);
@@ -233,7 +214,8 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                       selectedGrade = value;
                       selectedGroup = null; // Clear dependent selections
                       selectedSubject = null;
-                      selectedTempGrade = int.parse(value!);
+                      selectedTempGrade = getKeyFromValue(
+                          teacherGradesMap, value!); //int.parse(value!);
                       filterData();
                     });
                   },
@@ -308,7 +290,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (userStatus)
+                  if (currentUser!.isCurrentUserAdmin())
                     DropdownMenu<String>(
                         label: const Text(' Mes '),
                         trailingIcon: const Icon(Icons.arrow_drop_down),
@@ -347,7 +329,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
     selectedGroup ??= filteredGroup.first;
     selectedSubject ??= filteredSubject.first;
 
-    if (userStatus == true) {
+    if (currentUser!.isCurrentUserAdmin() == true) {
       monthValue = getKeyFromValue(spanishMonthsMap, monthValue).toString();
     } else {
       monthValue = getKeyFromValue(spanishMonthsMap, currentMonth).toString();

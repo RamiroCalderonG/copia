@@ -436,7 +436,7 @@ class NewFODAC27CommentDialog extends StatefulWidget {
   final VoidCallback onDialogClose;
 
   const NewFODAC27CommentDialog({
-    Key? key,
+    super.key,
     required this.selectedstudentId,
     required this.employeeNumber,
     required this.onDialogClose,
@@ -765,6 +765,7 @@ class EditCommentScreen extends StatefulWidget {
   final String studentID;
 
   const EditCommentScreen({
+    super.key,
     required this.id,
     required this.comment,
     required this.date,

@@ -46,6 +46,82 @@ dynamic loadStartGrading(
   }
 }
 
+Future<dynamic> loadStartGradingAsAdmin(String schoolYear, String? campus,
+    bool initialFetch, int? subject, int? group) async {
+  try {
+    DateTime now = DateTime.now();
+    int month = now.month;
+    List<dynamic> jsonList;
+    List<String> originalList = [];
+    if (initialFetch) {
+      //First time loading screen, to display all grades, groups, campus and assignatures to dispaly at DropdownSelector
+      await getTeacherGradeAndCoursesAsAdmin(month,
+              currentUser!.isCurrentUserAdmin(), campus, currentCycle!.claCiclo)
+          .then((response) {
+        jsonList = json.decode(utf8.decode(response.bodyBytes));
+        jsonDataForDropDownMenuClass = jsonList;
+        try {
+          for (var item in jsonList) {
+            // Check if the item has the "campus" key and is a String
+            if (item.containsKey('campus') && item['campus'] is String) {
+              campusesWhereTeacherTeach.add(item['campus']);
+            }
+          }
+          originalList.clear();
+          for (var i = 0; i < jsonList.length; i++) {
+            originalList.add(jsonList[i]['grade']);
+            oneTeacherGrades = originalList.toSet().toList();
+
+            Map<int, String> currentMapValue = {
+              jsonList[i]['sequence']: jsonList[i]['grade']
+            };
+
+            teacherGradesMap.addEntries(currentMapValue.entries);
+          }
+
+          if (oneTeacherGroups.isNotEmpty) {
+            oneTeacherGroups.clear();
+          }
+          originalList.clear();
+          for (var i = 0; i < jsonList.length; i++) {
+            // String group = apiResponse[i]['School_group'];
+            originalList.add(jsonList[i]['school_group']);
+            oneTeacherGroups = originalList.toSet().toList();
+          }
+          originalList.clear();
+          for (var i = 0; i < jsonList.length; i++) {
+            // String assignature = apiResponse[i]['Subject'];
+            // int assignatureID = apiResponse[i]['Subject_id'];
+            originalList.add(jsonList[i]['subject']);
+
+            oneTeacherAssignatures = originalList.toSet().toList();
+
+            Map<int, String> currentMapValue = {
+              jsonList[i]['subject_id']: jsonList[i]['subject']
+            };
+            assignaturesMap.addEntries(currentMapValue.entries);
+          }
+
+          // getSingleTeacherGroups(jsonList);
+        } catch (e) {
+          throw Future.error(e.toString());
+        }
+      }).catchError((onError) {
+        insertErrorLog(
+            'Error fetching start grading data loadStartGradingAsAdmin()',
+            onError);
+        throw FormatException(onError);
+      });
+    } else {
+      //When admin wants to retreive data for a specific grade and assignature
+      //TODO: PENDING TO IMPLEMENT
+    }
+  } catch (e) {
+    insertErrorLog(e.toString(), ' loadStartGradingAsAdmin  ');
+    throw Future.error(e.toString());
+  }
+}
+
 Future<void> getSingleTeacherGrades(List<dynamic> apiResponse) async {
   List<String> originalList = [];
   if (apiResponse.isNotEmpty) {
