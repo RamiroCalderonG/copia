@@ -241,8 +241,7 @@ Future<List<StudentEval>> getStudentsByAssinature(
   try {
     var studentsList = await getStudentsToGrade(assignature, group,
         gradeSelected, currentCycle!.claCiclo, campus, month);
-    List<dynamic> jsonList = json.decode(utf8.decode(studentsList.body));
-
+    List<dynamic> jsonList = json.decode(utf8.decode(studentsList.bodyBytes));
     List<StudentEval> evaluations = getEvalFromJSON(jsonList, false);
 
     return evaluations;

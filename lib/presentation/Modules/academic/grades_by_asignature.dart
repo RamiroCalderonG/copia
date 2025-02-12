@@ -1,5 +1,3 @@
-// ignore_for_file: constant_identifier_names, prefer_typing_uninitialized_variables
-
 import 'package:flutter/material.dart';
 
 import 'package:oxschool/core/constants/user_consts.dart';
@@ -235,19 +233,21 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                       // isUserAdmin = currentUser!.isCurrentUserAdmin();
 
                       if (currentUser!.isCurrentUserAdmin()) {
+                        //Get month number
                         monthNumber = getKeyFromValue(
                             spanishMonthsMap, selectedTempMonth!);
                       } else {
                         monthNumber = getKeyFromValue(
                             spanishMonthsMap, selectedCurrentTempMonth!);
                       }
+                      // get assignature id number
                       var assignatureID = getKeyFromValue(
                           assignaturesMap, selectedTempSubject!);
 
                       // var gradeInt = getKeyFromValue(
                       //     teacherGradesMap, selectedTempGrade!.toString());
 
-                      if (assignatureID != null && assignatureID > 0) {
+                      if (assignatureID != null && assignatureID != 0) {
                         searchBUttonAction(
                             selectedTempGroup!,
                             selectedTempGrade.toString(),

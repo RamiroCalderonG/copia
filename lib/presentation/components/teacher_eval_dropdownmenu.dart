@@ -46,10 +46,6 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
   @override
   void initState() {
     _isUserAdminResult();
-    // selectedTempMonth = currentMonth;
-    // if (selectedTempMonth != null) {
-    //   monthValue = selectedTempMonth!;
-    // }
     unityList = widget.campusesList.toList();
     if (unityList.length == 1) {
       selectedTempCampus = unityList.first;
@@ -60,19 +56,17 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
   }
 
   _isUserAdminResult() async {
-    // bool isUserAdmin = currentUser!.isCurrentUserAdmin();
-    // monthValue =
-    //     currentMonth; //isUserAdmin ? academicMonthsList.first : currentMonth;
     setState(() {
-      // userStatus = isUserAdmin;
       if (currentUser!.isCurrentUserAdmin() == false) {
+        //If user not admin, will assign current month, and it will not change
         selectedCurrentTempMonth = currentMonth;
         monthValue = currentMonth;
-        //selectedTempMonth = monthValue;
       } else {
+        //If user is admin, will assign current month and then can change
         if (selectedTempMonth != null) {
           monthValue = selectedTempMonth!;
         } else {
+          selectedTempMonth = currentMonth;
           monthValue = currentMonth;
         }
       }
@@ -321,10 +315,10 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
   }
 
   void validateEmptryFields() {
+    // Check if any of the fields are empty
     if (studentList.isNotEmpty) {
       studentList.clear();
     }
-
     selectedGrade ??= filteredGrade.first;
     selectedGroup ??= filteredGroup.first;
     selectedSubject ??= filteredSubject.first;

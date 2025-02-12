@@ -1,7 +1,7 @@
-
 import 'package:flutter/material.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
+import 'package:oxschool/data/DataTransferObjects/RoleModuleRelationshipDto.Dart';
 import 'package:oxschool/data/Models/Event.dart';
 import 'package:oxschool/data/Models/Role.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
@@ -27,6 +27,8 @@ class PoliciesScreen extends StatefulWidget {
 class _PoliciesScreenState extends State<PoliciesScreen> {
   late Future<void> _refreshEventsFuture;
   List<Event> eventsToDisplay = [];
+  List<RoleModuleRelationshipDto> roleScreensRelationship = [];
+  bool canRoleAccessodule = false;
 
   @override
   void initState() {
@@ -82,6 +84,14 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
                 itemCount: eventsToDisplay.length,
                 itemBuilder: (context, index) {
                   final currentEvent = eventsToDisplay[index];
+
+                  var rolesModuleRel = roleScreensRelationship.where(
+                      (item) => currentEvent.moduleName == item.moduleName);
+                  for (var item in rolesModuleRel) {
+                    canRoleAccessodule = item.canRoleAccessModule;
+                  }
+
+                  // final currentScreenRole = roleScreensRelationship
                   final previousEvent =
                       index > 0 ? eventsToDisplay[index - 1] : null;
 
@@ -93,20 +103,28 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
                     children: [
                       if (showModuleName)
                         Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            'Modulo: ${currentEvent.moduleName}',
-                            style: const TextStyle(
-                                fontSize: 20, fontFamily: 'Sora'),
-                          ),
-                        ),
+                            padding: const EdgeInsets.all(8.0),
+                            child: Stack(children: [
+                              Text(
+                                'Modulo: ${currentEvent.moduleName}',
+                                style: const TextStyle(
+                                    fontSize: 20, fontFamily: 'Sora'),
+                              ),
+                              SwitchListTile(
+                                  value: canRoleAccessodule,
+                                  onChanged: (event) {
+                                    setState(() {
+                                      canRoleAccessodule = event;
+                                    });
+                                  })
+                            ])),
                       PolicyCard(
                         policy: currentEvent,
                         roleID: widget.roleID,
                         onToggle: (event) {
                           setState(() {
-                            event.isActive =
-                                !event.isActive; // Toggle the isActive status
+                            event.canAcces =
+                                !event.canAcces; // Toggle the isActive status
                           });
                         },
                       ),
@@ -164,13 +182,18 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
   Future<void> refreshEvents(int? idRole) async {
     var eventsByRoleResponse =
         await fetchEventsByRole(idRole!); //Get events by role
+    roleScreensRelationship = await fetchScreensByRoleId(idRole);
     try {
       // Map to group events by moduleName
       Map<String, List<Event>> groupedEvents = {};
-
       for (var jsonItem in eventsByRoleResponse) {
-        Event event = Event(jsonItem['event_id'], jsonItem['event_name'],
-            jsonItem['event_active'], jsonItem['module_description'], idRole);
+        Event event = Event(
+            jsonItem['event_id'],
+            jsonItem['event_name'],
+            jsonItem['event_active'],
+            jsonItem['module_description'],
+            idRole,
+            jsonItem['can_access']);
 
         // Check if the moduleName already exists in the map
         if (groupedEvents.containsKey(event.moduleName)) {
@@ -209,7 +232,7 @@ class PolicyCard extends StatelessWidget {
           children: [
             SwitchListTile(
               title: Text(policy.eventName),
-              value: policy.isActive,
+              value: policy.canAcces,
               onChanged: (value) async {
                 onToggle(policy);
                 //var idValue = getEventIDbyName(policy.eventName);

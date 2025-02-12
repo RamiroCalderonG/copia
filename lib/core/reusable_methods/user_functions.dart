@@ -174,10 +174,10 @@ bool isCurrentUserCoordinator(int employeeNumber) {
   return isCoordinator['value'];
 }
 
-void logOutCurrentUser(User employee) async {
+Future<void> logOutCurrentUser(User employee) async {
   insertActionIntoLog('User end session', employee.employeeNumber.toString());
 
-  logOutUser(employee.token, employee.employeeNumber.toString());
+  await logOutUser(employee.token, employee.employeeNumber.toString());
 }
 
 Future<bool> updateUserPassword(String newPassword) async {

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
+import 'package:oxschool/data/DataTransferObjects/RoleModuleRelationshipDto.Dart';
 import 'package:oxschool/data/Models/Event.dart';
 import 'package:oxschool/data/Models/Module.dart';
 import 'package:oxschool/data/datasources/temp/users_temp_data.dart';
@@ -67,7 +68,7 @@ Future<dynamic> fetchEventsByRole(int roleId) async {
     var eventsByRole = await getEventsByRole(roleId);
     if (eventsByRole != null && eventsByRole.body != '[]') {
       // var evenntsList = eventsByRole.body;
-      var jsonList = json.decode(eventsByRole.body);
+      var jsonList = json.decode(utf8.decode(eventsByRole.bodyBytes));
       return jsonList;
     } else {
       return Future.error('Value is null');
@@ -75,6 +76,27 @@ Future<dynamic> fetchEventsByRole(int roleId) async {
   } catch (e) {
     insertErrorLog(e.toString(), 'fetchEventsByRole()');
     Future.error(e.toString());
+  }
+}
+
+Future<dynamic> fetchScreensByRoleId(int roleId) async {
+  List<RoleModuleRelationshipDto> screensList = [];
+  try {
+    await getScreenListByRoleId(roleId).then((response) {
+      var jsonList = json.decode(response.body);
+      for (var item in jsonList) {
+        RoleModuleRelationshipDto newItem =
+            RoleModuleRelationshipDto.fromJSON(item);
+        screensList.add(newItem);
+      }
+      return screensList;
+    }).onError((error, stackTrace) {
+      insertErrorLog(error.toString(), 'fetchScreensByRoleId($roleId)');
+      return Future.error(error.toString());
+    });
+  } catch (e) {
+    insertErrorLog(e.toString(), 'fetchScreensByRoleId($roleId)');
+    return Future.error(e.toString());
   }
 }
 
@@ -87,8 +109,13 @@ Future<List<Module>> fetchModulesAndEventsDetailed() async {
     await getEventsAndModulesCall().then((apiResponse) {
       var eventsModule = json.decode(apiResponse);
       for (var item in eventsModule) {
-        Event event = Event(item["event_id"], item["event_name"],
-            item["event_active"], item['module_name'], item["role_id"]);
+        Event event = Event(
+            item["event_id"],
+            item["event_name"],
+            item["event_active"],
+            item['module_name'],
+            item["role_id"],
+            item['can_access']);
         eventsList.add(event);
       }
 

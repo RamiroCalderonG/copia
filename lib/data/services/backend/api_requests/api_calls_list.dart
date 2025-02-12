@@ -39,7 +39,7 @@ Future<dynamic> loginUser(var jsonBody) async {
   }
 }
 
-void logOutUser(String token, String employee) async {
+Future<void> logOutUser(String token, String employee) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String? device = prefs.getString('device');
   String? ipAddres = prefs.getString('ip');
@@ -1261,6 +1261,24 @@ Future<dynamic> getEventsListRequest() async {
     return apiCall;
   } catch (e) {
     insertErrorLog(e.toString(), "EVENTS LIST CALL ERROR: ");
+    return Future.error(e.toString());
+  }
+}
+
+Future<dynamic> getScreenListByRoleId(int id) async {
+  try {
+    var apiCall = await Requests.get(
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/roles/modules/$id',
+        headers: {
+          'Authorization': currentUser!.token,
+          'Content-Type': 'application/json'
+        },
+        persistCookies: false,
+        timeoutSeconds: 20);
+    apiCall.raiseForStatus();
+    return apiCall;
+  } catch (e) {
+    insertErrorLog(e.toString(), "SCREEN LIST BY ROLE ID CALL ERROR: ");
     return Future.error(e.toString());
   }
 }

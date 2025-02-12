@@ -62,12 +62,7 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
           rolesListData.add(role);
         }
         for (var jsonevent in tmpeventsList) {
-          Event event = Event(
-              jsonevent['event_id'],
-              jsonevent['event_name'],
-              jsonevent['event_active'],
-              jsonevent['module_name'],
-              jsonevent['role_id']);
+          Event event = Event.fromJSON(jsonevent);
           for (var i = 0; i < rolesListData.length; i++) {
             if (rolesListData[i].roleID == event.roleID) {
               rolesListData[i].events?.add(event);
@@ -90,7 +85,7 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
           itemBuilder: (context, eventIndex) {
             return SwitchListTile(
               title: Text(rolesListData[index].events![eventIndex].eventName),
-              value: rolesListData[index].events![eventIndex].isActive,
+              value: rolesListData[index].events![eventIndex].canAcces,
               onChanged: (value) async {
                 setState(() {
                   _isloading = true;
@@ -395,7 +390,6 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
 
   @override
   void initState() {
-    super.initState();
     _roleController = TextEditingController(text: widget.role ?? '');
     _descriptionController =
         TextEditingController(text: widget.description ?? '');
@@ -403,8 +397,9 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
     _events = tmpeventsList.map((e) {
       bool isActive = e['event_name'] == widget.role && e['event_active'];
       return Event(e['event_id'], e['event_name'], isActive, e['module_name'],
-          e['role_id']);
+          e['role_id'], e['can_access']);
     }).toList();
+    super.initState();
   }
 
   @override

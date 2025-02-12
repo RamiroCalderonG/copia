@@ -66,6 +66,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
     _loadTapTimestamps();
     _startTimer();
     initPlatformState();
+    isLoading = false;
     _model = createModel(context, () => LoginViewModel());
 
     _model.textController1 ??= TextEditingController();
@@ -100,6 +101,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
   void dispose() {
     _model.dispose();
     timer?.cancel();
+    isLoading = false;
     // _model.textController1!.dispose();
     // _model.textController2!.dispose();
     super.dispose();
