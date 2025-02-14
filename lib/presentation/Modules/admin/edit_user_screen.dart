@@ -425,11 +425,13 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                               setState(() {
                                                 isloading = true;
                                               });
+
+                                              //TODO : CREATE ON BACKEND CASE FOR FIELD 2
                                               var response = await editUser(
                                                   dataToUpdate,
                                                   tempSelectedUsr!
-                                                      .employeeNumber
-                                                      .toString());
+                                                      .employeeNumber!,
+                                                  2);
                                               if (response == 200) {
                                                 setState(() {
                                                   isloading = false;

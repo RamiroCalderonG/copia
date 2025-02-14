@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
+import 'package:oxschool/data/Models/User.dart';
 import 'package:oxschool/presentation/Modules/enfermeria/no_data_avalibre.dart';
 import 'package:oxschool/presentation/Modules/user/create_user.dart';
 import 'package:oxschool/presentation/Modules/user/roles_screen.dart';
@@ -33,33 +34,35 @@ class UsersMainScreen extends StatefulWidget {
 class _UsersMainScreenState extends State<UsersMainScreen> {
   bool isUserAdmin = verifyUserAdmin(currentUser!);
   bool confirmation = false;
-  var listOfUsers;
 
-  Future<void> refreshButton() async {
+  late Future<dynamic> loadingCOntroller;
+
+  Future<dynamic> refreshButton() async {
     setState(() {
       isLoading = true;
-      // isSateManagerActive = true;
     });
     try {
-      listOfUsers = null;
-      listOfUsersForGrid = null;
+      listOfUsersForGrid.clear();
       userRows.clear();
-      listOfUsers = await getUsers();
-      if (listOfUsers != null) {
-        setState(() {
+      await getUsers().then((response) {
+        if (response != null) {
           usersPlutoRowList = userRows;
-          // super.initState();
-          List<dynamic> jsonList = json.decode(listOfUsers);
-          listOfUsersForGrid = parseUsersFromJSON(jsonList);
-          // userRows = createPlutoRows(listOfUsersForGrid);
-        });
-      } else {
-        if (kDebugMode) {
-          insertErrorLog(
-              'Cant fetch data from server, getUsers()', 'users_main_screen');
-          print('Cant fetch  data from server');
+          List<dynamic> jsonList = json.decode(response);
+          for (var item in jsonList) {
+            User newUser = User.usersSimplifiedList(item);
+            listOfUsersForGrid.add(newUser);
+          }
+          return response;
+          // listOfUsersForGrid = parseUsersFromJSON(jsonList);
+        } else {
+          if (kDebugMode) {
+            insertErrorLog(
+                'Cant fetch data from server, getUsers()', 'users_main_screen');
+            print('Cant fetch  data from server');
+          }
         }
-      }
+        return response;
+      });
     } catch (e) {
       isLoading = false;
       insertErrorLog(e.toString(), 'UsersMainScreen() , refreshButton');
@@ -77,7 +80,7 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
   @override
   void initState() {
     isLoading = false;
-    //refreshButton();
+    loadingCOntroller = refreshButton();
     super.initState();
   }
 
@@ -88,8 +91,7 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
     // listOfUsersForGrid.clear();
     isLoading = false;
     areaList.clear();
-    listOfUsers = null;
-    listOfUsersForGrid = null;
+    listOfUsersForGrid.clear();
     userRows.clear();
 
     super.dispose();
@@ -140,36 +142,48 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
               RefreshButton(
                 onPressed: refreshButton,
               ),
-              // TextButton.icon(
-              //     onPressed: () async {
-              //       refreshButton();
-              //     },
-              //     icon: const Icon(Icons.refresh),
-              //     label: const Text('Refresca')),
-              // TextButton.icon(
-              //     onPressed: () {},
-              //     icon: FaIcon(FontAwesomeIcons.download),
-              //     label: Text('Exportar ususarios')),
               const SizedBox(width: 20),
             ]),
             backgroundColor: FlutterFlowTheme.of(context).primary,
             title: const Text('Administración de usuarios',
                 style: TextStyle(color: Colors.white))),
-        body: Stack(
-          children: [
-            LayoutBuilder(
-                builder: (BuildContext context, BoxConstraints constraints) {
-              if (listOfUsersForGrid != null) {
+        body: FutureBuilder(
+            future: loadingCOntroller,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.done) {
                 return SizedBox(
                     width: MediaQuery.of(context).size.width,
                     child: const UsersTableView());
+              } else if (snapshot.connectionState == ConnectionState.waiting) {
+                return CustomLoadingIndicator();
+              } else if (snapshot.hasError) {
+                return Placeholder(
+                    child: Center(
+                  child: Text(
+                    'Error: ${snapshot.error}',
+                  ),
+                ));
               } else {
                 return const NoDataAvailble();
               }
-            }),
-            if (isLoading) CustomLoadingIndicator()
-          ],
-        ));
+            })
+
+        // Stack(
+        //   children: [
+        //     LayoutBuilder(
+        //         builder: (BuildContext context, BoxConstraints constraints) {
+        //       if (listOfUsersForGrid != null) {
+        //         return SizedBox(
+        //             width: MediaQuery.of(context).size.width,
+        //             child: const UsersTableView());
+        //       } else {
+        //         return const NoDataAvailble();
+        //       }
+        //     }),
+        //     if (isLoading) CustomLoadingIndicator()
+        //   ],
+        // )
+        );
   }
 }
 

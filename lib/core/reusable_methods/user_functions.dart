@@ -117,49 +117,10 @@ dynamic getSingleUser(String? userId) async {
   }
 }
 
-// ignore: non_constant_identifier_names
-// dynamic EventFromJSON(List<dynamic> jsonData) {
-//   List<Event> eventList = [];
-//   if (jsonData.isEmpty) {
-//     return null;
-//   } else {
-//     for (var item in jsonData) {
-//       int idEvento = item['id'];
-//       String eventName = item['event_name'];
-//       bool isActive = item['active'];
-//       String moduleName = item['module_name'];
-//       // int moduleID = item['module_id'];
-//       bool eventCanAccesModule = item['event_can_acces_module'];
-//       int roleID = item['role_id'];
-
-//       eventList.add(Event(idEvento, eventName, isActive, moduleName, roleID));
-//     }
-//     return eventList;
-//   }
-// }
-
-// ignore: non_constant_identifier_names
-// dynamic RoleFromJSON(List<dynamic> jsonData) {
-//   List<Role> roleList = [];
-//   if (jsonData.isEmpty) {
-//     return null;
-//   } else {
-//     for (var item in jsonData) {
-//       int roleID = item['role_id'];
-//       String roleName = item['role_name'];
-//       String roleDescription = item['role_description'];
-//       bool isActive = item['is_active'];
-
-//       roleList.add(Role(roleID, roleName, roleDescription, isActive, ));
-//     }
-//     return roleList;
-//   }
-// }
-
-dynamic changeUserActiveStatus(String employeeNum, int activeValue) async {
-  var body = {'bajalogicasino': activeValue};
+dynamic changeUserActiveStatus(int employeeNum, int activeValue) async {
+  var body = {'active': activeValue};
   try {
-    var response = await editUser(body, employeeNum);
+    var response = await editUser(body, employeeNum, 1);
     return response;
   } catch (e) {
     return ErrorDescription(e.toString());

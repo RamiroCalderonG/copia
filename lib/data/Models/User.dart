@@ -1,5 +1,7 @@
 // ignore_for_file: file_names, non_constant_identifier_names
 
+import 'package:oxschool/core/extensions/capitalize_strings.dart';
+
 class User {
   int? employeeNumber;
   String? employeeName;
@@ -111,4 +113,25 @@ class User {
   bool isCurrentUserAdmin() {
     return isAdmin!;
   }
+
+  /*
+  *Function used for getting all users from backend and display it
+  *uses less fiields because needs to be simplified.
+  */
+  User.usersSimplifiedList(Map<String, dynamic> json)
+      : claUn = json['campus'].toString().toTitleCase,
+        employeeName = json['name'],
+        employeeNumber = json['employeeNumber'],
+        role = json['roleName'].toString().toTitleCase,
+        userId = json['id'],
+        token = '',
+        userEmail = json['email'],
+        isActive = json['isActive'],
+        work_area = json['department'].toString().toTitleCase,
+        work_position = json['position'].toString().toTitleCase,
+        creationDate = json['creationDate'],
+        birthdate = json['birthdate'],
+        isTeacher = json['isTeacher'],
+        isAdmin = json['admin'],
+        roleID = 0;
 }

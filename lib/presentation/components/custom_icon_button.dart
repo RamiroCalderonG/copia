@@ -98,3 +98,18 @@ class RefreshButton extends StatelessWidget {
     );
   }
 }
+
+class CancelActionButton extends StatelessWidget {
+  final VoidCallback onPressed;
+
+  const CancelActionButton({super.key, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomIconButton(
+      onPressed: onPressed,
+      icon: const Icon(Icons.cancel),
+      tooltip: 'Cancelar',
+    );
+  }
+}

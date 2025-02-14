@@ -26,26 +26,14 @@ Future<dynamic> loginUser(var jsonBody) async {
     apiCall.raiseForStatus();
     return apiCall;
   } catch (e) {
-    // String errorMessage;
     insertErrorLog(e.toString(), '/login/userlogin/');
     if (e is HTTPException) {
       var statusCode = e.response.statusCode;
-      var message = '';
-      if (statusCode == 403) {
-        message = "User not authorized, verify with system admin";
-      } else {
-        message = e.toString();
-      }
+      var message = returnsMessageToDisplay(statusCode);
       return Future.error(message);
     } else {
       return Future.error(e.toString());
     }
-    // if (e is Exception) {
-    //   errorMessage = e.getErrorMessage();
-    //   return Future.error(errorMessage);
-    // } else {
-    //   Future.error(e.toString()); //?Why is this here?
-    // }
   }
 }
 
@@ -448,25 +436,23 @@ Future<dynamic> createUser(Map<String, dynamic> newUser) async {
   }
 }
 
-Future<dynamic> editUser(Map<String, dynamic> bodyObject, String userID) async {
-  int response;
-  // var apiBody = {};
+Future<dynamic> editUser(
+    Map<String, dynamic> bodyObject, int employeeNumber, int? field) async {
   try {
     var apiCall = await Requests.put(
-        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/user/$userID',
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/users/detail/$employeeNumber',
         headers: {
-          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-          'Auth': currentUser!.token
+          'Authorization': currentUser!.token,
+          'Content-Type': 'application/json'
         },
+        queryParameters: {'field': field},
         json: bodyObject,
-        // body: bodyObject,
         persistCookies: false,
-        timeoutSeconds: 7);
+        timeoutSeconds: 18);
     apiCall.raiseForStatus();
-    response = apiCall.statusCode;
-    return response;
+    return apiCall.statusCode;
   } catch (e) {
-    throw FormatException(e.toString());
+    throw Future.error(e.toString());
   }
 }
 

@@ -3,6 +3,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:oxschool/data/Models/User.dart';
 import 'package:oxschool/presentation/Modules/admin/edit_user_screen.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
@@ -10,6 +11,8 @@ import 'package:oxschool/presentation/Modules/login_view/login_view_widget.dart'
 import 'package:oxschool/core/reusable_methods/reusable_functions.dart';
 import 'package:oxschool/core/reusable_methods/user_functions.dart';
 import 'package:oxschool/data/datasources/temp/users_temp_data.dart';
+import 'package:oxschool/presentation/components/confirm_dialogs.dart';
+import 'package:oxschool/presentation/components/custom_icon_button.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
 class UsersTableView extends StatefulWidget {
@@ -20,7 +23,7 @@ class UsersTableView extends StatefulWidget {
 }
 
 class _UsersTableViewState extends State<UsersTableView> {
-  List<PlutoRow> userRows = [];
+  // List<PlutoRow> userRows = [];
   // ignore: prefer_typing_uninitialized_variables
   var toSee;
   bool isUserAdmin = currentUser!.isCurrentUserAdmin();
@@ -111,7 +114,9 @@ class _UsersTableViewState extends State<UsersTableView> {
                           PlutoColumn(
                               title: 'Numero de empleado',
                               field: 'employeeNumber',
-                              type: PlutoColumnType.number(),
+                              type: PlutoColumnType.number(
+                                format: '####',
+                              ),
                               readOnly: true),
                           PlutoColumn(
                               title: 'Rol del usuario',
@@ -168,146 +173,142 @@ class _UsersTableViewState extends State<UsersTableView> {
                                       isLoading = true;
                                     });
                                     try {
-                                      if (event.row.cells.values
-                                              .elementAt(4)
-                                              .value ==
-                                          0) {
-                                        showDialog(
-                                            context: context,
-                                            builder: (BuildContext context) {
-                                              return AlertDialog(
-                                                icon: const Icon(Icons.warning),
-                                                iconColor:
-                                                    Colors.yellow.shade300,
-                                                title: const Text('Confirmar'),
-                                                content: const Text(
-                                                    'Desactivar usuario?'),
-                                                actions: [
-                                                  Row(
-                                                    children: [
-                                                      Expanded(
-                                                          child: TextButton(
-                                                        onPressed: () async {
-                                                          setState(() {
-                                                            confirmation = true;
-                                                            isSearching = true;
-                                                          });
-                                                          await changeUserActiveStatus(
-                                                              event.row.cells
-                                                                  .values
-                                                                  .elementAt(2)
-                                                                  .value
-                                                                  .toString(),
-                                                              1);
-                                                          isSearching = false;
-                                                          Navigator.of(context)
-                                                              .pop();
-                                                        },
-                                                        child: const Text('Si'),
-                                                      )),
-                                                      Expanded(
-                                                          child: TextButton(
-                                                              onPressed: () {
-                                                                setState(() {
-                                                                  isSearching =
-                                                                      false;
-                                                                  Navigator.of(
-                                                                          context)
-                                                                      .pop();
-                                                                });
-                                                              },
-                                                              child: const Text(
-                                                                  'No')))
-                                                    ],
-                                                  )
-                                                ],
-                                              );
-                                            });
-                                        if (confirmation == true) {
-                                          await deleteUser(
-                                                  event //NOT BEING USED, REMOVE?
-                                                      .row
-                                                      .cells
-                                                      .values
-                                                      .first
-                                                      .value)
-                                              .whenComplete(() {
-                                            listOfUsers = null;
-                                            listOfUsersForGrid = null;
-                                            userRows.clear();
-                                            setState(() {
-                                              isLoading = false;
-                                            });
-                                          });
-                                        }
-                                      } else {
-                                        showDialog(
-                                            context: context,
-                                            builder: (BuildContext context) {
-                                              return AlertDialog(
-                                                icon: const Icon(Icons.warning),
-                                                iconColor: Colors.yellow,
-                                                title: const Text('Confirmar'),
-                                                content: const Text(
-                                                    'Activar usuario?'),
-                                                actions: [
-                                                  Row(
-                                                    children: [
-                                                      Expanded(
-                                                          child: TextButton(
-                                                        onPressed: () {
-                                                          setState(() {
-                                                            confirmation = true;
-                                                            isSearching = true;
-                                                          });
-                                                          if (confirmation ==
-                                                              true) {
-                                                            changeUserActiveStatus(
-                                                                event.row.cells
-                                                                    .values
-                                                                    .elementAt(
-                                                                        2)
-                                                                    .value
-                                                                    .toString(),
-                                                                0);
-                                                          }
-                                                          setState(() {
-                                                            isSearching = false;
-                                                            Navigator.of(
-                                                                    context)
-                                                                .pop();
-                                                          });
-                                                        },
-                                                        child: const Text('Si'),
-                                                      )),
-                                                      Expanded(
-                                                          child: TextButton(
-                                                              onPressed: () {
-                                                                Navigator.of(
-                                                                        context)
-                                                                    .pop();
-                                                              },
-                                                              child: const Text(
-                                                                  'No')))
-                                                    ],
-                                                  )
-                                                ],
-                                              );
-                                            });
+                                      User selectedUser = listOfUsersForGrid
+                                          .firstWhere((iterableItem) =>
+                                              iterableItem.employeeNumber ==
+                                              event.row.cells.values
+                                                  .elementAt(2)
+                                                  .value);
+
+                                      bool isCurrentlyActive = false;
+                                      if (selectedUser.isActive == 0) {
+                                        //when user is currently active
+                                        isCurrentlyActive = true;
+                                      } else if (selectedUser.isActive == 1) {
+                                        //when user is currently inactive
+                                        isCurrentlyActive = false;
                                       }
-                                    } catch (e) {
-                                      setState(() {
-                                        isLoading = false;
-                                      });
                                       showDialog(
                                           context: context,
                                           builder: (BuildContext context) {
                                             return AlertDialog(
-                                              icon: const Icon(Icons.error),
-                                              title: const Text('Error'),
-                                              content: Text(e.toString()),
+                                              icon: const Icon(Icons.warning),
+                                              iconColor: Colors.yellow.shade300,
+                                              title: const Text('Confirmar'),
+                                              content: isCurrentlyActive
+                                                  ? Text('Desactivar ususario?')
+                                                  : Text('Activar ususario?'),
+                                              actions: [
+                                                Row(
+                                                  children: [
+                                                    Expanded(
+                                                        child: TextButton(
+                                                      onPressed: () async {
+                                                        int newIsActiveIntValue;
+                                                        if (isCurrentlyActive) {
+                                                          //*IF user is currently active, set deactivate value
+                                                          newIsActiveIntValue =
+                                                              1;
+                                                        } else {
+                                                          newIsActiveIntValue =
+                                                              0;
+                                                        }
+                                                        setState(() {
+                                                          isCurrentlyActive =
+                                                              !isCurrentlyActive;
+                                                          confirmation = true;
+                                                          isSearching = true;
+                                                          selectedUser
+                                                                  .isActive =
+                                                              newIsActiveIntValue;
+                                                        });
+                                                        updateActiveUserStatus(
+                                                                selectedUser)
+                                                            .whenComplete(() {
+                                                          for (var item
+                                                              in listOfUsersForGrid) {
+                                                            if (item.employeeNumber ==
+                                                                selectedUser
+                                                                    .employeeNumber) {
+                                                              item.isActive =
+                                                                  newIsActiveIntValue;
+                                                            }
+                                                          }
+
+                                                          Navigator.of(context)
+                                                              .pop();
+                                                          isSearching = false;
+                                                        });
+                                                      },
+                                                      child:
+                                                          const Text('Aceptar'),
+                                                    )),
+                                                    Expanded(
+                                                        child: TextButton(
+                                                            onPressed: () {
+                                                              setState(() {
+                                                                userRows
+                                                                    .clear();
+                                                                for (var line
+                                                                    in listOfUsersForGrid) {
+                                                                  userRows.add(
+                                                                      PlutoRow(
+                                                                    cells: {
+                                                                      'id': PlutoCell(
+                                                                          value: line
+                                                                              .userId
+                                                                              .toString()),
+                                                                      'employeeName':
+                                                                          PlutoCell(
+                                                                              value: line.employeeName),
+                                                                      'employeeNumber':
+                                                                          PlutoCell(
+                                                                              value: line.employeeNumber),
+                                                                      'userRole':
+                                                                          PlutoCell(
+                                                                              value: line.role),
+                                                                      'isActive':
+                                                                          PlutoCell(
+                                                                              value: line.isActive),
+                                                                      'campus': PlutoCell(
+                                                                          value:
+                                                                              line.claUn),
+                                                                      // 'area': PlutoCell(value: user),
+                                                                      'mail': PlutoCell(
+                                                                          value:
+                                                                              line.userEmail),
+                                                                      'creation':
+                                                                          PlutoCell(
+                                                                              value: line.creationDate),
+                                                                      'birthdate':
+                                                                          PlutoCell(
+                                                                              value: line.birthdate),
+                                                                      'position':
+                                                                          PlutoCell(
+                                                                              value: line.work_area)
+                                                                    },
+                                                                  ));
+                                                                }
+                                                                isSearching =
+                                                                    false;
+                                                                Navigator.of(
+                                                                        context)
+                                                                    .pop();
+                                                              });
+                                                            },
+                                                            child: const Text(
+                                                                'Cancelar')))
+                                                  ],
+                                                )
+                                              ],
                                             );
                                           });
+                                    } catch (e) {
+                                      setState(() {
+                                        isLoading = false;
+                                      });
+                                      showErrorFromBackend(
+                                          context, e.toString());
                                     }
                                     setState(() {
                                       isLoading = false;
@@ -421,3 +422,32 @@ void updateUserScreen(BuildContext context) {
         );
       });
 }
+
+Future<void> updateActiveUserStatus(User selectedUser) async {
+  await changeUserActiveStatus(
+      selectedUser.employeeNumber!, selectedUser.isActive!);
+}
+
+// void refreshGridData() {
+//   if (userRows.isNotEmpty) {
+//     userRows.clear();
+//   }
+
+//   for (var line in listOfUsersForGrid) {
+//     userRows.add(PlutoRow(
+//       cells: {
+//         'id': PlutoCell(value: line.userId.toString()),
+//         'employeeName': PlutoCell(value: line.employeeName),
+//         'employeeNumber': PlutoCell(value: line.employeeNumber),
+//         'userRole': PlutoCell(value: line.role),
+//         'isActive': PlutoCell(value: line.isActive),
+//         'campus': PlutoCell(value: line.claUn),
+//         // 'area': PlutoCell(value: user),
+//         'mail': PlutoCell(value: line.userEmail),
+//         'creation': PlutoCell(value: line.creationDate),
+//         'birthdate': PlutoCell(value: line.birthdate),
+//         'position': PlutoCell(value: line.work_area)
+//       },
+//     ));
+//   }
+// }

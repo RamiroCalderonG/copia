@@ -10,7 +10,7 @@ import 'package:oxschool/data/datasources/temp/users_temp_data.dart';
 import '../../data/services/backend/api_requests/api_calls_list.dart';
 
 void clearTempData() {
-  listOfUsersForGrid = null;
+  listOfUsersForGrid.clear();
   usersPlutoRowList.clear();
   selectedUser = null;
   tempUserId = null;
