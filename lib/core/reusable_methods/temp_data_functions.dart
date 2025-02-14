@@ -79,11 +79,11 @@ Future<dynamic> fetchEventsByRole(int roleId) async {
   }
 }
 
-Future<dynamic> fetchScreensByRoleId(int roleId) async {
+Future<List<RoleModuleRelationshipDto>> fetchScreensByRoleId(int roleId) async {
   List<RoleModuleRelationshipDto> screensList = [];
   try {
     await getScreenListByRoleId(roleId).then((response) {
-      var jsonList = json.decode(response.body);
+      var jsonList = json.decode(utf8.decode(response.bodyBytes));
       for (var item in jsonList) {
         RoleModuleRelationshipDto newItem =
             RoleModuleRelationshipDto.fromJSON(item);
@@ -94,6 +94,7 @@ Future<dynamic> fetchScreensByRoleId(int roleId) async {
       insertErrorLog(error.toString(), 'fetchScreensByRoleId($roleId)');
       return Future.error(error.toString());
     });
+    return screensList;
   } catch (e) {
     insertErrorLog(e.toString(), 'fetchScreensByRoleId($roleId)');
     return Future.error(e.toString());

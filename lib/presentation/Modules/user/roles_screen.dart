@@ -88,6 +88,7 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
               value: rolesListData[index].events![eventIndex].canAcces,
               onChanged: (value) async {
                 setState(() {
+                  rolesListData[index].events![eventIndex].canAcces = value;
                   _isloading = true;
                 });
                 await modifyActiveOfEventRole(

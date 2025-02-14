@@ -16,7 +16,6 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<dynamic> loginUser(var jsonBody) async {
-  var response;
   try {
     var apiCall = await Requests.post(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/auth/login',
@@ -25,17 +24,28 @@ Future<dynamic> loginUser(var jsonBody) async {
         timeoutSeconds: 25);
 
     apiCall.raiseForStatus();
-    response = apiCall;
     return apiCall;
   } catch (e) {
-    String errorMessage;
+    // String errorMessage;
     insertErrorLog(e.toString(), '/login/userlogin/');
-    if (e is Exception) {
-      errorMessage = e.getErrorMessage();
-      return Future.error(errorMessage);
+    if (e is HTTPException) {
+      var statusCode = e.response.statusCode;
+      var message = '';
+      if (statusCode == 403) {
+        message = "User not authorized, verify with system admin";
+      } else {
+        message = e.toString();
+      }
+      return Future.error(message);
     } else {
-      e;
+      return Future.error(e.toString());
     }
+    // if (e is Exception) {
+    //   errorMessage = e.getErrorMessage();
+    //   return Future.error(errorMessage);
+    // } else {
+    //   Future.error(e.toString()); //?Why is this here?
+    // }
   }
 }
 
@@ -1279,6 +1289,27 @@ Future<dynamic> getScreenListByRoleId(int id) async {
     return apiCall;
   } catch (e) {
     insertErrorLog(e.toString(), "SCREEN LIST BY ROLE ID CALL ERROR: ");
+    return Future.error(e.toString());
+  }
+}
+
+Future<dynamic> updateModuleAccessByRole(
+    String moduleName, int roleId, bool access) async {
+  try {
+    var apiCall = await Requests.put(
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/roles/modules',
+        headers: {
+          'Authorization': currentUser!.token,
+          'Content-Type': 'application/json'
+        },
+        json: {'module': moduleName, 'role': roleId, 'access': access},
+        persistCookies: false,
+        timeoutSeconds: 20);
+    apiCall.raiseForStatus();
+    return apiCall;
+  } catch (e) {
+    insertErrorLog(e.toString(),
+        "UPDATE MODULE ACCESS BY ROLE CALL | body{ module: $moduleName, roleId: $roleId, access: $access}");
     return Future.error(e.toString());
   }
 }

@@ -37,6 +37,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
   List<String> filteredGrade = [];
   List<String> filteredGroup = [];
   List<String> filteredSubject = [];
+  Map<String, int> filteredSubjectMap = {};
   String currentMonth = spanishMonthsMap[currentMonthNumber] ?? 'Unknown month';
 
   String monthValue = '';
@@ -53,6 +54,15 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
     }
     filterData();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    // filteredSubjectMap.clear();
+    // filteredGrade.clear();
+    // filteredGroup.clear();
+    // filteredSubject.clear();
+    super.dispose();
   }
 
   _isUserAdminResult() async {
@@ -74,6 +84,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
   }
 
   void filterData() {
+    filteredSubjectMap.clear();
     if (selectedUnity != null) {
       // Filter grades based on Campus
       filteredGrade = widget.jsonData
@@ -120,6 +131,18 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
               (item) => (item['Subject'] ?? item['subject'])?.toString() ?? '')
           .toSet()
           .toList();
+
+      filteredSubjectMap = {
+        for (var item in widget.jsonData.where((item) =>
+            (item['Campus'] ?? item['campus']) == selectedUnity &&
+            (selectedGrade == null ||
+                (item['Grade'] ?? item['grade']) == selectedGrade) &&
+            (selectedGroup == null ||
+                (item['School_group'] ?? item['school_group']) ==
+                    selectedGroup)))
+          (item['Subject'] ?? item['subject'])?.toString() ?? '':
+              (item['Subject_id'] ?? item['subject_id']) ?? ''
+      };
 
       // Reset Subject if it doesn't match the new filter
       if (!filteredSubject.contains(selectedSubject)) {
@@ -266,6 +289,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                         initialSelection: preSelectedSubject ?? selectedSubject,
                         onSelected: (String? value) {
                           setState(() {
+                            selectedTempSubjectId = filteredSubjectMap[value];
                             preSelectedSubject = value;
                             selectedSubject = value;
                             selectedTempSubject = value;
