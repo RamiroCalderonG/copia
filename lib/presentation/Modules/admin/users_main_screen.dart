@@ -34,24 +34,33 @@ class UsersMainScreen extends StatefulWidget {
 class _UsersMainScreenState extends State<UsersMainScreen> {
   bool isUserAdmin = verifyUserAdmin(currentUser!);
   bool confirmation = false;
-
+  Key _key = UniqueKey();
   late Future<dynamic> loadingCOntroller;
+
+  void _restartScreen() {
+    setState(() {
+      refreshButton();
+      _key = UniqueKey();
+    });
+  }
 
   Future<dynamic> refreshButton() async {
     setState(() {
       isLoading = true;
-    });
-    try {
       listOfUsersForGrid.clear();
       userRows.clear();
+    });
+    try {
       await getUsers().then((response) {
         if (response != null) {
-          usersPlutoRowList = userRows;
           List<dynamic> jsonList = json.decode(response);
-          for (var item in jsonList) {
-            User newUser = User.usersSimplifiedList(item);
-            listOfUsersForGrid.add(newUser);
-          }
+          setState(() {
+            usersPlutoRowList = userRows;
+            for (var item in jsonList) {
+              User newUser = User.usersSimplifiedList(item);
+              listOfUsersForGrid.add(newUser);
+            }
+          });
           return response;
           // listOfUsersForGrid = parseUsersFromJSON(jsonList);
         } else {
@@ -100,6 +109,7 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        key: _key,
         appBar: AppBar(
             bottom: AppBar(automaticallyImplyLeading: false, actions: [
               TextButton.icon(
@@ -140,7 +150,8 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
                   icon: const FaIcon(FontAwesomeIcons.addressCard),
                   label: const Text('Nuevo usuario')),
               RefreshButton(
-                onPressed: refreshButton,
+                onPressed: _restartScreen,
+                // refreshButton,
               ),
               const SizedBox(width: 20),
             ]),

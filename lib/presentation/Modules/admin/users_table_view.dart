@@ -3,6 +3,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:oxschool/core/reusable_methods/temp_data_functions.dart';
 import 'package:oxschool/data/Models/User.dart';
 import 'package:oxschool/presentation/Modules/admin/edit_user_screen.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
@@ -30,6 +31,7 @@ class _UsersTableViewState extends State<UsersTableView> {
   bool confirmation = false;
   bool isSearching = true;
   late final PlutoGridStateManager stateManager;
+  Key usrsTableKey = UniqueKey();
   // ignore: prefer_typing_uninitialized_variables
   var listOfUsers;
 
@@ -61,6 +63,12 @@ class _UsersTableViewState extends State<UsersTableView> {
     //stateManager.dispose();
     areaList.clear();
     super.dispose();
+  }
+
+  void _restartTable() {
+    setState(() {
+      usrsTableKey = UniqueKey();
+    });
   }
 
   @override
@@ -139,17 +147,17 @@ class _UsersTableViewState extends State<UsersTableView> {
                               field: 'mail',
                               type: PlutoColumnType.text(),
                               readOnly: true),
-                          PlutoColumn(
-                            title: 'Fecha de alta',
-                            field: 'creation',
-                            type: PlutoColumnType.text(),
-                            readOnly: true,
-                          ),
-                          PlutoColumn(
-                              title: 'Posición',
-                              field: 'position',
-                              type: PlutoColumnType.text(),
-                              readOnly: true)
+                          // PlutoColumn(
+                          //   title: 'Fecha de alta',
+                          //   field: 'creation',
+                          //   type: PlutoColumnType.text(),
+                          //   readOnly: true,
+                          // ),
+                          // PlutoColumn(
+                          //     title: 'Posición',
+                          //     field: 'position',
+                          //     type: PlutoColumnType.text(),
+                          //     readOnly: true)
                         ],
                         rows: userRows,
                         onRowSecondaryTap: (event) {
@@ -238,6 +246,7 @@ class _UsersTableViewState extends State<UsersTableView> {
                                                           Navigator.of(context)
                                                               .pop();
                                                           isSearching = false;
+                                                          _restartTable();
                                                         });
                                                       },
                                                       child:
@@ -283,9 +292,9 @@ class _UsersTableViewState extends State<UsersTableView> {
                                                                       'birthdate':
                                                                           PlutoCell(
                                                                               value: line.birthdate),
-                                                                      'position':
-                                                                          PlutoCell(
-                                                                              value: line.work_area)
+                                                                      // 'position':
+                                                                      //     PlutoCell(
+                                                                      //         value: line.work_area)
                                                                     },
                                                                   ));
                                                                 }
@@ -327,15 +336,42 @@ class _UsersTableViewState extends State<UsersTableView> {
                                     tempUserId =
                                         event.row.cells.values.first.value;
                                     tempSelectedUsr?.clear();
-                                    await getSingleUser(null);
-                                    areaList.clear();
-                                    await getWorkDepartmentList();
-                                    var response = await getRolesList();
-                                    tmpRolesList = jsonDecode(response);
+                                    try {
+                                      //Get selected User
+                                      await getSingleUser(tempUserId!)
+                                          .then((value) async {
+                                        setState(() {
+                                          areaList.clear();
+                                        });
+                                        await getWorkDepartmentList()
+                                            .then((response) async {
+                                          if (tmpRolesList.isEmpty) {
+                                            await getRolesTempList()
+                                                .catchError((onError) {
+                                              showErrorFromBackend(
+                                                  context, onError.toString());
+                                            });
+                                          }
+                                        }).catchError((onError) {
+                                          showErrorFromBackend(
+                                              context, onError.toString());
+                                        });
+                                        //Get roles from DB
 
-                                    updateUserScreen(context);
+                                        // var response = await getRolesList();
+                                        // tmpRolesList = jsonDecode(response);
+                                        updateUserScreen(context);
+                                      }).catchError((error) {
+                                        showErrorFromBackend(
+                                            context, error.toString());
+                                      });
+                                      //Get departments from DB
+                                    } catch (e) {
+                                      showErrorFromBackend(
+                                          context, e.toString());
+                                    }
                                   },
-                                  enabled: isUserAdmin,
+                                  enabled: currentUser!.isCurrentUserAdmin(),
                                   child: const Text('Modificar ususario'),
                                 ),
                                 PopupMenuItem(

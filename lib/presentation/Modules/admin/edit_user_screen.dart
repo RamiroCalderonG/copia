@@ -1,8 +1,12 @@
 // ignore_for_file: prefer_typing_uninitialized_variables, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
+import 'package:oxschool/core/extensions/capitalize_strings.dart';
+import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/data/datasources/temp/users_temp_data.dart';
 import 'package:oxschool/core/utils/loader_indicator.dart';
+import 'package:oxschool/presentation/components/confirm_dialogs.dart';
+import 'package:oxschool/presentation/components/custom_icon_button.dart';
 
 import '../../../data/services/backend/api_requests/api_calls_list.dart';
 
@@ -20,10 +24,14 @@ class _EditUserScreenState extends State<EditUserScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _employeeNumberController =
       TextEditingController();
+  final TextEditingController _campusController = TextEditingController();
+  String? _selectedCampus;
   var _userRole;
+
   String? _userDepartment;
   List<String> roleNames = [];
   List<String> departmentsList = [];
+  List<String> campusesList = ['ANAHUAC', 'BARRAGAN', 'CONCORDIA', 'SENDERO'];
 
   var isActive;
   var genre;
@@ -54,9 +62,13 @@ class _EditUserScreenState extends State<EditUserScreen> {
     _nameController.text = tempSelectedUsr!.employeeName.toString();
     _employeeNumberController.text = tempSelectedUsr!.employeeNumber.toString();
     _userRole = tempSelectedUsr!.role.toString();
+    _selectedCampus = tempSelectedUsr!.claUn;
     _userDepartment = tempSelectedUsr!.work_area.toString();
+    _campusController.text = tempSelectedUsr!.claUn.toString();
 
-    roleNames = tmpRolesList.map((role) => role["Role"] as String).toList();
+    roleNames = tmpRolesList
+        .map((role) => role["softName"].toString().trim().toTitleCase)
+        .toList();
     // departmentsList = areaList.map((e) => e["work_department"]).toList();
     if (tempSelectedUsr!.isActive == 1) {
       isUserActive = false;
@@ -95,6 +107,41 @@ class _EditUserScreenState extends State<EditUserScreen> {
       return 'Please enter a valid email address';
     }
     return null;
+  }
+
+  void _updateUser() async {
+    if (_formKey.currentState!.validate()) {
+      await showConfirmationDialog(context, 'Confirmación', '¿Realiar cambios?')
+          .then((response) async {
+        if (response == 1) {
+          //User selected YES
+          if (dataToUpdate.isNotEmpty) {
+            try {
+              setState(() {
+                isloading = true;
+              });
+              await editUser(dataToUpdate, tempSelectedUsr!.employeeNumber!, 2)
+                  .whenComplete(() {
+                return;
+              }).catchError((onError) {
+                throw Future.error(onError);
+              });
+            } catch (e) {
+              setState(() {
+                isloading = false;
+              });
+              insertErrorLog(e.toString(),
+                  '_updateUser() | $dataToUpdate ${tempSelectedUsr!.employeeNumber!}, | field: 2');
+            }
+          } else {
+            throw Future.error('No data to update');
+          }
+        } else {
+          //User selected NO
+          Navigator.pop(context);
+        }
+      });
+    }
   }
 
   @override
@@ -145,9 +192,11 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                   return null;
                                 },
                                 onChanged: (value) {
-                                  _userNameUpdated = {'nombre_gafete': value};
-                                  dataToUpdate
-                                      .addEntries(_userNameUpdated.entries);
+                                  setState(() {
+                                    _userNameUpdated = {'nombre_gafete': value};
+                                    dataToUpdate
+                                        .addEntries(_userNameUpdated.entries);
+                                  });
                                 },
                               )),
                               const SizedBox(width: 15),
@@ -165,9 +214,11 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                   return null;
                                 },
                                 onChanged: (value) {
-                                  _newEmployeeNumber = {'noempleado': value};
-                                  dataToUpdate
-                                      .addEntries(_newEmployeeNumber.entries);
+                                  setState(() {
+                                    _newEmployeeNumber = {'noempleado': value};
+                                    dataToUpdate
+                                        .addEntries(_newEmployeeNumber.entries);
+                                  });
                                 },
                               )),
                             ],
@@ -184,9 +235,11 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                   ),
                                   validator: _validateEmail,
                                   onChanged: (value) {
-                                    _emailUpdated = {'user_email': value};
-                                    dataToUpdate
-                                        .addEntries(_emailUpdated.entries);
+                                    setState(() {
+                                      _emailUpdated = {'user_email': value};
+                                      dataToUpdate
+                                          .addEntries(_emailUpdated.entries);
+                                    });
                                   },
                                 ),
                               ),
@@ -216,30 +269,56 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                   //   return null;
                                   // },
                                   onChanged: (value) {
-                                    _passwordUpdated = {'user_password': value};
-                                    dataToUpdate
-                                        .addEntries(_passwordUpdated.entries);
+                                    setState(() {
+                                      _passwordUpdated = {
+                                        'user_password': value
+                                      };
+                                      dataToUpdate
+                                          .addEntries(_passwordUpdated.entries);
+                                    });
                                   },
                                 ),
-                              )
+                              ),
                             ],
                           ),
-                          // SizedBox(height: 46.0),
-                          // Row(
-                          //   children: [
-                          //     Text(
-                          //       'Datos personales del ususario',
-                          //       style: TextStyle(
-                          //           fontFamily: 'Sora', color: Colors.grey),
-                          //     )
-                          //   ],
-                          // ),
-                          // Divider(
-                          //   thickness: 2,
-                          // ),
-                          const SizedBox(height: 20),
+                          SizedBox(
+                            height: 10,
+                          ),
                           Row(
                             children: [
+                              Text('Campus:  '),
+                              Flexible(
+                                  child: DropdownButton<String>(
+                                hint: const Text('Campus'),
+                                value: _selectedCampus,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _selectedCampus = value;
+                                    var newUserCampus = {'campus': value};
+                                    dataToUpdate
+                                        .addEntries(newUserCampus.entries);
+                                  });
+                                },
+                                items: campusesList
+                                    .map<DropdownMenuItem<String>>(
+                                        (String value) {
+                                  return DropdownMenuItem<String>(
+                                    value: value,
+                                    child: Text(value),
+                                  );
+                                }).toList(),
+                              ))
+                            ],
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                'Rol de ususario:   ',
+                                style: TextStyle(fontFamily: 'Sora'),
+                              ),
                               Expanded(
                                 child: DropdownButton<String>(
                                   hint: const Text('Rol de ususario'),
@@ -327,6 +406,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
                           const SizedBox(height: 20),
                           Row(
                             children: [
+                              Text('Departamento asignado:  '),
                               Expanded(
                                 child: DropdownButton<String>(
                                   value: areaList.contains(dropdownValue)
@@ -355,158 +435,131 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                 ),
                               ),
                               const SizedBox(width: 15),
-                              // Expanded(
-                              //   child: DropdownButton<String>(
-                              //     value: areaList.contains(dropdownValue)
-                              //         ? dropdownValue
-                              //         : 'Select Department',
-                              //     hint: const Text('Departamento'),
-                              //     onChanged: (String? newValue) {
-                              //       setState(() {
-                              //         _userDepartment = newValue!;
-                              //         newUserPosition = {'position': newValue};
-                              //         dataToUpdate
-                              //             .addEntries(newUserPosition.entries);
-                              //       });
-                              //     },
-                              //     items: areaList.map<DropdownMenuItem<String>>(
-                              //         (String value) {
-                              //       return DropdownMenuItem<String>(
-                              //         value: value,
-                              //         child: Text(value),
-                              //       );
-                              //     }).toList(),
-                              //   ),
-                              // ),
                             ],
                           ),
-                          ElevatedButton(
-                            onPressed: () {
-                              if (_formKey.currentState!.validate()) {
-                                showDialog(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                    title: const Text('Confirmación'),
-                                    content: const Text('¿Realiar cambios?'),
-                                    actions: <Widget>[
-                                      TextButton(
-                                        onPressed: () async {
-                                          areaList.clear();
-                                          dispose();
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: const Text('Cancelar'),
-                                      ),
-                                      ElevatedButton(
-                                        onPressed: () async {
-                                          if (dataToUpdate.isEmpty) {
-                                            return showDialog(
-                                                context: context,
-                                                builder: (context) =>
-                                                    AlertDialog(
-                                                      title:
-                                                          const Text('Error'),
-                                                      content: const Text(
-                                                          'No se detectó ningun cambio'),
-                                                      actions: [
-                                                        TextButton(
-                                                            onPressed: () {
-                                                              Navigator.pop(
-                                                                  context);
-                                                            },
-                                                            child: const Text(
-                                                                'Ok'))
-                                                      ],
-                                                    ));
-                                          } else {
-                                            try {
-                                              // Navigator.of(context).pop();
-                                              // Navigator.of(context).pop();
-                                              setState(() {
-                                                isloading = true;
-                                              });
+                          const SizedBox(height: 20),
+                          Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                dataToUpdate.isNotEmpty
+                                    ? SaveItemButton(onPressed: _updateUser)
+                                    : Text(
+                                        'No se ha detectado ningun cambio',
+                                        style: TextStyle(color: Colors.amber),
+                                      )
+                              ])
+                          // ElevatedButton(
+                          //   onPressed: () {
+                          //     if (_formKey.currentState!.validate()) {
+                          //       showDialog(
+                          //         context: context,
+                          //         builder: (context) => AlertDialog(
+                          //           title: const Text('Confirmación'),
+                          //           content: const Text('¿Realiar cambios?'),
+                          //           actions: <Widget>[
+                          //             TextButton(
+                          //               onPressed: () async {
+                          //                 areaList.clear();
+                          //                 dispose();
+                          //                 Navigator.of(context).pop();
+                          //               },
+                          //               child: const Text('Cancelar'),
+                          //             ),
+                          //             ElevatedButton(
+                          //               onPressed: () async {
+                          //                 if (dataToUpdate.isEmpty) {
+                          //                   return showDialog(
+                          //                       context: context,
+                          //                       builder: (context) =>
+                          //                           AlertDialog(
+                          //                             title:
+                          //                                 const Text('Error'),
+                          //                             content: const Text(
+                          //                                 'No se detectó ningun cambio'),
+                          //                             actions: [
+                          //                               TextButton(
+                          //                                   onPressed: () {
+                          //                                     Navigator.pop(
+                          //                                         context);
+                          //                                   },
+                          //                                   child: const Text(
+                          //                                       'Ok'))
+                          //                             ],
+                          //                           ));
+                          //                 } else {
+                          //                   try {
+                          //                     setState(() {
+                          //                       isloading = true;
+                          //                     });
 
-                                              //TODO : CREATE ON BACKEND CASE FOR FIELD 2
-                                              var response = await editUser(
-                                                  dataToUpdate,
-                                                  tempSelectedUsr!
-                                                      .employeeNumber!,
-                                                  2);
-                                              if (response == 200) {
-                                                setState(() {
-                                                  isloading = false;
-                                                });
-                                                Navigator.of(context).pop();
+                          //                     //TODO : CREATE ON BACKEND CASE FOR FIELD 2
+                          //                     var response = await editUser(
+                          //                         dataToUpdate,
+                          //                         tempSelectedUsr!
+                          //                             .employeeNumber!,
+                          //                         2);
+                          //                     if (response == 200) {
+                          //                       setState(() {
+                          //                         isloading = false;
+                          //                       });
+                          //                       Navigator.of(context).pop();
 
-                                                showDialog(
-                                                    context: context,
-                                                    builder: (context) =>
-                                                        AlertDialog(
-                                                          icon: const Icon(
-                                                              Icons.done),
-                                                          iconColor: Colors
-                                                              .greenAccent,
-                                                          title: const Text(
-                                                              'Exito'),
-                                                          content: const Text(
-                                                              'Usuario actualizado exitosamente'),
-                                                          actions: [
-                                                            TextButton(
-                                                              onPressed: () {
-                                                                Navigator.of(
-                                                                        context)
-                                                                    .pop();
-                                                                Navigator.of(
-                                                                    context);
-                                                              },
-                                                              child: const Text(
-                                                                  'Cerrar'),
-                                                            )
-                                                          ],
-                                                        ));
-                                              }
-                                            } catch (e) {
-                                              setState(() {
-                                                isloading = false;
-                                              });
-                                              showDialog(
-                                                  context: context,
-                                                  builder: (context) =>
-                                                      AlertDialog(
-                                                        icon: const Icon(
-                                                            Icons.error),
-                                                        iconColor:
-                                                            Colors.redAccent,
-                                                        title:
-                                                            const Text('Error'),
-                                                        content:
-                                                            Text(e.toString()),
-                                                      ));
-                                            }
-                                            // setState(() {
-                                            //   isloading = false;
-                                            // });
-                                            // Navigator.of(context).pop();
-                                          }
-
-                                          // Navigator.of(context).pop();}
-                                          // Navigator.of(context).pop();
-                                          // // Proceed with registration logic here
-                                          // String email = _emailController.text;
-                                          // String password =
-                                          //     _passwordController.text;
-                                          // print(
-                                          //     'Email: $email, Password: $password');
-                                        },
-                                        child: const Text('Register'),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              }
-                            },
-                            child: const Text('Actualizar'),
-                          ),
+                          //                       showDialog(
+                          //                           context: context,
+                          //                           builder: (context) =>
+                          //                               AlertDialog(
+                          //                                 icon: const Icon(
+                          //                                     Icons.done),
+                          //                                 iconColor: Colors
+                          //                                     .greenAccent,
+                          //                                 title: const Text(
+                          //                                     'Exito'),
+                          //                                 content: const Text(
+                          //                                     'Usuario actualizado exitosamente'),
+                          //                                 actions: [
+                          //                                   TextButton(
+                          //                                     onPressed: () {
+                          //                                       Navigator.of(
+                          //                                               context)
+                          //                                           .pop();
+                          //                                       Navigator.of(
+                          //                                           context);
+                          //                                     },
+                          //                                     child: const Text(
+                          //                                         'Cerrar'),
+                          //                                   )
+                          //                                 ],
+                          //                               ));
+                          //                     }
+                          //                   } catch (e) {
+                          //                     setState(() {
+                          //                       isloading = false;
+                          //                     });
+                          //                     showDialog(
+                          //                         context: context,
+                          //                         builder: (context) =>
+                          //                             AlertDialog(
+                          //                               icon: const Icon(
+                          //                                   Icons.error),
+                          //                               iconColor:
+                          //                                   Colors.redAccent,
+                          //                               title:
+                          //                                   const Text('Error'),
+                          //                               content:
+                          //                                   Text(e.toString()),
+                          //                             ));
+                          //                   }
+                          //                 }
+                          //               },
+                          //               child: const Text('Register'),
+                          //             ),
+                          //           ],
+                          //         ),
+                          //       );
+                          //     }
+                          //   },
+                          //   child: const Text('Actualizar'),
+                          // ),
                         ],
                       ),
                     ));

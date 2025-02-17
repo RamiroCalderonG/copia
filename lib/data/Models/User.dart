@@ -60,43 +60,23 @@ class User {
 
         // "notActive": notActive
       };
-  User fromJson(List<dynamic> jsonUser) {
-    for (var item in jsonUser) {
-      claUn = jsonUser[item]['claun'];
-      employeeName = jsonUser[item]['nombre_gafete'];
-      employeeNumber = jsonUser[item]['noempleado'];
-      role = jsonUser[item]['role_name'];
-      userId = jsonUser[item]['role_name'];
-      token = '';
-      userEmail = jsonUser[item]['user_email'];
-      //usergenre = jsonUser[item]['genre'];
-      isActive = jsonUser[item]['bajalogicasino'];
-      work_area = jsonUser[item]['work_area'];
-      work_position = jsonUser[item]['work_position'];
-      creationDate = jsonUser[item]['creation_date'];
-      birthdate = jsonUser[item]['birthdate'];
-      isTeacher = jsonUser[item]['is_Teacher'];
-      isAdmin = jsonUser[item]['userRole']['isAdmin'];
-      roleID = jsonUser[item]['userRole']['id'];
-    }
-    return User(
-        claUn,
-        employeeName,
-        employeeNumber,
-        role,
-        userId,
-        token,
-        userEmail,
-        //usergenre,
-        isActive,
-        work_area,
-        work_position,
-        creationDate,
-        birthdate,
-        isTeacher,
-        isAdmin,
-        roleID);
-  }
+
+  User.fromJson(Map<String, dynamic> json)
+      : employeeNumber = json['employeeNumber'],
+        employeeName = json['userFullName'],
+        claUn = json['userCampus'],
+        role = json['userRole']['softName'],
+        userId = json['id'],
+        token = '',
+        userEmail = json['userMail'],
+        isActive = json['userActive'],
+        work_area = json['userDept'],
+        work_position = json['userPosition'],
+        creationDate = json['creation_date'],
+        birthdate = json['userBirth'],
+        isTeacher = json['userTeacher'],
+        isAdmin = json['userRole']['isAdmin'],
+        roleID = json['userRole']['id'];
 
   void clear() {
     employeeName = null;

@@ -43,24 +43,17 @@ Future<int> showConfirmationDialog(
           color: Colors.green,
         ),
         title: Text(titleText, style: const TextStyle(fontFamily: 'Sora')),
-        content: Text(contentText
-            // 'Por favor ingrese un valor que sea válido.'
-            ),
+        content: Text(contentText),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
               completer.complete(1); // User selected 'Yes'
             },
-            // style: ButtonStyle(
-            //   backgroundColor:
-            //       MaterialStateProperty.all<Color>(Colors.greenAccent),
-            // ),
             child: Text('Cerrar',
                 style: FlutterFlowTheme.of(context).labelLarge.override(
                       fontFamily: 'Roboto',
-                      color: FlutterFlowTheme.of(context)
-                          .primaryText, // const Color(0xFF130C0D),
+                      color: FlutterFlowTheme.of(context).primaryText,
                       fontWeight: FontWeight.w500,
                     )),
           ),

@@ -60,60 +60,25 @@ bool verifyUserAdmin(User currentUser) {
   return currentUser.isCurrentUserAdmin();
 }
 
-dynamic getSingleUser(String? userId) async {
-  if (userId == null) {
-    userId = tempUserId.toString();
-    selectedUser = await getUserDetail(userId);
-    List<dynamic> jsonList = json.decode(selectedUser);
+Future<dynamic> getSingleUser(int? userId) async {
+  if (userId != null) {
     try {
-      for (var i = 0; i < jsonList.length; i++) {
-        var claUn = jsonList[i]['claun'];
-        var employeeName = jsonList[i]['nombre_gafete'];
-        var employeeNumber = jsonList[i]['noempleado'];
-        var role = jsonList[i]['userRole']['name'];
-        // var nwuserId = jsonList[i]['role_name'];
-        var token = '';
-        var userEmail = jsonList[i]['user_email'];
-        var usergenre = jsonList[i]['genre'];
-        var isActive = jsonList[i]['bajalogicasino'];
-        var userId = 0;
-        String? workArea = jsonList[i]['work_department'];
-        String? workPosition = jsonList[i]['work_position'];
-        String? creationDate = jsonList[i]['createdAt'];
-        String? birthdate = jsonList[i]['birthdate'];
-        bool isTeacher = jsonList[i]['is_teacher'];
-        bool isAdmin = jsonList[i]['userRole']['isAdmin'];
-        int roleId = jsonList[i]['userRole']['id'];
+      userId = tempUserId;
+      selectedUser = await getUserDetailCall(userId!).then((response) {
+        Map<String, dynamic> jsonList = json.decode(response);
+        selectedUser = jsonList;
 
-        tempSelectedUsr = User(
-            claUn,
-            employeeName,
-            employeeNumber,
-            role,
-            userId,
-            token,
-            userEmail,
-            //usergenre,
-            isActive,
-            workArea,
-            workPosition,
-            creationDate,
-            birthdate,
-            isTeacher,
-            isAdmin,
-            roleId);
-      }
-      return tempSelectedUsr;
+        tempSelectedUsr = User.fromJson(jsonList);
+        return tempSelectedUsr;
+      }).catchError((error) {
+        insertErrorLog(
+            error.toString(), "getSingleUser($userId) | user_functions :63 ");
+      });
     } catch (e) {
-      AlertDialog(
-        title: const Text("Error"),
-        content: Text(e.toString()),
-      );
+      throw Future.error(e.toString());
     }
-
-    // tempSelectedUsr = tempSelectedUsr!.fromJson(jsonList);
   } else {
-    selectedUser = await getUserDetail(userId);
+    throw Future.error('No user selected');
   }
 }
 

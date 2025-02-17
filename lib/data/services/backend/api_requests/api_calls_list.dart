@@ -511,23 +511,22 @@ Future<dynamic> deleteUser(String id) async {
   }
 }
 
-Future<dynamic> getUserDetail(String userId) async {
-  String response;
+Future<dynamic> getUserDetailCall(int userId) async {
   try {
     var apiCall = await Requests.get(
-        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/user/detail',
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/users/$userId',
         headers: {
-          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-          'Auth': currentUser!.token
+          'Authorization': currentUser!.token,
+          'Content-Type': 'application/json',
         },
-        queryParameters: {'id': userId},
+        // queryParameters: {'id': userId},
         persistCookies: false,
-        timeoutSeconds: 10);
+        timeoutSeconds: 15);
     apiCall.raiseForStatus();
-    response = apiCall.content();
-    return response;
+    return apiCall.body;
   } catch (e) {
-    throw FormatException(e.toString());
+    insertErrorLog(e.toString(), 'getUserDetail() | $userId');
+    throw Future.error(e.toString());
   }
 }
 
@@ -568,17 +567,17 @@ Future<dynamic> getCampuseList() async {
 Future<dynamic> getWorkDepartments() async {
   try {
     var apiCall = await Requests.get(
-        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/departments',
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/department/all',
         headers: {
-          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-          'Auth': currentUser!.token
+          'Authorization': currentUser!.token,
+          "Content-Type": "application/json"
         },
         persistCookies: false,
-        timeoutSeconds: 10);
+        timeoutSeconds: 15);
     apiCall.raiseForStatus();
     return apiCall.content();
   } catch (e) {
-    throw FormatException(e.toString());
+    throw Future.error(e.toString());
   }
 }
 
