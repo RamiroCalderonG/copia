@@ -66,14 +66,6 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
     deviceData = device ?? '';
   }
 
-  // dynamic sendRecoveryTokenFunction(String email, String device) async {
-  //   try {
-  //     return await sendRecoveryToken(email, device.toString());
-  //   } catch (e) {
-  //     return FormatException(e.toString());
-  //   }
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -83,6 +75,7 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
       body: Padding(
           padding: EdgeInsets.only(left: 100, right: 100),
           child: PageView(
+            physics: NeverScrollableScrollPhysics(),
             controller: _pageController,
             children: [
               // First Step: Email Input
@@ -157,32 +150,31 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
                           return null;
                         },
                         onFieldSubmitted: (value) async {
-                          setState(() {
-                            isLoading = true; // Start loading animation
-                          });
-                          if (_textFieldController.text.isNotEmpty) {
-                            var response = await sendRecoveryToken(
-                                _textFieldController.text, deviceData);
-                            if (response.statusCode != 200) {
                               setState(() {
-                                isLoading = false;
+                                isLoading = true; // Start loading animation
                               });
-                              showErrorFromBackend(context, response.body);
-                            } else {
-                              setState(() {
-                                isLoading = false;
-                              });
-                              _pageController.nextPage(
-                                duration: const Duration(milliseconds: 300),
-                                curve: Curves.easeIn,
-                              );
-                            }
-                          } else {
-                            // Show error dialog for empty email
-                            _showErrorDialog(
-                                "Por favor, ingrese un email válido");
-                          }
-                        },
+                              if (_textFieldController.text.isNotEmpty) {
+                                await sendRecoveryToken(
+                                    _textFieldController.text, deviceData).then((response){
+                                      setState(() {
+                                    isLoading = false;
+                                  });
+                                  _pageController.nextPage(
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeIn,
+                                  );
+                                    }).catchError((onError){
+                                       setState(() {
+                                    isLoading = false;
+                                    showErrorFromBackend(context, onError.toString());
+                                  });
+                                    });
+                              } else {
+                                // Show error dialog for empty email
+                                _showErrorDialog(
+                                    "Por favor, ingrese un email válido");
+                              }
+                            },
                       )),
                   const SizedBox(width: 20),
                   Flexible(
@@ -195,22 +187,22 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
                                 isLoading = true; // Start loading animation
                               });
                               if (_textFieldController.text.isNotEmpty) {
-                                var response = await sendRecoveryToken(
-                                    _textFieldController.text, deviceData);
-                                if (response.statusCode != 200) {
-                                  setState(() {
-                                    isLoading = false;
-                                  });
-                                  showErrorFromBackend(context, response.body);
-                                } else {
-                                  setState(() {
+                                await sendRecoveryToken(
+                                    _textFieldController.text, deviceData).then((response){
+                                      setState(() {
                                     isLoading = false;
                                   });
                                   _pageController.nextPage(
                                     duration: const Duration(milliseconds: 300),
                                     curve: Curves.easeIn,
                                   );
-                                }
+                                    }).catchError((onError){
+                                       setState(() {
+                                    isLoading = false;
+                                     Navigator.pop(context);
+                                    showErrorFromBackend(context, onError.toString());
+                                  });
+                                    });
                               } else {
                                 // Show error dialog for empty email
                                 _showErrorDialog(

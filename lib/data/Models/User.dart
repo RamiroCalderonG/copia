@@ -19,6 +19,7 @@ class User {
   bool? isTeacher;
   bool? isAdmin;
   int? roleID;
+  bool? canUpdatePassword;
 
   // late final notActive;
 
@@ -38,7 +39,9 @@ class User {
       this.birthdate,
       this.isTeacher,
       this.isAdmin,
-      this.roleID);
+      this.roleID,
+      this.canUpdatePassword
+      );
 
   Map<dynamic, dynamic> toJson() => {
         "employeeNumber": employeeNumber,
@@ -76,7 +79,8 @@ class User {
         birthdate = json['userBirth'],
         isTeacher = json['userTeacher'],
         isAdmin = json['userRole']['isAdmin'],
-        roleID = json['userRole']['id'];
+        roleID = json['userRole']['id'],
+        canUpdatePassword = json['userCanUpdatePassword'];
 
   void clear() {
     employeeName = null;
@@ -113,5 +117,6 @@ class User {
         birthdate = json['birthdate'],
         isTeacher = json['isTeacher'],
         isAdmin = json['admin'],
-        roleID = 0;
+        roleID = 0,
+        canUpdatePassword = json['can_update_password'];
 }

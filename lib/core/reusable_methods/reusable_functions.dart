@@ -6,21 +6,21 @@ import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart'
 import 'package:oxschool/data/datasources/temp/users_temp_data.dart';
 
 Future<dynamic> getAllCampuse() async {
-  var response = await getCampuseList();
-  var campusList = jsonDecode(response);
-  // List<String> campuseNameList = [];
-  // campuseList.clear();
-  for (var item in campusList) {
+  await getCampuseList().then((response){
+    var campusList = jsonDecode(response);
+     for (var item in campusList) {
     String name = item['Name'];
     campuseList.add(name); //.add(name);
   }
-  // return campuseNameList;
+  }).onError((error, stackTrace){ 
+    insertErrorLog(error.toString(), 'getAllCampuse() | ');
+    return Future.error(error.toString());
+  });
 }
 
 Future<dynamic> getWorkDepartmentList() async {
   try {
     areaList.clear();
-    var response;
     await getWorkDepartments().then((response) {
       var jsonList = jsonDecode(response);
       for (var item in jsonList) {

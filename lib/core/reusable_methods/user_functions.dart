@@ -11,50 +11,53 @@ import 'package:http/http.dart' as http;
 
 import '../../data/Models/User.dart';
 
-List<User> parseUsersFromJSON(List<dynamic> jsonList) {
-  List<User> users = [];
+//List<User> parseUsersFromJSON(List<dynamic> jsonList) {
+//  List<User> users = [];
+//
+//  for (var item in jsonList) {
+//    int employeeNumber = item['employeeNumber'];
+//    String employeeName = item['name'];
+//    String claUn = item['campus'];
+//    String? role = item['roleName'];
+//    int? userId = item['id'];
+//    String? token = 'null';
+//    String? schoolEmail = item['email'];
+//    String? usergenre = item['genre'];
+//    int isActive = item['isActive'];
+//    String? workArea = item['department'];
+//    String? workPosition = item['position'];
+//    String? creationDate = item['creationDate'];
+//    String? birthdate = item['birthdate'];
+//    bool? isTeacher = item['isTeacher'];
+//    bool? isAdmin = item['admin'];
+//    int roleId = item['userRole']['id'];
+//    bool canUpdatePassword = item['can']
 
-  for (var item in jsonList) {
-    int employeeNumber = item['employeeNumber'];
-    String employeeName = item['name'];
-    String claUn = item['campus'];
-    String? role = item['roleName'];
-    int? userId = item['id'];
-    String? token = 'null';
-    String? schoolEmail = item['email'];
-    String? usergenre = item['genre'];
-    int isActive = item['isActive'];
-    String? workArea = item['department'];
-    String? workPosition = item['position'];
-    String? creationDate = item['creationDate'];
-    String? birthdate = item['birthdate'];
-    bool? isTeacher = item['isTeacher'];
-    bool? isAdmin = item['admin'];
-    int roleId = item['userRole']['id'];
-
-    User currentUser = User(
-        claUn.toTitleCase,
-        employeeName,
-        employeeNumber,
-        role!.toTitleCase,
-        userId!,
-        token,
-        schoolEmail,
+//    User currentUser = User(
+//        claUn.toTitleCase,
+//        employeeName,
+//        employeeNumber,
+//        role!.toTitleCase,
+//        userId!,
+//        token,
+//        schoolEmail,
         //usergenre,
-        isActive,
-        workArea?.toTitleCase,
-        workPosition?.toTitleCase,
-        creationDate,
-        birthdate,
-        isTeacher,
-        isAdmin,
-        roleId);
+//        isActive,
+//        workArea?.toTitleCase,
+//        workPosition?.toTitleCase,
+//        creationDate,
+//        birthdate,
+//        isTeacher,
+//        isAdmin,
+//        roleId,
+        
+//        );
 
-    users.add(currentUser);
-  }
+//    users.add(currentUser);
+//  }
 
-  return users;
-}
+//  return users;
+//}
 
 bool verifyUserAdmin(User currentUser) {
   return currentUser.isCurrentUserAdmin();
@@ -140,7 +143,7 @@ void setUserDataForDebug() {
       '01/01/2000',
       false,
       true,
-      1);
+      1, true);
   currentUser = user;
   var exampleEvents = [
     {

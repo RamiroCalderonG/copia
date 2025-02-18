@@ -1,19 +1,16 @@
 // ignore_for_file: use_build_context_synchronously, non_constant_identifier_names
 
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:oxschool/core/reusable_methods/temp_data_functions.dart';
 import 'package:oxschool/data/Models/User.dart';
 import 'package:oxschool/presentation/Modules/admin/edit_user_screen.dart';
-import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/presentation/Modules/login_view/login_view_widget.dart';
 import 'package:oxschool/core/reusable_methods/reusable_functions.dart';
 import 'package:oxschool/core/reusable_methods/user_functions.dart';
 import 'package:oxschool/data/datasources/temp/users_temp_data.dart';
 import 'package:oxschool/presentation/components/confirm_dialogs.dart';
-import 'package:oxschool/presentation/components/custom_icon_button.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
 class UsersTableView extends StatefulWidget {
@@ -31,7 +28,7 @@ class _UsersTableViewState extends State<UsersTableView> {
   bool confirmation = false;
   bool isSearching = true;
   late final PlutoGridStateManager stateManager;
-  Key usrsTableKey = UniqueKey();
+  //Key usrsTableKey = UniqueKey();
   // ignore: prefer_typing_uninitialized_variables
   var listOfUsers;
 
@@ -67,7 +64,7 @@ class _UsersTableViewState extends State<UsersTableView> {
 
   void _restartTable() {
     setState(() {
-      usrsTableKey = UniqueKey();
+      //usrsTableKey = UniqueKey();
     });
   }
 
@@ -189,13 +186,17 @@ class _UsersTableViewState extends State<UsersTableView> {
                                                   .value);
 
                                       bool isCurrentlyActive = false;
-                                      if (selectedUser.isActive == 0) {
+                                      setState(() {
+                                         if (selectedUser.isActive == 0) { //0 means that is active
                                         //when user is currently active
                                         isCurrentlyActive = true;
-                                      } else if (selectedUser.isActive == 1) {
+                                      } else if (selectedUser.isActive == 1) { // 1 means that is deactivated
                                         //when user is currently inactive
                                         isCurrentlyActive = false;
                                       }
+                                      });
+
+                                     
                                       showDialog(
                                           context: context,
                                           builder: (BuildContext context) {
@@ -212,8 +213,9 @@ class _UsersTableViewState extends State<UsersTableView> {
                                                     Expanded(
                                                         child: TextButton(
                                                       onPressed: () async {
-                                                        int newIsActiveIntValue;
-                                                        if (isCurrentlyActive) {
+                                                        int newIsActiveIntValue = 0;
+                                                        setState(() {
+                                                          if (isCurrentlyActive) {
                                                           //*IF user is currently active, set deactivate value
                                                           newIsActiveIntValue =
                                                               1;
@@ -221,7 +223,6 @@ class _UsersTableViewState extends State<UsersTableView> {
                                                           newIsActiveIntValue =
                                                               0;
                                                         }
-                                                        setState(() {
                                                           isCurrentlyActive =
                                                               !isCurrentlyActive;
                                                           confirmation = true;

@@ -25,6 +25,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
   final TextEditingController _employeeNumberController =
       TextEditingController();
   final TextEditingController _campusController = TextEditingController();
+
   String? _selectedCampus;
   var _userRole;
 
@@ -53,6 +54,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
   bool isloading = false;
   bool isUserActive = false;
   bool isUserTeacher = false;
+  bool canUserChangePassword = false;
 
   bool _obscureText = true;
 
@@ -65,6 +67,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
     _selectedCampus = tempSelectedUsr!.claUn;
     _userDepartment = tempSelectedUsr!.work_area.toString();
     _campusController.text = tempSelectedUsr!.claUn.toString();
+    canUserChangePassword = tempSelectedUsr!.canUpdatePassword!;
 
     roleNames = tmpRolesList
         .map((role) => role["softName"].toString().trim().toTitleCase)
@@ -117,11 +120,22 @@ class _EditUserScreenState extends State<EditUserScreen> {
           //User selected YES
           if (dataToUpdate.isNotEmpty) {
             try {
+              Key alertDialogKey = UniqueKey();
               setState(() {
                 isloading = true;
               });
+        
+              AlertDialog(
+                key: alertDialogKey,
+                icon: const Icon(Icons.hourglass_bottom_outlined),
+                title: const Text('Actualizando usuario...'),
+                content: const CustomLoadingIndicator()
+              );
               await editUser(dataToUpdate, tempSelectedUsr!.employeeNumber!, 2)
                   .whenComplete(() {
+                    
+                    Navigator.of(context, rootNavigator: true).pop();
+showConfirmationDialog(context, 'Éxito', 'Cambios realizados!');
                 return;
               }).catchError((onError) {
                 throw Future.error(onError);
@@ -130,6 +144,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
               setState(() {
                 isloading = false;
               });
+              showErrorFromBackend(context, e.toString());
               insertErrorLog(e.toString(),
                   '_updateUser() | $dataToUpdate ${tempSelectedUsr!.employeeNumber!}, | field: 2');
             }
@@ -147,35 +162,26 @@ class _EditUserScreenState extends State<EditUserScreen> {
   @override
   Widget build(BuildContext context) {
     String dropdownValue = _userDepartment ?? 'Select Department';
-    return Stack(
+    return SingleChildScrollView(
+      child: Stack(
       children: [
         Container(
-          margin: const EdgeInsets.all(10),
+          margin: const EdgeInsets.all(7),
           width: MediaQuery.of(context).size.width,
           child: LayoutBuilder(
             builder: (BuildContext context, BoxConstraints constraints) {
               if (constraints.maxWidth > 600) {
                 return Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.only(top: 8, bottom: 16, left: 16, right: 16),
                     child: Form(
                       key: _formKey,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          const Row(
-                            children: [
-                              Expanded(
-                                  child: Text(
-                                'Nombre y correo del ususario',
-                                style: TextStyle(
-                                    fontFamily: 'Sora', color: Colors.grey),
-                              ))
-                            ],
-                          ),
                           const Divider(
                             thickness: 2,
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 10),
                           Row(
                             children: [
                               Expanded(
@@ -193,7 +199,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                 },
                                 onChanged: (value) {
                                   setState(() {
-                                    _userNameUpdated = {'nombre_gafete': value};
+                                    _userNameUpdated = {'name': value};
                                     dataToUpdate
                                         .addEntries(_userNameUpdated.entries);
                                   });
@@ -215,7 +221,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                 },
                                 onChanged: (value) {
                                   setState(() {
-                                    _newEmployeeNumber = {'noempleado': value};
+                                    _newEmployeeNumber = {'employee_number': value};
                                     dataToUpdate
                                         .addEntries(_newEmployeeNumber.entries);
                                   });
@@ -236,7 +242,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                   validator: _validateEmail,
                                   onChanged: (value) {
                                     setState(() {
-                                      _emailUpdated = {'user_email': value};
+                                      _emailUpdated = {'email': value};
                                       dataToUpdate
                                           .addEntries(_emailUpdated.entries);
                                     });
@@ -271,7 +277,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                   onChanged: (value) {
                                     setState(() {
                                       _passwordUpdated = {
-                                        'user_password': value
+                                        'password': value
                                       };
                                       dataToUpdate
                                           .addEntries(_passwordUpdated.entries);
@@ -281,12 +287,13 @@ class _EditUserScreenState extends State<EditUserScreen> {
                               ),
                             ],
                           ),
-                          SizedBox(
-                            height: 10,
-                          ),
+                          const SizedBox(height: 10,),
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
-                              Text('Campus:  '),
+                              Text('Campus:  ', 
+                              style: TextStyle(fontFamily: 'Sora', fontWeight: FontWeight.bold)
+                              ),
                               Flexible(
                                   child: DropdownButton<String>(
                                 hint: const Text('Campus'),
@@ -307,17 +314,11 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                     child: Text(value),
                                   );
                                 }).toList(),
-                              ))
-                            ],
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Row(
-                            children: [
+                              )),
+                             
                               Text(
-                                'Rol de ususario:   ',
-                                style: TextStyle(fontFamily: 'Sora'),
+                                'Rol de ususario:',
+                                style: TextStyle(fontFamily: 'Sora', fontWeight: FontWeight.bold),
                               ),
                               Expanded(
                                 child: DropdownButton<String>(
@@ -326,7 +327,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                   onChanged: (String? newValue) {
                                     setState(() {
                                       _userRole = newValue!;
-                                      _newUserRole = {'role_name': newValue};
+                                      _newUserRole = {'role': newValue};
                                       dataToUpdate
                                           .addEntries(_newUserRole.entries);
                                     });
@@ -341,14 +342,22 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                   }).toList(),
                                 ),
                               ),
-                              const SizedBox(width: 15),
+                            ],
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
                               Expanded(
                                 child: SwitchListTile(
                                   title: Text(
                                     isUserActive
                                         ? 'Usuario activo'
                                         : 'Usuario desactivado',
-                                    style: const TextStyle(fontFamily: 'Sora'),
+                                        style: TextStyle(fontFamily: 'Sora', fontWeight: FontWeight.bold)
+                                    //style: const TextStyle(fontFamily: 'Sora'),
                                   ),
                                   value: isUserActive,
                                   onChanged: (value) async {
@@ -356,7 +365,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                       isloading = true;
                                       tempSelectedUsr!.isActive = value ? 1 : 0;
                                       _isActive = {
-                                        'bajalogicasino':
+                                        'active':
                                             tempSelectedUsr!.isActive
                                       };
                                       dataToUpdate
@@ -372,14 +381,14 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                       ListTileControlAffinity.trailing,
                                 ),
                               ),
-                              const SizedBox(width: 15),
                               Expanded(
                                 child: SwitchListTile(
                                   title: Text(
                                     isUserTeacher
                                         ? 'Es maestro'
                                         : 'No es maestro',
-                                    style: const TextStyle(fontFamily: 'Sora'),
+                                        style: TextStyle(fontFamily: 'Sora', fontWeight: FontWeight.bold)
+                                    //style: const TextStyle(fontFamily: 'Sora'),
                                   ),
                                   value: isUserTeacher,
                                   onChanged: (value) async {
@@ -387,7 +396,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                       isloading = true;
                                       tempSelectedUsr!.isTeacher =
                                           value ? true : false;
-                                      _isUserTeacher = {'is_teacher': value};
+                                      _isUserTeacher = {'teacher': value};
                                       dataToUpdate
                                           .addEntries(_isUserTeacher.entries);
                                       isUserTeacher = value;
@@ -400,13 +409,44 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                   controlAffinity:
                                       ListTileControlAffinity.trailing,
                                 ),
+                              ),
+                              Expanded(
+                                child: SwitchListTile(
+                                  title: Text(
+                                    canUserChangePassword
+                                        ? 'Puede cambiar su propia contraseña'
+                                        : 'No  puede cambiar su propia contraseña',
+                                        style: TextStyle(fontFamily: 'Sora', fontWeight: FontWeight.bold)
+                                    //style: const TextStyle(fontFamily: 'Sora'),
+                                  ),
+                                  value: canUserChangePassword,
+                                  onChanged: (value) async {
+                                    setState(() {
+                                      isloading = true;
+                                      tempSelectedUsr!.canUpdatePassword =
+                                          value ? true : false;
+                                      var canUpdatePwdValue = {'canUpdatePwd': value};
+                                      dataToUpdate
+                                          .addEntries(canUpdatePwdValue.entries);
+                                      canUserChangePassword = value;
+                                    });
+                                    setState(() {
+                                      isloading = false;
+                                      canUserChangePassword = value;
+                                    });
+                                  },
+                                  controlAffinity:
+                                      ListTileControlAffinity.trailing,
+                                ),
                               )
+
                             ],
                           ),
                           const SizedBox(height: 20),
                           Row(
+                            mainAxisAlignment:  MainAxisAlignment.spaceAround,
                             children: [
-                              Text('Departamento asignado:  '),
+                              Text('Departamento asignado:  ', style: TextStyle(fontFamily: 'Sora', fontWeight: FontWeight.bold)),
                               Expanded(
                                 child: DropdownButton<String>(
                                   value: areaList.contains(dropdownValue)
@@ -417,7 +457,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                     setState(() {
                                       _userDepartment = newValue!;
                                       newUserPosition = {
-                                        'work_department': newValue
+                                        'department': newValue
                                       };
                                       dataToUpdate
                                           .addEntries(newUserPosition.entries);
@@ -434,12 +474,14 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                   }).toList(),
                                 ),
                               ),
-                              const SizedBox(width: 15),
+                              
+                              //const SizedBox(width: 15),
                             ],
                           ),
                           const SizedBox(height: 20),
                           Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              mainAxisAlignment: MainAxisAlignment.end,
                               children: [
                                 dataToUpdate.isNotEmpty
                                     ? SaveItemButton(onPressed: _updateUser)
@@ -448,118 +490,6 @@ class _EditUserScreenState extends State<EditUserScreen> {
                                         style: TextStyle(color: Colors.amber),
                                       )
                               ])
-                          // ElevatedButton(
-                          //   onPressed: () {
-                          //     if (_formKey.currentState!.validate()) {
-                          //       showDialog(
-                          //         context: context,
-                          //         builder: (context) => AlertDialog(
-                          //           title: const Text('Confirmación'),
-                          //           content: const Text('¿Realiar cambios?'),
-                          //           actions: <Widget>[
-                          //             TextButton(
-                          //               onPressed: () async {
-                          //                 areaList.clear();
-                          //                 dispose();
-                          //                 Navigator.of(context).pop();
-                          //               },
-                          //               child: const Text('Cancelar'),
-                          //             ),
-                          //             ElevatedButton(
-                          //               onPressed: () async {
-                          //                 if (dataToUpdate.isEmpty) {
-                          //                   return showDialog(
-                          //                       context: context,
-                          //                       builder: (context) =>
-                          //                           AlertDialog(
-                          //                             title:
-                          //                                 const Text('Error'),
-                          //                             content: const Text(
-                          //                                 'No se detectó ningun cambio'),
-                          //                             actions: [
-                          //                               TextButton(
-                          //                                   onPressed: () {
-                          //                                     Navigator.pop(
-                          //                                         context);
-                          //                                   },
-                          //                                   child: const Text(
-                          //                                       'Ok'))
-                          //                             ],
-                          //                           ));
-                          //                 } else {
-                          //                   try {
-                          //                     setState(() {
-                          //                       isloading = true;
-                          //                     });
-
-                          //                     //TODO : CREATE ON BACKEND CASE FOR FIELD 2
-                          //                     var response = await editUser(
-                          //                         dataToUpdate,
-                          //                         tempSelectedUsr!
-                          //                             .employeeNumber!,
-                          //                         2);
-                          //                     if (response == 200) {
-                          //                       setState(() {
-                          //                         isloading = false;
-                          //                       });
-                          //                       Navigator.of(context).pop();
-
-                          //                       showDialog(
-                          //                           context: context,
-                          //                           builder: (context) =>
-                          //                               AlertDialog(
-                          //                                 icon: const Icon(
-                          //                                     Icons.done),
-                          //                                 iconColor: Colors
-                          //                                     .greenAccent,
-                          //                                 title: const Text(
-                          //                                     'Exito'),
-                          //                                 content: const Text(
-                          //                                     'Usuario actualizado exitosamente'),
-                          //                                 actions: [
-                          //                                   TextButton(
-                          //                                     onPressed: () {
-                          //                                       Navigator.of(
-                          //                                               context)
-                          //                                           .pop();
-                          //                                       Navigator.of(
-                          //                                           context);
-                          //                                     },
-                          //                                     child: const Text(
-                          //                                         'Cerrar'),
-                          //                                   )
-                          //                                 ],
-                          //                               ));
-                          //                     }
-                          //                   } catch (e) {
-                          //                     setState(() {
-                          //                       isloading = false;
-                          //                     });
-                          //                     showDialog(
-                          //                         context: context,
-                          //                         builder: (context) =>
-                          //                             AlertDialog(
-                          //                               icon: const Icon(
-                          //                                   Icons.error),
-                          //                               iconColor:
-                          //                                   Colors.redAccent,
-                          //                               title:
-                          //                                   const Text('Error'),
-                          //                               content:
-                          //                                   Text(e.toString()),
-                          //                             ));
-                          //                   }
-                          //                 }
-                          //               },
-                          //               child: const Text('Register'),
-                          //             ),
-                          //           ],
-                          //         ),
-                          //       );
-                          //     }
-                          //   },
-                          //   child: const Text('Actualizar'),
-                          // ),
                         ],
                       ),
                     ));
@@ -571,6 +501,9 @@ class _EditUserScreenState extends State<EditUserScreen> {
         ),
         if (isloading) CustomLoadingIndicator()
       ],
+    ),
     );
+    
+    
   }
 }

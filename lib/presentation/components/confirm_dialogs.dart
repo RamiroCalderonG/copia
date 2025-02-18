@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
+import 'package:oxschool/core/utils/loader_indicator.dart';
 
 void showEmptyFieldAlertDialog(BuildContext context, String contentText) {
   showDialog(
@@ -39,24 +40,49 @@ Future<int> showConfirmationDialog(
     builder: (BuildContext context) {
       return AlertDialog(
         icon: const Icon(
-          Icons.task_alt,
-          color: Colors.green,
+Icons.warning,
+          color: Colors.amber,
         ),
         title: Text(titleText, style: const TextStyle(fontFamily: 'Sora')),
         content: Text(contentText),
         actions: [
           TextButton(
+            style: ButtonStyle(
+              backgroundColor: WidgetStatePropertyAll(
+                Color.fromARGB(220, 203, 242, 173)
+              )
+
+            ),
             onPressed: () {
               Navigator.of(context).pop();
               completer.complete(1); // User selected 'Yes'
             },
-            child: Text('Cerrar',
+            child: Text('Confirmar',
                 style: FlutterFlowTheme.of(context).labelLarge.override(
                       fontFamily: 'Roboto',
                       color: FlutterFlowTheme.of(context).primaryText,
                       fontWeight: FontWeight.w500,
                     )),
           ),
+          TextButton(
+            style: ButtonStyle(
+              backgroundColor: WidgetStatePropertyAll(
+                Color.fromARGB(216, 250, 157, 157)
+              )
+
+            ),
+            onPressed: () {
+              Navigator.of(context).pop();
+              completer.complete(0); // User selected 'No'
+            },
+            child: Text('Cancelar', 
+            style: FlutterFlowTheme.of(context).labelLarge.override(
+                      fontFamily: 'Roboto',
+                      color: FlutterFlowTheme.of(context).primaryText,
+                      fontWeight: FontWeight.w500,
+                    )
+            )
+          )
         ],
       );
     },

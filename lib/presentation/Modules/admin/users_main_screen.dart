@@ -37,11 +37,13 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
   Key _key = UniqueKey();
   late Future<dynamic> loadingCOntroller;
 
-  void _restartScreen() {
-    setState(() {
-      refreshButton();
-      _key = UniqueKey();
-    });
+  void _restartScreen() async{
+    _key = UniqueKey();
+    loadingCOntroller = refreshButton();
+    //await refreshButton();
+   // setState(() {
+   //   refreshButton();
+   // });
   }
 
   Future<dynamic> refreshButton() async {
@@ -73,12 +75,12 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
         return response;
       });
     } catch (e) {
-      isLoading = false;
+      setState(() {
+        isLoading = false;
       insertErrorLog(e.toString(), 'UsersMainScreen() , refreshButton');
-      AlertDialog(
-        title: const Text("Error"),
-        content: Text(e.toString()),
-      );
+      showErrorFromBackend(context, e.toString());
+      });
+      
     }
     setState(() {
       isLoading = false;
@@ -137,21 +139,35 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
                   label: const Text('Administrar roles de usuarios')),
               TextButton.icon(
                   onPressed: () async {
-                    campuseList.clear();
+                    try {
+                      campuseList.clear();
                     areaList.clear();
-                    await getAllCampuse();
-                    await getWorkDepartmentList();
-                    var response = await getRolesList();
+                    //!PENDING TO CREATE ON BACKEND ENDPOINT
+                    await getAllCampuse().then((response)async {
+                       await getWorkDepartmentList();
+                       var response = await getRolesList();
                     tmpRolesList = jsonDecode(response);
-
-                    buildNewUserScreen(context);
-                    await getEventsList();
+                    await getEventsList().then((onValue){
+                      setState(() {
+                        buildNewUserScreen(context);
+                      });
+                    });
+                    }).onError((error, stacktrace){
+                      insertErrorLog(error.toString(), stacktrace.toString());
+                    });
+                    } catch (e) {
+                      insertErrorLog(e.toString(), 'users_main_screen 159');
+                      setState(() {
+                        isLoading = false;
+                        showErrorFromBackend(context, e.toString());
+                      });
+                      
+                    }
                   },
                   icon: const FaIcon(FontAwesomeIcons.addressCard),
                   label: const Text('Nuevo usuario')),
               RefreshButton(
                 onPressed: _restartScreen,
-                // refreshButton,
               ),
               const SizedBox(width: 20),
             ]),

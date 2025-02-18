@@ -610,9 +610,6 @@ Future<dynamic> sendRecoveryToken(String userMail, String deviceInfo) async {
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/auth/lost-password',
         headers: {
           "Content-Type": "application/json"
-          // 'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-          // 'device': deviceInfo,
-          // 'ip_address': deviceIp.toString()
         },
         json: {"email": userMail, "device": deviceInfo},
         persistCookies: false,
@@ -620,7 +617,12 @@ Future<dynamic> sendRecoveryToken(String userMail, String deviceInfo) async {
     apiCall.raiseForStatus();
     return apiCall;
   } catch (e) {
-    return e;
+    if (e is HTTPException) {
+      var message =  e.response.body;
+      return Future.error(message.toString());
+    }
+    return Future.error(e.toString());
+    //return Future.error(e.toString());
   }
 }
 
