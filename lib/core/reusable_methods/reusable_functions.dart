@@ -9,9 +9,10 @@ Future<dynamic> getAllCampuse() async {
   await getCampuseList().then((response){
     var campusList = jsonDecode(response);
      for (var item in campusList) {
-    String name = item['Name'];
+    String name = item['campusName'].toString().trim().toCapitalized;
     campuseList.add(name); //.add(name);
   }
+  return campuseList;
   }).onError((error, stackTrace){ 
     insertErrorLog(error.toString(), 'getAllCampuse() | ');
     return Future.error(error.toString());

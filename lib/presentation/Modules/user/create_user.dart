@@ -21,12 +21,7 @@ String areaSelector = ''; //areaList.first;
 
 List<String> roleNames = [];
 String roleSelector = ''; //roleNames.first;
-// List<String> roleList = [
-//   'Administrator',
-//   'Maestro',
-//   'IT Support',
-//   'Analista calidad'
-// ];
+
 
 String? _selectedGender;
 DateTime? _selectedBirthdate;
@@ -47,15 +42,14 @@ class _NewUserScreenState extends State<NewUserScreen> {
 
   @override
   void initState() {
-    super.initState();
-
-    roleNames = tmpRolesList.map((role) => role["Role"] as String).toList();
+    roleNames = tmpRolesList.map((role) => role["softName"].toString()).toList();
     roleNames.first;
-    campuseSelector = campuseList.first;
+    campuseSelector = campuseList.first.trim();
     areaSelector = areaList.first;
     roleSelector = roleNames.first;
     _selectedBirthdate = null;
     _creationDate = null;
+    super.initState();
   }
 
   @override
@@ -84,23 +78,6 @@ class _NewUserScreenState extends State<NewUserScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Future<DateTime> _selectDate(
-    //     BuildContext context, DateTime? returnDate) async {
-    //   final DateTime? picked = await showDatePicker(
-    //     context: context,
-    //     initialDate: DateTime.now(),
-    //     firstDate: DateTime(1900),
-    //     lastDate: DateTime.now(),
-    //   );
-    //   if (picked != null && picked != returnDate) {
-    //     setState(() {
-    //       returnDate = picked;
-    //     });
-    //     return picked;
-    //   } else {
-    //     return returnDate!;
-    //   }
-    // }
 
     final campuseSelectorField = DropdownButton<String>(
       value: campuseSelector,
@@ -295,7 +272,7 @@ class _NewUserScreenState extends State<NewUserScreen> {
                   controller: _employeeNumber,
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
-                      labelText: 'Generar número de empleado'),
+                      labelText: 'Número de empleado'),
                   enabled: true,
                 )),
                 const SizedBox(width: 30),
@@ -504,7 +481,8 @@ class _NewUserScreenState extends State<NewUserScreen> {
       secondFormScreen
     ];
 
-    return Stack(
+    return 
+    Stack(
       children: [
         Container(
             margin: const EdgeInsets.all(10),
@@ -517,9 +495,70 @@ class _NewUserScreenState extends State<NewUserScreen> {
                     physics: const NeverScrollableScrollPhysics(),
                     children: forms);
               } else {
-                return const Placeholder();
+                return  SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: _userName,
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Campo no puede estar vacio';
+                      }
+                      return null;
+                    },
+                    decoration:
+                        const InputDecoration(labelText: "Nombre completo"),
+                    textInputAction: TextInputAction.next,
+                  ),
+                ),
+                
+              ],
+            ),
+            Row(
+              children: [
+                Expanded(
+                    child: TextFormField(
+                  controller: _userEmail,
+                  decoration:
+                      const InputDecoration(labelText: "Correo electrónico"),
+                )),
+              ]
+            ),
+            Row(
+              children: [
+                IconButton(
+                    onPressed: () {
+                      // TODO: IMPLEMENT EMPLOYEE NUMBER GENERATOR
+                    },
+                    icon: const Icon(Icons.refresh)),
+                Expanded(
+                    child: TextFormField(
+                  controller: _employeeNumber,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                      labelText: 'Número de empleado'),
+                  enabled: true,
+                )),
+              ],
+            ),
+            Row(
+              children: [
+                const Text(
+                  'Rol asignado   ',
+                  style: TextStyle(fontSize: 11),
+                ),
+                Expanded(child: roleSelectorField)
+              ],
+            )
+                    ],
+                  ),
+                );
               }
-            })),
+            })
+            ),
         if (isLoading) CustomLoadingIndicator()
       ],
     );

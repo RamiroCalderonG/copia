@@ -550,13 +550,13 @@ Future<dynamic> getAllModules() async {
 Future<dynamic> getCampuseList() async {
   try {
     var apiCall = await Requests.get(
-        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/campus',
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/campus/all',
         headers: {
-          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-          'Auth': currentUser!.token
+          'Authorization': currentUser!.token,
+          'Content-Type': 'application/json',
         },
         persistCookies: true,
-        timeoutSeconds: 10);
+        timeoutSeconds: 20);
     apiCall.raiseForStatus();
     return apiCall.content();
   } catch (e) {

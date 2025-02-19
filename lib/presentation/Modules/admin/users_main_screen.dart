@@ -142,16 +142,17 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
                     try {
                       campuseList.clear();
                     areaList.clear();
-                    //!PENDING TO CREATE ON BACKEND ENDPOINT
                     await getAllCampuse().then((response)async {
                        await getWorkDepartmentList();
-                       var response = await getRolesList();
-                    tmpRolesList = jsonDecode(response);
+                       await getRolesList().then((onValue) async{
+                        tmpRolesList = jsonDecode(onValue.body);
                     await getEventsList().then((onValue){
                       setState(() {
                         buildNewUserScreen(context);
                       });
                     });
+                       });
+                    
                     }).onError((error, stacktrace){
                       insertErrorLog(error.toString(), stacktrace.toString());
                     });
