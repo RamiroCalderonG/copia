@@ -552,6 +552,11 @@ class _NewUserScreenState extends State<NewUserScreen> {
                 ),
                 Expanded(child: roleSelectorField)
               ],
+            ),
+            Row(
+              children: [
+                
+              ]
             )
                     ],
                   ),
