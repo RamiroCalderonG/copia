@@ -41,6 +41,7 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
   final PageController _pageController = PageController();
   bool _isPasswordVisible = false;
   bool _isPasswordVerifierVisible = false;
+  String tokenValue = '';
 
   @override
   void initState() {
@@ -252,6 +253,7 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
                 response = await validateToken(_tokenFieldController.text,
                     _textFieldController.text, deviceData);
                 if (response.statusCode == 200) {
+                  tokenValue =   _tokenFieldController.text;
                   _pageController.nextPage(
                     duration: const Duration(milliseconds: 300),
                     curve: Curves.easeIn,

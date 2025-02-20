@@ -401,10 +401,6 @@ showConfirmationDialog(context, 'Éxito', 'Cambios realizados!');
                                           .addEntries(_isUserTeacher.entries);
                                       isUserTeacher = value;
                                     });
-                                    setState(() {
-                                      isloading = false;
-                                      isUserTeacher = value;
-                                    });
                                   },
                                   controlAffinity:
                                       ListTileControlAffinity.trailing,

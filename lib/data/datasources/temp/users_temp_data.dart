@@ -1,3 +1,4 @@
+import 'package:oxschool/data/Models/Role.dart';
 import 'package:oxschool/data/Models/User.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
@@ -8,6 +9,7 @@ int? tempUserId;
 User? tempSelectedUsr;
 List<PlutoRow> userRows = [];
 List<dynamic> tmpRolesList = [];
+List<Role> tmpRoleObjectslist = [];
 List<dynamic> userRoles = [];
 List<dynamic> tmpeventsList = [];
 List<Map<String, dynamic>> eventsLisToShow = [];

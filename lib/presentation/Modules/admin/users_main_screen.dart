@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
+import 'package:oxschool/data/Models/Role.dart';
 import 'package:oxschool/data/Models/User.dart';
 import 'package:oxschool/presentation/Modules/enfermeria/no_data_avalibre.dart';
 import 'package:oxschool/presentation/Modules/user/create_user.dart';
@@ -36,6 +37,7 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
   bool confirmation = false;
   Key _key = UniqueKey();
   late Future<dynamic> loadingCOntroller;
+  bool isLoading = true;
 
   void _restartScreen() async{
     _key = UniqueKey();
@@ -146,6 +148,10 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
                        await getWorkDepartmentList();
                        await getRolesList().then((onValue) async{
                         tmpRolesList = jsonDecode(onValue.body);
+                        for (var item in tmpRolesList) {
+                          Role newRole = Role.fromJson(item);
+                          tmpRoleObjectslist.add(newRole);
+                        }
                     await getEventsList().then((onValue){
                       setState(() {
                         buildNewUserScreen(context);
@@ -222,7 +228,7 @@ void buildNewUserScreen(BuildContext context) {
         return AlertDialog(
           contentPadding: const EdgeInsets.all(50),
           title: const Text(
-            'Nuevo usuario',
+            ' Crear nuevo ususario',
             textAlign: TextAlign.center,
             style: TextStyle(fontFamily: 'Sora'),
           ),

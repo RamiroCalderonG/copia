@@ -410,27 +410,18 @@ Future<dynamic> createRole(Map<String, dynamic> bodyObject) async {
 }
 
 Future<dynamic> createUser(Map<String, dynamic> newUser) async {
-  int response;
   try {
     var apiCall = await Requests.post(
-        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/user/',
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/auth/signup',
         json: newUser,
         headers: {
-          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-          'Auth': currentUser!.token
+          'Authorization': currentUser!.token,
+          'Content-Type': 'application/json'
         },
-        // body: {
-        //   'nombre_gafete': newUser.employeeName,
-        //   'role': newUser.role,
-        //   'claUn': newUser.claUn,
-        //   'noempleado': newUser.employeeNumber,
-        //   'useremail': newUser.userEmail
-        // },
         persistCookies: false,
-        timeoutSeconds: 8);
+        timeoutSeconds: 15);
     apiCall.raiseForStatus();
-    response = apiCall.statusCode;
-    return response;
+    return apiCall.statusCode;
   } catch (e) {
     throw FormatException(e.toString());
   }
