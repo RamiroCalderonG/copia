@@ -7,6 +7,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:oxschool/core/reusable_methods/device_functions.dart';
 import 'package:oxschool/data/Models/Cycle.dart';
 import 'package:oxschool/data/Models/User.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
@@ -66,6 +67,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
     _loadTapTimestamps();
     _startTimer();
     initPlatformState();
+    storeCurrentDeviceIsMobile();
     isLoading = false;
     _model = createModel(context, () => LoginViewModel());
 
@@ -245,7 +247,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
         _saveTapTimestamps();
         _updateRemainingTime();
         try {
-          var value = trimSpaces(_model.textController2.text).toLowerCase();
+          var value = trimSpaces(_model.textController2.text);
           var emailValue =
               trimSpaces(_model.textController1.text).toLowerCase();
 
@@ -1200,7 +1202,8 @@ User parseLogedInUserFromJSON(Map<String, dynamic> jsonList, String userToken) {
       null,
       isTeacher,
       isAdmin,
-      roleId, canUpdatePassword);
+      roleId,
+      canUpdatePassword);
   // }
   // }
   userToken = currentUser.token;
