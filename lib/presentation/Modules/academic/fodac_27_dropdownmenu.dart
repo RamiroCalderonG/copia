@@ -1,18 +1,10 @@
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:oxschool/core/constants/screens.dart';
 import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/data/datasources/temp/studens_temp.dart';
-import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
-import 'package:oxschool/presentation/Modules/academic/fo_dac_27.dart';
-import 'package:oxschool/presentation/components/confirm_dialogs.dart';
 
-import 'package:pluto_grid/pluto_grid.dart';
 
 import '../../../core/constants/user_consts.dart';
-import '../../../core/reusable_methods/academic_functions.dart';
-import '../../../core/reusable_methods/user_functions.dart';
 import '../../../data/datasources/temp/teacher_grades_temp.dart';
 
 class Fodac27MenuSelector extends StatefulWidget {

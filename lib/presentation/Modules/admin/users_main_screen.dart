@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
+import 'package:oxschool/data/Models/Role.dart';
+import 'package:oxschool/data/Models/User.dart';
 import 'package:oxschool/presentation/Modules/enfermeria/no_data_avalibre.dart';
 import 'package:oxschool/presentation/Modules/user/create_user.dart';
 import 'package:oxschool/presentation/Modules/user/roles_screen.dart';
@@ -33,40 +35,54 @@ class UsersMainScreen extends StatefulWidget {
 class _UsersMainScreenState extends State<UsersMainScreen> {
   bool isUserAdmin = verifyUserAdmin(currentUser!);
   bool confirmation = false;
-  var listOfUsers;
+  Key _key = UniqueKey();
+  late Future<dynamic> loadingCOntroller;
+  bool isLoading = true;
 
-  Future<void> refreshButton() async {
+  void _restartScreen() async{
+    _key = UniqueKey();
+    loadingCOntroller = refreshButton();
+    //await refreshButton();
+   // setState(() {
+   //   refreshButton();
+   // });
+  }
+
+  Future<dynamic> refreshButton() async {
     setState(() {
       isLoading = true;
-      // isSateManagerActive = true;
+      listOfUsersForGrid.clear();
+      userRows.clear();
     });
     try {
-      listOfUsers = null;
-      listOfUsersForGrid = null;
-      userRows.clear();
-      listOfUsers = await getUsers();
-      if (listOfUsers != null) {
-        setState(() {
-          usersPlutoRowList = userRows;
-          // super.initState();
-          List<dynamic> jsonList = json.decode(listOfUsers);
-          listOfUsersForGrid = parseUsersFromJSON(jsonList);
-          // userRows = createPlutoRows(listOfUsersForGrid);
-        });
-      } else {
-        if (kDebugMode) {
-          insertErrorLog(
-              'Cant fetch data from server, getUsers()', 'users_main_screen');
-          print('Cant fetch  data from server');
+      await getUsers().then((response) {
+        if (response != null) {
+          List<dynamic> jsonList = json.decode(response);
+          setState(() {
+            usersPlutoRowList = userRows;
+            for (var item in jsonList) {
+              User newUser = User.usersSimplifiedList(item);
+              listOfUsersForGrid.add(newUser);
+            }
+          });
+          return response;
+          // listOfUsersForGrid = parseUsersFromJSON(jsonList);
+        } else {
+          if (kDebugMode) {
+            insertErrorLog(
+                'Cant fetch data from server, getUsers()', 'users_main_screen');
+            print('Cant fetch  data from server');
+          }
         }
-      }
+        return response;
+      });
     } catch (e) {
-      isLoading = false;
+      setState(() {
+        isLoading = false;
       insertErrorLog(e.toString(), 'UsersMainScreen() , refreshButton');
-      AlertDialog(
-        title: const Text("Error"),
-        content: Text(e.toString()),
-      );
+      showErrorFromBackend(context, e.toString());
+      });
+      
     }
     setState(() {
       isLoading = false;
@@ -77,7 +93,7 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
   @override
   void initState() {
     isLoading = false;
-    //refreshButton();
+    loadingCOntroller = refreshButton();
     super.initState();
   }
 
@@ -88,8 +104,7 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
     // listOfUsersForGrid.clear();
     isLoading = false;
     areaList.clear();
-    listOfUsers = null;
-    listOfUsersForGrid = null;
+    listOfUsersForGrid.clear();
     userRows.clear();
 
     super.dispose();
@@ -98,6 +113,7 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        key: _key,
         appBar: AppBar(
             bottom: AppBar(automaticallyImplyLeading: false, actions: [
               TextButton.icon(
@@ -125,51 +141,83 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
                   label: const Text('Administrar roles de usuarios')),
               TextButton.icon(
                   onPressed: () async {
-                    campuseList.clear();
+                    try {
+                      campuseList.clear();
                     areaList.clear();
-                    await getAllCampuse();
-                    await getWorkDepartmentList();
-                    var response = await getRolesList();
-                    tmpRolesList = jsonDecode(response);
-
-                    buildNewUserScreen(context);
-                    await getEventsList();
+                    await getAllCampuse().then((response)async {
+                       await getWorkDepartmentList();
+                       await getRolesList().then((onValue) async{
+                        tmpRolesList = jsonDecode(onValue.body);
+                        for (var item in tmpRolesList) {
+                          Role newRole = Role.fromJson(item);
+                          tmpRoleObjectslist.add(newRole);
+                        }
+                    await getEventsList().then((onValue){
+                      setState(() {
+                        buildNewUserScreen(context);
+                      });
+                    });
+                       });
+                    
+                    }).onError((error, stacktrace){
+                      insertErrorLog(error.toString(), stacktrace.toString());
+                    });
+                    } catch (e) {
+                      insertErrorLog(e.toString(), 'users_main_screen 159');
+                      setState(() {
+                        isLoading = false;
+                        showErrorFromBackend(context, e.toString());
+                      });
+                      
+                    }
                   },
                   icon: const FaIcon(FontAwesomeIcons.addressCard),
                   label: const Text('Nuevo usuario')),
               RefreshButton(
-                onPressed: refreshButton,
+                onPressed: _restartScreen,
               ),
-              // TextButton.icon(
-              //     onPressed: () async {
-              //       refreshButton();
-              //     },
-              //     icon: const Icon(Icons.refresh),
-              //     label: const Text('Refresca')),
-              // TextButton.icon(
-              //     onPressed: () {},
-              //     icon: FaIcon(FontAwesomeIcons.download),
-              //     label: Text('Exportar ususarios')),
               const SizedBox(width: 20),
             ]),
             backgroundColor: FlutterFlowTheme.of(context).primary,
             title: const Text('Administración de usuarios',
                 style: TextStyle(color: Colors.white))),
-        body: Stack(
-          children: [
-            LayoutBuilder(
-                builder: (BuildContext context, BoxConstraints constraints) {
-              if (listOfUsersForGrid != null) {
+        body: FutureBuilder(
+            future: loadingCOntroller,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.done) {
                 return SizedBox(
                     width: MediaQuery.of(context).size.width,
                     child: const UsersTableView());
+              } else if (snapshot.connectionState == ConnectionState.waiting) {
+                return CustomLoadingIndicator();
+              } else if (snapshot.hasError) {
+                return Placeholder(
+                    child: Center(
+                  child: Text(
+                    'Error: ${snapshot.error}',
+                  ),
+                ));
               } else {
                 return const NoDataAvailble();
               }
-            }),
-            if (isLoading) CustomLoadingIndicator()
-          ],
-        ));
+            })
+
+        // Stack(
+        //   children: [
+        //     LayoutBuilder(
+        //         builder: (BuildContext context, BoxConstraints constraints) {
+        //       if (listOfUsersForGrid != null) {
+        //         return SizedBox(
+        //             width: MediaQuery.of(context).size.width,
+        //             child: const UsersTableView());
+        //       } else {
+        //         return const NoDataAvailble();
+        //       }
+        //     }),
+        //     if (isLoading) CustomLoadingIndicator()
+        //   ],
+        // )
+        );
   }
 }
 
@@ -180,7 +228,7 @@ void buildNewUserScreen(BuildContext context) {
         return AlertDialog(
           contentPadding: const EdgeInsets.all(50),
           title: const Text(
-            'Nuevo usuario',
+            ' Crear nuevo ususario',
             textAlign: TextAlign.center,
             style: TextStyle(fontFamily: 'Sora'),
           ),

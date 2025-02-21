@@ -1,6 +1,5 @@
 // ignore_for_file: file_names, unnecessary_late
 
-import 'package:get/get_connect/http/src/response/response.dart';
 import 'package:oxschool/data/Models/Cycle.dart';
 import 'package:oxschool/data/Models/User.dart';
 // ignore: depend_on_referenced_packages

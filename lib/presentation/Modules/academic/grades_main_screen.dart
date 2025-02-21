@@ -38,7 +38,7 @@ class _GradesMainScreenState extends State<GradesMainScreen>
       false; //Evaluate if current dates are available for evaluations
   bool canUserEvaluate = false; //Evaluate if current user have any data
   bool displayEvaluateGrids = false;
-  bool isUserAdmin = false;
+  bool isUserAdmin = currentUser!.isCurrentUserAdmin();
   bool isSearchingGrades = false;
   String? errorMessage;
   bool displayErrorMessage = false;
@@ -51,7 +51,7 @@ class _GradesMainScreenState extends State<GradesMainScreen>
   void initState() {
     _tabController = TabController(length: 3, vsync: this);
     _tabController!.addListener(onTap);
-    fetchData();
+    // fetchData();
     _initializationFuture = validateDateAndUserPriv();
     super.initState();
   }
@@ -89,31 +89,42 @@ class _GradesMainScreenState extends State<GradesMainScreen>
     preSelectedGroup = null;
     preSelectedSubject = null;
     preSelectedUnity = null;
+    jsonDataForDropDownMenuClass.clear();
     _tabController?.dispose();
     super.dispose();
   }
 
-  void fetchData() {
-    isUserAdmin = currentUser!.isCurrentUserAdmin();
-  }
+  // void fetchData() {
+  //   isUserAdmin = currentUser!.isCurrentUserAdmin();
+  // }
 
   Future<void> validateDateAndUserPriv() async {
     try {
+      String? campus;
       setState(() {
         isSearching = true;
       });
-      if (currentUser!.isCurrentUserAdmin()) {
+      if (isUserAdmin) {
         canEvaluateNow = true;
-        //TODO: FETCH ALL DATA BASED ON ROLE
+        campus = currentUser!.claUn;
       } else {
+        //Fetch dates for evaluations, if not current date will not fetch student data
         canEvaluateNow = await isDateToEvaluateStudents().catchError((onError) {
           showErrorFromBackend(context, onError);
         });
       }
-
       if (canEvaluateNow) {
-        await loadStartGrading(
-            currentUser!.employeeNumber!, currentCycle!.claCiclo!);
+        if (isUserAdmin) {
+          await loadStartGradingAsAdmin(
+              currentCycle!.claCiclo!, null, true, null, null);
+        } else {
+          await loadStartGrading(
+              currentUser!.employeeNumber!,
+              currentCycle!.claCiclo!,
+              currentUser!.isCurrentUserAdmin(),
+              campus);
+        }
+
         setState(() {
           canUserEvaluate = canEvaluateNow;
           isSearching = false;

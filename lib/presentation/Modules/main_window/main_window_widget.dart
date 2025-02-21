@@ -693,21 +693,6 @@ class _DrawerState extends State<MyExpansionTileList> {
       if (!modulesMap[element['module']]!.contains(element['screenclass'])) {
         modulesMap[element['module']]!.add(element['screenclass']);
       }
-      // eventsList?.add(element['event_name']);
-      // // eventsList ??= element['screenclass'];
-
-      // if (eventsList!.isNotEmpty) {
-      //   if (!eventsList!.contains(element['event_name'])) {
-      //     eventsList?.add(element['event_name']);
-      //   }
-      // }
-      // if (!modulesMap.containsKey(module)) {
-      //   modulesMap[module] = [];
-      // }
-      // screens.forEach((screenClass, description) {
-      //   modulesMap[module]!.add('$screenClass');
-      // });
-      // });
     });
 
     // Iterate over modulesMap to create ExpansionTiles for each module
