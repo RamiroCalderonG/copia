@@ -6,9 +6,10 @@ class Event {
   bool isActive;
   String moduleName;
   int roleID;
+  bool canAcces;
 
   Event(this.eventID, this.eventName, this.isActive, this.moduleName,
-      this.roleID);
+      this.roleID, this.canAcces);
 
   Map<String, dynamic> toJSON() => {
         'event_ID': eventID,
@@ -19,9 +20,10 @@ class Event {
       };
 
   Event.fromJSON(Map<String, dynamic> json)
-      : eventID = json['event_ID'],
+      : eventID = json['event_id'],
         eventName = json['event_name'],
         isActive = json["event_active"],
         moduleName = json["module_name"],
-        roleID = json["role_id"];
+        roleID = json["role_id"],
+        canAcces = json["can_access"];
 }

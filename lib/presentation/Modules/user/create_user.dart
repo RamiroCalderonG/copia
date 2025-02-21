@@ -3,7 +3,10 @@
 import 'package:flutter/material.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
+import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/data/datasources/temp/users_temp_data.dart';
+import 'package:oxschool/presentation/components/confirm_dialogs.dart';
+import 'package:oxschool/presentation/components/custom_icon_button.dart';
 
 import '../../../data/services/backend/api_requests/api_calls_list.dart';
 import '../../../core/config/flutter_flow/flutter_flow_util.dart';
@@ -18,21 +21,12 @@ class NewUserScreen extends StatefulWidget {
 
 // List<String> areaList = [];
 String areaSelector = ''; //areaList.first;
-
 List<String> roleNames = [];
 String roleSelector = ''; //roleNames.first;
-// List<String> roleList = [
-//   'Administrator',
-//   'Maestro',
-//   'IT Support',
-//   'Analista calidad'
-// ];
-
 String? _selectedGender;
 DateTime? _selectedBirthdate;
 DateTime? _creationDate;
-bool isLoading = false;
-String campuseSelector = ''; //= campuseList.first;
+
 
 class _NewUserScreenState extends State<NewUserScreen> {
   // final _formKey = GlobalKey<FormState>();
@@ -40,22 +34,34 @@ class _NewUserScreenState extends State<NewUserScreen> {
   final _userEmail = TextEditingController();
   final _userCampus = TextEditingController();
   final _employeeNumber = TextEditingController();
-  final _isTeacher = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _birthdateController = TextEditingController();
+
+  bool isTeacher = false;
+  bool isLoading = false;
+  String campuseSelector = ''; //= campuseList.first;
+  bool sendPasswordToEmail = true;
+  bool canUpdatePassword = false;
+  bool _obscureText = true;
+  String password = '';
+  bool createAPassword = true; //When false, send '' so the backend will asign a random password.
+  int roleIdSelected = 0;
+
 
   int _currentPageIndex = 0;
   final PageController _pageController = PageController();
 
   @override
   void initState() {
-    super.initState();
-
-    roleNames = tmpRolesList.map((role) => role["Role"] as String).toList();
+    roleNames = tmpRolesList.map((role) => role["softName"].toString()).toList();
     roleNames.first;
-    campuseSelector = campuseList.first;
+    campuseSelector = campuseList.first.trim();
     areaSelector = areaList.first;
     roleSelector = roleNames.first;
     _selectedBirthdate = null;
     _creationDate = null;
+    _creationDate = DateTime.now();
+    super.initState();
   }
 
   @override
@@ -64,8 +70,10 @@ class _NewUserScreenState extends State<NewUserScreen> {
     _userEmail.dispose();
     _userCampus.dispose();
     _employeeNumber.dispose();
-    _isTeacher.dispose();
     _pageController.dispose();
+    _passwordController.dispose();
+    _birthdateController.dispose();
+    tmpRoleObjectslist.clear();
     super.dispose();
   }
 
@@ -82,25 +90,186 @@ class _NewUserScreenState extends State<NewUserScreen> {
     );
   }
 
+
+  
+
   @override
   Widget build(BuildContext context) {
-    // Future<DateTime> _selectDate(
-    //     BuildContext context, DateTime? returnDate) async {
-    //   final DateTime? picked = await showDatePicker(
-    //     context: context,
-    //     initialDate: DateTime.now(),
-    //     firstDate: DateTime(1900),
-    //     lastDate: DateTime.now(),
-    //   );
-    //   if (picked != null && picked != returnDate) {
-    //     setState(() {
-    //       returnDate = picked;
-    //     });
-    //     return picked;
-    //   } else {
-    //     return returnDate!;
-    //   }
-    // }
+
+
+
+void handleSave() async {
+    if (_userName.text.isEmpty ||
+                      _employeeNumber.text.isEmpty ||
+                      campuseSelector.isEmpty ||
+                      _userEmail.text.isEmpty ||
+                      _selectedBirthdate.toString().isEmpty) {
+                    showEmptyFieldAlertDialog(context, 'Verificar que no existan campos vacios');
+                    return;
+                  } else {
+                    if (!createAPassword) {
+                      password = '';
+                    }
+                    Map<String, dynamic> newUser = {
+                      'employeeNumber': int.parse(_employeeNumber.text),
+                      'fullName': _userName.text,
+                      'claun': campuseSelector.toUpperCase(),
+                      'roleId': roleIdSelected,
+                      'email': _userEmail.text,
+                      'genre': 'NULL',
+                      'bajalogicasino': 1,
+                      'workDepartment': areaSelector,
+                      'workPosition': '',
+                      'birthDate': _selectedBirthdate!.toIso8601String(),
+                      'createdBy': currentUser!.employeeNumber,
+                      'sendPasswordToEmail' : sendPasswordToEmail, 
+                      'canUpdatePassword' : canUpdatePassword, 
+                      'isTeacher': currentUser!.employeeNumber ,
+                      'password' : password 
+                    };
+                    try {
+                      setState(() {
+                        isLoading = true;
+                      });
+                      createUser(newUser).then((response){
+                        setState(() {
+                          isLoading = false;
+                          _userName.clear();
+                          _userEmail.clear();
+                          _userCampus.clear();
+                          _employeeNumber.clear();
+                          _selectedBirthdate = null;
+                        });
+                        Navigator.of(context).pop();
+                        showInformationDialog(context, 'Éxito', 'Usuario creado exitosamente');
+                      }).onError((error, stackTrace){
+                        setState(() {
+                          isLoading = false;
+                          showErrorFromBackend(context, error.toString());
+                        });
+                      });
+                    } catch (e) {
+                      throw Exception(e.toString());
+                    }
+                  }
+                }
+
+
+    Widget userCanUpdateOwnPassword = SwitchListTile(
+                                  title: Text(
+                                    canUpdatePassword
+                                        ? 'Puede cambiar su contraseña'
+                                        : 'No puede cambiar su contraseña',
+                                        style: TextStyle(fontFamily: 'Sora', fontWeight: FontWeight.bold)
+                                    //style: const TextStyle(fontFamily: 'Sora'),
+                                  ),
+                                  value: canUpdatePassword,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      canUpdatePassword = value;
+                                    });
+                                  },
+                                  controlAffinity:
+                                      ListTileControlAffinity.trailing,
+                                );
+
+
+
+    Widget userisTeacher =
+      SwitchListTile(
+                                  title: Text(
+                                    isTeacher
+                                        ? 'Es maestro'
+                                        : 'No es maestro',
+                                        style: TextStyle(fontFamily: 'Sora', fontWeight: FontWeight.bold)
+                                    //style: const TextStyle(fontFamily: 'Sora'),
+                                  ),
+                                  value: isTeacher,
+                                  onChanged: (value) async {
+                                    setState(() {
+                                      isTeacher = value;
+                                    });
+                                  },
+                                  controlAffinity:
+                                      ListTileControlAffinity.trailing,
+                                );
+
+TextFormField usrPasswordField = TextFormField(
+                                  textInputAction: TextInputAction.next,
+                                  controller: _passwordController,
+                                  decoration: InputDecoration(
+                                    icon: Icon(Icons.password),
+                                      labelText: 'Contraseña',
+                                      border: const UnderlineInputBorder(),
+                                      suffixIcon: GestureDetector(
+                                        onTap: () {
+                                          setState(() {
+                                            _obscureText = !_obscureText;
+                                          });
+                                        },
+                                        child: Icon(_obscureText
+                                            ? Icons.visibility
+                                            : Icons.visibility_off),
+                                      )),
+                                  obscureText: _obscureText,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      password = value;
+                                    });
+                                  },
+                                );
+    
+TextFormField birthDateField = TextFormField(
+                      controller: _birthdateController,
+                      textInputAction: TextInputAction.next,
+                      readOnly: true,
+                      onTap: () {
+                        showDatePicker(
+                              context: context,
+                              initialDate: _selectedBirthdate ?? DateTime.now(),
+                              firstDate: DateTime(1900),
+                              lastDate: DateTime.now(),
+                            ).then((selectedDate) {
+                              if (selectedDate != null) {
+                                setState(() {
+                                  _selectedBirthdate = selectedDate;
+                                  _birthdateController.text = DateFormat('yyyy-MM-dd')
+                                .format(_selectedBirthdate!);
+                                });
+                              }
+                            });
+                      },
+                      decoration: InputDecoration(
+                        icon: Icon(Icons.cake),
+                                      labelText: 'Fecha de nacimiento',
+                                      border: const UnderlineInputBorder(),
+                                      suffixIcon: GestureDetector(
+                                        onTap: () {
+                                        },
+                                        child: Icon(Icons.date_range),
+                                      )),
+                    );
+    
+    SwitchListTile customPasswordSwitcher = SwitchListTile(
+      title: createAPassword ? Text('Asignar contraseña', style: TextStyle(fontWeight: FontWeight.bold),) : Text('Asignar contraseña', style: TextStyle(fontWeight: FontWeight.bold)),
+      value: createAPassword, 
+      onChanged: (value) {
+        setState(() {
+          createAPassword = value;
+        });
+      });
+
+      SwitchListTile sendPasswordToMailSwitch = SwitchListTile(
+        title: Text('Envìar contraseña al correo'),
+        value: sendPasswordToEmail, onChanged: (value){
+        setState(() {
+          sendPasswordToEmail = value;
+        });
+      }); 
+
+
+  
+
 
     final campuseSelectorField = DropdownButton<String>(
       value: campuseSelector,
@@ -113,7 +282,7 @@ class _NewUserScreenState extends State<NewUserScreen> {
           ),
       underline: Container(
         height: 2,
-        color: Colors.white,
+        color: Colors.grey,
       ),
       items: campuseList.map<DropdownMenuItem<String>>((String value) {
         return DropdownMenuItem<String>(
@@ -141,7 +310,7 @@ class _NewUserScreenState extends State<NewUserScreen> {
           ),
       underline: Container(
         height: 2,
-        color: Colors.white,
+        color: Colors.grey,
       ),
       items: areaList.map<DropdownMenuItem<String>>((String value) {
         return DropdownMenuItem<String>(
@@ -170,7 +339,7 @@ class _NewUserScreenState extends State<NewUserScreen> {
           ),
       underline: Container(
         height: 2,
-        color: Colors.white,
+        color: Colors.grey,
       ),
       items: roleNames.map<DropdownMenuItem<String>>((String value) {
         return DropdownMenuItem<String>(
@@ -181,7 +350,7 @@ class _NewUserScreenState extends State<NewUserScreen> {
       onChanged: (String? value) {
         setState(() {
           roleSelector = value!;
-          // roleSelector = value;
+          roleIdSelected = tmpRoleObjectslist.firstWhere((item) => item.roleName.trim().toTitleCase == value.trim().toTitleCase).roleID;
         });
       },
     );
@@ -248,17 +417,11 @@ class _NewUserScreenState extends State<NewUserScreen> {
       SingleChildScrollView(
         child: Column(
           children: [
-            const Row(
-              children: [
-                Text(
-                  'Datos de acceso',
-                  style: TextStyle(fontStyle: FontStyle.italic, fontSize: 12),
-                )
-              ],
-            ),
+            
             Row(
+              //crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                const SizedBox(width: 15),
                 Expanded(
                   child: TextFormField(
                     controller: _userName,
@@ -269,39 +432,52 @@ class _NewUserScreenState extends State<NewUserScreen> {
                       return null;
                     },
                     decoration:
-                        const InputDecoration(labelText: "Nombre completo"),
+                        const InputDecoration(labelText: "Nombre completo", icon: Icon(Icons.people)),
                     textInputAction: TextInputAction.next,
                   ),
                 ),
-                const SizedBox(width: 15),
+                const SizedBox(
+                  width: 25
+                ,
+                ),
                 Expanded(
                     child: TextFormField(
                   controller: _userEmail,
                   decoration:
-                      const InputDecoration(labelText: "Correo electrónico"),
-                ))
+                      const InputDecoration(labelText: "Correo electrónico", icon: Icon(Icons.email)),
+                )),
+                const SizedBox(
+                  width: 25,
+                ),
+                Expanded(
+                  child: customPasswordSwitcher
+                ),
+                 Expanded(
+                  child: createAPassword ?  usrPasswordField : Text('Se asignará una contraseña genérica')
+                )
               ],
             ),
             const SizedBox(height: 20),
             Row(
               children: [
-                IconButton(
+                /* IconButton(
                     onPressed: () {
                       // TODO: IMPLEMENT EMPLOYEE NUMBER GENERATOR
                     },
-                    icon: const Icon(Icons.refresh)),
+                    icon: const Icon(Icons.refresh)), */
                 Expanded(
                     child: TextFormField(
                   controller: _employeeNumber,
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
-                      labelText: 'Generar número de empleado'),
+                    icon: Icon(Icons.numbers),
+                      labelText: 'Número de empleado'),
                   enabled: true,
                 )),
                 const SizedBox(width: 30),
                 const Text(
                   'Rol asignado   ',
-                  style: TextStyle(fontSize: 11),
+                  style: TextStyle(fontSize: 13),
                 ),
                 Expanded(child: roleSelectorField)
               ],
@@ -329,182 +505,56 @@ class _NewUserScreenState extends State<NewUserScreen> {
               ],
             ),
             const SizedBox(
-              height: 20,
-            ),
-            const Row(
-              children: [
-                Text('Informacion personal',
-                    style: TextStyle(fontStyle: FontStyle.italic, fontSize: 12))
-              ],
+              width: 20,
             ),
             Row(
               children: [
-                Expanded(child: genderSelection),
+                
                 Expanded(
-                    child: Column(
-                  children: [
-                    Column(
-                      children: <Widget>[
-                        _selectedBirthdate != null
-                            ? Text(DateFormat('yyyy-MM-dd')
-                                .format(_selectedBirthdate!))
-                            : Text(_selectedBirthdate.toString()),
-                        const Divider(thickness: 1),
-                        ElevatedButton(
-                          onPressed: () {
-                            showDatePicker(
-                              context: context,
-                              initialDate: _selectedBirthdate ?? DateTime.now(),
-                              firstDate: DateTime(1900),
-                              lastDate: DateTime.now(),
-                            ).then((selectedDate) {
-                              if (selectedDate != null) {
-                                setState(() {
-                                  _selectedBirthdate = selectedDate;
-                                });
-                              }
-                            });
-                          },
-                          child: const Text('Fecha de nacimiento'),
-                        ),
-                        const SizedBox(width: 16.0),
-                      ],
-                    ),
-                    const SizedBox(height: 10.0),
-                    Column(
-                      children: <Widget>[
-                        _creationDate != null
-                            ? Text(
-                                DateFormat('yyyy-MM-dd').format(_creationDate!))
-                            : Text(_creationDate.toString()),
-                        const Divider(thickness: 1),
-                        ElevatedButton(
-                          onPressed: () {
-                            showDatePicker(
-                              context: context,
-                              initialDate: _creationDate ?? DateTime.now(),
-                              firstDate: DateTime(1900),
-                              lastDate: DateTime.now(),
-                            ).then((selectedDate) {
-                              if (selectedDate != null) {
-                                setState(() {
-                                  _creationDate = selectedDate;
-                                });
-                              }
-                            });
-                          },
-                          child: const Text('Fecha de alta'),
-                        ),
-                        const SizedBox(width: 16.0),
-                      ],
-                    ),
-                  ],
-                )),
+                  child: userisTeacher,
+                ),
+                Expanded(child: userCanUpdateOwnPassword)
               ],
             ),
-            ElevatedButton(
+            const SizedBox(height: 15),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Expanded(
+                    child:birthDateField
+                ),
+                Expanded(child: sendPasswordToMailSwitch)
+              ],
+            ),
+
+            const SizedBox(height: 15),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SaveItemButton(onPressed: handleSave)
+              ],
+            ),
+            /*ElevatedButton(
                 onPressed: () async {
-                  if (_userName.text.isEmpty ||
-                      _employeeNumber.text.isEmpty ||
-                      campuseSelector.isEmpty ||
-                      _userEmail.text.isEmpty ||
-                      _selectedBirthdate.toString().isEmpty ||
-                      _selectedGender.toString().isEmpty) {
-                    showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            title: const Text('Error'),
-                            content: const Text(
-                                'Verificar que no existan campos vacios'),
-                            actions: <Widget>[
-                              TextButton(
-                                style: TextButton.styleFrom(
-                                  textStyle:
-                                      Theme.of(context).textTheme.labelLarge,
-                                ),
-                                child: const Text('Ok'),
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                              ),
-                            ],
-                          );
-                        });
-                  } else {
-                    Map<String, dynamic> newUser = {
-                      'employeeNumber': int.parse(_employeeNumber.text),
-                      'employeeName': _userName.text,
-                      'claUn': campuseSelector,
-                      'role': roleSelector,
-                      'useremail': _userEmail.text,
-                      'genre': _selectedGender,
-                      'bajalogicasino': 1,
-                      'department': areaSelector,
-                      'position': '',
-                      'birthdate': _selectedBirthdate!.toIso8601String(),
-                      'creationDate': _creationDate!.toIso8601String(),
-                      'createdBy': currentUser!.employeeNumber
-                    };
-
-                    try {
-                      setState(() {
-                        isLoading = true;
-                      });
-                      var statusCode = await createUser(newUser);
-
-                      if (statusCode == 200) {
-                        Navigator.of(context).pop();
-                        setState(() {
-                          isLoading = false;
-                          _userName.clear();
-                          _userEmail.clear();
-                          _userCampus.clear();
-                          _employeeNumber.clear();
-                          _isTeacher.clear();
-                          _selectedBirthdate = null;
-                        });
-                        // Navigator.of(context).pop();
-                        showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                                  icon: const Icon(Icons.done),
-                                  iconColor: Colors.greenAccent,
-                                  title: const Text('Exito'),
-                                  content:
-                                      const Text('Usuario creado exitosamente'),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                      child: const Text('Cerrar'),
-                                    )
-                                  ],
-                                ));
-                      } else {
-                        setState(() {
-                          isLoading = false;
-                        });
-                      }
-                    } catch (e) {
-                      throw Exception(e.toString());
-                    }
-                  }
+                  handleSave();
                 },
-                child: const Text('Guardar')),
+                child: const Text('Guardar')), */
             const SizedBox(height: 32),
-            ElevatedButton(
+
+            //IN CASE NEEDS TO ADD ANOTHER FORM
+           /*  ElevatedButton(
               onPressed: _nextPage,
               child: const Text('Continuar'),
-            ),
+            ), */
           ],
         ),
       ),
       secondFormScreen
     ];
 
-    return Stack(
+    return 
+    Stack(
       children: [
         Container(
             margin: const EdgeInsets.all(10),
@@ -517,11 +567,165 @@ class _NewUserScreenState extends State<NewUserScreen> {
                     physics: const NeverScrollableScrollPhysics(),
                     children: forms);
               } else {
-                return const Placeholder();
+                return  SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: _userName,
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Campo no puede estar vacio';
+                      }
+                      return null;
+                    },
+                    decoration:
+                        const InputDecoration(labelText: "Nombre completo", icon: Icon(Icons.people)),
+                    textInputAction: TextInputAction.next,
+                  ),
+                ),
+                
+              ],
+            ),
+            Row(
+              children: [
+                Expanded(
+                    child: TextFormField(
+                  controller: _userEmail,
+                  decoration:
+                      const InputDecoration(labelText: "Correo electrónico", icon: Icon(Icons.email)),
+                )),
+              ]
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                 Expanded(
+                  child: customPasswordSwitcher
+                ),
+              ]
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: createAPassword ?  usrPasswordField : Container(
+                    padding: EdgeInsets.all(6),
+                    child: Text('Se asignará una contraseña genérica', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),),
+                  ) 
+                )
+              ],
+            ),
+            Row(
+              children: [
+               /*  IconButton(
+                    onPressed: () {
+                      // TODO: IMPLEMENT EMPLOYEE NUMBER GENERATOR
+                    },
+                    icon: const Icon(Icons.refresh)), */
+                Expanded(
+                    child: TextFormField(
+                  controller: _employeeNumber,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    icon: Icon(Icons.numbers),
+                      labelText: 'Número de empleado'),
+                  enabled: true,
+                )),
+              ],
+            ),
+            const SizedBox( height: 8,),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                const Text(
+                  'Rol asignado   ',
+                  style: TextStyle(fontSize: 13),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: roleSelectorField)
+              ],
+            ),
+             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Expanded(
+                    child: const Text(
+                  'Campus',
+                  style: TextStyle(fontSize: 13),
+                )), 
+                Expanded(
+                  flex: 2,
+                  child: campuseSelectorField),
+                
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Expanded(
+                  flex: 1,
+                    child: const Text(
+                  'Area / Depto',
+                  style: TextStyle(fontSize: 13),
+                )), 
+                Expanded(
+                  flex: 2,
+                  child: areaSelectorField)
+              ]
+            ),
+            SizedBox(height: 8,),
+            Row(
+              children: [
+                Expanded(
+                  child: birthDateField,
+                )
+                
+              ],
+            ),
+            SizedBox(height: 8,),
+            
+            Row(
+              children: [
+                Expanded(
+                  child: userisTeacher,
+                ),
+                
+              ],
+            ),
+            SizedBox(height: 8,),
+            Row(
+              children: [
+                Expanded(child: userCanUpdateOwnPassword)
+              ]
+            ), 
+            Row(
+              children: [
+                Expanded(child: sendPasswordToMailSwitch)
+                
+              ],
+            ),
+            SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SaveItemButton(onPressed: handleSave)
+              ],
+            )
+            
+
+            
+                    ],
+                  ),
+                );
               }
-            })),
+            })
+            ),
         if (isLoading) CustomLoadingIndicator()
       ],
     );
   }
 }
+

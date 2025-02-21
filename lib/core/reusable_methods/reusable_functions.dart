@@ -1,31 +1,40 @@
 import 'dart:convert';
 
+import 'package:oxschool/core/extensions/capitalize_strings.dart';
+import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
 import 'package:oxschool/data/datasources/temp/users_temp_data.dart';
 
 Future<dynamic> getAllCampuse() async {
-  var response = await getCampuseList();
-  var campusList = jsonDecode(response);
-  // List<String> campuseNameList = [];
-  // campuseList.clear();
-  for (var item in campusList) {
-    String name = item['Name'];
+  await getCampuseList().then((response){
+    var campusList = jsonDecode(response);
+     for (var item in campusList) {
+    String name = item['campusName'].toString().trim().toCapitalized;
     campuseList.add(name); //.add(name);
   }
-  // return campuseNameList;
+  return campuseList;
+  }).onError((error, stackTrace){ 
+    insertErrorLog(error.toString(), 'getAllCampuse() | ');
+    return Future.error(error.toString());
+  });
 }
 
 Future<dynamic> getWorkDepartmentList() async {
-  // List<String> departments = [];
-  areaList.clear();
-  var response = await getWorkDepartments();
-  var jsonList = jsonDecode(response);
-
-  for (var item in jsonList) {
-    areaList.add(item['name']);
+  try {
+    areaList.clear();
+    await getWorkDepartments().then((response) {
+      var jsonList = jsonDecode(response);
+      for (var item in jsonList) {
+        areaList.add(item['bureauName'].toString().trim().toTitleCase);
+      }
+    }).catchError((onError) {
+      insertErrorLog(onError.toString(), 'getWorkDepartmentList()');
+      throw Future.error(onError);
+    });
+  } catch (e) {
+    insertErrorLog(e.toString(), 'getWorkDepartmentList()');
+    return Future.error(e.toString());
   }
-
-  // return departments;
 }
 
 int? getKeyFromValue(Map<int, String> map, String value) {

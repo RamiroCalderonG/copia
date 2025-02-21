@@ -279,7 +279,7 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
         drawer: Opacity(
             opacity: 1,
             child: _createDrawer(
-                context, userEvents as Future<http.Response>) //DrawerClass()
+                context, userEvents) //DrawerClass()
             ),
         body: NestedScrollView(
           headerSliverBuilder: (context, _) => [

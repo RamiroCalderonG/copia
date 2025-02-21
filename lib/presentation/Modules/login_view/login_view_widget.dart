@@ -7,8 +7,6 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get_connect/http/src/response/response.dart';
-import 'package:http/src/response.dart';
 import 'package:oxschool/data/Models/Cycle.dart';
 import 'package:oxschool/data/Models/User.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
@@ -68,6 +66,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
     _loadTapTimestamps();
     _startTimer();
     initPlatformState();
+    isLoading = false;
     _model = createModel(context, () => LoginViewModel());
 
     _model.textController1 ??= TextEditingController();
@@ -102,6 +101,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
   void dispose() {
     _model.dispose();
     timer?.cancel();
+    isLoading = false;
     // _model.textController1!.dispose();
     // _model.textController2!.dispose();
     super.dispose();
@@ -233,7 +233,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
     // ignore: prefer_typing_uninitialized_variables
     var apiResponse;
 
-    dynamic loginButtonFunction() async {
+    dynamic handleLogin() async {
       int currentTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
       // Remove timestamps older than the time limit
       tapTimestamps = tapTimestamps
@@ -264,8 +264,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
 
           if (value.isNotEmpty && emailValue.isNotEmpty) {
             //Attempt login
-            apiResponse = await loginUser(apiBody);
-            if (apiResponse != Exception) {
+            await loginUser(apiBody).then((response) async {
+              apiResponse = response;
               List<dynamic> jsonList;
               Map<String, dynamic> jsonData = jsonDecode(apiResponse.body);
               var token = jsonData['token'];
@@ -316,16 +316,10 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                     'Error en conección, vuelva a intentar Code: Cycle',
                     null));
               }
-            } else {
-              Map<String, dynamic> jsonMap = jsonDecode(apiResponse.body);
-              String description = jsonMap['description'];
-
-              var firstWord = getMessageToDisplay(description);
-
-              showErrorFromBackend(context, firstWord);
-            }
-
-            setState(() {});
+            }).onError((error, stackTrace) {
+              insertErrorLog(error.toString(), 'loginUser | $apiBody');
+              showErrorFromBackend(context, error.toString());
+            });
           } else {
             _model.textController2.text = '';
             showEmptyFieldAlertDialog(context,
@@ -336,8 +330,6 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
             isLoading = false;
           });
           insertErrorLog(e.toString(), 'LOGIN BUTTON');
-
-          // var displayMessage = getMessageToDisplay(e.toString());
           showErrorFromBackend(context, e.toString());
         }
       } else {
@@ -541,7 +533,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                 setState(() {
                                                   isLoading = true;
                                                 });
-                                                await loginButtonFunction()
+                                                await handleLogin()
                                                     .whenComplete(() {
                                                   isLoading = false;
                                                 });
@@ -664,7 +656,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                         '') {
                                                   ScaffoldMessenger.of(context)
                                                       .hideCurrentSnackBar();
-                                                  await loginButtonFunction()
+                                                  await handleLogin()
                                                       .whenComplete(() {
                                                     setState(() {
                                                       isLoading = false;
@@ -938,7 +930,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                 setState(() {
                                                   isLoading = true;
                                                 });
-                                                await loginButtonFunction()
+                                                await handleLogin()
                                                     .whenComplete(() {
                                                   isLoading = false;
                                                 });
@@ -1059,7 +1051,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                     _model.textController2
                                                             .text !=
                                                         '') {
-                                                  await loginButtonFunction()
+                                                  await handleLogin()
                                                       .whenComplete(() {
                                                     setState(() {
                                                       isLoading = false;
@@ -1167,139 +1159,6 @@ Future<void> _displayForgotPassword(BuildContext context) async {
   );
 }
 
-// Widget generateTokenScreen(BuildContext context){
-//   return AlertDialog(
-//           title: const Text(
-//             'Recuperar contraseña',
-//             style: TextStyle(fontFamily: 'Sora'),
-//           ),
-//           content: isLoading
-//               ? const Center(
-//                   child: CircularProgressIndicator(),
-//                 )
-//               : TextFormField(
-//                   autofocus: true,
-//                   controller: _textFieldController,
-//                   decoration: const InputDecoration(
-//                     hintText: "Email",
-//                     helperText: 'Ingrese su correo electrónico',
-//                     icon: Icon(Icons.numbers),
-//                   ),
-//                   validator: (value) {
-//                     if (value == null || value.isEmpty) {
-//                       return 'Por favor, ingrese un correo válido';
-//                     }
-//                     return null;
-//                   },
-//                 ),
-//           actions: <Widget>[
-//             TextButton(
-//               child: const Text('CANCELAR'),
-//               onPressed: () {
-//                 Navigator.pop(context);
-//               },
-//             ),
-//             TextButton(
-//               onPressed: isLoading
-//                   ? null // Disable the button when loading
-//                   : () async {
-//                       setState(() {
-//                         isLoading = true; // Start loading animation
-//                       });
-
-//                       if (_textFieldController.text.isNotEmpty ||
-//                           _textFieldController.text != '') {
-//                         var response = await sendRecoveryToken(
-//                             _textFieldController.text,
-//                             deviceInformation.toString());
-//                         if (response.statusCode == 200) {
-//                           setState (() {
-
-//                           })
-//                         }
-
-//                         var responseCode = await sendUserPasswordToMail(
-//                             _textFieldController.text,
-//                             deviceInformation.toString(),
-//                             deviceIP);
-//                         if (responseCode == 200) {
-//                           Navigator.pop(context);
-//                           showDialog(
-//                               context: context,
-//                               builder: (BuildContext context) {
-//                                 return AlertDialog(
-//                                   title: const Text(
-//                                     "Solicitud enviada",
-//                                     style: TextStyle(fontFamily: 'Sora'),
-//                                   ),
-//                                   content: const Text(
-//                                       "Si los resultados coinciden, recibirá en su correo su contraseña"),
-//                                   icon: (const Icon(Icons.beenhere_outlined)),
-//                                   actions: [
-//                                     TextButton(
-//                                         onPressed: () {
-//                                           Navigator.pop(context);
-//                                         },
-//                                         child: const Text('OK'))
-//                                   ],
-//                                 );
-//                               });
-//                         } else {
-//                           showDialog(
-//                               context: context,
-//                               builder: (BuildContext context) {
-//                                 return AlertDialog(
-//                                   title: const Text(
-//                                     "Error",
-//                                     style: TextStyle(fontFamily: 'Sora'),
-//                                   ),
-//                                   content: Text(responseCode.toString()),
-//                                   icon: (const Icon(Icons.error_outline)),
-//                                   actions: [
-//                                     TextButton(
-//                                         onPressed: () {
-//                                           Navigator.pop(context);
-//                                         },
-//                                         child: const Text('OK'))
-//                                   ],
-//                                 );
-//                               });
-//                         }
-//                       } else {
-//                         showDialog(
-//                           context: context,
-//                           builder: (BuildContext context) {
-//                             return AlertDialog(
-//                               icon: const Icon(Icons.error_outline),
-//                               title: const Text(
-//                                 "Error",
-//                                 style: TextStyle(fontFamily: 'Sora'),
-//                               ),
-//                               content: const Text(
-//                                 "Por favor, ingrese un número de empleado válido",
-//                               ),
-//                               actions: [
-//                                 TextButton(
-//                                   onPressed: () {
-//                                     Navigator.pop(context);
-//                                   },
-//                                   child: const Text('OK'),
-//                                 ),
-//                               ],
-//                             );
-//                           },
-//                         );
-//                       }
-//                       setState(() {
-//                         isLoading = false; // Stop loading animation
-//                       });
-//                     },
-//               child: const Text('OK'),
-//             ),
-//           ],
-//         );
-// }
-
 User parseLogedInUserFromJSON(Map<String, dynamic> jsonList, String userToken) {
   late User currentUser;
   // late List<dynamic> events = [];
@@ -1323,6 +1182,7 @@ User parseLogedInUserFromJSON(Map<String, dynamic> jsonList, String userToken) {
   bool? isTeacher = jsonList['userTeacher'];
   bool? isAdmin = jsonList['userRole']['isAdmin'];
   int roleId = jsonList['userRole']['id'];
+  bool canUpdatePassword = jsonList['userCanUpdatePassword'];
 
   currentUser = User(
       claUn,
@@ -1340,7 +1200,7 @@ User parseLogedInUserFromJSON(Map<String, dynamic> jsonList, String userToken) {
       null,
       isTeacher,
       isAdmin,
-      roleId);
+      roleId, canUpdatePassword);
   // }
   // }
   userToken = currentUser.token;

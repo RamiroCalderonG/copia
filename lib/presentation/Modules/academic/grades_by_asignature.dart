@@ -1,5 +1,3 @@
-// ignore_for_file: constant_identifier_names, prefer_typing_uninitialized_variables
-
 import 'package:flutter/material.dart';
 
 import 'package:oxschool/core/constants/user_consts.dart';
@@ -82,6 +80,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
   @override
   void dispose() {
     rows.clear();
+    selectedCurrentTempMonth = null;
     super.dispose();
   }
 
@@ -231,27 +230,35 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                     });
                     try {
                       var monthNumber;
-                      isUserAdmin = currentUser!.isCurrentUserAdmin();
+                      // isUserAdmin = currentUser!.isCurrentUserAdmin();
 
-                      if (isUserAdmin) {
+                      if (currentUser!.isCurrentUserAdmin()) {
+                        //Get month number
                         monthNumber = getKeyFromValue(
                             spanishMonthsMap, selectedTempMonth!);
                       } else {
                         monthNumber = getKeyFromValue(
                             spanishMonthsMap, selectedCurrentTempMonth!);
                       }
-                      var assignatureID = getKeyFromValue(
-                          assignaturesMap, selectedTempSubject!);
+                      // get assignature id number
+                      var assignatureID = selectedTempSubjectId;
 
-                      var gradeInt = getKeyFromValue(
-                          teacherGradesMap, selectedTempGrade!.toString());
+                      // var gradeInt = getKeyFromValue(
+                      //     teacherGradesMap, selectedTempGrade!.toString());
 
-                      searchBUttonAction(
-                          selectedTempGroup!,
-                          gradeInt.toString(),
-                          assignatureID.toString(),
-                          monthNumber.toString(),
-                          selectedTempCampus!);
+                      if (assignatureID != null && assignatureID != 0) {
+                        searchBUttonAction(
+                            selectedTempGroup!,
+                            selectedTempGrade.toString(),
+                            assignatureID.toString(),
+                            monthNumber.toString(),
+                            selectedTempCampus!);
+                      } else {
+                        isLoading = false;
+                        showInformationDialog(context, 'Alerta!',
+                            'No se detectó una asignatura, vuelva a intentar.');
+                      }
+
                       // setState(() {
                       //   isLoading = false;
                       // });
@@ -301,7 +308,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                           searchBUttonAction(
                               selectedTempGroup!,
                               gradeInt.toString(),
-                              assignatureID.toString(),
+                              selectedTempSubjectId.toString(),
                               monthNumber.toString(),
                               selectedTempCampus!);
                           setState(() {

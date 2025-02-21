@@ -1,8 +1,7 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
+import 'package:oxschool/data/DataTransferObjects/RoleModuleRelationshipDto.Dart';
 import 'package:oxschool/data/Models/Event.dart';
 import 'package:oxschool/data/Models/Role.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
@@ -28,6 +27,10 @@ class PoliciesScreen extends StatefulWidget {
 class _PoliciesScreenState extends State<PoliciesScreen> {
   late Future<void> _refreshEventsFuture;
   List<Event> eventsToDisplay = [];
+  List<RoleModuleRelationshipDto> roleScreensRelationship = [];
+
+  List<Map<String, bool>> tempRoleModuleList =
+      []; //List to store role-module relationship, K = moduleId, V = can role access to module
 
   @override
   void initState() {
@@ -39,6 +42,8 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
   @override
   void dispose() {
     eventsToDisplay.clear();
+    tempRoleModuleList.clear();
+    roleScreensRelationship.clear();
     super.dispose();
   }
 
@@ -83,6 +88,14 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
                 itemCount: eventsToDisplay.length,
                 itemBuilder: (context, index) {
                   final currentEvent = eventsToDisplay[index];
+                  String moduleName = currentEvent.moduleName;
+
+                  Map<String, bool>? matchedValue =
+                      tempRoleModuleList.firstWhere(
+                    (item) => item.containsKey(moduleName),
+                    orElse: () => {moduleName: false},
+                  );
+
                   final previousEvent =
                       index > 0 ? eventsToDisplay[index - 1] : null;
 
@@ -94,22 +107,48 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
                     children: [
                       if (showModuleName)
                         Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            'Modulo: ${currentEvent.moduleName}',
-                            style: const TextStyle(
-                                fontSize: 20, fontFamily: 'Sora'),
-                          ),
+                            padding: const EdgeInsets.only(
+                                top: 15, bottom: 10, left: 12, right: 12),
+                            child: Stack(children: [
+                              Text(
+                                'Modulo: ${currentEvent.moduleName}',
+                                style: const TextStyle(
+                                    fontSize: 20, fontFamily: 'Sora'),
+                              ),
+                              SwitchListTile(
+                                  subtitle: matchedValue[moduleName]!
+                                      ? Text(
+                                          'Tiene acceso al modulo',
+                                          style: TextStyle(color: Colors.green),
+                                        )
+                                      : Text(
+                                          'No tiene acceso al modulo',
+                                          style: TextStyle(color: Colors.red),
+                                        ),
+                                  value: matchedValue[moduleName] ?? false,
+                                  onChanged: (event) {
+                                    setState(() {
+                                      matchedValue[moduleName] = event;
+                                    });
+                                    updateModuleAccesStatus(widget.roleID,
+                                        currentEvent.moduleName, event);
+                                  })
+                            ])),
+                      Padding(
+                        padding: EdgeInsets.only(
+                          left: 20,
+                          right: 20,
                         ),
-                      PolicyCard(
-                        policy: currentEvent,
-                        roleID: widget.roleID,
-                        onToggle: (event) {
-                          setState(() {
-                            event.isActive =
-                                !event.isActive; // Toggle the isActive status
-                          });
-                        },
+                        child: PolicyCard(
+                          policy: currentEvent,
+                          roleID: widget.roleID,
+                          onToggle: (event) {
+                            setState(() {
+                              event.canAcces =
+                                  !event.canAcces; // Toggle the isActive status
+                            });
+                          },
+                        ),
                       ),
                     ],
                   );
@@ -165,27 +204,53 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
   Future<void> refreshEvents(int? idRole) async {
     var eventsByRoleResponse =
         await fetchEventsByRole(idRole!); //Get events by role
-    try {
-      // Map to group events by moduleName
-      Map<String, List<Event>> groupedEvents = {};
-
-      for (var jsonItem in eventsByRoleResponse) {
-        Event event = Event(jsonItem['event_id'], jsonItem['event_name'],
-            jsonItem['event_active'], jsonItem['module_description'], idRole);
-
-        // Check if the moduleName already exists in the map
-        if (groupedEvents.containsKey(event.moduleName)) {
-          groupedEvents[event.moduleName]!.add(event);
-        } else {
-          groupedEvents[event.moduleName] = [event];
+    await fetchScreensByRoleId(idRole).then((result) {
+      roleScreensRelationship = result;
+      try {
+        Map<String, bool> tempRoleModuleMap =
+            {}; //Map to store role-module relationship, K = moduleId, V = can role access to module
+        for (var item in roleScreensRelationship) {
+          if (!tempRoleModuleMap.containsKey(item.moduleName)) {
+            tempRoleModuleMap
+                .addAll({item.moduleName: item.canRoleAccessModule});
+            tempRoleModuleList.add(tempRoleModuleMap);
+          }
         }
+        Map<String, List<Event>> groupedEvents = {};
+        for (var jsonItem in eventsByRoleResponse) {
+          Event event = Event(
+              jsonItem['event_id'],
+              jsonItem['event_name'],
+              jsonItem['event_active'],
+              jsonItem['module_description'],
+              idRole,
+              jsonItem['can_access']);
+
+          // Check if the moduleName already exists in the map
+          if (groupedEvents.containsKey(event.moduleName)) {
+            groupedEvents[event.moduleName]!.add(event);
+          } else {
+            groupedEvents[event.moduleName] = [event];
+          }
+        }
+        setState(() {
+          eventsToDisplay =
+              groupedEvents.values.expand((events) => events).toList();
+        });
+      } catch (e) {
+        insertErrorLog(e.toString(), 'refreshEvents()');
+        return Future.error(e.toString());
       }
-      setState(() {
-        eventsToDisplay =
-            groupedEvents.values.expand((events) => events).toList();
-      });
+    });
+  }
+
+  Future<void> updateModuleAccesStatus(
+      int roleId, String moduleName, bool status) async {
+    try {
+      await updateModuleAccessByRole(moduleName, roleId, status);
+      //  return response;
     } catch (e) {
-      insertErrorLog(e.toString(), 'refreshEvents()');
+      insertErrorLog(e.toString(), 'updateModuleAccesStatus()');
       return Future.error(e.toString());
     }
   }
@@ -210,7 +275,7 @@ class PolicyCard extends StatelessWidget {
           children: [
             SwitchListTile(
               title: Text(policy.eventName),
-              value: policy.isActive,
+              value: policy.canAcces,
               onChanged: (value) async {
                 onToggle(policy);
                 //var idValue = getEventIDbyName(policy.eventName);
