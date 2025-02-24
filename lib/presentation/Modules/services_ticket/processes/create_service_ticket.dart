@@ -234,7 +234,14 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
                 if (constraints.maxWidth < 600) {
                   return SingleChildScrollView(
                     child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [Expanded(child: employeSelectorName)],
+                        ),
                         Padding(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 0.0, vertical: 25.0),

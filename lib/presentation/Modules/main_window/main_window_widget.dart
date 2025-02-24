@@ -563,7 +563,7 @@ class _HoverCardState extends State<HoverCard> {
                   padding: EdgeInsets.all(isHovered ? 20 : 10),
                   decoration: BoxDecoration(
                     color: isHovered
-                        ? const Color.fromRGBO(73, 73, 73, 1)
+                        ? const Color.fromARGB(54, 204, 201, 201)
                         : widget.backgroundColor,
                     borderRadius: BorderRadius.circular(15),
                   ),
@@ -573,8 +573,9 @@ class _HoverCardState extends State<HoverCard> {
                         widget.title,
                         textScaleFactor: 0.8,
                         softWrap: true,
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color:
+                              FlutterFlowTheme.of(context).hoverCardTextColor,
                           fontWeight: FontWeight.bold,
                           fontFamily: 'Sora',
                         ),
@@ -614,39 +615,39 @@ class _HoverCardState extends State<HoverCard> {
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   curve: Curves.ease,
-                  padding: EdgeInsets.all(isHovered ? 20 : 10),
+                  padding: EdgeInsets.all(isHovered ? 30 : 40),
                   decoration: BoxDecoration(
                     color: isHovered
-                        ? const Color.fromRGBO(73, 73, 73, 1)
+                        ? const Color.fromARGB(146, 251, 247, 247)
                         : widget.backgroundColor,
                     borderRadius: BorderRadius.circular(15),
                   ),
                   child: GestureDetector(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: <Widget>[
-                        Image.asset(
-                          widget.imagePath,
-                          fit: BoxFit.fill,
-                          scale: 15,
-                          // width: constraints.maxWidth * 0.5, // Adjust image width
-                          // height:
-                          // constraints.maxHeight * 0.5, // Adjust image height
-                          alignment: Alignment.center,
+                        Expanded(
+                          child: Image.asset(
+                            widget.imagePath,
+                            color: FlutterFlowTheme.of(context).info,
+                            fit: BoxFit.fill,
+                            scale: 15,
+                            alignment: Alignment.center,
+                          ),
                         ),
-                        const SizedBox(height: 7), // Add spacing
-                        Align(
-                          alignment: Alignment.bottomCenter,
+                        Expanded(
                           child: Text(
                             widget.title,
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: TextStyle(
+                              color: FlutterFlowTheme.of(context)
+                                  .hoverCardTextColor,
                               fontWeight: FontWeight.bold,
                               fontFamily: 'Sora',
                             ),
                           ),
-                        ),
+                        )
+                        // const SizedBox(height: 7), // Add spacing
                       ],
                     ),
                   ),

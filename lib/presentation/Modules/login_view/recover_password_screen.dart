@@ -42,6 +42,7 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
   bool _isPasswordVisible = false;
   bool _isPasswordVerifierVisible = false;
   String tokenValue = '';
+  String email = '';
 
   @override
   void initState() {
@@ -70,11 +71,12 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Recuperar contraseña'),
-      ),
-      body: Padding(
-          padding: EdgeInsets.only(left: 100, right: 100),
+        appBar: AppBar(
+          title: const Text('Recuperar contraseña'),
+        ),
+        body: Center(
+            child: Padding(
+          padding: EdgeInsets.all(20),
           child: PageView(
             physics: NeverScrollableScrollPhysics(),
             controller: _pageController,
@@ -86,147 +88,163 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
               // Third Step: Placeholder
               _buildPasswordInput(),
             ],
-          )),
-    );
+          ),
+        ))
+
+        // Padding(
+        //     padding: EdgeInsets.only(left: 100, right: 100),
+        //     child: ),
+        );
   }
 
   Widget _buildEmailInputStep() {
-    return
-        // Center(
-        // child:
-        Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      // crossAxisAlignment: CrossAxisAlignment.baseline,
-      children: [
-        Text(
-          'Instrucciones: ',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
+    _tokenFieldController.text = '';
+    return SingleChildScrollView(
+      child: Column(
+        // mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        // crossAxisAlignment: CrossAxisAlignment.baseline,
+        children: [
+          Text(
+            'Instrucciones: ',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
+            textAlign: TextAlign.start,
           ),
-          textAlign: TextAlign.start,
-        ),
-        Text(
-          '1.- Ingrese su correo y presione enviar.',
-          style: TextStyle(fontSize: 18, fontStyle: FontStyle.italic),
-          textAlign: TextAlign.start,
-        ),
-        Text(
-          '2.- Revise su correo electrónico para obtener un token de recuperación de contraseña.',
-          style: TextStyle(fontSize: 18, fontStyle: FontStyle.italic),
-          textAlign: TextAlign.start,
-        ),
-        Text(
-          '3.- Ingrese el token y su nueva contraseña.',
-          style: TextStyle(fontSize: 18, fontStyle: FontStyle.italic),
-          textAlign: TextAlign.start,
-        ),
-        SizedBox(height: 30),
-        isLoading
-            ? Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [const CircularProgressIndicator()],
-              )
-            : Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Flexible(
-                      flex: 4,
-                      child: TextFormField(
-                        autofocus: true,
-                        maxLength: 40,
-                        controller: _textFieldController,
-                        decoration: const InputDecoration(
-                          hintText: "Email",
-                          helperText: 'Ingrese su correo electrónico',
-                          icon: Icon(Icons.email),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Por favor, ingrese un correo válido';
+          Text(
+            '1.- Ingrese su correo y presione enviar. \n2.- Revise su correo electrónico para obtener un token de recuperación de contraseña. \n3.- Ingrese el token y su nueva contraseña.',
+            style: TextStyle(fontSize: 18, fontStyle: FontStyle.italic),
+            textAlign: TextAlign.start,
+          ),
+          SizedBox(height: 30),
+          isLoading
+              ? Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [const CircularProgressIndicator()],
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Flexible(
+                        // flex: 4,
+                        child: TextFormField(
+                      autofocus: true,
+                      maxLength: 50,
+                      controller: _textFieldController,
+                      decoration: const InputDecoration(
+                        hintText: "Email",
+                        helperText: 'Ingrese su correo electrónico',
+                        icon: Icon(Icons.email),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Por favor, ingrese un correo electrónico';
+                        }
+                        return null;
+                      },
+                      onFieldSubmitted: (value) async {
+                        setState(() {
+                          isLoading = true;
+                        });
+                        if (_textFieldController.text.isNotEmpty) {
+                          await sendRecoveryToken(
+                                  _textFieldController.text.trim(), deviceData)
+                              .then((response) {
+                            setState(() {
+                              email = _textFieldController.text
+                                  .trim()
+                                  .toLowerCase();
+                              isLoading = false;
+                            });
+                            _pageController.nextPage(
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeIn,
+                            );
+                          }).catchError((onError) {
+                            setState(() {
+                              isLoading = false;
+                              showErrorFromBackend(context, onError.toString());
+                            });
+                          });
+                        } else {
+                          // Show error dialog for empty email
+                          _showErrorDialog(
+                              "Por favor, ingrese un email válido");
+                        }
+                      },
+                    )),
+                    // const SizedBox(width: 20),
+                  ],
+                ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Flexible(
+                // flex: 2,
+                child: ElevatedButton(
+                  onPressed: isLoading
+                      ? null // Disable the button when loading
+                      : () async {
+                          setState(() {
+                            isLoading = true; // Start loading animation
+                          });
+                          if (_textFieldController.text.isNotEmpty) {
+                            await sendRecoveryToken(
+                                    _textFieldController.text
+                                        .trim()
+                                        .toLowerCase(),
+                                    deviceData)
+                                .then((response) {
+                              setState(() {
+                                email = _textFieldController.text
+                                    .trim()
+                                    .toLowerCase();
+                                isLoading = false;
+                              });
+                              _pageController.nextPage(
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeIn,
+                              );
+                            }).catchError((onError) {
+                              setState(() {
+                                isLoading = false;
+                                Navigator.pop(context);
+                                showErrorFromBackend(
+                                    context, onError.toString());
+                              });
+                            });
+                          } else {
+                            // Show error dialog for empty email
+                            _showErrorDialog(
+                                "Por favor, ingrese un email válido");
                           }
-                          return null;
                         },
-                        onFieldSubmitted: (value) async {
-                              setState(() {
-                                isLoading = true; // Start loading animation
-                              });
-                              if (_textFieldController.text.isNotEmpty) {
-                                await sendRecoveryToken(
-                                    _textFieldController.text, deviceData).then((response){
-                                      setState(() {
-                                    isLoading = false;
-                                  });
-                                  _pageController.nextPage(
-                                    duration: const Duration(milliseconds: 300),
-                                    curve: Curves.easeIn,
-                                  );
-                                    }).catchError((onError){
-                                       setState(() {
-                                    isLoading = false;
-                                    showErrorFromBackend(context, onError.toString());
-                                  });
-                                    });
-                              } else {
-                                // Show error dialog for empty email
-                                _showErrorDialog(
-                                    "Por favor, ingrese un email válido");
-                              }
-                            },
-                      )),
-                  const SizedBox(width: 20),
-                  Flexible(
-                    flex: 3,
-                    child: ElevatedButton(
-                      onPressed: isLoading
-                          ? null // Disable the button when loading
-                          : () async {
-                              setState(() {
-                                isLoading = true; // Start loading animation
-                              });
-                              if (_textFieldController.text.isNotEmpty) {
-                                await sendRecoveryToken(
-                                    _textFieldController.text, deviceData).then((response){
-                                      setState(() {
-                                    isLoading = false;
-                                  });
-                                  _pageController.nextPage(
-                                    duration: const Duration(milliseconds: 300),
-                                    curve: Curves.easeIn,
-                                  );
-                                    }).catchError((onError){
-                                       setState(() {
-                                    isLoading = false;
-                                     Navigator.pop(context);
-                                    showErrorFromBackend(context, onError.toString());
-                                  });
-                                    });
-                              } else {
-                                // Show error dialog for empty email
-                                _showErrorDialog(
-                                    "Por favor, ingrese un email válido");
-                              }
-                            },
-                      child: const Text('Enviar'),
-                    ),
-                  ),
-                ],
-              )
-      ],
+                  child: const Text('Enviar'),
+                ),
+              ),
+            ],
+          )
+        ],
+      ),
     );
+
+    ;
     // );
   }
 
   Widget _buildTokenInputStep() {
-    return Center(
+    return SingleChildScrollView(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
-            'Verifique su correo electronico e ingrese el token de recuperación \nNota: el token dura 3 minutos antes de expirar',
+            'Verifique su correo electronico e ingrese el token de recuperación \nNota: el token dura 5 minutos antes de expirar',
             style: TextStyle(fontFamily: 'Sora', fontStyle: FontStyle.italic),
           ),
           isLoading
@@ -245,15 +263,15 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
                     return null;
                   },
                 ),
-          const SizedBox(height: 20),
+          // const SizedBox(height: 20),
           ElevatedButton(
             onPressed: () async {
               var response;
               try {
-                response = await validateToken(_tokenFieldController.text,
-                    _textFieldController.text, deviceData);
+                response = await validateToken(
+                    _tokenFieldController.text.trim(), email, deviceData);
                 if (response.statusCode == 200) {
-                  tokenValue =   _tokenFieldController.text;
+                  tokenValue = _tokenFieldController.text;
                   _pageController.nextPage(
                     duration: const Duration(milliseconds: 300),
                     curve: Curves.easeIn,
@@ -283,9 +301,10 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
   }
 
   Widget _buildPasswordInput() {
-    return Center(
+    return SingleChildScrollView(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
             'Ingrese su nueva contraseña. Nota: No debe contener espacios',
@@ -301,7 +320,7 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
                       obscureText: !_isPasswordVisible,
                       decoration: InputDecoration(
                           // hintText: "Contraseña",
-                          helperText: 'Ingrese su contraseña',
+                          helperText: 'Ingrese su nueva contraseña',
                           icon: Icon(Icons.security),
                           suffix: IconButton(
                               onPressed: () {
@@ -309,10 +328,12 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
                                   _isPasswordVisible = !_isPasswordVisible;
                                 });
                               },
-                              icon: Icon(Icons.remove_red_eye))),
+                              icon: _isPasswordVisible
+                                  ? Icon(Icons.remove_red_eye)
+                                  : Icon(Icons.visibility_off))),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Por favor ingrese su contraseña';
+                          return 'Por favor ingrese su nueva contraseña';
                         }
                         return null;
                       },
@@ -325,7 +346,7 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
                       obscureText: !_isPasswordVerifierVisible,
                       decoration: InputDecoration(
                           // hintText: "Verifiue Contraseña",
-                          helperText: 'Verifique su contraseña',
+                          helperText: 'Verifique su nueva contraseña',
                           icon: Icon(Icons.security),
                           suffix: IconButton(
                               onPressed: () {
@@ -334,7 +355,9 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
                                       !_isPasswordVerifierVisible;
                                 });
                               },
-                              icon: Icon(Icons.remove_red_eye))),
+                              icon: _isPasswordVerifierVisible
+                                  ? Icon(Icons.remove_red_eye)
+                                  : Icon(Icons.visibility_off))),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Por favor ingrese su contraseña para verificarla';
@@ -358,7 +381,7 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
                     });
               } else {
                 var response = await updateUserPasswordByToken(
-                  _tokenFieldController.text,
+                  tokenValue.trim(),
                   _passwordController.text,
                 ).catchError((error) {
                   showErrorFromBackend(context, error);
