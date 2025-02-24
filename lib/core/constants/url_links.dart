@@ -20,12 +20,12 @@ final List<String> gridMainWindowIcons = [
 ];
 
 final List<Color> gridMainWindowColors = [
-  const Color(0xFF2BC0E4),
-  const Color(0xFF2BC0E4),
-  const Color(0xFF2BC0E4),
-  const Color(0xFF2BC0E4),
-  const Color(0xFF2BC0E4),
-  const Color(0xFF2BC0E4),
+  const Color(0xFF102542),
+  const Color(0xFF102542),
+  const Color(0xFF102542),
+  const Color(0xFF102542),
+  const Color(0xFF102542),
+  const Color(0xFF102542),
 ];
 
 final List<Color> gridDarkColorsMainWindow = [
