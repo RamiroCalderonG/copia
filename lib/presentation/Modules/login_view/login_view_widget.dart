@@ -637,18 +637,33 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                   setUserDataForDebug();
                                                   isLoading = false;
                                                 });
-                                                context.goNamed(
-                                                  'MainWindow',
-                                                  extra: <String, dynamic>{
-                                                    kTransitionInfoKey:
-                                                        const TransitionInfo(
-                                                      hasTransition: true,
-                                                      transitionType:
-                                                          PageTransitionType
-                                                              .fade,
-                                                    ),
-                                                  },
-                                                );
+                                                if (Platform.isAndroid ||
+                                                    Platform.isIOS) {
+                                                  context.goNamed(
+                                                      'MobileMainView',
+                                                      extra: <String, dynamic>{
+                                                        kTransitionInfoKey:
+                                                            const TransitionInfo(
+                                                          hasTransition: true,
+                                                          transitionType:
+                                                              PageTransitionType
+                                                                  .fade,
+                                                        ),
+                                                      });
+                                                } else {
+                                                  context.goNamed(
+                                                    'MainWindow',
+                                                    extra: <String, dynamic>{
+                                                      kTransitionInfoKey:
+                                                          const TransitionInfo(
+                                                        hasTransition: true,
+                                                        transitionType:
+                                                            PageTransitionType
+                                                                .fade,
+                                                      ),
+                                                    },
+                                                  );
+                                                }
                                               } else {
                                                 if (_model.textController1
                                                             .text !=

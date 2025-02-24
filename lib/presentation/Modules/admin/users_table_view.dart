@@ -1,6 +1,5 @@
 // ignore_for_file: use_build_context_synchronously, non_constant_identifier_names
 
-
 import 'package:flutter/material.dart';
 import 'package:oxschool/core/reusable_methods/temp_data_functions.dart';
 import 'package:oxschool/data/Models/User.dart';
@@ -187,16 +186,17 @@ class _UsersTableViewState extends State<UsersTableView> {
 
                                       bool isCurrentlyActive = false;
                                       setState(() {
-                                         if (selectedUser.isActive == 0) { //0 means that is active
-                                        //when user is currently active
-                                        isCurrentlyActive = true;
-                                      } else if (selectedUser.isActive == 1) { // 1 means that is deactivated
-                                        //when user is currently inactive
-                                        isCurrentlyActive = false;
-                                      }
+                                        if (selectedUser.isActive == 0) {
+                                          //0 means that is active
+                                          //when user is currently active
+                                          isCurrentlyActive = true;
+                                        } else if (selectedUser.isActive == 1) {
+                                          // 1 means that is deactivated
+                                          //when user is currently inactive
+                                          isCurrentlyActive = false;
+                                        }
                                       });
 
-                                     
                                       showDialog(
                                           context: context,
                                           builder: (BuildContext context) {
@@ -213,16 +213,17 @@ class _UsersTableViewState extends State<UsersTableView> {
                                                     Expanded(
                                                         child: TextButton(
                                                       onPressed: () async {
-                                                        int newIsActiveIntValue = 0;
+                                                        int newIsActiveIntValue =
+                                                            0;
                                                         setState(() {
                                                           if (isCurrentlyActive) {
-                                                          //*IF user is currently active, set deactivate value
-                                                          newIsActiveIntValue =
-                                                              1;
-                                                        } else {
-                                                          newIsActiveIntValue =
-                                                              0;
-                                                        }
+                                                            //*IF user is currently active, set deactivate value
+                                                            newIsActiveIntValue =
+                                                                1;
+                                                          } else {
+                                                            newIsActiveIntValue =
+                                                                0;
+                                                          }
                                                           isCurrentlyActive =
                                                               !isCurrentlyActive;
                                                           confirmation = true;
@@ -381,6 +382,7 @@ class _UsersTableViewState extends State<UsersTableView> {
                                 )
                               ]);
                         },
+
                         // onRowDoubleTap: (event) async {
                         //   tempUserId = event.row.cells.values.first.value;
                         //   tmpRolesList.clear();

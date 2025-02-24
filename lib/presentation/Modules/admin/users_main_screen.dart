@@ -39,13 +39,13 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
   late Future<dynamic> loadingCOntroller;
   bool isLoading = true;
 
-  void _restartScreen() async{
+  void _restartScreen() async {
     _key = UniqueKey();
     loadingCOntroller = refreshButton();
     //await refreshButton();
-   // setState(() {
-   //   refreshButton();
-   // });
+    // setState(() {
+    //   refreshButton();
+    // });
   }
 
   Future<dynamic> refreshButton() async {
@@ -79,10 +79,9 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
     } catch (e) {
       setState(() {
         isLoading = false;
-      insertErrorLog(e.toString(), 'UsersMainScreen() , refreshButton');
-      showErrorFromBackend(context, e.toString());
+        insertErrorLog(e.toString(), 'UsersMainScreen() , refreshButton');
+        showErrorFromBackend(context, e.toString());
       });
-      
     }
     setState(() {
       isLoading = false;
@@ -116,67 +115,73 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
         key: _key,
         appBar: AppBar(
             bottom: AppBar(automaticallyImplyLeading: false, actions: [
-              TextButton.icon(
-                  onPressed: () {
-                    try {
-                      //TODO: WHY DOES IT NEED TO BE IN TWO SEPARATE CALLS?
-                      getEventsTempList().whenComplete(() async {
-                        await getRolesTempList().whenComplete(() {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      const RolesAndProfilesScreen()));
+              Expanded(
+                child: TextButton.icon(
+                    onPressed: () {
+                      try {
+                        //TODO: WHY DOES IT NEED TO BE IN TWO SEPARATE CALLS?
+                        getEventsTempList().whenComplete(() async {
+                          await getRolesTempList().whenComplete(() {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const RolesAndProfilesScreen()));
+                          });
                         });
-                      });
-                    } catch (e) {
-                      setState(() {
-                        isLoading = false;
-                      });
-                      insertErrorLog(e.toString(), 'UsersMainScreen()');
-                      showErrorFromBackend(context, e.toString());
-                    }
-                  },
-                  icon: const Icon(Icons.verified_user),
-                  label: const Text('Administrar roles de usuarios')),
-              TextButton.icon(
-                  onPressed: () async {
-                    try {
-                      campuseList.clear();
-                    areaList.clear();
-                    await getAllCampuse().then((response)async {
-                       await getWorkDepartmentList();
-                       await getRolesList().then((onValue) async{
-                        tmpRolesList = jsonDecode(onValue.body);
-                        for (var item in tmpRolesList) {
-                          Role newRole = Role.fromJson(item);
-                          tmpRoleObjectslist.add(newRole);
-                        }
-                    await getEventsList().then((onValue){
-                      setState(() {
-                        buildNewUserScreen(context);
-                      });
-                    });
-                       });
-                    
-                    }).onError((error, stacktrace){
-                      insertErrorLog(error.toString(), stacktrace.toString());
-                    });
-                    } catch (e) {
-                      insertErrorLog(e.toString(), 'users_main_screen 159');
-                      setState(() {
-                        isLoading = false;
+                      } catch (e) {
+                        setState(() {
+                          isLoading = false;
+                        });
+                        insertErrorLog(e.toString(), 'UsersMainScreen()');
                         showErrorFromBackend(context, e.toString());
-                      });
-                      
-                    }
-                  },
-                  icon: const FaIcon(FontAwesomeIcons.addressCard),
-                  label: const Text('Nuevo usuario')),
-              RefreshButton(
-                onPressed: _restartScreen,
+                      }
+                    },
+                    icon: const Icon(Icons.verified_user),
+                    label: const Text('Administrar roles de usuarios')),
               ),
-              const SizedBox(width: 20),
+              Expanded(
+                child: TextButton.icon(
+                    onPressed: () async {
+                      try {
+                        campuseList.clear();
+                        areaList.clear();
+                        await getAllCampuse().then((response) async {
+                          await getWorkDepartmentList();
+                          await getRolesList().then((onValue) async {
+                            tmpRolesList = jsonDecode(onValue.body);
+                            for (var item in tmpRolesList) {
+                              Role newRole = Role.fromJson(item);
+                              tmpRoleObjectslist.add(newRole);
+                            }
+                            await getEventsList().then((onValue) {
+                              setState(() {
+                                buildNewUserScreen(context);
+                              });
+                            });
+                          });
+                        }).onError((error, stacktrace) {
+                          insertErrorLog(
+                              error.toString(), stacktrace.toString());
+                        });
+                      } catch (e) {
+                        insertErrorLog(e.toString(), 'users_main_screen 159');
+                        setState(() {
+                          isLoading = false;
+                          showErrorFromBackend(context, e.toString());
+                        });
+                      }
+                    },
+                    icon: const FaIcon(FontAwesomeIcons.addressCard),
+                    label: const Text('Nuevo usuario')),
+              ),
+              Expanded(
+                child: RefreshButton(
+                  onPressed: _restartScreen,
+                ),
+              ),
+
+              // const SizedBox(width: 20),
             ]),
             backgroundColor: FlutterFlowTheme.of(context).primary,
             title: const Text('Administración de usuarios',

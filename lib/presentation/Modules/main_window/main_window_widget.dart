@@ -615,7 +615,7 @@ class _HoverCardState extends State<HoverCard> {
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   curve: Curves.ease,
-                  padding: EdgeInsets.all(isHovered ? 20 : 10),
+                  padding: EdgeInsets.all(isHovered ? 30 : 40),
                   decoration: BoxDecoration(
                     color: isHovered
                         ? const Color.fromARGB(146, 251, 247, 247)
@@ -633,9 +633,6 @@ class _HoverCardState extends State<HoverCard> {
                             color: FlutterFlowTheme.of(context).info,
                             fit: BoxFit.fill,
                             scale: 15,
-                            // width: constraints.maxWidth * 0.5, // Adjust image width
-                            // height:
-                            // constraints.maxHeight * 0.5, // Adjust image height
                             alignment: Alignment.center,
                           ),
                         ),
@@ -650,7 +647,6 @@ class _HoverCardState extends State<HoverCard> {
                             ),
                           ),
                         )
-
                         // const SizedBox(height: 7), // Add spacing
                       ],
                     ),
