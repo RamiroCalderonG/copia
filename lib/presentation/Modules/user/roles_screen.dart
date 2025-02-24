@@ -388,6 +388,7 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
   List<Event> _events = [];
   Map<int, bool> roleEventActive = {};
   bool isRoleAdmin = false;
+  bool isRoleAcademicCoord = false;
 
   @override
   void initState() {
@@ -416,7 +417,8 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
       'name': _roleController.text,
       'description': _descriptionController.text,
       'isActive': _isActive,
-      'admin': isRoleAdmin
+      'admin': isRoleAdmin,
+      'academicCoord': isRoleAcademicCoord
     };
     var updatedRole = [
       _roleController.text,
@@ -533,6 +535,14 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
                       });
                     }),
                 const SizedBox(height: 16),
+                Text('Rol es coordinador académico ?'),
+                Switch(
+                    value: isRoleAcademicCoord,
+                    onChanged: (bool value) {
+                      setState(() {
+                        isRoleAcademicCoord = value;
+                      });
+                    }),
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () async {

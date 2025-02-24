@@ -723,8 +723,8 @@ Future<dynamic> validateToken(
 
 //Function to retrieve all grades and subjects/courses from a teacher
 //Validates if the user is admin or not by user role using isAdmin flag
-Future<dynamic> getTeacherGradeAndCourses(
-    var employee, var year, int month, bool isAdmin, String? campus) async {
+Future<dynamic> getTeacherGradeAndCourses(var employee, var year, int month,
+    bool isAdmin, bool isAcademicCoordinator, String? campus) async {
   try {
     SharedPreferences devicePrefs = await SharedPreferences.getInstance();
     var apiCall = await Requests.get(
@@ -738,7 +738,8 @@ Future<dynamic> getTeacherGradeAndCourses(
           "cycle": currentCycle!.claCiclo,
           "month": month,
           "flag": isAdmin,
-          "campus": campus
+          "campus": campus,
+          "flag2": isAcademicCoordinator,
         },
         persistCookies: false,
         timeoutSeconds: 40);
