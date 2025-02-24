@@ -53,7 +53,7 @@ class _MobileFloatingactionbuttonState
 
 Widget mobileFloatingActionButton(BuildContext context) {
   return FloatingActionButton(
-    backgroundColor: const Color(0xFF102542),
+    backgroundColor: const Color(0xFFF87060),
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
     tooltip: 'Menu rapido',
     onPressed: () {},
@@ -107,7 +107,7 @@ Widget mobileFloatingActionButton(BuildContext context) {
           default:
         }
       },
-      child: const Icon(Icons.menu, size: 28, color: Color(0xFFF87060)),
+      child: const Icon(Icons.menu, size: 28, color: Color(0xFF102542)),
     ),
   );
 }
