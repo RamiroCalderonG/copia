@@ -450,6 +450,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                           padding: const EdgeInsetsDirectional
                                               .fromSTEB(0.0, 0.0, 0.0, 16.0),
                                           child: TextFormField(
+                                            textInputAction:
+                                                TextInputAction.next,
                                             autofocus: true,
                                             enableSuggestions: true,
                                             controller: _model.textController1,
@@ -867,6 +869,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                           padding: const EdgeInsetsDirectional
                                               .fromSTEB(0.0, 0.0, 0.0, 16.0),
                                           child: TextFormField(
+                                            textInputAction:
+                                                TextInputAction.next,
                                             autofocus: true,
                                             enableSuggestions: true,
                                             controller: _model.textController1,
