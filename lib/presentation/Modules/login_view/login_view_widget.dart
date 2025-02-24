@@ -270,13 +270,16 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
               apiResponse = response;
               List<dynamic> jsonList;
               Map<String, dynamic> jsonData = jsonDecode(apiResponse.body);
-              var token = jsonData['token'];
+              devicePrefs.setString('token', 'Bearer ' + jsonData['token']);
+              // jsonData['token'] = '';
 
               //GET user data
-              apiResponse = await getCurrentUserData(token);
+              apiResponse =
+                  await getCurrentUserData(devicePrefs.getString('token')!);
               jsonData = json.decode(apiResponse.body);
 
-              currentUser = parseLogedInUserFromJSON(jsonData, token);
+              currentUser = parseLogedInUserFromJSON(
+                  jsonData, devicePrefs.getString('token')!);
 
               //GET USER ROLE AND PERMISSIONS
               await getUserRoleAndAcces(currentUser!.roleID!);

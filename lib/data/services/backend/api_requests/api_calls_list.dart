@@ -46,7 +46,7 @@ Future<void> logOutUser(String token, String employee) async {
       '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/auth/logout',
       headers: {
         //'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-        'Authorization': currentUser!.token,
+        'Authorization': prefs.getString('token')!,
       },
       json: {'device': device, 'ip': ipAddres, 'employee': employee},
       persistCookies: false,
@@ -55,11 +55,12 @@ Future<void> logOutUser(String token, String employee) async {
 }
 
 Future<dynamic> getCycle(int month) async {
+  SharedPreferences devicePrefs = await SharedPreferences.getInstance();
   try {
     var apiCall = await Requests.get(
       '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/cycles/status',
       headers: {
-        'Authorization': currentUser!.token,
+        'Authorization': devicePrefs.getString('token')!,
         'Content-Type': 'application/json',
       },
       queryParameters: {"status": month},
@@ -120,6 +121,7 @@ Future<dynamic> getCycle(int month) async {
 //   }
 // }
 
+//!Not using this function for now
 //Function to post new visit from a student to nursery
 Future<dynamic> postNurseryVisit(Map<String, dynamic> jsonBody) async {
   // var postResponse;
@@ -146,6 +148,7 @@ Future<dynamic> postNurseryVisit(Map<String, dynamic> jsonBody) async {
   // return postResponse;
 }
 
+//!Not using for now
 Future<String> searchEmployee(String employeeNumber) async {
   String postResponse;
   try {
@@ -169,6 +172,7 @@ Future<String> searchEmployee(String employeeNumber) async {
   }
 }
 
+//!Not ussing for now
 // Function to delete an allowed medicine from a student
 Future<int> deleteMedicineStudent(var idValue) async {
   int responseCode;
@@ -238,13 +242,15 @@ Future<int> deleteMedicineStudent(var idValue) async {
 //   }
 // }
 
+//Function to activate/deactive an event by role
 Future<dynamic> modifyActiveOfEventRole(
     int eventId, bool roleEventValue, int roleSelected) async {
+  SharedPreferences devicePrefs = await SharedPreferences.getInstance();
   try {
     var apiCall = await Requests.put(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/events/role-auth/$eventId',
         headers: {
-          'Authorization': currentUser!.token,
+          'Authorization': devicePrefs.getString('token')!,
           'Content-Type': 'application/json',
         },
         json: {'value': roleEventValue, 'role': roleSelected},
@@ -257,13 +263,15 @@ Future<dynamic> modifyActiveOfEventRole(
   }
 }
 
+//Function to fetch all roles
 Future<dynamic> getRolesList() async {
+  SharedPreferences devicePrefs = await SharedPreferences.getInstance();
   // String response;
   try {
     var apiCall = await Requests.get(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/roles/all',
         headers: {
-          'Authorization': currentUser!.token,
+          'Authorization': devicePrefs.getString('token')!,
           'Content-Type': 'application/json',
         },
         persistCookies: false,
@@ -276,6 +284,7 @@ Future<dynamic> getRolesList() async {
   }
 }
 
+//!Not using for now
 Future<dynamic> getRole(String roleName) async {
   String response;
   try {
@@ -295,12 +304,14 @@ Future<dynamic> getRole(String roleName) async {
   }
 }
 
+//Function to fetch events by role
 Future<dynamic> getEventsByRole(int? roleID) async {
+  SharedPreferences devicePrefs = await SharedPreferences.getInstance();
   try {
     var apiCal = await Requests.get(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/events/roles/$roleID',
         headers: {
-          'Authorization': currentUser!.token,
+          'Authorization': devicePrefs.getString('token')!,
           'Content-Type': 'application/json',
         },
         bodyEncoding: RequestBodyEncoding.JSON,
@@ -313,12 +324,14 @@ Future<dynamic> getEventsByRole(int? roleID) async {
   }
 }
 
+//Function to fetch a detailed list of modules
 Future<dynamic> getModulesListDetailed() async {
+  SharedPreferences devicePrefs = await SharedPreferences.getInstance();
   try {
     var apiCall = await Requests.get(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/modules/detail',
         headers: {
-          'Authorization': currentUser!.token,
+          'Authorization': devicePrefs.getString('token')!,
           'Content-Type': 'application/json',
         },
         persistCookies: true);
@@ -331,11 +344,12 @@ Future<dynamic> getModulesListDetailed() async {
 }
 
 Future<dynamic> getEventsAndModulesCall() async {
+  SharedPreferences devicePrefs = await SharedPreferences.getInstance();
   try {
     var apiCall = await Requests.get(
       '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/events/modules/detail',
       headers: {
-        'Authorization': currentUser!.token,
+        'Authorization': devicePrefs.getString('token')!,
         'Content-Type': 'application/json',
       },
       persistCookies: true,
@@ -348,14 +362,16 @@ Future<dynamic> getEventsAndModulesCall() async {
   }
 }
 
+//Function to edit a role
 Future<dynamic> editRole(
     int roleID, Map<String, dynamic> bodyObject, int? type) async {
+  SharedPreferences devicePrefs = await SharedPreferences.getInstance();
   String response;
   try {
     var apiCall = await Requests.put(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/roles/$roleID',
         headers: {
-          'Authorization': currentUser!.token,
+          'Authorization': devicePrefs.getString('token')!,
           'Content-Type': 'application/json',
         },
         queryParameters: {'type': type},
@@ -370,6 +386,7 @@ Future<dynamic> editRole(
   }
 }
 
+//!Not using for now
 Future<dynamic> deleteRole(int roleID) async {
   String response;
   try {
@@ -389,6 +406,7 @@ Future<dynamic> deleteRole(int roleID) async {
   }
 }
 
+//!Not using for now
 Future<dynamic> createRole(Map<String, dynamic> bodyObject) async {
   String response;
   try {
@@ -409,13 +427,15 @@ Future<dynamic> createRole(Map<String, dynamic> bodyObject) async {
   }
 }
 
+//Function to POST a new user
 Future<dynamic> createUser(Map<String, dynamic> newUser) async {
+  SharedPreferences devicePrefs = await SharedPreferences.getInstance();
   try {
     var apiCall = await Requests.post(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/auth/signup',
         json: newUser,
         headers: {
-          'Authorization': currentUser!.token,
+          'Authorization': devicePrefs.getString('token')!,
           'Content-Type': 'application/json'
         },
         persistCookies: false,
@@ -427,13 +447,15 @@ Future<dynamic> createUser(Map<String, dynamic> newUser) async {
   }
 }
 
+//Function to edit a user
 Future<dynamic> editUser(
     Map<String, dynamic> bodyObject, int employeeNumber, int? field) async {
+  SharedPreferences devicePrefs = await SharedPreferences.getInstance();
   try {
     var apiCall = await Requests.put(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/users/detail/$employeeNumber',
         headers: {
-          'Authorization': currentUser!.token,
+          'Authorization': devicePrefs.getString('token')!,
           'Content-Type': 'application/json'
         },
         queryParameters: {'field': field},
@@ -447,6 +469,7 @@ Future<dynamic> editUser(
   }
 }
 
+//!Not using for now
 Future<dynamic> editUserRole(String roleName, int userID) async {
   String response;
   try {
@@ -467,12 +490,16 @@ Future<dynamic> editUserRole(String roleName, int userID) async {
   }
 }
 
+//Function to fetch all users
 Future<dynamic> getUsers() async {
+  SharedPreferences devicePrefs = await SharedPreferences.getInstance();
   String response;
   try {
     var apiCall = await Requests.get(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/users/all',
-        headers: {'Authorization': currentUser!.token},
+        headers: {
+          'Authorization': devicePrefs.getString('token')!,
+        },
         persistCookies: false,
         timeoutSeconds: 30);
     apiCall.raiseForStatus();
@@ -483,6 +510,7 @@ Future<dynamic> getUsers() async {
   }
 }
 
+//!Not using for now
 Future<dynamic> deleteUser(String id) async {
   int response;
   try {
@@ -502,12 +530,14 @@ Future<dynamic> deleteUser(String id) async {
   }
 }
 
+//Function to get detail from a user
 Future<dynamic> getUserDetailCall(int userId) async {
+  SharedPreferences devicePrefs = await SharedPreferences.getInstance();
   try {
     var apiCall = await Requests.get(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/users/$userId',
         headers: {
-          'Authorization': currentUser!.token,
+          'Authorization': devicePrefs.getString('token')!,
           'Content-Type': 'application/json',
         },
         // queryParameters: {'id': userId},
@@ -521,6 +551,7 @@ Future<dynamic> getUserDetailCall(int userId) async {
   }
 }
 
+//!Not using for now
 Future<dynamic> getAllModules() async {
   try {
     var apiCall = await Requests.get(
@@ -538,12 +569,14 @@ Future<dynamic> getAllModules() async {
   }
 }
 
+//Function to get all campuses
 Future<dynamic> getCampuseList() async {
+  SharedPreferences devicePrefs = await SharedPreferences.getInstance();
   try {
     var apiCall = await Requests.get(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/campus/all',
         headers: {
-          'Authorization': currentUser!.token,
+          'Authorization': devicePrefs.getString('token')!,
           'Content-Type': 'application/json',
         },
         persistCookies: true,
@@ -555,12 +588,14 @@ Future<dynamic> getCampuseList() async {
   }
 }
 
+//Function to get all departments
 Future<dynamic> getWorkDepartments() async {
+  SharedPreferences devicePrefs = await SharedPreferences.getInstance();
   try {
     var apiCall = await Requests.get(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/department/all',
         headers: {
-          'Authorization': currentUser!.token,
+          'Authorization': devicePrefs.getString('token')!,
           "Content-Type": "application/json"
         },
         persistCookies: false,
@@ -572,6 +607,7 @@ Future<dynamic> getWorkDepartments() async {
   }
 }
 
+//!Not using for now
 Future<dynamic> sendUserPasswordToMail(
     //This was the old way to send a recovery password
     String employeeNumber,
@@ -594,14 +630,13 @@ Future<dynamic> sendUserPasswordToMail(
   }
 }
 
+//Function to send request for a token to recover password
 Future<dynamic> sendRecoveryToken(String userMail, String deviceInfo) async {
   http.Response apiCall;
   try {
     apiCall = await Requests.post(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/auth/lost-password',
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: {"Content-Type": "application/json"},
         json: {"email": userMail, "device": deviceInfo},
         persistCookies: false,
         timeoutSeconds: 10);
@@ -609,7 +644,7 @@ Future<dynamic> sendRecoveryToken(String userMail, String deviceInfo) async {
     return apiCall;
   } catch (e) {
     if (e is HTTPException) {
-      var message =  e.response.body;
+      var message = e.response.body;
       return Future.error(message.toString());
     }
     return Future.error(e.toString());
@@ -617,6 +652,7 @@ Future<dynamic> sendRecoveryToken(String userMail, String deviceInfo) async {
   }
 }
 
+//Function to send new updated password
 Future<dynamic> updateUserPasswordByToken(
     //This is for the recovery password at login screen (when user click on forgot password)
     String token,
@@ -641,14 +677,16 @@ Future<dynamic> updateUserPasswordByToken(
   }
 }
 
+//Function to update user password not by recovery token, but by the admin or the user itself logged in
 Future<dynamic> updateUserPasswordCall(String password) async {
+  SharedPreferences devicePrefs = await SharedPreferences.getInstance();
   //To use when the current user logged in can be switched
   try {
     var apiCall = await Requests.put(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/users/password',
         headers: {
           "Content-Type": "application/json",
-          "Authorization": currentUser!.token,
+          'Authorization': devicePrefs.getString('token')!,
           // "User-Agent": "$deviceInformation",
         },
         json: {
@@ -664,6 +702,7 @@ Future<dynamic> updateUserPasswordCall(String password) async {
   }
 } //This is for the user to change his password
 
+//Function to send the token caputred from user at recovery password that returns if token is valid
 Future<dynamic> validateToken(
     String token, String userMail, String devivce) async {
   try {
@@ -682,26 +721,16 @@ Future<dynamic> validateToken(
   }
 }
 
-// TODO: CONTINUE PATCH FOR STUDENT-GRADES
-// Future<dynamic> updateStudentsGrades(
-//   dynamic body
-// ) async {
-//   try {
-//     var apiCall = await Requests.patch(
-//       '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/student/grades'
-//     )
-//   } catch (e) {
-
-//   }
-// }
-
+//Function to retrieve all grades and subjects/courses from a teacher
+//Validates if the user is admin or not by user role using isAdmin flag
 Future<dynamic> getTeacherGradeAndCourses(
     var employee, var year, int month, bool isAdmin, String? campus) async {
   try {
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
     var apiCall = await Requests.get(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/teacher-grades',
         headers: {
-          'Authorization': currentUser!.token,
+          'Authorization': devicePrefs.getString('token')!,
           'Content-Type': 'application/json',
         },
         queryParameters: {
@@ -725,13 +754,15 @@ Future<dynamic> getTeacherGradeAndCourses(
   }
 }
 
+//Fucntion to get grades and courses if user is admin
 Future<dynamic> getTeacherGradeAndCoursesAsAdmin(
     int month, bool isAdmin, String? campus, String? cycle) async {
   try {
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
     var apiCall = await Requests.get(
       '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/teacher-grades',
       headers: {
-        'Authorization': currentUser!.token,
+        'Authorization': devicePrefs.getString('token')!,
         'Content-Type': 'application/json',
       },
       queryParameters: {
@@ -753,12 +784,17 @@ Future<dynamic> getTeacherGradeAndCoursesAsAdmin(
   }
 }
 
+//Function to get all students grades/evaluations value by group, subjects, grades, month and cycle
 Future<dynamic> getStudentsToGrade(String assignature, String group,
     String grade, String? cycle, String? campus, String month) async {
   try {
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
     var apiCall = await Requests.get(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/students-evaluation-subject',
-        headers: {'Authorization': currentUser!.token},
+        headers: {
+          'Authorization': devicePrefs.getString('token')!,
+          'Content-Type': 'application/json',
+        },
         queryParameters: {
           "grade": grade,
           "group": group,
@@ -780,6 +816,7 @@ Future<dynamic> getStudentsToGrade(String assignature, String group,
   }
 }
 
+//!Not using for now
 Future<dynamic> getStudentsGrades(
     //This gets data for grades_per_student.dart
     String? assignature,
@@ -817,9 +854,13 @@ Future<dynamic> getStudentsGrades(
 Future<dynamic> getSubjectsAndGradeByStuent(
     String? group, grade, cycle, campus, month) async {
   try {
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
     var apiCall = await Requests.get(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student-evaluation-student',
-        headers: {'Authorization': currentUser!.token},
+        headers: {
+          'Authorization': devicePrefs.getString('token')!,
+          'Content-Type': 'application/json',
+        },
         queryParameters: {
           "grade": grade,
           "group": group,
@@ -845,18 +886,19 @@ Future<dynamic> getSubjectsAndGradeByStuent(
   }
 }
 
+//Function to update studens grades/evaluations
 Future<dynamic> patchStudentsGrades(
     List<Map<String, dynamic>> requestBody, bool isByStudent) async {
   try {
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
     if (requestBody.isEmpty) {
       return throw const FormatException("No data to send");
     } else {
       var apiCall = await Requests.patch(
           '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student/grades',
           headers: {
-            //'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-            //'ip_address': deviceIp.toString(),
-            'Authorization': currentUser!.token
+            'Authorization': devicePrefs.getString('token')!,
+            'Content-Type': 'application/json',
           },
           // queryParameters: {
           //   "studentEval": isByStudent.toString(),
@@ -873,6 +915,7 @@ Future<dynamic> patchStudentsGrades(
   }
 }
 
+//!Not using for now
 Future<dynamic> getStudentsGradesComments(
     int grade, bool searchById, String? id, int? month) async {
   http.Response response;
@@ -913,6 +956,7 @@ Future<dynamic> getStudentsGradesComments(
   }
 }
 
+//!Not using for now
 Future<dynamic> putStudentEvaluationsComments(
     int evaluationId, commentID, bool ValueToUpdate) async {
   try {
@@ -935,7 +979,7 @@ Future<dynamic> putStudentEvaluationsComments(
   }
 }
 
-//NOT USING FOR NOW
+//!NOT USING FOR NOW
 Future<dynamic> validateUser(
   int employeeNumber,
   dynamic keyTovalidate,
@@ -956,11 +1000,16 @@ Future<dynamic> validateUser(
   }
 }
 
+//Function to get a list of students name and id by role to use on fodac27 screen
 Future<dynamic> getStudentsByRole(String cycle) async {
   try {
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
     var apiCall = await Requests.get(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/fodac27/students',
-        headers: {'Authorization': currentUser!.token},
+        headers: {
+          'Authorization': devicePrefs.getString('token')!,
+          'Content-Type': 'application/json',
+        },
         queryParameters: {'cycle': cycle},
         persistCookies: false,
         timeoutSeconds: 25);
@@ -972,15 +1021,17 @@ Future<dynamic> getStudentsByRole(String cycle) async {
   }
 }
 
+//Function to get history of comments at fodac27
 //Can be used to get more than one student if needed
 Future<dynamic> getStudentFodac27History(
     String cycle, String? studentID, bool isByStudent) async {
   try {
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
     var apiCall = await Requests.get(
       '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/fodac27/history',
       headers: {
-        // 'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-        'Authorization': currentUser!.token,
+        'Authorization': devicePrefs.getString('token')!,
+        'Content-Type': 'application/json',
       },
       queryParameters: {
         'cycle': cycle.toString(),
@@ -995,12 +1046,16 @@ Future<dynamic> getStudentFodac27History(
   }
 }
 
-//To obtains only subject_name, can be user for more data in future
+//Function to get a list of subjects that a student holds on selected cycle
 Future<dynamic> getStudentSubjects(String studentID, String cycle) async {
   try {
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
     var apiCall = await Requests.get(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student/subjects',
-        headers: {'Authorization': currentUser!.token},
+        headers: {
+          'Authorization': devicePrefs.getString('token')!,
+          'Content-Type': 'application/json',
+        },
         timeoutSeconds: 18,
         persistCookies: false,
         queryParameters: {'student': studentID, 'cycle': cycle});
@@ -1011,12 +1066,17 @@ Future<dynamic> getStudentSubjects(String studentID, String cycle) async {
   }
 }
 
+//Function to create a new fodac27 record
 Future<dynamic> postFodac27Record(DateTime date, String studentID, String cycle,
     String observations, int employeeNumber, int subject) async {
   try {
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
     var apiCall = await Requests.post(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student/fodac27',
-        headers: {'Authorization': currentUser!.token},
+        headers: {
+          'Authorization': devicePrefs.getString('token')!,
+          'Content-Type': 'application/json',
+        },
         json: {
           'date': date.toIso8601String(),
           'student': studentID.toString(),
@@ -1033,6 +1093,7 @@ Future<dynamic> postFodac27Record(DateTime date, String studentID, String cycle,
   }
 }
 
+//!Not using for now
 Future<int> editFodac27Record(Map<String, dynamic> body) async {
   try {
     var apiCall = await Requests.patch(
@@ -1050,12 +1111,16 @@ Future<int> editFodac27Record(Map<String, dynamic> body) async {
   }
 }
 
+//Function to get date from server side
 Future<dynamic> getActualDate() async {
+  SharedPreferences devicePrefs = await SharedPreferences.getInstance();
   try {
     var apiCall = await Requests.get(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/evaluation-date',
-        headers: {'Authorization': currentUser!.token},
-        //queryParameters: {'field': 1},
+        headers: {
+          'Authorization': devicePrefs.getString('token')!,
+          'Content-Type': 'application/json',
+        },
         timeoutSeconds: 20,
         persistCookies: false);
     apiCall.raiseForStatus();
@@ -1072,45 +1137,19 @@ Future<dynamic> getActualDate() async {
     } else {
       return Future.error(e);
     }
-
-    // Check if error response contains a message
-
-    // if (e is HTTPException) {
-    //   var displayMessage;
-    //   insertErrorLog(e.toString(), 'api/date');
-    //   if (e.response.body.contains('Outdated')) {
-    //     displayMessage = getMessageToDisplay('Outdated');
-    //   } else {
-    //     displayMessage =
-    //         getMessageToDisplay(e.response.reasonPhrase.toString());
-    //   }
-
-    //   try {
-    //     var errorResponse = jsonDecode(e.response.body);
-    //     if (errorResponse.containsKey('message')) {
-    //       print(errorResponse);
-    //       return errorResponse['message']; // Return only the message
-    //     } else {
-    //       return throw displayMessage; // Default message if no 'message' key
-    //     }
-    //   } catch (jsonError) {
-    //     return throw Exception(jsonError);
-    //   }
-    // } else if (e is TimeoutException) {
-    //   insertErrorLog(e.toString(), 'api/date');
-    //   var firstWord = getMessageToDisplay(e.toString());
-    //   return throw firstWord;
-    // } else {
-    //   return 'Request failed: ${e.toString()}'; // General error handling
-    // }
   }
 }
 
+//Function to delete a fodac27 record
 Future<int> deleteFodac27Record(int fodac27ID) async {
   try {
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
     var apiCall = await Requests.delete(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student/fodac27',
-        headers: {'Authorization': currentUser!.token},
+        headers: {
+          'Authorization': devicePrefs.getString('token')!,
+          'Content-Type': 'application/json',
+        },
         queryParameters: {'fodac27': fodac27ID},
         persistCookies: false);
     apiCall.raiseForStatus();
@@ -1120,6 +1159,7 @@ Future<int> deleteFodac27Record(int fodac27ID) async {
   }
 }
 
+//!Not using for now
 Future<dynamic> getGlobalGradesAndGroups(String cyle) async {
   try {
     var apiCall = await Requests.get(
@@ -1138,6 +1178,7 @@ Future<dynamic> getGlobalGradesAndGroups(String cyle) async {
   }
 }
 
+//!Not using for now
 Future<dynamic> getStudentsForFodac27(
     String grade, String group, String campus, String cycle) async {
   try {
@@ -1161,6 +1202,8 @@ Future<dynamic> getStudentsForFodac27(
   }
 }
 
+//!Not using for now
+//TODO: USE WHEN NEED TO VALIDATE IS USER IS COORDINATOR
 Future<dynamic> validateIfUserIsCoordinator(int user) async {
   try {
     var apiCall = await Requests.get(
@@ -1178,6 +1221,8 @@ Future<dynamic> validateIfUserIsCoordinator(int user) async {
   }
 }
 
+//!Not using for now
+//TODO:  USE THIS FUNCTION WHEN APP UODATES IS IMPLEMENTED
 Future<dynamic> checkForUpdates() async {
   try {
     var apiCall = await Requests.get(
@@ -1193,13 +1238,16 @@ Future<dynamic> checkForUpdates() async {
   }
 }
 
+//Function to get current user details, as username, role, etc..
 Future<dynamic> getCurrentUserData(String token) async {
   try {
+    // SharedPreferences devicePrefs = await SharedPreferences.getInstance();
+    // var token = devicePrefs.getString('token')!;
     var apiCall = await Requests.get(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/users/me',
         headers: {
-          //'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-          'Authorization': 'Bearer $token'
+          'Authorization': token,
+          'Content-Type': 'application/json',
         },
         persistCookies: false);
     apiCall.raiseForStatus();
@@ -1208,19 +1256,24 @@ Future<dynamic> getCurrentUserData(String token) async {
     String errorMessage;
     insertErrorLog(e.toString(), '/users/me/');
     if (e is Exception) {
-      errorMessage = e.getErrorMessage();
-      return Future.error(errorMessage);
+      // errorMessage = e.getErrorMessage();
+      return Future.error(e.toString());
     } else {
-      e;
+      return Future.error(e.toString());
     }
   }
 }
 
+//Function to get user comsunption from cafeteria that is pending to pay
 Future<dynamic> getUserCafeteriaConsumptionHistory() async {
   try {
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
     var apiCall = await Requests.get(
       '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/cafeteria/user/history',
-      headers: {'Authorization': currentUser!.token},
+      headers: {
+        'Authorization': devicePrefs.getString('token')!,
+        'Content-Type': 'application/json',
+      },
       queryParameters: {
         'employee': currentUser!.employeeNumber,
       },
@@ -1239,9 +1292,13 @@ Future<dynamic> getUserCafeteriaConsumptionHistory() async {
 // */
 Future<dynamic> getEventsListRequest() async {
   try {
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
     var apiCall = await Requests.get(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/events/all',
-        headers: {'Authorization': currentUser!.token},
+        headers: {
+          'Authorization': devicePrefs.getString('token')!,
+          'Content-Type': 'application/json',
+        },
         queryParameters: {'filter': 'true'},
         persistCookies: true,
         timeoutSeconds: 20);
@@ -1253,13 +1310,15 @@ Future<dynamic> getEventsListRequest() async {
   }
 }
 
+//Function to get a list from all screens that the user can acces
 Future<dynamic> getScreenListByRoleId(int id) async {
   try {
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
     var apiCall = await Requests.get(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/roles/modules/$id',
         headers: {
-          'Authorization': currentUser!.token,
-          'Content-Type': 'application/json'
+          'Authorization': devicePrefs.getString('token')!,
+          'Content-Type': 'application/json',
         },
         persistCookies: false,
         timeoutSeconds: 20);
@@ -1271,14 +1330,16 @@ Future<dynamic> getScreenListByRoleId(int id) async {
   }
 }
 
+//Function to update is a module can be accesed by a role
 Future<dynamic> updateModuleAccessByRole(
     String moduleName, int roleId, bool access) async {
   try {
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
     var apiCall = await Requests.put(
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/roles/modules',
         headers: {
-          'Authorization': currentUser!.token,
-          'Content-Type': 'application/json'
+          'Authorization': devicePrefs.getString('token')!,
+          'Content-Type': 'application/json',
         },
         json: {'module': moduleName, 'role': roleId, 'access': access},
         persistCookies: false,
@@ -1292,8 +1353,11 @@ Future<dynamic> updateModuleAccessByRole(
   }
 }
 
+//Function to get a list of acces items by a role
+//TODO: CHANGE TO Request.get()
 Future<http.Response> getUserRoleAndAcces(int roleId) async {
   try {
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
     Uri address = Uri(
         scheme: 'http',
         host: dotenv.env['HOST'],
@@ -1302,7 +1366,7 @@ Future<http.Response> getUserRoleAndAcces(int roleId) async {
         queryParameters: {'role': roleId.toString()});
     var response = http.get(address, headers: {
       "Content-Type": "application/json",
-      'Authorization': currentUser!.token,
+      'Authorization': devicePrefs.getString('token')!,
     });
     userEvents = response;
     return response;
