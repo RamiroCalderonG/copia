@@ -315,6 +315,7 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
                   children: [
                     Flexible(
                       child: IconButton(
+                          padding: const EdgeInsets.all(3),
                           tooltip: 'Otra opcion',
                           onPressed: () {},
                           icon: const Icon(
@@ -333,17 +334,18 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
               ),
               Expanded(
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Flexible(
                       child: IconButton(
+                          padding: const EdgeInsets.all(3),
                           onPressed: () {
                             showDialog(
                               context: context,
                               builder: (BuildContext context) {
                                 return AlertDialog(
-                                  title: const Text('Crear ticket de servicio'),
+                                  title: const Text('Nuevo ticket de servicio'),
                                   content: const CreateServiceTicket(),
                                   actions: <Widget>[
                                     TextButton(
@@ -363,11 +365,17 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
                             );
                           },
                           tooltip: 'Crear ticket de servicio',
-                          icon: const FaIcon(
-                            FontAwesomeIcons.ticket,
+                          icon: const Icon(
+                            Icons.adb,
                             color: Color(0xFFF87060),
-                            // size: 35.5,
-                          )),
+                          )
+                          // const FaIcon(
+                          //   FontAwesomeIcons.ticket,
+                          //   color: Color(0xFFF87060),
+                          //   // size: 35.5,
+                          // )
+
+                          ),
                     ),
                     Flexible(
                       child: Text(

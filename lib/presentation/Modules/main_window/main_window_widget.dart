@@ -145,7 +145,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                 context: context,
                 builder: (BuildContext context) {
                   return AlertDialog(
-                    title: const Text('Crear Ticket de servicio'),
+                    title: const Text('Nuevo Ticket de servicio'),
                     content: const CreateServiceTicket(),
                     actions: <Widget>[
                       TextButton(
