@@ -49,7 +49,7 @@ dynamic loadStartGrading(int employeeNumber, String schoolYear, bool isAdmin,
 }
 
 Future<dynamic> loadStartGradingAsAdmin(String schoolYear, String? campus,
-    bool initialFetch, int? subject, int? group) async {
+    bool initialFetch, int? subject, int? group, bool isAcademicCoord ) async {
   try {
     DateTime now = DateTime.now();
     int month = now.month;
@@ -58,7 +58,7 @@ Future<dynamic> loadStartGradingAsAdmin(String schoolYear, String? campus,
     if (initialFetch) {
       //First time loading screen, to display all grades, groups, campus and assignatures to dispaly at DropdownSelector
       await getTeacherGradeAndCoursesAsAdmin(month,
-              currentUser!.isCurrentUserAdmin(), campus, currentCycle!.claCiclo)
+              currentUser!.isCurrentUserAdmin(), campus, currentCycle!.claCiclo, isAcademicCoord)
           .then((response) {
         jsonList = json.decode(utf8.decode(response.bodyBytes));
         jsonDataForDropDownMenuClass = jsonList;

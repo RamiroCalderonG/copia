@@ -83,7 +83,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
   void _fetchData() async {
     var response = currentUser!.isCurrentUserAdmin()
         ? loadStartGradingAsAdmin(
-            currentCycle!.claCiclo!, null, true, null, null)
+            currentCycle!.claCiclo!, null, true, null, null, currentUser!.isCurrentUserAcademicCoord())
         : loadStartGrading(
             currentUser!.employeeNumber!,
             currentCycle!.toString(),

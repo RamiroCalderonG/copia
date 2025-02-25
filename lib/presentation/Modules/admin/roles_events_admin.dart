@@ -104,28 +104,29 @@ class _RolesEventsAdministrationState extends State<RolesEventsAdministration> {
 
                           // If apiEvent is null, set isActive to false
                           bool isActive = (apiEvent != null &&
-                                  apiEvent.containsKey("can_acces"))
-                              ? apiEvent["can_acces"] as bool
+                                  apiEvent.containsKey("can_access"))
+                              ? apiEvent["can_access"] as bool
                               : false;
 
                           event.isActive = isActive;
-                          return PolicyCard(
+                          return 
+                          PolicyCard(
                             policy: event, // Ensure UI reflects API data
                             roleID: widget.roleId,
                             onToggle: (updatedEvent) {
                               setState(() {
-                                event.isActive = !event.isActive;
+                                event = updatedEvent;
                               });
                             },
                           );
                         } else {
                           event.isActive = false;
                           return PolicyCard(
-                            policy: event, // Ensure UI reflects API data
+                            policy: event, 
                             roleID: widget.roleId,
                             onToggle: (updatedEvent) {
                               setState(() {
-                                event.isActive = !event.isActive;
+                                event = updatedEvent;
                               });
                             },
                           );
@@ -209,7 +210,58 @@ class _RolesEventsAdministrationState extends State<RolesEventsAdministration> {
   }
 }
 
-class PolicyCard extends StatelessWidget {
+class PolicyCard extends StatefulWidget {
+  final Event policy;
+  final int roleID;
+  final Function(Event) onToggle;
+
+  const PolicyCard(
+      {super.key, required this.policy, required this.roleID, required this.onToggle});
+
+  @override
+  State<PolicyCard> createState() => _PolicyCardState();
+}
+
+class _PolicyCardState extends State<PolicyCard> {
+  late bool isActive;
+
+  @override
+  void initState() {
+    super.initState();
+    isActive = widget.policy.isActive;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SwitchListTile(
+              title: Text(widget.policy.eventName),
+              value: isActive,
+              onChanged: (value) async {
+                setState(() {
+                  isActive = value;
+                });
+                widget.policy.isActive = value;
+                widget.onToggle(widget.policy);
+                await modifyActiveOfEventRole(widget.policy.eventID, value, widget.roleID);
+              },
+            ),
+            const Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+/* class PolicyCard extends StatelessWidget {
   final Event policy;
   final int roleID;
   final Function(Event) onToggle;
@@ -230,7 +282,10 @@ class PolicyCard extends StatelessWidget {
               title: Text(policy.eventName),
               value: policy.isActive,
               onChanged: (value) async {
+                policy.isActive = value;
                 onToggle(policy);
+
+                //policy.isActive = value;
                 //var idValue = getEventIDbyName(policy.eventName);
                 await modifyActiveOfEventRole(policy.eventID, value, roleID);
               },
@@ -245,3 +300,4 @@ class PolicyCard extends StatelessWidget {
     );
   }
 }
+ */

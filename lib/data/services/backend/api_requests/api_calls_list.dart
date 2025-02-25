@@ -427,7 +427,7 @@ Future<dynamic> createRole(Map<String, dynamic> bodyObject) async {
 }
 
 //Function to delete a userRole
-Future<dynamic> deleteRole(int roleId) async {
+Future<dynamic> deleteRoleCall(int roleId) async {
   SharedPreferences devicePrefs = await SharedPreferences.getInstance();
   try {
     var apiCall = await Requests.delete(
@@ -776,7 +776,7 @@ Future<dynamic> getTeacherGradeAndCourses(var employee, var year, int month,
 
 //Fucntion to get grades and courses if user is admin
 Future<dynamic> getTeacherGradeAndCoursesAsAdmin(
-    int month, bool isAdmin, String? campus, String? cycle) async {
+    int month, bool isAdmin, String? campus, String? cycle, bool isAcademicCoord) async {
   try {
     SharedPreferences devicePrefs = await SharedPreferences.getInstance();
     var apiCall = await Requests.get(
@@ -790,7 +790,8 @@ Future<dynamic> getTeacherGradeAndCoursesAsAdmin(
         "month": month,
         "flag": isAdmin,
         "campus": campus,
-        "employee": currentUser!.employeeNumber
+        "employee": currentUser!.employeeNumber,
+        "flag2" : isAcademicCoord
       },
       bodyEncoding: RequestBodyEncoding.JSON,
       persistCookies: true,

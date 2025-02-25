@@ -14,6 +14,7 @@ class PoliciesScreen extends StatefulWidget {
   final int roleID;
   final String roleName;
   final List<Role> roleListData;
+
   const PoliciesScreen(
       {super.key,
       required this.roleID,
@@ -28,13 +29,10 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
   late Future<void> _refreshEventsFuture;
   List<Event> eventsToDisplay = [];
   List<RoleModuleRelationshipDto> roleScreensRelationship = [];
-
-  List<Map<String, bool>> tempRoleModuleList =
-      []; //List to store role-module relationship, K = moduleId, V = can role access to module
+  Map<String, bool> matchedValue = {};
 
   @override
   void initState() {
-    //Download events and roles to populate the list
     _refreshEventsFuture = refreshEvents(widget.roleID);
     super.initState();
   }
@@ -42,7 +40,6 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
   @override
   void dispose() {
     eventsToDisplay.clear();
-    tempRoleModuleList.clear();
     roleScreensRelationship.clear();
     super.dispose();
   }
@@ -69,7 +66,7 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
                 color: Colors.white,
               ),
               style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.all(Colors.indigo),
+                backgroundColor: MaterialStateProperty.all(Colors.indigo),
               ),
             ),
         ],
@@ -90,11 +87,7 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
                   final currentEvent = eventsToDisplay[index];
                   String moduleName = currentEvent.moduleName;
 
-                  Map<String, bool>? matchedValue =
-                      tempRoleModuleList.firstWhere(
-                    (item) => item.containsKey(moduleName),
-                    orElse: () => {moduleName: false},
-                  );
+                  bool hasAccess = matchedValue[moduleName] ?? false;
 
                   final previousEvent =
                       index > 0 ? eventsToDisplay[index - 1] : null;
@@ -107,33 +100,37 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
                     children: [
                       if (showModuleName)
                         Padding(
-                            padding: const EdgeInsets.only(
-                                top: 15, bottom: 10, left: 12, right: 12),
-                            child: Stack(children: [
+                          padding: const EdgeInsets.only(
+                              top: 15, bottom: 10, left: 12, right: 12),
+                          child: Stack(
+                            children: [
                               Text(
                                 'Modulo: ${currentEvent.moduleName}',
                                 style: const TextStyle(
                                     fontSize: 20, fontFamily: 'Sora'),
                               ),
                               SwitchListTile(
-                                  subtitle: matchedValue[moduleName]!
-                                      ? Text(
-                                          'Tiene acceso al modulo',
-                                          style: TextStyle(color: Colors.green),
-                                        )
-                                      : Text(
-                                          'No tiene acceso al modulo',
-                                          style: TextStyle(color: Colors.red),
-                                        ),
-                                  value: matchedValue[moduleName] ?? false,
-                                  onChanged: (event) {
-                                    setState(() {
-                                      matchedValue[moduleName] = event;
-                                    });
-                                    updateModuleAccesStatus(widget.roleID,
-                                        currentEvent.moduleName, event);
-                                  })
-                            ])),
+                                subtitle: hasAccess
+                                    ? Text(
+                                        'Tiene acceso al modulo',
+                                        style: TextStyle(color: Colors.green),
+                                      )
+                                    : Text(
+                                        'No tiene acceso al modulo',
+                                        style: TextStyle(color: Colors.red),
+                                      ),
+                                value: hasAccess,
+                                onChanged: (event) {
+                                  setState(() {
+                                    matchedValue[moduleName] = event;
+                                  });
+                                  updateModuleAccesStatus(widget.roleID,
+                                      currentEvent.moduleName, event);
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
                       Padding(
                         padding: EdgeInsets.only(
                           left: 20,
@@ -144,8 +141,7 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
                           roleID: widget.roleID,
                           onToggle: (event) {
                             setState(() {
-                              event.canAcces =
-                                  !event.canAcces; // Toggle the isActive status
+                              event.canAcces = !event.canAcces;
                             });
                           },
                         ),
@@ -156,44 +152,46 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
               );
             } else {
               return Center(
-                  child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.all(10),
-                    child: const Text(
-                      'No se encuentran eventos para el rol seleccionado',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontFamily: 'Sora',
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.all(10),
+                      child: const Text(
+                        'No se encuentran eventos para el rol seleccionado',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontFamily: 'Sora',
+                        ),
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.all(10),
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => RolesEventsAdministration(
-                                roleName: widget.roleName,
-                                roleId: widget.roleID)));
-                      },
-                      label: Text(
-                        'Agregar permisos',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      icon: Icon(
-                        Icons.add,
-                        color: Colors.white,
-                      ),
-                      style: ButtonStyle(
-                        backgroundColor: WidgetStateProperty.all(Colors.indigo),
+                    Padding(
+                      padding: EdgeInsets.all(10),
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => RolesEventsAdministration(
+                                  roleName: widget.roleName,
+                                  roleId: widget.roleID)));
+                        },
+                        label: Text(
+                          'Agregar permisos',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        icon: Icon(
+                          Icons.add,
+                          color: Colors.white,
+                        ),
+                        style: ButtonStyle(
+                          backgroundColor:
+                              MaterialStateProperty.all(Colors.indigo),
+                        ),
                       ),
                     ),
-                  )
-                ],
-              ));
+                  ],
+                ),
+              );
             }
           }
         },
@@ -203,17 +201,14 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
 
   Future<void> refreshEvents(int? idRole) async {
     var eventsByRoleResponse =
-        await fetchEventsByRole(idRole!); //Get events by role
+        await fetchEventsByRole(idRole!); // Get events by role
     await fetchScreensByRoleId(idRole).then((result) {
       roleScreensRelationship = result;
       try {
-        Map<String, bool> tempRoleModuleMap =
-            {}; //Map to store role-module relationship, K = moduleId, V = can role access to module
+        Map<String, bool> tempRoleModuleMap = {};
         for (var item in roleScreensRelationship) {
           if (!tempRoleModuleMap.containsKey(item.moduleName)) {
-            tempRoleModuleMap
-                .addAll({item.moduleName: item.canRoleAccessModule});
-            tempRoleModuleList.add(tempRoleModuleMap);
+            tempRoleModuleMap[item.moduleName] = item.canRoleAccessModule;
           }
         }
         Map<String, List<Event>> groupedEvents = {};
@@ -226,7 +221,6 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
               idRole,
               jsonItem['can_access']);
 
-          // Check if the moduleName already exists in the map
           if (groupedEvents.containsKey(event.moduleName)) {
             groupedEvents[event.moduleName]!.add(event);
           } else {
@@ -236,6 +230,7 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
         setState(() {
           eventsToDisplay =
               groupedEvents.values.expand((events) => events).toList();
+          matchedValue = tempRoleModuleMap;
         });
       } catch (e) {
         insertErrorLog(e.toString(), 'refreshEvents()');
@@ -248,7 +243,6 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
       int roleId, String moduleName, bool status) async {
     try {
       await updateModuleAccessByRole(moduleName, roleId, status);
-      //  return response;
     } catch (e) {
       insertErrorLog(e.toString(), 'updateModuleAccesStatus()');
       return Future.error(e.toString());
@@ -261,9 +255,8 @@ class PolicyCard extends StatelessWidget {
   final int roleID;
   final Function(Event) onToggle;
 
-  // ignore: use_key_in_widget_constructors
   const PolicyCard(
-      {required this.policy, required this.roleID, required this.onToggle});
+      {super.key, required this.policy, required this.roleID, required this.onToggle});
 
   @override
   Widget build(BuildContext context) {
@@ -278,7 +271,7 @@ class PolicyCard extends StatelessWidget {
               value: policy.canAcces,
               onChanged: (value) async {
                 onToggle(policy);
-                //var idValue = getEventIDbyName(policy.eventName);
+                policy.canAcces = value;
                 await modifyActiveOfEventRole(policy.eventID, value, roleID);
               },
             ),

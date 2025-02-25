@@ -79,6 +79,36 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
     });
   }
 
+dynamic handleDeleteRole(int index) async {
+var response =
+                                                    await showConfirmationDialog(
+                                                        context,
+                                                        'Confirmar',
+                                                        '¿Eliminar el rol ${rolesListData[index].roleName}?');
+                                                if (response == 1) {
+                                                  insertActionIntoLog(
+                                                      'DELETE ROLE ACTION >> ',
+                                                      'User : ${currentUser!.employeeName}  deleted the role ${rolesListData[index].roleName}');
+                                                  int roleId =
+                                                      rolesListData[index]
+                                                          .roleID;
+                                                  await deleteRole(roleId)
+                                                      .then((value) {
+                                                    setState(() {
+                                                      tmpRolesList
+                                                          .removeAt(index);
+                                                      // isLoading = false;
+                                                    });
+                                                    showInformationDialog(context, 'Exito', 'Rol eliminado exitosamente');
+                                                  });
+                                                } else {
+                                                  insertActionIntoLog(
+                                                      'DELETE ROLE ACTION CANCELED >> ',
+                                                      'User : ${currentUser!.employeeName} canceled the action of deleting the role ${rolesListData[index].roleName}');
+                                                  // Navigator.pop(context);
+                                                }
+}
+
   Widget roleContainerCard(int index) {
     ListView resultItems = ListView();
     if (rolesListData[index].events != null) {
@@ -155,7 +185,7 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
 
   Future<void> deleteRole(int roleId) async {
     try {
-      await deleteRole(roleId);
+      await deleteRoleCall(roleId);
     } catch (e) {
       insertErrorLog(e.toString(), 'deleteRole($roleId)');
       throw Future.error(e.toString());
@@ -254,39 +284,13 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                                             icon: const Icon(
                                                 Icons.delete_outline),
                                             tooltip:
-                                                'Eliminar Rol (Proximamente)',
+                                                'Eliminar Rol',
                                             onPressed: () async {
                                               try {
-                                                var response =
-                                                    await showConfirmationDialog(
-                                                        context,
-                                                        'Confirmar',
-                                                        'Eliminar el rol ${rolesListData[index].roleName} ?');
-                                                if (response == 1) {
-                                                  insertActionIntoLog(
-                                                      'DELETE ROLE ACTION >> ',
-                                                      'User : ${currentUser!.employeeName}  deleted the role ${rolesListData[index].roleName}');
-                                                  int roleId =
-                                                      rolesListData[index]
-                                                          .roleID;
-                                                  await deleteRole(roleId)
-                                                      .then((value) {
-                                                    setState(() {
-                                                      tmpRolesList
-                                                          .removeAt(index);
-                                                      // isLoading = false;
-                                                    });
-                                                  });
-                                                } else {
-                                                  insertActionIntoLog(
-                                                      'DELETE ROLE ACTION CANCELED >> ',
-                                                      'User : ${currentUser!.employeeName} canceled the action of deleting the role ${rolesListData[index].roleName}');
-                                                  // Navigator.pop(context);
-                                                }
+                                                handleDeleteRole(index).then((value){
+                                                  _fetchData();
+                                                });
                                               } catch (e) {
-                                                // setState(() {
-                                                //   isLoading = false;
-                                                // });
                                                 showErrorFromBackend(
                                                     context, e.toString());
                                               }
