@@ -221,95 +221,7 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
               )),
             ],
           ),
-        )
-        // actions: [
-        //   const SizedBox(width: 30),
-        //   Expanded(
-        //     child: IconButton(
-        //         tooltip: 'Administrar roles de usuarios',
-        //         padding: const EdgeInsets.all(3),
-        //         color: const Color.fromARGB(255, 255, 255, 255),
-        //         style: ButtonStyle(
-        //             backgroundColor: WidgetStatePropertyAll(Colors.lightBlue)),
-        //         onPressed: () {
-        //           try {
-        //             getEventsTempList().whenComplete(() async {
-        //               await getRolesTempList().whenComplete(() {
-        //                 Navigator.push(
-        //                     context,
-        //                     MaterialPageRoute(
-        //                         builder: (context) =>
-        //                             const RolesAndProfilesScreen()));
-        //               });
-        //             });
-        //           } catch (e) {
-        //             setState(() {
-        //               isLoading = false;
-        //             });
-        //             insertErrorLog(e.toString(), 'UsersMainScreen()');
-        //             showErrorFromBackend(context, e.toString());
-        //           }
-        //         },
-        //         icon: const Icon(Icons.verified_user)),
-        //   ),
-        //   const SizedBox(width: 10),
-        //   Expanded(
-        //     child: IconButton(
-        //         padding: const EdgeInsets.all(3),
-        //         color: const Color.fromARGB(255, 255, 255, 255),
-        //         style: ButtonStyle(
-        //             backgroundColor:
-        //                 const WidgetStatePropertyAll(Colors.lightBlue)),
-        //         tooltip: 'Nuevo usuario',
-        //         onPressed: () async {
-        //           try {
-        //             campuseList.clear();
-        //             areaList.clear();
-        //             await getAllCampuse().then((response) async {
-        //               await getWorkDepartmentList();
-        //               await getRolesList().then((onValue) async {
-        //                 tmpRolesList = jsonDecode(onValue.body);
-        //                 for (var item in tmpRolesList) {
-        //                   Role newRole = Role.fromJson(item);
-        //                   tmpRoleObjectslist.add(newRole);
-        //                 }
-        //                 await getEventsList().then((onValue) {
-        //                   setState(() {
-        //                     buildNewUserScreen(context);
-        //                   });
-        //                 });
-        //               });
-        //             }).onError((error, stacktrace) {
-        //               insertErrorLog(error.toString(), stacktrace.toString());
-        //             });
-        //           } catch (e) {
-        //             insertErrorLog(e.toString(), 'users_main_screen 159');
-        //             setState(() {
-        //               isLoading = false;
-        //               showErrorFromBackend(context, e.toString());
-        //             });
-        //           }
-        //         },
-        //         icon: const Icon(Icons.add)),
-        //   ),
-        //   const SizedBox(width: 10),
-        //   Expanded(
-        //     child: IconButton(
-        //       padding: const EdgeInsets.all(3),
-        //       color: const Color.fromARGB(255, 255, 255, 255),
-        //       style: ButtonStyle(
-        //           backgroundColor:
-        //               const WidgetStatePropertyAll(Colors.lightBlue)),
-        //       tooltip: 'Refrescar',
-        //       icon: const Icon(Icons.refresh),
-        //       onPressed: _restartScreen,
-        //     ),
-        //   ),
-        //   const SizedBox(width: 10),
-
-        //   // const SizedBox(width: 20),
-        // ]
-        );
+        ));
 
     return Scaffold(
       key: _key,
@@ -317,73 +229,65 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
           bottom: isDeviceMobile
               ? mobileAppBar
               : AppBar(automaticallyImplyLeading: false, actions: [
-                  Expanded(
-                    child: TextButton.icon(
-                        onPressed: () {
-                          try {
-                            //?WHY DOES IT NEED TO BE IN TWO SEPARATE CALLS?
-                            getEventsTempList().whenComplete(() async {
-                              await getRolesTempList().whenComplete(() {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            const RolesAndProfilesScreen()));
-                              });
+                  TextButton.icon(
+                      onPressed: () {
+                        try {
+                          //?WHY DOES IT NEED TO BE IN TWO SEPARATE CALLS?
+                          getEventsTempList().whenComplete(() async {
+                            await getRolesTempList().whenComplete(() {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const RolesAndProfilesScreen()));
                             });
-                          } catch (e) {
-                            setState(() {
-                              isLoading = false;
-                            });
-                            insertErrorLog(e.toString(), 'UsersMainScreen()');
-                            showErrorFromBackend(context, e.toString());
-                          }
-                        },
-                        icon: const Icon(Icons.verified_user),
-                        label: Text('Administrar roles de usuarios')),
-                  ),
-                  Expanded(
-                    child: TextButton.icon(
-                        onPressed: () async {
-                          try {
-                            campuseList.clear();
-                            areaList.clear();
-                            await getAllCampuse().then((response) async {
-                              await getWorkDepartmentList();
-                              await getRolesList().then((onValue) async {
-                                tmpRolesList = jsonDecode(onValue.body);
-                                for (var item in tmpRolesList) {
-                                  Role newRole = Role.fromJson(item);
-                                  tmpRoleObjectslist.add(newRole);
-                                }
-                                await getEventsList().then((onValue) {
-                                  setState(() {
-                                    buildNewUserScreen(context);
-                                  });
+                          });
+                        } catch (e) {
+                          setState(() {
+                            isLoading = false;
+                          });
+                          insertErrorLog(e.toString(), 'UsersMainScreen()');
+                          showErrorFromBackend(context, e.toString());
+                        }
+                      },
+                      icon: const Icon(Icons.verified_user),
+                      label: Text('Administrar roles de usuarios')),
+                  TextButton.icon(
+                      onPressed: () async {
+                        try {
+                          campuseList.clear();
+                          areaList.clear();
+                          await getAllCampuse().then((response) async {
+                            await getWorkDepartmentList();
+                            await getRolesList().then((onValue) async {
+                              tmpRolesList = jsonDecode(onValue.body);
+                              for (var item in tmpRolesList) {
+                                Role newRole = Role.fromJson(item);
+                                tmpRoleObjectslist.add(newRole);
+                              }
+                              await getEventsList().then((onValue) {
+                                setState(() {
+                                  buildNewUserScreen(context);
                                 });
                               });
-                            }).onError((error, stacktrace) {
-                              insertErrorLog(
-                                  error.toString(), stacktrace.toString());
                             });
-                          } catch (e) {
+                          }).onError((error, stacktrace) {
                             insertErrorLog(
-                                e.toString(), 'users_main_screen 159');
-                            setState(() {
-                              isLoading = false;
-                              showErrorFromBackend(context, e.toString());
-                            });
-                          }
-                        },
-                        icon: const FaIcon(FontAwesomeIcons.addressCard),
-                        label: const Text('Nuevo usuario')),
+                                error.toString(), stacktrace.toString());
+                          });
+                        } catch (e) {
+                          insertErrorLog(e.toString(), 'users_main_screen 159');
+                          setState(() {
+                            isLoading = false;
+                            showErrorFromBackend(context, e.toString());
+                          });
+                        }
+                      },
+                      icon: const FaIcon(FontAwesomeIcons.addressCard),
+                      label: const Text('Nuevo usuario')),
+                  RefreshButton(
+                    onPressed: _restartScreen,
                   ),
-                  Expanded(
-                    child: RefreshButton(
-                      onPressed: _restartScreen,
-                    ),
-                  ),
-
                   // const SizedBox(width: 20),
                 ]),
           backgroundColor: FlutterFlowTheme.of(context).primary,
