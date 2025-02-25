@@ -32,7 +32,10 @@ void showEmptyFieldAlertDialog(BuildContext context, String contentText) {
 }
 
 Future<int> showConfirmationDialog(
-    BuildContext context, String titleText, String contentText) async {
+    //TO GET A CONFIRMATION FROM THE USER
+    BuildContext context,
+    String titleText,
+    String contentText) async {
   Completer<int> completer = Completer<int>();
   showDialog(
     barrierDismissible: false,
@@ -40,7 +43,7 @@ Future<int> showConfirmationDialog(
     builder: (BuildContext context) {
       return AlertDialog(
         icon: const Icon(
-Icons.warning,
+          Icons.warning,
           color: Colors.amber,
         ),
         title: Text(titleText, style: const TextStyle(fontFamily: 'Sora')),
@@ -48,11 +51,10 @@ Icons.warning,
         actions: [
           TextButton(
             style: ButtonStyle(
-              backgroundColor: WidgetStatePropertyAll(
-                Color.fromARGB(220, 203, 242, 173)
-              )
-
-            ),
+                backgroundColor: WidgetStatePropertyAll(
+                    FlutterFlowTheme.of(context)
+                        .tertiary //Color.fromARGB(255, 203, 242, 173)
+                    )),
             onPressed: () {
               Navigator.of(context).pop();
               completer.complete(1); // User selected 'Yes'
@@ -65,24 +67,21 @@ Icons.warning,
                     )),
           ),
           TextButton(
-            style: ButtonStyle(
-              backgroundColor: WidgetStatePropertyAll(
-                Color.fromARGB(216, 250, 157, 157)
-              )
-
-            ),
-            onPressed: () {
-              Navigator.of(context).pop();
-              completer.complete(0); // User selected 'No'
-            },
-            child: Text('Cancelar', 
-            style: FlutterFlowTheme.of(context).labelLarge.override(
-                      fontFamily: 'Roboto',
-                      color: FlutterFlowTheme.of(context).primaryText,
-                      fontWeight: FontWeight.w500,
-                    )
-            )
-          )
+              style: ButtonStyle(
+                  backgroundColor: WidgetStatePropertyAll(
+                      FlutterFlowTheme.of(context)
+                          .accent1 //Color.fromARGB(216, 250, 157, 157)
+                      )),
+              onPressed: () {
+                Navigator.of(context).pop();
+                completer.complete(0); // User selected 'No'
+              },
+              child: Text('Cancelar',
+                  style: FlutterFlowTheme.of(context).labelLarge.override(
+                        fontFamily: 'Roboto',
+                        color: FlutterFlowTheme.of(context).primaryText,
+                        fontWeight: FontWeight.w500,
+                      )))
         ],
       );
     },
@@ -90,6 +89,7 @@ Icons.warning,
   return completer.future;
 }
 
+//To display error from backend
 void showErrorFromBackend(BuildContext context, String errorMessage) {
   showDialog(
       context: context,
@@ -110,6 +110,7 @@ void showErrorFromBackend(BuildContext context, String errorMessage) {
       });
 }
 
+//To display information
 void showInformationDialog(
     BuildContext context, String header, String bodyMessage) {
   showDialog(

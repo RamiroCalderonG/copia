@@ -343,7 +343,7 @@ void buildNewUserScreen(BuildContext context) {
         return AlertDialog(
           contentPadding: const EdgeInsets.all(50),
           title: const Text(
-            ' Crear nuevo ususario',
+            ' Crear nuevo usuario',
             textAlign: TextAlign.center,
             style: TextStyle(fontFamily: 'Sora'),
           ),

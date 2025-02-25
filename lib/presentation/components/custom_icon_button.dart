@@ -34,7 +34,7 @@ class AddItemButton extends StatelessWidget {
     return CustomIconButton(
       onPressed: onPressed,
       icon: const Icon(Icons.add),
-      tooltip: 'Agregar registro',
+      tooltip: 'Nuevo ',
     );
   }
 }

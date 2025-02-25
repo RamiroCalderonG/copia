@@ -386,43 +386,62 @@ Future<dynamic> editRole(
   }
 }
 
-//!Not using for now
-Future<dynamic> deleteRole(int roleID) async {
-  String response;
+//Function to retrieve a single role, returns a simple list, not all details from Role
+Future<dynamic> getRoleDetailCall(int roleId) async {
+  SharedPreferences devicePrefs = await SharedPreferences.getInstance();
   try {
-    var apiCall = await Requests.delete(
-        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/role/$roleID',
+    var apiCall = await Requests.get(
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/roles/$roleId',
         headers: {
-          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-          'Auth': currentUser!.token
+          'Authorization': devicePrefs.getString('token')!,
+          'Content-Type': 'application/json',
         },
         persistCookies: false,
-        timeoutSeconds: 8);
+        timeoutSeconds: 20);
     apiCall.raiseForStatus();
-    response = apiCall.content();
-    return response;
+    return apiCall.body;
   } catch (e) {
+    insertErrorLog(e.toString(), 'getRoleDetail() | $roleId');
+    throw Future.error(e.toString());
+  }
+}
+
+Future<dynamic> createRole(Map<String, dynamic> bodyObject) async {
+  SharedPreferences devicePrefs = await SharedPreferences.getInstance();
+  try {
+    var apiCall = await Requests.post(
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/roles/',
+        headers: {
+          'Authorization': devicePrefs.getString('token')!,
+          'Content-Type': 'application/json'
+        },
+        json: bodyObject,
+        persistCookies: false,
+        timeoutSeconds: 10);
+    apiCall.raiseForStatus();
+    return apiCall.content();
+  } catch (e) {
+    insertErrorLog(e.toString(), 'createRole() | $bodyObject');
     throw FormatException(e.toString());
   }
 }
 
-//!Not using for now
-Future<dynamic> createRole(Map<String, dynamic> bodyObject) async {
-  String response;
+//Function to delete a userRole
+Future<dynamic> deleteRole(int roleId) async {
+  SharedPreferences devicePrefs = await SharedPreferences.getInstance();
   try {
-    var apiCall = await Requests.post(
-        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/role',
+    var apiCall = await Requests.delete(
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/roles/$roleId',
         headers: {
-          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-          'Auth': currentUser!.token
+          'Authorization': devicePrefs.getString('token')!,
+          'Content-Type': 'application/json'
         },
-        json: bodyObject,
         persistCookies: false,
-        timeoutSeconds: 8);
+        timeoutSeconds: 10);
     apiCall.raiseForStatus();
-    response = apiCall.content();
-    return response;
+    return apiCall.content();
   } catch (e) {
+    insertErrorLog(e.toString(), 'deleteRole() | $roleId');
     throw FormatException(e.toString());
   }
 }

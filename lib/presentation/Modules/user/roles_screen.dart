@@ -1,6 +1,9 @@
 // ignore_for_file: use_build_context_synchronously, library_private_types_in_public_api
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 
 import 'package:oxschool/data/Models/Event.dart';
@@ -113,10 +116,12 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
     final result = await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => AddEditRoleScreen(
-            role: rolesListData[index].roleName,
-            description: rolesListData[index].roleDescription,
-            isActive: isActive, // Pass the isActive value
-            roleCanAcces: rolesListData[index].isActive),
+          role: rolesListData[index].roleName,
+          description: rolesListData[index].roleDescription,
+          isActive: isActive, // Pass the isActive value
+          roleCanAcces: rolesListData[index].isActive,
+          roleSelected: rolesListData[index],
+        ),
       ),
     );
     if (result != null &&
@@ -145,6 +150,15 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
       //   isActive.add(result['isActive']);
       //   // role_id.add(result['role_id']);
       // });
+    }
+  }
+
+  Future<void> deleteRole(int roleId) async {
+    try {
+      await deleteRole(roleId);
+    } catch (e) {
+      insertErrorLog(e.toString(), 'deleteRole($roleId)');
+      throw Future.error(e.toString());
     }
   }
 
@@ -242,7 +256,40 @@ class _RolesAndProfilesScreenState extends State<RolesAndProfilesScreen> {
                                             tooltip:
                                                 'Eliminar Rol (Proximamente)',
                                             onPressed: () async {
-                                              //TODO: VERIFY IF ITS NEEDED, OR ONLY LOGIC
+                                              try {
+                                                var response =
+                                                    await showConfirmationDialog(
+                                                        context,
+                                                        'Confirmar',
+                                                        'Eliminar el rol ${rolesListData[index].roleName} ?');
+                                                if (response == 1) {
+                                                  insertActionIntoLog(
+                                                      'DELETE ROLE ACTION >> ',
+                                                      'User : ${currentUser!.employeeName}  deleted the role ${rolesListData[index].roleName}');
+                                                  int roleId =
+                                                      rolesListData[index]
+                                                          .roleID;
+                                                  await deleteRole(roleId)
+                                                      .then((value) {
+                                                    setState(() {
+                                                      tmpRolesList
+                                                          .removeAt(index);
+                                                      // isLoading = false;
+                                                    });
+                                                  });
+                                                } else {
+                                                  insertActionIntoLog(
+                                                      'DELETE ROLE ACTION CANCELED >> ',
+                                                      'User : ${currentUser!.employeeName} canceled the action of deleting the role ${rolesListData[index].roleName}');
+                                                  // Navigator.pop(context);
+                                                }
+                                              } catch (e) {
+                                                // setState(() {
+                                                //   isLoading = false;
+                                                // });
+                                                showErrorFromBackend(
+                                                    context, e.toString());
+                                              }
                                             },
                                           ),
                                           if (!rolesListData[index].isActive)
@@ -369,13 +416,15 @@ class AddEditRoleScreen extends StatefulWidget {
   final String? description;
   final bool? isActive;
   final bool? roleCanAcces;
+  final Role? roleSelected;
 
   const AddEditRoleScreen(
       {super.key,
       this.role,
       this.description,
       this.isActive,
-      this.roleCanAcces});
+      this.roleCanAcces,
+      this.roleSelected});
 
   @override
   _AddEditRoleScreenState createState() => _AddEditRoleScreenState();
@@ -389,6 +438,8 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
   Map<int, bool> roleEventActive = {};
   bool isRoleAdmin = false;
   bool isRoleAcademicCoord = false;
+  int? selectedRoleChipValue;
+  Map<String, dynamic>? roleDetailedData;
 
   @override
   void initState() {
@@ -401,6 +452,9 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
       return Event(e['event_id'], e['event_name'], isActive, e['module_name'],
           e['role_id'], e['can_access']);
     }).toList();
+    if (widget.role != null) {
+      getRoleDetail(widget.roleSelected!.roleID);
+    }
     super.initState();
   }
 
@@ -411,14 +465,27 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
     super.dispose();
   }
 
+  void getRoleDetail(int roleId) async {
+    await getRoleDetailCall(roleId).then(
+      (value) {
+        var response = json.decode(value);
+        setState(() {
+          selectedRoleChipValue = response!['value'];
+        });
+      },
+    ).onError((handleError, stackTrace) {
+      insertErrorLog(handleError.toString(), 'getRoleDetail($roleId)');
+      showErrorFromBackend(context, handleError.toString());
+    });
+  }
+
   Future<void> _updateRole(BuildContext context, int roleID) async {
     // Prepare JSON data for update
     final jsonData = {
       'name': _roleController.text,
       'description': _descriptionController.text,
       'isActive': _isActive,
-      'admin': isRoleAdmin,
-      'academicCoord': isRoleAcademicCoord
+      'roleValue': selectedRoleChipValue,
     };
     var updatedRole = [
       _roleController.text,
@@ -437,29 +504,36 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
     });
   }
 
-  void _addRole(BuildContext context) {
-    // Prepare JSON data for adding role
-    final jsonData = {
-      'roleName': _roleController.text,
-      'description': _descriptionController.text,
-      'isActive': _isActive,
-      'events': _events
-          .map((e) => {
-                'id': e.eventID,
-                'EventName': e.eventName,
-                'role_event_active': e.roleID,
-                'moduleName': e.moduleName,
-              })
-          .toList(),
-    };
-    createRole(jsonData);
-
-    // Close the dialog
-    Navigator.of(context).pop();
+  //Function to create a new Role at DB, this does not work with Events yet
+  Future<void> _addRole(BuildContext context) async {
+    try {
+      final jsonData = {
+        'roleName': _roleController.text,
+        'roleDescription': _descriptionController.text,
+        'roleActive': _isActive,
+        'roleValue': selectedRoleChipValue,
+      };
+      await createRole(jsonData);
+    } catch (e) {
+      insertErrorLog(e.toString(), '_addRole() | roles_screen: 465');
+      throw Future.error(e.toString());
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    List<String> kindOfRole = [
+      'Rol será administrador del sistema', //0
+      'Rol será coordinador académico', //1
+      'Ninguno de los anteriores' //2
+    ];
+
+    List<String> kindOfRoleIsActually = [
+      'Rol es administrador del sistema', //0
+      'Rol es coordinador académico', //1
+      'Ninguno de los anteriores' //2
+    ];
+
     // Group events by moduleName
     Map<String, List<Event>> groupedEvents = {};
     // ignore: avoid_function_literals_in_foreach_calls
@@ -485,7 +559,9 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
               children: [
                 const SizedBox(height: 16),
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Text('Estado del rol:   '),
                     ChoiceChip(
                       selectedColor: Colors.green,
                       label: const Text('Activo'),
@@ -513,7 +589,7 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
                 TextField(
                   controller: _roleController,
                   decoration: const InputDecoration(
-                    labelText: 'Rol',
+                    labelText: 'Nombre del rol',
                     border: OutlineInputBorder(),
                   ),
                 ),
@@ -526,45 +602,55 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Text('Rol es administrador ?'),
-                Switch(
-                    value: isRoleAdmin,
-                    onChanged: (bool value) {
-                      setState(() {
-                        isRoleAdmin = value;
-                      });
-                    }),
-                const SizedBox(height: 16),
-                Text('Rol es coordinador académico ?'),
-                Switch(
-                    value: isRoleAcademicCoord,
-                    onChanged: (bool value) {
-                      setState(() {
-                        isRoleAcademicCoord = value;
-                      });
-                    }),
+                Text(' Seleccione el tipo de rol: '),
+                Wrap(
+                    spacing: 5.0,
+                    children: List<Widget>.generate(3, (int index) {
+                      return ChoiceChip(
+                        label: widget.role == null
+                            ? Text(kindOfRole[index])
+                            : Text(kindOfRoleIsActually[index]),
+                        selected: selectedRoleChipValue == index,
+                        onSelected: (bool selected) {
+                          setState(() {
+                            selectedRoleChipValue = selected ? index : null;
+                          });
+                        },
+                      );
+                    }).toList()),
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () async {
                     try {
                       if (widget.role != null) {
+                        //Update role
                         String roleName = widget.role!;
-                        int roleId = getRoleIdValue(tmpRolesList, roleName);
+                        int roleId = widget.roleSelected!.roleID;
                         if (roleId != 0) {
-                          await _updateRole(context, roleId).whenComplete(() {
-                            showConfirmationDialog(context, 'Éxito',
-                                'Rol actualizado correctamente');
-                          });
+                          try {
+                            await _updateRole(context, roleId);
+                            showInformationDialog(
+                                context, 'Éxito', 'Rol actualizado con éxito');
+                          } catch (e) {
+                            insertErrorLog(e.toString(),
+                                'roles_screen when: ${widget.role}');
+                            showErrorFromBackend(context, e.toString());
+                          }
                         }
-                        setState(() {
-                          _isloading = false;
-                        });
-                        Navigator.of(context).pop();
                       } else {
+                        //Create role
                         if (_roleController.text.isNotEmpty &&
-                            _descriptionController.text.isNotEmpty) {
-                          _addRole(context);
-                          _isloading = false;
+                            _descriptionController.text.isNotEmpty &&
+                            selectedRoleChipValue != null) {
+                          try {
+                            await _addRole(context);
+                            showInformationDialog(
+                                context, 'Éxito', 'Rol creado con éxito');
+                          } catch (e) {
+                            insertErrorLog(e.toString(),
+                                'Create role | roles_screen:607 ');
+                            showErrorFromBackend(context, e.toString());
+                          }
                         } else {
                           showEmptyFieldAlertDialog(
                               context, 'Favor de no dejar ningun campo vacio');
@@ -576,7 +662,7 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
                     }
                   },
                   child: Text(
-                      widget.role != null ? 'Actualizar Rol' : 'Agregar Rol'),
+                      widget.role != null ? 'Actualizar Rol' : 'Crear Rol'),
                 ),
               ],
             ),
