@@ -13,15 +13,17 @@ import '../../data/services/backend/api_requests/api_calls_list.dart';
 
 import '../../data/datasources/temp/teacher_grades_temp.dart';
 
-dynamic loadStartGrading(
-    int employeeNumber, String schoolYear, bool isAdmin, String? campus) async {
+//Function to fetch groups, grades, campuses where it teach, and subjects from selected user
+//is use is academic coordinator will retrive all grades under its coordination
+dynamic loadStartGrading(int employeeNumber, String schoolYear, bool isAdmin,
+    bool isAcademicCoordinator, String? campus) async {
   try {
     DateTime now = DateTime.now();
     int month = now.month;
     List<dynamic> jsonList;
     //FETCH FOR TEACHER DATA
-    await getTeacherGradeAndCourses(
-            currentUser!.employeeNumber, currentCycle, month, isAdmin, campus)
+    await getTeacherGradeAndCourses(currentUser!.employeeNumber, currentCycle,
+            month, isAdmin, isAcademicCoordinator, campus)
         .then((onValue) {
       jsonList = json.decode(onValue);
       jsonDataForDropDownMenuClass = jsonList;

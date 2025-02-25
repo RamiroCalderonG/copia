@@ -41,6 +41,7 @@ class _GradesMainScreenState extends State<GradesMainScreen>
   bool canUserEvaluate = false; //Evaluate if current user have any data
   bool displayEvaluateGrids = false;
   bool isUserAdmin = currentUser!.isCurrentUserAdmin();
+  bool isUserAcdemicCoord = currentUser!.isCurrentUserAcademicCoord();
   bool isSearchingGrades = false;
   String? errorMessage;
   bool displayErrorMessage = false;
@@ -109,7 +110,7 @@ class _GradesMainScreenState extends State<GradesMainScreen>
       setState(() {
         isSearching = true;
       });
-      if (isUserAdmin) {
+      if (isUserAdmin || isUserAcdemicCoord) {
         canEvaluateNow = true;
         campus = currentUser!.claUn;
       } else {
@@ -127,6 +128,7 @@ class _GradesMainScreenState extends State<GradesMainScreen>
               currentUser!.employeeNumber!,
               currentCycle!.claCiclo!,
               currentUser!.isCurrentUserAdmin(),
+              currentUser!.isCurrentUserAcademicCoord(),
               campus);
         }
 

@@ -41,7 +41,7 @@ import '../../data/Models/User.dart';
 //        userId!,
 //        token,
 //        schoolEmail,
-        //usergenre,
+//usergenre,
 //        isActive,
 //        workArea?.toTitleCase,
 //        workPosition?.toTitleCase,
@@ -50,7 +50,7 @@ import '../../data/Models/User.dart';
 //        isTeacher,
 //        isAdmin,
 //        roleId,
-        
+
 //        );
 
 //    users.add(currentUser);
@@ -143,7 +143,9 @@ void setUserDataForDebug() {
       '01/01/2000',
       false,
       true,
-      1, true);
+      1,
+      true,
+      false);
   currentUser = user;
   var exampleEvents = [
     {

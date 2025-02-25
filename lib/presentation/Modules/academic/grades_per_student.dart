@@ -88,6 +88,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
             currentUser!.employeeNumber!,
             currentCycle!.toString(),
             currentUser!.isCurrentUserAdmin(),
+            currentUser!.isCurrentUserAcademicCoord(),
             currentUser!.claUn);
     fetchedData = response;
     setState(() {

@@ -1207,6 +1207,7 @@ User parseLogedInUserFromJSON(Map<String, dynamic> jsonList, String userToken) {
   bool? isAdmin = jsonList['userRole']['isAdmin'];
   int roleId = jsonList['userRole']['id'];
   bool canUpdatePassword = jsonList['userCanUpdatePassword'];
+  bool isAcademicCoord = jsonList['userRole']['isAcademicCoordinator'];
 
   currentUser = User(
       claUn,
@@ -1225,7 +1226,8 @@ User parseLogedInUserFromJSON(Map<String, dynamic> jsonList, String userToken) {
       isTeacher,
       isAdmin,
       roleId,
-      canUpdatePassword);
+      canUpdatePassword,
+      isAcademicCoord);
   // }
   // }
   userToken = currentUser.token;
