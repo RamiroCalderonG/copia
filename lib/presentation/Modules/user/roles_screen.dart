@@ -372,7 +372,7 @@ var response =
                                                           )));
                                             },
                                             icon: const Icon(Icons.security),
-                                            tooltip: 'Administrar Políticas',
+                                            tooltip: 'Administrar permisos',
                                           ),
                                         ],
                                       ),

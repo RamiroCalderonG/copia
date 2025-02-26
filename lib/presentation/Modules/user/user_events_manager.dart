@@ -66,7 +66,7 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
                 color: Colors.white,
               ),
               style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all(Colors.indigo),
+                backgroundColor: WidgetStateProperty.all(Colors.indigo),
               ),
             ),
         ],
