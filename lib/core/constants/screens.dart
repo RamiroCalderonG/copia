@@ -25,6 +25,8 @@ const mobilePages = [
   //Main
   MobileMainWindow(),
 ];
+ List<Map<String, String>> accessRoutes = [];
+
 
 const Map<String, String> modulesMapped = {
   '': "FichaDeSalud()",

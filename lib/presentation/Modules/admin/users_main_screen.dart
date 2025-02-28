@@ -178,11 +178,12 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
                                   Role newRole = Role.fromJson(item);
                                   tmpRoleObjectslist.add(newRole);
                                 }
-                                await getEventsList().then((onValue) {
+                                //TODO: IMPLEMENT A FETCH FOR EVENTS
+                                /* await getEventsList().then((onValue) {
                                   setState(() {
                                     buildNewUserScreen(context);
                                   });
-                                });
+                                }); */
                               });
                             }).onError((error, stacktrace) {
                               insertErrorLog(
@@ -265,11 +266,12 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
                                 Role newRole = Role.fromJson(item);
                                 tmpRoleObjectslist.add(newRole);
                               }
-                              await getEventsList().then((onValue) {
+                              //TODO: IMPLEMENT A FETCH FOR PERMISSIONS
+                             /*  await getEventsList().then((onValue) {
                                 setState(() {
                                   buildNewUserScreen(context);
                                 });
-                              });
+                              }); */
                             });
                           }).onError((error, stacktrace) {
                             insertErrorLog(

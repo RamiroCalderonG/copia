@@ -78,7 +78,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         drawer: Opacity(
           opacity: 1,
-          child: _createDrawer(context, userEvents),
+          child: _createDrawer(context),
         ),
         body: NestedScrollView(
           floatHeaderSlivers: true,
@@ -432,7 +432,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
     );
   }
 
-  Widget _createDrawer(BuildContext context, Future<http.Response> userEvents) {
+  Widget _createDrawer(BuildContext context) {
     final controller = ScrollController();
 
     return Drawer(
@@ -467,7 +467,8 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                 color: FlutterFlowTheme.of(context).primaryBackground,
               ),
             ),
-            FutureBuilder(
+            MyExpansionTileList(),
+          /*   FutureBuilder(
               future: userEvents,
               builder: (BuildContext context,
                   AsyncSnapshot<http.Response> snapshot) {
@@ -483,7 +484,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                   return MyExpansionTileList(elementList: json);
                 }
               },
-            ),
+            ), */
             const Divider(thickness: 3),
             ListTile(
               title: const Text('Cerrar sesión'),
@@ -663,9 +664,10 @@ class _HoverCardState extends State<HoverCard> {
 
 class MyExpansionTileList extends StatefulWidget {
   // BuildContext context;
-  final List<dynamic> elementList;
+  //final List<dynamic> elementList;
+  //final List<String> modulesList;
 
-  const MyExpansionTileList({Key? key, required this.elementList})
+  const MyExpansionTileList({Key? key})
       : super(key: key);
 
   @override
@@ -678,29 +680,46 @@ class Controller extends GetxController {
 
 class _DrawerState extends State<MyExpansionTileList> {
   final Controller c = Get.find();
-  List<Widget> _getChildren(final List<dynamic> userEvents) {
+  List<Widget> _getChildren() {
     List<Widget> children = [];
+    List<Widget> screensMenuChildren = [];
 
-    // Map to store unique module titles and their screen classes
-    Map<String, List<String>> modulesMap = {};
-
-    // Iterate over userEvents to populate modulesMap
-
-    userEvents.forEach((element) {
-      // element.forEach((module, screens) {
-      if (!modulesMap.containsKey(element['module'])) {
-        modulesMap[element['module']] = [];
+//TODO: CONTINUE HERE!!
+    currentUser!.userRole!.moduleScreenList!.forEach((module) {
+      currentUser!.userRole!.screenEventList!.forEach((screen) {
+      screensMenuChildren.add(ListTile(
+        title: Text(screen.entries.first.key, style: const TextStyle(fontFamily: 'Sora', fontSize: 15), ),
+         onTap: () {
+          //String? route = accessRoutes[screen];
+          Navigator.pop(context);
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => accessRoutes[screen] as Widget));
+        
       }
-      if (!modulesMap[element['module']]!.contains(element['screenclass'])) {
-        modulesMap[element['module']]!.add(element['screenclass']);
-      }
+      ),
+     
+      );
     });
-
+      children.add(
+        ExpansionTile(
+          title: Text(
+            module.entries.first.key, 
+            style: const TextStyle(fontFamily: 'Sora', fontSize: 18),
+          ),
+          leading: moduleIcons[module],
+          children: screensMenuChildren,
+          
+        ),
+      );
+      
+    },);
+    
+/* 
     // Iterate over modulesMap to create ExpansionTiles for each module
-    modulesMap.forEach((module, screens) {
-      List<Widget> subMenuChildren = [];
+    modulesList.forEach((module) {
+      
       screens.forEach((screen) {
-        subMenuChildren.add(ListTile(
+        screensMenuChildren.add(ListTile(
           title: Text(
             screen,
             style: const TextStyle(fontFamily: 'Sora', fontSize: 15),
@@ -735,14 +754,14 @@ class _DrawerState extends State<MyExpansionTileList> {
             style: const TextStyle(fontFamily: 'Sora', fontSize: 18),
           ),
           leading: moduleIcons[module],
-          children: subMenuChildren,
+          children: screensMenuChildren,
           // leading: Icon(
           //   Icons.subdirectory_arrow_right_rounded,
           //   size: ,
           // ),
         ),
       );
-    });
+    }); */
 
     return children;
   }
@@ -750,7 +769,7 @@ class _DrawerState extends State<MyExpansionTileList> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: _getChildren(widget.elementList),
+      children: _getChildren(),
     );
   }
 

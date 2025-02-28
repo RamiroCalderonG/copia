@@ -1,10 +1,12 @@
 import 'dart:convert';
 
+import 'package:oxschool/core/constants/screens.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/data/DataTransferObjects/RoleModuleRelationshipDto.Dart';
 import 'package:oxschool/data/Models/Event.dart';
 import 'package:oxschool/data/Models/Module.dart';
+import 'package:oxschool/data/Models/Role.dart';
 import 'package:oxschool/data/datasources/temp/users_temp_data.dart';
 
 import '../../data/services/backend/api_requests/api_calls_list.dart';
@@ -20,7 +22,7 @@ void clearTempData() {
   userRoles.clear();
 }
 
-Future<void> getEventsList() async {
+/* Future<void> getEventsList() async {
   try {
     var apiResponse = await getUserRoleAndAcces(currentUser!.roleID!);
     List<dynamic> jsonList = json.decode(apiResponse.body);
@@ -30,7 +32,58 @@ Future<void> getEventsList() async {
   } catch (e) {
     throw Future.error(e.toString());
   }
+} */
+
+//Function that retrieves user permissions and add them into currentUser.userRole
+Future<void> getRoleListOfPermissions(Map<String, dynamic> jsonuserInfo) async {
+  try {
+    getRolePermissions().then((onValue){
+      Map<String, dynamic> jsonResponse = json.decode(utf8.decode(onValue.bodyBytes));
+      
+      //Create Role object to then insert it into currentUser.userRole
+      Role userRole = Role(
+        roleID: jsonuserInfo['userRole']['id'],
+        roleName: jsonuserInfo['userRole']['softName'],
+        roleDescription: jsonuserInfo['userRole']['description'],
+        isActive: jsonuserInfo['userRole']['isActive']
+      );
+
+      Set<Map<String, dynamic>> moduleScreensSet = {};
+      Set<Map<String, dynamic>> screenEventsSet = {};
+      List<dynamic> moduleScreenListMap = jsonResponse['moduleScreen'];
+
+      List<dynamic> eventScreenListMap = jsonResponse['screenEvents'];
+
+
+
+      //Get unique  moduleScreen relations
+      for (var item in moduleScreenListMap) {
+        moduleScreensSet.add(item);
+      }
+      //Get unique screenEvents relations
+      for( var item in eventScreenListMap){
+        screenEventsSet.add(item);
+      }
+      userRole.moduleScreenList = moduleScreensSet.toList();
+      userRole.screenEventList = screenEventsSet.toList();
+      
+      currentUser!.userRole = userRole; //Insert Role into currentUser.userRole;
+      return;
+    });
+  } catch (e) {
+    insertErrorLog(e.toString(), 'getRoleListOfPermissions() | ');
+    throw Future.error(e.toString());
+  }
+  
 }
+
+  Future<void> getUserAccessRoutes() async {
+    var response = await getScreenAccessRoutes();
+    accessRoutes = json.decode(response);
+    
+    //accessRoutes = tempResponse.;
+    return;
+  }
 
 int getEventIDbyName(String eventName) {
   var idValue;

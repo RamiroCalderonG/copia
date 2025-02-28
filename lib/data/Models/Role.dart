@@ -11,6 +11,9 @@ class Role {
   List<Event>? events;
   List<RoleModuleRelationshipDto>?
       roleModuleRelationships; //Used to get relationship between role and modules
+  List<Map<String, dynamic>>? moduleScreenList;
+  List<Map<String, dynamic>>? screenEventList;
+
 
   Role(
       {required this.roleID,
@@ -18,7 +21,7 @@ class Role {
       required this.roleDescription,
       required this.isActive,
       this.events,
-      this.roleModuleRelationships});
+      this.roleModuleRelationships, this.moduleScreenList, this.screenEventList});
 
   Role.fromJson(Map<String, dynamic> json)
       : roleID = json["id"],
