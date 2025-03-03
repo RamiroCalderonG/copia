@@ -5,6 +5,7 @@ import 'package:oxschool/core/constants/url_links.dart';
 import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/core/reusable_methods/user_functions.dart';
 import 'package:oxschool/core/utils/device_information.dart';
+import 'package:oxschool/core/utils/temp_data.dart';
 import 'package:oxschool/presentation/Modules/user/user_view_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
@@ -680,6 +681,79 @@ class Controller extends GetxController {
 
 class _DrawerState extends State<MyExpansionTileList> {
   final Controller c = Get.find();
+
+  List<Widget> _getChildren() {
+    List<Widget> children = [];
+
+    // Iterate through uniqueItems to create ExpansionTiles
+    uniqueItems.forEach((moduleMap) {
+      String moduleName = moduleMap.keys.first;
+      List<String> screens = moduleMap[moduleName]!;
+
+      List<Widget> screensMenuChildren = [];
+
+      // Create ListTile for each screen
+      screens.forEach((screen) {
+        screensMenuChildren.add(
+          ListTile(
+            title: Text(
+              screen,
+              style: const TextStyle(fontFamily: 'Sora', fontSize: 15),
+            ),
+            onTap: () {
+              // Find the appropriate route from accessRoutes
+              var route = accessRoutes.firstWhere(
+                (element) => element.containsKey(screen),
+                orElse: () => {},
+              );
+
+              if (route.isNotEmpty) {
+                context.pushNamed(route[screen]!, extra: <String, dynamic>{
+                      kTransitionInfoKey: const TransitionInfo(
+                        hasTransition: true,
+                        transitionType: PageTransitionType.fade,
+                      ),
+                    },);
+              }
+            },
+          ),
+        );
+      });
+
+      // Create ExpansionTile for the current module
+      children.add(
+        ExpansionTile(
+          title: Text(
+            moduleName,
+            style: const TextStyle(fontFamily: 'Sora', fontSize: 18),
+          ),
+          leading: moduleIcons[moduleName],
+          children: screensMenuChildren,
+        ),
+      );
+    });
+
+    return children;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: _getChildren(),
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+  }
+}
+
+
+/*
+
+class _DrawerState extends State<MyExpansionTileList> {
+  final Controller c = Get.find();
   List<Widget> _getChildren() {
     List<Widget> children = [];
     List<Widget> screensMenuChildren = [];
@@ -693,8 +767,7 @@ class _DrawerState extends State<MyExpansionTileList> {
           //String? route = accessRoutes[screen];
           Navigator.pop(context);
             Navigator.push(context,
-                MaterialPageRoute(builder: (context) => accessRoutes[screen] as Widget));
-        
+                MaterialPageRoute(builder: (context) => accessRoutes as Widget));
       }
       ),
      
@@ -778,3 +851,5 @@ class _DrawerState extends State<MyExpansionTileList> {
     super.initState();
   }
 }
+
+*/

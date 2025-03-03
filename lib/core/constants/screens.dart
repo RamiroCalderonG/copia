@@ -25,7 +25,7 @@ const mobilePages = [
   //Main
   MobileMainWindow(),
 ];
- List<Map<String, String>> accessRoutes = [];
+ List<Map<String, dynamic>> accessRoutes = [];
 
 
 const Map<String, String> modulesMapped = {

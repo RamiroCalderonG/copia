@@ -30,6 +30,8 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
   List<Event> eventsToDisplay = [];
   List<RoleModuleRelationshipDto> roleScreensRelationship = [];
   Map<String, bool> matchedValue = {};
+  Map<String, List<RoleModuleRelationshipDto>> groupedEvents = {};
+  List<RoleModuleRelationshipDto> roleModuleRelationshipDto = [];
 
   @override
   void initState() {
@@ -41,10 +43,146 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
   void dispose() {
     eventsToDisplay.clear();
     roleScreensRelationship.clear();
+    groupedEvents.clear();
     super.dispose();
   }
 
   @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Permisos asignados al rol: ${widget.roleName}'),
+        actions: [
+          if (currentUser!.isAdmin!)
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => RolesEventsAdministration(
+                        roleName: widget.roleName, roleId: widget.roleID)));
+              },
+              label: Text(
+                'Agregar permisos',
+                style: TextStyle(color: Colors.white),
+              ),
+              icon: Icon(
+                Icons.add,
+                color: Colors.white,
+              ),
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all(Colors.indigo),
+              ),
+            ),
+        ],
+        backgroundColor: FlutterFlowTheme.of(context).primary,
+      ),
+      body: FutureBuilder<void>(
+        future: _refreshEventsFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          } else {
+            if (groupedEvents.isNotEmpty) {
+              return ListView.builder(
+                itemCount: groupedEvents.keys.length,
+                itemBuilder: (context, index) {
+                  String moduleName = groupedEvents.keys.elementAt(index);
+                  List<RoleModuleRelationshipDto> moduleEvents = groupedEvents[moduleName]!;
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(
+                            top: 15, bottom: 10, left: 12, right: 12),
+                        child: Text(
+                          'Modulo: $moduleName',
+                          style: const TextStyle(
+                              fontSize: 20, fontFamily: 'Sora'),
+                        ),
+                      ),
+                      ...moduleEvents.map((event) {
+                        bool hasAccess = event.canRoleAccessModule;
+
+                        return Padding(
+                          padding: const EdgeInsets.only(left: 20, right: 20),
+                          child: SwitchListTile(
+                            title: Text(event.event_name),
+                            subtitle: hasAccess
+                                ? Text(
+                                    'Tiene acceso a ',
+                                    style: TextStyle(color: Colors.green),
+                                  )
+                                : Text(
+                                    'No tiene acceso a ',
+                                    style: TextStyle(color: Colors.red),
+                                  ),
+                            value: hasAccess,
+                            onChanged: (value) {
+                              setState(() {
+                                event.canRoleAccessModule = value;
+                              });
+                              updateModuleAccesStatus(widget.roleID,
+                                  event.moduleName, value);
+                            },
+                          ),
+                        );
+                      }).toList(),
+                    ],
+                  );
+                },
+              );
+            } else {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.all(10),
+                      child: const Text(
+                        'No se encuentran eventos para el rol seleccionado',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontFamily: 'Sora',
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(10),
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => RolesEventsAdministration(
+                                  roleName: widget.roleName,
+                                  roleId: widget.roleID)));
+                        },
+                        label: Text(
+                          'Agregar permisos',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        icon: Icon(
+                          Icons.add,
+                          color: Colors.white,
+                        ),
+                        style: ButtonStyle(
+                          backgroundColor:
+                              MaterialStateProperty.all(Colors.indigo),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+          }
+        },
+      ),
+    );
+  }
+
+ /*  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -198,10 +336,22 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
       ),
     );
   }
-
+ */
   Future<void> refreshEvents(int? idRole) async {
-    var eventsByRoleResponse =
-        await fetchEventsByRole(idRole!); // Get events by role
+    // Get events by role
+        try {
+         roleModuleRelationshipDto =
+        await fetchEventsByRole(idRole!); 
+        } catch (e) {
+          insertErrorLog(e.toString(), 'refreshEvents() | $idRole');
+          throw Future.error(e.toString());
+        }
+
+
+
+
+/* 
+
     await fetchScreensByRoleId(idRole).then((result) {
       roleScreensRelationship = result;
       try {
@@ -236,7 +386,7 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
         insertErrorLog(e.toString(), 'refreshEvents()');
         return Future.error(e.toString());
       }
-    });
+    }); */
   }
 
   Future<void> updateModuleAccesStatus(

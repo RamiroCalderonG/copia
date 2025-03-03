@@ -13,6 +13,8 @@ class Role {
       roleModuleRelationships; //Used to get relationship between role and modules
   List<Map<String, dynamic>>? moduleScreenList;
   List<Map<String, dynamic>>? screenEventList;
+  
+
 
 
   Role(
