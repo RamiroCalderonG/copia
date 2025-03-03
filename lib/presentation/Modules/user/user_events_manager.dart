@@ -103,12 +103,12 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
                         ),
                       ),
                       ...moduleEvents.map((event) {
-                        bool hasAccess = event.canRoleAccessModule;
+                        bool hasAccess = event.canAccessEvent!;
 
                         return Padding(
                           padding: const EdgeInsets.only(left: 20, right: 20),
                           child: SwitchListTile(
-                            title: Text(event.event_name),
+                            title: Text(event.eventName!),
                             subtitle: hasAccess
                                 ? Text(
                                     'Tiene acceso a ',
@@ -121,10 +121,10 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
                             value: hasAccess,
                             onChanged: (value) {
                               setState(() {
-                                event.canRoleAccessModule = value;
+                                event.canAccessEvent = value;
                               });
                               updateModuleAccesStatus(widget.roleID,
-                                  event.moduleName, value);
+                                  event.moduleName!, value);
                             },
                           ),
                         );

@@ -15,14 +15,14 @@ class RoleModuleRelationshipDto{
   , this.eventId, this.eventName, this.canAccessEvent});
 
   RoleModuleRelationshipDto.fromJSON(Map<String, dynamic> json)
-  : role_id = json['role'],
-  module_id = json['module'],
-  module_name = json['module_name'],
-  can_access_module = json['can_role_access_module'],
-  screen_id = json['screen'],
-  screen_name = json['screen_name'],
-  can_access_screen = json['can_role_access_screen'],
-  event_id = json['event'],
-  event_name = json['event_name'],
-  can_access_event = json['can_role_access_event'];
+  : roleId = json['role'],
+  moduleId = json['module'],
+  moduleName = json['module_name'],
+  canAccessModule = json['can_role_access_module'],
+  screenId = json['screen'],
+  screenName = json['screen_name'],
+  canAccessScreen = json['can_role_access_screen'],
+  eventId = json['event'],
+  eventName = json['event_name'],
+  canAccessEvent = json['can_role_access_event'];
 }
