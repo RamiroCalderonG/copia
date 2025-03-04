@@ -4,7 +4,7 @@ import 'package:oxschool/core/constants/screens.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/core/utils/temp_data.dart';
-import 'package:oxschool/data/DataTransferObjects/RoleModuleRelationshipDto.Dart';
+import 'package:oxschool/data/DataTransferObjects/Role_module_relationship_dto.dart';
 import 'package:oxschool/data/Models/Event.dart';
 import 'package:oxschool/data/Models/Module.dart';
 import 'package:oxschool/data/Models/Role.dart';

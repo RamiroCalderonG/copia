@@ -4,7 +4,7 @@ class RoleModuleRelationshipDto {
   String? moduleName;
   bool? canAccessModule;
   int? screenId;
-  int? screenName;
+  String? screenName;
   bool? canAccessScreen;
   int? eventId;
   String? eventName;

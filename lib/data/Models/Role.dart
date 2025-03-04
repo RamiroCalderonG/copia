@@ -1,6 +1,7 @@
 // ignore_for_file: file_names
 
-import 'package:oxschool/data/DataTransferObjects/RoleModuleRelationshipDto.Dart';
+
+import 'package:oxschool/data/DataTransferObjects/Role_module_relationship_dto.dart';
 import 'package:oxschool/data/Models/Event.dart';
 
 class Role {

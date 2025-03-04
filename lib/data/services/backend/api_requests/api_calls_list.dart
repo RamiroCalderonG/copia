@@ -1353,7 +1353,7 @@ Future<dynamic> getScreenListByRoleId(int id) async {
 
 //Function to update is a module can be accesed by a role
 Future<dynamic> updateModuleAccessByRole(
-    String moduleName, int roleId, bool access) async {
+    int roleId, int flag, bool status, int item) async {
   try {
     SharedPreferences devicePrefs = await SharedPreferences.getInstance();
     var apiCall = await Requests.put(
@@ -1362,14 +1362,14 @@ Future<dynamic> updateModuleAccessByRole(
           'Authorization': devicePrefs.getString('token')!,
           'Content-Type': 'application/json',
         },
-        json: {'module': moduleName, 'role': roleId, 'access': access},
+        json: {'item': item, 'role': roleId, 'status': status, 'flag' : flag },
         persistCookies: false,
         timeoutSeconds: 20);
     apiCall.raiseForStatus();
     return apiCall;
   } catch (e) {
     insertErrorLog(e.toString(),
-        "UPDATE MODULE ACCESS BY ROLE CALL | body{ module: $moduleName, roleId: $roleId, access: $access}");
+        "UPDATE MODULE ACCESS BY ROLE CALL | body{ item: $item, roleId: $roleId, access: $status, flag : $flag}");
     return Future.error(e.toString());
   }
 }
