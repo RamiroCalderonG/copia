@@ -1,4 +1,4 @@
-class RoleModuleRelationshipDto{
+class RoleModuleRelationshipDto {
   int? roleId;
   int? moduleId;
   String? moduleName;
@@ -10,9 +10,9 @@ class RoleModuleRelationshipDto{
   String? eventName;
   bool? canAccessEvent;
 
-  RoleModuleRelationshipDto({this.roleId, this.moduleId, this.moduleName,
-  this.canAccessModule, this.screenId, this.screenName, this.canAccessScreen
-  , this.eventId, this.eventName, this.canAccessEvent});
+  RoleModuleRelationshipDto(this.roleId, this.moduleId, this.moduleName,
+  this.canAccessModule, this.screenId, this.screenName, this.canAccessScreen, 
+  this.eventId, this.eventName, this.canAccessEvent);
 
   RoleModuleRelationshipDto.fromJSON(Map<String, dynamic> json)
   : roleId = json['role'],
