@@ -5,6 +5,7 @@ import 'package:oxschool/core/constants/url_links.dart';
 import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/core/reusable_methods/user_functions.dart';
 import 'package:oxschool/core/utils/device_information.dart';
+import 'package:oxschool/core/utils/temp_data.dart';
 import 'package:oxschool/presentation/Modules/user/user_view_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
@@ -78,7 +79,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         drawer: Opacity(
           opacity: 1,
-          child: _createDrawer(context, userEvents),
+          child: _createDrawer(context),
         ),
         body: NestedScrollView(
           floatHeaderSlivers: true,
@@ -145,7 +146,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                 context: context,
                 builder: (BuildContext context) {
                   return AlertDialog(
-                    title: const Text('Crear Ticket de servicio'),
+                    title: const Text('Nuevo Ticket de servicio'),
                     content: const CreateServiceTicket(),
                     actions: <Widget>[
                       TextButton(
@@ -432,7 +433,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
     );
   }
 
-  Widget _createDrawer(BuildContext context, Future<http.Response> userEvents) {
+  Widget _createDrawer(BuildContext context) {
     final controller = ScrollController();
 
     return Drawer(
@@ -467,7 +468,8 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                 color: FlutterFlowTheme.of(context).primaryBackground,
               ),
             ),
-            FutureBuilder(
+            MyExpansionTileList(),
+          /*   FutureBuilder(
               future: userEvents,
               builder: (BuildContext context,
                   AsyncSnapshot<http.Response> snapshot) {
@@ -483,7 +485,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                   return MyExpansionTileList(elementList: json);
                 }
               },
-            ),
+            ), */
             const Divider(thickness: 3),
             ListTile(
               title: const Text('Cerrar sesión'),
@@ -563,7 +565,7 @@ class _HoverCardState extends State<HoverCard> {
                   padding: EdgeInsets.all(isHovered ? 20 : 10),
                   decoration: BoxDecoration(
                     color: isHovered
-                        ? const Color.fromRGBO(73, 73, 73, 1)
+                        ? const Color.fromARGB(54, 204, 201, 201)
                         : widget.backgroundColor,
                     borderRadius: BorderRadius.circular(15),
                   ),
@@ -573,8 +575,9 @@ class _HoverCardState extends State<HoverCard> {
                         widget.title,
                         textScaleFactor: 0.8,
                         softWrap: true,
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color:
+                              FlutterFlowTheme.of(context).hoverCardTextColor,
                           fontWeight: FontWeight.bold,
                           fontFamily: 'Sora',
                         ),
@@ -614,39 +617,39 @@ class _HoverCardState extends State<HoverCard> {
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   curve: Curves.ease,
-                  padding: EdgeInsets.all(isHovered ? 20 : 10),
+                  padding: EdgeInsets.all(isHovered ? 30 : 40),
                   decoration: BoxDecoration(
                     color: isHovered
-                        ? const Color.fromRGBO(73, 73, 73, 1)
+                        ? const Color.fromARGB(146, 251, 247, 247)
                         : widget.backgroundColor,
                     borderRadius: BorderRadius.circular(15),
                   ),
                   child: GestureDetector(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: <Widget>[
-                        Image.asset(
-                          widget.imagePath,
-                          fit: BoxFit.fill,
-                          scale: 15,
-                          // width: constraints.maxWidth * 0.5, // Adjust image width
-                          // height:
-                          // constraints.maxHeight * 0.5, // Adjust image height
-                          alignment: Alignment.center,
+                        Expanded(
+                          child: Image.asset(
+                            widget.imagePath,
+                            color: FlutterFlowTheme.of(context).info,
+                            fit: BoxFit.fill,
+                            scale: 15,
+                            alignment: Alignment.center,
+                          ),
                         ),
-                        const SizedBox(height: 7), // Add spacing
-                        Align(
-                          alignment: Alignment.bottomCenter,
+                        Expanded(
                           child: Text(
                             widget.title,
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: TextStyle(
+                              color: FlutterFlowTheme.of(context)
+                                  .hoverCardTextColor,
                               fontWeight: FontWeight.bold,
                               fontFamily: 'Sora',
                             ),
                           ),
-                        ),
+                        )
+                        // const SizedBox(height: 7), // Add spacing
                       ],
                     ),
                   ),
@@ -662,9 +665,10 @@ class _HoverCardState extends State<HoverCard> {
 
 class MyExpansionTileList extends StatefulWidget {
   // BuildContext context;
-  final List<dynamic> elementList;
+  //final List<dynamic> elementList;
+  //final List<String> modulesList;
 
-  const MyExpansionTileList({Key? key, required this.elementList})
+  const MyExpansionTileList({Key? key})
       : super(key: key);
 
   @override
@@ -677,29 +681,118 @@ class Controller extends GetxController {
 
 class _DrawerState extends State<MyExpansionTileList> {
   final Controller c = Get.find();
-  List<Widget> _getChildren(final List<dynamic> userEvents) {
+
+  List<Widget> _getChildren() {
     List<Widget> children = [];
 
-    // Map to store unique module titles and their screen classes
-    Map<String, List<String>> modulesMap = {};
+    // Iterate through uniqueItems to create ExpansionTiles
+    uniqueItems.forEach((moduleMap) {
+      String moduleName = moduleMap.keys.first;
+      List<String> screens = moduleMap[moduleName]!;
 
-    // Iterate over userEvents to populate modulesMap
+      List<Widget> screensMenuChildren = [];
 
-    userEvents.forEach((element) {
-      // element.forEach((module, screens) {
-      if (!modulesMap.containsKey(element['module'])) {
-        modulesMap[element['module']] = [];
-      }
-      if (!modulesMap[element['module']]!.contains(element['screenclass'])) {
-        modulesMap[element['module']]!.add(element['screenclass']);
-      }
+      // Create ListTile for each screen
+      screens.forEach((screen) {
+        screensMenuChildren.add(
+          ListTile(
+            title: Text(
+              screen,
+              style: const TextStyle(fontFamily: 'Sora', fontSize: 15),
+            ),
+            onTap: () {
+              // Find the appropriate route from accessRoutes
+              var route = accessRoutes.firstWhere(
+                (element) => element.containsKey(screen),
+                orElse: () => {},
+              );
+
+              if (route.isNotEmpty) {
+                context.pushNamed(route[screen]!, extra: <String, dynamic>{
+                      kTransitionInfoKey: const TransitionInfo(
+                        hasTransition: true,
+                        transitionType: PageTransitionType.fade,
+                      ),
+                    },);
+              }
+            },
+          ),
+        );
+      });
+
+      // Create ExpansionTile for the current module
+      children.add(
+        ExpansionTile(
+          title: Text(
+            moduleName,
+            style: const TextStyle(fontFamily: 'Sora', fontSize: 18),
+          ),
+          leading: moduleIcons[moduleName],
+          children: screensMenuChildren,
+        ),
+      );
     });
 
+    return children;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: _getChildren(),
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+  }
+}
+
+
+/*
+
+class _DrawerState extends State<MyExpansionTileList> {
+  final Controller c = Get.find();
+  List<Widget> _getChildren() {
+    List<Widget> children = [];
+    List<Widget> screensMenuChildren = [];
+
+//TODO: CONTINUE HERE!!
+    currentUser!.userRole!.moduleScreenList!.forEach((module) {
+      currentUser!.userRole!.screenEventList!.forEach((screen) {
+      screensMenuChildren.add(ListTile(
+        title: Text(screen.entries.first.key, style: const TextStyle(fontFamily: 'Sora', fontSize: 15), ),
+         onTap: () {
+          //String? route = accessRoutes[screen];
+          Navigator.pop(context);
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => accessRoutes as Widget));
+      }
+      ),
+     
+      );
+    });
+      children.add(
+        ExpansionTile(
+          title: Text(
+            module.entries.first.key, 
+            style: const TextStyle(fontFamily: 'Sora', fontSize: 18),
+          ),
+          leading: moduleIcons[module],
+          children: screensMenuChildren,
+          
+        ),
+      );
+      
+    },);
+    
+/* 
     // Iterate over modulesMap to create ExpansionTiles for each module
-    modulesMap.forEach((module, screens) {
-      List<Widget> subMenuChildren = [];
+    modulesList.forEach((module) {
+      
       screens.forEach((screen) {
-        subMenuChildren.add(ListTile(
+        screensMenuChildren.add(ListTile(
           title: Text(
             screen,
             style: const TextStyle(fontFamily: 'Sora', fontSize: 15),
@@ -734,14 +827,14 @@ class _DrawerState extends State<MyExpansionTileList> {
             style: const TextStyle(fontFamily: 'Sora', fontSize: 18),
           ),
           leading: moduleIcons[module],
-          children: subMenuChildren,
+          children: screensMenuChildren,
           // leading: Icon(
           //   Icons.subdirectory_arrow_right_rounded,
           //   size: ,
           // ),
         ),
       );
-    });
+    }); */
 
     return children;
   }
@@ -749,7 +842,7 @@ class _DrawerState extends State<MyExpansionTileList> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: _getChildren(widget.elementList),
+      children: _getChildren(),
     );
   }
 
@@ -758,3 +851,5 @@ class _DrawerState extends State<MyExpansionTileList> {
     super.initState();
   }
 }
+
+*/

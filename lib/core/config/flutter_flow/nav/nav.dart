@@ -1,7 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:oxschool/presentation/Modules/academic/fo_dac_27.dart';
 import 'package:oxschool/presentation/Modules/academic/grades_main_screen.dart';
+import 'package:oxschool/presentation/Modules/academic/grades_modules_configuration.dart';
+import 'package:oxschool/presentation/Modules/enfermeria/nursery_main_screen.dart';
+import 'package:oxschool/presentation/Modules/services_ticket/processes/services_main_screen.dart';
 import 'package:oxschool/presentation/components/pdf_viewer_screen.dart';
 import 'package:oxschool/presentation/Modules/main_window/mobile_main_window_widget.dart';
 import 'package:oxschool/presentation/Modules/user/user_view_screen.dart';
@@ -51,9 +55,9 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => const MainWindowWidget(),
         ),
         FFRoute(
-          name: 'Enfermeria',
-          path: '/enfermeria',
-          builder: (context, params) => const EnfermeriaWidget(),
+          name: 'NurseryMainScreen()',
+          path: '/nurseryMainScreen',
+          builder: (context, params) => const NurseryMainScreen(),
         ),
         FFRoute(
             name: 'UserView',
@@ -64,17 +68,25 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
             path: '/mobileMainView',
             builder: (context, params) => const MobileMainWindow()),
         FFRoute(
-            name: '/Print',
-            path: '/print',
-            builder: (context, params) => const MyStatefulWidget()),
+            name: 'FoDac27()',
+            path: '/fodac27',
+            builder: (context, params) => const FoDac27()),
         FFRoute(
-            name: 'UDashboard',
+            name: 'UsersDashboard()',
             path: '/udashboard',
             builder: (context, params) => const UsersMainScreen()),
         FFRoute(
-            name: 'Academic',
+            name: 'GradesViewScreen()',
             path: '/academic',
             builder: (context, params) => const GradesMainScreen()),
+            FFRoute(
+            name: 'ServicesTicketHistory()',
+            path: '/services',
+            builder: (context, params) => const ServicesTicketHistory()),
+            FFRoute(
+            name: 'GradesModuleConfiguration()',
+            path: '/academicConfig',
+            builder: (context, params) => const GradesModuleConfiguration()),
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
     );
 

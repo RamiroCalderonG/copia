@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_typing_uninitialized_variables, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/data/datasources/temp/users_temp_data.dart';
@@ -47,7 +48,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
   var newUserBirthDate = <String, dynamic>{};
   var _isUserTeacher = <String, bool>{};
   // final _newUserCampus = <String, dynamic>{};
-  var _newEmployeeNumber = <String, dynamic>{};
+  var _newEmployeeNumber = <String, int>{};
 
   var newUserEmployeeNumber = <String, dynamic>{};
 
@@ -125,17 +126,20 @@ class _EditUserScreenState extends State<EditUserScreen> {
                 isloading = true;
               });
         
-              AlertDialog(
+             /*  AlertDialog(
                 key: alertDialogKey,
                 icon: const Icon(Icons.hourglass_bottom_outlined),
                 title: const Text('Actualizando usuario...'),
                 content: const CustomLoadingIndicator()
-              );
+              ); */
               await editUser(dataToUpdate, tempSelectedUsr!.employeeNumber!, 2)
                   .whenComplete(() {
+                   setState(() {
+                isloading = false;
+              });
                     
-                    Navigator.of(context, rootNavigator: true).pop();
-showConfirmationDialog(context, 'Éxito', 'Cambios realizados!');
+                    //Navigator.of(context, rootNavigator: true).pop();
+showInformationDialog(context, 'Éxito', 'Cambios realizados!');
                 return;
               }).catchError((onError) {
                 throw Future.error(onError);
@@ -209,6 +213,10 @@ showConfirmationDialog(context, 'Éxito', 'Cambios realizados!');
                               Expanded(
                                   child: TextFormField(
                                 controller: _employeeNumberController,
+                                keyboardType: TextInputType.number,
+                                inputFormatters: <TextInputFormatter>[
+    FilteringTextInputFormatter.digitsOnly
+  ],
                                 decoration: const InputDecoration(
                                   labelText: 'Numero de empleado',
                                   border: OutlineInputBorder(),
@@ -221,7 +229,7 @@ showConfirmationDialog(context, 'Éxito', 'Cambios realizados!');
                                 },
                                 onChanged: (value) {
                                   setState(() {
-                                    _newEmployeeNumber = {'employee_number': value};
+                                    _newEmployeeNumber = {'employee_number': int.tryParse(value) ?? 0 };
                                     dataToUpdate
                                         .addEntries(_newEmployeeNumber.entries);
                                   });

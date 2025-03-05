@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:oxschool/core/constants/screens.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
@@ -41,7 +42,7 @@ import '../../data/Models/User.dart';
 //        userId!,
 //        token,
 //        schoolEmail,
-        //usergenre,
+//usergenre,
 //        isActive,
 //        workArea?.toTitleCase,
 //        workPosition?.toTitleCase,
@@ -50,7 +51,7 @@ import '../../data/Models/User.dart';
 //        isTeacher,
 //        isAdmin,
 //        roleId,
-        
+
 //        );
 
 //    users.add(currentUser);
@@ -143,7 +144,10 @@ void setUserDataForDebug() {
       '01/01/2000',
       false,
       true,
-      1, true);
+      1,
+      true,
+      false,
+      null);
   currentUser = user;
   var exampleEvents = [
     {

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:oxschool/core/reusable_methods/device_functions.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/core/reusable_methods/translate_messages.dart';
 import 'package:oxschool/core/utils/loader_indicator.dart';
@@ -8,6 +9,7 @@ import 'package:oxschool/presentation/Modules/academic/fo_dac_27.dart';
 import 'package:oxschool/presentation/Modules/academic/grades_by_asignature.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/presentation/components/confirm_dialogs.dart';
+import 'package:oxschool/presentation/components/mobile_FloatingActionButton.dart';
 
 import '../../../core/config/flutter_flow/flutter_flow_theme.dart';
 import '../../../core/reusable_methods/academic_functions.dart';
@@ -39,9 +41,11 @@ class _GradesMainScreenState extends State<GradesMainScreen>
   bool canUserEvaluate = false; //Evaluate if current user have any data
   bool displayEvaluateGrids = false;
   bool isUserAdmin = currentUser!.isCurrentUserAdmin();
+  bool isUserAcdemicCoord = currentUser!.isCurrentUserAcademicCoord();
   bool isSearchingGrades = false;
   String? errorMessage;
   bool displayErrorMessage = false;
+  bool isDeviceMobile = false;
 
   onTap() {
     isSearchingGrades = false;
@@ -51,6 +55,7 @@ class _GradesMainScreenState extends State<GradesMainScreen>
   void initState() {
     _tabController = TabController(length: 3, vsync: this);
     _tabController!.addListener(onTap);
+
     // fetchData();
     _initializationFuture = validateDateAndUserPriv();
     super.initState();
@@ -100,11 +105,12 @@ class _GradesMainScreenState extends State<GradesMainScreen>
 
   Future<void> validateDateAndUserPriv() async {
     try {
+      isDeviceMobile = await isCurrentDeviceMobile();
       String? campus;
       setState(() {
         isSearching = true;
       });
-      if (isUserAdmin) {
+      if (isUserAdmin || isUserAcdemicCoord) {
         canEvaluateNow = true;
         campus = currentUser!.claUn;
       } else {
@@ -116,12 +122,13 @@ class _GradesMainScreenState extends State<GradesMainScreen>
       if (canEvaluateNow) {
         if (isUserAdmin) {
           await loadStartGradingAsAdmin(
-              currentCycle!.claCiclo!, null, true, null, null);
+              currentCycle!.claCiclo!, null, true, null, null, currentUser!.isCurrentUserAcademicCoord());
         } else {
           await loadStartGrading(
               currentUser!.employeeNumber!,
               currentCycle!.claCiclo!,
               currentUser!.isCurrentUserAdmin(),
+              currentUser!.isCurrentUserAcademicCoord(),
               campus);
         }
 
@@ -223,72 +230,77 @@ class _GradesMainScreenState extends State<GradesMainScreen>
           );
         } else {
           return Scaffold(
-              appBar: AppBar(
-                actions: const [],
-                bottom: TabBar(
-                  labelColor: Colors.white,
-                  controller: _tabController,
-                  tabs: const <Widget>[
-                    Tab(
-                      icon: Icon(Icons.abc),
-                      text: 'Carga por materia',
+            appBar: AppBar(
+              actions: const [],
+              bottom: TabBar(
+                labelColor: Colors.white,
+                controller: _tabController,
+                tabs: const <Widget>[
+                  Tab(
+                    icon: Icon(Icons.abc),
+                    text: 'Carga por materia',
+                  ),
+                  Tab(
+                    icon: Icon(
+                      Icons.boy,
+                      // size: 40,
                     ),
-                    Tab(
-                      icon: Icon(
-                        Icons.boy,
-                        // size: 40,
-                      ),
-                      text: 'Carga por alumno',
+                    text: 'Carga por alumno',
+                  ),
+                  Tab(
+                    icon: FaIcon(
+                      FontAwesomeIcons.sheetPlastic,
                     ),
-                    Tab(
-                      icon: FaIcon(
-                        FontAwesomeIcons.sheetPlastic,
-                      ),
-                      text: 'FO-DAC-27',
-                    )
-                  ],
-                  indicatorColor: Colors.blueAccent,
-                ),
-                title: const Text('Calificaciones',
-                    style: TextStyle(color: Colors.white)),
-                backgroundColor: FlutterFlowTheme.of(context).primary,
+                    text: 'FO-DAC-27',
+                  )
+                ],
+                indicatorColor: Colors.blueAccent,
               ),
-              body: isSearching
-                  ? const CustomLoadingIndicator()
-                  : displayEvaluateGrids
-                      ? Container(
-                          constraints: BoxConstraints(
-                            minHeight: isDesktop ? 600 : 0,
-                          ),
-                          child: TabBarView(
-                            key: const PageStorageKey('value'),
-                            controller: _tabController,
-                            children: const <Widget>[
-                              GradesByAsignature(),
-                              GradesByStudent(),
-                              FoDac27()
-                            ],
-                          ),
-                        )
-                      : Placeholder(
-                          color: Colors.transparent,
-                          child: Center(
-                              child: Center(
-                            child: displayErrorMessage
-                                ? Text(
-                                    errorMessage!,
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                        fontFamily: 'Sora', fontSize: 20),
-                                  )
-                                : const Text(
-                                    'Sin información, consulte con el administrador',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        fontFamily: 'Sora', fontSize: 20),
-                                  ),
-                          )),
-                        ));
+              title: const Text('Calificaciones',
+                  style: TextStyle(color: Colors.white)),
+              backgroundColor: FlutterFlowTheme.of(context).primary,
+            ),
+            body: isSearching
+                ? const CustomLoadingIndicator()
+                : displayEvaluateGrids
+                    ? Container(
+                        constraints: BoxConstraints(
+                          minHeight: isDesktop ? 600 : 0,
+                        ),
+                        child: TabBarView(
+                          key: const PageStorageKey('value'),
+                          controller: _tabController,
+                          children: const <Widget>[
+                            GradesByAsignature(),
+                            GradesByStudent(),
+                            FoDac27()
+                          ],
+                        ),
+                      )
+                    : Placeholder(
+                        color: Colors.transparent,
+                        child: Center(
+                            child: Center(
+                          child: displayErrorMessage
+                              ? Text(
+                                  errorMessage!,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                      fontFamily: 'Sora', fontSize: 20),
+                                )
+                              : const Text(
+                                  'Sin información, consulte con el administrador',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      fontFamily: 'Sora', fontSize: 20),
+                                ),
+                        )),
+                      ),
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.miniEndDocked,
+            floatingActionButton:
+                isDeviceMobile ? mobileFloatingActionButton(context) : null,
+          );
         }
       },
     );

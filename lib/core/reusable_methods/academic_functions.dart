@@ -13,15 +13,17 @@ import '../../data/services/backend/api_requests/api_calls_list.dart';
 
 import '../../data/datasources/temp/teacher_grades_temp.dart';
 
-dynamic loadStartGrading(
-    int employeeNumber, String schoolYear, bool isAdmin, String? campus) async {
+//Function to fetch groups, grades, campuses where it teach, and subjects from selected user
+//is use is academic coordinator will retrive all grades under its coordination
+dynamic loadStartGrading(int employeeNumber, String schoolYear, bool isAdmin,
+    bool isAcademicCoordinator, String? campus) async {
   try {
     DateTime now = DateTime.now();
     int month = now.month;
     List<dynamic> jsonList;
     //FETCH FOR TEACHER DATA
-    await getTeacherGradeAndCourses(
-            currentUser!.employeeNumber, currentCycle, month, isAdmin, campus)
+    await getTeacherGradeAndCourses(currentUser!.employeeNumber, currentCycle,
+            month, isAdmin, isAcademicCoordinator, campus)
         .then((onValue) {
       jsonList = json.decode(onValue);
       jsonDataForDropDownMenuClass = jsonList;
@@ -47,7 +49,7 @@ dynamic loadStartGrading(
 }
 
 Future<dynamic> loadStartGradingAsAdmin(String schoolYear, String? campus,
-    bool initialFetch, int? subject, int? group) async {
+    bool initialFetch, int? subject, int? group, bool isAcademicCoord ) async {
   try {
     DateTime now = DateTime.now();
     int month = now.month;
@@ -56,7 +58,7 @@ Future<dynamic> loadStartGradingAsAdmin(String schoolYear, String? campus,
     if (initialFetch) {
       //First time loading screen, to display all grades, groups, campus and assignatures to dispaly at DropdownSelector
       await getTeacherGradeAndCoursesAsAdmin(month,
-              currentUser!.isCurrentUserAdmin(), campus, currentCycle!.claCiclo)
+              currentUser!.isCurrentUserAdmin(), campus, currentCycle!.claCiclo, isAcademicCoord)
           .then((response) {
         jsonList = json.decode(utf8.decode(response.bodyBytes));
         jsonDataForDropDownMenuClass = jsonList;
@@ -241,7 +243,7 @@ Future<List<StudentEval>> getStudentsByAssinature(
   try {
     var studentsList = await getStudentsToGrade(assignature, group,
         gradeSelected, currentCycle!.claCiclo, campus, month);
-    List<dynamic> jsonList = json.decode(utf8.decode(studentsList.bodyBytes));
+    var jsonList = json.decode(utf8.decode(studentsList.bodyBytes));
     List<StudentEval> evaluations = getEvalFromJSON(jsonList, false);
 
     return evaluations;
@@ -259,7 +261,7 @@ Future<List<StudentEval>> getSubjectsAndGradesByStudent(
     var subjectsGradesList =
         await getSubjectsAndGradeByStuent(group, grade, cycle, campus, month);
 
-    List<dynamic> jsonList = json.decode(subjectsGradesList.body);
+    List<dynamic> jsonList = json.decode(utf8.decode(subjectsGradesList.bodyBytes) );
     List<StudentEval> evaluations = getEvalFromJSON(jsonList, true);
     uniqueStudentsList.clear();
     uniqueStudents.clear();
