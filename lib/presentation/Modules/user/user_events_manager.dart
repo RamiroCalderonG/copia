@@ -142,7 +142,7 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
                         screenId = event.screenId;
                       });
                     });
-                    updateStatusAccess(widget.roleID, 0, value, screenId );
+                    updateStatusAccess(widget.roleID, 1, value, screenId );
                   },
                 ),
                 ...screenEvents.map((event) {
@@ -160,7 +160,7 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
                           event.canAccessEvent = value;
                           eventId = event.eventId;
                         });
-                        updateStatusAccess(widget.roleID, 0, value, eventId );
+                        updateStatusAccess(widget.roleID, 2, value, eventId );
                       },
                     ),
                   );
