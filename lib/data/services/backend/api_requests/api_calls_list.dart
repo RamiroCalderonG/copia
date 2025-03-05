@@ -1353,7 +1353,7 @@ Future<dynamic> getScreenListByRoleId(int id) async {
 
 //Function to update is a module can be accesed by a role
 Future<dynamic> updateModuleAccessByRole(
-    String moduleName, int roleId, bool access) async {
+    int roleId, int flag, bool status, int item) async {
   try {
     SharedPreferences devicePrefs = await SharedPreferences.getInstance();
     var apiCall = await Requests.put(
@@ -1362,21 +1362,66 @@ Future<dynamic> updateModuleAccessByRole(
           'Authorization': devicePrefs.getString('token')!,
           'Content-Type': 'application/json',
         },
-        json: {'module': moduleName, 'role': roleId, 'access': access},
+        json: {'item': item, 'role': roleId, 'status': status, 'flag' : flag },
         persistCookies: false,
         timeoutSeconds: 20);
     apiCall.raiseForStatus();
     return apiCall;
   } catch (e) {
     insertErrorLog(e.toString(),
-        "UPDATE MODULE ACCESS BY ROLE CALL | body{ module: $moduleName, roleId: $roleId, access: $access}");
+        "UPDATE MODULE ACCESS BY ROLE CALL | body{ item: $item, roleId: $roleId, access: $status, flag : $flag}");
     return Future.error(e.toString());
   }
 }
 
+//Function to get the permissions from the role, this returns modules, screens and events
+Future<dynamic> getRolePermissions() async {
+  try {
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
+    var apiCall = await Requests.get(
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/roles/me',
+     headers: {
+          'Authorization': devicePrefs.getString('token')!,
+          'Content-Type': 'application/json',
+        },
+        persistCookies: false,
+        timeoutSeconds: 15
+    );
+  apiCall.raiseForStatus();
+  return apiCall;
+  } catch (e) {
+    insertErrorLog(e.toString(),
+        "getRolepermissions()");
+    return Future.error(e.toString());
+  }
+}
+
+//Function to retrieve access routes for screens by token
+Future<dynamic> getScreenAccessRoutes()async {
+  try {
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
+    var apiCall = await Requests.get(
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/roles/routes/',
+     headers: {
+          'Authorization': devicePrefs.getString('token')!,
+          'Content-Type': 'application/json',
+        },
+        persistCookies: false,
+        timeoutSeconds: 15
+    );
+  apiCall.raiseForStatus();
+  return apiCall.body;
+  } catch (e) {
+    insertErrorLog(e.toString(), 'getScreenAccessRoutes()');
+    return Future.error(e.toString());
+  }
+}
+
+
+
+//!Not using for now
 //Function to get a list of acces items by a role
-//TODO: CHANGE TO Request.get()
-Future<http.Response> getUserRoleAndAcces(int roleId) async {
+/* Future<http.Response> getUserRoleAndAcces(int roleId) async {
   try {
     SharedPreferences devicePrefs = await SharedPreferences.getInstance();
     Uri address = Uri(
@@ -1401,7 +1446,7 @@ Future<http.Response> getUserRoleAndAcces(int roleId) async {
       return Future.error(e.toString());
     }
   }
-}
+} */
 
 // Future<dynamic> getUserEvents(int userId) async {
 //   var response;

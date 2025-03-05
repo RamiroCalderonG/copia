@@ -8,6 +8,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:oxschool/core/reusable_methods/device_functions.dart';
+import 'package:oxschool/core/reusable_methods/temp_data_functions.dart';
 import 'package:oxschool/data/Models/Cycle.dart';
 import 'package:oxschool/data/Models/User.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
@@ -270,19 +271,24 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
               apiResponse = response;
               List<dynamic> jsonList;
               Map<String, dynamic> jsonData = jsonDecode(apiResponse.body);
-              devicePrefs.setString('token', 'Bearer ' + jsonData['token']);
+              devicePrefs.setString('token', 'Bearer ' + jsonData['token']); //Store token
               // jsonData['token'] = '';
 
               //GET user data
               apiResponse =
-                  await getCurrentUserData(devicePrefs.getString('token')!);
+                  await getCurrentUserData(devicePrefs.getString('token')!); //Get user information
               jsonData = json.decode(apiResponse.body);
 
-              currentUser = parseLogedInUserFromJSON(
-                  jsonData, devicePrefs.getString('token')!);
+              currentUser = User.fromJson(jsonData);
 
               //GET USER ROLE AND PERMISSIONS
-              await getUserRoleAndAcces(currentUser!.roleID!);
+                await getRoleListOfPermissions(jsonData).whenComplete(()async{
+                  await getUserAccessRoutes();
+                }).catchError((error){
+                  throw Future.error(error.toString);
+                });
+              
+              //await getUserRoleAndAcces(currentUser!.roleID!);
 
               apiResponse = await getCycle(
                   1); //CurrentCicleCall.call().timeout(Duration(seconds: 7));
@@ -1183,7 +1189,7 @@ Future<void> _displayForgotPassword(BuildContext context) async {
   );
 }
 
-User parseLogedInUserFromJSON(Map<String, dynamic> jsonList, String userToken) {
+/* User parseLogedInUserFromJSON(Map<String, dynamic> jsonList, String userToken) {
   late User currentUser;
   // late List<dynamic> events = [];
 
@@ -1232,7 +1238,7 @@ User parseLogedInUserFromJSON(Map<String, dynamic> jsonList, String userToken) {
   // }
   userToken = currentUser.token;
   return currentUser;
-}
+} */
 
 Cycle getcurrentCycle(Map<String, dynamic> jsonList) {
   late Cycle currentCycle;

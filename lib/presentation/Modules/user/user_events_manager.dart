@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
-import 'package:oxschool/data/DataTransferObjects/RoleModuleRelationshipDto.Dart';
+import 'package:oxschool/data/DataTransferObjects/Role_module_relationship_dto.dart';
+
 import 'package:oxschool/data/Models/Event.dart';
 import 'package:oxschool/data/Models/Role.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
@@ -30,6 +31,8 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
   List<Event> eventsToDisplay = [];
   List<RoleModuleRelationshipDto> roleScreensRelationship = [];
   Map<String, bool> matchedValue = {};
+  Map<String, List<RoleModuleRelationshipDto>> groupedEvents = {};
+  List<RoleModuleRelationshipDto> roleModuleRelationshipDto = [];
 
   @override
   void initState() {
@@ -41,6 +44,7 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
   void dispose() {
     eventsToDisplay.clear();
     roleScreensRelationship.clear();
+    groupedEvents.clear();
     super.dispose();
   }
 
@@ -50,25 +54,7 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
       appBar: AppBar(
         title: Text('Permisos asignados al rol: ${widget.roleName}'),
         actions: [
-          if (currentUser!.isAdmin!)
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => RolesEventsAdministration(
-                        roleName: widget.roleName, roleId: widget.roleID)));
-              },
-              label: Text(
-                'Agregar permisos',
-                style: TextStyle(color: Colors.white),
-              ),
-              icon: Icon(
-                Icons.add,
-                color: Colors.white,
-              ),
-              style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.all(Colors.indigo),
-              ),
-            ),
+          
         ],
         backgroundColor: FlutterFlowTheme.of(context).primary,
       ),
@@ -80,77 +66,113 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
               child: CircularProgressIndicator(),
             );
           } else {
-            if (eventsToDisplay.isNotEmpty) {
-              return ListView.builder(
-                itemCount: eventsToDisplay.length,
-                itemBuilder: (context, index) {
-                  final currentEvent = eventsToDisplay[index];
-                  String moduleName = currentEvent.moduleName;
+            if (groupedEvents.isNotEmpty) {
+             return ListView.builder(
+  itemCount: groupedEvents.keys.length,
+  itemBuilder: (context, index) {
+    String moduleName = groupedEvents.keys.elementAt(index);
+    List<RoleModuleRelationshipDto> moduleEvents = groupedEvents[moduleName]!;
 
-                  bool hasAccess = matchedValue[moduleName] ?? false;
+    // Group events by screenName
+    Map<String, List<RoleModuleRelationshipDto>> groupedByScreenName = {};
+    for (var event in moduleEvents) {
+      if (!groupedByScreenName.containsKey(event.screenName)) {
+        groupedByScreenName[event.screenName!] = [];
+      }
+      groupedByScreenName[event.screenName]!.add(event);
+    }
 
-                  final previousEvent =
-                      index > 0 ? eventsToDisplay[index - 1] : null;
-
-                  final showModuleName = previousEvent == null ||
-                      currentEvent.moduleName != previousEvent.moduleName;
-
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (showModuleName)
-                        Padding(
-                          padding: const EdgeInsets.only(
-                              top: 15, bottom: 10, left: 12, right: 12),
-                          child: Stack(
-                            children: [
-                              Text(
-                                'Modulo: ${currentEvent.moduleName}',
-                                style: const TextStyle(
-                                    fontSize: 20, fontFamily: 'Sora'),
-                              ),
-                              SwitchListTile(
-                                subtitle: hasAccess
-                                    ? Text(
-                                        'Tiene acceso al modulo',
-                                        style: TextStyle(color: Colors.green),
-                                      )
-                                    : Text(
-                                        'No tiene acceso al modulo',
-                                        style: TextStyle(color: Colors.red),
-                                      ),
-                                value: hasAccess,
-                                onChanged: (event) {
-                                  setState(() {
-                                    matchedValue[moduleName] = event;
-                                  });
-                                  updateModuleAccesStatus(widget.roleID,
-                                      currentEvent.moduleName, event);
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                      Padding(
-                        padding: EdgeInsets.only(
-                          left: 20,
-                          right: 20,
-                        ),
-                        child: PolicyCard(
-                          policy: currentEvent,
-                          roleID: widget.roleID,
-                          onToggle: (event) {
-                            setState(() {
-                              event.canAcces = !event.canAcces;
-                            });
-                          },
-                        ),
-                      ),
-                    ],
-                  );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(
+              top: 15, bottom: 10, left: 12, right: 12),
+          child: Wrap(
+            spacing: 8.0,
+            children: [
+              Divider(
+                thickness: 3,
+              ),
+              SwitchListTile(
+                title: Text(
+                  'Modulo: $moduleName',
+                  style: const TextStyle(
+                      fontSize: 20, fontFamily: 'Sora'),
+                ),
+                activeColor: Colors.green,
+                value: moduleEvents.first.canAccessModule ?? false,
+                onChanged: (value) {
+                  var moduleId;
+                  setState(() {
+                    moduleEvents.forEach((event) {
+                      event.canAccessModule = value;
+                      moduleId = event.moduleId;
+                    });
+                  });
+                  updateStatusAccess(widget.roleID, 0, value, moduleId );
                 },
-              );
-            } else {
+              ),
+
+            ],
+          ),
+        ),
+        ...groupedByScreenName.entries.map((entry) {
+          String screenName = entry.key;
+          List<RoleModuleRelationshipDto> screenEvents = entry.value;
+          bool hasScreenAccess = screenEvents.first.canAccessScreen!;
+
+          return Padding(
+            padding: const EdgeInsets.only(left: 20, right: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+               
+                SwitchListTile(
+                  secondary: Icon(Icons.star),
+                  title: Text('Ventana: $screenName',),
+                  activeColor: Colors.green,
+                  
+                  value: hasScreenAccess,
+                  onChanged: (value) {
+                    var screenId;
+                    setState(() {
+                      screenEvents.forEach((event) {
+                        event.canAccessScreen = value;
+                        screenId = event.screenId;
+                      });
+                    });
+                    updateStatusAccess(widget.roleID, 1, value, screenId );
+                  },
+                ),
+                ...screenEvents.map((event) {
+                  return Padding(
+                    padding: EdgeInsets.only(left: 50, right: 20),
+                    child: SwitchListTile(
+                      secondary: Icon(Icons.circle, size: 12,),
+                      title: Text('Evento: ${event.eventName!}'),
+                      
+                      activeColor: Colors.green,
+                      value: event.canAccessEvent!,
+                      onChanged: (value) {
+                        var eventId;
+                        setState(() {
+                          event.canAccessEvent = value;
+                          eventId = event.eventId;
+                        });
+                        updateStatusAccess(widget.roleID, 2, value, eventId );
+                      },
+                    ),
+                  );
+                }).toList(),
+              ],
+            ),
+          );
+        }).toList(),
+      ],
+    );
+  },
+); } else {
               return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -185,7 +207,7 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
                         ),
                         style: ButtonStyle(
                           backgroundColor:
-                              MaterialStateProperty.all(Colors.indigo),
+                              WidgetStateProperty.all(Colors.indigo),
                         ),
                       ),
                     ),
@@ -200,55 +222,38 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
   }
 
   Future<void> refreshEvents(int? idRole) async {
-    var eventsByRoleResponse =
-        await fetchEventsByRole(idRole!); // Get events by role
-    await fetchScreensByRoleId(idRole).then((result) {
-      roleScreensRelationship = result;
-      try {
-        Map<String, bool> tempRoleModuleMap = {};
-        for (var item in roleScreensRelationship) {
-          if (!tempRoleModuleMap.containsKey(item.moduleName)) {
-            tempRoleModuleMap[item.moduleName] = item.canRoleAccessModule;
-          }
-        }
-        Map<String, List<Event>> groupedEvents = {};
-        for (var jsonItem in eventsByRoleResponse) {
-          Event event = Event(
-              jsonItem['event_id'],
-              jsonItem['event_name'],
-              jsonItem['event_active'],
-              jsonItem['module_description'],
-              idRole,
-              jsonItem['can_access']);
+    try {
+      roleModuleRelationshipDto =
+          await fetchEventsByRole(idRole!); // Get events by role
 
-          if (groupedEvents.containsKey(event.moduleName)) {
-            groupedEvents[event.moduleName]!.add(event);
-          } else {
-            groupedEvents[event.moduleName] = [event];
-          }
+      // Group events by module name
+      groupedEvents = {};
+      for (var item in roleModuleRelationshipDto) {
+        if (!groupedEvents.containsKey(item.moduleName)) {
+          groupedEvents[item.moduleName!] = [];
         }
-        setState(() {
-          eventsToDisplay =
-              groupedEvents.values.expand((events) => events).toList();
-          matchedValue = tempRoleModuleMap;
-        });
-      } catch (e) {
-        insertErrorLog(e.toString(), 'refreshEvents()');
-        return Future.error(e.toString());
+        groupedEvents[item.moduleName]!.add(item);
       }
-    });
+
+      setState(() {});
+    } catch (e) {
+      insertErrorLog(e.toString(), 'refreshEvents() | $idRole');
+      return Future.error(e.toString());
+    }
   }
 
-  Future<void> updateModuleAccesStatus(
-      int roleId, String moduleName, bool status) async {
+  Future<void> updateStatusAccess(
+      int roleId, int flag, bool status, int item) async {
     try {
-      await updateModuleAccessByRole(moduleName, roleId, status);
+      await updateModuleAccessByRole(roleId, flag, status, item);
+      //await updateModuleAccessByRole(moduleName, roleId, status);
     } catch (e) {
       insertErrorLog(e.toString(), 'updateModuleAccesStatus()');
       return Future.error(e.toString());
     }
   }
 }
+
 
 class PolicyCard extends StatelessWidget {
   final Event policy;
