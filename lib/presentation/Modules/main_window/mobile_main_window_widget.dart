@@ -235,7 +235,7 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
                       );
                     } else {
                       List<dynamic> json = jsonDecode(response.data!.body);
-                      return MyExpansionTileList(elementList: json);
+                      return MyExpansionTileList();
                     }
                   }),
               const Divider(thickness: 3),

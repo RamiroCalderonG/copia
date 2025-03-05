@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:oxschool/core/constants/screens.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
@@ -145,7 +146,8 @@ void setUserDataForDebug() {
       true,
       1,
       true,
-      false);
+      false,
+      null);
   currentUser = user;
   var exampleEvents = [
     {

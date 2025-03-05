@@ -1,6 +1,7 @@
 // ignore_for_file: file_names
 
-import 'package:oxschool/data/DataTransferObjects/RoleModuleRelationshipDto.Dart';
+
+import 'package:oxschool/data/DataTransferObjects/Role_module_relationship_dto.dart';
 import 'package:oxschool/data/Models/Event.dart';
 
 class Role {
@@ -11,6 +12,11 @@ class Role {
   List<Event>? events;
   List<RoleModuleRelationshipDto>?
       roleModuleRelationships; //Used to get relationship between role and modules
+  List<Map<String, dynamic>>? moduleScreenList;
+  List<Map<String, dynamic>>? screenEventList;
+  
+
+
 
   Role(
       {required this.roleID,
@@ -18,7 +24,7 @@ class Role {
       required this.roleDescription,
       required this.isActive,
       this.events,
-      this.roleModuleRelationships});
+      this.roleModuleRelationships, this.moduleScreenList, this.screenEventList});
 
   Role.fromJson(Map<String, dynamic> json)
       : roleID = json["id"],

@@ -53,17 +53,24 @@ class UserWindow extends StatelessWidget {
             SizedBox(
               height: MediaQuery.of(context).size.height,
               width: MediaQuery.of(context).size.width,
-              child: Column(
+              child: Wrap(
                 children: [
                   SizedBox(
                     height: 40,
                   ),
-                  CircleAvatar(
+                  Padding(padding: EdgeInsets.all(10), child: Center(
+                    child: Center(
+                      child: CircleAvatar(
                     radius: 100,
-                    // backgroundImage:
-                    //     AssetImage('assets/images/logoRedondoOx.png'),
-                    child: Text(currentUser!.employeeName!.toTitleCase),
+                    child: Center(
+                      child: Text(currentUser!.employeeName!.initials, 
+                      style: TextStyle(fontFamily: 'Sora', fontSize: 20)),
+                    ) 
+                    ,
                   ),
+                    ),
+                  ),),
+                  
                   const SizedBox(height: 8),
                   SizedBox(
                     height: 30,
@@ -80,10 +87,7 @@ class UserWindow extends StatelessWidget {
                                 width: 400,
                                 child: TextFormField(
                                   initialValue:
-                                      currentUser!.employeeName!.toTitleCase,
-                                  // controller: TextEditingController(
-                                  //     text: currentUser!
-                                  //         .employeeName!.toTitleCase),
+                                      currentUser!.employeeName!.initials,
                                   style: TextStyle(color: Colors.white),
                                   readOnly: true,
                                   decoration: InputDecoration(

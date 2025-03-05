@@ -1,6 +1,7 @@
 // ignore_for_file: file_names, non_constant_identifier_names
 
 import 'package:oxschool/core/extensions/capitalize_strings.dart';
+import 'package:oxschool/data/Models/Role.dart';
 
 class User {
   int? employeeNumber;
@@ -21,6 +22,7 @@ class User {
   int? roleID;
   bool? canUpdatePassword;
   bool? isAcademicCoord;
+  Role? userRole;
 
   // late final notActive;
 
@@ -42,7 +44,9 @@ class User {
       this.isAdmin,
       this.roleID,
       this.canUpdatePassword,
-      this.isAcademicCoord);
+      this.isAcademicCoord,
+      this.userRole
+      );
 
   Map<dynamic, dynamic> toJson() => {
         "employeeNumber": employeeNumber,

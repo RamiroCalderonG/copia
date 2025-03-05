@@ -27,7 +27,6 @@ String? _selectedGender;
 DateTime? _selectedBirthdate;
 DateTime? _creationDate;
 
-
 class _NewUserScreenState extends State<NewUserScreen> {
   // final _formKey = GlobalKey<FormState>();
   final _userName = TextEditingController();
@@ -44,16 +43,17 @@ class _NewUserScreenState extends State<NewUserScreen> {
   bool canUpdatePassword = false;
   bool _obscureText = true;
   String password = '';
-  bool createAPassword = true; //When false, send '' so the backend will asign a random password.
+  bool createAPassword =
+      true; //When false, send '' so the backend will asign a random password.
   int roleIdSelected = 0;
-
 
   int _currentPageIndex = 0;
   final PageController _pageController = PageController();
 
   @override
   void initState() {
-    roleNames = tmpRolesList.map((role) => role["softName"].toString()).toList();
+    roleNames =
+        tmpRolesList.map((role) => role["softName"].toString()).toList();
     roleNames.first;
     campuseSelector = campuseList.first.trim();
     areaSelector = areaList.first;
@@ -90,186 +90,173 @@ class _NewUserScreenState extends State<NewUserScreen> {
     );
   }
 
-
-  
-
   @override
   Widget build(BuildContext context) {
-
-
-
-void handleSave() async {
-    if (_userName.text.isEmpty ||
-                      _employeeNumber.text.isEmpty ||
-                      campuseSelector.isEmpty ||
-                      _userEmail.text.isEmpty ||
-                      _selectedBirthdate.toString().isEmpty) {
-                    showEmptyFieldAlertDialog(context, 'Verificar que no existan campos vacios');
-                    return;
-                  } else {
-                    if (!createAPassword) {
-                      password = '';
-                    }
-                    Map<String, dynamic> newUser = {
-                      'employeeNumber': int.parse(_employeeNumber.text),
-                      'fullName': _userName.text,
-                      'claun': campuseSelector.toUpperCase(),
-                      'roleId': roleIdSelected,
-                      'email': _userEmail.text,
-                      'genre': 'NULL',
-                      'bajalogicasino': 1,
-                      'workDepartment': areaSelector,
-                      'workPosition': '',
-                      'birthDate': _selectedBirthdate!.toIso8601String(),
-                      'createdBy': currentUser!.employeeNumber,
-                      'sendPasswordToEmail' : sendPasswordToEmail, 
-                      'canUpdatePassword' : canUpdatePassword, 
-                      'isTeacher': currentUser!.employeeNumber ,
-                      'password' : password 
-                    };
-                    try {
-                      setState(() {
-                        isLoading = true;
-                      });
-                      createUser(newUser).then((response){
-                        setState(() {
-                          isLoading = false;
-                          _userName.clear();
-                          _userEmail.clear();
-                          _userCampus.clear();
-                          _employeeNumber.clear();
-                          _selectedBirthdate = null;
-                        });
-                        Navigator.of(context).pop();
-                        showInformationDialog(context, 'Éxito', 'Usuario creado exitosamente');
-                      }).onError((error, stackTrace){
-                        setState(() {
-                          isLoading = false;
-                          showErrorFromBackend(context, error.toString());
-                        });
-                      });
-                    } catch (e) {
-                      throw Exception(e.toString());
-                    }
-                  }
-                }
-
+    void handleSave() async {
+      if (_userName.text.isEmpty ||
+          _employeeNumber.text.isEmpty ||
+          campuseSelector.isEmpty ||
+          _userEmail.text.isEmpty ||
+          _selectedBirthdate.toString().isEmpty) {
+        showEmptyFieldAlertDialog(
+            context, 'Verificar que no existan campos vacios');
+        return;
+      } else {
+        if (!createAPassword) {
+          password = '';
+        }
+        Map<String, dynamic> newUser = {
+          'employeeNumber': int.parse(_employeeNumber.text),
+          'fullName': _userName.text,
+          'claun': campuseSelector.toUpperCase(),
+          'roleId': roleIdSelected,
+          'email': _userEmail.text,
+          'genre': 'NULL',
+          'bajalogicasino': 1,
+          'workDepartment': areaSelector,
+          'workPosition': '',
+          'birthDate': _selectedBirthdate!.toIso8601String(),
+          'createdBy': currentUser!.employeeNumber,
+          'sendPasswordToEmail': sendPasswordToEmail,
+          'canUpdatePassword': canUpdatePassword,
+          'isTeacher': currentUser!.employeeNumber,
+          'password': password
+        };
+        try {
+          setState(() {
+            isLoading = true;
+          });
+          createUser(newUser).then((response) {
+            setState(() {
+              isLoading = false;
+              _userName.clear();
+              _userEmail.clear();
+              _userCampus.clear();
+              _employeeNumber.clear();
+              _selectedBirthdate = null;
+            });
+            Navigator.of(context).pop();
+            showInformationDialog(
+                context, 'Éxito', 'Usuario creado exitosamente');
+          }).onError((error, stackTrace) {
+            setState(() {
+              isLoading = false;
+              showErrorFromBackend(context, error.toString());
+            });
+          });
+        } catch (e) {
+          throw Exception(e.toString());
+        }
+      }
+    }
 
     Widget userCanUpdateOwnPassword = SwitchListTile(
-                                  title: Text(
-                                    canUpdatePassword
-                                        ? 'Puede cambiar su contraseña'
-                                        : 'No puede cambiar su contraseña',
-                                        style: TextStyle(fontFamily: 'Sora', fontWeight: FontWeight.bold)
-                                    //style: const TextStyle(fontFamily: 'Sora'),
-                                  ),
-                                  value: canUpdatePassword,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      canUpdatePassword = value;
-                                    });
-                                  },
-                                  controlAffinity:
-                                      ListTileControlAffinity.trailing,
-                                );
-
-
-
-    Widget userisTeacher =
-      SwitchListTile(
-                                  title: Text(
-                                    isTeacher
-                                        ? 'Es maestro'
-                                        : 'No es maestro',
-                                        style: TextStyle(fontFamily: 'Sora', fontWeight: FontWeight.bold)
-                                    //style: const TextStyle(fontFamily: 'Sora'),
-                                  ),
-                                  value: isTeacher,
-                                  onChanged: (value) async {
-                                    setState(() {
-                                      isTeacher = value;
-                                    });
-                                  },
-                                  controlAffinity:
-                                      ListTileControlAffinity.trailing,
-                                );
-
-TextFormField usrPasswordField = TextFormField(
-                                  textInputAction: TextInputAction.next,
-                                  controller: _passwordController,
-                                  decoration: InputDecoration(
-                                    icon: Icon(Icons.password),
-                                      labelText: 'Contraseña',
-                                      border: const UnderlineInputBorder(),
-                                      suffixIcon: GestureDetector(
-                                        onTap: () {
-                                          setState(() {
-                                            _obscureText = !_obscureText;
-                                          });
-                                        },
-                                        child: Icon(_obscureText
-                                            ? Icons.visibility
-                                            : Icons.visibility_off),
-                                      )),
-                                  obscureText: _obscureText,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      password = value;
-                                    });
-                                  },
-                                );
-    
-TextFormField birthDateField = TextFormField(
-                      controller: _birthdateController,
-                      textInputAction: TextInputAction.next,
-                      readOnly: true,
-                      onTap: () {
-                        showDatePicker(
-                              context: context,
-                              initialDate: _selectedBirthdate ?? DateTime.now(),
-                              firstDate: DateTime(1900),
-                              lastDate: DateTime.now(),
-                            ).then((selectedDate) {
-                              if (selectedDate != null) {
-                                setState(() {
-                                  _selectedBirthdate = selectedDate;
-                                  _birthdateController.text = DateFormat('yyyy-MM-dd')
-                                .format(_selectedBirthdate!);
-                                });
-                              }
-                            });
-                      },
-                      decoration: InputDecoration(
-                        icon: Icon(Icons.cake),
-                                      labelText: 'Fecha de nacimiento',
-                                      border: const UnderlineInputBorder(),
-                                      suffixIcon: GestureDetector(
-                                        onTap: () {
-                                        },
-                                        child: Icon(Icons.date_range),
-                                      )),
-                    );
-    
-    SwitchListTile customPasswordSwitcher = SwitchListTile(
-      title: createAPassword ? Text('Asignar contraseña', style: TextStyle(fontWeight: FontWeight.bold),) : Text('Asignar contraseña', style: TextStyle(fontWeight: FontWeight.bold)),
-      value: createAPassword, 
+      title: Text(
+          canUpdatePassword
+              ? 'Puede cambiar su contraseña'
+              : 'No puede cambiar su contraseña',
+          style: TextStyle(fontFamily: 'Sora', fontWeight: FontWeight.bold)
+          //style: const TextStyle(fontFamily: 'Sora'),
+          ),
+      value: canUpdatePassword,
       onChanged: (value) {
         setState(() {
-          createAPassword = value;
+          canUpdatePassword = value;
         });
-      });
+      },
+      controlAffinity: ListTileControlAffinity.trailing,
+    );
 
-      SwitchListTile sendPasswordToMailSwitch = SwitchListTile(
-        title: Text('Envìar contraseña al correo'),
-        value: sendPasswordToEmail, onChanged: (value){
+    Widget userisTeacher = SwitchListTile(
+      title: Text(isTeacher ? 'Es maestro' : 'No es maestro',
+          style: TextStyle(fontFamily: 'Sora', fontWeight: FontWeight.bold)
+          //style: const TextStyle(fontFamily: 'Sora'),
+          ),
+      value: isTeacher,
+      onChanged: (value) async {
         setState(() {
-          sendPasswordToEmail = value;
+          isTeacher = value;
         });
-      }); 
+      },
+      controlAffinity: ListTileControlAffinity.trailing,
+    );
 
+    TextFormField usrPasswordField = TextFormField(
+      textInputAction: TextInputAction.next,
+      controller: _passwordController,
+      decoration: InputDecoration(
+          icon: Icon(Icons.password),
+          labelText: 'Contraseña',
+          border: const UnderlineInputBorder(),
+          suffixIcon: GestureDetector(
+            onTap: () {
+              setState(() {
+                _obscureText = !_obscureText;
+              });
+            },
+            child: Icon(_obscureText ? Icons.visibility : Icons.visibility_off),
+          )),
+      obscureText: _obscureText,
+      onChanged: (value) {
+        setState(() {
+          password = value;
+        });
+      },
+    );
 
-  
+    TextFormField birthDateField = TextFormField(
+      controller: _birthdateController,
+      textInputAction: TextInputAction.next,
+      readOnly: true,
+      onTap: () {
+        showDatePicker(
+          context: context,
+          initialDate: _selectedBirthdate ?? DateTime.now(),
+          firstDate: DateTime(1900),
+          lastDate: DateTime.now(),
+        ).then((selectedDate) {
+          if (selectedDate != null) {
+            setState(() {
+              _selectedBirthdate = selectedDate;
+              _birthdateController.text =
+                  DateFormat('yyyy-MM-dd').format(_selectedBirthdate!);
+            });
+          }
+        });
+      },
+      decoration: InputDecoration(
+          icon: Icon(Icons.cake),
+          labelText: 'Fecha de nacimiento',
+          border: const UnderlineInputBorder(),
+          suffixIcon: GestureDetector(
+            onTap: () {},
+            child: Icon(Icons.date_range),
+          )),
+    );
 
+    SwitchListTile customPasswordSwitcher = SwitchListTile(
+        title: createAPassword
+            ? Text(
+                'Asignar contraseña',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              )
+            : Text('Asignar contraseña',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+        value: createAPassword,
+        onChanged: (value) {
+          setState(() {
+            createAPassword = value;
+          });
+        });
+
+    SwitchListTile sendPasswordToMailSwitch = SwitchListTile(
+        title: Text('Envìar contraseña al correo'),
+        value: sendPasswordToEmail,
+        onChanged: (value) {
+          setState(() {
+            sendPasswordToEmail = value;
+          });
+        });
 
     final campuseSelectorField = DropdownButton<String>(
       value: campuseSelector,
@@ -350,7 +337,10 @@ TextFormField birthDateField = TextFormField(
       onChanged: (String? value) {
         setState(() {
           roleSelector = value!;
-          roleIdSelected = tmpRoleObjectslist.firstWhere((item) => item.roleName.trim().toTitleCase == value.trim().toTitleCase).roleID;
+          roleIdSelected = tmpRoleObjectslist
+              .firstWhere((item) =>
+                  item.roleName.trim().toTitleCase == value.trim().toTitleCase)
+              .roleID;
         });
       },
     );
@@ -417,7 +407,6 @@ TextFormField birthDateField = TextFormField(
       SingleChildScrollView(
         child: Column(
           children: [
-            
             Row(
               //crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -431,30 +420,28 @@ TextFormField birthDateField = TextFormField(
                       }
                       return null;
                     },
-                    decoration:
-                        const InputDecoration(labelText: "Nombre completo", icon: Icon(Icons.people)),
+                    decoration: const InputDecoration(
+                        labelText: "Nombre completo", icon: Icon(Icons.people)),
                     textInputAction: TextInputAction.next,
                   ),
                 ),
                 const SizedBox(
-                  width: 25
-                ,
+                  width: 25,
                 ),
                 Expanded(
                     child: TextFormField(
                   controller: _userEmail,
-                  decoration:
-                      const InputDecoration(labelText: "Correo electrónico", icon: Icon(Icons.email)),
+                  decoration: const InputDecoration(
+                      labelText: "Correo electrónico", icon: Icon(Icons.email)),
                 )),
                 const SizedBox(
                   width: 25,
                 ),
+                Expanded(child: customPasswordSwitcher),
                 Expanded(
-                  child: customPasswordSwitcher
-                ),
-                 Expanded(
-                  child: createAPassword ?  usrPasswordField : Text('Se asignará una contraseña genérica')
-                )
+                    child: createAPassword
+                        ? usrPasswordField
+                        : Text('Se asignará una contraseña genérica'))
               ],
             ),
             const SizedBox(height: 20),
@@ -470,7 +457,7 @@ TextFormField birthDateField = TextFormField(
                   controller: _employeeNumber,
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
-                    icon: Icon(Icons.numbers),
+                      icon: Icon(Icons.numbers),
                       labelText: 'Número de empleado'),
                   enabled: true,
                 )),
@@ -509,7 +496,6 @@ TextFormField birthDateField = TextFormField(
             ),
             Row(
               children: [
-                
                 Expanded(
                   child: userisTeacher,
                 ),
@@ -521,9 +507,7 @@ TextFormField birthDateField = TextFormField(
               crossAxisAlignment: CrossAxisAlignment.center,
               //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Expanded(
-                    child:birthDateField
-                ),
+                Expanded(child: birthDateField),
                 Expanded(child: sendPasswordToMailSwitch)
               ],
             ),
@@ -531,9 +515,7 @@ TextFormField birthDateField = TextFormField(
             const SizedBox(height: 15),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SaveItemButton(onPressed: handleSave)
-              ],
+              children: [SaveItemButton(onPressed: handleSave)],
             ),
             /*ElevatedButton(
                 onPressed: () async {
@@ -543,7 +525,7 @@ TextFormField birthDateField = TextFormField(
             const SizedBox(height: 32),
 
             //IN CASE NEEDS TO ADD ANOTHER FORM
-           /*  ElevatedButton(
+            /*  ElevatedButton(
               onPressed: _nextPage,
               child: const Text('Continuar'),
             ), */
@@ -553,8 +535,7 @@ TextFormField birthDateField = TextFormField(
       secondFormScreen
     ];
 
-    return 
-    Stack(
+    return Stack(
       children: [
         Container(
             margin: const EdgeInsets.all(10),
@@ -567,165 +548,151 @@ TextFormField birthDateField = TextFormField(
                     physics: const NeverScrollableScrollPhysics(),
                     children: forms);
               } else {
-                return  SingleChildScrollView(
+                return SingleChildScrollView(
                   child: Column(
                     children: [
                       Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: _userName,
-                    validator: (value) {
-                      if (value!.isEmpty) {
-                        return 'Campo no puede estar vacio';
-                      }
-                      return null;
-                    },
-                    decoration:
-                        const InputDecoration(labelText: "Nombre completo", icon: Icon(Icons.people)),
-                    textInputAction: TextInputAction.next,
-                  ),
-                ),
-                
-              ],
-            ),
-            Row(
-              children: [
-                Expanded(
-                    child: TextFormField(
-                  controller: _userEmail,
-                  decoration:
-                      const InputDecoration(labelText: "Correo electrónico", icon: Icon(Icons.email)),
-                )),
-              ]
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                 Expanded(
-                  child: customPasswordSwitcher
-                ),
-              ]
-            ),
-            Row(
-              children: [
-                Expanded(
-                  child: createAPassword ?  usrPasswordField : Container(
-                    padding: EdgeInsets.all(6),
-                    child: Text('Se asignará una contraseña genérica', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),),
-                  ) 
-                )
-              ],
-            ),
-            Row(
-              children: [
-               /*  IconButton(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: _userName,
+                              validator: (value) {
+                                if (value!.isEmpty) {
+                                  return 'Campo no puede estar vacio';
+                                }
+                                return null;
+                              },
+                              decoration: const InputDecoration(
+                                  labelText: "Nombre completo",
+                                  icon: Icon(Icons.people)),
+                              textInputAction: TextInputAction.next,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(children: [
+                        Expanded(
+                            child: TextFormField(
+                          controller: _userEmail,
+                          decoration: const InputDecoration(
+                              labelText: "Correo electrónico",
+                              icon: Icon(Icons.email)),
+                        )),
+                      ]),
+                      const SizedBox(height: 8),
+                      Row(children: [
+                        Expanded(child: customPasswordSwitcher),
+                      ]),
+                      Row(
+                        children: [
+                          Expanded(
+                              child: createAPassword
+                                  ? usrPasswordField
+                                  : Container(
+                                      padding: EdgeInsets.all(6),
+                                      child: Text(
+                                        'Se asignará una contraseña genérica',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 13),
+                                      ),
+                                    ))
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          /*  IconButton(
                     onPressed: () {
                       // TODO: IMPLEMENT EMPLOYEE NUMBER GENERATOR
                     },
                     icon: const Icon(Icons.refresh)), */
-                Expanded(
-                    child: TextFormField(
-                  controller: _employeeNumber,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    icon: Icon(Icons.numbers),
-                      labelText: 'Número de empleado'),
-                  enabled: true,
-                )),
-              ],
-            ),
-            const SizedBox( height: 8,),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                const Text(
-                  'Rol asignado   ',
-                  style: TextStyle(fontSize: 13),
-                ),
-                Expanded(
-                  flex: 2,
-                  child: roleSelectorField)
-              ],
-            ),
-             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Expanded(
-                    child: const Text(
-                  'Campus',
-                  style: TextStyle(fontSize: 13),
-                )), 
-                Expanded(
-                  flex: 2,
-                  child: campuseSelectorField),
-                
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Expanded(
-                  flex: 1,
-                    child: const Text(
-                  'Area / Depto',
-                  style: TextStyle(fontSize: 13),
-                )), 
-                Expanded(
-                  flex: 2,
-                  child: areaSelectorField)
-              ]
-            ),
-            SizedBox(height: 8,),
-            Row(
-              children: [
-                Expanded(
-                  child: birthDateField,
-                )
-                
-              ],
-            ),
-            SizedBox(height: 8,),
-            
-            Row(
-              children: [
-                Expanded(
-                  child: userisTeacher,
-                ),
-                
-              ],
-            ),
-            SizedBox(height: 8,),
-            Row(
-              children: [
-                Expanded(child: userCanUpdateOwnPassword)
-              ]
-            ), 
-            Row(
-              children: [
-                Expanded(child: sendPasswordToMailSwitch)
-                
-              ],
-            ),
-            SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SaveItemButton(onPressed: handleSave)
-              ],
-            )
-            
-
-            
+                          Expanded(
+                              child: TextFormField(
+                            controller: _employeeNumber,
+                            keyboardType: TextInputType.number,
+                            decoration: const InputDecoration(
+                                icon: Icon(Icons.numbers),
+                                labelText: 'Número de empleado'),
+                            enabled: true,
+                          )),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 8,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          const Text(
+                            'Rol asignado   ',
+                            style: TextStyle(fontSize: 13),
+                          ),
+                          Expanded(flex: 2, child: roleSelectorField)
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Expanded(
+                              child: const Text(
+                            'Campus',
+                            style: TextStyle(fontSize: 13),
+                          )),
+                          Expanded(flex: 2, child: campuseSelectorField),
+                        ],
+                      ),
+                      Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Expanded(
+                                flex: 1,
+                                child: const Text(
+                                  'Area / Depto',
+                                  style: TextStyle(fontSize: 13),
+                                )),
+                            Expanded(flex: 2, child: areaSelectorField)
+                          ]),
+                      SizedBox(
+                        height: 8,
+                      ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: birthDateField,
+                          )
+                        ],
+                      ),
+                      SizedBox(
+                        height: 8,
+                      ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: userisTeacher,
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 8,
+                      ),
+                      Row(children: [
+                        Expanded(child: userCanUpdateOwnPassword)
+                      ]),
+                      Row(
+                        children: [Expanded(child: sendPasswordToMailSwitch)],
+                      ),
+                      SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [SaveItemButton(onPressed: handleSave)],
+                      )
                     ],
                   ),
                 );
               }
-            })
-            ),
+            })),
         if (isLoading) CustomLoadingIndicator()
       ],
     );
   }
 }
-

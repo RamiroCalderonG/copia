@@ -178,19 +178,19 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
     return Padding(
         padding:
             const EdgeInsets.only(bottom: 20, top: 25, right: 20, left: 20),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        child: Wrap(
+          spacing: 8.0,
+          runSpacing: 4.0,
+          //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          //crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // The Unity Dropdown
             if (unityList.length > 1)
-              Flexible(
-                  child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+              
                   DropdownMenu<String>(
                     label: const Text(
                       ' Campus ',
-                      style: TextStyle(fontSize: 14),
+                     style: TextStyle(fontSize: 12),
                     ),
                     trailingIcon: const Icon(Icons.arrow_drop_down),
                     initialSelection: selectedUnity,
@@ -210,18 +210,15 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                           value: value, label: value);
                     }).toList(),
                   ),
-                ],
-              )),
+                
+              
             if (unityList.length == 1) Flexible(child: Text(unityList.first)),
-
-            Flexible(
-                child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+           // Flexible(
+            //    child: 
                 DropdownMenu<String>(
                   label: const Text(
                     ' Grado ',
-                    style: TextStyle(fontSize: 14),
+                    style: TextStyle(fontSize: 12),
                   ),
                   trailingIcon: const Icon(Icons.arrow_drop_down),
                   initialSelection: preSelectedGrade ?? selectedGrade,
@@ -242,17 +239,14 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                         value: value, label: value);
                   }).toList(),
                 ),
-              ],
-            )),
+         // ),
 
-            Flexible(
-                child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+          //  Flexible(
+          //      child: 
                 DropdownMenu<String>(
                   label: const Text(
                     ' Grupo ',
-                    style: TextStyle(fontSize: 14),
+                    style: TextStyle(fontSize: 12),
                   ),
                   trailingIcon: const Icon(Icons.arrow_drop_down),
                   initialSelection: preSelectedGroup ?? selectedGroup,
@@ -271,19 +265,16 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                         value: value, label: value);
                   }).toList(),
                 ),
-              ],
-            )),
+          //    ),
             if (!widget.byStudent)
-              Flexible(
-                  flex: 2,
-                  fit: FlexFit.loose,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+              //Flexible(
+               //   flex: 2,
+                //  fit: FlexFit.loose,
+                //  child: 
                       DropdownMenu<String>(
                         label: const Text(
                           ' Materia ',
-                          style: TextStyle(fontSize: 14),
+                          style: TextStyle(fontSize: 12),
                         ),
                         trailingIcon: const Icon(Icons.arrow_drop_down),
                         initialSelection: preSelectedSubject ?? selectedSubject,
@@ -301,11 +292,11 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                               value: value, label: value);
                         }).toList(),
                       ),
-                    ],
-                  )),
+//),
 
-            Flexible(
-              child: Column(
+           // Flexible(
+            //  child: 
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (currentUser!.isCurrentUserAdmin())
@@ -333,7 +324,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                     )
                 ],
               ),
-            ),
+           // ),
           ],
         ));
   }
