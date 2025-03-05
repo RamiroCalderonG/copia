@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:oxschool/presentation/components/save_and_cancel_buttons.dart';
 import 'package:oxschool/core/utils/loader_indicator.dart';
 
 class CreateServiceTicket extends StatefulWidget {
@@ -81,7 +80,7 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
     final descriptionField = TextFormField(
       controller: _descriptionController,
       // expands: true,
-      maxLines: 8,
+      maxLines: 4,
       onChanged: (value) {
         setState(() {
           _isDescriptionFieldEmpty = true;
@@ -115,7 +114,7 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
     final observationsField = TextFormField(
       controller: _observationsController,
       // expands: true,
-      maxLines: 8,
+      maxLines: 4,
       onChanged: (value) {
         setState(() {
           _isObservationsFieldEmpty = true;
@@ -206,57 +205,33 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
           return DropdownMenuEntry<String>(value: value, label: value);
         }).toList());
 
-    return Stack(
-      children: [
-        SizedBox(
-            width: MediaQuery.of(context).size.width * 3 / 4,
-            child: LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) {
-                if (constraints.maxWidth < 600) {
-                  return SingleChildScrollView(
-                    child: Padding(
-                      padding: EdgeInsets.only(top: 12, bottom: 12),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        crossAxisAlignment: CrossAxisAlignment.start,
+    return    SizedBox(
+            width: MediaQuery.of(context).size.width * 3 / 5,
+            child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints){
+              if (_isSearching) {
+                return CustomLoadingIndicator();
+              } else {
+                return  SingleChildScrollView(
+                  child: Column(
+                        //mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        //crossAxisAlignment: CrossAxisAlignment.start,
                         // crossAxisAlignment
                         children: [
                           Row(
-                            // crossAxisAlignment: CrossAxisAlignment.center,
-                            // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [Flexible(child: employeSelectorName)],
-                          ),
-
-                          const SizedBox(
-                            height: 14,
-                          ),
-                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
-                              Flexible(
-                                child: campusSelectorDropDown,
-                              )
-                            ],
+                            Flexible(child: employeSelectorName,), 
+                            Flexible(child: campusSelectorDropDown), 
+                            Flexible(child: deptSelectorDropDown), 
+                            Flexible(child: dateAndTimeField,)],
                           ),
-                          const SizedBox(
-                            height: 14,
-                          ),
-                          Row(
-                            children: [Flexible(child: deptSelectorDropDown)],
-                          ),
-                          const SizedBox(
-                            height: 14,
+                          SizedBox(
+                            height: 18,
                           ),
                           Row(
-                            children: [
-                              Flexible(
-                                child: dateAndTimeField,
-                              )
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 14,
-                          ),
-                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
                               Flexible(
                                 child: descriptionField,
@@ -267,6 +242,8 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
                             height: 14,
                           ),
                           Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
                               Flexible(child: observationsField),
                             ],
@@ -305,94 +282,14 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
                               )),
                             ],
                           ),
-                          // Row(
-                          //   crossAxisAlignment: CrossAxisAlignment.start,
-                          //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          //   children: [
-
-                          //   ],
-                          // // )
-                          // Padding(
-                          //   padding: const EdgeInsets.symmetric(
-                          //       horizontal: 0.0, vertical: 25.0),
-                          //   child: Column(
-                          //     children: [
-                          //       const SizedBox(height: 15),
-                          //       const SizedBox(height: 15),
-                          //       const SizedBox(height: 15),
-                          //       const SizedBox(height: 18),
-                          //       const SizedBox(height: 20),
-                          //       Row(
-                          //         mainAxisAlignment: MainAxisAlignment.center,
-                          //         children: [
-
-                          //         ],
-                          //       )
-                          //     ],
-                          //   ),
-                          // ),
                         ],
                       ),
-                    ),
-                  );
-                } else {
-                  return SingleChildScrollView(
-                      child: Column(children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 0.0, vertical: 25.0),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              const SizedBox(width: 18),
-                              employeSelectorName,
-                              // _buildEmployeeNumberField(),
-                              const SizedBox(width: 18),
-                              campusSelectorDropDown,
-                              const SizedBox(width: 18),
-                              deptSelectorDropDown,
-                              const SizedBox(width: 18),
-                              dateAndTimeField
-                            ],
-                          ),
-                          const Divider(thickness: 1),
-                          const SizedBox(height: 18),
-                          Row(
-                            children: [descriptionField],
-                          ),
-                          const SizedBox(height: 20),
-                          Row(
-                            children: [observationsField],
-                          ),
-                          const SizedBox(height: 20),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              CustomSaveButton(
-                                onPressed: () {},
-                              ),
-                              const SizedBox(
-                                width: 30,
-                              ),
-                              CustomCancelButton(onPressed: () {
-                                Navigator.pop(context);
-                              })
-                            ],
-                          )
-                        ],
-                      ),
-                    )
-                  ]));
-                }
-              },
-            )),
-        if (_isSearching)
-          Center(
-            child: CustomLoadingIndicator(),
-          )
-      ],
+                      
+                );  
+              }
+            }),
+
+             
     );
   }
 

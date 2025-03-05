@@ -243,7 +243,7 @@ Future<List<StudentEval>> getStudentsByAssinature(
   try {
     var studentsList = await getStudentsToGrade(assignature, group,
         gradeSelected, currentCycle!.claCiclo, campus, month);
-    List<dynamic> jsonList = json.decode(utf8.decode(studentsList.bodyBytes));
+    var jsonList = json.decode(utf8.decode(studentsList.bodyBytes));
     List<StudentEval> evaluations = getEvalFromJSON(jsonList, false);
 
     return evaluations;
@@ -261,7 +261,7 @@ Future<List<StudentEval>> getSubjectsAndGradesByStudent(
     var subjectsGradesList =
         await getSubjectsAndGradeByStuent(group, grade, cycle, campus, month);
 
-    List<dynamic> jsonList = json.decode(subjectsGradesList.body);
+    List<dynamic> jsonList = json.decode(utf8.decode(subjectsGradesList.bodyBytes) );
     List<StudentEval> evaluations = getEvalFromJSON(jsonList, true);
     uniqueStudentsList.clear();
     uniqueStudents.clear();

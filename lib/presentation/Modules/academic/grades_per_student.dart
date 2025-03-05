@@ -134,7 +134,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
     }
   }
 
-  Future<void> searchBUttonAction(String groupSelected, String gradeString,
+  Future<void> searchBUttonAction(String groupSelected, int grade,
       int monthSelected, String campusSelected) async {
     try {
       setState(() {
@@ -144,13 +144,13 @@ class _GradesByStudentState extends State<GradesByStudent> {
         selectedStudentID = null;
         selectedStudentRows.clear();
       });
-      var gradeInt = getKeyFromValue(teacherGradesMap, gradeString);
+      //var gradeInt = getKeyFromValue(teacherGradesMap, gradeString);
       if (studentList.isNotEmpty && studentsGradesCommentsRows.isNotEmpty) {
         studentList.clear();
         studentsGradesCommentsRows.clear();
       }
       studentList = await getSubjectsAndGradesByStudent(
-          gradeInt!,
+          grade,
           groupSelected,
           currentCycle!.claCiclo!,
           campusSelected,
@@ -206,6 +206,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
                 );
               } else {
                 return SingleChildScrollView(
+
                     child: Padding(
                   padding: EdgeInsets.all(10),
                   child: Column(
@@ -238,9 +239,11 @@ class _GradesByStudentState extends State<GradesByStudent> {
                 Flexible(child: RefreshButton(onPressed: () async {
                   var monthNumber;
                   if (isUserAdmin) {
+                    //Calendar month number
                     monthNumber =
                         getKeyFromValue(spanishMonthsMap, selectedTempMonth!);
                   } else {
+                    //Calendar month number
                     monthNumber = getKeyFromValue(
                         spanishMonthsMap, selectedCurrentTempMonth!);
                   }
@@ -265,7 +268,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
                     });
                     await searchBUttonAction(
                       selectedTempGroup!,
-                      selectedTempGrade!.toString(),
+                      selectedTempGrade!,
                       monthNumber,
                       selectedTempCampus!,
                     ).whenComplete(() {
@@ -296,7 +299,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
                         saveButtonAction(monthNumber).whenComplete(() async {
                           await searchBUttonAction(
                             selectedTempGroup!,
-                            selectedTempGrade!.toString(),
+                            selectedTempGrade!,
                             monthNumber,
                             selectedTempCampus!,
                           ).whenComplete(() {
@@ -340,7 +343,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
           const Divider(thickness: 1),
           Container(
               width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height / 1.5,
+              height: MediaQuery.of(context).size.height / 1.8,
               margin: const EdgeInsets.only(right: 10, left: 10, bottom: 10),
               child: LayoutBuilder(
                   builder: (BuildContext context, BoxConstraints constraints) {
@@ -653,7 +656,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
             context, 'Actualizado', 'Cambios realizados con exito');
         searchBUttonAction(
           selectedTempGroup!,
-          selectedTempGrade!.toString(),
+          selectedTempGrade!,
           monthNumber!,
           selectedTempCampus!,
         );
