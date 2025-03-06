@@ -82,8 +82,8 @@ class _GradesByStudentState extends State<GradesByStudent> {
 
   void _fetchData() async {
     var response = currentUser!.isCurrentUserAdmin()
-        ? loadStartGradingAsAdmin(
-            currentCycle!.claCiclo!, null, true, null, null, currentUser!.isCurrentUserAcademicCoord())
+        ? loadStartGradingAsAdminOrAcademicCoord(
+            currentCycle!.claCiclo!, null, true, null, null, currentUser!.isCurrentUserAcademicCoord(), currentUser!.isCurrentUserAdmin() )
         : loadStartGrading(
             currentUser!.employeeNumber!,
             currentCycle!.toString(),
@@ -157,18 +157,18 @@ class _GradesByStudentState extends State<GradesByStudent> {
           monthSelected);
 
       fillGrid(studentList); //Fill student list by unque values
-      int studentNumber = 1;
+
 
       setState(() {
         studentEvaluationRows.clear();
+        var index = 0;
         for (var item in uniqueStudentsList) {
           studentEvaluationRows.add(PlutoRow(cells: {
-            'No': PlutoCell(value: studentNumber),
+            'No': PlutoCell(value: index +1),
             'studentID': PlutoCell(value: item['studentID']!.trim()),
             'studentName':
                 PlutoCell(value: item['studentName']!.trim().toTitleCase),
           }));
-          studentNumber++;
         }
       });
     } catch (e) {
@@ -244,7 +244,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Flexible(child: RefreshButton(onPressed: () async {
-                  if (isUserAdmin) {
+                  if (isUserAdmin || currentUser!.isAcademicCoord!) {
                     //Calendar month number
                     monthNumber =
                         getKeyFromValue(spanishMonthsMap, selectedTempMonth!);
@@ -395,7 +395,6 @@ class _GradesByStudentState extends State<GradesByStudent> {
                                     var gradeInt = getKeyFromValue(
                                         teacherGradesMap,
                                         selectedTempGrade!.toString());
-                                    var selectedmonth;
                                     int? monthNumber;
 
                                     if (isUserAdmin == true) {

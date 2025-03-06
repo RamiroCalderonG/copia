@@ -282,11 +282,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
               currentUser = User.fromJson(jsonData);
 
               //GET USER ROLE AND PERMISSIONS
-                await getRoleListOfPermissions(jsonData).whenComplete(()async{
-                  await getUserAccessRoutes();
-                }).catchError((error){
-                  throw Future.error(error.toString);
-                });
+                var result = await getRoleListOfPermissions(jsonData);
+                 await getUserAccessRoutes();
               
               //await getUserRoleAndAcces(currentUser!.roleID!);
 

@@ -203,10 +203,7 @@ class _DrawerClassState extends State<DrawerClass> {
             leading: const Icon(Icons.exit_to_app),
             onTap: () {
               // clearStudentData();
-              clearUserData();
-              clearTempData();
               logOutCurrentUser(currentUser!);
-
               context.goNamed(
                 '_initialize',
                 extra: <String, dynamic>{
@@ -216,6 +213,8 @@ class _DrawerClassState extends State<DrawerClass> {
                   ),
                 },
               );
+               clearUserData();
+              clearTempData();
               // Navigator.pop(context);
               // Navigator.pushReplacement(context,
               //     MaterialPageRoute(builder: (context) => LoginViewWidget()));
