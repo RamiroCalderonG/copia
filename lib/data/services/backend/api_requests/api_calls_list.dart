@@ -932,6 +932,7 @@ Future<dynamic> patchStudentsGrades(
       return apiCall.statusCode;
     }
   } catch (e) {
+    insertErrorLog(e.toString(), 'patchStudentsGrades() | isByStudent : $isByStudent , | body: $requestBody');
     return Future.error(e.toString());
   }
 }

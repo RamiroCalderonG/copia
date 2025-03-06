@@ -252,10 +252,12 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                   initialSelection: preSelectedGroup ?? selectedGroup,
                   onSelected: (String? value) {
                     setState(() {
+
                       preSelectedGroup = value;
                       selectedGroup = value;
-                      selectedSubject = null; // Clear dependent selections
+                      selectedSubject = filteredSubject.first; // Clear dependent selections
                       selectedTempGroup = value;
+
                       filterData();
                     });
                   },
@@ -266,7 +268,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                   }).toList(),
                 ),
           //    ),
-            if (!widget.byStudent)
+            if (!widget.byStudent) //Not by student
               //Flexible(
                //   flex: 2,
                 //  fit: FlexFit.loose,
@@ -276,6 +278,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                           ' Materia ',
                           style: TextStyle(fontSize: 12),
                         ),
+                        
                         trailingIcon: const Icon(Icons.arrow_drop_down),
                         initialSelection: preSelectedSubject ?? selectedSubject,
                         onSelected: (String? value) {

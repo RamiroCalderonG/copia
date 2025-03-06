@@ -49,7 +49,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
   String selectedStudentName = '';
   var fetchedData;
   bool isFetching = true;
-
+  int? monthNumber;
   String dropDownValue = ''; //oneTeacherAssignatures.first;
   int? assignatureID;
   late Future<dynamic> _fetchedDataFromRequest;
@@ -180,13 +180,20 @@ class _GradesByStudentState extends State<GradesByStudent> {
     }
   }
 
-  dynamic patchStudentGradesToDB() async {
-    var response = await patchStudentsGrades(studentGradesBodyToUpgrade, true);
-    if (response == 200) {
-      return 200;
-    } else {
-      return response;
-    }
+  Future<dynamic> patchStudentGradesToDB() async {
+    await patchStudentsGrades(studentGradesBodyToUpgrade, true).then((value) {
+      if (value != null) {
+        if (value == 200) {
+          return 200;
+        } else {
+          return value;
+        }
+      }
+    }).catchError((onError, stackTrace) {
+      insertErrorLog(onError.toString(),
+          'PATCH STUDENT GRADES TO DB | $studentGradesBodyToUpgrade');
+      throw Future.error(onError.toString);
+    });
   }
 
   @override
@@ -237,7 +244,6 @@ class _GradesByStudentState extends State<GradesByStudent> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Flexible(child: RefreshButton(onPressed: () async {
-                  var monthNumber;
                   if (isUserAdmin) {
                     //Calendar month number
                     monthNumber =
@@ -269,7 +275,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
                     await searchBUttonAction(
                       selectedTempGroup!,
                       selectedTempGrade!,
-                      monthNumber,
+                      monthNumber!,
                       selectedTempCampus!,
                     ).whenComplete(() {
                       setState(() {
@@ -284,12 +290,18 @@ class _GradesByStudentState extends State<GradesByStudent> {
                 Flexible(
                   child: SaveItemButton(
                     onPressed: () {
+                      setState(() {
+                        isFetching = true;
+                      });
                       if (studentGradesBodyToUpgrade.isEmpty) {
                         showEmptyFieldAlertDialog(
                             context, 'No se detectó ningun cambio a realizar');
+                            setState(() {
+                              isFetching = false;
+                            });
                       } else {
-                        var monthNumber;
-                        if (isUserAdmin) {
+                        try {
+                          if (isUserAdmin) {
                           monthNumber = getKeyFromValue(
                               spanishMonthsMap, selectedTempMonth!);
                         } else {
@@ -297,17 +309,27 @@ class _GradesByStudentState extends State<GradesByStudent> {
                               spanishMonthsMap, selectedCurrentTempMonth!);
                         }
                         saveButtonAction(monthNumber).whenComplete(() async {
+                          studentGradesBodyToUpgrade.clear();
                           await searchBUttonAction(
                             selectedTempGroup!,
                             selectedTempGrade!,
-                            monthNumber,
+                            monthNumber!,
                             selectedTempCampus!,
-                          ).whenComplete(() {
-                            setState(() {
+                          );
+                          setState(() {
                               isFetching = false;
+                              showInformationDialog(context, 'Èxito', 'Cambios realizados!');
                             });
-                          });
                         });
+                        } catch (e) {
+                          setState(() {
+                            isFetching = false;
+                             showErrorFromBackend(context, e.toString());
+                          });
+                         
+                        }
+                       
+                        
                       }
                     },
                   ),
@@ -420,7 +442,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
                             width: 20,
                           ),
                           Expanded(
-                            flex: 3,
+                            flex: 2,
                             child: LayoutBuilder(
                               builder: (BuildContext context,
                                   BoxConstraints constraints) {
@@ -648,12 +670,12 @@ class _GradesByStudentState extends State<GradesByStudent> {
   }
 
   Future<void> saveButtonAction(int? monthNumber) async {
-    var response = await patchStudentGradesToDB();
-
-    if (response == 200) {
+    await patchStudentGradesToDB().then((response){
+      return;
+/* if (response == 200) {
       if (context.mounted) {
-        showConfirmationDialog(
-            context, 'Actualizado', 'Cambios realizados con exito');
+       showInformationDialog(context, 'Èxito', 'Cambios realizados!');
+
         searchBUttonAction(
           selectedTempGroup!,
           selectedTempGrade!,
@@ -669,7 +691,12 @@ class _GradesByStudentState extends State<GradesByStudent> {
           showErrorFromBackend(context, response.toString());
         }
       }
-    }
+    } */
+    }).onError((error, stackTrace){
+      throw Future.error(error.toString());
+    });
+
+    
   }
 
   Future<void> loadSelectedStudent(

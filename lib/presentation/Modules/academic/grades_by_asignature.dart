@@ -117,11 +117,11 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
   /// [assignatureID] is the selected assignature ID.
   /// [monthNumber] is the selected month number.
   /// [campus] is the selected campus.
-  void searchBUttonAction(String groupSelected, String gradeInt,
-      String assignatureID, String monthNumber, String campus) async {
+  Future<void> searchBUttonAction(String groupSelected, String gradeInt,
+      String assignatureID, String month, String campus) async {
     try {
       studentList = await getStudentsByAssinature(
-          groupSelected, gradeInt, assignatureID, monthNumber, campus);
+          groupSelected, gradeInt, assignatureID, month, campus);
 
       await fillGrid(studentList);
       setState(() {
@@ -157,15 +157,18 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
   /// Updates the grades in the backend.
   ///
   /// Returns a future that completes with a boolean indicating whether the update was successful.
-  dynamic patchStudentGradesToDB() async {
-    var response = await patchStudentsGrades(studentGradesBodyToUpgrade, false);
-    if (response == 200) {
-      return 200;
-    } else {
-      return 400;
-    }
-
-    // return response;
+  Future<dynamic> patchStudentGradesToDB() async {
+    var response;
+    await patchStudentsGrades(studentGradesBodyToUpgrade, false).then((status) {
+      if (status == 200) {
+        response = 200;
+      }
+    }).onError((error, statusTrace) {
+      insertErrorLog(error.toString(),
+          'patchStudentsGrades  | $studentGradesBodyToUpgrade');
+      response = 400;
+    });
+    return response;
   }
 
   @override
@@ -229,7 +232,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                       isLoading = true;
                     });
                     try {
-                      var monthNumber;
+                   
                       // isUserAdmin = currentUser!.isCurrentUserAdmin();
 
                       if (currentUser!.isCurrentUserAdmin()) {
@@ -285,12 +288,9 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                       setState(() {
                         isLoading = true;
                       });
-                      updateButtonFunction((success) {
+                      await updateButtonFunction((success) async {
                         if (success) {
-                          showConfirmationDialog(
-                              context, 'Exito', 'Cambios realizados con exito');
-
-                          var assignatureID = getKeyFromValue(
+                          /*   var assignatureID = getKeyFromValue(
                               assignaturesMap, selectedTempSubject!);
 
                           var monthNumber;
@@ -302,21 +302,32 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                                 spanishMonthsMap, selectedCurrentTempMonth!);
                           }
                           var gradeInt = getKeyFromValue(
-                              teacherGradesMap, selectedTempGrade!.toString());
-                          assignatureRows.clear();
+                              teacherGradesMap, selectedTempGrade!.toString()); */
+                          try  {
+                            studentGradesBodyToUpgrade.clear();
+                             await searchBUttonAction(
+                                    selectedTempGroup!,
+                                    selectedTempGrade.toString(),
+                                    selectedTempSubjectId.toString(),
+                                    monthNumber.toString(),
+                                    selectedTempCampus!);
 
-                          searchBUttonAction(
-                              selectedTempGroup!,
-                              gradeInt.toString(),
-                              selectedTempSubjectId.toString(),
-                              monthNumber.toString(),
-                              selectedTempCampus!);
-                          setState(() {
-                            isLoading = false;
-                          });
+                            setState(() {
+                              isLoading = false;
+                              showInformationDialog(context, 'Èxito', 'Cambios realizados!');
+                            });
+                          } catch (e) {
+                            setState(() {
+                              isLoading = false;
+                            });
+                            showErrorFromBackend(context, e.toString());
+                          }
                         } else {
                           showErrorFromBackend(context, 'Error');
                         }
+                      });
+                      setState(() {
+                        isLoading = false;
                       });
                     },
                     icon: const Icon(Icons.save),
@@ -442,19 +453,21 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
   /// Updates the grades in the backend and shows a confirmation dialog.
   ///
   /// [callback] is a function that is called with a boolean indicating whether the update was successful.
-  void updateButtonFunction(void Function(bool success) callback) async {
+  Future<void> updateButtonFunction(void Function(bool success) callback) async {
     if (studentGradesBodyToUpgrade.isEmpty) {
       callback(false);
     } else {
-      var response;
       try {
-        response = await patchStudentGradesToDB();
+        await patchStudentGradesToDB().then((response) {
+          if (response == 200) {
+            callback(true);
+          } else {
+            callback(false);
+          }
+        }).onError((error, stackTrace) {
+          callback(false);
+        });
       } catch (e) {
-        callback(false);
-      }
-      if (response == 200) {
-        callback(true);
-      } else {
         callback(false);
       }
     }
