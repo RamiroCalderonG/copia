@@ -13,6 +13,7 @@ import 'package:oxschool/core/config/flutter_flow/flutter_flow_util.dart';
 import 'package:oxschool/presentation/Modules/main_window/main_window_widget.dart';
 import 'package:oxschool/presentation/Modules/user/user_view_screen.dart';
 import 'package:oxschool/presentation/components/mobile_FloatingActionButton.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/constants/url_links.dart';
 
@@ -243,7 +244,7 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
               ListTile(
                 title: const Text('Cerrar sesión'),
                 leading: const Icon(Icons.exit_to_app),
-                onTap: () {
+                onTap: () async {
                   logOutCurrentUser(currentUser!);
                   context.goNamed(
                     '_initialize',
@@ -256,6 +257,8 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
                   );
                                     clearUserData();
                   clearTempData();
+                     SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.clear();
 
                   // Navigator.pop(context);
                   // Navigator.pushReplacement(context,

@@ -474,7 +474,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
             ListTile(
               title: const Text('Cerrar sesión'),
               leading: const Icon(Icons.exit_to_app),
-              onTap: () {
+              onTap: () async {
                 logOutCurrentUser(currentUser!);
                 context.goNamed(
                   '_initialize',
@@ -487,6 +487,8 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                 );
                 clearUserData();
                 clearTempData();
+                   SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.clear();
               },
             ),
           ],
