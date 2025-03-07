@@ -14,7 +14,7 @@ import '../../data/services/backend/api_requests/api_calls_list.dart';
 
 void clearTempData() {
   listOfUsersForGrid.clear();
-  usersPlutoRowList.clear();
+  //usersPlutoRowList.clear();
   selectedUser = null;
   tempUserId = null;
   tempSelectedUsr = null;
@@ -94,6 +94,10 @@ Future<void> getRoleListOfPermissions(Map<String, dynamic> jsonuserInfo) async {
 
       currentUser!.userRole = userRole; // Insert Role into currentUser.userRole
       return;
+    }).onError((error, stackTrace){
+      insertErrorLog(error.toString(), 'getRolePermissions');
+      throw Future.error(error.toString());
+      
     });
   } catch (e) {
     insertErrorLog(e.toString(), 'getRoleListOfPermissions() | ');

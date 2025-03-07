@@ -3,6 +3,7 @@
 import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/constants/url_links.dart';
 import 'package:oxschool/core/extensions/capitalize_strings.dart';
+import 'package:oxschool/core/reusable_methods/temp_data_functions.dart';
 import 'package:oxschool/core/reusable_methods/user_functions.dart';
 import 'package:oxschool/core/utils/device_information.dart';
 import 'package:oxschool/core/utils/temp_data.dart';
@@ -469,28 +470,11 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
               ),
             ),
             MyExpansionTileList(),
-          /*   FutureBuilder(
-              future: userEvents,
-              builder: (BuildContext context,
-                  AsyncSnapshot<http.Response> snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                } else if (!snapshot.hasData ||
-                    snapshot.data!.statusCode != 200) {
-                  return const Center(child: Text('Error Loading Data'));
-                } else {
-                  List<dynamic> json = jsonDecode(snapshot.data!.body);
-                  return MyExpansionTileList(elementList: json);
-                }
-              },
-            ), */
             const Divider(thickness: 3),
             ListTile(
               title: const Text('Cerrar sesión'),
               leading: const Icon(Icons.exit_to_app),
-              onTap: () {
+              onTap: () async {
                 logOutCurrentUser(currentUser!);
                 context.goNamed(
                   '_initialize',
@@ -501,6 +485,10 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                     ),
                   },
                 );
+                clearUserData();
+                clearTempData();
+                   SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.clear();
               },
             ),
           ],

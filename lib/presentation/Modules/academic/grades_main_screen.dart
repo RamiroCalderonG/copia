@@ -120,9 +120,9 @@ class _GradesMainScreenState extends State<GradesMainScreen>
         });
       }
       if (canEvaluateNow) {
-        if (isUserAdmin) {
-          await loadStartGradingAsAdmin(
-              currentCycle!.claCiclo!, null, true, null, null, currentUser!.isCurrentUserAcademicCoord());
+        if (isUserAdmin || currentUser!.isAcademicCoord! ) {
+          await loadStartGradingAsAdminOrAcademicCoord(
+              currentCycle!.claCiclo!, currentUser!.claUn, true, null, null, currentUser!.isCurrentUserAcademicCoord(), currentUser!.isCurrentUserAdmin() );
         } else {
           await loadStartGrading(
               currentUser!.employeeNumber!,

@@ -48,8 +48,8 @@ dynamic loadStartGrading(int employeeNumber, String schoolYear, bool isAdmin,
   }
 }
 
-Future<dynamic> loadStartGradingAsAdmin(String schoolYear, String? campus,
-    bool initialFetch, int? subject, int? group, bool isAcademicCoord ) async {
+Future<dynamic> loadStartGradingAsAdminOrAcademicCoord(String schoolYear, String? campus,
+    bool initialFetch, int? subject, int? group, bool isAcademicCoord, bool isAdmin ) async {
   try {
     DateTime now = DateTime.now();
     int month = now.month;
@@ -58,7 +58,7 @@ Future<dynamic> loadStartGradingAsAdmin(String schoolYear, String? campus,
     if (initialFetch) {
       //First time loading screen, to display all grades, groups, campus and assignatures to dispaly at DropdownSelector
       await getTeacherGradeAndCoursesAsAdmin(month,
-              currentUser!.isCurrentUserAdmin(), campus, currentCycle!.claCiclo, isAcademicCoord)
+              isAdmin, isAdmin ? null : campus, currentCycle!.claCiclo, isAcademicCoord)
           .then((response) {
         jsonList = json.decode(utf8.decode(response.bodyBytes));
         jsonDataForDropDownMenuClass = jsonList;
@@ -133,11 +133,11 @@ Future<void> getSingleTeacherGrades(List<dynamic> apiResponse) async {
     for (var i = 0; i < apiResponse.length; i++) {
       // String grade = apiResponse[i]['Grade'];
       // int gradeSequence = apiResponse[i]['Sequence'];
-      originalList.add(apiResponse[i]['Grade']);
+      originalList.add(apiResponse[i]['grade']);
       oneTeacherGrades = originalList.toSet().toList();
 
       Map<int, String> currentMapValue = {
-        apiResponse[i]['Sequence']: apiResponse[i]['Grade']
+        apiResponse[i]['sequence']: apiResponse[i]['grade']
       };
 
       teacherGradesMap.addEntries(currentMapValue.entries);
@@ -154,7 +154,7 @@ Future<void> getSingleTeacherGroups(List<dynamic> apiResponse) async {
     for (var i = 0; i < apiResponse.length; i++) {
       // String group = apiResponse[i]['School_group'];
 
-      originalList.add(apiResponse[i]['School_group']);
+      originalList.add(apiResponse[i]['school_group']);
       oneTeacherGroups = originalList.toSet().toList();
     }
   }
@@ -169,12 +169,12 @@ Future<void> getSingleTeacherAssignatures(List<dynamic> apiResponse) async {
     for (var i = 0; i < apiResponse.length; i++) {
       // String assignature = apiResponse[i]['Subject'];
       // int assignatureID = apiResponse[i]['Subject_id'];
-      originalList.add(apiResponse[i]['Subject']);
+      originalList.add(apiResponse[i]['subject']);
 
       oneTeacherAssignatures = originalList.toSet().toList();
 
       Map<int, String> currentMapValue = {
-        apiResponse[i]['Subject_id']: apiResponse[i]['Subject']
+        apiResponse[i]['subject_id']: apiResponse[i]['subject']
       };
       assignaturesMap.addEntries(currentMapValue.entries);
     }

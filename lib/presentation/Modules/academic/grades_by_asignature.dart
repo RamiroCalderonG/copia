@@ -127,8 +127,10 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
       setState(() {
         isLoading = true;
         assignatureRows.clear();
+        var index = 0;
         for (var item in studentList) {
           assignatureRows.add(PlutoRow(cells: {
+            'No': PlutoCell(value: index +1),
             'Matricula': PlutoCell(value: item.studentID),
             'Nombre': PlutoCell(value: item.studentName),
             'Apellido paterno': PlutoCell(value: item.student1LastName),
