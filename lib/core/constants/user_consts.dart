@@ -19,5 +19,6 @@ String? deviceIp;
 void clearUserData() {
   currentUser?.clear();
   currentCycle?.clear();
+  currentUser = null;
   _grades = null;
 }

@@ -94,6 +94,10 @@ Future<void> getRoleListOfPermissions(Map<String, dynamic> jsonuserInfo) async {
 
       currentUser!.userRole = userRole; // Insert Role into currentUser.userRole
       return;
+    }).onError((error, stackTrace){
+      insertErrorLog(error.toString(), 'getRolePermissions');
+      throw Future.error(error.toString());
+      
     });
   } catch (e) {
     insertErrorLog(e.toString(), 'getRoleListOfPermissions() | ');

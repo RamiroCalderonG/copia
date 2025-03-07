@@ -3,6 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 // ignore: depend_on_referenced_packages
 import 'package:http/http.dart' as http;
+import 'package:oxschool/core/reusable_methods/temp_data_functions.dart';
 import 'package:oxschool/core/reusable_methods/user_functions.dart';
 import 'package:oxschool/presentation/Modules/services_ticket/processes/create_service_ticket.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
@@ -244,9 +245,6 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
                 leading: const Icon(Icons.exit_to_app),
                 onTap: () {
                   logOutCurrentUser(currentUser!);
-                  // clearStudentData();
-                  // clearUserData();
-
                   context.goNamed(
                     '_initialize',
                     extra: <String, dynamic>{
@@ -256,6 +254,9 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
                       ),
                     },
                   );
+                                    clearUserData();
+                  clearTempData();
+
                   // Navigator.pop(context);
                   // Navigator.pushReplacement(context,
                   //     MaterialPageRoute(builder: (context) => LoginViewWidget()));

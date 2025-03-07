@@ -212,7 +212,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                   ),
                 
               
-            if (unityList.length == 1) Flexible(child: Text(unityList.first)),
+            if (unityList.length == 1) Text(unityList.first),
            // Flexible(
             //    child: 
                 DropdownMenu<String>(
@@ -302,7 +302,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (currentUser!.isCurrentUserAdmin())
+                  if (currentUser!.isCurrentUserAdmin() || currentUser!.isCurrentUserAcademicCoord())
                     DropdownMenu<String>(
                         label: const Text(' Mes '),
                         trailingIcon: const Icon(Icons.arrow_drop_down),

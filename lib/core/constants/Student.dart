@@ -1,5 +1,6 @@
 // ignore_for_file: file_names, prefer_typing_uninitialized_variables
 
+import 'package:flutter/material.dart';
 import 'package:oxschool/data/Models/Family.dart';
 import 'package:oxschool/data/Models/Student.dart';
 import 'package:pluto_grid/pluto_grid.dart';
@@ -31,14 +32,22 @@ void clearStudentData() {
 }
 
 final List<PlutoColumn> studentColumnsToEvaluateByStudent = <PlutoColumn>[
-  PlutoColumn(
+   PlutoColumn(
     title: 'No',
     field: 'No',
     type: PlutoColumnType.number(),
-    width: 50,
+    width: 25,
     readOnly: true,
+    renderer: (rendererContext) {
+      return Center(
+        child : Text(
+          (rendererContext.rowIdx +1).toString(),
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+      );
+    },
     // sort: PlutoColumnSort.ascending
-  ),
+  ), 
   PlutoColumn(
       title: 'Matricula',
       field: 'studentID',
@@ -59,6 +68,21 @@ final List<PlutoColumn> evaluationColumnsToEvaluateByStudent = <PlutoColumn>[];
 
 final List<PlutoColumn> assignaturesColumns = <PlutoColumn>[
   //TO USE at grades_by_assignature
+  PlutoColumn(
+    title: 'No',
+    field: 'No',
+    width: 12,
+    type: PlutoColumnType.number(),
+    readOnly: true, 
+    renderer: (rendererContext) {
+      return Center(
+        child: Text(
+          (rendererContext.rowIdx + 1).toString(),
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+      );
+    },
+  ),
   PlutoColumn(
       title: 'Matricula',
       field: 'Matricula',
