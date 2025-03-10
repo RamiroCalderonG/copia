@@ -37,8 +37,8 @@ String? subjectSelected = oneTeacherAssignatures.first;
 List<PlutoRow> rows = [];
 
 class _GradesByStudentState extends State<GradesByStudent> {
-  bool isUserAdmin = currentUser!.isCurrentUserAdmin();
-  bool isUserAcademicCoord = currentUser!.isCurrentUserAcademicCoord();
+  bool isUserAdmin = false;
+  bool isUserAcademicCoord = false;
   var commentsController = TextEditingController();
   late PlutoGridStateManager stateManager;
   late PlutoGridStateManager gridAStateManager;
@@ -60,6 +60,8 @@ class _GradesByStudentState extends State<GradesByStudent> {
 
   @override
   void initState() {
+    isUserAdmin = currentUser!.isCurrentUserAdmin();
+    isUserAcademicCoord = currentUser!.isCurrentUserAcademicCoord();
     _fetchData();
     initializeDateFormatting();
     super.initState();
@@ -82,7 +84,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
   }
 
   void _fetchData() async {
-    var response = isUserAdmin
+    var response = isUserAdmin || isUserAcademicCoord
         ? loadStartGradingAsAdminOrAcademicCoord(
             currentCycle!.claCiclo!, null, true, null, null, isUserAcademicCoord, isUserAdmin )
         : loadStartGrading(

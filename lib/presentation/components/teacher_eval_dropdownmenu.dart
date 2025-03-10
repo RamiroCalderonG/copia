@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:oxschool/core/reusable_methods/reusable_functions.dart';
@@ -58,13 +57,9 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
 
   @override
   void dispose() {
-    monthValue = '';
-    selectedCurrentTempMonth = null;
-    selectedTempMonth = null;
-    // filteredSubjectMap.clear();
-    // filteredGrade.clear();
-    // filteredGroup.clear();
-    // filteredSubject.clear();
+    //monthValue = '';
+    //selectedCurrentTempMonth = null;
+    //selectedTempMonth = null;
     super.dispose();
   }
 
