@@ -51,7 +51,8 @@ String currentMonth = DateFormat.MMMM().format(DateTime.now());
 String? subjectSelected = oneTeacherAssignatures.first;
 
 /// Whether the user is an admin.
-bool isUserAdmin = false; //currentUser!.isCurrentUserAdmin();
+bool isUserAdmin = false;
+bool isUserAcademicCoord = false;
 
 /// The list of rows in the grid.
 List<PlutoRow> rows = [];
@@ -61,7 +62,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
   String? selectedStudentName;
   // var gradeInt;
   int? monthNumber;
-  String monthValue = isUserAdmin ? academicMonthsList.first : currentMonth;
+  String monthValue = isUserAdmin || isUserAcademicCoord ? academicMonthsList.first : currentMonth;
 
   // int? assignatureID;
   String campusSelected = '';
@@ -73,6 +74,8 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
 
   @override
   void initState() {
+    isUserAdmin = currentUser!.isCurrentUserAdmin();
+    isUserAcademicCoord = currentUser!.isCurrentUserAcademicCoord();
     _fetchData();
     super.initState();
   }
@@ -237,7 +240,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                    
                       // isUserAdmin = currentUser!.isCurrentUserAdmin();
 
-                      if (currentUser!.isCurrentUserAdmin()) {
+                      if (isUserAdmin || isUserAcademicCoord) {
                         //Get month number
                         monthNumber = getKeyFromValue(
                             spanishMonthsMap, selectedTempMonth!);
@@ -316,15 +319,17 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
 
                             setState(() {
                               isLoading = false;
-                              showInformationDialog(context, 'Èxito', 'Cambios realizados!');
+                              showInformationDialog(context, 'Éxito', 'Cambios realizados!');
                             });
                           } catch (e) {
                             setState(() {
                               isLoading = false;
+                              showErrorFromBackend(context, e.toString());
                             });
-                            showErrorFromBackend(context, e.toString());
+                            
                           }
                         } else {
+                          isLoading = false;
                           showErrorFromBackend(context, 'Error');
                         }
                       });
@@ -442,7 +447,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
     }
     selectedUnity ??= campusesWhereTeacherTeach.first;
 
-    if (isUserAdmin == true) {
+    if (isUserAdmin || isUserAcademicCoord) {
       monthNumber = getKeyFromValue(spanishMonthsMap, monthValue);
     } else {
       monthNumber = getKeyFromValue(spanishMonthsMap, currentMonth);

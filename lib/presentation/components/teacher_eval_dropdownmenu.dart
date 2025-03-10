@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:oxschool/core/reusable_methods/reusable_functions.dart';
@@ -58,16 +57,15 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
 
   @override
   void dispose() {
-    // filteredSubjectMap.clear();
-    // filteredGrade.clear();
-    // filteredGroup.clear();
-    // filteredSubject.clear();
+    //monthValue = '';
+    //selectedCurrentTempMonth = null;
+    //selectedTempMonth = null;
     super.dispose();
   }
 
   _isUserAdminResult() async {
     setState(() {
-      if (currentUser!.isCurrentUserAdmin() == false) {
+      if (currentUser!.isCurrentUserAdmin() == false && currentUser!.isCurrentUserAcademicCoord() == false) {
         //If user not admin, will assign current month, and it will not change
         selectedCurrentTempMonth = currentMonth;
         monthValue = currentMonth;
@@ -341,7 +339,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
     selectedGroup ??= filteredGroup.first;
     selectedSubject ??= filteredSubject.first;
 
-    if (currentUser!.isCurrentUserAdmin() == true) {
+    if (currentUser!.isCurrentUserAdmin() || currentUser!.isCurrentUserAcademicCoord()) {
       monthValue = getKeyFromValue(spanishMonthsMap, monthValue).toString();
     } else {
       monthValue = getKeyFromValue(spanishMonthsMap, currentMonth).toString();
