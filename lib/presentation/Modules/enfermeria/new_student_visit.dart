@@ -16,7 +16,7 @@ import 'package:oxschool/core/utils/loader_indicator.dart';
 
 import '../../../data/services/backend/api_requests/api_calls.dart';
 import '../../../data/services/backend/api_requests/api_manager.dart';
-import '../../../core/constants/User.dart';
+import '../../../core/constants/user_consts.dart';
 import '../../../core/reusable_methods/employees_methods.dart';
 import '../../../core/utils/temp_data.dart';
 
@@ -70,12 +70,28 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
   String? selectedAccidentType;
 
   @override
+  void dispose() {
+    _date.dispose();
+    _studentId.dispose();
+    _studentname.dispose();
+    _visitMotive.dispose();
+    _tx.dispose();
+    _valoration.dispose();
+    _kindOfPain.dispose();
+    _kindOfWound.dispose();
+    _otherCauses.dispose();
+    _observations.dispose();
+    _accidentTypes.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    Color getColor(Set<MaterialState> states) {
-      const Set<MaterialState> interactiveStates = <MaterialState>{
-        MaterialState.pressed,
-        MaterialState.hovered,
-        MaterialState.focused,
+    Color getColor(Set<WidgetState> states) {
+      const Set<WidgetState> interactiveStates = <WidgetState>{
+        WidgetState.pressed,
+        WidgetState.hovered,
+        WidgetState.focused,
       };
       if (states.any(interactiveStates.contains)) {
         return Colors.blue;
@@ -434,7 +450,7 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
                               Checkbox(
                                 checkColor: Colors.white,
                                 fillColor:
-                                    MaterialStateProperty.resolveWith(getColor),
+                                    WidgetStateProperty.resolveWith(getColor),
                                 value: _isClinicChecked,
                                 onChanged: (bool? value) {
                                   setState(() {
@@ -450,7 +466,7 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
                               Checkbox(
                                 checkColor: Colors.white,
                                 fillColor:
-                                    MaterialStateProperty.resolveWith(getColor),
+                                    WidgetStateProperty.resolveWith(getColor),
                                 value: _isDoctorConsultChecked,
                                 onChanged: (bool? value) {
                                   setState(() {
@@ -475,7 +491,7 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
                             Checkbox(
                                 checkColor: Colors.white,
                                 fillColor:
-                                    MaterialStateProperty.resolveWith(getColor),
+                                    WidgetStateProperty.resolveWith(getColor),
                                 value: _isPhoneNotChecked,
                                 onChanged: (bool? value) {
                                   setState(() {
@@ -491,7 +507,7 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
                             Checkbox(
                                 checkColor: Colors.white,
                                 fillColor:
-                                    MaterialStateProperty.resolveWith(getColor),
+                                    WidgetStateProperty.resolveWith(getColor),
                                 value: _isPersonalNotifChecked,
                                 onChanged: (bool? value) {
                                   setState(() {
@@ -507,7 +523,7 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
                             Checkbox(
                                 checkColor: Colors.white,
                                 fillColor:
-                                    MaterialStateProperty.resolveWith(getColor),
+                                    WidgetStateProperty.resolveWith(getColor),
                                 value: _isReportNotifChecked,
                                 onChanged: (bool? value) {
                                   setState(() {

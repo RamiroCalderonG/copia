@@ -12,7 +12,7 @@ List<String> academicMonthsList = [
   'Diciembre'
 ];
 
-Map<int, String> monthsListMap = {
+Map<int, String> spanishMonthsMap = {
   1: 'Enero',
   2: 'Febrero',
   3: 'Marzo',
@@ -25,4 +25,19 @@ Map<int, String> monthsListMap = {
   10: 'Octubre',
   11: 'Noviembre',
   12: 'Diciembre'
+};
+
+Map<int, String> englishMonthsMap = {
+  1: 'January',
+  2: 'February',
+  3: 'March',
+  4: 'April',
+  5: 'May',
+  6: 'June',
+  7: 'July',
+  8: 'August',
+  9: 'September',
+  10: 'October',
+  11: 'November',
+  12: 'December'
 };

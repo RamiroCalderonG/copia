@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:oxschool/core/constants/User.dart';
+import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/reusable_methods/user_functions.dart';
 import 'package:oxschool/presentation/Modules/enfermeria/nursery_main_screen.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_util.dart';
 import 'package:oxschool/core/reusable_methods/temp_data_functions.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../Modules/academic/grades_main_screen.dart';
 import '../Modules/services_ticket/processes/services_main_screen.dart';
 
@@ -201,13 +202,9 @@ class _DrawerClassState extends State<DrawerClass> {
           ListTile(
             title: const Text('Cerrar Sesion'),
             leading: const Icon(Icons.exit_to_app),
-            onTap: () {
+            onTap: () async {
               // clearStudentData();
-              clearUserData();
-              clearTempData();
-              logOutCurrentUser(
-                  currentUser!.token, currentUser!.employeeNumber.toString());
-
+              logOutCurrentUser(currentUser!);
               context.goNamed(
                 '_initialize',
                 extra: <String, dynamic>{
@@ -217,6 +214,10 @@ class _DrawerClassState extends State<DrawerClass> {
                   ),
                 },
               );
+               clearUserData();
+              clearTempData();
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.clear();
               // Navigator.pop(context);
               // Navigator.pushReplacement(context,
               //     MaterialPageRoute(builder: (context) => LoginViewWidget()));

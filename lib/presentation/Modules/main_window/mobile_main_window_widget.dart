@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 // ignore: depend_on_referenced_packages
 import 'package:http/http.dart' as http;
+import 'package:oxschool/core/reusable_methods/temp_data_functions.dart';
 import 'package:oxschool/core/reusable_methods/user_functions.dart';
 import 'package:oxschool/presentation/Modules/services_ticket/processes/create_service_ticket.dart';
-import 'package:oxschool/core/constants/User.dart';
+import 'package:oxschool/core/constants/user_consts.dart';
 
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_util.dart';
 import 'package:oxschool/presentation/Modules/main_window/main_window_widget.dart';
 import 'package:oxschool/presentation/Modules/user/user_view_screen.dart';
+import 'package:oxschool/presentation/components/mobile_FloatingActionButton.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/constants/url_links.dart';
 
@@ -27,14 +31,14 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
   @override
   void dispose() {
     _model.dispose();
-
     super.dispose();
   }
 
   @override
   void initState() {
-    super.initState();
     _model = createModel(context, () => MainWindowModel());
+
+    super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {}));
   }
@@ -106,20 +110,22 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
                               Navigator.of(context).push(MaterialPageRoute(
                                   builder: (context) => const UserWindow()));
                             },
-                            icon: const Icon(Icons.person),
+                            style: ButtonStyle(
+                              backgroundColor: WidgetStateProperty.all(
+                                  FlutterFlowTheme.of(context)
+                                      .secondaryBackground),
+                              shape: WidgetStateProperty.all(
+                                  RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(30))),
+                            ),
+                            tooltip: 'Perfil de usuario',
+                            icon: const Icon(
+                              Icons.person,
+                            ),
                             iconSize: 30.2,
-                            color: const Color.fromRGBO(235, 48, 69, 0.988),
+                            color: const Color(0xFF2BC0E4),
                           ),
-                          Text(
-                              '${currentUser?.employeeName?.toLowerCase().trimRight()}',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  fontFamily: 'Sora',
-                                  fontSize: 18,
-                                  color: FlutterFlowTheme.of(context)
-                                      .primaryText) // FlutterFlowTheme.of(context).bodyMedium,
-                              ),
-                          // Padding(padding: EdgeInsets.only(left: 5, right: 5)),
+                          Padding(padding: EdgeInsets.only(left: 5, right: 5)),
                         ],
                       ),
                     ),
@@ -133,12 +139,17 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
       bottom: AppBar(
         backgroundColor: FlutterFlowTheme.of(context).primary,
         leading: IconButton(
-          hoverColor: Colors.black12,
-          icon: const Icon(
-            Icons.menu,
+          color: const Color(0xFF1F1C2C),
+          //hoverColor: const Color(0xFFF87060),
+          icon: const FaIcon(
+            FontAwesomeIcons.barsStaggered,
             size: 30,
-            // size: 40.5,
           ),
+          // Icon(
+          //   Icons.menu,
+          //   size: 30,
+          //   // size: 40.5,
+          // ),
           onPressed: () async {
             scaffoldKey.currentState!.openDrawer();
           },
@@ -226,19 +237,15 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
                       );
                     } else {
                       List<dynamic> json = jsonDecode(response.data!.body);
-                      return MyExpansionTileList(elementList: json);
+                      return MyExpansionTileList();
                     }
                   }),
               const Divider(thickness: 3),
               ListTile(
                 title: const Text('Cerrar sesión'),
                 leading: const Icon(Icons.exit_to_app),
-                onTap: () {
-                  logOutCurrentUser(currentUser!.token,
-                      currentUser!.employeeNumber.toString());
-                  // clearStudentData();
-                  // clearUserData();
-
+                onTap: () async {
+                  logOutCurrentUser(currentUser!);
                   context.goNamed(
                     '_initialize',
                     extra: <String, dynamic>{
@@ -248,6 +255,11 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
                       ),
                     },
                   );
+                                    clearUserData();
+                  clearTempData();
+                     SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.clear();
+
                   // Navigator.pop(context);
                   // Navigator.pushReplacement(context,
                   //     MaterialPageRoute(builder: (context) => LoginViewWidget()));
@@ -274,6 +286,7 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
           ],
           floatHeaderSlivers: true,
           body: Placeholder(
+            color: FlutterFlowTheme.of(context).primaryBackground,
             strokeWidth: 0.0,
             child: menuListItems,
           ),
@@ -292,79 +305,91 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
           // ),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        floatingActionButton: FloatingActionButton(
-          backgroundColor: const Color.fromRGBO(82, 170, 94, 1.0),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-          tooltip: 'Menu rapido',
-          onPressed: () {},
-          child: PopupMenuButton<int>(
-            key: UniqueKey(),
-            itemBuilder: (context) => [
-              const PopupMenuItem<int>(
-                value: 1,
-                child: Text('Crear ticket de servicio'),
-              ),
-              const PopupMenuItem<int>(
-                value: 2,
-                child: Text('Consultar recibo de nomina'),
-              ),
-              const PopupMenuItem<int>(
-                value: 3,
-                child: Text('Consulta huellas en checador'),
-              ),
-            ],
-            onSelected: (value) {
-              switch (value) {
-                case 1:
-                  showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: const Text('Crear Ticket de servicio'),
-                          content: const CreateServiceTicket(),
-                          actions: <Widget>[
-                            TextButton(
-                              style: TextButton.styleFrom(
-                                textStyle:
-                                    Theme.of(context).textTheme.labelLarge,
-                              ),
-                              child: const Text(''),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                          ],
-                        );
-                      });
-
-                  break;
-                default:
-              }
-            },
-            child: const Icon(Icons.menu, size: 28),
-          ),
-        ),
+        floatingActionButton: mobileFloatingActionButton(context),
         bottomNavigationBar: BottomAppBar(
-          color: const Color(0xFF0299FF),
+          color: const Color(0xFF102542),
           shape: const CircularNotchedRectangle(),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              IconButton(
-                  onPressed: () {},
-                  icon: const Icon(
-                    Icons.home,
-                    color: Color.fromRGBO(43, 217, 254, 1.0),
-                    size: 35.5,
-                  )),
-              IconButton(
-                  onPressed: () {},
-                  icon: const Icon(
-                    Icons.favorite,
-                    color: Colors.red,
-                    size: 35.5,
-                  )),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Flexible(
+                      child: IconButton(
+                          padding: const EdgeInsets.all(3),
+                          tooltip: 'Otra opcion',
+                          onPressed: () {},
+                          icon: const Icon(
+                            Icons.home,
+                            color: Color(0xFFF87060),
+                          )),
+                    ),
+                    Flexible(
+                      child: Text(
+                        'Otra opción',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Flexible(
+                      child: IconButton(
+                          padding: const EdgeInsets.all(3),
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text('Nuevo ticket de servicio'),
+                                  content: const CreateServiceTicket(),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      style: TextButton.styleFrom(
+                                        textStyle: Theme.of(context)
+                                            .textTheme
+                                            .labelLarge,
+                                      ),
+                                      child: const Text(''),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          },
+                          tooltip: 'Crear ticket de servicio',
+                          icon: const Icon(
+                            Icons.adb,
+                            color: Color(0xFFF87060),
+                          )
+                          // const FaIcon(
+                          //   FontAwesomeIcons.ticket,
+                          //   color: Color(0xFFF87060),
+                          //   // size: 35.5,
+                          // )
+
+                          ),
+                    ),
+                    Flexible(
+                      child: Text(
+                        'Ticket de servicio',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    )
+                  ],
+                ),
+              ),
             ],
           ),
         ),

@@ -1,5 +1,8 @@
 // ignore_for_file: file_names, non_constant_identifier_names
 
+import 'package:oxschool/core/extensions/capitalize_strings.dart';
+import 'package:oxschool/data/Models/Role.dart';
+
 class User {
   int? employeeNumber;
   String? employeeName;
@@ -8,13 +11,18 @@ class User {
   int userId;
   String token;
   String? userEmail;
-  String? usergenre;
+  //String? usergenre;
   int? isActive;
   String? work_area;
   String? work_position;
   String? creationDate;
   String? birthdate;
   bool? isTeacher;
+  bool? isAdmin;
+  int? roleID;
+  bool? canUpdatePassword;
+  bool? isAcademicCoord;
+  Role? userRole;
 
   // late final notActive;
 
@@ -26,13 +34,19 @@ class User {
       this.userId,
       this.token,
       this.userEmail,
-      this.usergenre,
+      //this.usergenre,
       this.isActive,
       this.work_area,
       this.work_position,
       this.creationDate,
       this.birthdate,
-      this.isTeacher);
+      this.isTeacher,
+      this.isAdmin,
+      this.roleID,
+      this.canUpdatePassword,
+      this.isAcademicCoord,
+      this.userRole
+      );
 
   Map<dynamic, dynamic> toJson() => {
         "employeeNumber": employeeNumber,
@@ -42,64 +56,76 @@ class User {
         "id": userId,
         "role": role,
         'useremail': userEmail,
-        'genre': usergenre,
+        //'genre': usergenre,
         "bajalogicasino": isActive,
         "department": work_area,
         "position": work_position,
         "creationDate": creationDate.toString(),
         "birthdate": birthdate,
-        "is_Teacher": isTeacher
-
+        "is_Teacher": isTeacher,
+        "isAdmin": isAdmin,
+        "roleID": roleID,
         // "notActive": notActive
       };
-  User fromJson(List<dynamic> jsonUser) {
-    for (var item in jsonUser) {
-      claUn = jsonUser[item]['claun'];
-      employeeName = jsonUser[item]['nombre_gafete'];
-      employeeNumber = jsonUser[item]['noempleado'];
-      role = jsonUser[item]['role_name'];
-      userId = jsonUser[item]['role_name'];
-      token = '';
-      userEmail = jsonUser[item]['user_email'];
-      usergenre = jsonUser[item]['genre'];
-      isActive = jsonUser[item]['bajalogicasino'];
-      work_area = jsonUser[item]['work_area'];
-      work_position = jsonUser[item]['work_position'];
-      creationDate = jsonUser[item]['creation_date'];
-      birthdate = jsonUser[item]['birthdate'];
-      isTeacher = jsonUser[item]['is_Teacher'];
-    }
-    return User(
-        claUn,
-        employeeName,
-        employeeNumber,
-        role,
-        userId,
-        token,
-        userEmail,
-        usergenre,
-        isActive,
-        work_area,
-        work_position,
-        creationDate,
-        birthdate,
-        isTeacher);
-  }
+
+  User.fromJson(Map<String, dynamic> json)
+      : employeeNumber = json['employeeNumber'],
+        employeeName = json['userFullName'],
+        claUn = json['userCampus'],
+        role = json['userRole']['softName'],
+        userId = json['id'],
+        token = '',
+        userEmail = json['userMail'],
+        isActive = json['userActive'],
+        work_area = json['userDept'],
+        work_position = json['userPosition'],
+        creationDate = json['creation_date'],
+        birthdate = json['userBirth'],
+        isTeacher = json['userTeacher'],
+        isAdmin = json['userRole']['isAdmin'],
+        roleID = json['userRole']['id'],
+        canUpdatePassword = json['userCanUpdatePassword'],
+        isAcademicCoord = json['userRole']['isAcademicCoordinator'];
 
   void clear() {
     employeeName = null;
     employeeNumber = null;
     claUn = null;
     token = "";
+    isAdmin = null;
   }
 
-  dynamic canEditStudentGrades() {
-    if (role == 'Administrador' ||
-        role == 'Director' ||
-        role == 'Coordinador') {
-      return true;
-    } else {
-      return false;
-    }
+  bool isUserTeacher() {
+    return isTeacher!;
   }
+
+  bool isCurrentUserAdmin() {
+    return isAdmin!;
+  }
+
+  bool isCurrentUserAcademicCoord() {
+    return isAcademicCoord!;
+  }
+
+  /*
+  *Function used for getting all users from backend and display it
+  *uses less fiields because needs to be simplified.
+  */
+  User.usersSimplifiedList(Map<String, dynamic> json)
+      : claUn = json['campus'].toString().toTitleCase,
+        employeeName = json['name'],
+        employeeNumber = json['employeeNumber'],
+        role = json['roleName'].toString().toTitleCase,
+        userId = json['id'],
+        token = '',
+        userEmail = json['email'],
+        isActive = json['isActive'],
+        work_area = json['department'].toString().toTitleCase,
+        work_position = json['position'].toString().toTitleCase,
+        creationDate = json['creationDate'],
+        birthdate = json['birthdate'],
+        isTeacher = json['isTeacher'],
+        isAdmin = json['admin'],
+        roleID = 0,
+        canUpdatePassword = json['can_update_password'];
 }

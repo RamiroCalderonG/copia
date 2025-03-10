@@ -1,37 +1,126 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
+import 'package:oxschool/core/reusable_methods/logger_actions.dart';
+
 import 'package:oxschool/data/Models/Student_eval.dart';
-import 'package:oxschool/core/constants/User.dart';
+import 'package:oxschool/core/constants/user_consts.dart';
 
 import '../../data/datasources/temp/studens_temp.dart';
 import '../../data/services/backend/api_requests/api_calls_list.dart';
 
 import '../../data/datasources/temp/teacher_grades_temp.dart';
 
-dynamic loadStartGrading(int employeeNumber, String schoolYear) async {
+//Function to fetch groups, grades, campuses where it teach, and subjects from selected user
+//is use is academic coordinator will retrive all grades under its coordination
+dynamic loadStartGrading(int employeeNumber, String schoolYear, bool isAdmin,
+    bool isAcademicCoordinator, String? campus) async {
   try {
-    var startGrading = await getTeacherGradeAndCourses(
-        currentUser!.employeeNumber, currentCycle);
-    List<dynamic> jsonList = json.decode(startGrading);
-    jsonDataForDropDownMenuClass = jsonList;
+    DateTime now = DateTime.now();
+    int month = now.month;
+    List<dynamic> jsonList;
+    //FETCH FOR TEACHER DATA
+    await getTeacherGradeAndCourses(currentUser!.employeeNumber, currentCycle,
+            month, isAdmin, isAcademicCoordinator, campus)
+        .then((onValue) {
+      jsonList = json.decode(onValue);
+      jsonDataForDropDownMenuClass = jsonList;
+      fetchedDataFromloadStartGrading = jsonList;
+      try {
+        getTeacherEvalCampuses(jsonList);
+        getSingleTeacherGrades(jsonList);
+        getSingleTeacherGroups(jsonList);
+        getSingleTeacherAssignatures(jsonList);
+        return jsonList;
+      } catch (e) {
+        rethrow;
+      }
+    }).catchError((onError) {
+      insertErrorLog('Error fetching start grading data', onError);
+      throw FormatException(onError);
+    });
+    // List<dynamic> jsonList = json.decode(startGrading);
+  } catch (e) {
+    insertErrorLog(e.toString(), ' INIT STUDENT EVALUATION GRID ');
+    throw FormatException(e.toString());
+  }
+}
 
-    try {
-      getTeacherEvalCampuses(jsonList);
-      await getSingleTeacherGrades(jsonList);
-      await getSingleTeacherGroups(jsonList);
-      await getSingleTeacherAssignatures(jsonList);
+Future<dynamic> loadStartGradingAsAdminOrAcademicCoord(String schoolYear, String? campus,
+    bool initialFetch, int? subject, int? group, bool isAcademicCoord, bool isAdmin ) async {
+  try {
+    DateTime now = DateTime.now();
+    int month = now.month;
+    List<dynamic> jsonList;
+    List<String> originalList = [];
+    if (initialFetch) {
+      //First time loading screen, to display all grades, groups, campus and assignatures to dispaly at DropdownSelector
+      await getTeacherGradeAndCoursesAsAdmin(month,
+              isAdmin, isAdmin ? null : campus, currentCycle!.claCiclo, isAcademicCoord)
+          .then((response) {
+        jsonList = json.decode(utf8.decode(response.bodyBytes));
+        jsonDataForDropDownMenuClass = jsonList;
+        try {
+          for (var item in jsonList) {
+            // Check if the item has the "campus" key and is a String
+            if (item.containsKey('campus') && item['campus'] is String) {
+              campusesWhereTeacherTeach.add(item['campus']);
+            }
+          }
+          originalList.clear();
+          for (var i = 0; i < jsonList.length; i++) {
+            originalList.add(jsonList[i]['grade']);
+            oneTeacherGrades = originalList.toSet().toList();
 
-      // await getStudentsByTeacher(jsonList);
-      // await getStudentsIDByTeacher(jsonList);
-      // await getGroupsByTeacher(jsonList);
-      return jsonList;
-    } catch (e) {
-      throw FormatException(e.toString());
+            Map<int, String> currentMapValue = {
+              jsonList[i]['sequence']: jsonList[i]['grade']
+            };
+
+            teacherGradesMap.addEntries(currentMapValue.entries);
+          }
+
+          if (oneTeacherGroups.isNotEmpty) {
+            oneTeacherGroups.clear();
+          }
+          originalList.clear();
+          for (var i = 0; i < jsonList.length; i++) {
+            // String group = apiResponse[i]['School_group'];
+            originalList.add(jsonList[i]['school_group']);
+            oneTeacherGroups = originalList.toSet().toList();
+          }
+          originalList.clear();
+          for (var i = 0; i < jsonList.length; i++) {
+            // String assignature = apiResponse[i]['Subject'];
+            // int assignatureID = apiResponse[i]['Subject_id'];
+            originalList.add(jsonList[i]['subject']);
+
+            oneTeacherAssignatures = originalList.toSet().toList();
+
+            Map<int, String> currentMapValue = {
+              jsonList[i]['subject_id']: jsonList[i]['subject']
+            };
+            assignaturesMap.addEntries(currentMapValue.entries);
+          }
+
+          // getSingleTeacherGroups(jsonList);
+        } catch (e) {
+          throw Future.error(e.toString());
+        }
+      }).catchError((onError) {
+        insertErrorLog(
+            'Error fetching start grading data loadStartGradingAsAdmin()',
+            onError);
+        throw FormatException(onError);
+      });
+    } else {
+      //When admin wants to retreive data for a specific grade and assignature
+      //TODO: PENDING TO IMPLEMENT
     }
   } catch (e) {
-    throw FormatException(e.toString());
+    insertErrorLog(e.toString(), ' loadStartGradingAsAdmin  ');
+    throw Future.error(e.toString());
   }
 }
 
@@ -42,12 +131,14 @@ Future<void> getSingleTeacherGrades(List<dynamic> apiResponse) async {
       oneTeacherGrades.clear();
     }
     for (var i = 0; i < apiResponse.length; i++) {
-      String grade = apiResponse[i]['grade'];
-      int gradeSequence = apiResponse[i]['gradeseq'];
-      originalList.add(grade);
+      // String grade = apiResponse[i]['Grade'];
+      // int gradeSequence = apiResponse[i]['Sequence'];
+      originalList.add(apiResponse[i]['grade']);
       oneTeacherGrades = originalList.toSet().toList();
 
-      Map<int, String> currentMapValue = {gradeSequence: grade};
+      Map<int, String> currentMapValue = {
+        apiResponse[i]['sequence']: apiResponse[i]['grade']
+      };
 
       teacherGradesMap.addEntries(currentMapValue.entries);
     }
@@ -61,9 +152,9 @@ Future<void> getSingleTeacherGroups(List<dynamic> apiResponse) async {
       oneTeacherGroups.clear();
     }
     for (var i = 0; i < apiResponse.length; i++) {
-      String group = apiResponse[i]['school_group'];
+      // String group = apiResponse[i]['School_group'];
 
-      originalList.add(group);
+      originalList.add(apiResponse[i]['school_group']);
       oneTeacherGroups = originalList.toSet().toList();
     }
   }
@@ -76,22 +167,40 @@ Future<void> getSingleTeacherAssignatures(List<dynamic> apiResponse) async {
       oneTeacherAssignatures.clear();
     }
     for (var i = 0; i < apiResponse.length; i++) {
-      String assignature = apiResponse[i]['assignature_name'];
-      int assignatureID = int.parse(apiResponse[i]['assignature_id']);
-      originalList.add(assignature);
+      // String assignature = apiResponse[i]['Subject'];
+      // int assignatureID = apiResponse[i]['Subject_id'];
+      originalList.add(apiResponse[i]['subject']);
 
       oneTeacherAssignatures = originalList.toSet().toList();
 
-      Map<int, String> currentMapValue = {assignatureID: assignature};
+      Map<int, String> currentMapValue = {
+        apiResponse[i]['subject_id']: apiResponse[i]['subject']
+      };
       assignaturesMap.addEntries(currentMapValue.entries);
     }
   }
 }
 
-Future<List<dynamic>> getStudentsByTeacher(
-    int employeeNumber, String selectedCycle, roleName) async {
-  var response = await getStudentsByRole(employeeNumber, roleName);
+Future<List<dynamic>> getStudentsByTeacher(String selectedCycle) async {
+  var response = await getStudentsByRole(selectedCycle);
   List<dynamic> jsonList = json.decode(response);
+
+  for (var item in jsonList) {
+    String campus = item['Claun'];
+    String grade = item['GradoSecuencia'].toString();
+    String group = item['Grupo'];
+    String gradeName = item['gradeName'];
+
+    if (!teacherCampusListFODAC27.contains(campus)) {
+      teacherCampusListFODAC27.add(campus);
+    }
+    if (!teacherGradesListFODAC27.contains(grade)) {
+      teacherGradesListFODAC27.add(grade);
+    }
+    if (!gradesMapFODAC27.containsKey(gradeName.trim())) {
+      gradesMapFODAC27[gradeName.trim()] = int.parse(grade);
+    }
+  }
 
   return jsonList;
 }
@@ -134,29 +243,35 @@ Future<List<StudentEval>> getStudentsByAssinature(
   try {
     var studentsList = await getStudentsToGrade(assignature, group,
         gradeSelected, currentCycle!.claCiclo, campus, month);
-    List<dynamic> jsonList = json.decode(studentsList.body);
-
+    var jsonList = json.decode(utf8.decode(studentsList.bodyBytes));
     List<StudentEval> evaluations = getEvalFromJSON(jsonList, false);
 
     return evaluations;
   } catch (e) {
+    if (e is TimeoutException) {
+      return throw TimeoutException(e.toString());
+    }
     return throw FormatException(e.toString());
   }
 }
 
 Future<List<StudentEval>> getSubjectsAndGradesByStudent(
-    String grade, group, cycle, campus, month) async {
+    int grade, String group, String cycle, String campus, int month) async {
   try {
     var subjectsGradesList =
         await getSubjectsAndGradeByStuent(group, grade, cycle, campus, month);
 
-    List<dynamic> jsonList = json.decode(subjectsGradesList.body);
+    List<dynamic> jsonList = json.decode(utf8.decode(subjectsGradesList.bodyBytes) );
     List<StudentEval> evaluations = getEvalFromJSON(jsonList, true);
     uniqueStudentsList.clear();
     uniqueStudents.clear();
 
     for (var student in jsonList) {
-      uniqueStudents[student['studentID']] = student['studentName'];
+      uniqueStudents[student['studentID']] = student['student'] +
+          ' ' +
+          student['1lastName'] +
+          ' ' +
+          student['2lastName'];
       // uniqueStudents[student['studentName']] = student['studentName'];
     }
 
@@ -169,6 +284,9 @@ Future<List<StudentEval>> getSubjectsAndGradesByStudent(
 
     return evaluations;
   } catch (e) {
+    if (e is TimeoutException) {
+      return throw TimeoutException(e.toString());
+    }
     return throw FormatException(e.toString());
   }
 }
@@ -257,15 +375,19 @@ List<Map<String, dynamic>> mergeCommentsData(
 }
 
 void composeBodyToUpdateGradeBySTudent(
-    String key, studentID, int value, int subject, month) {
+    String key, studentID, int value, int evalId, month) {
   bool idExists = false;
 
   if (studentGradesBodyToUpgrade.isEmpty) {
-    studentGradesBodyToUpgrade.add(
-        {'student': studentID, key: value, 'subject': subject, 'month': month});
+    studentGradesBodyToUpgrade.add({
+      'student': studentID,
+      'eval': value,
+      'idEval': evalId,
+      'month': month
+    });
   } else {
     for (var obj in studentGradesBodyToUpgrade) {
-      if (obj['student'] == studentID && obj['subject'] == subject) {
+      if (obj['student'] == studentID && obj['idEval'] == evalId) {
         //If already exist data for selected student
         idExists = true;
         if (key == 'Comentarios') {
@@ -295,10 +417,10 @@ void composeBodyToUpdateGradeBySTudent(
             obj[key] = newValue;
           }
         } else {
-          if (obj.containsKey(key)) {
-            obj[key] = value; //Update the existing value
+          if (obj.containsKey('eval')) {
+            obj['eval'] = value; //Update the existing value
           } else {
-            obj[key] = value; //Add the new value
+            obj['eval'] = value; //Add the new value
           }
         }
       }
@@ -307,23 +429,26 @@ void composeBodyToUpdateGradeBySTudent(
     if (!idExists) {
       studentGradesBodyToUpgrade.add({
         'student': studentID,
-        key: value,
-        'subject': subject,
+        'eval': value,
+        'idEval': evalId,
         'month': month
       });
     }
   }
 }
 
-void composeUpdateStudentGradesBody(String key, dynamic value, int rowIndex) {
-  var idToupdate = studentList[rowIndex].rateID;
+void composeUpdateStudentGradesBody(String key, dynamic value, int idEval) {
   bool idExists = false;
 
+  if (key == 'Calif') {
+    key = 'eval';
+  }
+
   if (studentGradesBodyToUpgrade.isEmpty) {
-    studentGradesBodyToUpgrade.add({'id': idToupdate, key: value});
+    studentGradesBodyToUpgrade.add({'idEval': idEval, key: value});
   } else {
     for (var obj in studentGradesBodyToUpgrade) {
-      if (obj['id'] == idToupdate) {
+      if (obj['idEval'] == idEval) {
         idExists = true;
         if (obj.containsKey(key)) {
           obj[key] = value; // Update the existing value
@@ -333,21 +458,30 @@ void composeUpdateStudentGradesBody(String key, dynamic value, int rowIndex) {
       }
     }
     if (!idExists) {
-      studentGradesBodyToUpgrade.add({'id': idToupdate, key: value});
+      studentGradesBodyToUpgrade.add({'idEval': idEval, key: value});
     }
   }
 }
 
-Future<String> createFodac27Record(String date, String studentID, String cycle,
-    String observations, int employeeNumber, int subject) async {
-  var responseCode = await postFodac27Record(
-      date, studentID, cycle, observations, employeeNumber, subject);
-
-  if (responseCode.statusCode == 200) {
-    return 'Succes';
-  } else {
-    return 'Error: ${responseCode.body}';
+Future<dynamic> createFodac27Record(DateTime date, String studentID,
+    String cycle, String observations, int employeeNumber, int subject) async {
+  // var responseCode =
+  try {
+    var result = await postFodac27Record(
+            date, studentID, cycle, observations, employeeNumber, subject)
+        .catchError((error) {
+      return Future.error('Error: ${error.toString()}');
+    });
+    return result;
+  } catch (e) {
+    Future.error(e.toString());
   }
+
+  // if (responseCode.statusCode == 200) {
+  //   return 'Succes';
+  // } else {
+  //   return 'Error: ${responseCode.body}';
+  // }
 }
 
 Future<int> updateFodac27Record(
@@ -360,27 +494,26 @@ Future<int> updateFodac27Record(
 Future<Map<String, dynamic>> populateSubjectsDropDownSelector(
     String studentID, String cycle) async {
   try {
-    var subjects = await getStudentSubjects(studentID, cycle);
-
-    if (subjects.statusCode != 200) {
-      return {'error': 'Error fetching subjects'};
-    }
-    var subjectsList = jsonDecode(subjects.body);
+    var subjects = await getStudentSubjects(studentID, cycle).catchError((e) {
+      return {'error': 'Error fetching subjects ${e.toString()}'};
+    });
+    // if (subjects.statusCode != 200) {
+    //   return {'error': 'Error fetching subjects'};
+    // }
+    var subjectsList = json.decode(utf8.decode(subjects.body.codeUnits));
     Map<String, dynamic> result = {};
 
     for (var item in subjectsList) {
-      result[item['subject']] = item['subject2'];
-
-      // result.add(item['subject']);
+      result[item['subject'].trim()] = item['subject2'];
     }
 
     return result;
   } catch (e) {
-    return throw FormatException(e.toString());
+    return Future.error(e.toString());
   }
 }
 
-//Function that validate that value can´t be less than 50
+//Function that validate that value can´t be less than 50 and more than 100
 int validateNewGradeValue(int newValue, String columnNameToFind) {
   //If value < 50 -> returns 50
   List<String> columnName = [
@@ -410,18 +543,17 @@ int validateNewGradeValue(int newValue, String columnNameToFind) {
   }
 }
 
-Future<bool> isDateToEvaluateStudents() async {
+Future<dynamic> isDateToEvaluateStudents() async {
   try {
-    var originDate = await getActualDate();
-    List<dynamic> parsedJson = json.decode(originDate);
-    bool dateValue = parsedJson[0]['date'];
-    if (dateValue) {
-      return true;
-    } else {
-      return false;
-    }
+    var originDate = await getActualDate().catchError((error) {
+      return error;
+    });
+    var originResponse = jsonDecode(originDate);
+    var response = originResponse['Value'];
+    return response;
   } catch (e) {
-    return throw FormatException(e.toString());
+    insertErrorLog(e.toString(), 'FETCH DATE FOR STUDENT EVALUATION');
+    return throw Future.error(e);
   }
 }
 
@@ -429,8 +561,8 @@ void getTeacherEvalCampuses(List<dynamic> jsonData) {
   if (jsonData.isNotEmpty) {
     for (var item in jsonData) {
       // Check if the item has the "campus" key and is a String
-      if (item.containsKey('campus') && item['campus'] is String) {
-        campusesWhereTeacherTeach.add(item['campus']);
+      if (item.containsKey('Campus') && item['Campus'] is String) {
+        campusesWhereTeacherTeach.add(item['Campus']);
       }
     }
   }

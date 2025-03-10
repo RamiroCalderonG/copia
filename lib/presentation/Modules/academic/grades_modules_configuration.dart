@@ -78,7 +78,7 @@ class HomeDashboard extends StatelessWidget {
         children: [
           Text(
             'Dashboard',
-            style: Theme.of(context).textTheme.headline4,
+            style: Theme.of(context).textTheme.headlineMedium,
           ),
           const SizedBox(height: 16),
           const Row(
@@ -133,7 +133,11 @@ class DashboardCard extends StatelessWidget {
   final String label;
   final String value;
 
-  const DashboardCard({super.key, required this.icon, required this.label, required this.value});
+  const DashboardCard(
+      {super.key,
+      required this.icon,
+      required this.label,
+      required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -153,12 +157,12 @@ class DashboardCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               label,
-              style: Theme.of(context).textTheme.bodyText1,
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 4),
             Text(
               value,
-              style: Theme.of(context).textTheme.headline6?.copyWith(
+              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                     color: Theme.of(context).colorScheme.primary,
                   ),
             ),

@@ -12,7 +12,7 @@ import 'package:oxschool/data/services/backend/api_requests/api_calls.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
 import 'package:oxschool/presentation/components/confirm_dialogs.dart';
 import 'package:oxschool/core/constants/Student.dart';
-import 'package:oxschool/core/constants/User.dart';
+import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/presentation/Modules/enfermeria/no_data_avalibre.dart';
 import 'package:oxschool/presentation/Modules/enfermeria/student_history_grid.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';

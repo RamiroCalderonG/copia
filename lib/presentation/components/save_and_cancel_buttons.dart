@@ -9,7 +9,7 @@ class CustomSaveButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton(
         style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.resolveWith<Color>((states) {
+          backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
             if (Theme.of(context).brightness == Brightness.dark) {
               return Colors.white;
             } else {
@@ -42,7 +42,7 @@ class CustomCancelButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton(
         style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.resolveWith<Color>((states) {
+          backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
             if (Theme.of(context).brightness == Brightness.dark) {
               return Colors.white;
             } else {

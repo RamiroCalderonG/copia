@@ -1,5 +1,6 @@
 // ignore_for_file: file_names, prefer_typing_uninitialized_variables
 
+import 'package:flutter/material.dart';
 import 'package:oxschool/data/Models/Family.dart';
 import 'package:oxschool/data/Models/Student.dart';
 import 'package:pluto_grid/pluto_grid.dart';
@@ -31,13 +32,22 @@ void clearStudentData() {
 }
 
 final List<PlutoColumn> studentColumnsToEvaluateByStudent = <PlutoColumn>[
-  PlutoColumn(
-      title: 'No',
-      field: 'No',
-      type: PlutoColumnType.number(),
-      readOnly: true,
-      sort: PlutoColumnSort.ascending,
-      width: 30),
+   PlutoColumn(
+    title: 'No',
+    field: 'No',
+    type: PlutoColumnType.number(),
+    width: 25,
+    readOnly: true,
+    renderer: (rendererContext) {
+      return Center(
+        child : Text(
+          (rendererContext.rowIdx +1).toString(),
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+      );
+    },
+    // sort: PlutoColumnSort.ascending
+  ), 
   PlutoColumn(
       title: 'Matricula',
       field: 'studentID',
@@ -59,6 +69,21 @@ final List<PlutoColumn> evaluationColumnsToEvaluateByStudent = <PlutoColumn>[];
 final List<PlutoColumn> assignaturesColumns = <PlutoColumn>[
   //TO USE at grades_by_assignature
   PlutoColumn(
+    title: 'No',
+    field: 'No',
+    width: 12,
+    type: PlutoColumnType.number(),
+    readOnly: true, 
+    renderer: (rendererContext) {
+      return Center(
+        child: Text(
+          (rendererContext.rowIdx + 1).toString(),
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+      );
+    },
+  ),
+  PlutoColumn(
       title: 'Matricula',
       field: 'Matricula',
       type: PlutoColumnType.text(),
@@ -69,7 +94,7 @@ final List<PlutoColumn> assignaturesColumns = <PlutoColumn>[
     field: 'Nombre',
     type: PlutoColumnType.text(),
     readOnly: true,
-    sort: PlutoColumnSort.ascending,
+    //sort: PlutoColumnSort.ascending,
   ),
   PlutoColumn(
       title: 'Apellido paterno',
@@ -83,7 +108,7 @@ final List<PlutoColumn> assignaturesColumns = <PlutoColumn>[
       field: 'Apellido materno',
       type: PlutoColumnType.text(),
       readOnly: true,
-      sort: PlutoColumnSort.ascending,
+      //sort: PlutoColumnSort.ascending,
       width: 150),
   PlutoColumn(
       title: 'Calif',
@@ -92,33 +117,43 @@ final List<PlutoColumn> assignaturesColumns = <PlutoColumn>[
       readOnly: false,
       width: 100),
   PlutoColumn(
-      title: 'Faltas',
-      field: 'Ausencia',
-      type: PlutoColumnType.number(negative: false, format: '#'),
-      readOnly: false,
-      width: 100),
-  PlutoColumn(
-      title: 'Tareas',
-      field: 'Tareas',
+      title: 'idCalif',
+      field: 'idCalif',
       type: PlutoColumnType.number(negative: false),
-      readOnly: false,
-      width: 100),
-  PlutoColumn(
-      title: 'Conducta',
-      field: 'Conducta',
-      type: PlutoColumnType.number(negative: false),
-      readOnly: false,
-      width: 100),
-  PlutoColumn(
-      title: 'Uniforme',
-      field: 'Uniforme',
-      type: PlutoColumnType.number(negative: false),
-      readOnly: false,
-      width: 100),
+      hide: true)
   // PlutoColumn(
+  //     hide: true,
+  //     title: 'Faltas',
+  //     field: 'Ausencia',
+  //     type: PlutoColumnType.number(negative: false, format: '#'),
+  //     readOnly: false,
+  //     width: 100),
+  // PlutoColumn(
+  //     hide: true,
+  //     title: 'Tareas',
+  //     field: 'Tareas',
+  //     type: PlutoColumnType.number(negative: false),
+  //     readOnly: false,
+  //     width: 100),
+  // PlutoColumn(
+  //     hide: true,
+  //     title: 'Conducta',
+  //     field: 'Conducta',
+  //     type: PlutoColumnType.number(negative: false),
+  //     readOnly: false,
+  //     width: 100),
+  // PlutoColumn(
+  //     hide: true,
+  //     title: 'Uniforme',
+  //     field: 'Uniforme',
+  //     type: PlutoColumnType.number(negative: false),
+  //     readOnly: false,
+  //     width: 100),
+  // PlutoColumn(
+  //     hide: true,
   //     title: 'Comentarios',
   //     field: 'Comentarios',
-  //     type: PlutoColumnType.select(commentStringEval, enableColumnFilter: true),
+  //     type: PlutoColumnType.text(),
   //     readOnly: false,
   //     width: 200),
 ];
@@ -128,14 +163,15 @@ final List<PlutoColumn> gradesByStudentColumns = [
       title: 'Materia',
       field: 'subject',
       type: PlutoColumnType.text(),
-      sort: PlutoColumnSort.ascending,
       readOnly: true,
       hide: true),
   PlutoColumn(
     title: 'Materia',
     field: 'subject_name',
     type: PlutoColumnType.text(),
+    width: 80,
     frozen: PlutoColumnFrozen.start,
+    sort: PlutoColumnSort.ascending,
     readOnly: true,
   ),
   PlutoColumn(
@@ -144,15 +180,24 @@ final List<PlutoColumn> gradesByStudentColumns = [
     type: PlutoColumnType.number(negative: false),
   ),
   PlutoColumn(
+      title: 'idCalif',
+      field: 'idCicloEscolar',
+      type: PlutoColumnType.number(negative: false),
+      hide: true,
+      readOnly: true),
+  PlutoColumn(
       title: 'Faltas',
+      hide: true,
       field: 'absence_eval',
       type: PlutoColumnType.number(negative: false)),
   PlutoColumn(
       title: 'Tareas',
+      hide: true,
       field: 'homework_eval',
       type: PlutoColumnType.number(negative: false)),
   PlutoColumn(
       title: 'Conducta',
+      hide: true,
       field: 'discipline_eval',
       type: PlutoColumnType.number(negative: false)),
   // PlutoColumn(
@@ -163,10 +208,12 @@ final List<PlutoColumn> gradesByStudentColumns = [
   //         PlutoColumnType.select(commentStringEval, enableColumnFilter: true)),
   PlutoColumn(
       title: 'Habitos',
+      hide: true,
       field: 'habit_eval',
       type: PlutoColumnType.number(negative: false)),
   PlutoColumn(
       title: 'Uniforme',
+      hide: true,
       field: 'outfit',
       type: PlutoColumnType.number(negative: false)),
 ];

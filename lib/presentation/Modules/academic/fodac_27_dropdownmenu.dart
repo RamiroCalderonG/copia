@@ -1,17 +1,10 @@
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/data/datasources/temp/studens_temp.dart';
-import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
-import 'package:oxschool/presentation/Modules/academic/fo_dac_27.dart';
-import 'package:oxschool/presentation/Modules/login_view/login_view_widget.dart';
-import 'package:oxschool/presentation/components/confirm_dialogs.dart';
 
-import 'package:pluto_grid/pluto_grid.dart';
 
-import '../../../core/constants/User.dart';
-import '../../../core/reusable_methods/academic_functions.dart';
-import '../../../core/reusable_methods/user_functions.dart';
+import '../../../core/constants/user_consts.dart';
 import '../../../data/datasources/temp/teacher_grades_temp.dart';
 
 class Fodac27MenuSelector extends StatefulWidget {
@@ -26,14 +19,15 @@ String selectedCampus = '';
 class _Fodac27MenuSelectorState extends State<Fodac27MenuSelector> {
   TextEditingController selectedStudentController = TextEditingController();
 
-  List<Map<String, dynamic>> globalGradesAndGroups = [];
+  // List<Map<String, dynamic>> globalGradesAndGroups = [];
 
   bool isUserAdmin = false;
   List<String> studentsList = [];
 
   String selectedStudent = '';
   String? selectedCampus;
-  String? selectedGrade;
+  int? selectedGrade;
+  String? selectedGradeName;
   String? selectedGroup;
   String? selectedstudentId;
   String selectedSubjectNameToEdit = '';
@@ -47,7 +41,7 @@ class _Fodac27MenuSelectorState extends State<Fodac27MenuSelector> {
 
   @override
   void initState() {
-    isUserAdmin = verifyUserAdmin(currentUser!);
+    isUserAdmin = currentUser!.isCurrentUserAdmin();
 
     populateDropDownMenus();
     super.initState();
@@ -60,24 +54,35 @@ class _Fodac27MenuSelectorState extends State<Fodac27MenuSelector> {
     selectedTempCampus = null;
     selectedTempGrade = null;
     selectedTempGroup = null;
+    selectedStudentController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     List<String> gradesValues = selectedCampus != null
-        ? globalGradesAndGroups
-            .where((item) => item['campus'] == selectedCampus)
-            .map((item) => item['grade'] as String)
+        ? simplifiedStudentsList
+            .where((item) => item['Claun'] == selectedCampus)
+            .map((item) => item['gradeName'].trim() as String)
             .toSet()
             .toList()
         : [];
     List<String> groupsValues = selectedGrade != null
-        ? globalGradesAndGroups
+        ? simplifiedStudentsList
             .where((item) =>
-                item['campus'] == selectedCampus &&
-                item['grade'] == selectedGrade)
-            .map((item) => item['group'] as String)
+                item['Claun'] == selectedCampus &&
+                item['GradoSecuencia'] == selectedGrade)
+            .map((item) => item['Grupo'] as String)
+            .toSet()
+            .toList()
+        : [];
+    List<String> studentsValues = selectedGroup != null
+        ? simplifiedStudentsList
+            .where((item) =>
+                item['Claun'] == selectedCampus &&
+                item['GradoSecuencia'] == selectedGrade &&
+                item['Grupo'] == selectedGroup)
+            .map((item) => item['student_name'] as String)
             .toSet()
             .toList()
         : [];
@@ -102,7 +107,7 @@ class _Fodac27MenuSelectorState extends State<Fodac27MenuSelector> {
                   });
                 });
               },
-              dropdownMenuEntries: campusesList
+              dropdownMenuEntries: teacherCampusListFODAC27
                   .toList()
                   .map<DropdownMenuEntry<String>>((String value) {
                 return DropdownMenuEntry<String>(value: value, label: value);
@@ -116,15 +121,16 @@ class _Fodac27MenuSelectorState extends State<Fodac27MenuSelector> {
                       trailingIcon: const Icon(Icons.arrow_drop_down),
                       onSelected: (value) {
                         setState(() {
-                          selectedGrade = value!;
-                          selectedTempGrade = value;
+                          selectedGradeName = value as String?;
+                          selectedGrade = gradesMapFODAC27[selectedGradeName];
+                          selectedTempGrade = selectedGrade;
                         });
                       },
                       dropdownMenuEntries: gradesValues
                           .toList()
                           .map<DropdownMenuEntry<String>>((String value) {
                         return DropdownMenuEntry<String>(
-                            value: value, label: value);
+                            value: value, label: value.toString());
                       }).toList())),
             const SizedBox(width: 10),
             if (selectedGrade != null)
@@ -134,19 +140,19 @@ class _Fodac27MenuSelectorState extends State<Fodac27MenuSelector> {
                     trailingIcon: const Icon(Icons.arrow_drop_down),
                     onSelected: (value) async {
                       setState(() {
-                        selectedGroup = value;
+                        selectedGroup = value as String?;
                         selectedTempGroup = value;
-                        studentsList.clear();
+                        // studentsList.clear();
                         selectedStudent = '';
 
                         // print('simplifiedList: ' +
                         //     simplifiedStudentsList.toString());
                       });
-                      studentsList = await getStudentsListForFodac27(
-                          selectedCampus!,
-                          currentCycle!.claCiclo!,
-                          selectedGrade!,
-                          selectedGroup!);
+                      // studentsList = await getStudentsListForFodac27(
+                      //     selectedCampus!,
+                      //     currentCycle!.claCiclo!,
+                      //     selectedGrade.toString(),
+                      //     selectedGroup!);
                       setState(() {
                         selectedStudentController.text = '';
                       });
@@ -173,106 +179,70 @@ class _Fodac27MenuSelectorState extends State<Fodac27MenuSelector> {
                           // selectedStudent = student;
                           selectedStudentController.text = student;
                           selectedTempStudent = student;
-
-                          // if (selectedstudentId != null) {
-                          //   populateGrid(
-                          //       selectedstudentId!, currentCycle!.claCiclo!, true);
-                          // }
                         });
                       }
                     },
-                    dropdownMenuEntries: studentsList
+                    dropdownMenuEntries: studentsValues
                         .toList()
                         .map<DropdownMenuEntry<String>>((var value) {
                       return DropdownMenuEntry<String>(
-                          value: value, label: value);
+                          value: value, label: value.toTitleCase);
                     }).toList()),
               ),
           ],
         ));
   }
 
-  Future<void> populateStudentsDropDownMenu() async {
-    var response = await getStudentsByTeacher(
-      currentUser!.employeeNumber!,
-      currentCycle!.claCiclo!,
-      currentUser!.role,
-    );
+  // void handleAddItem() {
+  //   if (selectedStudent.isEmpty) {
+  //     showEmptyFieldAlertDialog(context, 'Favor de seleccionar un alumno');
+  //   } else {
+  //     showDialog(
+  //       context: context,
+  //       builder: (BuildContext context) {
+  //         return AlertDialog(
+  //           title: Text('Agregar comentario a:\n$selectedStudent'),
+  //           content: NewFODAC27CommentDialog(
+  //             selectedstudentId: selectedstudentId!,
+  //             employeeNumber: currentUser!.employeeNumber!, ,
+  //           ),
+  //         );
+  //       },
+  //     );
+  //   }
+  // }
 
-    simplifiedStudentsList = response.map((item) => item.toString()).toList();
+  // void _handleRefreshWithLoading() {
+  //   setState(() {
+  //     isLoading = true;
+  //   });
 
-    if (simplifiedStudentsList.isNotEmpty) {
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
+  //   handleRefresh().then((_) {
+  //     setState(() {
+  //       isLoading = false;
+  //     });
+  //   }).catchError((error) {
+  //     setState(() {
+  //       isLoading = false;
+  //     });
+  //     showErrorFromBackend(context, error.toString());
+  //   });
+  // }
 
-  void handleAddItem() {
-    if (selectedStudent.isEmpty) {
-      showEmptyFieldAlertDialog(context, 'Favor de seleccionar un alumno');
-    } else {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Agregar comentario a:\n$selectedStudent'),
-            content: NewFODAC27CommentDialog(
-              selectedstudentId: selectedstudentId!,
-              employeeNumber: currentUser!.employeeNumber!,
-            ),
-          );
-        },
-      );
-    }
-  }
-
-  Future<int> deleteAction(int fodac27ID) async {
-    var response = await deleteFodac27Record(fodac27ID);
-    return response;
-  }
-
-  Future<void> populateGrid(
-      String studentID, String cycle, bool isByStudent) async {
-    var apiResponse = await getFodac27History(cycle, studentID, isByStudent);
-    if (apiResponse != null) {
-      var decodedResponse = json.decode(apiResponse) as List;
-      List<PlutoRow> newRows = decodedResponse.map((item) {
-        return PlutoRow(cells: {
-          'date': PlutoCell(value: item['date']),
-          'studentID': PlutoCell(value: item['student']),
-          'Obs': PlutoCell(value: item['observation']),
-          'subject': PlutoCell(value: item['subject']),
-          'teacher': PlutoCell(value: item['teacher']),
-          'fodac27': PlutoCell(value: int.parse(item['fodac27'])),
-        });
-      }).toList();
-
-      // setState(() {
-      //   fodac27HistoryRows = newRows;
-      //   stateManager.removeAllRows();
-      //   stateManager.appendRows(newRows);
-      // });
-    }
-  }
+  // Future<int> deleteAction(int fodac27ID) async {
+  //   var response = await deleteFodac27Record(fodac27ID);
+  //   return response;
+  // }
 
   void populateDropDownMenus() {
     if (isUserAdmin) {
-      campusesList = ['ANAHUAC', 'BARRAGAN', 'CONCORDIA', 'SENDERO'];
+      campusesList = teacherCampusListFODAC27;
       selectedCampus = campusesList.first;
     } else {
       campusesList = campusesWhereTeacherTeach.toList();
       selectedCampus = campusesWhereTeacherTeach.first;
-      selectedGrade = oneTeacherGrades.first;
+      selectedGrade = int.parse(oneTeacherGrades.first);
     }
-    getGradesandGroupByCycle(currentCycle!.claCiclo!);
-  }
-
-  void getGradesandGroupByCycle(String cycle) async {
-    var list = await getGradesAndGroupsByCampus(cycle);
-    List<Map<String, dynamic>> returnedList = list;
-
-    globalGradesAndGroups = returnedList;
   }
 }
 

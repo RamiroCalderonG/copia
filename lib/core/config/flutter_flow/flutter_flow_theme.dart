@@ -53,6 +53,7 @@ abstract class FlutterFlowTheme {
   late Color warning;
   late Color error;
   late Color info;
+  late Color hoverCardTextColor;
   late List<Color> mainWindowCards;
 
   @Deprecated('Use displaySmallFamily instead')
@@ -146,6 +147,7 @@ class LightModeTheme extends FlutterFlowTheme {
   late Color error = const Color(0xFFF83B46);
   late Color info = const Color(0xFFFFFFFF);
   late Color titles = const Color(0xFFFFFFFF);
+  late Color hoverCardTextColor = const Color(0xFFEAECC6);
   final List<Color> mainWindowCards = [
     //OXSCHOOL MAIN COLORS
     const Color.fromRGBO(23, 76, 147, 1),
@@ -328,6 +330,7 @@ class DarkModeTheme extends FlutterFlowTheme {
   late Color error = const Color(0xFFF83B46);
   late Color info = const Color(0xFFFFFFFF);
   late Color titles = const Color(0xFFFFFFFF);
+  late Color hoverCardTextColor = const Color(0xFFF87060);
   final List<Color> mainWindowCards = [
     const Color.fromRGBO(185, 201, 222, 1),
     const Color.fromRGBO(246, 146, 51, 1),

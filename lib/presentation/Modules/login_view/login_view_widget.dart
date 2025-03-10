@@ -7,14 +7,19 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:oxschool/core/reusable_methods/device_functions.dart';
+import 'package:oxschool/core/reusable_methods/temp_data_functions.dart';
 import 'package:oxschool/data/Models/Cycle.dart';
 import 'package:oxschool/data/Models/User.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
-import 'package:oxschool/core/constants/User.dart';
+import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:flutter/material.dart';
-import 'package:oxschool/core/constants/connection.dart';
+import 'package:oxschool/presentation/Modules/login_view/recover_password_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/reusable_methods/logger_actions.dart';
+import '../../../core/reusable_methods/translate_messages.dart';
+import '../../../core/reusable_methods/user_functions.dart';
 import '../../components/confirm_dialogs.dart';
 import '../../components/custom_scaffold_messenger.dart';
 
@@ -47,6 +52,9 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
   List<int> tapTimestamps = [];
   int remainingTime = 0;
   Timer? timer;
+  bool isDebugging = false;
+  final List<String> _suggestedDomains = ['oxschool.edu.mx'];
+  String? _suggestedDomain;
 
   // late User currentUser;
 
@@ -60,10 +68,35 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
     _loadTapTimestamps();
     _startTimer();
     initPlatformState();
+    storeCurrentDeviceIsMobile();
+    isLoading = false;
     _model = createModel(context, () => LoginViewModel());
 
     _model.textController1 ??= TextEditingController();
     _model.textController2 ??= TextEditingController();
+    _model.textController1!.addListener(() {
+      final text = _model.textController1.text;
+      if (text.contains('@')) {
+        final atIndex = text.indexOf('@');
+        final localPart = text.substring(0, atIndex);
+        final domainPart = text.substring(atIndex + 1);
+
+        if (domainPart.isEmpty) {
+          setState(() {
+            _suggestedDomain = _suggestedDomains.first;
+          });
+        } else if (!_suggestedDomains.any((d) => d.startsWith(domainPart))) {
+          setState(() {
+            _suggestedDomain = null;
+          });
+        }
+      } else {
+        setState(() {
+          _suggestedDomain = null;
+        });
+      }
+    });
+
     WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {}));
   }
 
@@ -71,7 +104,25 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
   void dispose() {
     _model.dispose();
     timer?.cancel();
+    isLoading = false;
+    // _model.textController1!.dispose();
+    // _model.textController2!.dispose();
     super.dispose();
+  }
+
+  void _applySuggestion() {
+    if (_suggestedDomain != null) {
+      final atIndex = _model.textController1.text.indexOf('@');
+      if (atIndex != -1) {
+        final localPart = _model.textController1.text.substring(0, atIndex);
+        setState(() {
+          _model.textController1.text = '$localPart@$_suggestedDomain';
+          _model.textController1!.selection = TextSelection.fromPosition(
+            TextPosition(offset: _model.textController1.text.length),
+          );
+        });
+      }
+    }
   }
 
   _loadTapTimestamps() async {
@@ -128,21 +179,34 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
       if (kIsWeb) {
         deviceData = readWebBrowserInfo(await deviceInfoPlugin.webBrowserInfo);
       } else {
-        deviceData = switch (defaultTargetPlatform) {
-          TargetPlatform.android =>
-            readAndroidBuildData(await deviceInfoPlugin.androidInfo),
-          TargetPlatform.iOS =>
-            readIosDeviceInfo(await deviceInfoPlugin.iosInfo),
-          TargetPlatform.linux =>
-            readLinuxDeviceInfo(await deviceInfoPlugin.linuxInfo),
-          TargetPlatform.windows =>
-            readWindowsDeviceInfo(await deviceInfoPlugin.windowsInfo),
-          TargetPlatform.macOS =>
-            readMacOsDeviceInfo(await deviceInfoPlugin.macOsInfo),
-          TargetPlatform.fuchsia => <String, dynamic>{
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.android:
+            // Await the deviceInfoPlugin.androidInfo call
+            var androidInfo = await deviceInfoPlugin.androidInfo;
+            deviceData = readAndroidBuildData(androidInfo);
+            break;
+          case TargetPlatform.iOS:
+            var iosInfo = await deviceInfoPlugin.iosInfo;
+            deviceData = readIosDeviceInfo(iosInfo);
+            break;
+          case TargetPlatform.linux:
+            var linuxInfo = await deviceInfoPlugin.linuxInfo;
+            deviceData = readLinuxDeviceInfo(linuxInfo);
+            break;
+          case TargetPlatform.windows:
+            var windowsInfo = await deviceInfoPlugin.windowsInfo;
+            deviceData = readWindowsDeviceInfo(windowsInfo);
+            break;
+          case TargetPlatform.macOS:
+            var macOsInfo = await deviceInfoPlugin.macOsInfo;
+            deviceData = readMacOsDeviceInfo(macOsInfo);
+            break;
+          case TargetPlatform.fuchsia:
+            deviceData = <String, dynamic>{
               'Error:': 'Fuchsia platform isn\'t supported'
-            },
-        };
+            };
+            break;
+        }
         currentDeviceData = deviceData.toString();
         SharedPreferences devicePrefs = await SharedPreferences.getInstance();
         devicePrefs.setString('device', currentDeviceData);
@@ -172,7 +236,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
     // ignore: prefer_typing_uninitialized_variables
     var apiResponse;
 
-    dynamic loginButtonFunction() async {
+    dynamic handleLogin() async {
       int currentTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
       // Remove timestamps older than the time limit
       tapTimestamps = tapTimestamps
@@ -185,33 +249,48 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
         _updateRemainingTime();
         try {
           var value = trimSpaces(_model.textController2.text);
-          var emplNumberValue = trimSpaces(_model.textController1.text);
+          var emailValue =
+              trimSpaces(_model.textController1.text).toLowerCase();
 
-          Map<String, dynamic> nip = {'Nip': value};
+          Map<String, dynamic> nip = {'password': value};
           apiBody.addEntries(nip.entries);
           Map<String, dynamic> employeeNumber = {
-            'employeeNumber': _model.textController1.text
+            'email': _model.textController1.text.toLowerCase()
           };
           apiBody.addEntries(employeeNumber.entries);
           Map<String, dynamic> device = {'device': currentDeviceData};
           apiBody.addEntries(device.entries);
-          Map<String, dynamic> deviceIp = {'ip_address': deviceIP};
+          Map<String, dynamic> deviceIp = {'local': deviceIP};
           apiBody.addEntries(deviceIp.entries);
           SharedPreferences devicePrefs = await SharedPreferences.getInstance();
           devicePrefs.setString('ip', deviceIP);
 
-          if (value.isNotEmpty && emplNumberValue.isNotEmpty) {
-            apiResponse = await loginUser(apiBody);
-            if (apiResponse.statusCode == 200) {
-              List<dynamic> jsonList = json.decode(apiResponse.body);
-              currentUser = parseLogedInUserFromJSON(jsonList);
+          if (value.isNotEmpty && emailValue.isNotEmpty) {
+            //Attempt login
+            await loginUser(apiBody).then((response) async {
+              apiResponse = response;
+              List<dynamic> jsonList;
+              Map<String, dynamic> jsonData = jsonDecode(apiResponse.body);
+              devicePrefs.setString('token', 'Bearer ' + jsonData['token']); //Store token
+              // jsonData['token'] = '';
 
-              getUserPermissions(currentUser!.userId);
+              //GET user data
+              apiResponse =
+                  await getCurrentUserData(devicePrefs.getString('token')!); //Get user information
+              jsonData = json.decode(apiResponse.body);
+
+              currentUser = User.fromJson(jsonData);
+
+              //GET USER ROLE AND PERMISSIONS
+                var result = await getRoleListOfPermissions(jsonData);
+                 await getUserAccessRoutes();
+              
+              //await getUserRoleAndAcces(currentUser!.roleID!);
 
               apiResponse = await getCycle(
-                  0); //CurrentCicleCall.call().timeout(Duration(seconds: 7));
+                  1); //CurrentCicleCall.call().timeout(Duration(seconds: 7));
               if (apiResponse != null) {
-                List<dynamic> jsonList = json.decode(apiResponse);
+                Map<String, dynamic> jsonList = json.decode(apiResponse.body);
 
                 currentCycle = getcurrentCycle(jsonList);
               }
@@ -245,18 +324,10 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                     'Error en conección, vuelva a intentar Code: Cycle',
                     null));
               }
-            } else {
-              Map<String, dynamic> jsonMap = jsonDecode(apiResponse.body);
-              String description = jsonMap['description'];
-              // Map<dynamic, String> response = {
-              //   apiResponse.statusCode: description
-              // };
-              showErrorFromBackend(context, description);
-              // ScaffoldMessenger.of(context).showSnackBar(
-              //     customScaffoldMesg(context, response.toString(), null));
-            }
-
-            setState(() {});
+            }).onError((error, stackTrace) {
+              insertErrorLog(error.toString(), 'loginUser | $apiBody');
+              showErrorFromBackend(context, error.toString());
+            });
           } else {
             _model.textController2.text = '';
             showEmptyFieldAlertDialog(context,
@@ -266,35 +337,16 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
           setState(() {
             isLoading = false;
           });
-          // _model.textController2.text = '';
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                e.toString(),
-                style: FlutterFlowTheme.of(context).labelMedium.override(
-                      fontFamily: 'Roboto',
-                      color: const Color(0xFF130C0D),
-                      fontWeight: FontWeight.w500,
-                    ),
-              ),
-              action: SnackBarAction(
-                  label: 'Cerrar mensaje',
-                  textColor: FlutterFlowTheme.of(context).info,
-                  backgroundColor: Colors.black12,
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                  }),
-              duration: const Duration(milliseconds: 5000),
-              backgroundColor: FlutterFlowTheme.of(context).secondary,
-            ),
-          );
+          insertErrorLog(e.toString(), 'LOGIN BUTTON');
+          showErrorFromBackend(context, e.toString());
         }
       } else {
+        insertAlertLog('ANTISPAM ACTIVATED ON: LOGIN SCREEN');
         // Show a message to the user
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
               content: Text(
-            'Por favor espere ${remainingTime ~/ 60}:${(remainingTime % 60).toString().padLeft(2, '0')} minutos antes de volver a intentar',
+            'Por favor, espere ${remainingTime ~/ 60}:${(remainingTime % 60).toString().padLeft(2, '0')} minutos antes de volver a intentar, Code: 429',
             style: const TextStyle(
                 fontSize: 15, fontWeight: FontWeight.bold, fontFamily: 'Sora'),
           )),
@@ -404,14 +456,27 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                           padding: const EdgeInsetsDirectional
                                               .fromSTEB(0.0, 0.0, 0.0, 16.0),
                                           child: TextFormField(
+                                            textInputAction:
+                                                TextInputAction.next,
                                             autofocus: true,
                                             enableSuggestions: true,
                                             controller: _model.textController1,
                                             obscureText: false,
-                                            keyboardType: TextInputType.number,
-                                            maxLength: 8,
+                                            keyboardType:
+                                                TextInputType.emailAddress,
+                                            maxLength: 50,
                                             decoration: InputDecoration(
-                                              labelText: 'Numero de empleado',
+                                              labelText: 'E-mail',
+                                              suffix: _suggestedDomain != null
+                                                  ? GestureDetector(
+                                                      onTap: _applySuggestion,
+                                                      child: Text(
+                                                        '@$_suggestedDomain',
+                                                        style: TextStyle(
+                                                            color: Colors.blue),
+                                                      ),
+                                                    )
+                                                  : null,
                                               hintStyle:
                                                   FlutterFlowTheme.of(context)
                                                       .bodyLarge,
@@ -419,7 +484,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                 borderSide: BorderSide(
                                                   color: FlutterFlowTheme.of(
                                                           context)
-                                                      .primaryBackground,
+                                                      .secondaryBackground,
                                                   width: 2.0,
                                                 ),
                                                 borderRadius:
@@ -427,7 +492,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                               ),
                                               focusedBorder: OutlineInputBorder(
                                                 borderSide: const BorderSide(
-                                                  color: Color(0x00000000),
+                                                  color: Color.fromARGB(
+                                                      206, 1, 58, 203),
                                                   width: 2.0,
                                                 ),
                                                 borderRadius:
@@ -469,10 +535,15 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                       '' &&
                                                   _model.textController2.text !=
                                                       '') {
+                                                insertActionIntoLog(
+                                                    'LOG IN BY: ',
+                                                    _model
+                                                        .textController1.text);
+
                                                 setState(() {
                                                   isLoading = true;
                                                 });
-                                                await loginButtonFunction()
+                                                await handleLogin()
                                                     .whenComplete(() {
                                                   isLoading = false;
                                                 });
@@ -480,6 +551,9 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                 setState(() {
                                                   isLoading = false;
                                                 });
+                                                showEmptyFieldAlertDialog(
+                                                    context,
+                                                    'Verificar información, usuario y/o contraseña no pueden estar en blanco');
                                               }
                                             },
                                             controller: _model.textController2,
@@ -494,7 +568,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                 borderSide: BorderSide(
                                                   color: FlutterFlowTheme.of(
                                                           context)
-                                                      .primaryBackground,
+                                                      .secondaryBackground,
                                                   width: 2.0,
                                                 ),
                                                 borderRadius:
@@ -502,7 +576,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                               ),
                                               focusedBorder: OutlineInputBorder(
                                                 borderSide: const BorderSide(
-                                                  color: Color(0x00000000),
+                                                  color: Color.fromARGB(
+                                                      206, 1, 58, 203),
                                                   width: 2.0,
                                                 ),
                                                 borderRadius:
@@ -558,18 +633,69 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                           padding: const EdgeInsetsDirectional
                                               .fromSTEB(0.0, 0.0, 0.0, 16.0),
                                           child: FFButtonWidget(
+                                            //
                                             onPressed: () async {
-                                              setState(() {
-                                                isLoading = true;
-                                              });
-                                              ScaffoldMessenger.of(context)
-                                                  .hideCurrentSnackBar();
-                                              await loginButtonFunction()
-                                                  .whenComplete(() {
+                                              if (kDebugMode &&
+                                                  _model.textController1.text
+                                                      .isEmpty &&
+                                                  _model.textController2.text
+                                                      .isEmpty) {
                                                 setState(() {
+                                                  isDebugging = true;
+                                                  setUserDataForDebug();
                                                   isLoading = false;
                                                 });
-                                              });
+                                                if (Platform.isAndroid ||
+                                                    Platform.isIOS) {
+                                                  context.goNamed(
+                                                      'MobileMainView',
+                                                      extra: <String, dynamic>{
+                                                        kTransitionInfoKey:
+                                                            const TransitionInfo(
+                                                          hasTransition: true,
+                                                          transitionType:
+                                                              PageTransitionType
+                                                                  .fade,
+                                                        ),
+                                                      });
+                                                } else {
+                                                  context.goNamed(
+                                                    'MainWindow',
+                                                    extra: <String, dynamic>{
+                                                      kTransitionInfoKey:
+                                                          const TransitionInfo(
+                                                        hasTransition: true,
+                                                        transitionType:
+                                                            PageTransitionType
+                                                                .fade,
+                                                      ),
+                                                    },
+                                                  );
+                                                }
+                                              } else {
+                                                if (_model.textController1
+                                                            .text !=
+                                                        '' &&
+                                                    _model.textController2
+                                                            .text !=
+                                                        '') {
+                                                  ScaffoldMessenger.of(context)
+                                                      .hideCurrentSnackBar();
+                                                  await handleLogin()
+                                                      .whenComplete(() {
+                                                    setState(() {
+                                                      isLoading = false;
+                                                    });
+                                                  });
+                                                } else {
+                                                  setState(() {
+                                                    isLoading = false;
+                                                  });
+                                                  showEmptyFieldAlertDialog(
+                                                      context,
+                                                      'Verificar información, usuario y/o contraseña no pueden estar en blanco');
+                                                }
+                                              }
                                             },
                                             text: 'Ingresar',
                                             options: FFButtonOptions(
@@ -749,14 +875,27 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                           padding: const EdgeInsetsDirectional
                                               .fromSTEB(0.0, 0.0, 0.0, 16.0),
                                           child: TextFormField(
+                                            textInputAction:
+                                                TextInputAction.next,
                                             autofocus: true,
                                             enableSuggestions: true,
                                             controller: _model.textController1,
                                             obscureText: false,
-                                            keyboardType: TextInputType.number,
-                                            maxLength: 8,
+                                            keyboardType:
+                                                TextInputType.emailAddress,
+                                            maxLength: 50,
                                             decoration: InputDecoration(
-                                              labelText: 'Numero de empleado',
+                                              labelText: 'E-mail',
+                                              suffix: _suggestedDomain != null
+                                                  ? GestureDetector(
+                                                      onTap: _applySuggestion,
+                                                      child: Text(
+                                                        '@$_suggestedDomain',
+                                                        style: TextStyle(
+                                                            color: Colors.blue),
+                                                      ),
+                                                    )
+                                                  : null,
                                               hintStyle:
                                                   FlutterFlowTheme.of(context)
                                                       .bodySmall,
@@ -764,7 +903,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                 borderSide: BorderSide(
                                                   color: FlutterFlowTheme.of(
                                                           context)
-                                                      .primaryBackground,
+                                                      .secondaryBackground,
                                                   width: 2.0,
                                                 ),
                                                 borderRadius:
@@ -772,7 +911,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                               ),
                                               focusedBorder: OutlineInputBorder(
                                                 borderSide: const BorderSide(
-                                                  color: Color(0x00000000),
+                                                  color: Color.fromARGB(
+                                                      206, 1, 58, 203),
                                                   width: 2.0,
                                                 ),
                                                 borderRadius:
@@ -780,7 +920,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                               ),
                                               errorBorder: OutlineInputBorder(
                                                 borderSide: const BorderSide(
-                                                  color: Color(0x00000000),
+                                                  color: Color.fromARGB(
+                                                      225, 255, 0, 0),
                                                   width: 2.0,
                                                 ),
                                                 borderRadius:
@@ -816,7 +957,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                 setState(() {
                                                   isLoading = true;
                                                 });
-                                                await loginButtonFunction()
+                                                await handleLogin()
                                                     .whenComplete(() {
                                                   isLoading = false;
                                                 });
@@ -824,6 +965,10 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                 setState(() {
                                                   isLoading = false;
                                                 });
+                                                insertActionIntoLog(
+                                                    'LOG IN BY: ',
+                                                    _model
+                                                        .textController1.text);
                                               }
                                             },
                                             controller: _model.textController2,
@@ -838,7 +983,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                 borderSide: BorderSide(
                                                   color: FlutterFlowTheme.of(
                                                           context)
-                                                      .primaryBackground,
+                                                      .secondaryBackground,
                                                   width: 2.0,
                                                 ),
                                                 borderRadius:
@@ -846,7 +991,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                               ),
                                               focusedBorder: OutlineInputBorder(
                                                 borderSide: const BorderSide(
-                                                  color: Color(0x00000000),
+                                                  color: Color.fromARGB(
+                                                      206, 1, 58, 203),
                                                   width: 2.0,
                                                 ),
                                                 borderRadius:
@@ -903,20 +1049,46 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                               .fromSTEB(0.0, 0.0, 0.0, 16.0),
                                           child: FFButtonWidget(
                                             onPressed: () async {
-                                              if (_model.textController1.text !=
-                                                      '' &&
-                                                  _model.textController2.text !=
-                                                      '') {
-                                                await loginButtonFunction()
-                                                    .whenComplete(() {
+                                              if (kDebugMode &&
+                                                  _model.textController1.text
+                                                      .isEmpty &&
+                                                  _model.textController2.text
+                                                      .isEmpty) {
+                                                setState(() {
+                                                  isDebugging = true;
+                                                  setUserDataForDebug();
+                                                  isLoading = false;
+                                                });
+                                                context.goNamed(
+                                                  'MainWindow',
+                                                  extra: <String, dynamic>{
+                                                    kTransitionInfoKey:
+                                                        const TransitionInfo(
+                                                      hasTransition: true,
+                                                      transitionType:
+                                                          PageTransitionType
+                                                              .fade,
+                                                    ),
+                                                  },
+                                                );
+                                              } else {
+                                                if (_model.textController1
+                                                            .text !=
+                                                        '' &&
+                                                    _model.textController2
+                                                            .text !=
+                                                        '') {
+                                                  await handleLogin()
+                                                      .whenComplete(() {
+                                                    setState(() {
+                                                      isLoading = false;
+                                                    });
+                                                  });
+                                                } else {
                                                   setState(() {
                                                     isLoading = false;
                                                   });
-                                                });
-                                              } else {
-                                                setState(() {
-                                                  isLoading = false;
-                                                });
+                                                }
                                               }
                                             },
                                             text: 'Ingresar',
@@ -997,193 +1169,82 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
   }
 }
 
-TextEditingController _textFieldController = TextEditingController();
+// TextEditingController _textFieldController = TextEditingController();
+bool displayTokenGenerator = true;
 
 Future<void> _displayForgotPassword(BuildContext context) async {
-  _textFieldController.text = '';
+  // _textFieldController.text = '';
   bool isLoading = false; // Flag to track loading state
 
   return showDialog(
     context: context,
     builder: (context) {
       return StatefulBuilder(builder: (context, setState) {
-        return AlertDialog(
-          title: const Text(
-            'Recuperar contraseña',
-            style: TextStyle(fontFamily: 'Sora'),
-          ),
-          content: isLoading
-              ? const Center(
-                  child: CircularProgressIndicator(),
-                )
-              : TextFormField(
-                  autofocus: true,
-                  controller: _textFieldController,
-                  decoration: const InputDecoration(
-                    hintText: "Numero de empleado",
-                    helperText: 'Ingrese su numero de empleado',
-                    icon: Icon(Icons.numbers),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Por favor, ingrese un número de empleado válido';
-                    }
-                    return null;
-                  },
-                ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('CANCEL'),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-            TextButton(
-              onPressed: isLoading
-                  ? null // Disable the button when loading
-                  : () async {
-                      setState(() {
-                        isLoading = true; // Start loading animation
-                      });
-
-                      if (_textFieldController.text.isNotEmpty ||
-                          _textFieldController.text != '') {
-                        var responseCode = await sendUserPasswordToMail(
-                            _textFieldController.text,
-                            deviceInformation.toString(),
-                            deviceIP);
-                        if (responseCode == 200) {
-                          Navigator.pop(context);
-                          showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: const Text(
-                                    "Solicitud enviada",
-                                    style: TextStyle(fontFamily: 'Sora'),
-                                  ),
-                                  content: const Text(
-                                      "Si los resultados coinciden, recibirá en su correo su contraseña"),
-                                  icon: (const Icon(Icons.beenhere_outlined)),
-                                  actions: [
-                                    TextButton(
-                                        onPressed: () {
-                                          Navigator.pop(context);
-                                        },
-                                        child: const Text('OK'))
-                                  ],
-                                );
-                              });
-                        } else {
-                          showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: const Text(
-                                    "Error",
-                                    style: TextStyle(fontFamily: 'Sora'),
-                                  ),
-                                  content: Text(responseCode.toString()),
-                                  icon: (const Icon(Icons.error_outline)),
-                                  actions: [
-                                    TextButton(
-                                        onPressed: () {
-                                          Navigator.pop(context);
-                                        },
-                                        child: const Text('OK'))
-                                  ],
-                                );
-                              });
-                        }
-                      } else {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              icon: const Icon(Icons.error_outline),
-                              title: const Text(
-                                "Error",
-                                style: TextStyle(fontFamily: 'Sora'),
-                              ),
-                              content: const Text(
-                                "Por favor, ingrese un número de empleado válido",
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                  child: const Text('OK'),
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      }
-                      setState(() {
-                        isLoading = false; // Stop loading animation
-                      });
-                    },
-              child: const Text('OK'),
-            ),
-          ],
-        );
+        return RecoverPasswordScreen();
       });
     },
   );
 }
 
-User parseLogedInUserFromJSON(List<dynamic> jsonList) {
+/* User parseLogedInUserFromJSON(Map<String, dynamic> jsonList, String userToken) {
   late User currentUser;
   // late List<dynamic> events = [];
 
-  for (var i = 0; i < jsonList.length; i++) {
-    if (i == 0) {
-      int employeeNumber = jsonList[i]['NoEmpleado'];
-      String employeeName = jsonList[i]['Nombre_Gafete'];
-      String claUn = jsonList[i]['ClaUn'];
-      String role = jsonList[i]['RoleName'];
-      int userId = jsonList[i]['id'];
-      String token = 'Bearer ';
-      token = token + jsonList[1]['token'];
-      String schoolEmail = jsonList[i]['user_email'];
-      String usergenre = jsonList[i]['genre'];
-      int isActive = jsonList[i]['bajalogicasino'];
-      String? department = jsonList[i]['department'];
-      String? position = jsonList[i]['position'];
-      String? dateTime = jsonList[i]['createdAt'];
-      String? birthdate = jsonList[i]['birthdate'];
-      bool? isTeacher = jsonList[i]['is_teacher'];
-      currentUser = User(
-          claUn,
-          employeeName,
-          employeeNumber,
-          role,
-          userId,
-          token,
-          schoolEmail,
-          usergenre,
-          isActive,
-          department,
-          position,
-          dateTime,
-          birthdate,
-          isTeacher);
-    }
-  }
+  // for (var i = 0; i < jsonList.length; i++) {
+  // if (i == 0) {
+  int employeeNumber = jsonList['employeeNumber'];
+  String employeeName = jsonList['userFullName'];
+  String claUn = jsonList['userCampus'];
+  String role = jsonList['userRole']['name'];
+  int userId = jsonList['id'];
+  String token = 'Bearer ';
+  token = token + userToken;
+  String schoolEmail = jsonList['userMail'];
+  String? usergenre = jsonList['genre'];
+  int isActive = jsonList['status'];
+  String? department = jsonList['userDept'];
+  String? position = jsonList['userPosition'];
+  //String? dateTime = jsonList[i]['createdAt'];
+  //String? birthdate = jsonList[i]['birthdate'];
+  bool? isTeacher = jsonList['userTeacher'];
+  bool? isAdmin = jsonList['userRole']['isAdmin'];
+  int roleId = jsonList['userRole']['id'];
+  bool canUpdatePassword = jsonList['userCanUpdatePassword'];
+  bool isAcademicCoord = jsonList['userRole']['isAcademicCoordinator'];
+
+  currentUser = User(
+      claUn,
+      employeeName,
+      employeeNumber,
+      role,
+      userId,
+      token,
+      schoolEmail,
+      //usergenre,
+      isActive,
+      department,
+      position,
+      null,
+      null,
+      isTeacher,
+      isAdmin,
+      roleId,
+      canUpdatePassword,
+      isAcademicCoord);
+  // }
+  // }
   userToken = currentUser.token;
   return currentUser;
-}
+} */
 
-Cycle getcurrentCycle(List<dynamic> jsonList) {
+Cycle getcurrentCycle(Map<String, dynamic> jsonList) {
   late Cycle currentCycle;
 
-  for (var item in jsonList) {
-    String claCiclo = item['ClaCiclo'];
-    String fecIniCiclo = item['FecIniCiclo'];
-    String fecFinCiclo = item['FecFinCiclo'];
-    currentCycle = Cycle(claCiclo, fecIniCiclo, fecFinCiclo);
-  }
+  String claCiclo = jsonList['cycle'];
+  String fecIniCiclo = jsonList['initialDate'];
+  String fecFinCiclo = jsonList['finalDate'];
+
+  currentCycle = Cycle(claCiclo, fecIniCiclo, fecFinCiclo);
 
   return currentCycle;
 }

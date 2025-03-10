@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:oxschool/presentation/Modules/academic/grades_modules_configuration.dart';
-import 'package:oxschool/presentation/Modules/user/users_main_screen.dart';
+import 'package:oxschool/presentation/Modules/admin/users_main_screen.dart';
 
 import '../../presentation/Modules/enfermeria/nursery_main_screen.dart';
 import '../../presentation/Modules/enfermeria/students_with_illness.dart';
@@ -25,6 +25,8 @@ const mobilePages = [
   //Main
   MobileMainWindow(),
 ];
+ List<Map<String, dynamic>> accessRoutes = [];
+
 
 const Map<String, String> modulesMapped = {
   '': "FichaDeSalud()",

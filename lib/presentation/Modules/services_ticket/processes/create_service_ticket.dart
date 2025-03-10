@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:oxschool/presentation/components/save_and_cancel_buttons.dart';
 import 'package:oxschool/core/utils/loader_indicator.dart';
 
 class CreateServiceTicket extends StatefulWidget {
@@ -38,6 +37,8 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
     _requirementController.dispose();
     _date.dispose();
     _employeeNameController.dispose();
+    _descriptionController.dispose();
+    _observationsController.dispose();
     super.dispose();
   }
 
@@ -64,7 +65,8 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
 
     final DropdownMenu employeSelectorName = DropdownMenu<String>(
         initialSelection: employeeList.first,
-        label: const Text('Nombre de empleado que solicita'),
+        enableFilter: true,
+        label: const Text('Nombre del empleado que solicita'),
         onSelected: (String? value) {
           setState(() {
             dropDownValue = value!;
@@ -75,19 +77,25 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
           return DropdownMenuEntry<String>(value: value, label: value);
         }).toList());
 
-    final descriptionField = Expanded(
-        child: TextFormField(
+    final descriptionField = TextFormField(
       controller: _descriptionController,
       // expands: true,
-      maxLines: 5,
+      maxLines: 4,
       onChanged: (value) {
         setState(() {
           _isDescriptionFieldEmpty = true;
         });
       },
       decoration: InputDecoration(
-        // helperText: 'Descripción del Reporte de Detallle',
-        label: const Text('Descripción del Reporte de Detallle'),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10.0),
+          borderSide: const BorderSide(
+            color: Colors.grey,
+            width: 1.0,
+          ),
+        ),
+
+        label: const Text('Descripción del Reporte'),
         // prefixIcon: const Icon(Icons.person),
         suffixIcon: _isDescriptionFieldEmpty
             ? GestureDetector(
@@ -101,21 +109,26 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
               )
             : null,
       ),
-    ));
+    );
 
-    final observationsField = Expanded(
-        child: TextFormField(
+    final observationsField = TextFormField(
       controller: _observationsController,
       // expands: true,
-      maxLines: 5,
+      maxLines: 4,
       onChanged: (value) {
         setState(() {
           _isObservationsFieldEmpty = true;
         });
       },
       decoration: InputDecoration(
-        // helperText: 'Descripción del Reporte de Detallle',
-        label: const Text('Descripción del Reporte de Detallle'),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10.0),
+          borderSide: const BorderSide(
+            color: Colors.grey,
+            width: 1.0,
+          ),
+        ),
+        label: const Text('Observaciones'),
         // prefixIcon: const Icon(Icons.person),
         suffixIcon: _isObservationsFieldEmpty
             ? GestureDetector(
@@ -129,40 +142,9 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
               )
             : null,
       ),
-    ));
+    );
 
-    // final employeeNameField = Expanded(
-    //     child: TextFormField(
-    //   controller: _employeeNameController,
-    //   // inputFormatters: [FilteringTextInputFormatter.singleLineFormatter],
-    //   keyboardType: TextInputType.name,
-    //   decoration: InputDecoration(
-    //     label: const Text('Nombre de quien solicita el servicio'),
-    //     prefixIcon: const Icon(Icons.person),
-    //     suffixIcon: _showSearchEmployee
-    //         ? GestureDetector(
-    //             onTap: () async {
-    //               // ignore: unused_local_variable
-    //               var apiResponse;
-    //               setState(() {
-    //                 _isSearching = true;
-    //               });
-    //               apiResponse =
-    //                   await searchEmployee(_employeeNumberController.text)
-    //                       .whenComplete(() {
-    //                 setState(() {
-    //                   _isSearching = false;
-    //                 });
-    //               });
-    //             },
-    //             child: const Icon(Icons.numbers),
-    //           )
-    //         : null,
-    //   ),
-    // ));
-
-    final dateAndTimeField = Expanded(
-        child: TextField(
+    final dateAndTimeField = TextField(
       controller: _date,
       decoration: InputDecoration(
         // icon: Icon(Icons.calendar_today),
@@ -195,7 +177,7 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
           return null;
         });
       },
-    ));
+    );
 
     final DropdownMenu campusSelectorDropDown = DropdownMenu<String>(
         initialSelection: months.first,
@@ -223,133 +205,91 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
           return DropdownMenuEntry<String>(value: value, label: value);
         }).toList());
 
-    return Stack(
-      children: [
-        SizedBox(
-            width: MediaQuery.of(context).size.width * 3 / 4,
-            child: LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) {
-                if (constraints.maxWidth < 600) {
-                  return SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 0.0, vertical: 25.0),
-                          child: Column(
+    return    SizedBox(
+            width: MediaQuery.of(context).size.width * 3 / 5,
+            child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints){
+              if (_isSearching) {
+                return CustomLoadingIndicator();
+              } else {
+                return  SingleChildScrollView(
+                  child: Column(
+                        //mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        //crossAxisAlignment: CrossAxisAlignment.start,
+                        // crossAxisAlignment
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
-                              Row(
-                                children: [
-                                  employeSelectorName,
-                                ],
-                              ),
-                              const SizedBox(height: 15),
-                              Row(
-                                children: [
-                                  SizedBox(
-                                    width: 10,
-                                    child: campusSelectorDropDown,
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 15),
-                              Row(
-                                children: [deptSelectorDropDown],
-                              ),
-                              const SizedBox(height: 15),
-                              Row(
-                                children: [
-                                  dateAndTimeField,
-                                  const SizedBox(width: 10),
-                                ],
-                              ),
-                              const SizedBox(height: 18),
-                              Row(
-                                children: [descriptionField],
-                              ),
-                              const SizedBox(height: 20),
-                              Row(
-                                children: [observationsField],
-                              ),
-                              const SizedBox(height: 20),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  CustomSaveButton(
-                                    onPressed: () {},
-                                  ),
-                                  const SizedBox(
-                                    width: 30,
-                                  ),
-                                  CustomCancelButton(onPressed: () {
-                                    Navigator.pop(context);
-                                  })
-                                ],
+                            Flexible(child: employeSelectorName,), 
+                            Flexible(child: campusSelectorDropDown), 
+                            Flexible(child: deptSelectorDropDown), 
+                            Flexible(child: dateAndTimeField,)],
+                          ),
+                          SizedBox(
+                            height: 18,
+                          ),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Flexible(
+                                child: descriptionField,
                               )
                             ],
                           ),
-                        ),
-                      ],
-                    ),
-                  );
-                } else {
-                  return SingleChildScrollView(
-                      child: Column(children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 0.0, vertical: 25.0),
-                      child: Column(
-                        children: [
+                          const SizedBox(
+                            height: 14,
+                          ),
                           Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              const SizedBox(width: 18),
-                              employeSelectorName,
-                              // _buildEmployeeNumberField(),
-                              const SizedBox(width: 18),
-                              campusSelectorDropDown,
-                              const SizedBox(width: 18),
-                              deptSelectorDropDown,
-                              const SizedBox(width: 18),
-                              dateAndTimeField
+                              Flexible(child: observationsField),
                             ],
                           ),
-                          const Divider(thickness: 1),
-                          const SizedBox(height: 18),
-                          Row(
-                            children: [descriptionField],
+                          const SizedBox(
+                            height: 14,
                           ),
-                          const SizedBox(height: 20),
                           Row(
-                            children: [observationsField],
-                          ),
-                          const SizedBox(height: 20),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              CustomSaveButton(
-                                onPressed: () {},
-                              ),
-                              const SizedBox(
-                                width: 30,
-                              ),
-                              CustomCancelButton(onPressed: () {
-                                Navigator.pop(context);
-                              })
+                              Flexible(
+                                  child: Column(
+                                children: [
+                                  IconButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      icon: Icon(
+                                        Icons.cancel,
+                                        color: Colors.red,
+                                      )),
+                                  Text('Cancelar')
+                                ],
+                              )),
+                              Flexible(
+                                  child: Column(
+                                children: [
+                                  IconButton(
+                                      onPressed: () {},
+                                      icon: Icon(
+                                        Icons.save,
+                                      )),
+                                  Text('Guardar')
+                                ],
+                              )),
                             ],
-                          )
+                          ),
                         ],
                       ),
-                    )
-                  ]));
-                }
-              },
-            )),
-        if (_isSearching)
-          Center(
-            child: CustomLoadingIndicator(),
-          )
-      ],
+                      
+                );  
+              }
+            }),
+
+             
     );
   }
 

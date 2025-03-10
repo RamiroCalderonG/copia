@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
+import 'package:oxschool/core/utils/loader_indicator.dart';
 
 void showEmptyFieldAlertDialog(BuildContext context, String contentText) {
   showDialog(
@@ -31,7 +32,10 @@ void showEmptyFieldAlertDialog(BuildContext context, String contentText) {
 }
 
 Future<int> showConfirmationDialog(
-    BuildContext context, String titleText, String contentText) async {
+    //TO GET A CONFIRMATION FROM THE USER
+    BuildContext context,
+    String titleText,
+    String contentText) async {
   Completer<int> completer = Completer<int>();
   showDialog(
     barrierDismissible: false,
@@ -39,30 +43,45 @@ Future<int> showConfirmationDialog(
     builder: (BuildContext context) {
       return AlertDialog(
         icon: const Icon(
-          Icons.task_alt,
-          color: Colors.green,
+          Icons.warning,
+          color: Colors.amber,
         ),
         title: Text(titleText, style: const TextStyle(fontFamily: 'Sora')),
-        content: Text(contentText
-            // 'Por favor ingrese un valor que sea válido.'
-            ),
+        content: Text(contentText),
         actions: [
           TextButton(
+            style: ButtonStyle(
+                backgroundColor: WidgetStatePropertyAll(
+                    FlutterFlowTheme.of(context)
+                        .tertiary //Color.fromARGB(255, 203, 242, 173)
+                    )),
             onPressed: () {
               Navigator.of(context).pop();
               completer.complete(1); // User selected 'Yes'
             },
-            // style: ButtonStyle(
-            //   backgroundColor:
-            //       MaterialStateProperty.all<Color>(Colors.greenAccent),
-            // ),
-            child: Text('Cerrar',
+            child: Text('Confirmar',
                 style: FlutterFlowTheme.of(context).labelLarge.override(
                       fontFamily: 'Roboto',
-                      color: const Color(0xFF130C0D),
+                      color: FlutterFlowTheme.of(context).primaryText,
                       fontWeight: FontWeight.w500,
                     )),
           ),
+          TextButton(
+              style: ButtonStyle(
+                  backgroundColor: WidgetStatePropertyAll(
+                      FlutterFlowTheme.of(context)
+                          .accent1 //Color.fromARGB(216, 250, 157, 157)
+                      )),
+              onPressed: () {
+                Navigator.of(context).pop();
+                completer.complete(0); // User selected 'No'
+              },
+              child: Text('Cancelar',
+                  style: FlutterFlowTheme.of(context).labelLarge.override(
+                        fontFamily: 'Roboto',
+                        color: FlutterFlowTheme.of(context).primaryText,
+                        fontWeight: FontWeight.w500,
+                      )))
         ],
       );
     },
@@ -70,6 +89,7 @@ Future<int> showConfirmationDialog(
   return completer.future;
 }
 
+//To display error from backend
 void showErrorFromBackend(BuildContext context, String errorMessage) {
   showDialog(
       context: context,
@@ -90,6 +110,7 @@ void showErrorFromBackend(BuildContext context, String errorMessage) {
       });
 }
 
+//To display information
 void showInformationDialog(
     BuildContext context, String header, String bodyMessage) {
   showDialog(
@@ -107,7 +128,11 @@ void showInformationDialog(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text('Cerrar'),
+              child: Text('Cerrar',
+                  style: TextStyle(
+                    fontFamily: 'Sora',
+                    // backgroundColor: Colors.blue[50],
+                  )),
             )
           ],
         );
@@ -133,8 +158,7 @@ Future<int> showDeleteConfirmationAlertDialog(BuildContext context) async {
                 completer.complete(0); // User selected 'No'
               },
               style: ButtonStyle(
-                  backgroundColor:
-                      MaterialStateProperty.all<Color>(Colors.red)),
+                  backgroundColor: WidgetStateProperty.all<Color>(Colors.red)),
               child: Text(
                 'No',
                 style: FlutterFlowTheme.of(context).labelLarge.override(
@@ -151,7 +175,7 @@ Future<int> showDeleteConfirmationAlertDialog(BuildContext context) async {
               },
               style: ButtonStyle(
                 backgroundColor:
-                    MaterialStateProperty.all<Color>(Colors.greenAccent),
+                    WidgetStateProperty.all<Color>(Colors.greenAccent),
               ),
               child: Text('Si',
                   style: FlutterFlowTheme.of(context).labelLarge.override(

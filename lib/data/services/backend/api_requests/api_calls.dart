@@ -1,4 +1,4 @@
-import 'package:oxschool/core/constants/User.dart';
+import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'api_manager.dart';

@@ -4,9 +4,8 @@ import 'package:flutter/material.dart';
 
 import 'package:intl/intl.dart';
 
-import 'package:oxschool/core/constants/User.dart';
-import 'package:oxschool/core/reusable_methods/user_functions.dart';
-import 'package:oxschool/data/datasources/temp/users_temp_data.dart';
+import 'package:oxschool/core/constants/user_consts.dart';
+
 import 'package:oxschool/presentation/components/custom_icon_button.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
@@ -16,7 +15,7 @@ import '../../../data/services/backend/api_requests/api_calls_list.dart';
 import '../../components/confirm_dialogs.dart';
 
 import 'fodac_27_dropdownmenu.dart';
-import '../../components/plutogrid_export_options.dart';
+
 import '../../components/save_and_cancel_buttons.dart';
 import '../../../core/reusable_methods/academic_functions.dart';
 import '../../../core/utils/loader_indicator.dart';
@@ -29,7 +28,7 @@ class FoDac27 extends StatefulWidget {
 }
 
 class _FoDac27State extends State<FoDac27> {
-  // List<dynamic> simplifiedStudentsList = [];
+  late Future<dynamic> _studentsFuture;
   List<PlutoRow> fodac27HistoryRows = [];
   late PlutoGridStateManager stateManager;
 
@@ -43,6 +42,7 @@ class _FoDac27State extends State<FoDac27> {
 
   bool isLoading = true;
   bool isUserAdmin = false;
+  bool displayLoading = false;
 
   int selectedEvalID = 0;
   String selectedCommentToEdit = '';
@@ -50,8 +50,8 @@ class _FoDac27State extends State<FoDac27> {
 
   @override
   void initState() {
-    isUserAdmin = verifyUserAdmin(currentUser!);
-    populateStudentsDropDownMenu();
+    isUserAdmin = currentUser!.isCurrentUserAdmin();
+    _studentsFuture = populateStudentsDropDownMenu();
     super.initState();
   }
 
@@ -59,6 +59,12 @@ class _FoDac27State extends State<FoDac27> {
   void dispose() {
     tempStudentMap.clear();
     fodac27HistoryRows.clear();
+    teacherGradesListFODAC27.clear();
+    teacherGroupsListFODAC27.clear();
+    teacherCampusListFODAC27.clear();
+    gradesMapFODAC27.clear();
+    studentSelectorController.dispose();
+    selectedTempStudent = null;
     super.dispose();
   }
 
@@ -72,11 +78,14 @@ class _FoDac27State extends State<FoDac27> {
     PlutoColumn(
         title: 'id',
         field: 'fodac27',
-        type: PlutoColumnType.number(),
+        type: PlutoColumnType.number(
+          format: '####',
+          negative: false,
+        ),
         readOnly: true,
         sort: PlutoColumnSort.ascending,
         enableColumnDrag: true,
-        width: 68),
+        enableRowDrag: true),
     PlutoColumn(
       title: 'Fecha',
       field: 'date',
@@ -125,22 +134,22 @@ class _FoDac27State extends State<FoDac27> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-          if (isLoading) {
-            return CustomLoadingIndicator();
+    return FutureBuilder(
+        future: _studentsFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CustomLoadingIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
           } else {
             return Column(
               children: [
                 buildStudentSelector(),
-                Expanded(child: buildPlutoGrid()),
+                Expanded(child: buildPlutoGrid())
               ],
             );
           }
-        },
-      ),
-    );
+        });
   }
 
   Widget buildStudentSelector() {
@@ -160,9 +169,24 @@ class _FoDac27State extends State<FoDac27> {
               alignment: Alignment.bottomCenter,
               child: Column(
                 children: [
-                  RefreshButton(onPressed: handleRefresh),
+                  RefreshButton(onPressed: () {
+                    setState(() {
+                      isLoading = true;
+                    });
+                    handleRefresh();
+                    setState(() {
+                      isLoading = false;
+                    });
+                  }),
                   const SizedBox(height: 10),
-                  AddItemButton(onPressed: handleAddItem),
+                  AddItemButton(onPressed: () {
+                    handleAddItem();
+
+                    handleRefresh();
+                    // if (mounted) {
+
+                    // }
+                  }),
                   const SizedBox(height: 10),
                   if (isUserAdmin)
                     DeleteItemButton(onPressed: () async {
@@ -176,157 +200,41 @@ class _FoDac27State extends State<FoDac27> {
                         int confirmation =
                             await showDeleteConfirmationAlertDialog(context);
                         if (confirmation == 1) {
-                          int response = await deleteAction(selectedEvalID);
-                          if (response == 200) {
+                          try {
+                            setState(() {
+                              isLoading = true;
+                            });
+                            int response = await deleteAction(selectedEvalID)
+                                .catchError((onError) {
+                              showErrorFromBackend(context, onError.toString());
+                            }).whenComplete(() {
+                              setState(() {
+                                isLoading = false;
+                              });
+                            });
+                            // if (response == 200) {
                             if (mounted) {
                               await showConfirmationDialog(
                                   context, 'Realizado', 'Registro eliminado');
                               handleRefresh();
+                              setState(() {
+                                isLoading = false;
+                              });
+                            }
+                            // }
+                          } catch (e) {
+                            if (mounted) {
+                              showErrorFromBackend(context, e.toString());
                             }
                           }
                         }
                       }
                     })
-
-                  //                 DeleteItemButton(
-                  //                   onPressed: () async {
-                  //                     if (selectedEvalID == 0) {
-                  //                       const AlertDialog(
-                  //                         title: Text('Error'),
-                  //                         content: Text(
-                  //                             'Primero selecciona un registro para editar'),
-                  //                       );
                 ],
               )),
         ],
       ),
     );
-    // Padding(
-    //   padding: const EdgeInsets.only(left: 2, right: 30, top: 20, bottom: 10),
-    //   child: Row(
-    //     mainAxisAlignment: MainAxisAlignment.spaceAround,
-    //     children: [
-    //       Column
-    //       const Fodac27MenuSelector(),
-    //       const Spacer(), // add a spacer to push the RefreshButton to the end
-    //       Column(
-    //         mainAxisSize: MainAxisSize.min,
-    //         children: [
-    //
-    //         ],
-    //       ),
-    //     ],
-    //   ),
-    // );
-
-    //       Padding(
-    //     padding: const EdgeInsets.only(left: 10, right: 10, top: 20),
-    //     child: Row(
-    //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-    //       children: [
-    //         Flexible(
-    //           child: DropdownMenu<String>(
-    //             controller: studentSelectorController,
-    //             enableFilter: true,
-    //             requestFocusOnTap: true,
-    //             leadingIcon: const Icon(Icons.search),
-    //             // trailingIcon: IconButton(
-    //             //   onPressed: studentSelectorController.clear,
-    //             //   icon: const Icon(Icons.clear),
-    //             // ),
-    //             label: const Text('Alumno'),
-    //             inputDecorationTheme: const InputDecorationTheme(
-    //               filled: true,
-    //               contentPadding: EdgeInsets.symmetric(vertical: 5.0),
-    //             ),
-    //             onSelected: (student) {
-    //               if (student != null) {
-    //                 setState(() {
-    //                   selectedStudent = student;
-    //                   selectedstudentId = getStudentIdByName(student);
-    //                   if (selectedstudentId != null) {
-    //                     populateGrid(
-    //                         selectedstudentId!, currentCycle!.claCiclo!, true);
-    //                   }
-    //                 });
-    //               }
-    //             },
-    //             dropdownMenuEntries: simplifiedStudentsList
-    //                 .map<DropdownMenuEntry<String>>((e) => DropdownMenuEntry(
-    //                     leadingIcon: const Icon(Icons.circle, size: 5),
-    //                     value: e['name'],
-    //                     label: e['name']
-    //                     // +
-    //                     //     '  |  ' +
-    //                     //     e['grade'].toString() +
-    //                     //     e['group'] +
-    //                     //     '  |  ' +
-    //                     //     e['campus'],
-    //                     ))
-    //                 .toList(),
-    //           ),
-    //         ),
-    //         Flexible(
-    //           child: Row(
-    //             mainAxisAlignment: MainAxisAlignment.end,
-    //             children: [
-    //               AddItemButton(onPressed: handleAddItem),
-    //               EditItemButton(
-    //                 onPressed: () {
-    //                   if (selectedEvalID == 0) {
-    //                     const AlertDialog(
-    //                       title: Text('Error'),
-    //                       content:
-    //                           Text('Primero selecciona un registro para editar'),
-    //                     );
-    //                   } else {
-    //                     showDialog(
-    //                         context: context,
-    //                         builder: (BuildContext context) {
-    //                           return EditCommentScreen(
-    //                             id: selectedEvalID,
-    //                             comment: selectedCommentToEdit,
-    //                             date: selectedDateToEdit,
-    //                             selectedSubject: selectedSubjectNameToEdit,
-    //                             studentID: selectedStudentIdToEdit,
-    //                           );
-    //                         });
-    //                   }
-    //                 },
-    //               ),
-    //               // exportToExcel,
-    //               RefreshButton(onPressed: handleRefresh),
-    //               if (isUserAdmin)
-    //                 DeleteItemButton(
-    //                   onPressed: () async {
-    //                     if (selectedEvalID == 0) {
-    //                       const AlertDialog(
-    //                         title: Text('Error'),
-    //                         content: Text(
-    //                             'Primero selecciona un registro para editar'),
-    //                       );
-    //                     } else {
-    //                       int confirmation =
-    //                           await showDeleteConfirmationAlertDialog(context);
-
-    //                       if (confirmation == 1) {
-    //                         int response = await deleteAction(selectedEvalID);
-    //                         if (response == 200) {
-    //                           if (mounted) {
-    //                             await showConfirmationDialog(
-    //                                 context, 'Realizado', 'Registro eliminado');
-    //                           }
-    //                         }
-    //                       }
-    //                     }
-    //                   },
-    //                 ),
-    //             ],
-    //           ),
-    //         ),
-    //       ],
-    //     ),
-    //   );
   }
 
   Widget buildPlutoGrid() {
@@ -341,8 +249,8 @@ class _FoDac27State extends State<FoDac27> {
           stateManager = event.stateManager;
         },
         onSelected: handleSelectedCell,
-        createHeader: (stateManager) =>
-            PlutoGridHeader(stateManager: stateManager),
+        // createHeader: (stateManager) =>
+        //     PlutoGridHeader(stateManager: stateManager),
         configuration: const PlutoGridConfiguration(
           style: PlutoGridStyleConfig(
             enableColumnBorderVertical: false,
@@ -357,7 +265,6 @@ class _FoDac27State extends State<FoDac27> {
     if (selectedTempStudent == null) {
       showEmptyFieldAlertDialog(context, 'Favor de seleccionar un alumno');
     } else {
-      handleRefresh();
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -366,6 +273,7 @@ class _FoDac27State extends State<FoDac27> {
             content: NewFODAC27CommentDialog(
               selectedstudentId: selectedstudentId!,
               employeeNumber: currentUser!.employeeNumber!,
+              onDialogClose: _handleRefreshWithLoading,
             ),
           );
         },
@@ -373,15 +281,37 @@ class _FoDac27State extends State<FoDac27> {
     }
   }
 
-  void handleRefresh() {
-    for (var map in tempStudentMap) {
-      if (map.containsKey('name') && map['name'] == selectedTempStudent) {
-        selectedstudentId = map['studentID'];
+  void _handleRefreshWithLoading() {
+    setState(() {
+      isLoading = true;
+    });
+
+    handleRefresh().then((_) {
+      setState(() {
+        isLoading = false;
+      });
+    }).catchError((error) {
+      setState(() {
+        isLoading = false;
+      });
+      showErrorFromBackend(context, error.toString());
+    });
+  }
+
+  Future<dynamic> handleRefresh() async {
+    setState(() {
+      fodac27HistoryRows.clear();
+    });
+
+    for (var map in simplifiedStudentsList) {
+      if (map.containsKey('student_name') &&
+          map['student_name'] == selectedTempStudent) {
+        selectedstudentId = map['matricula'];
         break;
       }
     }
     if (selectedstudentId != null) {
-      populateGrid(selectedstudentId!, currentCycle!.claCiclo!, true);
+      await populateGrid(selectedstudentId!, currentCycle!.claCiclo!, true);
     }
   }
 
@@ -401,18 +331,24 @@ class _FoDac27State extends State<FoDac27> {
 
   Future<void> populateGrid(
       String studentID, String cycle, bool isByStudent) async {
-    var apiResponse = await getFodac27History(cycle, studentID, isByStudent)
-        .onError((error, stackTrace) => stateManager.removeAllRows());
+    setState(() {
+      isLoading = true;
+    });
+
+    var apiResponse =
+        await getStudentFodac27History(cycle, studentID, isByStudent)
+            .onError((error, stackTrace) => stateManager.removeAllRows());
     if (apiResponse != null) {
-      var decodedResponse = json.decode(apiResponse) as List;
+      var decodedResponse =
+          json.decode(utf8.decode(apiResponse.codeUnits)) as List;
       List<PlutoRow> newRows = decodedResponse.map((item) {
         return PlutoRow(cells: {
           'date': PlutoCell(value: item['date']),
-          'studentID': PlutoCell(value: item['student']),
+          'studentID': PlutoCell(value: item['studentId']),
           'Obs': PlutoCell(value: item['observation']),
-          'subject': PlutoCell(value: item['subject']),
-          'teacher': PlutoCell(value: item['teacher']),
-          'fodac27': PlutoCell(value: int.parse(item['fodac27'])),
+          'subject': PlutoCell(value: item['subjectName']),
+          'teacher': PlutoCell(value: item['teacherName']),
+          'fodac27': PlutoCell(value: item['fodacId']),
         });
       }).toList();
 
@@ -420,18 +356,19 @@ class _FoDac27State extends State<FoDac27> {
         fodac27HistoryRows = newRows;
         stateManager.removeAllRows();
         stateManager.appendRows(newRows);
+        isLoading = false;
       });
     }
   }
 
-  Future<void> populateStudentsDropDownMenu() async {
-    String userRole = currentUser!.role;
+  Future<dynamic> populateStudentsDropDownMenu() async {
+    // String userRole = currentUser!.role;
 
-    simplifiedStudentsList = await getStudentsByTeacher(
-      currentUser!.employeeNumber!,
-      currentCycle!.claCiclo!,
-      userRole,
-    );
+    // var response = await getStudentsByRole(currentCycle!.claCiclo!);
+    // List<dynamic> simplifiedStudentsList = json.decode(response);
+
+    simplifiedStudentsList =
+        await getStudentsByTeacher(currentCycle!.claCiclo!);
 
     if (simplifiedStudentsList.isNotEmpty) {
       setState(() {
@@ -440,9 +377,13 @@ class _FoDac27State extends State<FoDac27> {
     }
   }
 
-  Future<int> deleteAction(int fodac27ID) async {
-    var response = await deleteFodac27Record(fodac27ID);
-    return response;
+  Future<dynamic> deleteAction(int fodac27ID) async {
+    try {
+      var response = await deleteFodac27Record(fodac27ID);
+      return response;
+    } catch (e) {
+      return Future.error(e);
+    }
   }
 }
 
@@ -472,6 +413,7 @@ class EditCellDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () {
+            controller.dispose();
             Navigator.of(context).pop();
           },
           child: const Text('Cancelar'),
@@ -491,11 +433,13 @@ class EditCellDialog extends StatelessWidget {
 class NewFODAC27CommentDialog extends StatefulWidget {
   final String selectedstudentId;
   final int employeeNumber;
+  final VoidCallback onDialogClose;
 
   const NewFODAC27CommentDialog({
-    Key? key,
+    super.key,
     required this.selectedstudentId,
     required this.employeeNumber,
+    required this.onDialogClose,
   });
 
   @override
@@ -512,6 +456,8 @@ class _NewFODAC27CommentDialogState extends State<NewFODAC27CommentDialog> {
   List<String> _materias = [];
   Map<String, dynamic> subjectsMap = {};
   bool isLoading = false;
+  late Future<dynamic> loadingDone;
+  DateTime? _selectedDate;
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -522,6 +468,7 @@ class _NewFODAC27CommentDialogState extends State<NewFODAC27CommentDialog> {
     );
     if (picked != null && picked != DateTime.now()) {
       setState(() {
+        _selectedDate = picked;
         _dateController.text = "${picked.day}/${picked.month}/${picked.year}";
       });
     }
@@ -530,14 +477,22 @@ class _NewFODAC27CommentDialogState extends State<NewFODAC27CommentDialog> {
   @override
   void initState() {
     isLoading = true;
-    getSubjects();
+    loadingDone = getSubjects();
     // isLoading = false;
 
     super.initState();
     //_dateController.text = "22/07/2024"; // Initial date
   }
 
-  void getSubjects() async {
+  @override
+  void dispose() {
+    tempStudentMap.clear();
+    _dateController.dispose();
+    _observacionesController.dispose();
+    super.dispose();
+  }
+
+  Future<void> getSubjects() async {
     Map<String, dynamic> subjects = await populateSubjectsDropDownSelector(
         widget.selectedstudentId, currentCycle!.claCiclo!);
 
@@ -546,250 +501,259 @@ class _NewFODAC27CommentDialogState extends State<NewFODAC27CommentDialog> {
     isLoading = false;
   }
 
-  void _addNewComment() async {
+  Future<void> _addNewComment() async {
     if (_formKey.currentState!.validate()) {
-      var subjectID;
+      var subjectID = subjectsMap[_selectedSubject];
 
-      if (subjectsMap.containsKey(_selectedSubject)) {
-        subjectID = subjectsMap[_selectedSubject]!;
-      } else {
-        debugPrint('Does not exists the in the map');
+      if (subjectID == null) {
+        debugPrint('Subject does not exist in the map');
+        return;
       }
-
-      var result = await createFodac27Record(
-        _dateController.text,
-        widget.selectedstudentId,
-        currentCycle!.claCiclo!,
-        _observacionesController.text,
-        widget.employeeNumber,
-        subjectID,
-      );
-      if (result == 'Succes') {
-        // ScaffoldMessenger.of(context).showSnackBar(
-        //   SnackBar(content: const Text('Form submitted successfully!')),
-        // );
-        if (mounted) {
-          int response = await showConfirmationDialog(
-              context, 'Realizado', 'Comentario agregado!');
-          if (response == 1) {
-            Navigator.pop(context);
-          }
-        }
-        _dateController.clear();
-        _observacionesController.text = '';
-      } else {
-        showErrorFromBackend(context, result);
+      try {
+        var result = await createFodac27Record(
+          _selectedDate!,
+          widget.selectedstudentId,
+          currentCycle!.claCiclo!,
+          _observacionesController.text,
+          widget.employeeNumber,
+          subjectID,
+        ).catchError((e) {
+          return showErrorFromBackend(context, e.toString());
+        }).whenComplete(() {
+          return;
+        });
+      } catch (error) {
+        setState(() {
+          isLoading = false;
+        });
+        return Future.error(error);
       }
-
-      // Show a snackbar notification after function execution
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Text('Fecha'),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: TextFormField(
-                    controller: _dateController,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 8),
-                    ),
-                    readOnly: true,
-                    onTap: () {
-                      _selectDate(context);
-                    },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Por favor, seleccione una fecha';
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-                const SizedBox(width: 16),
-                const Text('Materia'),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    value: _selectedSubject,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 8),
-                    ),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        _selectedSubject = newValue;
-                      });
-                    },
-                    items: _materias.map((String materia) {
-                      return DropdownMenuItem<String>(
-                        value: materia,
-                        child: Text(materia),
-                      );
-                    }).toList(),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Por favor, seleccione una materia';
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('Habitos',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 8),
-                      Container(
-                        height: 200,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.black),
+    return FutureBuilder(
+        future: loadingDone,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CustomLoadingIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else {
+            return SingleChildScrollView(
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Text('Fecha'),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextFormField(
+                            controller: _dateController,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              contentPadding:
+                                  EdgeInsets.symmetric(horizontal: 8),
+                            ),
+                            readOnly: true,
+                            onTap: () {
+                              _selectDate(context);
+                            },
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Por favor, seleccione una fecha';
+                              }
+                              return null;
+                            },
+                          ),
                         ),
-                        child: Column(
-                          children: [
-                            Container(
-                              color: Colors.grey[500],
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 8),
-                              child: const Row(
-                                children: [
-                                  Expanded(
-                                      child: Text(
-                                    'Descripción',
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                  )),
-                                  Text('Sel'),
-                                ],
+                        const SizedBox(width: 16),
+                        const Text('Materia'),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: DropdownButtonFormField<String>(
+                            value: _selectedSubject,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              contentPadding:
+                                  EdgeInsets.symmetric(horizontal: 8),
+                            ),
+                            onChanged: (String? newValue) {
+                              setState(() {
+                                _selectedSubject = newValue;
+                              });
+                            },
+                            items: _materias.map((String materia) {
+                              return DropdownMenuItem<String>(
+                                value: materia,
+                                child: Text(materia),
+                              );
+                            }).toList(),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Por favor, seleccione una materia';
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('Habitos',
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold)),
+                              const SizedBox(height: 8),
+                              Container(
+                                height: 200,
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.black),
+                                ),
+                                child: Column(
+                                  children: [
+                                    Container(
+                                      color: Colors.grey[500],
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8),
+                                      child: const Row(
+                                        children: [
+                                          Expanded(
+                                              child: Text(
+                                            'Descripción',
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold),
+                                          )),
+                                          Text('Sel'),
+                                        ],
+                                      ),
+                                    ),
+                                    const Expanded(
+                                      child: Center(
+                                          child:
+                                              Text('< No existen Habitos >')),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                            const Expanded(
-                              child:
-                                  Center(child: Text('< No existen Habitos >')),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('Conductas',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 8),
-                      Container(
-                        height: 200,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.black),
-                        ),
-                        child: Column(
-                          children: [
-                            Container(
-                              color: Colors.grey[500],
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 8),
-                              child: const Row(
-                                children: [
-                                  Expanded(
-                                      child: Text(
-                                    'Descripción',
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                  )),
-                                  Text('Sel'),
-                                ],
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('Conductas',
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold)),
+                              const SizedBox(height: 8),
+                              Container(
+                                height: 200,
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.black),
+                                ),
+                                child: Column(
+                                  children: [
+                                    Container(
+                                      color: Colors.grey[500],
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8),
+                                      child: const Row(
+                                        children: [
+                                          Expanded(
+                                              child: Text(
+                                            'Descripción',
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold),
+                                          )),
+                                          Text('Sel'),
+                                        ],
+                                      ),
+                                    ),
+                                    const Expanded(
+                                      child: Center(
+                                          child:
+                                              Text('< No existen Conductas >')),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                            const Expanded(
-                              child: Center(
-                                  child: Text('< No existen Conductas >')),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            const Text('Observaciones Generales',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            TextFormField(
-              controller: _observacionesController,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                contentPadding:
-                    EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-              ),
-              maxLines: 5,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Por favor, ingrese observaciones';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(child: CustomSaveButton(
-                  onPressed: () {
-                    _addNewComment();
-                  },
-                )
-
-                    // ElevatedButton(
-                    //   onPressed: () {
-                    //     _addNewComment();
-                    //   },
-                    //   child: const Text('Guardar'),
-                    // ),
+                      ],
                     ),
-                const SizedBox(
-                  width: 10,
-                ),
-                Expanded(child: CustomCancelButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                )
-
-                    //  ElevatedButton(
-                    //   style: ButtonStyle(backgroundColor: MaterialStateColor.resolveWith((states) => null) ),
-                    //     onPressed: () => Navigator.pop(context),
-                    //     child: const Text('Cancelar'))
+                    const SizedBox(height: 16),
+                    const Text('Observaciones Generales',
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _observacionesController,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                      ),
+                      maxLines: 8,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Por favor, ingrese observaciones';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(child: CustomSaveButton(
+                          onPressed: () {
+                            _addNewComment().then((_) {
+                              if (mounted) {
+                                Navigator.pop(context);
+                                showConfirmationDialog(
+                                  context,
+                                  'Éxito',
+                                  'Registro agregado exitosamente',
+                                ).then((response) {
+                                  if (response == 1) {
+                                    return;
+                                  }
+                                });
+                              }
+                            }).onError((error, stackTrace) {
+                              showErrorFromBackend(context, error.toString());
+                            });
+                          },
+                        )),
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        Expanded(child: CustomCancelButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                        ))
+                      ],
                     )
-              ],
-            )
-          ],
-        ),
-      ),
-    );
+                  ],
+                ),
+              ),
+            );
+          }
+        });
   }
 }
 
@@ -801,6 +765,7 @@ class EditCommentScreen extends StatefulWidget {
   final String studentID;
 
   const EditCommentScreen({
+    super.key,
     required this.id,
     required this.comment,
     required this.date,
@@ -841,7 +806,6 @@ class _EditCommentScreenState extends State<EditCommentScreen> {
   void dispose() {
     _commentController.dispose();
     _dateController.dispose();
-
     subjectsMap.clear();
     newObservation.clear();
     newDate.clear();
@@ -859,9 +823,10 @@ class _EditCommentScreenState extends State<EditCommentScreen> {
     if (picked != null && picked != _selectedDate) {
       setState(() {
         _selectedDate = picked;
-        _dateController.text = DateFormat.yMd().format(picked);
+        _dateController.text =
+            picked as String; //DateFormat.yMd().format(picked);
         newDate.clear();
-        newDate = {'date': _dateController.text};
+        newDate = {'date': picked};
       });
     }
   }

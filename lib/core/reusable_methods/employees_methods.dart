@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:oxschool/core/utils/temp_data.dart';
 import 'package:oxschool/data/Models/Employee.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls.dart';
-import 'package:oxschool/core/constants/User.dart';
+import 'package:oxschool/core/constants/user_consts.dart';
 
 //selectedcampus:  can be 'A' to get all campuses or the initial letter of each campus
 //employeeID: if you want to get a single employee

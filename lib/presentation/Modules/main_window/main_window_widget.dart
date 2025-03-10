@@ -1,15 +1,18 @@
 // ignore_for_file: depend_on_referenced_packages, library_private_types_in_public_api, prefer_const_constructors_in_immutables, use_super_parameters, avoid_function_literals_in_foreach_calls
 
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-
-import 'package:oxschool/core/constants/User.dart';
+import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/constants/url_links.dart';
+import 'package:oxschool/core/extensions/capitalize_strings.dart';
+import 'package:oxschool/core/reusable_methods/temp_data_functions.dart';
 import 'package:oxschool/core/reusable_methods/user_functions.dart';
 import 'package:oxschool/core/utils/device_information.dart';
+import 'package:oxschool/core/utils/temp_data.dart';
 import 'package:oxschool/presentation/Modules/user/user_view_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/reusable_methods/logger_actions.dart';
 import '../services_ticket/processes/create_service_ticket.dart';
 import '../../../core/constants/screens.dart';
 import '../../components/quality_dialogs.dart';
@@ -51,8 +54,16 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => MainWindowModel());
-
+    saveUserRoleToSharedPref();
     WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {}));
+    insertAlertLog('USER LOGED IN: ${currentUser!.employeeNumber.toString()}');
+  }
+
+  void saveUserRoleToSharedPref() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var isUserAdmin = verifyUserAdmin(currentUser!); //Retrives user role
+
+    await prefs.setBool('isUserAdmin', isUserAdmin);
   }
 
   final ExpansionTileController controller =
@@ -60,9 +71,50 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
 
   @override
   Widget build(BuildContext context) {
-    // ignore: unused_local_variable
     Controller c = Get.put(Controller());
-    final appHeader = SliverAppBar(
+
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
+      child: Scaffold(
+        key: scaffoldKey,
+        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+        drawer: Opacity(
+          opacity: 1,
+          child: _createDrawer(context),
+        ),
+        body: NestedScrollView(
+          floatHeaderSlivers: true,
+          headerSliverBuilder: (context, _) => [
+            _buildAppHeader(context),
+          ],
+          body: SafeArea(
+            top: false,
+            child: Column(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Padding(
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        28.0, 5.0, 16.0, 10.0),
+                    child: Column(
+                      children: [
+                        _buildIconsLinksGrid(context),
+                        _buildFooterText(context),
+                      ],
+                    ),
+                  ),
+                ),
+                _buildBottomBar(context),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAppHeader(BuildContext context) {
+    return SliverAppBar(
       pinned: true,
       floating: false,
       snap: false,
@@ -71,109 +123,9 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
       toolbarHeight: 95.0,
       title: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
-          if (constraints.maxWidth < 600) {
-            // For smaller screens, display a simplified AppBar
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                const Padding(padding: EdgeInsets.only(left: 10.5)),
-                Image.asset(
-                  Theme.of(context).brightness == Brightness.light
-                      ? 'assets/images/1_OS_color.png' //igth theme image
-                      : 'assets/images/logoBlancoOx.png', //Dark theme image
-                  fit: BoxFit.fill,
-                  height: 50,
-                  filterQuality: FilterQuality.high,
-                ),
-                const Spacer(
-                  flex: 1,
-                ),
-              ],
-            );
-          } else {
-            // For larger screens, display the original AppBar
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                const Padding(padding: EdgeInsets.only(left: 10.5)),
-                Image.asset(
-                  Theme.of(context).brightness == Brightness.light
-                      ? 'assets/images/1_OS_color.png' //igth theme image
-                      : 'assets/images/logoBlancoOx.png', //Dark theme image
-                  fit: BoxFit.fill,
-                  height: 50,
-                  filterQuality: FilterQuality.high,
-                ),
-                const Spacer(
-                  flex: 1,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Row(
-                        children: [
-                          IconButton(
-                              onPressed: () {
-                                Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (context) => const UserWindow()));
-                              },
-                              tooltip: 'Consultar mi información',
-                              icon: const Icon(
-                                Icons.person,
-                                size: 30,
-                              ),
-                              color: const Color.fromRGBO(235, 48, 69, 0.988)),
-
-                          // Text(
-                          //   'Ing. Sanchez',
-                          //   style: TextStyle(
-                          //       fontFamily: 'Sora',
-                          //       fontStyle: FontStyle.normal,
-                          //       fontSize: 20),
-                          // ),
-                          Text(
-                              ' ${currentUser?.employeeName?.toLowerCase().trimRight()}',
-                              textAlign: TextAlign.center,
-                              style: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .override(
-                                      fontFamily: 'Sora',
-                                      color: FlutterFlowTheme.of(context)
-                                          .primaryText,
-                                      fontSize:
-                                          20 // FlutterFlowTheme.of(context).bodyMedium,
-                                      )),
-                          // const Padding(
-                          //     padding: EdgeInsets.only(left: 15, right: 15)),
-                          // IconButton(
-                          //     onPressed: () {},
-                          //     icon: const FaIcon(FontAwesomeIcons.facebookF),
-                          //     color: const Color.fromRGBO(235, 48, 69, 0.988)),
-                          // const Padding(
-                          //     padding: EdgeInsets.only(left: 15, right: 15)),
-                          // IconButton(
-                          //     onPressed: () {},
-                          //     icon: const FaIcon(FontAwesomeIcons.instagram),
-                          //     color: const Color.fromRGBO(235, 48, 69, 0.988)),
-                          // const Padding(
-                          //     padding: EdgeInsets.only(left: 15, right: 15)),
-                          // IconButton(
-                          //     onPressed: () {},
-                          //     icon: const FaIcon(FontAwesomeIcons.youtube),
-                          //     color: const Color.fromRGBO(235, 48, 69, 0.988)),
-
-                          const Padding(
-                              padding: EdgeInsets.only(left: 15, right: 5)),
-                        ],
-                      ),
-                    ),
-                  ],
-                )
-              ],
-            );
-          }
+          return constraints.maxWidth < 600
+              ? _buildSmallScreenAppBar(context)
+              : _buildLargeScreenAppBar(context);
         },
       ),
       bottom: AppBar(
@@ -190,257 +142,299 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
         ),
         actions: [
           TextButton(
-              onPressed: () {
-                showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: const Text('Crear Ticket de servicio'),
-                        content: const CreateServiceTicket(),
-                        actions: <Widget>[
-                          TextButton(
-                            style: TextButton.styleFrom(
-                              textStyle: Theme.of(context).textTheme.labelLarge,
-                            ),
-                            child: const Text(''),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                          ),
-                        ],
-                      );
-                    });
-              },
-              child: const Text('Crear Ticket de Servicio',
-                  style: TextStyle(
-                      fontFamily: 'Sora', fontSize: 16, color: Colors.white)))
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text('Nuevo Ticket de servicio'),
+                    content: const CreateServiceTicket(),
+                    actions: <Widget>[
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          textStyle: Theme.of(context).textTheme.labelLarge,
+                        ),
+                        child: const Text(''),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+            child: const Text(
+              'Crear Ticket de Servicio',
+              style: TextStyle(
+                fontFamily: 'Sora',
+                fontSize: 16,
+                color: Colors.white,
+              ),
+            ),
+          ),
         ],
       ),
     );
+  }
 
-    final iconsLinksGrid = Expanded(
-        flex: 2,
-        child: Container(
-          padding: const EdgeInsets.all(5),
-          margin: const EdgeInsets.all(5),
-          child: GridView.builder(
-              // physics: NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  crossAxisSpacing: 50.0,
-                  mainAxisSpacing: 50.0,
-                  childAspectRatio: 1.9),
-              padding: const EdgeInsets.only(left: 10, right: 10),
-              // shrinkWrap: true,
-              itemCount: oxlinks.length,
-              itemBuilder: (BuildContext context, int index) {
-                return GestureDetector(
-                  onTap: () {
-                    Uri url = Uri.parse(oxlinks[index]);
-                    launchUrlDirection(url);
-                  },
-                  child: HoverCard(
-                    imagePath: gridMainWindowIcons[index],
-                    backgroundColor: Theme.of(context).brightness ==
-                            Brightness.light
-                        ? gridMainWindowColors[index] //igth theme image
-                        : gridDarkColorsMainWindow[index], //Dark theme image
+  Widget _buildSmallScreenAppBar(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        const Padding(padding: EdgeInsets.only(left: 10.5)),
+        Image.asset(
+          Theme.of(context).brightness == Brightness.light
+              ? 'assets/images/1_OS_color.png'
+              : 'assets/images/logoBlancoOx.png',
+          fit: BoxFit.fill,
+          height: 50,
+          filterQuality: FilterQuality.high,
+        ),
+        const Spacer(flex: 1),
+      ],
+    );
+  }
 
-                    title: mainWindowGridTitles[index],
+  Widget _buildLargeScreenAppBar(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        const Padding(padding: EdgeInsets.only(left: 10.5)),
+        Image.asset(
+          Theme.of(context).brightness == Brightness.light
+              ? 'assets/images/1_OS_color.png'
+              : 'assets/images/logoBlancoOx.png',
+          fit: BoxFit.fill,
+          height: 50,
+          filterQuality: FilterQuality.high,
+        ),
+        const Spacer(flex: 1),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => const UserWindow(),
+                      ));
+                    },
+                    tooltip: 'Consultar mi información',
+                    icon: const Icon(
+                      Icons.person,
+                      size: 30,
+                    ),
+                    color: const Color.fromRGBO(235, 48, 69, 0.988),
                   ),
-                );
-              }),
-        ));
-
-    return GestureDetector(
-      onTap: () => FocusScope.of(context).requestFocus(_model.unfocusNode),
-      child: Scaffold(
-        key: scaffoldKey,
-        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        drawer: Opacity(
-            opacity: 1,
-            child: _createDrawer(context, userEvents) //DrawerClass()
-            ),
-        body: NestedScrollView(
-          // physics: NeverScrollableScrollPhysics(),
-          floatHeaderSlivers: true,
-          headerSliverBuilder: (context, _) => [
-            appHeader,
-          ],
-          body: Builder(
-            builder: (context) {
-              return SafeArea(
-                top: false,
-                child: Align(
-                    alignment: const AlignmentDirectional(0.0, 0.0),
-                    child: Column(
-                      children: [
-                        Expanded(
-                          flex: 3,
-                          child: Padding(
-                              padding: const EdgeInsetsDirectional.fromSTEB(
-                                  28.0, 5.0, 16.0, 10.0),
-                              child: Column(
-                                children: [
-                                  iconsLinksGrid,
-                                  Align(
-                                      alignment:
-                                          AlignmentDirectional.bottomCenter,
-                                      child: Container(
-                                        margin: const EdgeInsets.all(9),
-                                        child: Text(
-                                          'Disciplina, Moralidad, Trabajo y Eficiencia',
-                                          style: FlutterFlowTheme.of(context)
-                                              .bodyMedium
-                                              .override(
-                                                fontFamily: 'Sora',
-                                                color:
-                                                    FlutterFlowTheme.of(context)
-                                                        .primaryText,
-                                              ),
-                                        ),
-                                      ))
-                                ],
-                              )),
+                  Text(
+                    ' ${currentUser?.employeeName?.trimRight().capitalize}',
+                    textAlign: TextAlign.center,
+                    style: FlutterFlowTheme.of(context).bodyMedium.override(
+                          fontFamily: 'Sora',
+                          color: FlutterFlowTheme.of(context).primaryText,
+                          fontSize: 20,
                         ),
-                        Align(
-                            alignment: Alignment.bottomCenter,
-                            child: LayoutBuilder(builder: (BuildContext context,
-                                BoxConstraints constraints) {
-                              if (constraints.maxWidth < 600) {
-                                return Container(
-                                    padding: const EdgeInsets.only(
-                                        top: 10, bottom: 10),
-                                    width: MediaQuery.of(context).size.width,
-                                    height: 100,
-                                    color: const Color.fromRGBO(23, 76, 147, 1),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: <Widget>[
-                                        TextButton(
-                                            onPressed: () {
-                                              showMision(context);
-                                            },
-                                            child: Text('Misión',
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .titleSmall
-                                                        .override(
-                                                          fontFamily: 'Sora',
-                                                          color: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .info,
-                                                        ))),
-                                        TextButton(
-                                            onPressed: () {
-                                              showVision(context);
-                                            },
-                                            child: Text('Visión',
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .titleSmall
-                                                        .override(
-                                                          fontFamily: 'Sora',
-                                                          color: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .info,
-                                                        ))),
-                                        TextButton(
-                                            onPressed: () {
-                                              qualityPolitic(context);
-                                            },
-                                            child: Text('Politica de calidad',
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .titleSmall
-                                                        .override(
-                                                          fontFamily: 'Sora',
-                                                          color: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .info,
-                                                        )))
-                                      ],
-                                    ));
-                              } else {
-                                return Container(
-                                  padding: const EdgeInsets.only(top: 10),
-                                  width: MediaQuery.of(context).size.width,
-                                  height:
-                                      MediaQuery.of(context).size.height / 13,
-                                  color: const Color.fromRGBO(23, 76, 147, 1),
-                                  child: Row(children: <Widget>[
-                                    Expanded(
-                                        child: Column(
-                                      children: [
-                                        Column(
-                                          children: [
-                                            TextButton(
-                                                onPressed: () {
-                                                  showMision(context);
-                                                },
-                                                child: const Text('Misión',
-                                                    style: TextStyle(
-                                                        fontFamily: 'Sora',
-                                                        fontSize: 16,
-                                                        color: Colors.white))),
-                                          ],
-                                        ),
-                                      ],
-                                    )),
-                                    Expanded(
-                                        child: Column(
-                                      children: [
-                                        Column(
-                                          children: [
-                                            TextButton(
-                                                onPressed: () {
-                                                  showVision(context);
-                                                },
-                                                child: const Text('Visión',
-                                                    style: TextStyle(
-                                                      fontFamily: 'Sora',
-                                                      fontSize: 16,
-                                                      color: Colors.white,
-                                                    ))),
-                                          ],
-                                        ),
-                                      ],
-                                    )),
-                                    Expanded(
-                                        child: Column(
-                                      children: [
-                                        Column(
-                                          children: [
-                                            TextButton(
-                                                onPressed: () {
-                                                  qualityPolitic(context);
-                                                },
-                                                child: const Text(
-                                                    'Politica de calidad',
-                                                    style: TextStyle(
-                                                        fontFamily: 'Sora',
-                                                        fontSize: 16,
-                                                        color: Colors.white))),
-                                          ],
-                                        ),
-                                      ],
-                                    )),
-                                  ]),
-                                );
-                              }
-                            })),
-                      ],
-                    )),
-              );
-            },
+                  ),
+                  const Padding(padding: EdgeInsets.only(left: 15, right: 5)),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildIconsLinksGrid(BuildContext context) {
+    return Expanded(
+      flex: 2,
+      child: Container(
+        padding: const EdgeInsets.all(5),
+        margin: const EdgeInsets.all(5),
+        child: GridView.builder(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            crossAxisSpacing: 50.0,
+            mainAxisSpacing: 50.0,
+            childAspectRatio: 1.9,
           ),
+          padding: const EdgeInsets.only(left: 10, right: 10),
+          itemCount: oxlinks.length,
+          itemBuilder: (BuildContext context, int index) {
+            return GestureDetector(
+              onTap: () {
+                Uri url = Uri.parse(oxlinks[index]);
+                launchUrlDirection(url);
+              },
+              child: HoverCard(
+                imagePath: gridMainWindowIcons[index],
+                backgroundColor:
+                    Theme.of(context).brightness == Brightness.light
+                        ? gridMainWindowColors[index]
+                        : gridDarkColorsMainWindow[index],
+                title: mainWindowGridTitles[index],
+              ),
+            );
+          },
         ),
       ),
     );
   }
 
-  Widget _createDrawer(BuildContext context, Future<http.Response> userEvents) {
+  Widget _buildFooterText(BuildContext context) {
+    return Align(
+      alignment: AlignmentDirectional.bottomCenter,
+      child: Container(
+        margin: const EdgeInsets.all(9),
+        child: Text(
+          'Disciplina, Moralidad, Trabajo y Eficiencia',
+          style: FlutterFlowTheme.of(context).bodyMedium.override(
+                fontFamily: 'Sora',
+                color: FlutterFlowTheme.of(context).primaryText,
+              ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBottomBar(BuildContext context) {
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        return constraints.maxWidth < 600
+            ? _buildSmallScreenBottomBar(context)
+            : _buildLargeScreenBottomBar(context);
+      },
+    );
+  }
+
+  Widget _buildSmallScreenBottomBar(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.only(top: 10, bottom: 10),
+      width: MediaQuery.of(context).size.width,
+      height: 100,
+      color: const Color.fromRGBO(23, 76, 147, 1),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            TextButton(
+              onPressed: () {
+                showMision(context);
+              },
+              child: Text(
+                'Misión',
+                style: FlutterFlowTheme.of(context).titleSmall.override(
+                      fontFamily: 'Sora',
+                      color: FlutterFlowTheme.of(context).info,
+                    ),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                showVision(context);
+              },
+              child: Text(
+                'Visión',
+                style: FlutterFlowTheme.of(context).titleSmall.override(
+                      fontFamily: 'Sora',
+                      color: FlutterFlowTheme.of(context).info,
+                    ),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                qualityPolitic(context);
+              },
+              child: Text(
+                'Politica de calidad',
+                style: FlutterFlowTheme.of(context).titleSmall.override(
+                      fontFamily: 'Sora',
+                      color: FlutterFlowTheme.of(context).info,
+                    ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLargeScreenBottomBar(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.only(top: 10),
+      width: MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.height / 13,
+      color: const Color.fromRGBO(23, 76, 147, 1),
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: Column(
+              children: [
+                TextButton(
+                  onPressed: () {
+                    showMision(context);
+                  },
+                  child: const Text(
+                    'Misión',
+                    style: TextStyle(
+                      fontFamily: 'Sora',
+                      fontSize: 16,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: Column(
+              children: [
+                TextButton(
+                  onPressed: () {
+                    showVision(context);
+                  },
+                  child: const Text(
+                    'Visión',
+                    style: TextStyle(
+                      fontFamily: 'Sora',
+                      fontSize: 16,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: Column(
+              children: [
+                TextButton(
+                  onPressed: () {
+                    qualityPolitic(context);
+                  },
+                  child: const Text(
+                    'Politica de calidad',
+                    style: TextStyle(
+                      fontFamily: 'Sora',
+                      fontSize: 16,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _createDrawer(BuildContext context) {
     final controller = ScrollController();
 
     return Drawer(
@@ -450,66 +444,38 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
           children: <Widget>[
             UserAccountsDrawerHeader(
               accountName: Text(
-                currentUser!.employeeName!,
+                currentUser!.employeeName!.toTitleCase,
                 style: TextStyle(
-                    fontFamily: 'Sora',
-                    fontSize: 18,
-                    color: FlutterFlowTheme.of(context).primaryText),
+                  fontFamily: 'Sora',
+                  fontSize: 18,
+                  color: FlutterFlowTheme.of(context).primaryText,
+                ),
               ),
               accountEmail: Text(
                 currentUser!.employeeNumber!.toString(),
                 style: TextStyle(
-                    fontFamily: 'Sora',
-                    fontSize: 16,
-                    color: FlutterFlowTheme.of(context).primaryText),
+                  fontFamily: 'Sora',
+                  fontSize: 16,
+                  color: FlutterFlowTheme.of(context).primaryText,
+                ),
               ),
               currentAccountPicture: CircleAvatar(
                 backgroundColor: FlutterFlowTheme.of(context).accent4,
                 child: const Image(
-                    image: AssetImage('assets/images/logoRedondoOx.png')),
-                // Text(currentUser!.employeeName![0],
-                //     style: TextStyle(fontFamily: 'Sora', fontSize: 20)),
+                  image: AssetImage('assets/images/logoRedondoOx.png'),
+                ),
               ),
               decoration: BoxDecoration(
-                  color: FlutterFlowTheme.of(context).primaryBackground),
+                color: FlutterFlowTheme.of(context).primaryBackground,
+              ),
             ),
-            FutureBuilder(
-                future: userEvents,
-                builder: (BuildContext context,
-                    AsyncSnapshot<http.Response> response) {
-                  if (!response.hasData) {
-                    return const Center(
-                      child: Text('Loading...'),
-                    );
-                  } else if (response.data!.statusCode != 200) {
-                    return const Center(
-                      child: Text('Error Loading'),
-                    );
-                  } else {
-                    List<dynamic> json = jsonDecode(response.data!.body);
-                    return MyExpansionTileList(elementList: json);
-                  }
-                }),
+            MyExpansionTileList(),
             const Divider(thickness: 3),
             ListTile(
               title: const Text('Cerrar sesión'),
               leading: const Icon(Icons.exit_to_app),
-              onTap: () {
-                logOutCurrentUser(
-                    currentUser!.token, currentUser!.employeeNumber.toString());
-                // Clear any necessary data or variables
-                // clearStudentData();
-                // clearUserData();
-                // setState(() {
-                // currentUser?.clear();
-                // currentCycle?.clear();
-                // eventsList?.clear();
-                // deviceIp = '';
-                // cleatTempData();
-                // });
-
-                // Navigate to the initial screen
-
+              onTap: () async {
+                logOutCurrentUser(currentUser!);
                 context.goNamed(
                   '_initialize',
                   extra: <String, dynamic>{
@@ -519,11 +485,12 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                     ),
                   },
                 );
-                // Navigator.pop(context);
-                // Navigator.pushReplacement(context,
-                //     MaterialPageRoute(builder: (context) => LoginViewWidget()));
+                clearUserData();
+                clearTempData();
+                   SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.clear();
               },
-            )
+            ),
           ],
         ),
       ),
@@ -586,7 +553,7 @@ class _HoverCardState extends State<HoverCard> {
                   padding: EdgeInsets.all(isHovered ? 20 : 10),
                   decoration: BoxDecoration(
                     color: isHovered
-                        ? const Color.fromRGBO(73, 73, 73, 1)
+                        ? const Color.fromARGB(54, 204, 201, 201)
                         : widget.backgroundColor,
                     borderRadius: BorderRadius.circular(15),
                   ),
@@ -596,8 +563,9 @@ class _HoverCardState extends State<HoverCard> {
                         widget.title,
                         textScaleFactor: 0.8,
                         softWrap: true,
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color:
+                              FlutterFlowTheme.of(context).hoverCardTextColor,
                           fontWeight: FontWeight.bold,
                           fontFamily: 'Sora',
                         ),
@@ -637,39 +605,39 @@ class _HoverCardState extends State<HoverCard> {
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   curve: Curves.ease,
-                  padding: EdgeInsets.all(isHovered ? 20 : 10),
+                  padding: EdgeInsets.all(isHovered ? 30 : 40),
                   decoration: BoxDecoration(
                     color: isHovered
-                        ? const Color.fromRGBO(73, 73, 73, 1)
+                        ? const Color.fromARGB(146, 251, 247, 247)
                         : widget.backgroundColor,
                     borderRadius: BorderRadius.circular(15),
                   ),
                   child: GestureDetector(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: <Widget>[
-                        Image.asset(
-                          widget.imagePath,
-                          fit: BoxFit.fill,
-                          scale: 15,
-                          // width: constraints.maxWidth * 0.5, // Adjust image width
-                          // height:
-                          // constraints.maxHeight * 0.5, // Adjust image height
-                          alignment: Alignment.center,
+                        Expanded(
+                          child: Image.asset(
+                            widget.imagePath,
+                            color: FlutterFlowTheme.of(context).info,
+                            fit: BoxFit.fill,
+                            scale: 15,
+                            alignment: Alignment.center,
+                          ),
                         ),
-                        const SizedBox(height: 7), // Add spacing
-                        Align(
-                          alignment: Alignment.bottomCenter,
+                        Expanded(
                           child: Text(
                             widget.title,
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: TextStyle(
+                              color: FlutterFlowTheme.of(context)
+                                  .hoverCardTextColor,
                               fontWeight: FontWeight.bold,
                               fontFamily: 'Sora',
                             ),
                           ),
-                        ),
+                        )
+                        // const SizedBox(height: 7), // Add spacing
                       ],
                     ),
                   ),
@@ -685,9 +653,10 @@ class _HoverCardState extends State<HoverCard> {
 
 class MyExpansionTileList extends StatefulWidget {
   // BuildContext context;
-  final List<dynamic> elementList;
+  //final List<dynamic> elementList;
+  //final List<String> modulesList;
 
-  const MyExpansionTileList({Key? key, required this.elementList})
+  const MyExpansionTileList({Key? key})
       : super(key: key);
 
   @override
@@ -700,30 +669,118 @@ class Controller extends GetxController {
 
 class _DrawerState extends State<MyExpansionTileList> {
   final Controller c = Get.find();
-  List<Widget> _getChildren(final List<dynamic> userEvents) {
+
+  List<Widget> _getChildren() {
     List<Widget> children = [];
 
-    // Map to store unique module titles and their screen classes
-    Map<String, List<String>> modulesMap = {};
+    // Iterate through uniqueItems to create ExpansionTiles
+    uniqueItems.forEach((moduleMap) {
+      String moduleName = moduleMap.keys.first;
+      List<String> screens = moduleMap[moduleName]!;
 
-    // Iterate over userEvents to populate modulesMap
+      List<Widget> screensMenuChildren = [];
 
-    userEvents.forEach((element) {
-      element.forEach((module, screens) {
-        if (!modulesMap.containsKey(module)) {
-          modulesMap[module] = [];
-        }
-        screens.forEach((screenClass, description) {
-          modulesMap[module]!.add('$screenClass');
-        });
+      // Create ListTile for each screen
+      screens.forEach((screen) {
+        screensMenuChildren.add(
+          ListTile(
+            title: Text(
+              screen,
+              style: const TextStyle(fontFamily: 'Sora', fontSize: 15),
+            ),
+            onTap: () {
+              // Find the appropriate route from accessRoutes
+              var route = accessRoutes.firstWhere(
+                (element) => element.containsKey(screen),
+                orElse: () => {},
+              );
+
+              if (route.isNotEmpty) {
+                context.pushNamed(route[screen]!, extra: <String, dynamic>{
+                      kTransitionInfoKey: const TransitionInfo(
+                        hasTransition: true,
+                        transitionType: PageTransitionType.fade,
+                      ),
+                    },);
+              }
+            },
+          ),
+        );
       });
+
+      // Create ExpansionTile for the current module
+      children.add(
+        ExpansionTile(
+          title: Text(
+            moduleName,
+            style: const TextStyle(fontFamily: 'Sora', fontSize: 18),
+          ),
+          leading: moduleIcons[moduleName],
+          children: screensMenuChildren,
+        ),
+      );
     });
 
+    return children;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: _getChildren(),
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+  }
+}
+
+
+/*
+
+class _DrawerState extends State<MyExpansionTileList> {
+  final Controller c = Get.find();
+  List<Widget> _getChildren() {
+    List<Widget> children = [];
+    List<Widget> screensMenuChildren = [];
+
+//TODO: CONTINUE HERE!!
+    currentUser!.userRole!.moduleScreenList!.forEach((module) {
+      currentUser!.userRole!.screenEventList!.forEach((screen) {
+      screensMenuChildren.add(ListTile(
+        title: Text(screen.entries.first.key, style: const TextStyle(fontFamily: 'Sora', fontSize: 15), ),
+         onTap: () {
+          //String? route = accessRoutes[screen];
+          Navigator.pop(context);
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => accessRoutes as Widget));
+      }
+      ),
+     
+      );
+    });
+      children.add(
+        ExpansionTile(
+          title: Text(
+            module.entries.first.key, 
+            style: const TextStyle(fontFamily: 'Sora', fontSize: 18),
+          ),
+          leading: moduleIcons[module],
+          children: screensMenuChildren,
+          
+        ),
+      );
+      
+    },);
+    
+/* 
     // Iterate over modulesMap to create ExpansionTiles for each module
-    modulesMap.forEach((module, screens) {
-      List<Widget> subMenuChildren = [];
+    modulesList.forEach((module) {
+      
       screens.forEach((screen) {
-        subMenuChildren.add(ListTile(
+        screensMenuChildren.add(ListTile(
           title: Text(
             screen,
             style: const TextStyle(fontFamily: 'Sora', fontSize: 15),
@@ -758,14 +815,14 @@ class _DrawerState extends State<MyExpansionTileList> {
             style: const TextStyle(fontFamily: 'Sora', fontSize: 18),
           ),
           leading: moduleIcons[module],
-          children: subMenuChildren,
+          children: screensMenuChildren,
           // leading: Icon(
           //   Icons.subdirectory_arrow_right_rounded,
           //   size: ,
           // ),
         ),
       );
-    });
+    }); */
 
     return children;
   }
@@ -773,7 +830,7 @@ class _DrawerState extends State<MyExpansionTileList> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: _getChildren(widget.elementList),
+      children: _getChildren(),
     );
   }
 
@@ -782,3 +839,5 @@ class _DrawerState extends State<MyExpansionTileList> {
     super.initState();
   }
 }
+
+*/

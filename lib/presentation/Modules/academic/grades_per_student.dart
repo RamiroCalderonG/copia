@@ -1,17 +1,21 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
+import 'package:oxschool/core/extensions/capitalize_strings.dart';
+import 'package:oxschool/core/reusable_methods/logger_actions.dart';
+import 'package:oxschool/core/reusable_methods/translate_messages.dart';
 import 'package:oxschool/data/Models/Student_eval.dart';
 
-import 'package:oxschool/core/constants/User.dart';
+import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/constants/date_constants.dart';
 import 'package:oxschool/core/reusable_methods/academic_functions.dart';
-import 'package:oxschool/core/reusable_methods/user_functions.dart';
 import 'package:oxschool/data/datasources/temp/teacher_grades_temp.dart';
 
 import 'package:pluto_grid/pluto_grid.dart';
 
+import '../../../core/utils/loader_indicator.dart';
 import '../../../data/datasources/temp/studens_temp.dart';
 import '../../../data/services/backend/api_requests/api_calls_list.dart';
 import '../../../core/constants/Student.dart';
@@ -28,47 +32,71 @@ class GradesByStudent extends StatefulWidget {
   State<GradesByStudent> createState() => _GradesByStudentState();
 }
 
-String currentMonth = DateFormat.MMMM().format(DateTime.now());
-
 String? subjectSelected = oneTeacherAssignatures.first;
-bool isUserAdmin = verifyUserAdmin(currentUser!);
+
 List<PlutoRow> rows = [];
 
 class _GradesByStudentState extends State<GradesByStudent> {
+  bool isUserAdmin = false;
+  bool isUserAcademicCoord = false;
   var commentsController = TextEditingController();
   late PlutoGridStateManager stateManager;
-
   late PlutoGridStateManager gridAStateManager;
+  String currentMonth = DateFormat.MMMM('es').format(DateTime.now());
 
   Key? currentRowKey;
   Timer? _debounce;
   String? asignatureNameListener;
   String selectedStudentName = '';
-
+  var fetchedData;
+  bool isFetching = true;
+  int? monthNumber;
   String dropDownValue = ''; //oneTeacherAssignatures.first;
   int? assignatureID;
+  late Future<dynamic> _fetchedDataFromRequest;
+  DateFormat? dateFormat;
 
   String? selectedStudentID;
 
   @override
   void initState() {
-    loadStartGrading(currentUser!.employeeNumber!, currentCycle!.claCiclo!);
+    isUserAdmin = currentUser!.isCurrentUserAdmin();
+    isUserAcademicCoord = currentUser!.isCurrentUserAcademicCoord();
+    _fetchData();
+    initializeDateFormatting();
     super.initState();
   }
 
   @override
   void dispose() {
-    studentsGradesCommentsRows.clear();
-    evaluationComments.clear();
-    commentStringEval.clear();
+    //studentsGradesCommentsRows.clear();
+    //evaluationComments.clear();
+    //commentStringEval.clear();
     _debounce?.cancel();
-    selectedTempGrade = null;
-    selectedTempGroup = null;
-    selectedTempStudent = null;
-    selectedTempCampus = null;
-    selectedTempMonth = null;
-    selectedCurrentTempMonth = null;
+    commentsController.dispose();
+    //selectedTempGrade = null;
+    //selectedTempGroup = null;
+    //selectedTempStudent = null;
+    //selectedTempCampus = null;
+    //selectedTempMonth = null;
+    //selectedCurrentTempMonth = null;
     super.dispose();
+  }
+
+  void _fetchData() async {
+    var response = isUserAdmin || isUserAcademicCoord
+        ? loadStartGradingAsAdminOrAcademicCoord(
+            currentCycle!.claCiclo!, null, true, null, null, isUserAcademicCoord, isUserAdmin )
+        : loadStartGrading(
+            currentUser!.employeeNumber!,
+            currentCycle!.toString(),
+            isUserAdmin,
+            isUserAcademicCoord,
+            currentUser!.claUn);
+    fetchedData = response;
+    setState(() {
+      isFetching = false;
+    });
   }
 
   Future<void> fillGrid(List<StudentEval> evaluationList) async {
@@ -80,10 +108,8 @@ class _GradesByStudentState extends State<GradesByStudent> {
         studentSet.add(student.studentID);
         uniqueStudents.add({
           'studentID': student.studentID,
-          'studentName': student.fulllName!,
+          'student': student.fulllName!,
         });
-
-        // print(uniqueStudents.toString());
       }
     }
     setState(() {
@@ -111,93 +137,99 @@ class _GradesByStudentState extends State<GradesByStudent> {
     }
   }
 
-  void searchBUttonAction(String groupSelected, String gradeString,
+  Future<void> searchBUttonAction(String groupSelected, int grade,
       int monthSelected, String campusSelected) async {
     try {
-      var gradeInt = getKeyFromValue(teacherGradesMap, gradeString!);
+      setState(() {
+        studentList.clear();
+        studentEvaluationRows.clear();
+        selectedStudentName = '';
+        selectedStudentID = null;
+        selectedStudentRows.clear();
+      });
+      //var gradeInt = getKeyFromValue(teacherGradesMap, gradeString);
       if (studentList.isNotEmpty && studentsGradesCommentsRows.isNotEmpty) {
         studentList.clear();
         studentsGradesCommentsRows.clear();
       }
-      studentList = await getSubjectsAndGradesByStudent(gradeInt.toString(),
-          groupSelected, currentCycle!.claCiclo, campusSelected, monthSelected);
-
-      if (gradeInt! >= 6) {
-        await getCommentsForEvals(gradeInt!);
-      }
+      studentList = await getSubjectsAndGradesByStudent(
+          grade,
+          groupSelected,
+          currentCycle!.claCiclo!,
+          campusSelected,
+          monthSelected);
 
       fillGrid(studentList); //Fill student list by unque values
-      var studentNumber = 0;
+
 
       setState(() {
         studentEvaluationRows.clear();
+        var index = 0;
         for (var item in uniqueStudentsList) {
           studentEvaluationRows.add(PlutoRow(cells: {
-            'No': PlutoCell(value: studentNumber + 1),
-            'studentID': PlutoCell(value: item['studentID']),
-            'studentName': PlutoCell(value: item['studentName']),
+            'No': PlutoCell(value: index +1),
+            'studentID': PlutoCell(value: item['studentID']!.trim()),
+            'studentName':
+                PlutoCell(value: item['studentName']!.trim().toTitleCase),
           }));
-          studentNumber++;
         }
       });
     } catch (e) {
+      insertErrorLog(e.toString(), 'SEARCH GRADES BY STUDENT ');
+      var message = getMessageToDisplay(e.toString());
       if (context.mounted) {
-        // ensures the widget is still part of the widget tree after the await
-        showErrorFromBackend(context, e.toString());
+        showErrorFromBackend(context, message.toString());
       }
     }
   }
 
-  dynamic patchStudentGradesToDB() async {
-    var response = await patchStudentsGrades(studentGradesBodyToUpgrade, true);
-    if (response == 200) {
-      return 200;
-    } else {
-      return response;
-    }
+  Future<dynamic> patchStudentGradesToDB() async {
+    await patchStudentsGrades(studentGradesBodyToUpgrade, true).then((value) {
+      if (value != null) {
+        if (value == 200) {
+          return 200;
+        } else {
+          return value;
+        }
+      }
+    }).catchError((onError, stackTrace) {
+      insertErrorLog(onError.toString(),
+          'PATCH STUDENT GRADES TO DB | $studentGradesBodyToUpgrade');
+      throw Future.error(onError.toString);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: loadStartGrading(
-          currentUser!.employeeNumber!, currentCycle!.toString()),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        } else if (!snapshot.hasData || snapshot.data == null) {
-          return const Center(child: Text('No data available'));
-        } else {
-          return Stack(
-            children: [
-              SizedBox(
-                width: MediaQuery.of(context).size.width,
-                child: LayoutBuilder(builder:
-                    (BuildContext context, BoxConstraints constraints) {
-                  if (constraints.maxWidth > 600) {
-                    return SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [_buildGradesPerStudent()],
-                          )
-                        ],
-                      ),
-                    );
-                  } else {
-                    return const Placeholder(
-                      child: Text('Smaller screen version pending to design'),
-                    );
-                  }
-                }),
-              )
-            ],
+    return isFetching
+        ? const CustomLoadingIndicator()
+        : SizedBox(
+            width: MediaQuery.of(context).size.width,
+            child: LayoutBuilder(
+                builder: (BuildContext context, BoxConstraints constraints) {
+              if (fetchedData is Error || fetchedData is FormatException) {
+                return Placeholder(
+                  color: Colors.transparent,
+                  child: Center(
+                    child: Text('Error en la conección: $fetchedData'),
+                  ),
+                );
+              } else {
+                return SingleChildScrollView(
+
+                    child: Padding(
+                  padding: EdgeInsets.all(10),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [_buildGradesPerStudent()],
+                      )
+                    ],
+                  ),
+                ));
+              }
+            }),
           );
-        }
-      },
-    );
   }
 
   Widget _buildGradesPerStudent() {
@@ -214,14 +246,15 @@ class _GradesByStudentState extends State<GradesByStudent> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Flexible(child: RefreshButton(onPressed: () {
-                  var monthNumber;
-                  if (isUserAdmin) {
+                Flexible(child: RefreshButton(onPressed: () async {
+                  if (isUserAdmin || isUserAcademicCoord) {
+                    //Calendar month number
                     monthNumber =
-                        getKeyFromValue(monthsListMap, selectedTempMonth!);
+                        getKeyFromValue(spanishMonthsMap, selectedTempMonth!);
                   } else {
+                    //Calendar month number
                     monthNumber = getKeyFromValue(
-                        monthsListMap, selectedCurrentTempMonth!);
+                        spanishMonthsMap, selectedCurrentTempMonth!);
                   }
                   if (selectedTempGroup == null || selectedTempGroup == '') {
                     return showEmptyFieldAlertDialog(
@@ -239,12 +272,19 @@ class _GradesByStudentState extends State<GradesByStudent> {
                     return showEmptyFieldAlertDialog(
                         context, 'Seleccionar un mes a evaluar');
                   } else {
-                    searchBUttonAction(
+                    setState(() {
+                      isFetching = true;
+                    });
+                    await searchBUttonAction(
                       selectedTempGroup!,
                       selectedTempGrade!,
-                      monthNumber,
+                      monthNumber!,
                       selectedTempCampus!,
-                    );
+                    ).whenComplete(() {
+                      setState(() {
+                        isFetching = false;
+                      });
+                    });
                   }
                 })),
                 const SizedBox(
@@ -253,19 +293,46 @@ class _GradesByStudentState extends State<GradesByStudent> {
                 Flexible(
                   child: SaveItemButton(
                     onPressed: () {
+                      setState(() {
+                        isFetching = true;
+                      });
                       if (studentGradesBodyToUpgrade.isEmpty) {
                         showEmptyFieldAlertDialog(
                             context, 'No se detectó ningun cambio a realizar');
+                            setState(() {
+                              isFetching = false;
+                            });
                       } else {
-                        var monthNumber;
-                        if (isUserAdmin) {
+                        try {
+                          if (isUserAdmin || isUserAcademicCoord) {
                           monthNumber = getKeyFromValue(
-                              monthsListMap, selectedTempMonth!);
+                              spanishMonthsMap, selectedTempMonth!);
                         } else {
                           monthNumber = getKeyFromValue(
-                              monthsListMap, selectedCurrentTempMonth!);
+                              spanishMonthsMap, selectedCurrentTempMonth!);
                         }
-                        saveButtonAction(monthNumber);
+                        saveButtonAction(monthNumber).whenComplete(() async {
+                          studentGradesBodyToUpgrade.clear();
+                          await searchBUttonAction(
+                            selectedTempGroup!,
+                            selectedTempGrade!,
+                            monthNumber!,
+                            selectedTempCampus!,
+                          );
+                          setState(() {
+                              isFetching = false;
+                              showInformationDialog(context, 'Èxito', 'Cambios realizados!');
+                            });
+                        });
+                        } catch (e) {
+                          setState(() {
+                            isFetching = false;
+                             showErrorFromBackend(context, e.toString());
+                          });
+                         
+                        }
+                       
+                        
                       }
                     },
                   ),
@@ -295,13 +362,13 @@ class _GradesByStudentState extends State<GradesByStudent> {
                             fontWeight: FontWeight.bold,
                             color: Colors.blue),
                       ),
-              )
+              ),
             ],
           ),
           const Divider(thickness: 1),
           Container(
               width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height / 1.5,
+              height: MediaQuery.of(context).size.height / 1.8,
               margin: const EdgeInsets.only(right: 10, left: 10, bottom: 10),
               child: LayoutBuilder(
                   builder: (BuildContext context, BoxConstraints constraints) {
@@ -329,16 +396,16 @@ class _GradesByStudentState extends State<GradesByStudent> {
                                   mode: PlutoGridMode.select,
                                   onRowDoubleTap: (event) async {
                                     var gradeInt = getKeyFromValue(
-                                        teacherGradesMap, selectedTempGrade!);
-                                    var selectedmonth;
+                                        teacherGradesMap,
+                                        selectedTempGrade!.toString());
                                     int? monthNumber;
 
-                                    if (isUserAdmin == true) {
+                                    if (isUserAdmin || isUserAcademicCoord) {
                                       monthNumber = getKeyFromValue(
-                                          monthsListMap, selectedTempMonth!);
+                                          spanishMonthsMap, selectedTempMonth!);
                                     } else {
                                       monthNumber = getKeyFromValue(
-                                          monthsListMap,
+                                          spanishMonthsMap,
                                           selectedCurrentTempMonth!);
                                     }
                                     selectedStudentID =
@@ -377,7 +444,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
                             width: 20,
                           ),
                           Expanded(
-                            flex: 3,
+                            flex: 2,
                             child: LayoutBuilder(
                               builder: (BuildContext context,
                                   BoxConstraints constraints) {
@@ -397,15 +464,21 @@ class _GradesByStudentState extends State<GradesByStudent> {
 
                                                 final subjectID = event.row
                                                     .cells['subject']?.value;
-                                                var monthNumber;
-                                                if (isUserAdmin == true) {
+                                                final evalId = event
+                                                    .row
+                                                    .cells['idCicloEscolar']
+                                                    ?.value;
+                                                int? monthNumber;
+                                                if (isUserAdmin || isUserAcademicCoord ) {
                                                   monthNumber = getKeyFromValue(
-                                                      monthsListMap,
-                                                      selectedTempMonth!);
+                                                      spanishMonthsMap,
+                                                      selectedTempMonth!
+                                                          .toCapitalized);
                                                 } else {
                                                   monthNumber = getKeyFromValue(
-                                                      monthsListMap,
-                                                      currentMonth);
+                                                      spanishMonthsMap,
+                                                      currentMonth
+                                                          .toCapitalized);
                                                 }
 
                                                 validator();
@@ -413,33 +486,33 @@ class _GradesByStudentState extends State<GradesByStudent> {
                                                   event.column.title,
                                                   selectedStudentID!,
                                                   newValue,
-                                                  subjectID,
+                                                  evalId,
                                                   monthNumber,
                                                 );
                                               },
-                                              onRowSecondaryTap: (event) async {
-                                                var gradeInt = getKeyFromValue(
-                                                    teacherGradesMap,
-                                                    selectedTempGrade!);
-                                                asignatureNameListener = '';
-                                                asignatureNameListener = event
-                                                    .row
-                                                    .cells['subject_name']
-                                                    ?.value
-                                                    .toString();
+                                              // onRowSecondaryTap: (event) async {
+                                              //   var gradeInt = getKeyFromValue(
+                                              //       teacherGradesMap,
+                                              //       selectedTempGrade!);
+                                              //   asignatureNameListener = '';
+                                              //   asignatureNameListener = event
+                                              //       .row
+                                              //       .cells['subject_name']
+                                              //       ?.value
+                                              //       .toString();
 
-                                                if (gradeInt! >= 6) {
-                                                  await showCommentsDialog(
-                                                      context,
-                                                      commentsAsignated,
-                                                      asignatureNameListener!);
-                                                } else {
-                                                  showInformationDialog(
-                                                      context,
-                                                      'Aviso',
-                                                      'Sin comentarios disponibles a asignar al alumno seleccionado');
-                                                }
-                                              },
+                                              //   if (gradeInt! >= 6) {
+                                              //     await showCommentsDialog(
+                                              //         context,
+                                              //         commentsAsignated,
+                                              //         asignatureNameListener!);
+                                              //   } else {
+                                              //     showInformationDialog(
+                                              //         context,
+                                              //         'Aviso',
+                                              //         'Sin comentarios disponibles a asignar al alumno seleccionado');
+                                              //   }
+                                              // },
                                               onLoaded: (PlutoGridOnLoadedEvent
                                                   event) {
                                                 gridAStateManager =
@@ -598,13 +671,13 @@ class _GradesByStudentState extends State<GradesByStudent> {
     );
   }
 
-  void saveButtonAction(int? monthNumber) async {
-    var response = await patchStudentGradesToDB();
-
-    if (response == 200) {
+  Future<void> saveButtonAction(int? monthNumber) async {
+    await patchStudentGradesToDB().then((response){
+      return;
+/* if (response == 200) {
       if (context.mounted) {
-        showConfirmationDialog(
-            context, 'Actualizado', 'Cambios realizados con exito');
+       showInformationDialog(context, 'Èxito', 'Cambios realizados!');
+
         searchBUttonAction(
           selectedTempGroup!,
           selectedTempGrade!,
@@ -613,10 +686,19 @@ class _GradesByStudentState extends State<GradesByStudent> {
         );
       } else {
         if (context.mounted) {
+          setState(() {
+            isFetching = false;
+            studentGradesBodyToUpgrade.clear();
+          });
           showErrorFromBackend(context, response.toString());
         }
       }
-    }
+    } */
+    }).onError((error, stackTrace){
+      throw Future.error(error.toString());
+    });
+
+    
   }
 
   Future<void> loadSelectedStudent(
@@ -631,7 +713,8 @@ class _GradesByStudentState extends State<GradesByStudent> {
       for (var student in selectedStudentList) {
         selectedStudentRows.add(PlutoRow(cells: {
           'subject': PlutoCell(value: student.subject),
-          'subject_name': PlutoCell(value: student.subjectName),
+          'subject_name':
+              PlutoCell(value: student.subjectName!.trim().toTitleCase),
           'evaluation': PlutoCell(value: student.evaluation),
           // 'eval_type': PlutoCell(value: student.),
           'absence_eval': PlutoCell(value: student.absence),
@@ -641,14 +724,15 @@ class _GradesByStudentState extends State<GradesByStudent> {
           'habit_eval': PlutoCell(value: student.habits_evaluation),
           'other': PlutoCell(value: student.other),
           'outfit': PlutoCell(value: student.outfit),
+          'idCicloEscolar': PlutoCell(value: student.rateID),
         }));
       }
     });
 
-    if (gradeInt! >= 6) {
-      commentsAsignatedList =
-          await populateAsignatedComments(gradeInt!, month, true, studentID);
-    }
+    // if (gradeInt! >= 6) {
+    //   commentsAsignatedList =
+    //       await populateAsignatedComments(gradeInt!, month, true, studentID);
+    // }
   }
 
   Future<List<PlutoRow>> populateAsignatedComments(

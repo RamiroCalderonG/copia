@@ -6,14 +6,20 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 // ignore: depend_on_referenced_packages
 import 'package:flutter_web_plugins/url_strategy.dart';
+import 'package:oxschool/data/Models/Logger.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import "package:window_size/window_size.dart";
 import 'core/config/flutter_flow/flutter_flow_theme.dart';
 import 'core/config/flutter_flow/flutter_flow_util.dart';
 import 'core/config/flutter_flow/internationalization.dart';
 import 'core/config/flutter_flow/nav/nav.dart';
+import 'core/reusable_methods/logger_actions.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await FileLogger.init();
+  insertActionIntoLog('APP STARTED, ', Platform.operatingSystem);
+  revealLoggerFileLocation();
 
   usePathUrlStrategy();
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
@@ -51,6 +57,12 @@ class _MyAppState extends State<MyApp> {
     _router = createRouter(_appStateNotifier);
   }
 
+  @override
+  void dispose() {
+    removeSharedPref();
+    super.dispose();
+  }
+
   void setLocale(String language) {
     setState(() => _locale = createLocale(language));
   }
@@ -60,18 +72,24 @@ class _MyAppState extends State<MyApp> {
         FlutterFlowTheme.saveThemeMode(mode);
       });
 
+  void removeSharedPref() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('isUserAdmin');
+    await prefs.clear();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
       title: 'Oxschool',
       localizationsDelegates: const [
-        FFLocalizationsDelegate(),
+        // FFLocalizationsDelegate(),
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      locale: _locale,
-      supportedLocales: const [Locale('en', '')],
+      // locale: _locale,
+      supportedLocales: const [Locale('en'), Locale('es')],
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
           useMaterial3: true,

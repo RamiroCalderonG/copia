@@ -5,7 +5,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls.dart';
-import 'package:oxschool/core/constants/User.dart';
+import 'package:oxschool/core/constants/user_consts.dart';
 
 Future<List<String>> getPainList(String logger) async {
   List<dynamic> jsonList;

@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class CustomIconButton extends StatelessWidget {
@@ -6,22 +9,18 @@ class CustomIconButton extends StatelessWidget {
   final String tooltip;
 
   const CustomIconButton({
-    Key? key,
+    super.key,
     required this.onPressed,
     required this.icon,
     required this.tooltip,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton.icon(
-        onPressed: onPressed, icon: icon, label: Text(tooltip));
-
-    // IconButton.outlined(
-    //   onPressed: onPressed,
-    //   icon: icon,
-    //   tooltip: tooltip,
-    // );
+    return Platform.isIOS
+        ? CupertinoButton(onPressed: onPressed, child: Text(tooltip))
+        : ElevatedButton.icon(
+            onPressed: onPressed, icon: icon, label: Text(tooltip));
   }
 }
 
@@ -35,7 +34,7 @@ class AddItemButton extends StatelessWidget {
     return CustomIconButton(
       onPressed: onPressed,
       icon: const Icon(Icons.add),
-      tooltip: 'Agregar registro',
+      tooltip: 'Nuevo ',
     );
   }
 }
@@ -96,6 +95,21 @@ class RefreshButton extends StatelessWidget {
       onPressed: onPressed,
       icon: const Icon(Icons.refresh),
       tooltip: 'Actualizar',
+    );
+  }
+}
+
+class CancelActionButton extends StatelessWidget {
+  final VoidCallback onPressed;
+
+  const CancelActionButton({super.key, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomIconButton(
+      onPressed: onPressed,
+      icon: const Icon(Icons.cancel),
+      tooltip: 'Cancelar',
     );
   }
 }

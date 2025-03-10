@@ -20,21 +20,21 @@ final List<String> gridMainWindowIcons = [
 ];
 
 final List<Color> gridMainWindowColors = [
-  const Color.fromRGBO(23, 76, 147, 1),
-  const Color.fromRGBO(246, 146, 51, 1),
-  const Color.fromRGBO(235, 48, 69, 1),
-  const Color.fromRGBO(23, 76, 147, 1),
-  const Color.fromRGBO(246, 146, 51, 1),
-  const Color.fromRGBO(235, 48, 69, 1)
+  const Color(0xFF102542),
+  const Color(0xFF102542),
+  const Color(0xFF102542),
+  const Color(0xFF102542),
+  const Color(0xFF102542),
+  const Color(0xFF102542),
 ];
 
 final List<Color> gridDarkColorsMainWindow = [
-  const Color.fromRGBO(62, 120, 178, 1),
-  const Color.fromRGBO(222, 158, 54, 1),
-  const Color.fromRGBO(227, 101, 91, 1),
-  const Color.fromRGBO(62, 120, 178, 1),
-  const Color.fromRGBO(222, 158, 54, 1),
-  const Color.fromRGBO(227, 101, 91, 1),
+  const Color(0xFF102542),
+  const Color(0xFF102542),
+  const Color(0xFF102542),
+  const Color(0xFF102542),
+  const Color(0xFF102542),
+  const Color(0xFF102542),
 ];
 
 final List<String> mainWindowGridTitles = [
