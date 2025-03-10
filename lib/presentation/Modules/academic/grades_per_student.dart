@@ -38,6 +38,7 @@ List<PlutoRow> rows = [];
 
 class _GradesByStudentState extends State<GradesByStudent> {
   bool isUserAdmin = currentUser!.isCurrentUserAdmin();
+  bool isUserAcademicCoord = currentUser!.isCurrentUserAcademicCoord();
   var commentsController = TextEditingController();
   late PlutoGridStateManager stateManager;
   late PlutoGridStateManager gridAStateManager;
@@ -81,14 +82,14 @@ class _GradesByStudentState extends State<GradesByStudent> {
   }
 
   void _fetchData() async {
-    var response = currentUser!.isCurrentUserAdmin()
+    var response = isUserAdmin
         ? loadStartGradingAsAdminOrAcademicCoord(
-            currentCycle!.claCiclo!, null, true, null, null, currentUser!.isCurrentUserAcademicCoord(), currentUser!.isCurrentUserAdmin() )
+            currentCycle!.claCiclo!, null, true, null, null, isUserAcademicCoord, isUserAdmin )
         : loadStartGrading(
             currentUser!.employeeNumber!,
             currentCycle!.toString(),
-            currentUser!.isCurrentUserAdmin(),
-            currentUser!.isCurrentUserAcademicCoord(),
+            isUserAdmin,
+            isUserAcademicCoord,
             currentUser!.claUn);
     fetchedData = response;
     setState(() {
@@ -244,7 +245,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Flexible(child: RefreshButton(onPressed: () async {
-                  if (isUserAdmin || currentUser!.isAcademicCoord!) {
+                  if (isUserAdmin || isUserAcademicCoord) {
                     //Calendar month number
                     monthNumber =
                         getKeyFromValue(spanishMonthsMap, selectedTempMonth!);
@@ -301,7 +302,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
                             });
                       } else {
                         try {
-                          if (isUserAdmin) {
+                          if (isUserAdmin || isUserAcademicCoord) {
                           monthNumber = getKeyFromValue(
                               spanishMonthsMap, selectedTempMonth!);
                         } else {
@@ -397,7 +398,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
                                         selectedTempGrade!.toString());
                                     int? monthNumber;
 
-                                    if (isUserAdmin == true) {
+                                    if (isUserAdmin || isUserAcademicCoord) {
                                       monthNumber = getKeyFromValue(
                                           spanishMonthsMap, selectedTempMonth!);
                                     } else {
@@ -466,7 +467,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
                                                     .cells['idCicloEscolar']
                                                     ?.value;
                                                 int? monthNumber;
-                                                if (isUserAdmin == true) {
+                                                if (isUserAdmin || isUserAcademicCoord ) {
                                                   monthNumber = getKeyFromValue(
                                                       spanishMonthsMap,
                                                       selectedTempMonth!
