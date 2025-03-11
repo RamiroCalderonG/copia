@@ -3,6 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 // ignore: depend_on_referenced_packages
 import 'package:http/http.dart' as http;
+import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/core/reusable_methods/temp_data_functions.dart';
 import 'package:oxschool/core/reusable_methods/user_functions.dart';
 import 'package:oxschool/presentation/Modules/services_ticket/processes/create_service_ticket.dart';
@@ -189,8 +190,7 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
     );
 
     // ignore: no_leading_underscores_for_local_identifiers
-    Widget _createDrawer(
-        BuildContext context, Future<http.Response> userEvents) {
+    Widget _createDrawer(BuildContext context) {
       final controller = ScrollController();
 
       return Drawer(
@@ -200,46 +200,32 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
             children: <Widget>[
               UserAccountsDrawerHeader(
                 accountName: Text(
-                  currentUser!.employeeName!,
+                  currentUser!.employeeName!.toTitleCase,
                   style: TextStyle(
-                      fontFamily: 'Sora',
-                      fontSize: 18,
-                      color: FlutterFlowTheme.of(context).primaryText),
+                    fontFamily: 'Sora',
+                    fontSize: 18,
+                    color: FlutterFlowTheme.of(context).primaryText,
+                  ),
                 ),
                 accountEmail: Text(
                   currentUser!.employeeNumber!.toString(),
                   style: TextStyle(
-                      fontFamily: 'Sora',
-                      fontSize: 16,
-                      color: FlutterFlowTheme.of(context).primaryText),
+                    fontFamily: 'Sora',
+                    fontSize: 16,
+                    color: FlutterFlowTheme.of(context).primaryText,
+                  ),
                 ),
                 currentAccountPicture: CircleAvatar(
                   backgroundColor: FlutterFlowTheme.of(context).accent4,
                   child: const Image(
-                      image: AssetImage('assets/images/logoRedondoOx.png')),
-                  // Text(currentUser!.employeeName![0],
-                  //     style: TextStyle(fontFamily: 'Sora', fontSize: 20)),
+                    image: AssetImage('assets/images/logoRedondoOx.png'),
+                  ),
                 ),
                 decoration: BoxDecoration(
-                    color: FlutterFlowTheme.of(context).primaryBackground),
+                  color: FlutterFlowTheme.of(context).primaryBackground,
+                ),
               ),
-              FutureBuilder(
-                  future: userEvents,
-                  builder: (BuildContext context,
-                      AsyncSnapshot<http.Response> response) {
-                    if (!response.hasData) {
-                      return const Center(
-                        child: Text('Loading...'),
-                      );
-                    } else if (response.data!.statusCode != 200) {
-                      return const Center(
-                        child: Text('Error Loading'),
-                      );
-                    } else {
-                      List<dynamic> json = jsonDecode(response.data!.body);
-                      return MyExpansionTileList();
-                    }
-                  }),
+              MyExpansionTileList(),
               const Divider(thickness: 3),
               ListTile(
                 title: const Text('Cerrar sesión'),
@@ -255,16 +241,13 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
                       ),
                     },
                   );
-                                    clearUserData();
+                  clearUserData();
                   clearTempData();
-                     SharedPreferences prefs = await SharedPreferences.getInstance();
-  await prefs.clear();
-
-                  // Navigator.pop(context);
-                  // Navigator.pushReplacement(context,
-                  //     MaterialPageRoute(builder: (context) => LoginViewWidget()));
+                  SharedPreferences prefs =
+                      await SharedPreferences.getInstance();
+                  await prefs.clear();
                 },
-              )
+              ),
             ],
           ),
         ),
@@ -276,10 +259,9 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
       child: Scaffold(
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        drawer: Opacity(
-            opacity: 1,
-            child: _createDrawer(context, userEvents) //DrawerClass()
-            ),
+        drawer:
+            Opacity(opacity: 1, child: _createDrawer(context) //DrawerClass()
+                ),
         body: NestedScrollView(
           headerSliverBuilder: (context, _) => [
             appBar,
