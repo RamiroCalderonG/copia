@@ -775,8 +775,8 @@ Future<dynamic> getTeacherGradeAndCourses(var employee, var year, int month,
 }
 
 //Fucntion to get grades and courses if user is admin
-Future<dynamic> getTeacherGradeAndCoursesAsAdmin(
-    int month, bool isAdmin, String? campus, String? cycle, bool isAcademicCoord) async {
+Future<dynamic> getTeacherGradeAndCoursesAsAdmin(int month, bool isAdmin,
+    String? campus, String? cycle, bool isAcademicCoord) async {
   try {
     SharedPreferences devicePrefs = await SharedPreferences.getInstance();
     var apiCall = await Requests.get(
@@ -791,7 +791,7 @@ Future<dynamic> getTeacherGradeAndCoursesAsAdmin(
         "flag": isAdmin,
         "campus": campus,
         "employee": currentUser!.employeeNumber,
-        "flag2" : isAcademicCoord
+        "flag2": isAcademicCoord
       },
       bodyEncoding: RequestBodyEncoding.JSON,
       persistCookies: true,
@@ -932,7 +932,8 @@ Future<dynamic> patchStudentsGrades(
       return apiCall.statusCode;
     }
   } catch (e) {
-    insertErrorLog(e.toString(), 'patchStudentsGrades() | isByStudent : $isByStudent , | body: $requestBody');
+    insertErrorLog(e.toString(),
+        'patchStudentsGrades() | isByStudent : $isByStudent , | body: $requestBody');
     return Future.error(e.toString());
   }
 }
@@ -1363,7 +1364,7 @@ Future<dynamic> updateModuleAccessByRole(
           'Authorization': devicePrefs.getString('token')!,
           'Content-Type': 'application/json',
         },
-        json: {'item': item, 'role': roleId, 'status': status, 'flag' : flag },
+        json: {'item': item, 'role': roleId, 'status': status, 'flag': flag},
         persistCookies: false,
         timeoutSeconds: 20);
     apiCall.raiseForStatus();
@@ -1380,40 +1381,51 @@ Future<dynamic> getRolePermissions() async {
   try {
     SharedPreferences devicePrefs = await SharedPreferences.getInstance();
     var apiCall = await Requests.get(
-      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/roles/me',
-     headers: {
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/roles/me',
+        headers: {
           'Authorization': devicePrefs.getString('token')!,
           'Content-Type': 'application/json',
         },
         persistCookies: false,
-        timeoutSeconds: 15
-    );
-  apiCall.raiseForStatus();
-  return apiCall;
+        timeoutSeconds: 15);
+    apiCall.raiseForStatus();
+    return apiCall;
   } catch (e) {
-    insertErrorLog(e.toString(),
-        "getRolepermissions()");
+    insertErrorLog(e.toString(), "getRolepermissions()");
     return Future.error(e.toString());
   }
 }
 
 //Function to retrieve access routes for screens by token
-Future<dynamic> getScreenAccessRoutes()async {
+Future<dynamic> getScreenAccessRoutes() async {
   try {
     SharedPreferences devicePrefs = await SharedPreferences.getInstance();
     var apiCall = await Requests.get(
-      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/roles/routes/',
-     headers: {
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/roles/routes/',
+        headers: {
           'Authorization': devicePrefs.getString('token')!,
           'Content-Type': 'application/json',
         },
         persistCookies: false,
-        timeoutSeconds: 15
-    );
-  apiCall.raiseForStatus();
-  return apiCall.body;
+        timeoutSeconds: 15);
+    apiCall.raiseForStatus();
+    return apiCall.body;
   } catch (e) {
     insertErrorLog(e.toString(), 'getScreenAccessRoutes()');
+    return Future.error(e.toString());
+  }
+}
+
+Future<dynamic> getLatestAppVersion() async {
+  try {
+    var apiCall = await Requests.get(
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/version',
+        persistCookies: false,
+        timeoutSeconds: 10);
+    apiCall.raiseForStatus();
+    return apiCall;
+  } catch (e) {
+    insertErrorLog(e.toString(), 'getLatestAppVersion()');
     return Future.error(e.toString());
   }
 }

@@ -6,6 +6,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 // ignore: depend_on_referenced_packages
 import 'package:flutter_web_plugins/url_strategy.dart';
+import 'package:oxschool/core/utils/version_updater.dart';
 import 'package:oxschool/data/Models/Logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import "package:window_size/window_size.dart";

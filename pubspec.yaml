@@ -82,10 +82,11 @@ dependencies:
   flutter_dotenv: ^5.1.0
   flutter_secure_storage: ^9.2.2
   # updat: ^1.2.0+1
-  file_selector: ^1.0.3
   file_picker: ^8.0.0+1
   package_info_plus: ^8.1.2
   process_run: ^1.2.2+1
+  install_plugin: ^2.1.0
+  open_file: ^3.5.10
       #ref: 927f8cbc09b35d85245c095f2db8f9b186f6618
 
 dev_dependencies:
