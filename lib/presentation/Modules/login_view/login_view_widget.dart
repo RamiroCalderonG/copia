@@ -7,6 +7,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:oxschool/core/constants/version.dart';
 import 'package:oxschool/core/reusable_methods/device_functions.dart';
 import 'package:oxschool/core/reusable_methods/temp_data_functions.dart';
 import 'package:oxschool/core/utils/version_updater.dart';
@@ -230,6 +231,11 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
       deviceInformation = deviceData;
     });
   }
+
+  final versionDisplay = Text(
+    'Version: $current_version',
+    style: TextStyle(fontFamily: 'Sora', fontWeight: FontWeight.bold, fontSize: 8), 
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -764,6 +770,12 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                 )),
                                           ],
                                         ),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            versionDisplay
+                                          ],
+                                        )
                                       ],
                                     ),
                                   ),
@@ -1152,6 +1164,12 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                 )),
                                           ],
                                         ),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            versionDisplay
+                                          ],
+                                        )
                                       ],
                                     ),
                                   ),

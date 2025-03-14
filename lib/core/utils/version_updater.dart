@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:oxschool/core/constants/version.dart';
 import 'package:oxschool/core/utils/update_installer.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
 import 'package:package_info_plus/package_info_plus.dart';

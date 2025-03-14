@@ -1,1 +1,1 @@
-var currentVersion = '0.0.0.1';
+var current_version = '';
