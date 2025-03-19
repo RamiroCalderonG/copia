@@ -21,7 +21,7 @@ Future<dynamic> loginUser(var jsonBody) async {
         '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/auth/login',
         json: jsonBody,
         persistCookies: false,
-        timeoutSeconds: 25);
+        timeoutSeconds: 12);
 
     apiCall.raiseForStatus();
     return apiCall;

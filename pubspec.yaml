@@ -86,6 +86,7 @@ dependencies:
   install_plugin: ^2.1.0
   remove: ^1.0.10
   dio: ^5.8.0+1
+  ftpconnect: ^2.0.7
       #ref: 927f8cbc09b35d85245c095f2db8f9b186f6618
 
 dev_dependencies:

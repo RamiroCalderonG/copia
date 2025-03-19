@@ -1,6 +1,7 @@
 import 'dart:io';
 //import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:ftpconnect/ftpconnect.dart';
 
 //*Works for WINDOWS AND MACOS
 void runUpdateScript() {
@@ -41,56 +42,84 @@ void runUpdateScript() {
     }); */
   }
 }
-
+String pcPath =  '10.23.2.99';//dotenv.env['MACOS']!;
+FTPConnect ftpConnection = FTPConnect(pcPath, user: 'Client', pass: 'SAre17204_', showLog: true, securityType: SecurityType.FTPES);
+  
 void runMacOsUpdateScript() async {
-  String networkPath = dotenv.env['MACOS']!;
-  String localMountPath = "${Platform.environment['HOME']}/tmpOxschool";
-  String scriptPath = "$localMountPath/update.sh";
+  String directoryPath = 'shared2';
+  String scriptName = 'update.sh';
+  //String localScriptPath = '/tmp/$scriptName';
+  String downloadDirectory = "/Users/${Platform.environment['USER']}/Downloads/update.sh";
 
   try {
-    // Ensure the mount directory exists
-    await Process.run('mkdir', ['-p', localMountPath], runInShell: true);
+    await _downloadWithRetry();
 
-    // Print the command for debugging
-    print('mount_smbfs //GUEST@${networkPath} $localMountPath');
-
-    // Mount the SMB network share as Guest
-    ProcessResult mountResult = await Process.run(
-      'mount_smbfs',
-      ['//GUEST@${networkPath}', localMountPath], runInShell: true
-    );
-
-    if (mountResult.exitCode != 0) {
-      print("Failed to mount SMB share: ${mountResult.stderr}");
-      await cleanup(localMountPath);
-      return;
-    }
-    print("SMB Share mounted successfully.");
-
-    // Check if the update script exists
-    if (!File(scriptPath).existsSync()) {
-      print("Error: Update script not found at $scriptPath");
-      await cleanup(localMountPath);
-      return;
-    }
-
-    // Give execute permissions to the script
-    await Process.run('chmod', ['+x', scriptPath]);
-
-    // Run the update script
-    ProcessResult result = await Process.run(scriptPath, [], runInShell: true);
+    // Execute the downloaded script
+    ProcessResult result = await Process.run('sh', [downloadDirectory], runInShell: true);
     if (result.exitCode != 0) {
-      print("Update script execution failed: ${result.stderr}");
-      await cleanup(localMountPath);
-      return;
+      print("Script execution failed: ${result.stderr}");
+    } else {
+      print("Script executed successfully: ${result.stdout}");
     }
 
-    print("Update script executed successfully.");
+    // Delete the script file
+    File(downloadDirectory).deleteSync();
+    print("Script file deleted: $downloadDirectory");
+
   } catch (e) {
+    ftpConnection.disconnect();
     print("Error: $e");
-    await cleanup(localMountPath);
   }
 }
+
+Future<File> fileMock({fileName = 'update.sh', content = ''}) async {  
+  try {
+    String downloadDirectory = "/Users/${Platform.environment['USER']}/Downloads";
+  final Directory directory = Directory(downloadDirectory)..createSync(recursive: true);
+  final File file = File('${directory.path}/$fileName');
+  await file.writeAsString(content);
+  return file;
+  } catch (e) {
+   print(e.toString());
+    rethrow; 
+  }
+  
+}
+
+Future<void> _downloadWithRetry() async {
+  try {
+    String fileName = 'update.sh';
+    String remoteFilePath = '/Downloads/$fileName';
+    await ftpConnection.connect();
+    print('Connected to FTP server.');
+
+    File downloadedFile = await fileMock(fileName: fileName);
+    print('Local file created at: ${downloadedFile.path}');
+
+    bool res = await ftpConnection.downloadFileWithRetry(
+      remoteFilePath,
+      downloadedFile,
+      pRetryCount: 2,
+      onProgress: (progressInPercent, totalReceived, fileSize) {
+        print('Progress: $progressInPercent%, received: $totalReceived bytes, fileSize: $fileSize bytes');
+      },
+    );
+
+    if (res) {
+      print('File downloaded successfully to: ${downloadedFile.path}');
+    } else {
+      print('File download failed.');
+    }
+
+    await ftpConnection.disconnect();
+    print('Disconnected from FTP server.');
+  } catch (e) {
+    await ftpConnection.disconnect();
+    print('Downloading FAILED: ${e.toString()}');
+  }
+}
+
+
 
 // Cleanup function to remove the local mount path
 Future<void> cleanup(String localMountPath) async {
