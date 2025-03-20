@@ -88,6 +88,7 @@ dependencies:
   dio: ^5.8.0+1
   ftpconnect: ^2.0.7
   updat: ^1.2.0+1
+  archive: ^4.0.4
       #ref: 927f8cbc09b35d85245c095f2db8f9b186f6618
 
 dev_dependencies:

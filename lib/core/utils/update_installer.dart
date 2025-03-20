@@ -1,76 +1,139 @@
 import 'dart:convert';
 import 'dart:io';
 //import 'package:dio/dio.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:archive/archive_io.dart';
+import 'package:dio/dio.dart';
 import 'package:ftpconnect/ftpconnect.dart';
-import 'package:updat/updat.dart';
 import 'package:http/http.dart' as http;
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 
-//*Works for WINDOWS AND MACOS
-void runUpdateScript() {
-  String scriptUrl = Platform.isWindows
-      ? r'\\10.23.2.99\Shared\update.bat' // Windows UNC path
-      : r'//10.23.2.99/Shared/update.sh'; // Linux path
 
-  if (Platform.isWindows) {
-    Process.run('cmd.exe', ['/c', 'start', scriptUrl], runInShell: true)
-        .then((ProcessResult result) {
-      print("Update script executed successfully");
-    }).catchError((e) {
-      print("Failed to execute update script: $e");
-    });
-  } else if (Platform.isMacOS) {
-    try {
-       UpdatWidget(
-  currentVersion: "1.0.0",
-  getLatestVersion: () async {
-        // Github gives us a super useful latest endpoint, and we can use it to get the latest stable release
-        final data = await http.get(Uri.parse(
-          "https://github.com/ericksanr/OXSClientSideREST/releases/latest",
-        ),
-        headers: {
-          'Authorization' : 'token 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'
-        }
-        );
+void runUpdateScript() async {
+  String platformPackageName = '';
+  String urlDownloadLink = '';
+  int assetId = 0;
 
-        // Return the tag name, which is always a semantically versioned string.
-        return jsonDecode(data.body)["tag_name"];
-      },
-      getBinaryUrl: (version) async {
-        // Github also gives us a great way to download the binary for a certain release (as long as we use a consistent naming scheme)
+  final response = await http.get(
+      Uri.parse(
+        "https://api.github.com/repos/ericksanr/OXSClientSideREST/releases/latest",
+      ),
+      headers: {
+        'Authorization': 'Bearer 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'
+      });
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+    List<dynamic> assets = data["assets"];
 
-        // Make sure that this link includes the platform extension with which to save your binary.
-        // If you use https://exapmle.com/latest/macos for instance then you need to create your own file using `getDownloadFileLocation`
-        return "https://github.com/ericksanr/OXSClientSideREST/releases/download/$version/sidekick-${Platform.operatingSystem}-$version.$platformExt";
-      },
-  // Lastly, enter your app name so we know what to call your files.
-  appName: "Updat Example",
-);
-
-      //runMacOsUpdateScript();
-    } catch (e) {
-      print("Function runMacOsUpdateScript failed: $e");
+    if (Platform.isWindows) {
+      platformPackageName = 'windows.zip';
+    } else if (Platform.isMacOS) {
+      platformPackageName = "macos.zip";
+    }
+    for (var item in assets) {
+      if (item["name"].toString().toLowerCase() == platformPackageName.toLowerCase()) {
+        urlDownloadLink = item["url"];
+        break;
+      }
     }
 
+    // Download the zip file
+    String downloadDirectory =
+        "/Users/${Platform.environment['USER']}/Downloads";
+    String zipFilePath = path.join(downloadDirectory, platformPackageName);
+    var zipedFile = await downloadFile(urlDownloadLink, zipFilePath, platformPackageName);
+
+    Directory tempDir = await getApplicationDocumentsDirectory();
+    String savepath = tempDir.path;
 
 
+    // Unzip the file
+    await unzipFile(zipedFile!, savepath!);
 
-  /*   Process.run('mkdir', ['-p', localMountPath], runInShell: true).then((_) {
-      Process.run('mount_smbfs', [networkPath, localMountPath],
-              runInShell: true)
-          .then((_) {
-        Process.run('sh', ['$localMountPath/update.sh'], runInShell: true)
-            .then((ProcessResult result) {
-          print("Update script executed successfully");
-        }).catchError((e) {
-          print("Failed to execute update script: $e");
-        });
-      }).catchError((e) {
-        print("Failed to mount network share: $e");
-      });
-    }); */
+    // Execute the script
+    String scriptName = Platform.isWindows ? "update.bat" : "update.sh";
+    String scriptPath = path.join(downloadDirectory, scriptName);
+    await executeScript(scriptPath);
+
+    // Delete the zip file
+    File(zipFilePath).deleteSync();
+    print("Zip file deleted: $zipFilePath");
+  } else {
+    throw Exception("Failed to fetch latest version: ${response.statusCode}");
   }
 }
+
+Future<String?> downloadFile(String url, String filePath, String fileName) async {
+  try {
+    Dio dio = Dio();
+    Directory tempDir = await getApplicationDocumentsDirectory();
+    String savepath = "${tempDir.path}/$fileName";
+
+    //Download file
+    await dio.download(url, savepath, options: Options(
+      headers: {
+      'Authorization': 'Bearer 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', 
+      'Accept' : 'application/octet-stream'}), onReceiveProgress: (count, total) {
+      print("Progress: ${((count / total) * 100).toStringAsFixed(0)}%");
+    },);
+    print("Download completed: $savepath");
+    return savepath;
+
+  } catch (e) {
+    print(e.toString());
+    throw Exception("Failed to download file: ${e.toString()}");
+  }
+}
+
+Future<void> unzipFile(String zipFilePath, String destinationDir) async {
+  try {
+    final bytes = File(zipFilePath).readAsBytesSync();
+  final archive = ZipDecoder().decodeBytes(bytes);
+
+  for (final file in archive) {
+    final fileName = path.join(destinationDir, file.name);
+    if (file.isFile) {
+      final data = file.content as List<int>;
+      File(fileName)
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(data);
+    } else {
+      Directory(fileName).create(recursive: true);
+    }
+  }
+  print("File unzipped to: $destinationDir");
+  } catch (e) {
+    print(e.toString());
+    throw Exception("Failed to unzip file: ${e.toString()}");
+  }
+  
+}
+
+Future<void> executeScript(String scriptPath) async {
+  try {
+    ProcessResult result;
+    if (Platform.isWindows) {
+      result = await Process.run('cmd.exe', ['/c', 'start', scriptPath],
+          runInShell: true);
+    } else if (Platform.isMacOS) {
+      result = await Process.run('sh', [scriptPath], runInShell: true);
+    } else {
+      throw Exception("Unsupported platform: ${Platform.operatingSystem}");
+    }
+
+    if (result.exitCode != 0) {
+      print("Script execution failed: ${result.stderr}");
+    } else {
+      print("Script executed successfully: ${result.stdout}");
+    }
+
+    // Close the Flutter app
+    exit(0);
+  } catch (e) {
+    print("Error executing script: $e");
+  }
+}
+
 String pcPath =  '10.23.2.99';//dotenv.env['MACOS']!;
 FTPConnect ftpConnection = FTPConnect(pcPath, user: 'Client', pass: 'SAre17204_', showLog: true, securityType: SecurityType.FTPES);
   
