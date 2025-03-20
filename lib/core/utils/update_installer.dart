@@ -1,7 +1,10 @@
+import 'dart:convert';
 import 'dart:io';
 //import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:ftpconnect/ftpconnect.dart';
+import 'package:updat/updat.dart';
+import 'package:http/http.dart' as http;
 
 //*Works for WINDOWS AND MACOS
 void runUpdateScript() {
@@ -18,7 +21,33 @@ void runUpdateScript() {
     });
   } else if (Platform.isMacOS) {
     try {
-      runMacOsUpdateScript();
+       UpdatWidget(
+  currentVersion: "1.0.0",
+  getLatestVersion: () async {
+        // Github gives us a super useful latest endpoint, and we can use it to get the latest stable release
+        final data = await http.get(Uri.parse(
+          "https://github.com/ericksanr/OXSClientSideREST/releases/latest",
+        ),
+        headers: {
+          'Authorization' : 'token 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'
+        }
+        );
+
+        // Return the tag name, which is always a semantically versioned string.
+        return jsonDecode(data.body)["tag_name"];
+      },
+      getBinaryUrl: (version) async {
+        // Github also gives us a great way to download the binary for a certain release (as long as we use a consistent naming scheme)
+
+        // Make sure that this link includes the platform extension with which to save your binary.
+        // If you use https://exapmle.com/latest/macos for instance then you need to create your own file using `getDownloadFileLocation`
+        return "https://github.com/ericksanr/OXSClientSideREST/releases/download/$version/sidekick-${Platform.operatingSystem}-$version.$platformExt";
+      },
+  // Lastly, enter your app name so we know what to call your files.
+  appName: "Updat Example",
+);
+
+      //runMacOsUpdateScript();
     } catch (e) {
       print("Function runMacOsUpdateScript failed: $e");
     }
@@ -74,7 +103,7 @@ void runMacOsUpdateScript() async {
 
 Future<File> fileMock({fileName = 'update.sh', content = ''}) async {  
   try {
-    String downloadDirectory = "/Users/${Platform.environment['USER']}/Downloads";
+    String downloadDirectory = "${Platform.environment['HOME']}";
   final Directory directory = Directory(downloadDirectory)..createSync(recursive: true);
   final File file = File('${directory.path}/$fileName');
   await file.writeAsString(content);
@@ -84,6 +113,29 @@ Future<File> fileMock({fileName = 'update.sh', content = ''}) async {
     rethrow; 
   }
   
+}
+
+String get platformExt {
+  switch (Platform.operatingSystem) {
+    case 'windows':
+      {
+        return 'msix';
+      }
+
+    case 'macos':
+      {
+        return 'dmg';
+      }
+
+    case 'linux':
+      {
+        return 'AppImage';
+      }
+    default:
+      {
+        return 'zip';
+      }
+  }
 }
 
 Future<void> _downloadWithRetry() async {
@@ -128,4 +180,5 @@ Future<void> cleanup(String localMountPath) async {
   await Process.run('rm', ['-rf', localMountPath], runInShell: true);
 }
 
-//!NOT WORKING YET FOR ANDROID AND IOS, PENDING TO DEVELOP
+
+ 
