@@ -1,17 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:oxschool/core/constants/version.dart';
-import 'package:oxschool/core/utils/loader_indicator.dart';
+import 'package:oxschool/core/config/flutter_flow/flutter_flow_util.dart';
 import 'package:oxschool/core/utils/update_installer.dart';
-import 'package:oxschool/core/utils/update_installer2.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:updat/theme/chips/default_with_check_for.dart';
-import 'package:updat/updat.dart';
-import 'package:updat/updat_window_manager.dart';
-import 'package:url_launcher/url_launcher.dart';
+
 import 'dart:io';
 
 class UpdateChecker {
@@ -27,10 +20,7 @@ class UpdateChecker {
         String latestVersion = data["version"];
 
         if (latestVersion.compareTo(currentVersion) > 0) {
-          String downloadUrl = getDownloadUrl(data);
-          if (downloadUrl.isNotEmpty) {
-            showUpdateDialog(context, downloadUrl);
-          }
+          showUpdateDialog(context);
         }
       }
     } catch (e) {
@@ -46,7 +36,7 @@ class UpdateChecker {
     return "";
   }
 
-  static void showUpdateDialog(BuildContext context, String downloadUrl) {
+  static void showUpdateDialog(BuildContext context) {
     showDialog(
         context: context,
         barrierDismissible: false,
@@ -61,12 +51,13 @@ class UpdateChecker {
                   ),
                   TextButton(
                     onPressed: () async {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => UpdateInstaller(),
-                        ),
-                      );
+                      context.goNamed('UpdaterScreen', extra: <String, dynamic>{
+                      kTransitionInfoKey: const TransitionInfo(
+                        hasTransition: true,
+                        transitionType: PageTransitionType.fade,
+                      ),
+                    },);
+                      
                       //runUpdateScript();
                     },
                     child: Text("Update"),
