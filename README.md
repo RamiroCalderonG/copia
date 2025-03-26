@@ -101,3 +101,8 @@ To run this project, you will need to add the following environment variables to
 ## Versioning
 
 
+## Contributions
+
+- [@RamiroCalderonG](https://github.com/ramirocalderong)
+
+
