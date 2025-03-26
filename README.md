@@ -53,13 +53,13 @@ Y para que este pueda trabajar correctamente se debe incluir los siguientes perm
   ALL ALL=(ALL) NOPASSWD: /usr/bin/xattr -dr com.apple.quarantine
 ```
 
-*Para insertar presionar i y posteriormente agregar la linea, luego presionar CTRL+C y luego :qw
+- Para insertar presionar i y posteriormente agregar la linea, luego presionar CTRL+C y luego :qw
 
-#TODO 🚀
+##TODO 🚀
 *PENDIENTE DE AGREGAR PROCESO EN UN SCRIPT AL MOMENTO DE HACER LA INSTALACION*
 
 
-[oxsUpdaterHelper Repo](https://github.com/ericksanr/oxsUpdaterHelper/tree/main)
+**Updater Helper** [oxsUpdaterHelper Repo](https://github.com/ericksanr/oxsUpdaterHelper/tree/main)
 
 
 
