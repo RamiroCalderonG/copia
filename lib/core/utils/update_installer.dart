@@ -41,7 +41,6 @@ class _UpdateInstallerState extends State<UpdateInstaller> {
   void runUpdateScript() async {
   String platformPackageName = '';
   String urlDownloadLink = '';
-  //String scriptPackage = '';
   int assetId = 0;
 
   try {
@@ -95,7 +94,7 @@ class _UpdateInstallerState extends State<UpdateInstaller> {
     });
     
     //Execute script
-    runAppleScript();
+    //runAppleScript();
 
   } else {
     throw Exception("Failed to fetch latest version: ${response.statusCode}");
@@ -156,7 +155,7 @@ Future<void> downloadFile(String url, String filePath) async {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Actualizacion en curso, por favor espere..."),
+        title: Text("\nActualizacion en curso, por favor espere...", style: TextStyle(fontFamily: 'Sora'),),
       ),
       body: Center(
         child: StreamBuilder<double>(
@@ -165,19 +164,21 @@ Future<void> downloadFile(String url, String filePath) async {
             if (_showWaitMessage) {
               return Column(
                 mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   CircularProgressIndicator(),
-                  Text(directoryToDisplay),
+                  //Text(directoryToDisplay),
                 ],
               );
             } else if (snapshot.hasData) {
               return Column(
                 mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   CircularProgressIndicator(value: snapshot.data! / 100),
                   SizedBox(height: 20),
                   Text("${snapshot.data!.toStringAsFixed(0)}%"),
-                  Text(directoryToDisplay)
+                  //Text(directoryToDisplay)
                 ],
               );
             } else if (snapshot.hasError){
@@ -186,6 +187,7 @@ Future<void> downloadFile(String url, String filePath) async {
               });
               return Column(
                 mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(snapshot.error.toString()),
                   ElevatedButton(onPressed: (){
@@ -196,8 +198,10 @@ Future<void> downloadFile(String url, String filePath) async {
             }
             else {
               return Center(child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('Por favor espere, actualización en curso en: $directoryToDisplay,'),
+                  Text('Por favor espere, actualización en curso,'),
                   CustomLoadingIndicator()
                 ],
               ));

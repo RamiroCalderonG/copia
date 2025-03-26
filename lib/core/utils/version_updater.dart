@@ -42,13 +42,13 @@ class UpdateChecker {
         context: context,
         barrierDismissible: false,
         builder: (context) => AlertDialog(
-                title: Text("Update Available"),
+                title: Text("Actualización disponible! 🚀"),
                 content:  
-                    Text("A new version is available. Do you want to update?"),
+                    Text("Una nueva versión se encuentra disponible, desea actualizar ahora?"),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: Text("Later"),
+                    child: Text("Posponer"),
                   ),
                   TextButton(
                     onPressed: () async {
@@ -60,7 +60,7 @@ class UpdateChecker {
                     },); 
                       //runUpdateScript();
                     },
-                    child: Text("Update"),
+                    child: Text("Actualizar"),
                   ),
                 ],
               ));
