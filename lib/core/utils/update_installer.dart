@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:oxschool/core/utils/loader_indicator.dart';
 import 'package:path/path.dart' as path;
@@ -45,11 +46,10 @@ class _UpdateInstallerState extends State<UpdateInstaller> {
 
   try {
     final response = await http.get(
-    Uri.parse(
-      "https://api.github.com/repos/ericksanr/OXSClientSideREST/releases/latest",
+    Uri.parse( dotenv.env['GITHUBREPOURL']!
     ),
     headers: {
-      'Authorization': 'Bearer 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'
+      'Authorization': 'Bearer ${dotenv.env['GITHUBHEADER']!}'
     },
   ).catchError((onError){
     print(onError);
@@ -61,10 +61,10 @@ class _UpdateInstallerState extends State<UpdateInstaller> {
     List<dynamic> assets = data["assets"];
 
     if (Platform.isWindows) {
-      platformPackageName = 'windows.zip';
+      platformPackageName = dotenv.env['WINDOWSPLATFORMNAME']!;//'windows.zip';
     } else if (Platform.isMacOS) {
       //scriptPackage = "update.sh";
-      platformPackageName = "macOs.zip";
+      platformPackageName = dotenv.env['MACOSPLATFORMNAME']!;//"macOs.zip";
     }
 
     // Find download links for the .zip and .sh files
@@ -134,7 +134,7 @@ Future<void> downloadFile(String url, String filePath) async {
       filePath,
       options: Options(
         headers: {
-          'Authorization': 'Bearer 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',
+          'Authorization': 'Bearer ${dotenv.env['GITHUBHEADER']!}',// 'Bearer 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',
           'Accept': 'application/octet-stream'
         },
       ),
@@ -167,7 +167,6 @@ Future<void> downloadFile(String url, String filePath) async {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   CircularProgressIndicator(),
-                  //Text(directoryToDisplay),
                 ],
               );
             } else if (snapshot.hasData) {
@@ -178,7 +177,6 @@ Future<void> downloadFile(String url, String filePath) async {
                   CircularProgressIndicator(value: snapshot.data! / 100),
                   SizedBox(height: 20),
                   Text("${snapshot.data!.toStringAsFixed(0)}%"),
-                  //Text(directoryToDisplay)
                 ],
               );
             } else if (snapshot.hasError){
