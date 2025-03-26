@@ -94,7 +94,7 @@ class _UpdateInstallerState extends State<UpdateInstaller> {
     });
     
     //Execute script
-    //runAppleScript();
+    runAppleScript();
 
   } else {
     throw Exception("Failed to fetch latest version: ${response.statusCode}");
