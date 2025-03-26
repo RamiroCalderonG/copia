@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_util.dart';
+import 'package:oxschool/core/utils/_update_installer.dart';
 import 'package:oxschool/core/utils/update_installer.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -56,8 +57,7 @@ class UpdateChecker {
                         hasTransition: true,
                         transitionType: PageTransitionType.fade,
                       ),
-                    },);
-                      
+                    },); 
                       //runUpdateScript();
                     },
                     child: Text("Update"),
