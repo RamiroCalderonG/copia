@@ -59,6 +59,8 @@ Y para que este pueda trabajar correctamente se debe incluir los siguientes perm
 *PENDIENTE DE AGREGAR PROCESO EN UN SCRIPT AL MOMENTO DE HACER LA INSTALACION*
 
 
+[oxsUpdaterHelper Repo](https://github.com/ericksanr/oxsUpdaterHelper/tree/main/oxsUpdaterHelper)
+
 
 
 
