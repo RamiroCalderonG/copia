@@ -27,9 +27,13 @@ Para el manejo de versiones el concepto para aplciacion de escritorio es el sigu
 * Se contruye el proyecto para Windows y MacOS, posteriormente se carga en Github la nueva version como un release y en app_versions se crea un nuevo registro con la nueva version
 
 Pasos para Windows
+- Modificar Runner.rc con la version a contruir
 - Construir .exe
 - Comprimir
 - Cargar en Release de Github 
+
+**NOTA:**
+
 
 Pasos para MacOS
 - Construir .app
