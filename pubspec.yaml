@@ -1,5 +1,5 @@
 name: oxschool
-description: A new Flutter project.
+description: Ox School.
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `pub publish`. This is preferred for private packages.
@@ -15,7 +15,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.0.0+1
+version: 0.0.1
 
 environment:
   sdk: ">=2.17.0 <4.0.0"
@@ -45,7 +45,7 @@ dependencies:
   path_provider_platform_interface: ^2.1.2
   provider: ^6.0.5
   shared_preferences: ^2.2.3
-  shared_preferences_android: ^2.2.1
+  shared_preferences_android: ^2.3.4
   # shared_preferences_ios: 2.1.1
   shared_preferences_platform_interface: ^2.3.2
   shared_preferences_web: ^2.2.1
@@ -78,14 +78,14 @@ dependencies:
   pdf: ^3.10.7
   get: ^4.6.6
   # pluto_grid_export: ^1.0.6
-  file_saver: ^0.2.6
   flutter_dotenv: ^5.1.0
   flutter_secure_storage: ^9.2.2
-  # updat: ^1.2.0+1
-  file_selector: ^1.0.3
-  file_picker: ^8.0.0+1
   package_info_plus: ^8.1.2
   process_run: ^1.2.2+1
+  install_plugin: ^2.1.0
+  remove: ^1.0.10
+  dio: ^5.8.0+1
+  archive: ^4.0.4
       #ref: 927f8cbc09b35d85245c095f2db8f9b186f6618
 
 dev_dependencies:

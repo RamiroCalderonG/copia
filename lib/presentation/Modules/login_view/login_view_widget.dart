@@ -7,8 +7,10 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:oxschool/core/constants/version.dart';
 import 'package:oxschool/core/reusable_methods/device_functions.dart';
 import 'package:oxschool/core/reusable_methods/temp_data_functions.dart';
+import 'package:oxschool/core/utils/version_updater.dart';
 import 'package:oxschool/data/Models/Cycle.dart';
 import 'package:oxschool/data/Models/User.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
@@ -65,6 +67,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
   @override
   void initState() {
     super.initState();
+    UpdateChecker.checkForUpdate(context);
     _loadTapTimestamps();
     _startTimer();
     initPlatformState();
@@ -229,6 +232,11 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
     });
   }
 
+  final versionDisplay = Text(
+    'Version: $current_version',
+    style: TextStyle(fontFamily: 'Sora', fontWeight: FontWeight.bold, fontSize: 8), 
+  );
+
   @override
   Widget build(BuildContext context) {
     // String? _text;
@@ -271,20 +279,21 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
               apiResponse = response;
               List<dynamic> jsonList;
               Map<String, dynamic> jsonData = jsonDecode(apiResponse.body);
-              devicePrefs.setString('token', 'Bearer ' + jsonData['token']); //Store token
+              devicePrefs.setString(
+                  'token', 'Bearer ' + jsonData['token']); //Store token
               // jsonData['token'] = '';
 
               //GET user data
-              apiResponse =
-                  await getCurrentUserData(devicePrefs.getString('token')!); //Get user information
+              apiResponse = await getCurrentUserData(
+                  devicePrefs.getString('token')!); //Get user information
               jsonData = json.decode(apiResponse.body);
 
               currentUser = User.fromJson(jsonData);
 
               //GET USER ROLE AND PERMISSIONS
-                var result = await getRoleListOfPermissions(jsonData);
-                 await getUserAccessRoutes();
-              
+              var result = await getRoleListOfPermissions(jsonData);
+              await getUserAccessRoutes();
+
               //await getUserRoleAndAcces(currentUser!.roleID!);
 
               apiResponse = await getCycle(
@@ -761,6 +770,12 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                 )),
                                           ],
                                         ),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            versionDisplay
+                                          ],
+                                        )
                                       ],
                                     ),
                                   ),
@@ -1149,6 +1164,12 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                                 )),
                                           ],
                                         ),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            versionDisplay
+                                          ],
+                                        )
                                       ],
                                     ),
                                   ),

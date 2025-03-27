@@ -6,6 +6,9 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 // ignore: depend_on_referenced_packages
 import 'package:flutter_web_plugins/url_strategy.dart';
+import 'package:oxschool/core/utils/device_information.dart';
+import 'package:oxschool/core/utils/global_options.dart';
+import 'package:oxschool/core/utils/version_updater.dart';
 import 'package:oxschool/data/Models/Logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import "package:window_size/window_size.dart";
@@ -25,9 +28,14 @@ void main() async {
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
     setWindowMinSize(const Size(600, 500));
   }
+  await getAppCurrentVersion();
 
   await FlutterFlowTheme.initialize();
   await dotenv.load(fileName: "lib/core/config/oxschool.env");
+
+  UpdatGlobalOptions.downloadReleaseHeaders = {
+  "Authorization": "Bearer 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",
+};
 
   runApp(const MyApp());
 }
