@@ -1,0 +1,48 @@
+::SCRIPT TO BE USED AS SCRIPT WHEN UPGRADING APP VERSIONS
+
+@echo on
+setlocal
+
+:: Define paths
+set "PROGRAM_NAME=oxschool.exe"
+set "ZIP_PATH=%TEMP%\windows.zip"
+set "EXTRACT_DIR=C:\OxSchool\ERP"
+
+
+:: Change cursor to loading (hourglass)
+powershell -Command "$Host.UI.RawUI.CursorSize = 100"
+
+:: Close the program if it's running
+taskkill /IM %PROGRAM_NAME% /F 2>nul
+::pause
+
+:: Wait a bit to ensure the program is closed
+timeout /t 2 /nobreak >nul
+
+:: Ensure the directory exists
+if not exist "%EXTRACT_DIR%" mkdir "%EXTRACT_DIR%"
+::pause
+
+:: Extract the zip file to the destination folder
+powershell -Command "Expand-Archive -Path '%ZIP_PATH%' -DestinationPath '%EXTRACT_DIR%' -Force"
+::pause
+
+:: Wait a moment to ensure extraction completes
+timeout /t 2 /nobreak >nul
+
+:: Delete the zip file permanently
+del /f /q "%ZIP_PATH%"
+::pause
+
+:: Ensure everything is completed before reopening the program
+timeout /t 1 /nobreak >nul
+::pause
+
+:: Restore the normal cursor
+powershell -Command "$Host.UI.RawUI.CursorSize = 25"
+::pause
+
+:: Start the program from the new location
+start "" "%EXTRACT_DIR%\%PROGRAM_NAME%"
+
+exit

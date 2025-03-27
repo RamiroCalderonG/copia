@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
+import 'package:oxschool/core/constants/version.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 // DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
 final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
@@ -293,3 +295,7 @@ Future getDeviceIP() async {
 
 //   }
 
+Future<void> getAppCurrentVersion()async {
+  PackageInfo packageInfo = await PackageInfo.fromPlatform();
+   current_version  = packageInfo.version;
+}
