@@ -271,7 +271,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
             'email': _model.textController1.text.toLowerCase()
           };
           apiBody.addEntries(employeeNumber.entries);
-          Map<String, dynamic> device = {'device': currentDeviceData};
+          Map<String, dynamic> device = {'device': deviceInformation};
           apiBody.addEntries(device.entries);
           Map<String, dynamic> deviceIp = {'local': deviceIP};
           apiBody.addEntries(deviceIp.entries);
@@ -287,6 +287,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
               devicePrefs.setString(
                   'token', 'Bearer ' + jsonData['token']); //Store token
               // jsonData['token'] = '';
+              devicePrefs.setInt('idSession', jsonData['idSession']);
 
               //GET user data
               apiResponse = await getCurrentUserData(

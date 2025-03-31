@@ -147,7 +147,8 @@ void setUserDataForDebug() {
       1,
       true,
       false,
-      null);
+      null,
+      0000);
   currentUser = user;
   var exampleEvents = [
     {
