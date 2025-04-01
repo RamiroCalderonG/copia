@@ -51,7 +51,6 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
   static const int tapLimit = 4;
   static const int timeLimit = 3 * 60; // 3 minutes in seconds
 
-
   List<int> tapTimestamps = [];
   int remainingTime = 0;
   Timer? timer;
@@ -212,14 +211,11 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
             break;
         }
 
-
-
         currentDeviceData = deviceData.toString();
         SharedPreferences devicePrefs = await SharedPreferences.getInstance();
         devicePrefs.setString('device', currentDeviceData);
         // devicePrefs.setString('ip', deviceIP);
       }
-      
     } on PlatformException {
       deviceData = <String, dynamic>{
         'Error:': 'Failed to get platform version.'
@@ -239,7 +235,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
 
   final versionDisplay = Text(
     'Version: $current_version',
-    style: TextStyle(fontFamily: 'Sora', fontWeight: FontWeight.bold, fontSize: 8), 
+    style:
+        TextStyle(fontFamily: 'Sora', fontWeight: FontWeight.bold, fontSize: 8),
   );
 
   @override
@@ -777,10 +774,9 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                           ],
                                         ),
                                         Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            versionDisplay
-                                          ],
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [versionDisplay],
                                         )
                                       ],
                                     ),
@@ -1171,10 +1167,9 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                                           ],
                                         ),
                                         Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            versionDisplay
-                                          ],
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [versionDisplay],
                                         )
                                       ],
                                     ),

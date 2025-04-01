@@ -23,7 +23,7 @@ class User {
   bool? canUpdatePassword;
   bool? isAcademicCoord;
   Role? userRole;
-  int idLogin;
+  int? idLogin;
 
   // late final notActive;
 
@@ -47,8 +47,7 @@ class User {
       this.canUpdatePassword,
       this.isAcademicCoord,
       this.userRole,
-      this.idLogin
-      );
+      this.idLogin);
 
   Map<dynamic, dynamic> toJson() => {
         "employeeNumber": employeeNumber,

@@ -981,8 +981,8 @@ Future<dynamic> getStudentsGradesComments(
 //!Not using for now
 Future<dynamic> putStudentEvaluationsComments(
     int evaluationId, commentID, bool ValueToUpdate) async {
-      SharedPreferences devicePrefs = await SharedPreferences.getInstance();
-      int? idSesion = devicePrefs.getInt("idSession");
+  SharedPreferences devicePrefs = await SharedPreferences.getInstance();
+  int? idSesion = devicePrefs.getInt("idSession");
 
   try {
     var apiCall = await Requests.patch(
@@ -995,7 +995,7 @@ Future<dynamic> putStudentEvaluationsComments(
         'comment': commentID,
         'evaluation': evaluationId,
         'value': ValueToUpdate,
-        'idSesion' : idSesion
+        'idSesion': idSesion
       },
       persistCookies: false,
     );
@@ -1432,8 +1432,6 @@ Future<dynamic> getLatestAppVersion() async {
     return Future.error(e.toString());
   }
 }
-
-
 
 //!Not using for now
 //Function to get a list of acces items by a role

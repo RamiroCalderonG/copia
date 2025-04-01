@@ -143,7 +143,7 @@ Map<String, dynamic> readWindowsDeviceInfo(WindowsDeviceInfo data) {
     'digitalProductId': data.digitalProductId,
     'displayVersion': data.displayVersion,
     'editionId': data.editionId,
-    'installDate': data.installDate,
+    //'installDate': data.installDate,
     'productId': data.productId,
     'productName': data.productName,
     'registeredOwner': data.registeredOwner,
@@ -292,10 +292,9 @@ Future getDeviceIP() async {
 //       wifiGatewayIP = 'Failed to get Wifi gateway address';
 //     }
 
-
 //   }
 
-Future<void> getAppCurrentVersion()async {
+Future<void> getAppCurrentVersion() async {
   PackageInfo packageInfo = await PackageInfo.fromPlatform();
-   current_version  = packageInfo.version;
+  current_version = packageInfo.version;
 }
