@@ -247,6 +247,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Flexible(child: RefreshButton(onPressed: () async {
+                  studentGradesBodyToUpgrade.clear();
                   if (isUserAdmin || isUserAcademicCoord) {
                     //Calendar month number
                     monthNumber =

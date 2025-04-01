@@ -7,6 +7,7 @@ import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 
 import 'package:oxschool/data/Models/Student_eval.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/datasources/temp/studens_temp.dart';
 import '../../data/services/backend/api_requests/api_calls_list.dart';
@@ -437,15 +438,18 @@ void composeBodyToUpdateGradeBySTudent(
   }
 }
 
-void composeUpdateStudentGradesBody(String key, dynamic value, int idEval) {
+void composeUpdateStudentGradesBody(String key, dynamic value, int idEval) async {
   bool idExists = false;
+   SharedPreferences devicePrefs = await SharedPreferences.getInstance();
+      int? idSesion = devicePrefs.getInt("idSession");
+
 
   if (key == 'Calif') {
     key = 'eval';
   }
 
   if (studentGradesBodyToUpgrade.isEmpty) {
-    studentGradesBodyToUpgrade.add({'idEval': idEval, key: value});
+    studentGradesBodyToUpgrade.add({'idEval': idEval, key: value, 'idSesion' : idSesion});
   } else {
     for (var obj in studentGradesBodyToUpgrade) {
       if (obj['idEval'] == idEval) {
@@ -458,7 +462,7 @@ void composeUpdateStudentGradesBody(String key, dynamic value, int idEval) {
       }
     }
     if (!idExists) {
-      studentGradesBodyToUpgrade.add({'idEval': idEval, key: value});
+      studentGradesBodyToUpgrade.add({'idEval': idEval, key: value, 'idSesion' : idSesion});
     }
   }
 }

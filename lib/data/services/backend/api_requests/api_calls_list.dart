@@ -45,7 +45,6 @@ Future<void> logOutUser(String token, String employee) async {
   var apiCall = await Requests.post(
       '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/auth/logout',
       headers: {
-        //'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
         'Authorization': prefs.getString('token')!,
       },
       json: {'device': device, 'ip': ipAddres, 'employee': employee},
@@ -926,7 +925,7 @@ Future<dynamic> patchStudentsGrades(
           //   "cycle": currentCycle!.claCiclo
           // },
           persistCookies: false,
-          timeoutSeconds: 25,
+          timeoutSeconds: 35,
           json: requestBody);
       apiCall.raiseForStatus();
       return apiCall.statusCode;
@@ -982,6 +981,9 @@ Future<dynamic> getStudentsGradesComments(
 //!Not using for now
 Future<dynamic> putStudentEvaluationsComments(
     int evaluationId, commentID, bool ValueToUpdate) async {
+      SharedPreferences devicePrefs = await SharedPreferences.getInstance();
+      int? idSesion = devicePrefs.getInt("idSession");
+
   try {
     var apiCall = await Requests.patch(
       '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student/comments',
@@ -993,6 +995,7 @@ Future<dynamic> putStudentEvaluationsComments(
         'comment': commentID,
         'evaluation': evaluationId,
         'value': ValueToUpdate,
+        'idSesion' : idSesion
       },
       persistCookies: false,
     );

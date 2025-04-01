@@ -51,6 +51,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
   static const int tapLimit = 4;
   static const int timeLimit = 3 * 60; // 3 minutes in seconds
 
+
   List<int> tapTimestamps = [];
   int remainingTime = 0;
   Timer? timer;
@@ -210,11 +211,15 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
             };
             break;
         }
+
+
+
         currentDeviceData = deviceData.toString();
         SharedPreferences devicePrefs = await SharedPreferences.getInstance();
         devicePrefs.setString('device', currentDeviceData);
         // devicePrefs.setString('ip', deviceIP);
       }
+      
     } on PlatformException {
       deviceData = <String, dynamic>{
         'Error:': 'Failed to get platform version.'
@@ -266,7 +271,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
             'email': _model.textController1.text.toLowerCase()
           };
           apiBody.addEntries(employeeNumber.entries);
-          Map<String, dynamic> device = {'device': currentDeviceData};
+          Map<String, dynamic> device = {'device': deviceInformation};
           apiBody.addEntries(device.entries);
           Map<String, dynamic> deviceIp = {'local': deviceIP};
           apiBody.addEntries(deviceIp.entries);
@@ -282,6 +287,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
               devicePrefs.setString(
                   'token', 'Bearer ' + jsonData['token']); //Store token
               // jsonData['token'] = '';
+              devicePrefs.setInt('idSession', jsonData['idSession']);
 
               //GET user data
               apiResponse = await getCurrentUserData(
