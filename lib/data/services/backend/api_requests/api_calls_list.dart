@@ -909,10 +909,6 @@ Future<dynamic> getSubjectsAndGradeByStuent(
 //Function to update studens grades/evaluations
 Future<dynamic> patchStudentsGrades(
     List<Map<String, dynamic>> requestBody, bool isByStudent) async {
-      SharedPreferences devicePrefs = await SharedPreferences.getInstance();
-      int? idSesion = devicePrefs.getInt("idSession");
-      Map<String, Object?> idLoginMap = {"idSesion" : idSesion};
-      requestBody.add(idLoginMap);
   try {
     SharedPreferences devicePrefs = await SharedPreferences.getInstance();
     if (requestBody.isEmpty) {
@@ -929,7 +925,7 @@ Future<dynamic> patchStudentsGrades(
           //   "cycle": currentCycle!.claCiclo
           // },
           persistCookies: false,
-          timeoutSeconds: 25,
+          timeoutSeconds: 35,
           json: requestBody);
       apiCall.raiseForStatus();
       return apiCall.statusCode;
