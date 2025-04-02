@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:oxschool/presentation/components/custom_icon_button.dart';
 
 class Processes extends StatefulWidget {
   const Processes({super.key});
@@ -35,65 +36,50 @@ class _ProcessesState extends State<Processes> {
     return Stack(children: [
       SizedBox(
         width: MediaQuery.of(context).size.width,
-        child: LayoutBuilder(
+        child: SingleChildScrollView(
+              child: _activeServices(),
+            ),
+        /* LayoutBuilder(
             builder: (BuildContext context, BoxConstraints constraints) {
           if (constraints.maxWidth > 600) {
             return SingleChildScrollView(
-              child: Column(
-                children: [
-                  Row(
-                    children: [_activeServices()],
-                  )
-                ],
-              ),
+              child: _activeServices(),
             );
           } else {
             //TODO: CREATE A VERSION FOR SMALLER SCREENS
             return const Placeholder();
           }
-        }),
+        }), */
       )
     ]);
   }
 
   Widget _activeServices() {
-    return Expanded(
-      child: Column(
+    return Wrap(
+      spacing: 5,
+      children: [
+         Column(
         children: [
-          const Row(
+              Padding(
+                padding: EdgeInsets.only(top: 10, left: 15, right: 15), 
+                child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              SizedBox(
-                height: 10,
-              )
+                  Flexible(child: Padding(padding: EdgeInsets.only(left: 3, right: 3), child: RefreshButton(onPressed: (){}))),
+                  Flexible(child: Padding(padding: EdgeInsets.only(left: 3, right: 3), child: ExportButton(onPressed: () {}))),
+                  Flexible(child: Padding(padding: EdgeInsets.only(left: 3, right: 3), child: PrintButton(onPressed: (){}))),
             ],
-          ),
-          Row(
-            // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              const SizedBox(width: 15),
-              IconButton.outlined(
-                onPressed: () {},
-                icon: const Icon(Icons.refresh),
-              ),
-              const SizedBox(
-                width: 5,
-              ),
-              IconButton.outlined(
-                  onPressed: () {},
-                  icon: const FaIcon(FontAwesomeIcons.fileExcel)),
-              const SizedBox(width: 5),
-              IconButton.outlined(
-                  onPressed: () {}, icon: const Icon(Icons.print))
-            ],
-          ),
+          ),) , 
           const Divider(
             thickness: 1,
           ),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              const SizedBox(width: 30),
               Expanded(
-                child: TextField(
+                child: Padding(padding: EdgeInsets.only(left: 10, right: 10), child: TextField(
                   controller: _dateController,
                   decoration: InputDecoration(
                     labelText: 'Tickets desde',
@@ -123,12 +109,10 @@ class _ProcessesState extends State<Processes> {
                       return DateTime.now();
                     });
                   },
-                ),
+                ),)
               ),
-              const SizedBox(width: 30),
               Expanded(
-                  // flex: 2,
-                  child: DropdownMenu<String>(
+                  child: Padding(padding: EdgeInsets.only(right: 5, left: 5), child: DropdownMenu<String>(
                       initialSelection: serviceListStatus.first,
                       label: const Text('Estatus'),
                       onSelected: (String? value) {
@@ -140,8 +124,8 @@ class _ProcessesState extends State<Processes> {
                           .map<DropdownMenuEntry<String>>((String value) {
                         return DropdownMenuEntry<String>(
                             value: value, label: value);
-                      }).toList())),
-              // SizedBox(width: 30),
+                      }).toList()))
+                  ),
               const Text(
                 'Tipo de servicio:',
                 style:
@@ -252,6 +236,8 @@ class _ProcessesState extends State<Processes> {
           })
         ],
       ),
+ 
+      ],
     );
-  }
+     }
 }

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class CustomIconButton extends StatelessWidget {
   final VoidCallback onPressed;
@@ -95,6 +96,36 @@ class RefreshButton extends StatelessWidget {
       onPressed: onPressed,
       icon: const Icon(Icons.refresh),
       tooltip: 'Actualizar',
+    );
+  }
+}
+
+class PrintButton extends StatelessWidget{
+  final VoidCallback onPressed;
+
+  const PrintButton({super.key, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomIconButton(
+      onPressed: onPressed,
+      icon: const Icon(Icons.print),
+      tooltip: 'Imprimir',
+    );
+  }
+}
+
+class ExportButton extends StatelessWidget{
+  final VoidCallback onPressed;
+
+  const ExportButton({super.key, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomIconButton(
+      onPressed: onPressed,
+      icon: const Icon(Icons.file_download),
+      tooltip: 'Exportar',
     );
   }
 }
