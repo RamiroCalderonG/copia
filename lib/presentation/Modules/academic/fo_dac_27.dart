@@ -170,6 +170,7 @@ class _FoDac27State extends State<FoDac27> {
               child: Column(
                 children: [
                   RefreshButton(onPressed: () {
+                    studentGradesBodyToUpgrade.clear();
                     setState(() {
                       isLoading = true;
                     });
