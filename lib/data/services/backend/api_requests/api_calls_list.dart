@@ -1433,6 +1433,29 @@ Future<dynamic> getLatestAppVersion() async {
   }
 }
 
+Future<dynamic> getAllServiceTickets(String toFetch) async {
+  String startDate = toFetch.replaceAll('-', '');
+  try {
+     SharedPreferences devicePrefs = await SharedPreferences.getInstance();
+    var apiCall = await Requests.get(
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/services/all',
+      headers: {
+          'Authorization': devicePrefs.getString('token')!,
+          'Content-Type': 'application/json',
+        },
+        queryParameters: {
+          'toFetch': startDate.toString(),
+        },
+        persistCookies: false,
+        timeoutSeconds: 20
+    );
+    apiCall.raiseForStatus();
+    return apiCall;
+  } catch (e) {
+    insertErrorLog(e.toString(), 'getAllServiceTickets $toFetch');
+    return Future.error(e.toString());
+  }
+}
 //!Not using for now
 //Function to get a list of acces items by a role
 /* Future<http.Response> getUserRoleAndAcces(int roleId) async {

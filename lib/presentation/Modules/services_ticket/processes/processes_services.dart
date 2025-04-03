@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:oxschool/core/reusable_methods/logger_actions.dart';
+import 'package:oxschool/core/reusable_methods/services_functions.dart';
+import 'package:oxschool/core/utils/loader_indicator.dart';
 import 'package:oxschool/presentation/components/custom_icon_button.dart';
+import 'package:pluto_grid/pluto_grid.dart';
 
 class Processes extends StatefulWidget {
   const Processes({super.key});
@@ -10,7 +14,7 @@ class Processes extends StatefulWidget {
   State<Processes> createState() => _ProcessesState();
 }
 
-final _dateController = TextEditingController();
+
 
 const List<String> serviceListStatus = <String>[
   'Todos',
@@ -28,8 +32,22 @@ enum SingingCharacter { madeBySomeOneElse, madeByMe }
 
 class _ProcessesState extends State<Processes> {
   SingingCharacter? _character = SingingCharacter.madeBySomeOneElse;
+  List<PlutoRow> servicesGridRows = <PlutoRow>[];
+  bool isLoading = false;
+  final _dateController = TextEditingController();
 
   int selectedOption = 1;
+
+  @override
+  void initState(){
+    super.initState();
+  }
+
+  @override
+  void dispose(){
+    //_dateController.dispose();
+    super.dispose;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,20 +57,51 @@ class _ProcessesState extends State<Processes> {
         child: SingleChildScrollView(
               child: _activeServices(),
             ),
-        /* LayoutBuilder(
-            builder: (BuildContext context, BoxConstraints constraints) {
-          if (constraints.maxWidth > 600) {
-            return SingleChildScrollView(
-              child: _activeServices(),
-            );
-          } else {
-            //TODO: CREATE A VERSION FOR SMALLER SCREENS
-            return const Placeholder();
-          }
-        }), */
       )
     ]);
   }
+
+  final List<PlutoColumn> ticketServicesColumns = <PlutoColumn>[
+    PlutoColumn(title: 'Id', field: 'id', type: PlutoColumnType.number(), readOnly: true, enableRowChecked: true),
+    PlutoColumn(title: 'Reportado por', field: 'reportedBy', type: PlutoColumnType.text(), readOnly: true),
+    PlutoColumn(title: 'Departamento que solicita', field: 'departmentWhoRequest', type: PlutoColumnType.text(), readOnly: true),
+    PlutoColumn(title: 'Capturado por', field: 'capturedBy', type: PlutoColumnType.text(), readOnly: true),
+    PlutoColumn(title: 'Departamento al que se solicita', field: 'depRequestIsMadeTo', type: PlutoColumnType.text(), readOnly: true),
+    PlutoColumn(title: 'Asignado a ', field: 'assignedTo', type: PlutoColumnType.text(), hide: true),
+    PlutoColumn(title: 'Campus', field: 'campus', type: PlutoColumnType.text(), readOnly: true),
+    PlutoColumn(title: 'Fecha de elaboración', field: 'requestCreationDate', type: PlutoColumnType.date(format: 'yyy-MM-dd'), readOnly: true),
+    PlutoColumn(title: 'Fecha para cuando se solicita', field: 'requesDate', type: PlutoColumnType.date(format: 'yyy-MM-dd'), readOnly: true),
+    PlutoColumn(title: 'Fecha compromiso', field: 'deadline', type: PlutoColumnType.date(format: 'yyy-MM-dd'), readOnly: true),
+    PlutoColumn(title: 'Fecha de término', field: 'closureDate', type: PlutoColumnType.date(format: 'yyy-MM-dd'), readOnly: true),
+    PlutoColumn(title: 'Descripción', field: 'description', type: PlutoColumnType.text(), readOnly: true),
+    PlutoColumn(title: 'Observaciones', field: 'observations', type: PlutoColumnType.text(), readOnly: true),
+    PlutoColumn(title: 'Estatus', field: 'status', type: PlutoColumnType.number(), readOnly: true, hide: true)
+  ]; 
+
+  handleRefresh() async{
+    setState(() {
+      isLoading = true;
+      servicesGridRows.clear();
+    });
+    try {
+      await getServiceTicketsByDate(_dateController.text).then((value){
+        setState(() {
+          servicesGridRows = value!;
+          isLoading = false;
+    });
+        }).onError((stacktrace, error){
+          setState(() {
+            isLoading = false;
+          });
+          insertActionIntoLog(error.toString(), 'getServiceTicketsByDate');
+        });
+    } catch (e) {
+      insertActionIntoLog(e.toString(), 'getServiceTicketsByDate');
+      throw Future.error(e.toString());
+    }
+  }
+
+
 
   Widget _activeServices() {
     return Wrap(
@@ -63,10 +112,10 @@ class _ProcessesState extends State<Processes> {
               Padding(
                 padding: EdgeInsets.only(top: 10, left: 15, right: 15), 
                 child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-                  Flexible(child: Padding(padding: EdgeInsets.only(left: 3, right: 3), child: RefreshButton(onPressed: (){}))),
+                  Flexible(child: Padding(padding: EdgeInsets.only(left: 3, right: 3), child: RefreshButton(onPressed: (){handleRefresh();}))),
                   Flexible(child: Padding(padding: EdgeInsets.only(left: 3, right: 3), child: ExportButton(onPressed: () {}))),
                   Flexible(child: Padding(padding: EdgeInsets.only(left: 3, right: 3), child: PrintButton(onPressed: (){}))),
             ],
@@ -82,6 +131,7 @@ class _ProcessesState extends State<Processes> {
                 child: Padding(padding: EdgeInsets.only(left: 10, right: 10), child: TextField(
                   controller: _dateController,
                   decoration: InputDecoration(
+                    //helper: Text('Tickets desde'),
                     labelText: 'Tickets desde',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10.0),
@@ -172,66 +222,34 @@ class _ProcessesState extends State<Processes> {
               )),
             ],
           ),
-          const SizedBox(
-            height: 30,
-          ),
-          const Align(
-            alignment: Alignment.bottomLeft,
-            child: Text('  Servicios',
-                style: TextStyle(fontFamily: 'Sora', fontSize: 18)),
-          ),
-          const Divider(
+          Padding(padding: const EdgeInsets.only(top: 15, bottom: 15), child:const Divider(
             thickness: 1,
-          ),
-          LayoutBuilder(
+          ) ,),
+                LayoutBuilder(
               builder: (BuildContext context, BoxConstraints constraints) {
-            return SizedBox(
+                if (isLoading) {
+                  return const Center(
+                    child: CustomLoadingIndicator(),
+                  );
+                } 
+            return 
+            SizedBox(
               height: constraints.maxWidth,
               width: constraints.maxWidth,
-              child: Table(
-                border: TableBorder.all(),
-                children: const [
-                  TableRow(
-                    children: [
-                      TableCell(
-                        child: Center(child: Text('Cell 1')),
-                      ),
-                      TableCell(
-                        child: Center(child: Text('Cell 2')),
-                      ),
-                      TableCell(
-                        child: Center(child: Text('Cell 3')),
-                      ),
-                    ],
-                  ),
-                  TableRow(
-                    children: [
-                      TableCell(
-                        child: Center(child: Text('Cell 4')),
-                      ),
-                      TableCell(
-                        child: Center(child: Text('Cell 5')),
-                      ),
-                      TableCell(
-                        child: Center(child: Text('Cell 6')),
-                      ),
-                    ],
-                  ),
-                  TableRow(
-                    children: [
-                      TableCell(
-                        child: Center(child: Text('Cell 7')),
-                      ),
-                      TableCell(
-                        child: Center(child: Text('Cell 8')),
-                      ),
-                      TableCell(
-                        child: Center(child: Text('Cell 9')),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+              child: PlutoGrid(
+                columns: ticketServicesColumns, 
+                rows: servicesGridRows,
+                rowColorCallback: (rowColorContext) {
+                  final statusValue = rowColorContext.row.cells['status']?.value;
+                  if (statusValue == 2) {
+                    return Colors.lightBlue.shade50;
+                  }
+                  else if (statusValue == 3){
+                    return Colors.lightGreen.shade50;
+                  }
+                  return Colors.transparent;
+                  }
+                )
             );
           })
         ],
