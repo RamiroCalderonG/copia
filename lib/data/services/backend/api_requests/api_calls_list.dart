@@ -1433,21 +1433,24 @@ Future<dynamic> getLatestAppVersion() async {
   }
 }
 
-Future<dynamic> getAllServiceTickets(String toFetch) async {
+Future<dynamic> getAllServiceTickets(String toFetch, int statusVal, int byWho) async {
   String startDate = toFetch.replaceAll('-', '');
   try {
      SharedPreferences devicePrefs = await SharedPreferences.getInstance();
     var apiCall = await Requests.get(
-      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/services/all',
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/services/ticket/',
       headers: {
           'Authorization': devicePrefs.getString('token')!,
           'Content-Type': 'application/json',
         },
         queryParameters: {
           'toFetch': startDate.toString(),
+          'from' : currentUser!.idLogin,
+          'status' : statusVal,
+          'flag' : byWho
         },
-        persistCookies: false,
-        timeoutSeconds: 20
+        persistCookies: true,
+        timeoutSeconds: 35
     );
     apiCall.raiseForStatus();
     return apiCall;

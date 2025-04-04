@@ -33,6 +33,13 @@ class _ServicesTicketHistoryState extends State<ServicesTicketHistory>
   }
 
   @override
+  void dispose(){
+    _tabController.dispose();
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     // final servicesDetail = Stack(
     //   children: [
