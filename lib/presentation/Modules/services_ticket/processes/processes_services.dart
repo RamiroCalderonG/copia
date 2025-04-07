@@ -37,10 +37,10 @@ const Map<String, int> serviceListStatusMap = <String, int>{
 };
 String? serviceStatusSelected;
 
-enum SingingCharacter { madeBySomeOneElse, madeByMe }
+enum SingingCharacter { iWasReported, madeByMe }
 
 class _ProcessesState extends State<Processes> {
-  SingingCharacter? _character = SingingCharacter.madeBySomeOneElse;
+  SingingCharacter? _character = SingingCharacter.iWasReported;
   List<PlutoRow> servicesGridRows = <PlutoRow>[];
   bool isLoading = false;
   bool displayError = false;
@@ -187,9 +187,9 @@ class _ProcessesState extends State<Processes> {
       serviceStatusSelected ??= serviceListStatus.first;
       final int? status = serviceListStatusMap[serviceStatusSelected];
 
-      int byWho = _character == SingingCharacter.madeBySomeOneElse
-          ? 1
-          : 2;
+      int byWho = _character == SingingCharacter.madeByMe
+          ? 1 //I Made
+          : 2; // I Was Reported
 
 
       await getServiceTicketsByDate(_dateController.text, status!, byWho).then((value) {
@@ -266,6 +266,7 @@ class _ProcessesState extends State<Processes> {
                       // ignore: unused_local_variable
                       DateTime? pickedDate = await showDatePicker(
                               context: context,
+                              helpText: 'MM-DD-AAAA',
                               initialDate: DateTime.now(),
                               firstDate: DateTime(2000),
                               lastDate: DateTime(2101))
@@ -313,7 +314,7 @@ class _ProcessesState extends State<Processes> {
                   child: ListTile(
                       title: const Text('Que me reportaron'),
                       leading: Radio<SingingCharacter>(
-                        value: SingingCharacter.madeBySomeOneElse,
+                        value: SingingCharacter.iWasReported,
                         groupValue: _character,
                         onChanged: (SingingCharacter? value) {
                           setState(() {
@@ -395,7 +396,12 @@ class _ProcessesState extends State<Processes> {
           showDialog(
             context : context,
             builder: (BuildContext context){
-              return AlertDialog(
+              return Material(
+                type: MaterialType.transparency,
+                child: TicketDetail(ticketId: ticketNumber, observations: observations, description: description),
+              );
+              
+              /* AlertDialog(
                 title: Text('Detalle del ticket: ${ticketNumber.toString()} '),
                 content: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -407,6 +413,10 @@ class _ProcessesState extends State<Processes> {
                     Text('Descripción: $description'),
                     const SizedBox(height: 10,),
                     Text('Observaciones: $observations'),
+                    Divider(
+                      thickness: 2,
+                    )
+                    
                   ],
                 ),
                 actions: [
@@ -414,11 +424,77 @@ class _ProcessesState extends State<Processes> {
                     Navigator.of(context).pop();
                   }, child: const Text('Close'))
                 ],
-              );
+              ); */
             }
           );
         }
       },
+    /*   onRowSecondaryTap: (event) {
+    if (event.row != null) {
+      final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+      showMenu(
+        context: context,
+        position: RelativeRect.fromRect(
+          event.offset & const Size(40, 40), // Position of the tap
+          Offset.zero & overlay.size, // Size of the screen
+        ),
+        items: [
+          PopupMenuItem(
+            value: 'enable_disable',
+            child: const Text('Asignar'),
+          ),
+          PopupMenuItem(
+            value: 'assignate',
+            child: const Text('Assignate'),
+          ),
+          PopupMenuItem(
+            value: 'information',
+            child: const Text('Information'),
+          ),
+        ],
+      ).then((value) {
+        if (value == 'enable_disable') {
+          // Handle Enable/Disable action
+          final ticketId = event.row!.cells['id']?.value ?? 'Unknown';
+          print('Enable/Disable selected for ticket: $ticketId');
+        } else if (value == 'assignate') {
+          // Handle Assignate action
+          final ticketId = event.row!.cells['id']?.value ?? 'Unknown';
+          print('Assignate selected for ticket: $ticketId');
+        } else if (value == 'information') {
+          // Handle Information action
+          final description = event.row!.cells['description']?.value ?? 'Sin descripción';
+          final observations = event.row!.cells['observations']?.value ?? 'Sin observaciones';
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text('Information'),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Descripción: $description'),
+                    const SizedBox(height: 10),
+                    Text('Observaciones: $observations'),
+                  ],
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('Close'),
+                  ),
+                ],
+              );
+            },
+          );
+        }
+      });
+    }
+  }, */
+      
     ),
   ),
 ),
@@ -455,3 +531,523 @@ class _ProcessesState extends State<Processes> {
         );
   }
 }
+
+
+class TicketDetail extends StatefulWidget {
+  const TicketDetail({super.key, required this.ticketId, 
+  required this.description, required this.observations, this.deadLine});
+  final int ticketId;
+  final String description;
+  final String observations;
+  final String? deadLine;
+  
+
+  @override
+  State<TicketDetail> createState() => _ScreenState();
+}
+class _ScreenState extends State<TicketDetail> {
+  static const List<String> list = <String>[
+    'Asignar',
+    'Cerrar',
+    'Cancelar',
+    'Reabrir',
+    'Evaluar',
+  ];
+
+  final TextEditingController _dateController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _observationsController = TextEditingController();
+  
+  String selectedValue = list.first;
+
+
+  @override
+  void initState() {
+    super.initState();
+    _dateController.text = widget.deadLine ?? 'Sin fecha compromiso';
+    _descriptionController.text = widget.description;
+    _observationsController.text = widget.observations;
+  }
+
+  @override
+Widget build(BuildContext context) {
+  return Padding(
+    padding: const EdgeInsets.only(left: 50, right: 50, bottom: 50, top: 50),
+    child: Container(
+      decoration: BoxDecoration(
+        color: Colors.grey.shade300,
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: Column(
+        children: [
+          // Header Section
+          Padding(
+            padding: const EdgeInsets.only(top: 0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade400,
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(30),
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                          left: 50, right: 20, top: 8, bottom: 8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Ticket de servicio',
+                            style: TextStyle(
+                              fontFamily: 'Sora',
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontStyle: FontStyle.italic,
+                              fontSize: 26,
+                            ),
+                          ),
+                          IconButton.outlined(
+                            onPressed: () {},
+                            icon: const Icon(Icons.print, color: Colors.white),
+                            iconSize: 20,
+                            style: OutlinedButton.styleFrom(
+                              shape: const CircleBorder(),
+                              side: const BorderSide(
+                                color: Colors.white,
+                                width: 0.5,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Ticket ID Section
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Text(
+                  'Ticket  #${widget.ticketId}.',
+                  style: const TextStyle(
+                    fontFamily: 'Sora',
+                    fontWeight: FontWeight.bold,
+                    fontSize: 30,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Divider
+          const Divider(
+            thickness: 1,
+            color: Colors.black,
+          ),
+
+          // Scrollable Content Section
+          Expanded(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.only(left: 20, right: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade400,
+                      border: Border.all(color: Colors.black)
+                    ),
+                    child: Text('Descripción', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+                  ),
+                      )
+                    ],
+                  ),
+                  
+                    TextField(
+                      controller: _descriptionController,
+                      readOnly: true,
+                      maxLines: 3,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // Observaciones Section
+                    Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade400,
+                      border: Border.all(color: Colors.black)
+                    ),
+                    child: Text('Observaciones', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+                  ),
+                      )
+                    ],
+                  ),
+                    TextField(
+                      controller: _observationsController,
+                      readOnly: true,
+                      maxLines: 3,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // Dropdown and Date Picker Section
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Expanded(
+                          child: DropdownButton<String>(
+                            hint: const Text('Reasignar'),
+                            value: selectedValue,
+                            icon: const Icon(Icons.arrow_drop_down),
+                            elevation: 16,
+                            style: const TextStyle(color: Colors.deepPurple),
+                            underline: Container(
+                              height: 2,
+                              color: Colors.deepPurpleAccent,
+                            ),
+                            onChanged: (String? value) {
+                              setState(() {
+                                selectedValue = value!;
+                              });
+                            },
+                            items: list.map<DropdownMenuItem<String>>(
+                                (String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                        const SizedBox(width: 20),
+                        Expanded(
+                          child: TextField(
+                            controller: _dateController,
+                            decoration: InputDecoration(
+                              labelText: 'Fecha Compromiso',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                                borderSide: const BorderSide(
+                                  color: Colors.grey,
+                                  width: 1.0,
+                                ),
+                              ),
+                              filled: true,
+                              fillColor: Colors.transparent,
+                            ),
+                            readOnly: true,
+                            onTap: () async {
+                              DateTime? pickedDate = await showDatePicker(
+                                context: context,
+                                helpText: 'MM-DD-AAAA',
+                                initialDate: DateTime.now(),
+                                firstDate: DateTime(2000),
+                                lastDate: DateTime(2101),
+                              );
+                              if (pickedDate != null) {
+                                setState(() {
+                                  _dateController.text = DateFormat('yyyy-MM-dd')
+                                      .format(pickedDate);
+                                });
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SaveItemButton(onPressed: (){})
+                      ],
+                    )
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+ /*  @override
+  Widget build(BuildContext context) {
+    return  Padding(
+      padding: EdgeInsets.only(left: 50, right: 50, bottom: 50, top: 50), 
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.grey.shade300,
+          borderRadius: BorderRadius.circular(30)
+        ),
+        child: Wrap(
+        spacing: 10,
+        children: [
+          Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top:0), 
+              child:  Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment:  MainAxisAlignment.start,
+            children: [
+              Expanded(child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.red.shade400,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+                ),
+                child: Padding(padding: const EdgeInsets.only(left: 50, right: 20, top: 8, bottom: 8), 
+                child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Ticket de servicio',
+                style: TextStyle(
+                  fontFamily: 'Sora',
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontStyle: FontStyle.italic,
+                  fontSize: 26,
+                ),
+              ),
+              IconButton.outlined(
+                  onPressed: (){}, 
+                  icon: Icon(Icons.print, color: Colors.white),
+                  iconSize: 20,
+                  style: OutlinedButton.styleFrom(
+                    shape: const CircleBorder(
+                      
+                    ),
+                    side: const BorderSide(
+                      color: Colors.white,
+                      width: 0.5,
+                    ),)
+                  ),
+              ],
+                )
+                ,),
+              ) ),
+            ],
+          )
+          ,),
+          Padding(padding: const EdgeInsets.all(20),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+               Text(
+                'Ticket  #${widget.ticketId}.',
+                style: TextStyle(
+                  fontFamily: 'Sora',
+                  fontWeight: FontWeight.bold,
+                  fontSize: 30,
+                ),
+              ),
+            ],
+          ),
+          ),
+          Divider(
+            thickness: 1,
+            color: Colors.black,
+          ),
+          Padding(padding: const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 1), 
+          child:Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade400,
+                      border: Border.all(color: Colors.black)
+                    ),
+                    child: Text('Descripción', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+                  ),
+                      )
+                    ],
+                  ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 20, right: 20, top: 0),
+            child: Row(
+                    children: [
+                      Expanded(
+                        child: 
+                        TextField(
+                          controller: _descriptionController,
+                          readOnly: true,
+                          maxLines: 3,
+                        ),
+                      )
+                    ],
+                  ),
+          ),
+          Padding(padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 1), 
+          child:Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade400,
+                      border: Border.all(color: Colors.black)
+                    ),
+                    child: Text('Observaciones', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+                  ),
+                      )
+                    ],
+                  ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 20, right: 20, top: 0),
+            child: Row(
+                    children: [
+                      Expanded(
+                        child: 
+                        TextField(
+                          controller: _observationsController,
+                          readOnly: true,
+                          maxLines: 3,
+                        )
+                      ,)
+                    ],
+                  ),
+          ),
+
+          Padding(padding: const EdgeInsets.only(left: 20, right: 20, top: 40),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: DropdownButton(
+
+                  hint: Text('Reasignar'),
+                  value: selectedValue,
+                  icon: const Icon(Icons.arrow_drop_down),
+                  elevation: 16,
+                  style: const TextStyle(color: Colors.deepPurple),
+                  underline: Container(
+                    height: 2,color: Colors.deepPurpleAccent,
+                  ),
+                  onChanged: (String? value){
+                    setState(() {
+                      selectedValue = value!;
+                    });
+                  },
+                  items: list.map<DropdownMenuItem<String>>((String value){
+                    return DropdownMenuItem<String>(value: value, child: Text(value));
+                  }).toList(), )),
+                  SizedBox(
+                    width: 20,
+                  ),
+                  Expanded(
+                    child: TextField(
+                    controller: _dateController,
+                    decoration: InputDecoration(
+                      //helper: Text('Tickets desde'),
+                      labelText: 'Fecha Compromiso',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                        borderSide:
+                            const BorderSide(color: Colors.grey, width: 1.0),
+                      ),
+                      filled: true,
+                      fillColor: Colors.transparent,
+                    ),
+                    readOnly: true,
+                    onTap: () async {
+                      // ignore: unused_local_variable
+                      DateTime? pickedDate = await showDatePicker(
+                              context: context,
+                              helpText: 'MM-DD-AAAA',
+                              initialDate: DateTime.now(),
+                              firstDate: DateTime(2000),
+                              lastDate: DateTime(2101))
+                          .then((pickedDate) {
+                        if (pickedDate != null) {
+                          setState(() {
+                            _dateController.text =
+                                DateFormat('yyyy-MM-dd').format(pickedDate);
+                          });
+                        }
+                        return DateTime.now();
+                      });
+                    },
+                  ),
+                  ),
+                  //SizedBox(
+                  //  width: 10,
+                 // ),
+                  /*Padding(
+                  padding: const EdgeInsets.only(left: 20, right: 20, top: 40),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: SaveItemButton(onPressed: (){}),
+                      ),
+                    ],
+                  ),
+                 ) */
+            ],
+          ),
+          )
+
+
+
+
+        
+          
+
+             
+            ],
+          )
+          
+          
+        ],
+
+    ),
+
+      ));  
+        
+  }
+ */
+
+}
+
