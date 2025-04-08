@@ -144,3 +144,19 @@ class CancelActionButton extends StatelessWidget {
     );
   }
 }
+
+class ShowHistoryButton extends StatelessWidget {
+  final VoidCallback onPressed;
+
+  const ShowHistoryButton({super.key, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomIconButton(
+      onPressed: onPressed,
+      icon: const Icon(Icons.history),
+      tooltip: 'Historial',
+    );
+  }
+  
+}
