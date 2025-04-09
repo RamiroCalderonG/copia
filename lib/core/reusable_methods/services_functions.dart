@@ -147,6 +147,60 @@ void refreshTicketsCuantity() {
   }
 }
 
-List<Map<String, dynamic>> getRequestTicketHistory(int ticketId) async {
+Future<List<Map<String, dynamic>>> getRequestTicketHistory(int ticketId) async {
+try {
+  var response = await getRequestticketHistory(ticketId);
+  if (response.statusCode == 200) {
+    List<Map<String, dynamic>> history = [];
+    var decodedResponse = json.decode(utf8.decode(response.bodyBytes));
+    for (var item in decodedResponse) {
+      history.add(item);
+    }
+    return history;
+  } else {
+    return [];
+  }
+} catch (e) {
+  insertErrorLog(e.toString(), 'getRequestTicketHistory($ticketId)');
+  throw Future.error(e.toString());
+}
+}
 
+Future<dynamic> getUsersList() async {
+  try {
+    var response = await getUsersForTicket();
+    if (response.statusCode == 200) {
+      List<Map<String, dynamic>> usersList = [];
+      var decodedResponse = json.decode(utf8.decode(response.bodyBytes));
+      for (var item in decodedResponse) {
+        usersList.add(item);
+      }
+      return usersList;
+    } else {
+      return [];
+    }
+  } catch (e) {
+    insertErrorLog(e.toString(), 'getUsersList()');
+    throw Future.error(e.toString());
+  }
+}
+
+Future<dynamic> getDepartments() async {
+  try {
+    var response = await getWorkDepartments();
+    if (response.statusCode == 200) {
+      Map<int, dynamic> deptsMap = {};
+      var decoded = json.decode(utf8.decode(response.bodyBytes));
+    for (var element in decoded) {
+      deptsMap.addAll({element['id'] : element['bureauName']});
+    }
+    return deptsMap;
+    } else {
+      throw Future.error(response.body.toString());
+    }
+    
+  } catch (e) {
+    insertErrorLog(e.toString(), 'getDepartments()');
+    throw Future.error(e.toString());
+  }
 }

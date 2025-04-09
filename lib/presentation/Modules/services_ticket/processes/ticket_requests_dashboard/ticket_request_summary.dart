@@ -7,8 +7,9 @@ import 'package:oxschool/presentation/Modules/services_ticket/processes/ticket_r
 import 'package:oxschool/presentation/components/custom_icon_button.dart';
 
 class TicketRequestSummary extends StatefulWidget {
-  const TicketRequestSummary({Key? key, required this.isSelectedRequestsIMade}) : super(key: key);
-final bool isSelectedRequestsIMade;
+  const TicketRequestSummary({Key? key, required this.isSelectedRequestsIMade})
+      : super(key: key);
+  final bool isSelectedRequestsIMade;
 
   @override
   _TicketRequestSummaryState createState() => _TicketRequestSummaryState();
@@ -43,79 +44,6 @@ class _TicketRequestSummaryState extends State<TicketRequestSummary>
 
   @override
   Widget build(BuildContext context) {
-    final summary = Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Expanded(
-          child: Column(
-            children: [
-              Text(unassigned.toString(),
-                  style: Theme.of(context).textTheme.headlineMedium),
-              const Text('Sin asignar'),
-            ],
-          ),
-        ),
-        Container(
-          height: 50,
-          child: const VerticalDivider(
-            thickness: 1,
-            width: 2,
-            color: Color.fromARGB(255, 0, 0, 0),
-            indent: 10,
-            endIndent: 10,
-          ),
-        ),
-        Expanded(
-          child: Column(
-            children: [
-              Text(assigned.toString(),
-                  style: Theme.of(context).textTheme.headlineMedium),
-              const Text('Asignados'),
-            ],
-          ),
-        ),
-        Container(
-          height: 50,
-          child: const VerticalDivider(
-            thickness: 1,
-            width: 2,
-            color: Color.fromARGB(255, 0, 0, 0),
-            indent: 10,
-            endIndent: 10,
-          ),
-        ),
-        Expanded(
-          child: Column(
-            children: [
-              Text(onProgress.toString(),
-                  style: Theme.of(context).textTheme.headlineMedium),
-              const Text('En proceso'),
-            ],
-          ),
-        ),
-        Container(
-          height: 50,
-          child: const VerticalDivider(
-            thickness: 1,
-            width: 2,
-            color: Color.fromARGB(255, 0, 0, 0),
-            indent: 10,
-            endIndent: 10,
-          ),
-        ),
-        Expanded(
-          child: Column(
-            children: [
-              Text(overdue.toString(),
-                  style: Theme.of(context).textTheme.headlineMedium),
-              const Text('Vencidos'),
-            ],
-          ),
-        ),
-      ],
-    );
-
     final TabBar tabBar = TabBar(
       controller: _tabController,
       indicatorColor: const Color.fromARGB(255, 254, 0, 0),
@@ -162,40 +90,52 @@ class _TicketRequestSummaryState extends State<TicketRequestSummary>
           ? ListView.builder(
               itemCount: unassignedTickets.length,
               itemBuilder: (context, index) {
-                return Padding(padding: const EdgeInsets.all(12),
-                child: Card(
-                  color: FlutterFlowTheme.of(context).primaryBackground,
-                  shadowColor: FlutterFlowTheme.of(context).primaryText,
-                  child: ListTile(
-                    leading: IconButton(
-                      icon: Icon(Icons.check_circle_outline, color: Colors.blue),
-                      onPressed: () {
-                        showDialog(
-            context : context,
-            builder: (BuildContext context){
-              return Material(
-                type: MaterialType.transparency,
-                child: TicketDetail(
-                  ticketId: unassignedTickets[index].idReqServ, 
-                  observations: unassignedTickets[index].observations, 
-                  description: unassignedTickets[index].description,
-                  deadLine: unassignedTickets[index].deadLine,
-                  requestDate: unassignedTickets[index].serviceRequestDate,
-                  closureDate: unassignedTickets[index].closureDate,
-                  creationDate: unassignedTickets[index].serviceCreationDate,
-                  assignedTo: unassignedTickets[index].assignedTo,
-                  reportedBy: unassignedTickets[index].reportedBy,
-                  isSelectedRequestsIMade: widget.isSelectedRequestsIMade,
-                  ),
-              );
-            }
-          );
-                      },
+                return Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Card(
+                    color: FlutterFlowTheme.of(context).primaryBackground,
+                    shadowColor: FlutterFlowTheme.of(context).primaryText,
+                    child: ListTile(
+                      leading: IconButton(
+                        icon: Icon(Icons.check_circle_outline,
+                            color: Colors.blue),
+                        onPressed: () {
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return Material(
+                                  type: MaterialType.transparency,
+                                  child: TicketDetail(
+                                    ticketId:
+                                        unassignedTickets[index].idReqServ,
+                                    observations:
+                                        unassignedTickets[index].observations,
+                                    description:
+                                        unassignedTickets[index].description,
+                                    deadLine: unassignedTickets[index].deadLine,
+                                    requestDate: unassignedTickets[index]
+                                        .serviceRequestDate,
+                                    closureDate:
+                                        unassignedTickets[index].closureDate,
+                                    creationDate: unassignedTickets[index]
+                                        .serviceCreationDate,
+                                    assignedTo:
+                                        unassignedTickets[index].assignedTo,
+                                    reportedBy:
+                                        unassignedTickets[index].reportedBy,
+                                    isSelectedRequestsIMade:
+                                        widget.isSelectedRequestsIMade,
+                                  ),
+                                );
+                              });
+                        },
+                      ),
+                      title: Text(
+                          '${unassignedTickets[index].idReqServ.toString()} : ${unassignedTickets[index].description}'),
+                      subtitle: Text(
+                          ' * Observaciones: ${unassignedTickets[index].observations}'),
                     ),
-                    title: Text('${unassignedTickets[index].idReqServ.toString()} : ${unassignedTickets[index].description}'),
-                    subtitle: Text(' * Observaciones: ${unassignedTickets[index].observations}'),
                   ),
-                ),
                 );
               },
             )
@@ -204,40 +144,51 @@ class _TicketRequestSummaryState extends State<TicketRequestSummary>
           ? ListView.builder(
               itemCount: assignedTickets.length,
               itemBuilder: (context, index) {
-                return Padding(padding: const EdgeInsets.all(12),
-                child: Card(
-                  color: FlutterFlowTheme.of(context).primaryBackground,
-                  shadowColor: FlutterFlowTheme.of(context).primaryText,
-                  child: ListTile(
-                    leading: IconButton(
-                      icon: Icon(Icons.check_circle_outline, color: Colors.blue),
-                      onPressed: () {
-                        showDialog(
-            context : context,
-            builder: (BuildContext context){
-              return Material(
-                type: MaterialType.transparency,
-                child: TicketDetail(
-                  ticketId: assignedTickets[index].idReqServ, 
-                  observations: assignedTickets[index].observations, 
-                  description: assignedTickets[index].description,
-                  deadLine: assignedTickets[index].deadLine,
-                  requestDate: assignedTickets[index].serviceRequestDate,
-                  closureDate: assignedTickets[index].closureDate,
-                  creationDate: assignedTickets[index].serviceCreationDate,
-                  assignedTo: assignedTickets[index].assignedTo,
-                  reportedBy: assignedTickets[index].reportedBy,
-                  isSelectedRequestsIMade: widget.isSelectedRequestsIMade,
-                  ),
-              );
-            }
-          );
-                      },
+                return Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Card(
+                    color: FlutterFlowTheme.of(context).primaryBackground,
+                    shadowColor: FlutterFlowTheme.of(context).primaryText,
+                    child: ListTile(
+                      leading: IconButton(
+                        icon: Icon(Icons.check_circle_outline,
+                            color: Colors.blue),
+                        onPressed: () {
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return Material(
+                                  type: MaterialType.transparency,
+                                  child: TicketDetail(
+                                    ticketId: assignedTickets[index].idReqServ,
+                                    observations:
+                                        assignedTickets[index].observations,
+                                    description:
+                                        assignedTickets[index].description,
+                                    deadLine: assignedTickets[index].deadLine,
+                                    requestDate: assignedTickets[index]
+                                        .serviceRequestDate,
+                                    closureDate:
+                                        assignedTickets[index].closureDate,
+                                    creationDate: assignedTickets[index]
+                                        .serviceCreationDate,
+                                    assignedTo:
+                                        assignedTickets[index].assignedTo,
+                                    reportedBy:
+                                        assignedTickets[index].reportedBy,
+                                    isSelectedRequestsIMade:
+                                        widget.isSelectedRequestsIMade,
+                                  ),
+                                );
+                              });
+                        },
+                      ),
+                      title: Text(
+                          '${assignedTickets[index].idReqServ.toString()} : ${assignedTickets[index].description}'),
+                      subtitle: Text(
+                          ' * Observaciones: ${assignedTickets[index].observations}'),
                     ),
-                    title: Text('${assignedTickets[index].idReqServ.toString()} : ${assignedTickets[index].description}'),
-                    subtitle: Text(' * Observaciones: ${assignedTickets[index].observations}'),
                   ),
-                ),
                 );
               },
             )
@@ -246,40 +197,52 @@ class _TicketRequestSummaryState extends State<TicketRequestSummary>
           ? ListView.builder(
               itemCount: onProgressTickets.length,
               itemBuilder: (context, index) {
-                return Padding(padding: const EdgeInsets.all(12),
-                child: Card(
-                  color: FlutterFlowTheme.of(context).primaryBackground,
-                  shadowColor: FlutterFlowTheme.of(context).primaryText,
-                  child: ListTile(
-                    leading: IconButton(
-                      icon: Icon(Icons.check_circle_outline, color: Colors.blue),
-                      onPressed: () {
-                        showDialog(
-            context : context,
-            builder: (BuildContext context){
-              return Material(
-                type: MaterialType.transparency,
-                child: TicketDetail(
-                  ticketId: onProgressTickets[index].idReqServ, 
-                  observations: onProgressTickets[index].observations, 
-                  description: onProgressTickets[index].description,
-                  deadLine: onProgressTickets[index].deadLine,
-                  requestDate: onProgressTickets[index].serviceRequestDate,
-                  closureDate: onProgressTickets[index].closureDate,
-                  creationDate: onProgressTickets[index].serviceCreationDate,
-                  assignedTo: onProgressTickets[index].assignedTo,
-                  reportedBy: onProgressTickets[index].reportedBy,
-                  isSelectedRequestsIMade: widget.isSelectedRequestsIMade,
-                  ),
-              );
-            }
-          );
-                      },
+                return Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Card(
+                    color: FlutterFlowTheme.of(context).primaryBackground,
+                    shadowColor: FlutterFlowTheme.of(context).primaryText,
+                    child: ListTile(
+                      leading: IconButton(
+                        icon: Icon(Icons.check_circle_outline,
+                            color: Colors.blue),
+                        onPressed: () {
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return Material(
+                                  type: MaterialType.transparency,
+                                  child: TicketDetail(
+                                    ticketId:
+                                        onProgressTickets[index].idReqServ,
+                                    observations:
+                                        onProgressTickets[index].observations,
+                                    description:
+                                        onProgressTickets[index].description,
+                                    deadLine: onProgressTickets[index].deadLine,
+                                    requestDate: onProgressTickets[index]
+                                        .serviceRequestDate,
+                                    closureDate:
+                                        onProgressTickets[index].closureDate,
+                                    creationDate: onProgressTickets[index]
+                                        .serviceCreationDate,
+                                    assignedTo:
+                                        onProgressTickets[index].assignedTo,
+                                    reportedBy:
+                                        onProgressTickets[index].reportedBy,
+                                    isSelectedRequestsIMade:
+                                        widget.isSelectedRequestsIMade,
+                                  ),
+                                );
+                              });
+                        },
+                      ),
+                      title: Text(
+                          '${onProgressTickets[index].idReqServ.toString()} : ${onProgressTickets[index].description.toCapitalized}'),
+                      subtitle: Text(
+                          ' * Observaciones: ${onProgressTickets[index].observations}'),
                     ),
-                    title: Text('${onProgressTickets[index].idReqServ.toString()} : ${onProgressTickets[index].description.toCapitalized}'),
-                    subtitle: Text(' * Observaciones: ${onProgressTickets[index].observations}'),
                   ),
-                ),
                 );
               },
             )
@@ -288,40 +251,51 @@ class _TicketRequestSummaryState extends State<TicketRequestSummary>
           ? ListView.builder(
               itemCount: overdueTickets.length,
               itemBuilder: (context, index) {
-                return Padding(padding: const EdgeInsets.all(12),
-                child: Card(
-                  color: FlutterFlowTheme.of(context).primaryBackground,
-                  shadowColor: FlutterFlowTheme.of(context).primaryText,
-                  child: ListTile(
-                    leading: IconButton(
-                      icon: Icon(Icons.check_circle_outline, color: Colors.redAccent),
-                      onPressed: () {
-                        showDialog(
-            context : context,
-            builder: (BuildContext context){
-              return Material(
-                type: MaterialType.transparency,
-                child: TicketDetail(
-                  ticketId: overdueTickets[index].idReqServ, 
-                  observations: overdueTickets[index].observations, 
-                  description: overdueTickets[index].description,
-                  deadLine: overdueTickets[index].deadLine,
-                  requestDate: overdueTickets[index].serviceRequestDate,
-                  closureDate: overdueTickets[index].closureDate,
-                  creationDate: overdueTickets[index].serviceCreationDate,
-                  assignedTo: overdueTickets[index].assignedTo,
-                  reportedBy: overdueTickets[index].reportedBy,
-                  isSelectedRequestsIMade: widget.isSelectedRequestsIMade,
-                  ),
-              );
-            }
-          );
-                      },
+                return Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Card(
+                    color: FlutterFlowTheme.of(context).primaryBackground,
+                    shadowColor: FlutterFlowTheme.of(context).primaryText,
+                    child: ListTile(
+                      leading: IconButton(
+                        icon: Icon(Icons.check_circle_outline,
+                            color: Colors.redAccent),
+                        onPressed: () {
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return Material(
+                                  type: MaterialType.transparency,
+                                  child: TicketDetail(
+                                    ticketId: overdueTickets[index].idReqServ,
+                                    observations:
+                                        overdueTickets[index].observations,
+                                    description:
+                                        overdueTickets[index].description,
+                                    deadLine: overdueTickets[index].deadLine,
+                                    requestDate: overdueTickets[index]
+                                        .serviceRequestDate,
+                                    closureDate:
+                                        overdueTickets[index].closureDate,
+                                    creationDate: overdueTickets[index]
+                                        .serviceCreationDate,
+                                    assignedTo:
+                                        overdueTickets[index].assignedTo,
+                                    reportedBy:
+                                        overdueTickets[index].reportedBy,
+                                    isSelectedRequestsIMade:
+                                        widget.isSelectedRequestsIMade,
+                                  ),
+                                );
+                              });
+                        },
+                      ),
+                      title: Text(
+                          '${overdueTickets[index].idReqServ.toString()} : ${overdueTickets[index].description}'),
+                      subtitle: Text(
+                          ' * Observaciones: ${overdueTickets[index].observations}'),
                     ),
-                    title: Text('${overdueTickets[index].idReqServ.toString()} : ${overdueTickets[index].description}'),
-                    subtitle: Text(' * Observaciones: ${overdueTickets[index].observations}'),
                   ),
-                ),
                 );
               },
             )
@@ -330,82 +304,93 @@ class _TicketRequestSummaryState extends State<TicketRequestSummary>
           ? ListView.builder(
               itemCount: closedTickets.length,
               itemBuilder: (context, index) {
-                return Padding(padding: const EdgeInsets.all(12),
-                child: Card(
-                  color: FlutterFlowTheme.of(context).primaryBackground,
-                  shadowColor: FlutterFlowTheme.of(context).primaryText,
-                  child: ListTile(
-                    leading: IconButton(
-                      icon: Icon(Icons.check_circle_outline, color: Colors.green,),
-                      onPressed: () {
-                        showDialog(
-            context : context,
-            builder: (BuildContext context){
-              return Material(
-                type: MaterialType.transparency,
-                child: TicketDetail(
-                  ticketId: closedTickets[index].idReqServ, 
-                  observations: closedTickets[index].observations, 
-                  description: closedTickets[index].description,
-                  deadLine: closedTickets[index].deadLine,
-                  requestDate: closedTickets[index].serviceRequestDate,
-                  closureDate: closedTickets[index].closureDate,
-                  creationDate: closedTickets[index].serviceCreationDate,
-                  assignedTo: closedTickets[index].assignedTo,
-                  reportedBy: closedTickets[index].reportedBy,
-                  isSelectedRequestsIMade: widget.isSelectedRequestsIMade,
-                  ),
-              );
-            }
-          );
-                      },
+                return Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Card(
+                    color: FlutterFlowTheme.of(context).primaryBackground,
+                    shadowColor: FlutterFlowTheme.of(context).primaryText,
+                    child: ListTile(
+                      leading: IconButton(
+                        icon: Icon(
+                          Icons.check_circle_outline,
+                          color: Colors.green,
+                        ),
+                        onPressed: () {
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return Material(
+                                  type: MaterialType.transparency,
+                                  child: TicketDetail(
+                                    ticketId: closedTickets[index].idReqServ,
+                                    observations:
+                                        closedTickets[index].observations,
+                                    description:
+                                        closedTickets[index].description,
+                                    deadLine: closedTickets[index].deadLine,
+                                    requestDate:
+                                        closedTickets[index].serviceRequestDate,
+                                    closureDate:
+                                        closedTickets[index].closureDate,
+                                    creationDate: closedTickets[index]
+                                        .serviceCreationDate,
+                                    assignedTo: closedTickets[index].assignedTo,
+                                    reportedBy: closedTickets[index].reportedBy,
+                                    isSelectedRequestsIMade:
+                                        widget.isSelectedRequestsIMade,
+                                  ),
+                                );
+                              });
+                        },
+                      ),
+                      title: Text(
+                          '${closedTickets[index].idReqServ.toString()} : ${closedTickets[index].description}'),
+                      subtitle: Text(
+                          ' * Observaciones: ${closedTickets[index].observations}'),
                     ),
-                    title: Text('${closedTickets[index].idReqServ.toString()} : ${closedTickets[index].description}'),
-                    subtitle: Text(' * Observaciones: ${closedTickets[index].observations}'),
                   ),
-                ),
                 );
               },
             )
           : const Center(child: Text('No hay tickets cerrados')),
     ]);
 
-    return 
-        Column(
-          children: [
-            Padding(padding: const EdgeInsets.all(10), child: Container(
-              height: MediaQuery.of(context).size.height * 0.58,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: FlutterFlowTheme.of(context).primaryBackground,
-                border: Border.all(
-                  color: const Color.fromARGB(255, 145, 158, 172),
-                  width: 1,
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(10),
+          child: Container(
+            height: MediaQuery.of(context).size.height * 0.58,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: FlutterFlowTheme.of(context).primaryBackground,
+              border: Border.all(
+                color: const Color.fromARGB(255, 145, 158, 172),
+                width: 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color.fromARGB(255, 197, 214, 234),
+                  spreadRadius: 1,
+                  blurRadius: 5,
+                  offset: const Offset(0, 3), // changes position of shadow
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color.fromARGB(255, 197, 214, 234),
-                    spreadRadius: 1,
-                    blurRadius: 5,
-                    offset: const Offset(0, 3), // changes position of shadow
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8.0),
-                    child: tabBar,
-                  ),
-                  Expanded(
-                    child: tabBarView,
-                  ),
-                ],
-              ),
-            ),)
-            
-          ],
-        );
-   
+              ],
+            ),
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8.0),
+                  child: tabBar,
+                ),
+                Expanded(
+                  child: tabBarView,
+                ),
+              ],
+            ),
+          ),
+        )
+      ],
+    );
   }
 }

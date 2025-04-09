@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/core/reusable_methods/services_functions.dart';
 import 'package:oxschool/core/utils/loader_indicator.dart';
 import 'package:oxschool/data/datasources/temp/services_temp.dart';
+import 'package:oxschool/presentation/Modules/services_ticket/processes/create_service_ticket.dart';
 import 'package:oxschool/presentation/Modules/services_ticket/processes/ticket_requests_dashboard/request_ticket_history.dart';
 import 'package:oxschool/presentation/Modules/services_ticket/processes/ticket_requests_dashboard/ticket_request_summary.dart';
+import 'package:oxschool/presentation/components/confirm_dialogs.dart';
 import 'package:oxschool/presentation/components/custom_icon_button.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
@@ -184,7 +185,8 @@ class _ProcessesState extends State<Processes> {
       servicesGridRows.clear();
     });
     try {
-      serviceStatusSelected ??= serviceListStatus.first;
+      if (_dateController.text.isNotEmpty ) {
+        serviceStatusSelected ??= serviceListStatus.first;
       final int? status = serviceListStatusMap[serviceStatusSelected];
 
       int byWho = _character == SingingCharacter.madeByMe
@@ -205,6 +207,10 @@ class _ProcessesState extends State<Processes> {
         });
         insertActionIntoLog(error.toString(), 'getServiceTicketsByDate');
       });
+      } else {
+        showEmptyFieldAlertDialog(context, 'Favor de seleccionar una fecha');
+      }
+      
     } catch (e) {
       insertActionIntoLog(e.toString(), 'getServiceTicketsByDate');
       throw Future.error(e.toString());
@@ -225,8 +231,26 @@ class _ProcessesState extends State<Processes> {
                       padding: EdgeInsets.only(left: 3, right: 3),
                       child: isLoading
                           ? null
+                          : AddItemButton(onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const CreateServiceTicket(),
+                              ),
+                            );  
+                            }))),
+              Flexible(
+                  child: Padding(
+                      padding: EdgeInsets.only(left: 3, right: 3),
+                      child: isLoading
+                          ? null
                           : RefreshButton(onPressed: () {
+                            if (_dateController.text.isNotEmpty) {
                               handleRefresh();
+                            } else {
+                              showEmptyFieldAlertDialog(context, 'Seleccione una fecha');
+                            }
+                              
                             }))),
               Flexible(
                   child: Padding(
@@ -387,49 +411,6 @@ class _ProcessesState extends State<Processes> {
                                 isSelectedRequestsIMade:
                                     isSelectedRequestsIMade),
                           )
-
-                          /* PlutoGrid(
-      columns: ticketServicesColumns,
-      rows: servicesGridRows,
-      rowColorCallback: (rowColorContext) {
-        final isDeadLineOnTime = rowColorContext.row.cells['deadLineOnTime']?.value;
-        final isRequesttedDateOnTime = rowColorContext.row.cells['requesttedDateOnTime']?.value;
-        final statusValue = rowColorContext.row.cells['status']?.value;
-        if ((isDeadLineOnTime == false &&  statusValue != 3) || (isRequesttedDateOnTime == false && statusValue != 3)) { //If the service is overdue
-          return Colors.red.shade50;
-        } else  { 
-          return Colors.transparent;
-        }
-      },
-      configuration: PlutoGridConfiguration(
-        columnSize: PlutoGridColumnSizeConfig(
-          autoSizeMode: PlutoAutoSizeMode.none,
-        )
-      ),
-      createFooter: (stateManager) {
-        stateManager.setPageSize(20, notify: false); // Display 10 items per page
-        return PlutoPagination(stateManager);
-      },
-      onRowDoubleTap: (event) {
-        if (event.row != null) {
-          final description = event.row!.cells['description']?.value ?? 'Sin descripción';
-          final observations = event.row!.cells['observations']?.value ?? 'Sin onbservaciones';
-          final ticketNumber = event.row!.cells['id']?.value ?? 'Sin id';
-
-          showDialog(
-            context : context,
-            builder: (BuildContext context){
-              return Material(
-                type: MaterialType.transparency,
-                child: TicketDetail(ticketId: ticketNumber, observations: observations, description: description),
-              );
-            }
-          );
-        }
-      },
-  
-      
-    ), */
                           ),
                     ),
                   ],
@@ -449,7 +430,12 @@ class _ProcessesState extends State<Processes> {
                   const SizedBox(height: 10),
                   ElevatedButton(
                     onPressed: () {
-                      handleRefresh();
+                      if (_dateController.text.isNotEmpty) {
+                         handleRefresh();
+                      } else {
+                        showEmptyFieldAlertDialog(context, 'Seleccione una fecha');
+                      }
+                     
                     },
                     child: const Text('Reintentar'),
                   ),
@@ -534,349 +520,413 @@ class _ScreenState extends State<TicketDetail> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 50, right: 50, bottom: 50, top: 50),
-      child: Container(
-        decoration: BoxDecoration(
-          color: FlutterFlowTheme.of(context).secondaryBackground,
-          borderRadius: BorderRadius.circular(30),
-        ),
-        child: Column(
-          children: [
-            // Header Section
-            Padding(
-              padding: const EdgeInsets.only(top: 0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.red.shade400,
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(30),
-                        ),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.only(
-                            left: 50, right: 20, top: 8, bottom: 8),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Ticket de servicio',
-                              style: TextStyle(
-                                fontFamily: 'Sora',
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontStyle: FontStyle.italic,
-                                fontSize: 26,
-                              ),
-                            ),
-                            Spacer(),
-                            IconButton.outlined(
-                              onPressed: () {
-                                if (editMode) {
-                                  null;
-                                } else {
-                                  //TODO: INSERT PRINT FUNCTION
-                                  print('Print ticket');
-                                }
-                              },
-                              icon:
-                                  const Icon(Icons.print, color: Colors.white),
-                              iconSize: 20,
-                              tooltip: 'Imprimir ticket',
-                              style: OutlinedButton.styleFrom(
-                                shape: const CircleBorder(),
-                                side: const BorderSide(
-                                  color: Colors.white,
-                                  width: 0.5,
-                                ),
-                              ),
-                            ),
-                            SizedBox(
-                              width: 10,
-                            ),
-                            IconButton.outlined(
-  enableFeedback: true,
-  onPressed: () {
-    
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Historial de movimientos'),
-          content: RequestTicketHistory(history: [],),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: const Text('Cerrar'),
-            ),
-          ],
+    return LayoutBuilder(builder: (context, constraints) {
+      if (isLoading) {
+        return Center(
+          child: CustomLoadingIndicator(),
         );
-      },
-    );
-  },
-  icon: const Icon(Icons.history, color: Colors.white),
-  iconSize: 20,
-  tooltip: 'Historial de movimientos',
-  style: OutlinedButton.styleFrom(
-    shape: const CircleBorder(),
-    side: const BorderSide(
-      color: Colors.white,
-      width: 0.5,
-    ),
-  ),
-)
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+      } else {
+        return Padding(
+          padding:
+              const EdgeInsets.only(left: 50, right: 50, bottom: 50, top: 50),
+          child: Container(
+            decoration: BoxDecoration(
+              color: FlutterFlowTheme.of(context).secondaryBackground,
+              borderRadius: BorderRadius.circular(30),
             ),
-
-            // Ticket ID Section
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Text(
-                    editMode
-                        ? 'EDITANDO: #${widget.ticketId}'
-                        : 'Ticket  #${widget.ticketId}.',
-                    style: const TextStyle(
-                      fontFamily: 'Sora',
-                      fontWeight: FontWeight.bold,
-                      fontSize: 30,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Divider
-            const Divider(
-              thickness: 1,
-              color: Colors.black,
-            ),
-
-            // Scrollable Content Section
-            Expanded(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 20, right: 20),
-                  child: Column(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 0),
+                  child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  color: Colors.red.shade400,
-                                  border: Border.all(color: Colors.black)),
-                              child: Text('Descripción',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white)),
-                            ),
-                          )
-                        ],
-                      ),
-
-                      TextField(
-                        controller: _descriptionController,
-                        readOnly: true,
-                        maxLines: 3,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // Observaciones Section
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  color: Colors.red.shade400,
-                                  border: Border.all(color: Colors.black)),
-                              child: Text('Observaciones',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white)),
-                            ),
-                          )
-                        ],
-                      ),
-                      TextField(
-                        controller: _observationsController,
-                        readOnly: true,
-                        maxLines: 3,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // Dropdown and Date Picker Section
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Expanded(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  color: Colors.red.shade400,
-                                  border: Border.all(color: Colors.black)),
-                              child: Text('Asignado a: ${widget.assignedTo}',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white)),
+                      Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: FlutterFlowTheme.of(context).secondary,
+                            borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(30),
                             ),
                           ),
-                          const SizedBox(width: 20),
-                          Expanded(
-                            child: TextField(
-                              controller: _dateController,
-                              decoration: InputDecoration(
-                                labelText: 'Fecha Compromiso',
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10.0),
-                                  borderSide: const BorderSide(
-                                    color: Colors.grey,
-                                    width: 1.0,
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                                left: 50, right: 20, top: 8, bottom: 8),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Ticket de servicio',
+                                  style: TextStyle(
+                                    fontFamily: 'Sora',
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontStyle: FontStyle.italic,
+                                    fontSize: 26,
                                   ),
                                 ),
-                                filled: true,
-                                fillColor: Colors.transparent,
-                              ),
-                              readOnly: true,
-                              onTap: () async {
-                                if (editMode) {
-                                  DateTime? pickedDate = await showDatePicker(
-                                    context: context,
-                                    helpText: 'MM-DD-AAAA',
-                                    initialDate: DateTime.now(),
-                                    firstDate: DateTime(2000),
-                                    lastDate: DateTime(2101),
-                                  );
-                                  if (pickedDate != null) {
+                                Spacer(),
+                                IconButton.outlined(
+                                  onPressed: () {
+                                    if (editMode) {
+                                      null;
+                                    } else {
+                                      //TODO: INSERT PRINT FUNCTION
+                                      print('Print ticket');
+                                    }
+                                  },
+                                  icon: const Icon(Icons.print,
+                                      color: Colors.white),
+                                  iconSize: 20,
+                                  tooltip: 'Imprimir ticket',
+                                  style: OutlinedButton.styleFrom(
+                                    shape: const CircleBorder(),
+                                    side: const BorderSide(
+                                      color: Colors.white,
+                                      width: 0.5,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 10,
+                                ), 
+                                
+                                IconButton.outlined(
+                                  enableFeedback: true,
+                                  onPressed: () {
                                     setState(() {
-                                      _dateController.text =
-                                          DateFormat('yyyy-MM-dd')
-                                              .format(pickedDate);
+                                      isLoading = true;
                                     });
-                                  }
-                                } else {
-                                  null;
-                                }
-                              },
+                                    var ticketHistory =
+                                        getRequestTicketHistory(widget.ticketId)
+                                            .then((value) {
+                                      setState(() {
+                                        isLoading = false;
+                                        showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              title: Text(
+                                                  'Historial de movimientos del ticket: ${widget.ticketId}'),
+                                              content: RequestTicketHistory(
+                                                history: value,
+                                              ),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.of(context)
+                                                        .pop(); // Close the dialog
+                                                  },
+                                                  child: const Text('Cerrar'),
+                                                ),
+                                              ],
+                                            );
+                                          },
+                                        );
+                                      });
+                                    }).onError((error, stackTrace) {
+                                      setState(() {
+                                        isLoading = false;
+                                      });
+                                    });
+                                  },
+                                  icon: const Icon(Icons.history,
+                                      color: Colors.white),
+                                  iconSize: 20,
+                                  tooltip: 'Historial de movimientos',
+                                  style: OutlinedButton.styleFrom(
+                                    shape: const CircleBorder(),
+                                    side: const BorderSide(
+                                      color: Colors.white,
+                                      width: 0.5,
+                                    ),
+                                  ),
+                                ),
+                                 SizedBox(
+                                  width: 10,
+                                ), 
+                                IconButton.outlined(onPressed: (){
+                                  Navigator.pop(context);
+                                }, icon: const Icon(Icons.close,
+                                      color: Colors.white),
+                                  iconSize: 20,
+                                  tooltip: 'Cerrar',
+                                  style: OutlinedButton.styleFrom(
+                                    shape: const CircleBorder(),
+                                    side: const BorderSide(
+                                      color: Colors.white,
+                                      width: 0.5,
+                                    ),
+                                  ),),
+                              ],
                             ),
                           ),
-                          SizedBox(
-                            width: 20,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Ticket ID Section
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(
+                        editMode
+                            ? 'EDITANDO: #${widget.ticketId}'
+                            : 'Ticket  #${widget.ticketId}.',
+                        style: const TextStyle(
+                          fontFamily: 'Sora',
+                          fontWeight: FontWeight.bold,
+                          fontSize: 30,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Divider
+                const Divider(
+                  thickness: 1,
+                  color: Colors.black,
+                ),
+
+                // Scrollable Content Section
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 20, right: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                      color: FlutterFlowTheme.of(context)
+                                          .secondary,
+                                      border: Border.all(color: Colors.black),
+                                      borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(10),
+                                          topRight: Radius.circular(10))),
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(left: 5),
+                                    child: Text('Descripción',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white)),
+                                  ),
+                                ),
+                              )
+                            ],
                           ),
-                          Expanded(
-                              child: TextField(
-                            decoration: InputDecoration(
-                              labelText: 'Fecha de creación',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10.0),
-                                borderSide: const BorderSide(
-                                  color: Colors.grey,
-                                  width: 1.0,
+
+                          TextField(
+                            controller: _descriptionController,
+                            readOnly: true,
+                            maxLines: 3,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          // Observaciones Section
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                      color: FlutterFlowTheme.of(context)
+                                          .secondary,
+                                      border: Border.all(color: Colors.black),
+                                      borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(10),
+                                          topRight: Radius.circular(10))),
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(left: 5),
+                                    child: Text('Observaciones',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white)),
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                          TextField(
+                            controller: _observationsController,
+                            readOnly: true,
+                            maxLines: 3,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Expanded(
+                                child: 
+                                Container(
+                                  decoration: BoxDecoration(
+                                      color: FlutterFlowTheme.of(context)
+                                          .secondary,
+                                      border: Border.all(color: Colors.black),
+                                      borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(10),
+                                          topRight: Radius.circular(10))),
+                                  child: Padding(
+                                      padding: const EdgeInsets.only(left: 5),
+                                      child: Text(
+                                          'Asignado a: ${widget.assignedTo}',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white))),
+                                )
+                              ),
+                              const SizedBox(width: 20),
+                              Expanded(
+                                child: TextField(
+                                  controller: _dateController,
+                                  decoration: InputDecoration(
+                                    labelText: 'Fecha Compromiso',
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10.0),
+                                      borderSide: const BorderSide(
+                                        color: Colors.grey,
+                                        width: 1.0,
+                                      ),
+                                    ),
+                                    filled: true,
+                                    fillColor: Colors.transparent,
+                                  ),
+                                  readOnly: true,
+                                  onTap: () async {
+                                    if (editMode) {
+                                      DateTime? pickedDate =
+                                          await showDatePicker(
+                                        context: context,
+                                        helpText: 'MM-DD-AAAA',
+                                        initialDate: DateTime.now(),
+                                        firstDate: DateTime(2000),
+                                        lastDate: DateTime(2101),
+                                      );
+                                      if (pickedDate != null) {
+                                        setState(() {
+                                          _dateController.text =
+                                              DateFormat('yyyy-MM-dd')
+                                                  .format(pickedDate);
+                                        });
+                                      }
+                                    } else {
+                                      null;
+                                    }
+                                  },
                                 ),
                               ),
-                              filled: true,
-                              fillColor: Colors.transparent,
-                            ),
-                            readOnly: true,
-                            controller: TextEditingController(
-                              text: widget.creationDate != null
-                                  ? DateFormat('yyyy-MM-dd')
-                                      .format(widget.creationDate)
-                                  : 'Sin fecha de creación',
-                            ),
-                          )),
-                          SizedBox(
-                            width: 20,
-                          ),
-                          Expanded(
-                              child: TextField(
-                            decoration: InputDecoration(
-                              labelText: 'Fecha solicitada para servicio',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10.0),
-                                borderSide: const BorderSide(
-                                  color: Colors.grey,
-                                  width: 1.0,
-                                ),
+                              SizedBox(
+                                width: 20,
                               ),
-                              filled: true,
-                              fillColor: Colors.transparent,
-                            ),
-                            readOnly: true,
-                            controller: TextEditingController(
-                              text: widget.requestDate != null
-                                  ? DateFormat('yyyy-MM-dd')
-                                      .format(widget.creationDate)
-                                  : 'Sin fecha de solicitud',
-                            ),
-                          ))
-                        ],
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      /* Row(
+                              Expanded(
+                                  child: TextField(
+                                decoration: InputDecoration(
+                                  labelText: 'Fecha de creación',
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                    borderSide: const BorderSide(
+                                      color: Colors.grey,
+                                      width: 1.0,
+                                    ),
+                                  ),
+                                  filled: true,
+                                  fillColor: Colors.transparent,
+                                ),
+                                readOnly: true,
+                                controller: TextEditingController(
+                                  text: widget.creationDate != null
+                                      ? DateFormat('yyyy-MM-dd')
+                                          .format(widget.creationDate)
+                                      : 'Sin fecha de creación',
+                                ),
+                              )),
+                              SizedBox(
+                                width: 20,
+                              ),
+                              Expanded(
+                                  child: TextField(
+                                decoration: InputDecoration(
+                                  labelText: 'Fecha solicitada para servicio',
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                    borderSide: const BorderSide(
+                                      color: Colors.grey,
+                                      width: 1.0,
+                                    ),
+                                  ),
+                                  filled: true,
+                                  fillColor: Colors.transparent,
+                                ),
+                                readOnly: true,
+                                controller: TextEditingController(
+                                  text: widget.requestDate != null
+                                      ? DateFormat('yyyy-MM-dd')
+                                          .format(widget.creationDate)
+                                      : 'Sin fecha de solicitud',
+                                ),
+                              ))
+                            ],
+                          ),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          /* Row(
                       children: [
                         
                       ],
                     ) */
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (!widget.isSelectedRequestsIMade)
-                            editMode
-                                ? SaveItemButton(onPressed: () {
-                                    setState(() {
-                                      isLoading = true;
-                                      editMode = !editMode;
-                                    });
-                                  })
-                                : EditItemButton(onPressed: () {
-                                    setState(() {
-                                      editMode = !editMode;
-                                    });
-                                  }),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (!widget.isSelectedRequestsIMade)
+                                editMode
+                                    ? SaveItemButton(onPressed: () {
+                                        setState(() {
+                                          isLoading = true;
+                                          editMode = !editMode;
+                                        });
+                                      })
+                                    : EditItemButton(onPressed: () {
+                                        setState(() {
+                                          editMode = !editMode;
+                                        });
+                                      }),
+                            ],
+                          )
                         ],
-                      )
-                    ],
+                      ),
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
-      ),
-    );
+          ),
+        );
+      }
+    });
   }
 }

@@ -619,7 +619,7 @@ Future<dynamic> getWorkDepartments() async {
         persistCookies: false,
         timeoutSeconds: 15);
     apiCall.raiseForStatus();
-    return apiCall.content();
+    return apiCall;
   } catch (e) {
     throw Future.error(e.toString());
   }
@@ -1459,6 +1459,47 @@ Future<dynamic> getAllServiceTickets(String toFetch, int statusVal, int byWho) a
     return Future.error(e.toString());
   }
 }
+
+Future<dynamic> getRequestticketHistory(int ticketId) async {
+  try {
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
+    var apiCall = await Requests.get(
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/services/ticket/$ticketId',
+      headers: {
+          'Authorization': devicePrefs.getString('token')!,
+          'Content-Type': 'application/json',
+        },
+        persistCookies: true,
+        timeoutSeconds: 35
+    );
+    apiCall.raiseForStatus();
+    return apiCall;
+  } catch (e) {
+    insertErrorLog(e.toString(), 'getAllServiceTickets $ticketId');
+    return Future.error(e.toString());
+  }
+}
+
+Future<dynamic> getUsersForTicket() async {
+  try {
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
+    var apiCall = await Requests.get(
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/users/ticket/users',
+      headers: {
+          'Authorization': devicePrefs.getString('token')!,
+          'Content-Type': 'application/json',
+        },
+      persistCookies: false,
+      timeoutSeconds: 10,
+    );
+    apiCall.raiseForStatus();
+    return apiCall;
+  } catch (e) {
+    insertErrorLog(e.toString(), 'getUsersForTicket()');
+    return Future.error(e.toString());
+  }
+}
+
 //!Not using for now
 //Function to get a list of acces items by a role
 /* Future<http.Response> getUserRoleAndAcces(int roleId) async {

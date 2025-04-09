@@ -89,7 +89,7 @@ class _ServicesTicketHistoryState extends State<ServicesTicketHistory>
             indicatorColor: Colors.blueAccent,
           ),
           title: const Text('Ticket de servicio ',
-              style: TextStyle(color: Colors.white)),
+              style: TextStyle(color: Colors.white), textAlign: TextAlign.start,),
           backgroundColor: FlutterFlowTheme.of(context).primary,
         ),
         body: TabBarView(

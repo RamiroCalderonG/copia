@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
+import 'package:oxschool/core/reusable_methods/logger_actions.dart';
+import 'package:oxschool/core/reusable_methods/services_functions.dart';
 import 'package:oxschool/core/utils/loader_indicator.dart';
+import 'package:oxschool/core/utils/searchable_drop_down.dart';
+import 'package:oxschool/presentation/components/custom_icon_button.dart';
 
 class CreateServiceTicket extends StatefulWidget {
   const CreateServiceTicket({super.key});
@@ -20,12 +25,17 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
   final _descriptionController = TextEditingController();
   final _observationsController = TextEditingController();
   late DateTime selectedDateTime;
+  List<String> employeeList = <String>[];
+  bool displayError = false;
+  String? errorMessage;
+  String? deptSelected;
+  late Future<dynamic> usersListFuture;
+  List<String> deptsList = <String>[];
 
-  // bool _showSearchIcon = false;
+  Map<int,dynamic> deptsMap = {};
+
   bool _isDescriptionFieldEmpty = false;
   bool _isObservationsFieldEmpty = false;
-  // bool _showSearchEmployee = false;
-  // ignore: prefer_final_fields
   bool _isSearching = false;
 
   @override
@@ -43,6 +53,47 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
   }
 
   @override
+  void initState() {
+    fetchUsersList();
+    _isDescriptionFieldEmpty = false;
+    _isObservationsFieldEmpty = false;
+    super.initState();
+  }
+
+  void fetchUsersList() {
+    usersListFuture = getUsersList().then((value) {
+      getEmployeesNames(value);
+      getDepartments().then((onValue){
+        deptsMap = onValue;
+        deptsMap.forEach((key,value){
+          setState(() {
+            deptsList.add(value);
+          });
+        });
+      }).onError((error, StackTrace){
+        insertErrorLog(error.toString(), 'getDepartments()');
+        throw Future.error(error.toString());
+      });
+      
+
+    }).onError((error, stacktrace) {
+      insertErrorLog(error.toString(),
+          'Error al obtener la lista de empleados | fetchUsersList()');
+    });
+  }
+
+  void getEmployeesNames(List<Map<String, dynamic>> usersLists) {
+    setState(() {
+      employeeList.clear();
+      for (var element in usersLists) {
+        if (element['name'] != null) {
+          employeeList.add(element['name'].toString());
+        }
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     const List<String> months = <String>[
       'Anahuac',
@@ -52,30 +103,7 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
       'Sendero'
     ];
 
-    const List<String> deptsList = <String>[
-      'IT',
-      'Calidad',
-      'Mantenimiento',
-      'Coord Academica'
-    ];
-    const List<String> employeeList = <String>['Fulano', 'Mengano', 'Sutano'];
-
-    // ignore: unused_local_variable
     String? dropDownValue;
-
-    final DropdownMenu employeSelectorName = DropdownMenu<String>(
-        initialSelection: employeeList.first,
-        enableFilter: true,
-        label: const Text('Nombre del empleado que solicita'),
-        onSelected: (String? value) {
-          setState(() {
-            dropDownValue = value!;
-          });
-        },
-        dropdownMenuEntries:
-            employeeList.map<DropdownMenuEntry<String>>((String value) {
-          return DropdownMenuEntry<String>(value: value, label: value);
-        }).toList());
 
     final descriptionField = TextFormField(
       controller: _descriptionController,
@@ -192,161 +220,113 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
           return DropdownMenuEntry<String>(value: value, label: value);
         }).toList());
 
-    final DropdownMenu deptSelectorDropDown = DropdownMenu<String>(
-        initialSelection: deptsList.first,
-        label: const Text('Departamento al que solicita'),
-        onSelected: (String? value) {
-          setState(() {
-            dropDownValue = value;
-          });
-        },
-        dropdownMenuEntries:
-            deptsList.map<DropdownMenuEntry<String>>((String value) {
-          return DropdownMenuEntry<String>(value: value, label: value);
-        }).toList());
-
-    return    SizedBox(
-            width: MediaQuery.of(context).size.width * 3 / 5,
-            child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints){
-              if (_isSearching) {
-                return CustomLoadingIndicator();
+    return SizedBox(
+        width: MediaQuery.of(context).size.width * 3 / 5,
+        child: FutureBuilder(
+            future: usersListFuture,
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return Center(
+                  child: Text(snapshot.error.toString()),
+                );
+              } else if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CustomLoadingIndicator());
               } else {
-                return  SingleChildScrollView(
-                  child: Column(
-                        //mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        //crossAxisAlignment: CrossAxisAlignment.start,
-                        // crossAxisAlignment
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                            Flexible(child: employeSelectorName,), 
-                            Flexible(child: campusSelectorDropDown), 
-                            Flexible(child: deptSelectorDropDown), 
-                            Flexible(child: dateAndTimeField,)],
-                          ),
-                          SizedBox(
-                            height: 18,
-                          ),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              Flexible(
-                                child: descriptionField,
-                              )
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 14,
-                          ),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              Flexible(child: observationsField),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 14,
-                          ),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              Flexible(
-                                  child: Column(
-                                children: [
-                                  IconButton(
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                      },
-                                      icon: Icon(
-                                        Icons.cancel,
-                                        color: Colors.red,
-                                      )),
-                                  Text('Cancelar')
-                                ],
-                              )),
-                              Flexible(
-                                  child: Column(
-                                children: [
-                                  IconButton(
-                                      onPressed: () {},
-                                      icon: Icon(
-                                        Icons.save,
-                                      )),
-                                  Text('Guardar')
-                                ],
-                              )),
-                            ],
-                          ),
-                        ],
-                      ),
-                      
-                );  
+                return Scaffold(
+                  appBar: AppBar(
+                    title:  Text('Crear Ticket de Servicio', style: TextStyle(color: FlutterFlowTheme.of(context).info ),),
+                    backgroundColor: FlutterFlowTheme.of(context).secondary,
+                  ),
+                  body: SingleChildScrollView(
+                      child: SafeArea(
+                          child: Padding(
+                    padding: const EdgeInsets.only(
+                        top: 30, bottom: 10, left: 10, right: 10),
+                    child: Column(
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Flexible(
+                              child: SearchableDropdown(
+                                items: employeeList,
+                                label: 'Nombre de quien solicita',
+                                onSelected: (String? value) {
+                                  setState(() {
+                                    dropDownValue = value!;
+                                  });
+                                },
+                                hint :'Nombre'
+                              ),
+                            ),
+                            Flexible(child: campusSelectorDropDown),
+                            Flexible(child: SearchableDropdown(
+                                items: deptsList,
+                                label: 'Departamento al que solicita',
+                                onSelected: (String? value) {
+                                  setState(() {
+                                    deptSelected = value!;
+                                  });
+                                },
+                                hint :'Departamento al que solicita'
+                              ),
+        ),
+                            Flexible(
+                              child: dateAndTimeField,
+                            )
+                          ],
+                        ),
+                        SizedBox(
+                          height: 18,
+                        ),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Flexible(
+                              child: descriptionField,
+                            )
+                          ],
+                        ),
+                        const SizedBox(
+                          height: 14,
+                        ),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Flexible(child: observationsField),
+                          ],
+                        ),
+                        const SizedBox(
+                          height: 14,
+                        ),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Flexible(
+                                child: Column(
+                              children: [
+                                CancelActionButton(onPressed: (){Navigator.pop(context);})
+                              ],
+                            )),
+                            Flexible(
+                                child: Column(
+                              children: [
+                                SaveItemButton(onPressed: (){})
+                              ],
+                            )),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ))),
+                );
               }
-            }),
-
-             
-    );
+            }));
   }
-
-  //TODO: DO NOT DELETE, CAN BE USED  FOR SEARCHING EMPLOYEES
-  // Widget _buildEmployeeNumberField() {
-  //   return Expanded(
-  //     flex: 5,
-  //     child: TextFormField(
-  //       controller: _employeeNumberController,
-  //       onChanged: (value) {
-  //         setState(() {
-  //           _showSearchIcon = value.length >= 3;
-  //         });
-  //       },
-  //       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-  //       keyboardType: TextInputType.number,
-  //       autofocus: true,
-  //       // textInputAction: TextInputAction.next,
-  //       onFieldSubmitted: (value) async {
-  //         // ignore: unused_local_variable
-  //         var apiResponse;
-  //         setState(() {
-  //           _isSearching = true;
-  //         });
-  //         apiResponse = await searchEmployee(_employeeNumberController.text)
-  //             .whenComplete(() {
-  //           setState(() {
-  //             _isSearching = false;
-  //           });
-  //         });
-  //       },
-  //       decoration: InputDecoration(
-  //         label: const Text('No. Empleado que solicita servicio'),
-  //         prefixIcon: const Icon(Icons.numbers),
-  //         suffixIcon: _showSearchIcon
-  //             ? GestureDetector(
-  //                 onTap: () async {
-  //                   // ignore: unused_local_variable
-  //                   var apiResponse;
-  //                   setState(() {
-  //                     _isSearching = true;
-  //                   });
-  //                   apiResponse =
-  //                       await searchEmployee(_employeeNumberController.text)
-  //                           .whenComplete(() {
-  //                     setState(() {
-  //                       _isSearching = false;
-  //                     });
-  //                   });
-  //                 },
-  //                 child: const Icon(Icons.search),
-  //               )
-  //             : null,
-  //       ),
-  //     ),
-  //   );
-  // }
 
   final ButtonStyle raisedButtonStyle = ElevatedButton.styleFrom(
     foregroundColor: Colors.black87,
