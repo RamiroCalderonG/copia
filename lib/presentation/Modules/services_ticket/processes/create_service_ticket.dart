@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
+import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/core/reusable_methods/services_functions.dart';
 import 'package:oxschool/core/utils/loader_indicator.dart';
 import 'package:oxschool/core/utils/searchable_drop_down.dart';
+import 'package:oxschool/presentation/components/confirm_dialogs.dart';
 import 'package:oxschool/presentation/components/custom_icon_button.dart';
 
 class CreateServiceTicket extends StatefulWidget {
@@ -15,38 +17,26 @@ class CreateServiceTicket extends StatefulWidget {
 }
 
 class _CreateServiceTicketState extends State<CreateServiceTicket> {
-  final _nameController = TextEditingController();
-  final _employeeNumberController = TextEditingController();
-  final _departmentController = TextEditingController();
-  final _dueDateController = TextEditingController();
-  final _requirementController = TextEditingController();
-  final _employeeNameController = TextEditingController();
   final _date = TextEditingController();
   final _descriptionController = TextEditingController();
   final _observationsController = TextEditingController();
-  late DateTime selectedDateTime;
   List<String> employeeList = <String>[];
-  bool displayError = false;
-  String? errorMessage;
   String? deptSelected;
   late Future<dynamic> usersListFuture;
   List<String> deptsList = <String>[];
+  String campusSelected = '';
+  DateTime? pickedDate;
+  String whoRequest = '';
 
-  Map<int,dynamic> deptsMap = {};
+  Map<int, dynamic> deptsMap = {};
+  List<Map<String, dynamic>> usersMapsL = [];
 
   bool _isDescriptionFieldEmpty = false;
   bool _isObservationsFieldEmpty = false;
-  bool _isSearching = false;
 
   @override
   void dispose() {
-    _nameController.dispose();
-    _employeeNumberController.dispose();
-    _departmentController.dispose();
-    _dueDateController.dispose();
-    _requirementController.dispose();
     _date.dispose();
-    _employeeNameController.dispose();
     _descriptionController.dispose();
     _observationsController.dispose();
     super.dispose();
@@ -62,20 +52,19 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
 
   void fetchUsersList() {
     usersListFuture = getUsersList().then((value) {
+      usersMapsL = value;
       getEmployeesNames(value);
-      getDepartments().then((onValue){
+      getDepartments().then((onValue) {
         deptsMap = onValue;
-        deptsMap.forEach((key,value){
+        deptsMap.forEach((key, value) {
           setState(() {
             deptsList.add(value);
           });
         });
-      }).onError((error, StackTrace){
+      }).onError((error, StackTrace) {
         insertErrorLog(error.toString(), 'getDepartments()');
         throw Future.error(error.toString());
       });
-      
-
     }).onError((error, stacktrace) {
       insertErrorLog(error.toString(),
           'Error al obtener la lista de empleados | fetchUsersList()');
@@ -95,7 +84,7 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
 
   @override
   Widget build(BuildContext context) {
-    const List<String> months = <String>[
+    const List<String> campusList = <String>[
       'Anahuac',
       'Barragan',
       'Concordia',
@@ -190,14 +179,13 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
       readOnly: true,
       onTap: () async {
         // ignore: unused_local_variable
-        DateTime? pickedDate = await showDatePicker(
+        pickedDate = await showDatePicker(
                 context: context,
                 initialDate: DateTime.now(),
                 firstDate: DateTime(2000),
                 lastDate: DateTime(2101))
             .then((pickedDate) {
           if (pickedDate != null) {
-            // selectedDateTime = DateTime.now();
             setState(() {
               _date.text = DateFormat('yyyy-MM-dd').format(pickedDate);
             });
@@ -208,15 +196,15 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
     );
 
     final DropdownMenu campusSelectorDropDown = DropdownMenu<String>(
-        initialSelection: months.first,
+        initialSelection: campusList.first,
         label: const Text('Campus'),
         onSelected: (String? value) {
           setState(() {
-            dropDownValue = value;
+            campusSelected = value!;
           });
         },
         dropdownMenuEntries:
-            months.map<DropdownMenuEntry<String>>((String value) {
+            campusList.map<DropdownMenuEntry<String>>((String value) {
           return DropdownMenuEntry<String>(value: value, label: value);
         }).toList());
 
@@ -234,7 +222,11 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
               } else {
                 return Scaffold(
                   appBar: AppBar(
-                    title:  Text('Crear Ticket de Servicio', style: TextStyle(color: FlutterFlowTheme.of(context).info ),),
+                    title: Text(
+                      'Crear Ticket de Servicio',
+                      style:
+                          TextStyle(color: FlutterFlowTheme.of(context).info),
+                    ),
                     backgroundColor: FlutterFlowTheme.of(context).secondary,
                   ),
                   body: SingleChildScrollView(
@@ -250,28 +242,28 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
                           children: [
                             Flexible(
                               child: SearchableDropdown(
-                                items: employeeList,
-                                label: 'Nombre de quien solicita',
-                                onSelected: (String? value) {
-                                  setState(() {
-                                    dropDownValue = value!;
-                                  });
-                                },
-                                hint :'Nombre'
-                              ),
+                                  items: employeeList,
+                                  label: 'Nombre de quien solicita',
+                                  onSelected: (String? value) {
+                                    setState(() {
+                                      whoRequest = value!;
+                                      dropDownValue = value!;
+                                    });
+                                  },
+                                  hint: 'Nombre de qien solicita'),
                             ),
                             Flexible(child: campusSelectorDropDown),
-                            Flexible(child: SearchableDropdown(
-                                items: deptsList,
-                                label: 'Departamento al que solicita',
-                                onSelected: (String? value) {
-                                  setState(() {
-                                    deptSelected = value!;
-                                  });
-                                },
-                                hint :'Departamento al que solicita'
-                              ),
-        ),
+                            Flexible(
+                              child: SearchableDropdown(
+                                  items: deptsList,
+                                  label: 'Departamento al que solicita',
+                                  onSelected: (String? value) {
+                                    setState(() {
+                                      deptSelected = value!;
+                                    });
+                                  },
+                                  hint: 'Departamento al que solicita'),
+                            ),
                             Flexible(
                               child: dateAndTimeField,
                             )
@@ -309,13 +301,80 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
                             Flexible(
                                 child: Column(
                               children: [
-                                CancelActionButton(onPressed: (){Navigator.pop(context);})
+                                CancelActionButton(onPressed: () {
+                                  Navigator.pop(context);
+                                })
                               ],
                             )),
                             Flexible(
                                 child: Column(
                               children: [
-                                SaveItemButton(onPressed: (){})
+                                SaveItemButton(onPressed: () {
+                                  if ((whoRequest == null) ||
+                                      (campusSelected.isEmpty) ||
+                                      (deptSelected == null) ||
+                                      (_descriptionController.text.isEmpty) ||
+                                      (_date.text.isEmpty)) {
+                                    showEmptyFieldAlertDialog(context,
+                                        'Verificar que ningun campo quede vacio');
+                                  } else {
+                                    Map<String, dynamic> bodyComposed = {};
+                                    int deptId = deptsMap.entries
+                                        .firstWhere((entry) =>
+                                            entry.value == deptSelected)
+                                        .key;
+                                    int idLoginUser = usersMapsL
+                                            .firstWhere(
+                                                (item) =>
+                                                    item["name"] == whoRequest,
+                                                orElse: () => {})
+                                            .containsKey("userN")
+                                        ? usersMapsL.firstWhere((item) =>
+                                            item["name"] == whoRequest)["userN"]
+                                        : -1;
+
+                                        int deptFromWhereRequests = deptsMap.entries
+                                        .firstWhere((entry) =>
+                                            entry.value == currentUser!.work_area)
+                                        .key;
+
+                                    bodyComposed.addAll({
+                                      "whoRequests": idLoginUser,
+                                      "campus": campusSelected,
+                                      "requestedToDept": deptId,
+                                      "description":
+                                          _descriptionController.text,
+                                      "observations":
+                                          _observationsController.text,
+                                      "dateRequest": _date.text,
+                                      "whoRegisteredLoginId":
+                                          currentUser!.idLogin,
+                                      "deptWhoRequests": deptFromWhereRequests,
+                                      "whoRegisteredNumber":
+                                          currentUser!.employeeNumber
+                                    });
+                                    createRequestTicket(bodyComposed).then(
+                                      (value) {
+                                        print(value);
+                                        setState(() {
+                                          bodyComposed.clear();
+                                          _descriptionController.text = '';
+                                          _date.text = '';
+                                          _observationsController.text = '';
+                                          whoRequest = '';
+                                          campusSelected = '';
+                                          showConfirmationDialog(
+                                              context, 'Éxito', 'Ticket #');
+                                        });
+                                      },
+                                    ).onError((error, stackTrace) {
+                                      setState(() {
+                                        showErrorFromBackend(
+                                            context, error.toString());
+                                      });
+                                    });
+                                  }
+                                })
                               ],
                             )),
                           ],

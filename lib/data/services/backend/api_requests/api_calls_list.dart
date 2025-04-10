@@ -79,47 +79,6 @@ Future<dynamic> getCycle(int month) async {
   }
 }
 
-// Future<dynamic> getCycle(
-//   int month,
-// ) async {
-//   String response;
-//   if (month == 0) {
-//     try {
-//       var apiCall = await Requests.get(
-//           '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/cycles/1',
-//           headers: {
-//             //'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-//             'Authorization': currentUser!.token,
-//           },
-//           persistCookies: false,
-//           timeoutSeconds: 12);
-//       apiCall.raiseForStatus();
-//       response = apiCall.content();
-//       return response;
-//     } catch (e) {
-//       insertErrorLog(e.toString(), '/api/cycles/1');
-//       throw FormatException(e.toString());
-//     }
-//   } else {
-//     try {
-//       var apiCall = await Requests.get(
-//           '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/cycles/',
-//           headers: {
-//             'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-//             'Auth': currentUser!.token,
-//           },
-//           persistCookies: false,
-//           timeoutSeconds: 12);
-//       apiCall.raiseForStatus();
-//       response = apiCall.content();
-//       return response;
-//     } catch (e) {
-//       insertErrorLog(e.toString(), '/api/cycles/$month');
-//       throw FormatException(e.toString());
-//     }
-//   }
-// }
-
 //!Not using this function for now
 //Function to post new visit from a student to nursery
 Future<dynamic> postNurseryVisit(Map<String, dynamic> jsonBody) async {
@@ -199,47 +158,6 @@ Future<int> deleteMedicineStudent(var idValue) async {
   }
   // return responseCode;
 }
-
-// Future<dynamic> getEvents(String? param) async {
-//   String responseCode;
-
-//   if (param == null) {
-//     try {
-//       var apiCall = await Requests.get(
-//           '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/events',
-//           headers: {
-//             'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-//             'Auth': currentUser!.token
-//           },
-//           persistCookies: false,
-//           timeoutSeconds: 8);
-
-//       apiCall.raiseForStatus();
-//       responseCode = apiCall.content();
-//       return responseCode;
-//     } catch (e) {
-//       throw FormatException(e.toString());
-//     }
-//   } else {
-//     try {
-//       var apiCall = await Requests.get(
-//           '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/events',
-//           headers: {
-//             'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-//             'Auth': currentUser!.token
-//           },
-//           queryParameters: {'detail': param},
-//           persistCookies: false,
-//           timeoutSeconds: 8);
-
-//       apiCall.raiseForStatus();
-//       responseCode = apiCall.content();
-//       return responseCode;
-//     } catch (e) {
-//       throw FormatException(e.toString());
-//     }
-//   }
-// }
 
 //Function to activate/deactive an event by role
 Future<dynamic> modifyActiveOfEventRole(
@@ -1497,6 +1415,34 @@ Future<dynamic> getUsersForTicket() async {
   } catch (e) {
     insertErrorLog(e.toString(), 'getUsersForTicket()');
     return Future.error(e.toString());
+  }
+}
+
+
+Future<dynamic> createNewTicketServices(Map<String, dynamic> body) async {
+  try {
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
+    var apiCall = await Requests.post(
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/services/ticket',
+      headers: {
+          'Authorization': devicePrefs.getString('token')!,
+          'Content-Type': 'application/json',
+        },
+        json: body,
+      persistCookies: false,
+      timeoutSeconds: 15,
+    );
+    apiCall.raiseForStatus();
+    if (apiCall.statusCode == 200) {
+      return apiCall;
+    }
+    else {
+      insertErrorLog(apiCall.body, 'createNewTicketServices()');
+      throw Future.error(apiCall.body);
+    }
+  } catch (e) {
+    insertErrorLog(e.toString(), 'createNewTicketServices()');
+    throw Future.error(e.toString());
   }
 }
 

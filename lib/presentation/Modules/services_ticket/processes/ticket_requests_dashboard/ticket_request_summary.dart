@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
+import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/data/Models/ServiceTicketRequest.dart';
 import 'package:oxschool/data/datasources/temp/services_temp.dart';
@@ -18,10 +19,14 @@ class TicketRequestSummary extends StatefulWidget {
 class _TicketRequestSummaryState extends State<TicketRequestSummary>
     with TickerProviderStateMixin {
   late final TabController _tabController;
+  bool canCreateTicket = false;
+  bool canEditTicket = false;
+  bool canAssignTicket = false;
 
   @override
   void initState() {
     _tabController = TabController(length: 5, vsync: this);
+    enableDisableEvents();
     super.initState();
   }
 
@@ -40,6 +45,32 @@ class _TicketRequestSummaryState extends State<TicketRequestSummary>
     closedTickets.clear();
     overdueTickets.clear();
     super.dispose();
+  }
+
+  void enableDisableEvents(){
+    for (var element in currentUser!.userRole!.roleModuleRelationships!) {
+      if (element.eventId == 20 && element.canAccessEvent == true ) {
+        setState(() {
+          canAssignTicket = true;
+          print(canAssignTicket);
+          print(element.eventId);
+        });
+        
+      }
+      if (element.eventId == 19 && element.canAccessEvent == true) {
+        setState(() {
+          canCreateTicket = true;
+        });
+        
+      }
+      if (element.eventId == 21 && element.canAccessEvent == true) {
+        setState(() {
+          canEditTicket = true;
+        });
+      }
+      
+    }
+
   }
 
   @override
@@ -96,6 +127,11 @@ class _TicketRequestSummaryState extends State<TicketRequestSummary>
                     color: FlutterFlowTheme.of(context).primaryBackground,
                     shadowColor: FlutterFlowTheme.of(context).primaryText,
                     child: ListTile(
+                      trailing: canAssignTicket ? IconButton(onPressed: (){
+                      }, 
+                      icon: Icon(Icons.arrow_forward_ios_rounded, color: Colors.deepPurpleAccent,),
+                      tooltip: 'Asignar ticket',
+                      ) : null,
                       leading: IconButton(
                         icon: Icon(Icons.check_circle_outline,
                             color: Colors.blue),

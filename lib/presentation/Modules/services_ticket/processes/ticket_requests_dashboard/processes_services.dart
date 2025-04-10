@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
+import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/core/reusable_methods/services_functions.dart';
 import 'package:oxschool/core/utils/loader_indicator.dart';
 import 'package:oxschool/data/datasources/temp/services_temp.dart';
+import 'package:oxschool/data/services/backend/validate_user_permissions.dart';
 import 'package:oxschool/presentation/Modules/services_ticket/processes/create_service_ticket.dart';
 import 'package:oxschool/presentation/Modules/services_ticket/processes/ticket_requests_dashboard/request_ticket_history.dart';
 import 'package:oxschool/presentation/Modules/services_ticket/processes/ticket_requests_dashboard/ticket_request_summary.dart';
@@ -185,32 +187,31 @@ class _ProcessesState extends State<Processes> {
       servicesGridRows.clear();
     });
     try {
-      if (_dateController.text.isNotEmpty ) {
+      if (_dateController.text.isNotEmpty) {
         serviceStatusSelected ??= serviceListStatus.first;
-      final int? status = serviceListStatusMap[serviceStatusSelected];
+        final int? status = serviceListStatusMap[serviceStatusSelected];
 
-      int byWho = _character == SingingCharacter.madeByMe
-          ? 1 //I Made
-          : 2; // I Was Reported
+        int byWho = _character == SingingCharacter.madeByMe
+            ? 1 //I Made
+            : 2; // I Was Reported
 
-      await getServiceTicketsByDate(_dateController.text, status!, byWho)
-          .then((value) {
-        setState(() {
-          servicesGridRows = value!;
-          isLoading = false;
+        await getServiceTicketsByDate(_dateController.text, status!, byWho)
+            .then((value) {
+          setState(() {
+            servicesGridRows = value!;
+            isLoading = false;
+          });
+        }).onError((stacktrace, error) {
+          setState(() {
+            isLoading = false;
+            displayError = true;
+            errorMessage = error.toString();
+          });
+          insertActionIntoLog(error.toString(), 'getServiceTicketsByDate');
         });
-      }).onError((stacktrace, error) {
-        setState(() {
-          isLoading = false;
-          displayError = true;
-          errorMessage = error.toString();
-        });
-        insertActionIntoLog(error.toString(), 'getServiceTicketsByDate');
-      });
       } else {
         showEmptyFieldAlertDialog(context, 'Favor de seleccionar una fecha');
       }
-      
     } catch (e) {
       insertActionIntoLog(e.toString(), 'getServiceTicketsByDate');
       throw Future.error(e.toString());
@@ -232,12 +233,20 @@ class _ProcessesState extends State<Processes> {
                       child: isLoading
                           ? null
                           : AddItemButton(onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const CreateServiceTicket(),
-                              ),
-                            );  
+                              bool? isEnabled = canRoleConsumeEvent(
+                                  "Crear ticket de servicio");
+                              if (isEnabled != null && isEnabled == true) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const CreateServiceTicket(),
+                                  ),
+                                );
+                              } else {
+                                showInformationDialog(context, 'Error',
+                                    'No cuenta con permisos, consulte con el administrador');
+                              }
                             }))),
               Flexible(
                   child: Padding(
@@ -245,12 +254,12 @@ class _ProcessesState extends State<Processes> {
                       child: isLoading
                           ? null
                           : RefreshButton(onPressed: () {
-                            if (_dateController.text.isNotEmpty) {
-                              handleRefresh();
-                            } else {
-                              showEmptyFieldAlertDialog(context, 'Seleccione una fecha');
-                            }
-                              
+                              if (_dateController.text.isNotEmpty) {
+                                handleRefresh();
+                              } else {
+                                showEmptyFieldAlertDialog(
+                                    context, 'Seleccione una fecha');
+                              }
                             }))),
               Flexible(
                   child: Padding(
@@ -410,8 +419,7 @@ class _ProcessesState extends State<Processes> {
                             child: TicketRequestSummary(
                                 isSelectedRequestsIMade:
                                     isSelectedRequestsIMade),
-                          )
-                          ),
+                          )),
                     ),
                   ],
                 ),
@@ -431,11 +439,11 @@ class _ProcessesState extends State<Processes> {
                   ElevatedButton(
                     onPressed: () {
                       if (_dateController.text.isNotEmpty) {
-                         handleRefresh();
+                        handleRefresh();
                       } else {
-                        showEmptyFieldAlertDialog(context, 'Seleccione una fecha');
+                        showEmptyFieldAlertDialog(
+                            context, 'Seleccione una fecha');
                       }
-                     
                     },
                     child: const Text('Reintentar'),
                   ),
@@ -591,8 +599,7 @@ class _ScreenState extends State<TicketDetail> {
                                 ),
                                 SizedBox(
                                   width: 10,
-                                ), 
-                                
+                                ),
                                 IconButton.outlined(
                                   enableFeedback: true,
                                   onPressed: () {
@@ -644,12 +651,14 @@ class _ScreenState extends State<TicketDetail> {
                                     ),
                                   ),
                                 ),
-                                 SizedBox(
+                                SizedBox(
                                   width: 10,
-                                ), 
-                                IconButton.outlined(onPressed: (){
-                                  Navigator.pop(context);
-                                }, icon: const Icon(Icons.close,
+                                ),
+                                IconButton.outlined(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  icon: const Icon(Icons.close,
                                       color: Colors.white),
                                   iconSize: 20,
                                   tooltip: 'Cerrar',
@@ -659,7 +668,8 @@ class _ScreenState extends State<TicketDetail> {
                                       color: Colors.white,
                                       width: 0.5,
                                     ),
-                                  ),),
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -780,24 +790,22 @@ class _ScreenState extends State<TicketDetail> {
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
                               Expanded(
-                                child: 
-                                Container(
-                                  decoration: BoxDecoration(
-                                      color: FlutterFlowTheme.of(context)
-                                          .secondary,
-                                      border: Border.all(color: Colors.black),
-                                      borderRadius: BorderRadius.only(
-                                          topLeft: Radius.circular(10),
-                                          topRight: Radius.circular(10))),
-                                  child: Padding(
-                                      padding: const EdgeInsets.only(left: 5),
-                                      child: Text(
-                                          'Asignado a: ${widget.assignedTo}',
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white))),
-                                )
-                              ),
+                                  child: Container(
+                                decoration: BoxDecoration(
+                                    color:
+                                        FlutterFlowTheme.of(context).secondary,
+                                    border: Border.all(color: Colors.black),
+                                    borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(10),
+                                        topRight: Radius.circular(10))),
+                                child: Padding(
+                                    padding: const EdgeInsets.only(left: 5),
+                                    child: Text(
+                                        'Asignado a: ${widget.assignedTo}',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white))),
+                              )),
                               const SizedBox(width: 20),
                               Expanded(
                                 child: TextField(

@@ -204,3 +204,14 @@ Future<dynamic> getDepartments() async {
     throw Future.error(e.toString());
   }
 }
+
+
+Future<dynamic> createRequestTicket(Map<String, dynamic> body) async {
+  try {
+    var response = await createNewTicketServices(body);
+    return json.decode(utf8.decode(response.bodyBytes));
+  } catch (e) {
+    insertErrorLog(e.toString(), 'createRequestTicket');
+    throw Future.error(e.toString());
+  }
+}
