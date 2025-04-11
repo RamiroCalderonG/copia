@@ -1368,7 +1368,7 @@ Future<dynamic> getAllServiceTickets(String toFetch, int statusVal, int byWho) a
           'flag' : byWho
         },
         persistCookies: true,
-        timeoutSeconds: 35
+        timeoutSeconds: 120
     );
     apiCall.raiseForStatus();
     return apiCall;
@@ -1398,7 +1398,7 @@ Future<dynamic> getRequestticketHistory(int ticketId) async {
   }
 }
 
-Future<dynamic> getUsersForTicket() async {
+Future<dynamic> getUsersForTicket(int filter, int item) async {
   try {
     SharedPreferences devicePrefs = await SharedPreferences.getInstance();
     var apiCall = await Requests.get(
@@ -1406,6 +1406,10 @@ Future<dynamic> getUsersForTicket() async {
       headers: {
           'Authorization': devicePrefs.getString('token')!,
           'Content-Type': 'application/json',
+        },
+        queryParameters: {
+          'filter' : filter,
+          'item' : item
         },
       persistCookies: false,
       timeoutSeconds: 10,
@@ -1442,7 +1446,7 @@ Future<dynamic> createNewTicketServices(Map<String, dynamic> body) async {
     }
   } catch (e) {
     insertErrorLog(e.toString(), 'createNewTicketServices()');
-    throw Future.error(e.toString());
+    throw e.toString();
   }
 }
 

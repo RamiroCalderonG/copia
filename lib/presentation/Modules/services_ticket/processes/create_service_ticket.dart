@@ -25,7 +25,7 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
   late Future<dynamic> usersListFuture;
   List<String> deptsList = <String>[];
   String campusSelected = '';
-  DateTime? pickedDate;
+  DateTime? finalDateTime;
   String whoRequest = '';
 
   Map<int, dynamic> deptsMap = {};
@@ -44,14 +44,14 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
 
   @override
   void initState() {
-    fetchUsersList();
+    fetchUsersList(1,0);
     _isDescriptionFieldEmpty = false;
     _isObservationsFieldEmpty = false;
     super.initState();
   }
 
-  void fetchUsersList() {
-    usersListFuture = getUsersList().then((value) {
+  void fetchUsersList(int filter, int item) {
+    usersListFuture = getUsersList(filter, item).then((value) {
       usersMapsL = value;
       getEmployeesNames(value);
       getDepartments().then((onValue) {
@@ -179,7 +179,7 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
       readOnly: true,
       onTap: () async {
         // ignore: unused_local_variable
-        pickedDate = await showDatePicker(
+        DateTime? pickedDate = await showDatePicker(
                 context: context,
                 initialDate: DateTime.now(),
                 firstDate: DateTime(2000),
@@ -187,6 +187,7 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
             .then((pickedDate) {
           if (pickedDate != null) {
             setState(() {
+              finalDateTime = pickedDate;
               _date.text = DateFormat('yyyy-MM-dd').format(pickedDate);
             });
           }
@@ -318,12 +319,20 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
                                     showEmptyFieldAlertDialog(context,
                                         'Verificar que ningun campo quede vacio');
                                   } else {
-                                    Map<String, dynamic> bodyComposed = {};
-                                    int deptId = deptsMap.entries
+                                     Map<String, dynamic> bodyComposed = {};
+                                     int deptFromWhereRequests = 0;
+                                     int deptId = 0;
+                                     int idLoginUser = 0;
+
+                                     deptFromWhereRequests = deptsMap.entries
+                                        .firstWhere((entry) =>
+                                            entry.value.trim() == currentUser!.work_area!.toUpperCase())
+                                        .key;
+                                    deptId = deptsMap.entries
                                         .firstWhere((entry) =>
                                             entry.value == deptSelected)
                                         .key;
-                                    int idLoginUser = usersMapsL
+                                    idLoginUser = usersMapsL
                                             .firstWhere(
                                                 (item) =>
                                                     item["name"] == whoRequest,
@@ -333,21 +342,16 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
                                             item["name"] == whoRequest)["userN"]
                                         : -1;
 
-                                        int deptFromWhereRequests = deptsMap.entries
-                                        .firstWhere((entry) =>
-                                            entry.value == currentUser!.work_area)
-                                        .key;
-
                                     bodyComposed.addAll({
                                       "whoRequests": idLoginUser,
-                                      "campus": campusSelected,
+                                      "campus": campusSelected.toUpperCase(),
                                       "requestedToDept": deptId,
                                       "description":
                                           _descriptionController.text,
                                       "observations":
                                           _observationsController.text,
-                                      "dateRequest": _date.text,
-                                      "whoRegisteredLoginId":
+                                      "dateRequest": finalDateTime.toString(),
+                                      "whoRegisteredLogin":
                                           currentUser!.idLogin,
                                       "deptWhoRequests": deptFromWhereRequests,
                                       "whoRegisteredNumber":
@@ -363,8 +367,8 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
                                           _observationsController.text = '';
                                           whoRequest = '';
                                           campusSelected = '';
-                                          showConfirmationDialog(
-                                              context, 'Éxito', 'Ticket #');
+                                          showSuccessDialog(
+                                              context, 'Éxito', 'El ticket fue registrado con el número:  ${value["idReqSerDepto"]}');
                                         });
                                       },
                                     ).onError((error, stackTrace) {

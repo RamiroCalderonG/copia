@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/extensions/capitalize_strings.dart';
+import 'package:oxschool/core/reusable_methods/logger_actions.dart';
+import 'package:oxschool/core/reusable_methods/services_functions.dart';
 import 'package:oxschool/data/Models/ServiceTicketRequest.dart';
 import 'package:oxschool/data/datasources/temp/services_temp.dart';
 import 'package:oxschool/presentation/Modules/services_ticket/processes/ticket_requests_dashboard/processes_services.dart';
@@ -22,6 +24,8 @@ class _TicketRequestSummaryState extends State<TicketRequestSummary>
   bool canCreateTicket = false;
   bool canEditTicket = false;
   bool canAssignTicket = false;
+  List<Map<String, dynamic>> usersMapsL = [];
+   List<String> employeeList = <String>[];
 
   @override
   void initState() {
@@ -44,6 +48,9 @@ class _TicketRequestSummaryState extends State<TicketRequestSummary>
     onProgressTickets.clear();
     closedTickets.clear();
     overdueTickets.clear();
+    usersMapsL.clear();
+    employeeList.clear();
+
     super.dispose();
   }
 
@@ -52,8 +59,6 @@ class _TicketRequestSummaryState extends State<TicketRequestSummary>
       if (element.eventId == 20 && element.canAccessEvent == true ) {
         setState(() {
           canAssignTicket = true;
-          print(canAssignTicket);
-          print(element.eventId);
         });
         
       }
@@ -67,10 +72,29 @@ class _TicketRequestSummaryState extends State<TicketRequestSummary>
         setState(() {
           canEditTicket = true;
         });
-      }
-      
+      } 
     }
+  }
 
+    void getEmployeesNames(List<Map<String, dynamic>> usersLists) {
+    setState(() {
+      employeeList.clear();
+      for (var element in usersLists) {
+        if (element['name'] != null) {
+          employeeList.add(element['name'].toString());
+        }
+      }
+    });
+  }
+
+  void fetchUsersList(int filter, int item) {
+    var userResponse = getUsersList(filter, item).then((value) {
+      usersMapsL = value;
+      getEmployeesNames(value);
+    }).onError((error, stacktrace) {
+      insertErrorLog(error.toString(),
+          'Error al obtener la lista de empleados | fetchUsersList()');
+    });
   }
 
   @override
@@ -127,7 +151,12 @@ class _TicketRequestSummaryState extends State<TicketRequestSummary>
                     color: FlutterFlowTheme.of(context).primaryBackground,
                     shadowColor: FlutterFlowTheme.of(context).primaryText,
                     child: ListTile(
-                      trailing: canAssignTicket ? IconButton(onPressed: (){
+                      trailing: canAssignTicket ? IconButton(
+                        onPressed: () async {
+                          ff
+                          
+
+
                       }, 
                       icon: Icon(Icons.arrow_forward_ios_rounded, color: Colors.deepPurpleAccent,),
                       tooltip: 'Asignar ticket',

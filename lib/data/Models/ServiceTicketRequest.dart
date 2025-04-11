@@ -11,8 +11,8 @@ class Serviceticketrequest {
   DateTime? deadLine;
   DateTime? closureDate;
   String description;
-  String observations;
-  int status;
+  String? observations;
+  int? status;
 
 
   Serviceticketrequest({

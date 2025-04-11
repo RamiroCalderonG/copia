@@ -466,20 +466,20 @@ class TicketDetail extends StatefulWidget {
       {super.key,
       required this.ticketId,
       required this.description,
-      required this.observations,
+      this.observations,
       this.deadLine,
-      required this.requestDate,
-      required this.creationDate,
+      this.requestDate,
+      this.creationDate,
       this.closureDate,
       this.assignedTo,
       this.reportedBy,
       required this.isSelectedRequestsIMade});
   final int ticketId;
   final String description;
-  final String observations;
+  final String? observations;
   final DateTime? deadLine;
-  final DateTime requestDate;
-  final DateTime creationDate;
+  final DateTime? requestDate;
+  final DateTime? creationDate;
   final DateTime? closureDate;
   final String? assignedTo;
   final String? reportedBy;
@@ -512,7 +512,16 @@ class _ScreenState extends State<TicketDetail> {
         ? DateFormat('yyyy-MM-dd').format(widget.deadLine!)
         : 'Sin fecha compromiso';
     _descriptionController.text = widget.description;
-    _observationsController.text = widget.observations;
+
+    if (widget.observations == null) {
+       _observationsController.text = '';
+      
+    } else {
+       _observationsController.text = widget.observations!;
+    }
+    if (widget.creationDate  == null) {
+      _dateController.text = 'Sin fecha de creación';
+    }
     editMode = false;
     super.initState();
   }
@@ -867,7 +876,7 @@ class _ScreenState extends State<TicketDetail> {
                                 controller: TextEditingController(
                                   text: widget.creationDate != null
                                       ? DateFormat('yyyy-MM-dd')
-                                          .format(widget.creationDate)
+                                          .format(widget.creationDate!)
                                       : 'Sin fecha de creación',
                                 ),
                               )),
@@ -892,7 +901,7 @@ class _ScreenState extends State<TicketDetail> {
                                 controller: TextEditingController(
                                   text: widget.requestDate != null
                                       ? DateFormat('yyyy-MM-dd')
-                                          .format(widget.creationDate)
+                                          .format(widget.creationDate!)
                                       : 'Sin fecha de solicitud',
                                 ),
                               ))

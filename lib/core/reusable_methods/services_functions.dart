@@ -16,7 +16,7 @@ Future<List<PlutoRow>> getServiceTicketsByDate(
       servicesTicketsDecodedResponse =
           json.decode(utf8.decode(response.bodyBytes));
 
-      newRows = servicesTicketsDecodedResponse.map((item) {
+      /* newRows = servicesTicketsDecodedResponse.map((item) {
         // Calculate if the service is still on time or overdue
         DateTime deadline =
             DateTime.parse(item['deadLine']); // Fecha compromiso
@@ -61,7 +61,7 @@ Future<List<PlutoRow>> getServiceTicketsByDate(
           'deadLineOnTime': PlutoCell(value: isDeadLineOnTime),
           'requesttedDateOnTime': PlutoCell(value: isRequesttedDateOnTime),
         });
-      }).toList();
+      }).toList(); */
 
       servicesTicketsDecodedResponseList =
           await getServicesTickets(servicesTicketsDecodedResponse);
@@ -166,9 +166,9 @@ try {
 }
 }
 
-Future<dynamic> getUsersList() async {
+Future<dynamic> getUsersList(int filter, int item ) async {
   try {
-    var response = await getUsersForTicket();
+    var response = await getUsersForTicket(filter, item);
     if (response.statusCode == 200) {
       List<Map<String, dynamic>> usersList = [];
       var decodedResponse = json.decode(utf8.decode(response.bodyBytes));
@@ -212,6 +212,8 @@ Future<dynamic> createRequestTicket(Map<String, dynamic> body) async {
     return json.decode(utf8.decode(response.bodyBytes));
   } catch (e) {
     insertErrorLog(e.toString(), 'createRequestTicket');
-    throw Future.error(e.toString());
+    throw e.toString();
   }
 }
+
+
