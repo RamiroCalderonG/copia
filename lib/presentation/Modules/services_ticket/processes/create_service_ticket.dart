@@ -44,13 +44,13 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
 
   @override
   void initState() {
-    fetchUsersList(1,0);
+    fetchUsersList(1, '');
     _isDescriptionFieldEmpty = false;
     _isObservationsFieldEmpty = false;
     super.initState();
   }
 
-  void fetchUsersList(int filter, int item) {
+  void fetchUsersList(int filter, String item) {
     usersListFuture = getUsersList(filter, item).then((value) {
       usersMapsL = value;
       getEmployeesNames(value);
@@ -319,14 +319,16 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
                                     showEmptyFieldAlertDialog(context,
                                         'Verificar que ningun campo quede vacio');
                                   } else {
-                                     Map<String, dynamic> bodyComposed = {};
-                                     int deptFromWhereRequests = 0;
-                                     int deptId = 0;
-                                     int idLoginUser = 0;
+                                    Map<String, dynamic> bodyComposed = {};
+                                    int deptFromWhereRequests = 0;
+                                    int deptId = 0;
+                                    int idLoginUser = 0;
 
-                                     deptFromWhereRequests = deptsMap.entries
+                                    deptFromWhereRequests = deptsMap.entries
                                         .firstWhere((entry) =>
-                                            entry.value.trim() == currentUser!.work_area!.toUpperCase())
+                                            entry.value.trim() ==
+                                            currentUser!.work_area!
+                                                .toUpperCase())
                                         .key;
                                     deptId = deptsMap.entries
                                         .firstWhere((entry) =>
@@ -367,8 +369,8 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
                                           _observationsController.text = '';
                                           whoRequest = '';
                                           campusSelected = '';
-                                          showSuccessDialog(
-                                              context, 'Éxito', 'El ticket fue registrado con el número:  ${value["idReqSerDepto"]}');
+                                          showSuccessDialog(context, 'Éxito',
+                                              'El ticket fue registrado con el número:  ${value["idReqSerDepto"]}');
                                         });
                                       },
                                     ).onError((error, stackTrace) {

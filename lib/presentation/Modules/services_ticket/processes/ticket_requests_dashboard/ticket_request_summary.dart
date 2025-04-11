@@ -4,10 +4,8 @@ import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/core/reusable_methods/services_functions.dart';
-import 'package:oxschool/data/Models/ServiceTicketRequest.dart';
 import 'package:oxschool/data/datasources/temp/services_temp.dart';
 import 'package:oxschool/presentation/Modules/services_ticket/processes/ticket_requests_dashboard/processes_services.dart';
-import 'package:oxschool/presentation/components/custom_icon_button.dart';
 
 class TicketRequestSummary extends StatefulWidget {
   const TicketRequestSummary({Key? key, required this.isSelectedRequestsIMade})
@@ -25,7 +23,7 @@ class _TicketRequestSummaryState extends State<TicketRequestSummary>
   bool canEditTicket = false;
   bool canAssignTicket = false;
   List<Map<String, dynamic>> usersMapsL = [];
-   List<String> employeeList = <String>[];
+  List<String> employeeList = <String>[];
 
   @override
   void initState() {
@@ -50,33 +48,30 @@ class _TicketRequestSummaryState extends State<TicketRequestSummary>
     overdueTickets.clear();
     usersMapsL.clear();
     employeeList.clear();
-
     super.dispose();
   }
 
-  void enableDisableEvents(){
+  void enableDisableEvents() {
     for (var element in currentUser!.userRole!.roleModuleRelationships!) {
-      if (element.eventId == 20 && element.canAccessEvent == true ) {
+      if (element.eventId == 20 && element.canAccessEvent == true) {
         setState(() {
           canAssignTicket = true;
         });
-        
       }
       if (element.eventId == 19 && element.canAccessEvent == true) {
         setState(() {
           canCreateTicket = true;
         });
-        
       }
       if (element.eventId == 21 && element.canAccessEvent == true) {
         setState(() {
           canEditTicket = true;
         });
-      } 
+      }
     }
   }
 
-    void getEmployeesNames(List<Map<String, dynamic>> usersLists) {
+  void getEmployeesNames(List<Map<String, dynamic>> usersLists) {
     setState(() {
       employeeList.clear();
       for (var element in usersLists) {
@@ -87,8 +82,8 @@ class _TicketRequestSummaryState extends State<TicketRequestSummary>
     });
   }
 
-  void fetchUsersList(int filter, int item) {
-    var userResponse = getUsersList(filter, item).then((value) {
+  void fetchUsersList(int filter, String dept) {
+    var userResponse = getUsersList(filter, dept).then((value) {
       usersMapsL = value;
       getEmployeesNames(value);
     }).onError((error, stacktrace) {
@@ -151,16 +146,19 @@ class _TicketRequestSummaryState extends State<TicketRequestSummary>
                     color: FlutterFlowTheme.of(context).primaryBackground,
                     shadowColor: FlutterFlowTheme.of(context).primaryText,
                     child: ListTile(
-                      trailing: canAssignTicket ? IconButton(
-                        onPressed: () async {
-                          ff
-                          
-
-
-                      }, 
-                      icon: Icon(Icons.arrow_forward_ios_rounded, color: Colors.deepPurpleAccent,),
-                      tooltip: 'Asignar ticket',
-                      ) : null,
+                      trailing: canAssignTicket
+                          ? IconButton(
+                              onPressed: () async {
+                                fetchUsersList(2, currentUser!.work_area!);
+                                
+                              },
+                              icon: Icon(
+                                Icons.arrow_forward_ios_rounded,
+                                color: Colors.deepPurpleAccent,
+                              ),
+                              tooltip: 'Asignar ticket',
+                            )
+                          : null,
                       leading: IconButton(
                         icon: Icon(Icons.check_circle_outline,
                             color: Colors.blue),
@@ -438,7 +436,7 @@ class _TicketRequestSummaryState extends State<TicketRequestSummary>
                   color: const Color.fromARGB(255, 197, 214, 234),
                   spreadRadius: 1,
                   blurRadius: 5,
-                  offset: const Offset(0, 3), // changes position of shadow
+                  offset: const Offset(0, 3),
                 ),
               ],
             ),

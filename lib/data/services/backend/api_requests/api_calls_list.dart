@@ -1351,25 +1351,25 @@ Future<dynamic> getLatestAppVersion() async {
   }
 }
 
-Future<dynamic> getAllServiceTickets(String toFetch, int statusVal, int byWho) async {
+Future<dynamic> getAllServiceTickets(
+    String toFetch, int statusVal, int byWho) async {
   String startDate = toFetch.replaceAll('-', '');
   try {
-     SharedPreferences devicePrefs = await SharedPreferences.getInstance();
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
     var apiCall = await Requests.get(
-      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/services/ticket/',
-      headers: {
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/services/ticket/',
+        headers: {
           'Authorization': devicePrefs.getString('token')!,
           'Content-Type': 'application/json',
         },
         queryParameters: {
           'toFetch': startDate.toString(),
-          'from' : currentUser!.idLogin,
-          'status' : statusVal,
-          'flag' : byWho
+          'from': currentUser!.idLogin,
+          'status': statusVal,
+          'flag': byWho
         },
         persistCookies: true,
-        timeoutSeconds: 120
-    );
+        timeoutSeconds: 120);
     apiCall.raiseForStatus();
     return apiCall;
   } catch (e) {
@@ -1382,14 +1382,13 @@ Future<dynamic> getRequestticketHistory(int ticketId) async {
   try {
     SharedPreferences devicePrefs = await SharedPreferences.getInstance();
     var apiCall = await Requests.get(
-      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/services/ticket/$ticketId',
-      headers: {
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/services/ticket/$ticketId',
+        headers: {
           'Authorization': devicePrefs.getString('token')!,
           'Content-Type': 'application/json',
         },
         persistCookies: true,
-        timeoutSeconds: 35
-    );
+        timeoutSeconds: 35);
     apiCall.raiseForStatus();
     return apiCall;
   } catch (e) {
@@ -1398,19 +1397,16 @@ Future<dynamic> getRequestticketHistory(int ticketId) async {
   }
 }
 
-Future<dynamic> getUsersForTicket(int filter, int item) async {
+Future<dynamic> getUsersForTicket(int filter, String dept) async {
   try {
     SharedPreferences devicePrefs = await SharedPreferences.getInstance();
     var apiCall = await Requests.get(
       '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/users/ticket/users',
       headers: {
-          'Authorization': devicePrefs.getString('token')!,
-          'Content-Type': 'application/json',
-        },
-        queryParameters: {
-          'filter' : filter,
-          'item' : item
-        },
+        'Authorization': devicePrefs.getString('token')!,
+        'Content-Type': 'application/json',
+      },
+      queryParameters: {'filter': filter, 'item': dept},
       persistCookies: false,
       timeoutSeconds: 10,
     );
@@ -1422,25 +1418,23 @@ Future<dynamic> getUsersForTicket(int filter, int item) async {
   }
 }
 
-
 Future<dynamic> createNewTicketServices(Map<String, dynamic> body) async {
   try {
     SharedPreferences devicePrefs = await SharedPreferences.getInstance();
     var apiCall = await Requests.post(
       '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/services/ticket',
       headers: {
-          'Authorization': devicePrefs.getString('token')!,
-          'Content-Type': 'application/json',
-        },
-        json: body,
+        'Authorization': devicePrefs.getString('token')!,
+        'Content-Type': 'application/json',
+      },
+      json: body,
       persistCookies: false,
       timeoutSeconds: 15,
     );
     apiCall.raiseForStatus();
     if (apiCall.statusCode == 200) {
       return apiCall;
-    }
-    else {
+    } else {
       insertErrorLog(apiCall.body, 'createNewTicketServices()');
       throw Future.error(apiCall.body);
     }

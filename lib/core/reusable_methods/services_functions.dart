@@ -148,27 +148,27 @@ void refreshTicketsCuantity() {
 }
 
 Future<List<Map<String, dynamic>>> getRequestTicketHistory(int ticketId) async {
-try {
-  var response = await getRequestticketHistory(ticketId);
-  if (response.statusCode == 200) {
-    List<Map<String, dynamic>> history = [];
-    var decodedResponse = json.decode(utf8.decode(response.bodyBytes));
-    for (var item in decodedResponse) {
-      history.add(item);
+  try {
+    var response = await getRequestticketHistory(ticketId);
+    if (response.statusCode == 200) {
+      List<Map<String, dynamic>> history = [];
+      var decodedResponse = json.decode(utf8.decode(response.bodyBytes));
+      for (var item in decodedResponse) {
+        history.add(item);
+      }
+      return history;
+    } else {
+      return [];
     }
-    return history;
-  } else {
-    return [];
+  } catch (e) {
+    insertErrorLog(e.toString(), 'getRequestTicketHistory($ticketId)');
+    throw Future.error(e.toString());
   }
-} catch (e) {
-  insertErrorLog(e.toString(), 'getRequestTicketHistory($ticketId)');
-  throw Future.error(e.toString());
-}
 }
 
-Future<dynamic> getUsersList(int filter, int item ) async {
+Future<dynamic> getUsersList(int filter, String dept) async {
   try {
-    var response = await getUsersForTicket(filter, item);
+    var response = await getUsersForTicket(filter, dept);
     if (response.statusCode == 200) {
       List<Map<String, dynamic>> usersList = [];
       var decodedResponse = json.decode(utf8.decode(response.bodyBytes));
@@ -191,20 +191,18 @@ Future<dynamic> getDepartments() async {
     if (response.statusCode == 200) {
       Map<int, dynamic> deptsMap = {};
       var decoded = json.decode(utf8.decode(response.bodyBytes));
-    for (var element in decoded) {
-      deptsMap.addAll({element['id'] : element['bureauName']});
-    }
-    return deptsMap;
+      for (var element in decoded) {
+        deptsMap.addAll({element['id']: element['bureauName']});
+      }
+      return deptsMap;
     } else {
       throw Future.error(response.body.toString());
     }
-    
   } catch (e) {
     insertErrorLog(e.toString(), 'getDepartments()');
     throw Future.error(e.toString());
   }
 }
-
 
 Future<dynamic> createRequestTicket(Map<String, dynamic> body) async {
   try {
@@ -215,5 +213,3 @@ Future<dynamic> createRequestTicket(Map<String, dynamic> body) async {
     throw e.toString();
   }
 }
-
-
