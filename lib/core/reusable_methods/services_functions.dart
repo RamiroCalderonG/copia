@@ -213,3 +213,14 @@ Future<dynamic> createRequestTicket(Map<String, dynamic> body) async {
     throw e.toString();
   }
 }
+
+Future<dynamic> updateRequestTicket(
+    Map<String, dynamic> contents, int flag) async {
+  try {
+    var response = await updateSupportTicket(contents, flag);
+    return json.decode(utf8.decode(response.bodybytes));
+  } catch (e) {
+    insertErrorLog(e.toString(), 'updateRequestTicket');
+    return e;
+  }
+}

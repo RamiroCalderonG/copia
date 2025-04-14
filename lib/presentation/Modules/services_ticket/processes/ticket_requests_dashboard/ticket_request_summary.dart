@@ -146,19 +146,19 @@ class _TicketRequestSummaryState extends State<TicketRequestSummary>
                     color: FlutterFlowTheme.of(context).primaryBackground,
                     shadowColor: FlutterFlowTheme.of(context).primaryText,
                     child: ListTile(
-                      trailing: canAssignTicket
-                          ? IconButton(
-                              onPressed: () async {
-                                fetchUsersList(2, currentUser!.work_area!);
-                                
-                              },
-                              icon: Icon(
-                                Icons.arrow_forward_ios_rounded,
-                                color: Colors.deepPurpleAccent,
-                              ),
-                              tooltip: 'Asignar ticket',
-                            )
-                          : null,
+                      // trailing: canAssignTicket
+                      //     ? IconButton(
+                      //         onPressed: () async {
+                      //           fetchUsersList(2, currentUser!.work_area!);
+
+                      //         },
+                      //         icon: Icon(
+                      //           Icons.arrow_forward_ios_rounded,
+                      //           color: Colors.deepPurpleAccent,
+                      //         ),
+                      //         tooltip: 'Asignar ticket',
+                      //       )
+                      //     : null,
                       leading: IconButton(
                         icon: Icon(Icons.check_circle_outline,
                             color: Colors.blue),

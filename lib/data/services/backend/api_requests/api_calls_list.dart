@@ -1397,6 +1397,27 @@ Future<dynamic> getRequestticketHistory(int ticketId) async {
   }
 }
 
+Future<dynamic> updateSupportTicket(Map<String, dynamic> body, int flag) async {
+  try {
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
+    var apiCall = await Requests.put(
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/services/ticket/',
+        headers: {
+          'Authorization': devicePrefs.getString('token')!,
+          'Content-Type': 'application/json',
+        },
+        queryParameters: {"update": flag},
+        json: body,
+        persistCookies: true,
+        timeoutSeconds: 35);
+    apiCall.raiseForStatus();
+    return apiCall;
+  } catch (e) {
+    insertErrorLog(e.toString(), 'updateSupportTicket()');
+    return e;
+  }
+}
+
 Future<dynamic> getUsersForTicket(int filter, String dept) async {
   try {
     SharedPreferences devicePrefs = await SharedPreferences.getInstance();
