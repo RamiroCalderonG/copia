@@ -498,30 +498,38 @@ class _ScreenState extends State<TicketDetail> {
     'Evaluar',
   ];
 
+  List<Map<String, dynamic>> usersMapsL = [];
+  List<String> employeeList = <String>[];
+  late Future _employeeListFuture;
+
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _observationsController = TextEditingController();
   bool editMode = false;
   bool isLoading = false;
+  bool dateEdited = false;
+  bool asigneEdited = false;
 
+  Map<String, dynamic> updateBody = {};
   String selectedValue = list.first;
 
   @override
   void initState() {
+    fetchUsersList(2, currentUser!.work_area!);
     _dateController.text = widget.deadLine != null
         ? DateFormat('yyyy-MM-dd').format(widget.deadLine!)
         : 'Sin fecha compromiso';
     _descriptionController.text = widget.description;
 
     if (widget.observations == null) {
-       _observationsController.text = '';
-      
+      _observationsController.text = '';
     } else {
-       _observationsController.text = widget.observations!;
+      _observationsController.text = widget.observations!;
     }
-    if (widget.creationDate  == null) {
+    if (widget.creationDate == null) {
       _dateController.text = 'Sin fecha de creación';
     }
+
     editMode = false;
     super.initState();
   }
@@ -535,415 +543,996 @@ class _ScreenState extends State<TicketDetail> {
     super.dispose();
   }
 
+  void fetchUsersList(int filter, String dept) {
+    _employeeListFuture = getUsersList(filter, dept).then((value) {
+      usersMapsL = value;
+      getEmployeesNames(value);
+    }).onError((error, stacktrace) {
+      insertErrorLog(error.toString(),
+          'Error al obtener la lista de empleados | fetchUsersList()');
+    });
+  }
+
+  void getEmployeesNames(List<Map<String, dynamic>> usersLists) {
+    employeeList.clear();
+    for (var element in usersLists) {
+      if (element['users1'] != null) {
+        employeeList.add(element['users1'].toString().trim());
+      }
+    }
+  }
+
+  dynamic handleUpdate(int flag) async {
+    if (dateEdited || asigneEdited) {
+      updateRequestTicket(updateBody, flag);
+    } else {
+      showEmptyFieldAlertDialog(context, 'Ningun cambio detectado');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, constraints) {
-      if (isLoading) {
-        return Center(
-          child: CustomLoadingIndicator(),
-        );
-      } else {
-        return Padding(
-          padding:
-              const EdgeInsets.only(left: 50, right: 50, bottom: 50, top: 50),
-          child: Container(
-            decoration: BoxDecoration(
-              color: FlutterFlowTheme.of(context).secondaryBackground,
-              borderRadius: BorderRadius.circular(30),
-            ),
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: FlutterFlowTheme.of(context).secondary,
-                            borderRadius: const BorderRadius.vertical(
-                              top: Radius.circular(30),
-                            ),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.only(
-                                left: 50, right: 20, top: 8, bottom: 8),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'Ticket de servicio',
-                                  style: TextStyle(
-                                    fontFamily: 'Sora',
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontStyle: FontStyle.italic,
-                                    fontSize: 26,
-                                  ),
-                                ),
-                                Spacer(),
-                                IconButton.outlined(
-                                  onPressed: () {
-                                    if (editMode) {
-                                      null;
-                                    } else {
-                                      //TODO: INSERT PRINT FUNCTION
-                                      print('Print ticket');
-                                    }
-                                  },
-                                  icon: const Icon(Icons.print,
-                                      color: Colors.white),
-                                  iconSize: 20,
-                                  tooltip: 'Imprimir ticket',
-                                  style: OutlinedButton.styleFrom(
-                                    shape: const CircleBorder(),
-                                    side: const BorderSide(
-                                      color: Colors.white,
-                                      width: 0.5,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 10,
-                                ),
-                                IconButton.outlined(
-                                  enableFeedback: true,
-                                  onPressed: () {
-                                    setState(() {
-                                      isLoading = true;
-                                    });
-                                    var ticketHistory =
-                                        getRequestTicketHistory(widget.ticketId)
-                                            .then((value) {
-                                      setState(() {
-                                        isLoading = false;
-                                        showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return AlertDialog(
-                                              title: Text(
-                                                  'Historial de movimientos del ticket: ${widget.ticketId}'),
-                                              content: RequestTicketHistory(
-                                                history: value,
-                                              ),
-                                              actions: [
-                                                TextButton(
-                                                  onPressed: () {
-                                                    Navigator.of(context)
-                                                        .pop(); // Close the dialog
-                                                  },
-                                                  child: const Text('Cerrar'),
-                                                ),
-                                              ],
-                                            );
-                                          },
-                                        );
-                                      });
-                                    }).onError((error, stackTrace) {
-                                      setState(() {
-                                        isLoading = false;
-                                      });
-                                    });
-                                  },
-                                  icon: const Icon(Icons.history,
-                                      color: Colors.white),
-                                  iconSize: 20,
-                                  tooltip: 'Historial de movimientos',
-                                  style: OutlinedButton.styleFrom(
-                                    shape: const CircleBorder(),
-                                    side: const BorderSide(
-                                      color: Colors.white,
-                                      width: 0.5,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 10,
-                                ),
-                                IconButton.outlined(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                  icon: const Icon(Icons.close,
-                                      color: Colors.white),
-                                  iconSize: 20,
-                                  tooltip: 'Cerrar',
-                                  style: OutlinedButton.styleFrom(
-                                    shape: const CircleBorder(),
-                                    side: const BorderSide(
-                                      color: Colors.white,
-                                      width: 0.5,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+    Map<String, dynamic> ticketId = {'RequestService': widget.ticketId};
+    updateBody.addEntries(ticketId.entries);
 
-                // Ticket ID Section
-                Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text(
-                        editMode
-                            ? 'EDITANDO: #${widget.ticketId}'
-                            : 'Ticket  #${widget.ticketId}.',
-                        style: const TextStyle(
-                          fontFamily: 'Sora',
-                          fontWeight: FontWeight.bold,
-                          fontSize: 30,
-                        ),
-                      ),
-                    ],
-                  ),
+    return FutureBuilder(
+        future: _employeeListFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(
+              child: CustomLoadingIndicator(),
+            );
+          } else if (snapshot.hasError) {
+            return Placeholder(
+              child: Center(
+                child: Text(snapshot.error.toString()),
+              ),
+            );
+          } else {
+            return Padding(
+              padding: const EdgeInsets.only(
+                  left: 50, right: 50, bottom: 50, top: 50),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: FlutterFlowTheme.of(context).secondaryBackground,
+                  borderRadius: BorderRadius.circular(30),
                 ),
-
-                // Divider
-                const Divider(
-                  thickness: 1,
-                  color: Colors.black,
-                ),
-
-                // Scrollable Content Section
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 20, right: 20),
-                      child: Column(
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 0),
+                      child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                      color: FlutterFlowTheme.of(context)
-                                          .secondary,
-                                      border: Border.all(color: Colors.black),
-                                      borderRadius: BorderRadius.only(
-                                          topLeft: Radius.circular(10),
-                                          topRight: Radius.circular(10))),
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(left: 5),
-                                    child: Text('Descripción',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white)),
-                                  ),
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: FlutterFlowTheme.of(context).secondary,
+                                borderRadius: const BorderRadius.vertical(
+                                  top: Radius.circular(30),
                                 ),
-                              )
-                            ],
-                          ),
-
-                          TextField(
-                            controller: _descriptionController,
-                            readOnly: true,
-                            maxLines: 3,
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                            ),
-                          ),
-
-                          const SizedBox(height: 20),
-
-                          // Observaciones Section
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                      color: FlutterFlowTheme.of(context)
-                                          .secondary,
-                                      border: Border.all(color: Colors.black),
-                                      borderRadius: BorderRadius.only(
-                                          topLeft: Radius.circular(10),
-                                          topRight: Radius.circular(10))),
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(left: 5),
-                                    child: Text('Observaciones',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white)),
-                                  ),
-                                ),
-                              )
-                            ],
-                          ),
-                          TextField(
-                            controller: _observationsController,
-                            readOnly: true,
-                            maxLines: 3,
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                            ),
-                          ),
-
-                          const SizedBox(height: 20),
-
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              Expanded(
-                                  child: Container(
-                                decoration: BoxDecoration(
-                                    color:
-                                        FlutterFlowTheme.of(context).secondary,
-                                    border: Border.all(color: Colors.black),
-                                    borderRadius: BorderRadius.only(
-                                        topLeft: Radius.circular(10),
-                                        topRight: Radius.circular(10))),
-                                child: Padding(
-                                    padding: const EdgeInsets.only(left: 5),
-                                    child: Text(
-                                        'Asignado a: ${widget.assignedTo}',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white))),
-                              )),
-                              const SizedBox(width: 20),
-                              Expanded(
-                                child: TextField(
-                                  controller: _dateController,
-                                  decoration: InputDecoration(
-                                    labelText: 'Fecha Compromiso',
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(10.0),
-                                      borderSide: const BorderSide(
-                                        color: Colors.grey,
-                                        width: 1.0,
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                    left: 50, right: 20, top: 8, bottom: 8),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'Ticket de servicio',
+                                      style: TextStyle(
+                                        fontFamily: 'Sora',
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontStyle: FontStyle.italic,
+                                        fontSize: 26,
                                       ),
                                     ),
-                                    filled: true,
-                                    fillColor: Colors.transparent,
-                                  ),
-                                  readOnly: true,
-                                  onTap: () async {
-                                    if (editMode) {
-                                      DateTime? pickedDate =
-                                          await showDatePicker(
-                                        context: context,
-                                        helpText: 'MM-DD-AAAA',
-                                        initialDate: DateTime.now(),
-                                        firstDate: DateTime(2000),
-                                        lastDate: DateTime(2101),
-                                      );
-                                      if (pickedDate != null) {
-                                        setState(() {
-                                          _dateController.text =
-                                              DateFormat('yyyy-MM-dd')
-                                                  .format(pickedDate);
-                                        });
-                                      }
-                                    } else {
-                                      null;
-                                    }
-                                  },
-                                ),
-                              ),
-                              SizedBox(
-                                width: 20,
-                              ),
-                              Expanded(
-                                  child: TextField(
-                                decoration: InputDecoration(
-                                  labelText: 'Fecha de creación',
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10.0),
-                                    borderSide: const BorderSide(
-                                      color: Colors.grey,
-                                      width: 1.0,
+                                    Spacer(),
+                                    IconButton.outlined(
+                                      onPressed: () {
+                                        if (editMode) {
+                                          null;
+                                        } else {
+                                          //TODO: INSERT PRINT FUNCTION
+                                          print('Print ticket');
+                                        }
+                                      },
+                                      icon: const Icon(Icons.print,
+                                          color: Colors.white),
+                                      iconSize: 20,
+                                      tooltip: 'Imprimir ticket',
+                                      style: OutlinedButton.styleFrom(
+                                        shape: const CircleBorder(),
+                                        side: const BorderSide(
+                                          color: Colors.white,
+                                          width: 0.5,
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                  filled: true,
-                                  fillColor: Colors.transparent,
-                                ),
-                                readOnly: true,
-                                controller: TextEditingController(
-                                  text: widget.creationDate != null
-                                      ? DateFormat('yyyy-MM-dd')
-                                          .format(widget.creationDate!)
-                                      : 'Sin fecha de creación',
-                                ),
-                              )),
-                              SizedBox(
-                                width: 20,
-                              ),
-                              Expanded(
-                                  child: TextField(
-                                decoration: InputDecoration(
-                                  labelText: 'Fecha solicitada para servicio',
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10.0),
-                                    borderSide: const BorderSide(
-                                      color: Colors.grey,
-                                      width: 1.0,
+                                    SizedBox(
+                                      width: 10,
                                     ),
-                                  ),
-                                  filled: true,
-                                  fillColor: Colors.transparent,
-                                ),
-                                readOnly: true,
-                                controller: TextEditingController(
-                                  text: widget.requestDate != null
-                                      ? DateFormat('yyyy-MM-dd')
-                                          .format(widget.creationDate!)
-                                      : 'Sin fecha de solicitud',
-                                ),
-                              ))
-                            ],
-                          ),
-                          SizedBox(
-                            height: 20,
-                          ),
-                          /* Row(
-                      children: [
-                        
-                      ],
-                    ) */
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (!widget.isSelectedRequestsIMade)
-                                editMode
-                                    ? SaveItemButton(onPressed: () {
+                                    IconButton.outlined(
+                                      enableFeedback: true,
+                                      onPressed: () {
                                         setState(() {
                                           isLoading = true;
-                                          editMode = !editMode;
                                         });
-                                      })
-                                    : EditItemButton(onPressed: () {
-                                        setState(() {
-                                          editMode = !editMode;
+                                        var ticketHistory =
+                                            getRequestTicketHistory(
+                                                    widget.ticketId)
+                                                .then((value) {
+                                          setState(() {
+                                            isLoading = false;
+                                            showDialog(
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return AlertDialog(
+                                                  title: Text(
+                                                      'Historial de movimientos del ticket: ${widget.ticketId}'),
+                                                  content: RequestTicketHistory(
+                                                    history: value,
+                                                  ),
+                                                  actions: [
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        Navigator.of(context)
+                                                            .pop(); // Close the dialog
+                                                      },
+                                                      child:
+                                                          const Text('Cerrar'),
+                                                    ),
+                                                  ],
+                                                );
+                                              },
+                                            );
+                                          });
+                                        }).onError((error, stackTrace) {
+                                          setState(() {
+                                            isLoading = false;
+                                          });
                                         });
-                                      }),
-                            ],
-                          )
+                                      },
+                                      icon: const Icon(Icons.history,
+                                          color: Colors.white),
+                                      iconSize: 20,
+                                      tooltip: 'Historial de movimientos',
+                                      style: OutlinedButton.styleFrom(
+                                        shape: const CircleBorder(),
+                                        side: const BorderSide(
+                                          color: Colors.white,
+                                          width: 0.5,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 10,
+                                    ),
+                                    IconButton.outlined(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      icon: const Icon(Icons.close,
+                                          color: Colors.white),
+                                      iconSize: 20,
+                                      tooltip: 'Cerrar',
+                                      style: OutlinedButton.styleFrom(
+                                        shape: const CircleBorder(),
+                                        side: const BorderSide(
+                                          color: Colors.white,
+                                          width: 0.5,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),
-                  ),
+
+                    // Ticket ID Section
+                    Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Text(
+                            editMode
+                                ? 'EDITANDO: #${widget.ticketId}'
+                                : 'Ticket  #${widget.ticketId}.',
+                            style: const TextStyle(
+                              fontFamily: 'Sora',
+                              fontWeight: FontWeight.bold,
+                              fontSize: 30,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Divider
+                    const Divider(
+                      thickness: 1,
+                      color: Colors.black,
+                    ),
+
+                    // Scrollable Content Section
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 20, right: 20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                          color: FlutterFlowTheme.of(context)
+                                              .secondary,
+                                          border:
+                                              Border.all(color: Colors.black),
+                                          borderRadius: BorderRadius.only(
+                                              topLeft: Radius.circular(10),
+                                              topRight: Radius.circular(10))),
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(left: 5),
+                                        child: Text('Descripción',
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white)),
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              ),
+
+                              TextField(
+                                controller: _descriptionController,
+                                readOnly: true,
+                                maxLines: 3,
+                                decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
+
+                              const SizedBox(height: 20),
+
+                              // Observaciones Section
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                          color: FlutterFlowTheme.of(context)
+                                              .secondary,
+                                          border:
+                                              Border.all(color: Colors.black),
+                                          borderRadius: BorderRadius.only(
+                                              topLeft: Radius.circular(10),
+                                              topRight: Radius.circular(10))),
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(left: 5),
+                                        child: Text('Observaciones',
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white)),
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              ),
+                              TextField(
+                                controller: _observationsController,
+                                readOnly: true,
+                                maxLines: 3,
+                                decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
+
+                              const SizedBox(height: 20),
+
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Expanded(
+                                      flex: 2,
+                                      child: Container(
+                                          decoration: BoxDecoration(
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .secondary,
+                                              border: Border.all(
+                                                  color: Colors.black),
+                                              borderRadius: BorderRadius.only(
+                                                  topLeft: Radius.circular(10),
+                                                  topRight:
+                                                      Radius.circular(10))),
+                                          child: Padding(
+                                              padding: const EdgeInsets.only(
+                                                  left: 5),
+                                              child: editMode
+                                                  ? widget.assignedTo == "NULL"
+                                                      ? DropdownButton<String>(
+                                                          value: employeeList
+                                                                  .isNotEmpty
+                                                              ? employeeList
+                                                                  .first
+                                                              : null,
+                                                          hint: const Text(
+                                                            'Seleccionar asignado',
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .white),
+                                                          ),
+                                                          items: employeeList.map<
+                                                              DropdownMenuItem<
+                                                                  String>>((String
+                                                              value) {
+                                                            return DropdownMenuItem<
+                                                                String>(
+                                                              value: value,
+                                                              child:
+                                                                  Text(value),
+                                                            );
+                                                          }).toList(),
+                                                          onChanged: (String?
+                                                              newValue) {
+                                                            setState(() {
+                                                              final matchingUser =
+                                                                  usersMapsL
+                                                                      .firstWhere(
+                                                                (user) =>
+                                                                    user['users1']
+                                                                        .toString()
+                                                                        .trim() ==
+                                                                    newValue
+                                                                        .toString()
+                                                                        .trim(),
+                                                                orElse: () =>
+                                                                    {}, // Return an empty map if no match is found
+                                                              );
+                                                              if (matchingUser
+                                                                  .isNotEmpty) {
+                                                                final key =
+                                                                    matchingUser[
+                                                                        'NoEmpleado'];
+                                                                Map<String,
+                                                                        dynamic>
+                                                                    userMap = {
+                                                                  'user': key
+                                                                };
+
+                                                                updateBody
+                                                                    .addEntries(
+                                                                        userMap
+                                                                            .entries);
+                                                                asigneEdited =
+                                                                    true;
+                                                              } else {
+                                                                print(
+                                                                    'No matching user found');
+                                                              }
+                                                            });
+                                                          },
+                                                        )
+                                                      : Text(
+                                                          'Asignado a: ${widget.assignedTo}',
+                                                          style:
+                                                              const TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            color: Colors.white,
+                                                          ),
+                                                        )
+                                                  : Text(
+                                                      'Pendiente de asignación',
+                                                      style: const TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: Colors.white,
+                                                      ),
+                                                    )))),
+                                  const SizedBox(width: 20),
+                                  Expanded(
+                                    child: TextField(
+                                      controller: _dateController,
+                                      decoration: InputDecoration(
+                                        labelText: 'Fecha Compromiso',
+                                        border: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(10.0),
+                                          borderSide: const BorderSide(
+                                            color: Colors.grey,
+                                            width: 1.0,
+                                          ),
+                                        ),
+                                        filled: true,
+                                        fillColor: Colors.transparent,
+                                      ),
+                                      readOnly: true,
+                                      onTap: () async {
+                                        if (editMode) {
+                                          DateTime? pickedDate =
+                                              await showDatePicker(
+                                            context: context,
+                                            helpText: 'MM-DD-AAAA',
+                                            initialDate: DateTime.now(),
+                                            firstDate: DateTime(2000),
+                                            lastDate: DateTime(2101),
+                                          );
+                                          if (pickedDate != null) {
+                                            setState(() {
+                                              _dateController.text =
+                                                  DateFormat('yyyy-MM-dd')
+                                                      .format(pickedDate);
+                                              Map<String, dynamic> dateMap = {
+                                                'date': _dateController.text
+                                              };
+                                              updateBody
+                                                  .addEntries(dateMap.entries);
+                                              dateEdited = true;
+                                            });
+                                          }
+                                        } else {
+                                          null;
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 20,
+                                  ),
+                                  Expanded(
+                                      child: TextField(
+                                    decoration: InputDecoration(
+                                      labelText: 'Fecha de creación',
+                                      border: OutlineInputBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(10.0),
+                                        borderSide: const BorderSide(
+                                          color: Colors.grey,
+                                          width: 1.0,
+                                        ),
+                                      ),
+                                      filled: true,
+                                      fillColor: Colors.transparent,
+                                    ),
+                                    readOnly: true,
+                                    controller: TextEditingController(
+                                      text: widget.creationDate != null
+                                          ? DateFormat('yyyy-MM-dd')
+                                              .format(widget.creationDate!)
+                                          : 'Sin fecha de creación',
+                                    ),
+                                  )),
+                                  SizedBox(
+                                    width: 20,
+                                  ),
+                                  Expanded(
+                                      child: TextField(
+                                    decoration: InputDecoration(
+                                      labelText:
+                                          'Fecha solicitada para servicio',
+                                      border: OutlineInputBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(10.0),
+                                        borderSide: const BorderSide(
+                                          color: Colors.grey,
+                                          width: 1.0,
+                                        ),
+                                      ),
+                                      filled: true,
+                                      fillColor: Colors.transparent,
+                                    ),
+                                    readOnly: true,
+                                    controller: TextEditingController(
+                                      text: widget.requestDate != null
+                                          ? DateFormat('yyyy-MM-dd')
+                                              .format(widget.creationDate!)
+                                          : 'Sin fecha de solicitud',
+                                    ),
+                                  ))
+                                ],
+                              ),
+                              SizedBox(
+                                height: 20,
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (!widget.isSelectedRequestsIMade)
+                                    editMode
+                                        ? SaveItemButton(onPressed: () {
+                                            setState(() {
+                                              // print(updateBody.toString());
+                                              isLoading = true;
+                                              handleUpdate(1);
+                                              isLoading = false;
+                                              editMode = !editMode;
+                                            });
+                                          })
+                                        : EditItemButton(onPressed: () {
+                                            setState(() {
+                                              editMode = !editMode;
+                                            });
+                                          }),
+                                  editMode
+                                      ? CancelActionButton(
+                                          onPressed: () {
+                                            setState(() {
+                                              // isLoading = true;
+                                              editMode = !editMode;
+                                            });
+                                          },
+                                        )
+                                      : Text(''),
+                                ],
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-        );
-      }
-    });
+              ),
+            );
+          }
+        });
+
+    // LayoutBuilder(builder: (context, constraints) {
+    //   if (isLoading) {
+    //     return Center(
+    //       child: CustomLoadingIndicator(),
+    //     );
+    //   } else {
+    //     return Padding(
+    //       padding:
+    //           const EdgeInsets.only(left: 50, right: 50, bottom: 50, top: 50),
+    //       child: Container(
+    //         decoration: BoxDecoration(
+    //           color: FlutterFlowTheme.of(context).secondaryBackground,
+    //           borderRadius: BorderRadius.circular(30),
+    //         ),
+    //         child: Column(
+    //           children: [
+    //             Padding(
+    //               padding: const EdgeInsets.only(top: 0),
+    //               child: Row(
+    //                 crossAxisAlignment: CrossAxisAlignment.start,
+    //                 mainAxisAlignment: MainAxisAlignment.start,
+    //                 children: [
+    //                   Expanded(
+    //                     child: Container(
+    //                       decoration: BoxDecoration(
+    //                         color: FlutterFlowTheme.of(context).secondary,
+    //                         borderRadius: const BorderRadius.vertical(
+    //                           top: Radius.circular(30),
+    //                         ),
+    //                       ),
+    //                       child: Padding(
+    //                         padding: const EdgeInsets.only(
+    //                             left: 50, right: 20, top: 8, bottom: 8),
+    //                         child: Row(
+    //                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    //                           crossAxisAlignment: CrossAxisAlignment.start,
+    //                           children: [
+    //                             const Text(
+    //                               'Ticket de servicio',
+    //                               style: TextStyle(
+    //                                 fontFamily: 'Sora',
+    //                                 color: Colors.white,
+    //                                 fontWeight: FontWeight.bold,
+    //                                 fontStyle: FontStyle.italic,
+    //                                 fontSize: 26,
+    //                               ),
+    //                             ),
+    //                             Spacer(),
+    //                             IconButton.outlined(
+    //                               onPressed: () {
+    //                                 if (editMode) {
+    //                                   null;
+    //                                 } else {
+    //                                   //TODO: INSERT PRINT FUNCTION
+    //                                   print('Print ticket');
+    //                                 }
+    //                               },
+    //                               icon: const Icon(Icons.print,
+    //                                   color: Colors.white),
+    //                               iconSize: 20,
+    //                               tooltip: 'Imprimir ticket',
+    //                               style: OutlinedButton.styleFrom(
+    //                                 shape: const CircleBorder(),
+    //                                 side: const BorderSide(
+    //                                   color: Colors.white,
+    //                                   width: 0.5,
+    //                                 ),
+    //                               ),
+    //                             ),
+    //                             SizedBox(
+    //                               width: 10,
+    //                             ),
+    //                             IconButton.outlined(
+    //                               enableFeedback: true,
+    //                               onPressed: () {
+    //                                 setState(() {
+    //                                   isLoading = true;
+    //                                 });
+    //                                 var ticketHistory =
+    //                                     getRequestTicketHistory(widget.ticketId)
+    //                                         .then((value) {
+    //                                   setState(() {
+    //                                     isLoading = false;
+    //                                     showDialog(
+    //                                       context: context,
+    //                                       builder: (BuildContext context) {
+    //                                         return AlertDialog(
+    //                                           title: Text(
+    //                                               'Historial de movimientos del ticket: ${widget.ticketId}'),
+    //                                           content: RequestTicketHistory(
+    //                                             history: value,
+    //                                           ),
+    //                                           actions: [
+    //                                             TextButton(
+    //                                               onPressed: () {
+    //                                                 Navigator.of(context)
+    //                                                     .pop(); // Close the dialog
+    //                                               },
+    //                                               child: const Text('Cerrar'),
+    //                                             ),
+    //                                           ],
+    //                                         );
+    //                                       },
+    //                                     );
+    //                                   });
+    //                                 }).onError((error, stackTrace) {
+    //                                   setState(() {
+    //                                     isLoading = false;
+    //                                   });
+    //                                 });
+    //                               },
+    //                               icon: const Icon(Icons.history,
+    //                                   color: Colors.white),
+    //                               iconSize: 20,
+    //                               tooltip: 'Historial de movimientos',
+    //                               style: OutlinedButton.styleFrom(
+    //                                 shape: const CircleBorder(),
+    //                                 side: const BorderSide(
+    //                                   color: Colors.white,
+    //                                   width: 0.5,
+    //                                 ),
+    //                               ),
+    //                             ),
+    //                             SizedBox(
+    //                               width: 10,
+    //                             ),
+    //                             IconButton.outlined(
+    //                               onPressed: () {
+    //                                 Navigator.pop(context);
+    //                               },
+    //                               icon: const Icon(Icons.close,
+    //                                   color: Colors.white),
+    //                               iconSize: 20,
+    //                               tooltip: 'Cerrar',
+    //                               style: OutlinedButton.styleFrom(
+    //                                 shape: const CircleBorder(),
+    //                                 side: const BorderSide(
+    //                                   color: Colors.white,
+    //                                   width: 0.5,
+    //                                 ),
+    //                               ),
+    //                             ),
+    //                           ],
+    //                         ),
+    //                       ),
+    //                     ),
+    //                   ),
+    //                 ],
+    //               ),
+    //             ),
+
+    //             // Ticket ID Section
+    //             Padding(
+    //               padding: const EdgeInsets.all(20),
+    //               child: Row(
+    //                 crossAxisAlignment: CrossAxisAlignment.start,
+    //                 mainAxisAlignment: MainAxisAlignment.start,
+    //                 children: [
+    //                   Text(
+    //                     editMode
+    //                         ? 'EDITANDO: #${widget.ticketId}'
+    //                         : 'Ticket  #${widget.ticketId}.',
+    //                     style: const TextStyle(
+    //                       fontFamily: 'Sora',
+    //                       fontWeight: FontWeight.bold,
+    //                       fontSize: 30,
+    //                     ),
+    //                   ),
+    //                 ],
+    //               ),
+    //             ),
+
+    //             // Divider
+    //             const Divider(
+    //               thickness: 1,
+    //               color: Colors.black,
+    //             ),
+
+    //             // Scrollable Content Section
+    //             Expanded(
+    //               child: SingleChildScrollView(
+    //                 child: Padding(
+    //                   padding: const EdgeInsets.only(left: 20, right: 20),
+    //                   child: Column(
+    //                     crossAxisAlignment: CrossAxisAlignment.start,
+    //                     children: [
+    //                       Row(
+    //                         mainAxisAlignment: MainAxisAlignment.start,
+    //                         crossAxisAlignment: CrossAxisAlignment.start,
+    //                         children: [
+    //                           Expanded(
+    //                             child: Container(
+    //                               decoration: BoxDecoration(
+    //                                   color: FlutterFlowTheme.of(context)
+    //                                       .secondary,
+    //                                   border: Border.all(color: Colors.black),
+    //                                   borderRadius: BorderRadius.only(
+    //                                       topLeft: Radius.circular(10),
+    //                                       topRight: Radius.circular(10))),
+    //                               child: Padding(
+    //                                 padding: const EdgeInsets.only(left: 5),
+    //                                 child: Text('Descripción',
+    //                                     style: TextStyle(
+    //                                         fontWeight: FontWeight.bold,
+    //                                         color: Colors.white)),
+    //                               ),
+    //                             ),
+    //                           )
+    //                         ],
+    //                       ),
+
+    //                       TextField(
+    //                         controller: _descriptionController,
+    //                         readOnly: true,
+    //                         maxLines: 3,
+    //                         decoration: const InputDecoration(
+    //                           border: OutlineInputBorder(),
+    //                         ),
+    //                       ),
+
+    //                       const SizedBox(height: 20),
+
+    //                       // Observaciones Section
+    //                       Row(
+    //                         mainAxisAlignment: MainAxisAlignment.start,
+    //                         crossAxisAlignment: CrossAxisAlignment.start,
+    //                         children: [
+    //                           Expanded(
+    //                             child: Container(
+    //                               decoration: BoxDecoration(
+    //                                   color: FlutterFlowTheme.of(context)
+    //                                       .secondary,
+    //                                   border: Border.all(color: Colors.black),
+    //                                   borderRadius: BorderRadius.only(
+    //                                       topLeft: Radius.circular(10),
+    //                                       topRight: Radius.circular(10))),
+    //                               child: Padding(
+    //                                 padding: const EdgeInsets.only(left: 5),
+    //                                 child: Text('Observaciones',
+    //                                     style: TextStyle(
+    //                                         fontWeight: FontWeight.bold,
+    //                                         color: Colors.white)),
+    //                               ),
+    //                             ),
+    //                           )
+    //                         ],
+    //                       ),
+    //                       TextField(
+    //                         controller: _observationsController,
+    //                         readOnly: true,
+    //                         maxLines: 3,
+    //                         decoration: const InputDecoration(
+    //                           border: OutlineInputBorder(),
+    //                         ),
+    //                       ),
+
+    //                       const SizedBox(height: 20),
+
+    //                       Row(
+    //                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    //                         children: [
+    //                           Expanded(
+    //                               child: Container(
+    //                                   decoration: BoxDecoration(
+    //                                       color: FlutterFlowTheme.of(context)
+    //                                           .secondary,
+    //                                       border:
+    //                                           Border.all(color: Colors.black),
+    //                                       borderRadius: BorderRadius.only(
+    //                                           topLeft: Radius.circular(10),
+    //                                           topRight: Radius.circular(10))),
+    //                                   child: Padding(
+    //                                     padding: const EdgeInsets.only(left: 5),
+    //                                     child: widget.assignedTo == "NULL"
+    //                                         ? DropdownButton<String>(
+    //                                             value: employeeList.first,
+    //                                             hint: const Text(
+    //                                               'Seleccionar asignado',
+    //                                               style: TextStyle(
+    //                                                   color: Colors.white),
+    //                                             ),
+    //                                             items: employeeList.map<
+    //                                                     DropdownMenuItem<
+    //                                                         String>>(
+    //                                                 (String value) {
+    //                                               return DropdownMenuItem<
+    //                                                   String>(
+    //                                                 value: value,
+    //                                                 child: Text(value),
+    //                                               );
+    //                                             }).toList(),
+    //                                             onChanged: (String? newValue) {
+    //                                               setState(() {
+    //                                                 // widget.assignedTo =
+    //                                                 //     newValue; // Update the assignedTo value
+    //                                               });
+    //                                             },
+    //                                           )
+    //                                         : Text(
+    //                                             'Asignado a: ${widget.assignedTo}',
+    //                                             style: const TextStyle(
+    //                                               fontWeight: FontWeight.bold,
+    //                                               color: Colors.white,
+    //                                             ),
+    //                                           ),
+    //                                   ))),
+    //                           const SizedBox(width: 20),
+    //                           Expanded(
+    //                             child: TextField(
+    //                               controller: _dateController,
+    //                               decoration: InputDecoration(
+    //                                 labelText: 'Fecha Compromiso',
+    //                                 border: OutlineInputBorder(
+    //                                   borderRadius: BorderRadius.circular(10.0),
+    //                                   borderSide: const BorderSide(
+    //                                     color: Colors.grey,
+    //                                     width: 1.0,
+    //                                   ),
+    //                                 ),
+    //                                 filled: true,
+    //                                 fillColor: Colors.transparent,
+    //                               ),
+    //                               readOnly: true,
+    //                               onTap: () async {
+    //                                 if (editMode) {
+    //                                   DateTime? pickedDate =
+    //                                       await showDatePicker(
+    //                                     context: context,
+    //                                     helpText: 'MM-DD-AAAA',
+    //                                     initialDate: DateTime.now(),
+    //                                     firstDate: DateTime(2000),
+    //                                     lastDate: DateTime(2101),
+    //                                   );
+    //                                   if (pickedDate != null) {
+    //                                     setState(() {
+    //                                       _dateController.text =
+    //                                           DateFormat('yyyy-MM-dd')
+    //                                               .format(pickedDate);
+    //                                     });
+    //                                   }
+    //                                 } else {
+    //                                   null;
+    //                                 }
+    //                               },
+    //                             ),
+    //                           ),
+    //                           SizedBox(
+    //                             width: 20,
+    //                           ),
+    //                           Expanded(
+    //                               child: TextField(
+    //                             decoration: InputDecoration(
+    //                               labelText: 'Fecha de creación',
+    //                               border: OutlineInputBorder(
+    //                                 borderRadius: BorderRadius.circular(10.0),
+    //                                 borderSide: const BorderSide(
+    //                                   color: Colors.grey,
+    //                                   width: 1.0,
+    //                                 ),
+    //                               ),
+    //                               filled: true,
+    //                               fillColor: Colors.transparent,
+    //                             ),
+    //                             readOnly: true,
+    //                             controller: TextEditingController(
+    //                               text: widget.creationDate != null
+    //                                   ? DateFormat('yyyy-MM-dd')
+    //                                       .format(widget.creationDate!)
+    //                                   : 'Sin fecha de creación',
+    //                             ),
+    //                           )),
+    //                           SizedBox(
+    //                             width: 20,
+    //                           ),
+    //                           Expanded(
+    //                               child: TextField(
+    //                             decoration: InputDecoration(
+    //                               labelText: 'Fecha solicitada para servicio',
+    //                               border: OutlineInputBorder(
+    //                                 borderRadius: BorderRadius.circular(10.0),
+    //                                 borderSide: const BorderSide(
+    //                                   color: Colors.grey,
+    //                                   width: 1.0,
+    //                                 ),
+    //                               ),
+    //                               filled: true,
+    //                               fillColor: Colors.transparent,
+    //                             ),
+    //                             readOnly: true,
+    //                             controller: TextEditingController(
+    //                               text: widget.requestDate != null
+    //                                   ? DateFormat('yyyy-MM-dd')
+    //                                       .format(widget.creationDate!)
+    //                                   : 'Sin fecha de solicitud',
+    //                             ),
+    //                           ))
+    //                         ],
+    //                       ),
+    //                       SizedBox(
+    //                         height: 20,
+    //                       ),
+    //                       /* Row(
+    //                   children: [
+
+    //                   ],
+    //                 ) */
+    //                       Row(
+    //                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    //                         crossAxisAlignment: CrossAxisAlignment.start,
+    //                         children: [
+    //                           if (!widget.isSelectedRequestsIMade)
+    //                             editMode
+    //                                 ? SaveItemButton(onPressed: () {
+    //                                     setState(() {
+    //                                       isLoading = true;
+    //                                       editMode = !editMode;
+    //                                     });
+    //                                   })
+    //                                 : EditItemButton(onPressed: () {
+    //                                     setState(() {
+    //                                       editMode = !editMode;
+    //                                     });
+    //                                   }),
+    //                         ],
+    //                       )
+    //                     ],
+    //                   ),
+    //                 ),
+    //               ),
+    //             ),
+    //           ],
+    //         ),
+    //       ),
+    //     );
+    //   }
+    // });
   }
 }
