@@ -178,6 +178,9 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
                                   Role newRole = Role.fromJson(item);
                                   tmpRoleObjectslist.add(newRole);
                                 }
+                                setState(() {
+                                    buildNewUserScreen(context);
+                                  });
 
                                 //TODO: IMPLEMENT A FETCH FOR EVENTS
                                 /* await getEventsList().then((onValue) {

@@ -161,8 +161,6 @@ Future<dynamic> fetchEventsByRole(int roleId) async {
           RoleModuleRelationshipDto roleDetails = RoleModuleRelationshipDto.fromJSON(item);
            roleDetailedList.add(roleDetails);
          }
-
-
       return roleDetailedList;
     } else {
       return Future.error('Value is null');

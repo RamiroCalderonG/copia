@@ -4,9 +4,11 @@ import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/core/reusable_methods/services_functions.dart';
+import 'package:oxschool/core/reusable_methods/user_functions.dart';
 import 'package:oxschool/data/Models/ServiceTicketRequest.dart';
 import 'package:oxschool/data/datasources/temp/services_temp.dart';
 import 'package:oxschool/presentation/Modules/services_ticket/processes/ticket_requests_dashboard/processes_services.dart';
+import 'package:oxschool/presentation/components/confirm_dialogs.dart';
 import 'package:oxschool/presentation/components/custom_icon_button.dart';
 
 class TicketRequestSummary extends StatefulWidget {
@@ -99,6 +101,58 @@ class _TicketRequestSummaryState extends State<TicketRequestSummary>
 
   @override
   Widget build(BuildContext context) {
+
+    dynamic assignSupportTicketWidget( String observations, String description, int ticketiD, List<dynamic> deptMembers  ){
+      List<String> names = [];
+
+      for (var element in deptMembers) {
+        names.add(element["userName"]);
+      }
+
+      return Wrap(
+        spacing: 2,
+        children: [
+          Row(
+            children: [
+            Text('Ticket #${ticketiD.toString()}')
+          ],),
+          Row(
+            children: [
+              Text('Descripción: $description'),
+            ],
+          ),
+          Row(
+            children: [
+              Text('Observations: $observations')
+            ],
+          ),
+          Row(
+            children: [
+              DropdownMenu<String>(
+                    label: const Text(
+                      ' Usuario ',
+                     style: TextStyle(fontSize: 12),
+                    ),
+                    trailingIcon: const Icon(Icons.arrow_drop_down),
+                    initialSelection: names.first,
+                    onSelected: (String? value) {
+                      setState(() {
+                        
+                      });
+                    },
+                    dropdownMenuEntries: names
+                        .map<DropdownMenuEntry<String>>((String value) {
+                      return DropdownMenuEntry<String>(
+                          value: value, label: value);
+                    }).toList(),
+                  ),
+            ],
+          )
+        ],
+      );
+    }
+
+
     final TabBar tabBar = TabBar(
       controller: _tabController,
       indicatorColor: const Color.fromARGB(255, 254, 0, 0),
@@ -153,9 +207,20 @@ class _TicketRequestSummaryState extends State<TicketRequestSummary>
                     child: ListTile(
                       trailing: canAssignTicket ? IconButton(
                         onPressed: () async {
-                          ff
-                          
+                          //Validate if role can asignate Ticket
+                          var response = await validateEventStatus(20);
 
+                             showDialog(context: context, builder: (
+                              BuildContext context){
+                            return AlertDialog(
+                              scrollable: true,
+                              content: 
+                              assignSupportTicketWidget(
+                                unassignedTickets[index].observations ?? 'Sin observaciones', 
+                                unassignedTickets[index].description, 
+                                unassignedTickets[index].idReqServ, response),
+                            );
+                          }); 
 
                       }, 
                       icon: Icon(Icons.arrow_forward_ios_rounded, color: Colors.deepPurpleAccent,),

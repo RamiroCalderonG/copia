@@ -537,7 +537,7 @@ Future<dynamic> getWorkDepartments() async {
         persistCookies: false,
         timeoutSeconds: 15);
     apiCall.raiseForStatus();
-    return apiCall;
+    return apiCall.body;
   } catch (e) {
     throw Future.error(e.toString());
   }
@@ -1398,6 +1398,7 @@ Future<dynamic> getRequestticketHistory(int ticketId) async {
   }
 }
 
+
 Future<dynamic> getUsersForTicket(int filter, int item) async {
   try {
     SharedPreferences devicePrefs = await SharedPreferences.getInstance();
@@ -1419,6 +1420,30 @@ Future<dynamic> getUsersForTicket(int filter, int item) async {
   } catch (e) {
     insertErrorLog(e.toString(), 'getUsersForTicket()');
     return Future.error(e.toString());
+  }
+}
+
+//Function to validate a detail from an user
+//* dept, campus
+Future<dynamic> getUsersListByDeptCall(int loginId, String param) async {
+  try{
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
+    var apiCall = await Requests.get(
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/users/detail/$param',
+headers: {
+          'Authorization': devicePrefs.getString('token')!,
+          'Content-Type': 'application/json',
+        },
+        queryParameters: {
+          "user" : loginId
+        },
+        persistCookies: false,
+        timeoutSeconds: 10
+    );
+    apiCall.raiseForStatus();
+    return apiCall;
+  } catch(e){
+    rethrow;
   }
 }
 
