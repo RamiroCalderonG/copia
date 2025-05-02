@@ -7,9 +7,11 @@ import 'package:oxschool/core/reusable_methods/temp_data_functions.dart';
 import 'package:oxschool/core/reusable_methods/user_functions.dart';
 import 'package:oxschool/core/utils/device_information.dart';
 import 'package:oxschool/core/utils/temp_data.dart';
+import 'package:oxschool/data/services/backend/validate_user_permissions.dart';
 import 'package:oxschool/presentation/Modules/user/user_view_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
+import 'package:oxschool/presentation/components/confirm_dialogs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/reusable_methods/logger_actions.dart';
@@ -64,6 +66,8 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
     var isUserAdmin = verifyUserAdmin(currentUser!); //Retrives user role
 
     await prefs.setBool('isUserAdmin', isUserAdmin);
+    currentUser!.userRole!.roleModuleRelationships =
+        await fetchEventsByRole(currentUser!.userRole!.roleID);
   }
 
   final ExpansionTileController controller =
@@ -143,26 +147,18 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
         actions: [
           TextButton(
             onPressed: () {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: const Text('Nuevo Ticket de servicio'),
-                    content: const CreateServiceTicket(),
-                    actions: <Widget>[
-                      TextButton(
-                        style: TextButton.styleFrom(
-                          textStyle: Theme.of(context).textTheme.labelLarge,
-                        ),
-                        child: const Text(''),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ],
-                  );
-                },
-              );
+              bool? isEnabled = canRoleConsumeEvent("Crear ticket de servicio");
+              if (isEnabled != null && isEnabled == true) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CreateServiceTicket(),
+                  ),
+                );
+              } else {
+                showInformationDialog(context, 'Error',
+                    'No cuenta con permisos, consulte con el administrador');
+              }
             },
             child: const Text(
               'Crear Ticket de Servicio',
@@ -487,8 +483,8 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                 );
                 clearUserData();
                 clearTempData();
-                   SharedPreferences prefs = await SharedPreferences.getInstance();
-  await prefs.clear();
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                await prefs.clear();
               },
             ),
           ],
@@ -656,8 +652,7 @@ class MyExpansionTileList extends StatefulWidget {
   //final List<dynamic> elementList;
   //final List<String> modulesList;
 
-  const MyExpansionTileList({Key? key})
-      : super(key: key);
+  const MyExpansionTileList({Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _DrawerState();
@@ -696,12 +691,15 @@ class _DrawerState extends State<MyExpansionTileList> {
               );
 
               if (route.isNotEmpty) {
-                context.pushNamed(route[screen]!, extra: <String, dynamic>{
-                      kTransitionInfoKey: const TransitionInfo(
-                        hasTransition: true,
-                        transitionType: PageTransitionType.fade,
-                      ),
-                    },);
+                context.pushNamed(
+                  route[screen]!,
+                  extra: <String, dynamic>{
+                    kTransitionInfoKey: const TransitionInfo(
+                      hasTransition: true,
+                      transitionType: PageTransitionType.fade,
+                    ),
+                  },
+                );
               }
             },
           ),

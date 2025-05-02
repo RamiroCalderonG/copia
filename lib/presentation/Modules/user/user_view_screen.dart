@@ -87,7 +87,7 @@ class UserWindow extends StatelessWidget {
                                 width: 400,
                                 child: TextFormField(
                                   initialValue:
-                                      currentUser!.employeeName!.initials,
+                                      currentUser!.employeeName!,
                                   style: TextStyle(color: Colors.white),
                                   readOnly: true,
                                   decoration: InputDecoration(
@@ -95,7 +95,6 @@ class UserWindow extends StatelessWidget {
                                       'Nombre',
                                       style: TextStyle(color: Colors.white),
                                     ),
-                                    // labelText: 'Nombre',
                                     icon:
                                         Icon(Icons.person, color: Colors.white),
                                     border: OutlineInputBorder(

@@ -46,7 +46,8 @@ class _UsersTableViewState extends State<UsersTableView> {
           'mail': PlutoCell(value: line.userEmail),
           'creation': PlutoCell(value: line.creationDate),
           'birthdate': PlutoCell(value: line.birthdate),
-          'position': PlutoCell(value: line.work_area)
+          'position': PlutoCell(value: line.work_area),
+          'idLogin': PlutoCell(value: line.idLogin)
         },
       ));
     }
@@ -142,6 +143,11 @@ class _UsersTableViewState extends State<UsersTableView> {
                               title: 'e-mail',
                               field: 'mail',
                               type: PlutoColumnType.text(),
+                              readOnly: true),
+                          PlutoColumn(
+                              title: 'idLogin',
+                              field: 'idLogin',
+                              type: PlutoColumnType.number(),
                               readOnly: true),
                           // PlutoColumn(
                           //   title: 'Fecha de alta',

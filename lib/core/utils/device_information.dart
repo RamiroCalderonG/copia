@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
+import 'package:oxschool/core/constants/version.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 // DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
 final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
@@ -141,7 +143,7 @@ Map<String, dynamic> readWindowsDeviceInfo(WindowsDeviceInfo data) {
     'digitalProductId': data.digitalProductId,
     'displayVersion': data.displayVersion,
     'editionId': data.editionId,
-    'installDate': data.installDate,
+    //'installDate': data.installDate,
     'productId': data.productId,
     'productName': data.productName,
     'registeredOwner': data.registeredOwner,
@@ -290,6 +292,9 @@ Future getDeviceIP() async {
 //       wifiGatewayIP = 'Failed to get Wifi gateway address';
 //     }
 
-
 //   }
 
+Future<void> getAppCurrentVersion() async {
+  PackageInfo packageInfo = await PackageInfo.fromPlatform();
+  current_version = packageInfo.version;
+}

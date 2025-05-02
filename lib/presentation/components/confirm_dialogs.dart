@@ -110,6 +110,34 @@ void showErrorFromBackend(BuildContext context, String errorMessage) {
       });
 }
 
+void showSuccessDialog(
+    BuildContext context, String header, String bodyMessage) {
+  showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(header),
+          content: Text(bodyMessage),
+          icon: const Icon(
+            Icons.check,
+            color: Colors.green,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cerrar',
+                  style: TextStyle(
+                    fontFamily: 'Sora',
+                    // backgroundColor: Colors.blue[50],
+                  )),
+            )
+          ],
+        );
+      });
+}
+
 //To display information
 void showInformationDialog(
     BuildContext context, String header, String bodyMessage) {

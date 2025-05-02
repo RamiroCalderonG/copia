@@ -5,7 +5,7 @@ import 'complaints.dart';
 import 'evaluate_dept.dart';
 import 'evaluate_service.dart';
 import 'improvement_project.dart';
-import 'processes_services.dart';
+import 'ticket_requests_dashboard/processes_services.dart';
 
 class ServicesTicketHistory extends StatefulWidget {
   const ServicesTicketHistory({super.key});
@@ -30,6 +30,13 @@ class _ServicesTicketHistoryState extends State<ServicesTicketHistory>
       });
     super.initState();
     // _tabController.addListener(onTap);
+  }
+
+  @override
+  void dispose(){
+    _tabController.dispose();
+    controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -82,7 +89,7 @@ class _ServicesTicketHistoryState extends State<ServicesTicketHistory>
             indicatorColor: Colors.blueAccent,
           ),
           title: const Text('Ticket de servicio ',
-              style: TextStyle(color: Colors.white)),
+              style: TextStyle(color: Colors.white), textAlign: TextAlign.start,),
           backgroundColor: FlutterFlowTheme.of(context).primary,
         ),
         body: TabBarView(

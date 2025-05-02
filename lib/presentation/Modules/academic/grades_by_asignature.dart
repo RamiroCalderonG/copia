@@ -233,6 +233,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
               children: [
                 Flexible(
                   child: RefreshButton(onPressed: () {
+                    studentGradesBodyToUpgrade.clear();
                     setState(() {
                       isLoading = true;
                     });
