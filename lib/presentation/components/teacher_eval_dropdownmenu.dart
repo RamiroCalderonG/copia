@@ -1,7 +1,6 @@
-
 import 'package:flutter/material.dart';
 import 'package:oxschool/core/reusable_methods/reusable_functions.dart';
-import 'package:oxschool/presentation/Modules/academic/grades_main_screen.dart';
+import 'package:oxschool/presentation/Modules/academic/school%20grades/grades_main_screen.dart';
 import '../../core/constants/date_constants.dart';
 import '../../core/constants/user_consts.dart';
 import '../../data/datasources/temp/studens_temp.dart';
@@ -65,7 +64,8 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
 
   _isUserAdminResult() async {
     setState(() {
-      if (currentUser!.isCurrentUserAdmin() == false && currentUser!.isCurrentUserAcademicCoord() == false) {
+      if (currentUser!.isCurrentUserAdmin() == false &&
+          currentUser!.isCurrentUserAcademicCoord() == false) {
         //If user not admin, will assign current month, and it will not change
         selectedCurrentTempMonth = currentMonth;
         monthValue = currentMonth;
@@ -184,148 +184,142 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
           children: [
             // The Unity Dropdown
             if (unityList.length > 1)
-              
-                  DropdownMenu<String>(
-                    label: const Text(
-                      ' Campus ',
-                     style: TextStyle(fontSize: 12),
-                    ),
-                    trailingIcon: const Icon(Icons.arrow_drop_down),
-                    initialSelection: selectedUnity,
-                    onSelected: (String? value) {
-                      setState(() {
-                        selectedUnity = value;
-                        selectedGrade = null; // Clear dependent selections
-                        selectedGroup = null;
-                        selectedSubject = null;
-                        selectedTempCampus = value;
-                        filterData();
-                      });
-                    },
-                    dropdownMenuEntries: unityList
-                        .map<DropdownMenuEntry<String>>((String value) {
-                      return DropdownMenuEntry<String>(
-                          value: value, label: value);
-                    }).toList(),
-                  ),
-                
-              
+              DropdownMenu<String>(
+                label: const Text(
+                  ' Campus ',
+                  style: TextStyle(fontSize: 12),
+                ),
+                trailingIcon: const Icon(Icons.arrow_drop_down),
+                initialSelection: selectedUnity,
+                onSelected: (String? value) {
+                  setState(() {
+                    selectedUnity = value;
+                    selectedGrade = null; // Clear dependent selections
+                    selectedGroup = null;
+                    selectedSubject = null;
+                    selectedTempCampus = value;
+                    filterData();
+                  });
+                },
+                dropdownMenuEntries:
+                    unityList.map<DropdownMenuEntry<String>>((String value) {
+                  return DropdownMenuEntry<String>(value: value, label: value);
+                }).toList(),
+              ),
+
             if (unityList.length == 1) Text(unityList.first),
-           // Flexible(
-            //    child: 
-                DropdownMenu<String>(
-                  label: const Text(
-                    ' Grado ',
-                    style: TextStyle(fontSize: 12),
-                  ),
-                  trailingIcon: const Icon(Icons.arrow_drop_down),
-                  initialSelection: preSelectedGrade ?? selectedGrade,
-                  onSelected: (String? value) {
-                    setState(() {
-                      preSelectedGrade = value;
-                      selectedGrade = value;
-                      selectedGroup = null; // Clear dependent selections
-                      selectedSubject = null;
-                      selectedTempGrade = getKeyFromValue(
-                          teacherGradesMap, value!); //int.parse(value!);
-                      filterData();
-                    });
-                  },
-                  dropdownMenuEntries: filteredGrade
-                      .map<DropdownMenuEntry<String>>((String value) {
-                    return DropdownMenuEntry<String>(
-                        value: value, label: value);
-                  }).toList(),
-                ),
-         // ),
+            // Flexible(
+            //    child:
+            DropdownMenu<String>(
+              label: const Text(
+                ' Grado ',
+                style: TextStyle(fontSize: 12),
+              ),
+              trailingIcon: const Icon(Icons.arrow_drop_down),
+              initialSelection: preSelectedGrade ?? selectedGrade,
+              onSelected: (String? value) {
+                setState(() {
+                  preSelectedGrade = value;
+                  selectedGrade = value;
+                  selectedGroup = null; // Clear dependent selections
+                  selectedSubject = null;
+                  selectedTempGrade = getKeyFromValue(
+                      teacherGradesMap, value!); //int.parse(value!);
+                  filterData();
+                });
+              },
+              dropdownMenuEntries:
+                  filteredGrade.map<DropdownMenuEntry<String>>((String value) {
+                return DropdownMenuEntry<String>(value: value, label: value);
+              }).toList(),
+            ),
+            // ),
 
-          //  Flexible(
-          //      child: 
-                DropdownMenu<String>(
-                  label: const Text(
-                    ' Grupo ',
-                    style: TextStyle(fontSize: 12),
-                  ),
-                  trailingIcon: const Icon(Icons.arrow_drop_down),
-                  initialSelection: preSelectedGroup ?? selectedGroup,
-                  onSelected: (String? value) {
-                    setState(() {
+            //  Flexible(
+            //      child:
+            DropdownMenu<String>(
+              label: const Text(
+                ' Grupo ',
+                style: TextStyle(fontSize: 12),
+              ),
+              trailingIcon: const Icon(Icons.arrow_drop_down),
+              initialSelection: preSelectedGroup ?? selectedGroup,
+              onSelected: (String? value) {
+                setState(() {
+                  preSelectedGroup = value;
+                  selectedGroup = value;
+                  selectedSubject =
+                      filteredSubject.first; // Clear dependent selections
+                  selectedTempGroup = value;
 
-                      preSelectedGroup = value;
-                      selectedGroup = value;
-                      selectedSubject = filteredSubject.first; // Clear dependent selections
-                      selectedTempGroup = value;
-
-                      filterData();
-                    });
-                  },
-                  dropdownMenuEntries: filteredGroup
-                      .map<DropdownMenuEntry<String>>((String value) {
-                    return DropdownMenuEntry<String>(
-                        value: value, label: value);
-                  }).toList(),
-                ),
-          //    ),
+                  filterData();
+                });
+              },
+              dropdownMenuEntries:
+                  filteredGroup.map<DropdownMenuEntry<String>>((String value) {
+                return DropdownMenuEntry<String>(value: value, label: value);
+              }).toList(),
+            ),
+            //    ),
             if (!widget.byStudent) //Not by student
               //Flexible(
-               //   flex: 2,
-                //  fit: FlexFit.loose,
-                //  child: 
-                      DropdownMenu<String>(
-                        label: const Text(
-                          ' Materia ',
-                          style: TextStyle(fontSize: 12),
-                        ),
-                        
-                        trailingIcon: const Icon(Icons.arrow_drop_down),
-                        initialSelection: preSelectedSubject ?? selectedSubject,
-                        onSelected: (String? value) {
-                          setState(() {
-                            selectedTempSubjectId = filteredSubjectMap[value];
-                            preSelectedSubject = value;
-                            selectedSubject = value;
-                            selectedTempSubject = value;
-                          });
-                        },
-                        dropdownMenuEntries: filteredSubject
-                            .map<DropdownMenuEntry<String>>((String value) {
-                          return DropdownMenuEntry<String>(
-                              value: value, label: value);
-                        }).toList(),
-                      ),
+              //   flex: 2,
+              //  fit: FlexFit.loose,
+              //  child:
+              DropdownMenu<String>(
+                label: const Text(
+                  ' Materia ',
+                  style: TextStyle(fontSize: 12),
+                ),
+                trailingIcon: const Icon(Icons.arrow_drop_down),
+                initialSelection: preSelectedSubject ?? selectedSubject,
+                onSelected: (String? value) {
+                  setState(() {
+                    selectedTempSubjectId = filteredSubjectMap[value];
+                    preSelectedSubject = value;
+                    selectedSubject = value;
+                    selectedTempSubject = value;
+                  });
+                },
+                dropdownMenuEntries: filteredSubject
+                    .map<DropdownMenuEntry<String>>((String value) {
+                  return DropdownMenuEntry<String>(value: value, label: value);
+                }).toList(),
+              ),
 //),
 
-           // Flexible(
-            //  child: 
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (currentUser!.isCurrentUserAdmin() || currentUser!.isCurrentUserAcademicCoord())
-                    DropdownMenu<String>(
-                        label: const Text(' Mes '),
-                        trailingIcon: const Icon(Icons.arrow_drop_down),
-                        initialSelection: monthValue,
-                        onSelected: (String? value) {
-                          setState(() {
-                            monthValue = value!;
-                            selectedTempMonth = value;
-                          });
-                        },
-                        dropdownMenuEntries: academicMonthsList
-                            .toList()
-                            .map<DropdownMenuEntry<String>>((String value) {
-                          return DropdownMenuEntry<String>(
-                              value: value, label: value);
-                        }).toList())
-                  else
-                    Text(
-                      currentMonth,
-                      style: const TextStyle(
-                          fontFamily: 'Sora', fontWeight: FontWeight.bold),
-                    )
-                ],
-              ),
-           // ),
+            // Flexible(
+            //  child:
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (currentUser!.isCurrentUserAdmin() ||
+                    currentUser!.isCurrentUserAcademicCoord())
+                  DropdownMenu<String>(
+                      label: const Text(' Mes '),
+                      trailingIcon: const Icon(Icons.arrow_drop_down),
+                      initialSelection: monthValue,
+                      onSelected: (String? value) {
+                        setState(() {
+                          monthValue = value!;
+                          selectedTempMonth = value;
+                        });
+                      },
+                      dropdownMenuEntries: academicMonthsList
+                          .toList()
+                          .map<DropdownMenuEntry<String>>((String value) {
+                        return DropdownMenuEntry<String>(
+                            value: value, label: value);
+                      }).toList())
+                else
+                  Text(
+                    currentMonth,
+                    style: const TextStyle(
+                        fontFamily: 'Sora', fontWeight: FontWeight.bold),
+                  )
+              ],
+            ),
+            // ),
           ],
         ));
   }
@@ -339,7 +333,8 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
     selectedGroup ??= filteredGroup.first;
     selectedSubject ??= filteredSubject.first;
 
-    if (currentUser!.isCurrentUserAdmin() || currentUser!.isCurrentUserAcademicCoord()) {
+    if (currentUser!.isCurrentUserAdmin() ||
+        currentUser!.isCurrentUserAcademicCoord()) {
       monthValue = getKeyFromValue(spanishMonthsMap, monthValue).toString();
     } else {
       monthValue = getKeyFromValue(spanishMonthsMap, currentMonth).toString();

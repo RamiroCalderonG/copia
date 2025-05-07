@@ -2,9 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:oxschool/core/utils/update_installer.dart';
-import 'package:oxschool/presentation/Modules/academic/fo_dac_27.dart';
-import 'package:oxschool/presentation/Modules/academic/grades_main_screen.dart';
-import 'package:oxschool/presentation/Modules/academic/grades_modules_configuration.dart';
+import 'package:oxschool/presentation/Modules/academic/discipline/discipline_screen.dart';
+import 'package:oxschool/presentation/Modules/academic/school%20grades/fo_dac_27.dart';
+import 'package:oxschool/presentation/Modules/academic/school%20grades/grades_main_screen.dart';
+import 'package:oxschool/presentation/Modules/academic/school%20grades/grades_modules_configuration.dart';
 import 'package:oxschool/presentation/Modules/enfermeria/nursery_main_screen.dart';
 import 'package:oxschool/presentation/Modules/services_ticket/processes/services_main_screen.dart';
 import 'package:oxschool/presentation/components/pdf_viewer_screen.dart';
@@ -80,17 +81,21 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
             name: 'GradesViewScreen()',
             path: '/academic',
             builder: (context, params) => const GradesMainScreen()),
-            FFRoute(
+        FFRoute(
             name: 'ServicesTicketHistory()',
             path: '/services',
             builder: (context, params) => const ServicesTicketHistory()),
-            FFRoute(
+        FFRoute(
             name: 'GradesModuleConfiguration()',
             path: '/academicConfig',
             builder: (context, params) => const GradesModuleConfiguration()),
-            FFRoute(
-            name: 'UpdaterScreen', 
-            path: '/updater', 
+        FFRoute(
+            name: 'DisciplineScreen()',
+            path: '/discipline',
+            builder: (context, params) => const DisciplineScreen()),
+        FFRoute(
+            name: 'UpdaterScreen',
+            path: '/updater',
             builder: (context, params) => const UpdateInstaller()),
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
     );

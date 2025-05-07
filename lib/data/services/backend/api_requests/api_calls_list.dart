@@ -1337,6 +1337,7 @@ Future<dynamic> getScreenAccessRoutes() async {
   }
 }
 
+//* Retrieves latest app version
 Future<dynamic> getLatestAppVersion() async {
   try {
     var apiCall = await Requests.get(
@@ -1351,6 +1352,13 @@ Future<dynamic> getLatestAppVersion() async {
   }
 }
 
+//* Fetch for all support tickets,
+/*
+* toFetch = initial date to fetch
+* statusVal = status of ticket to fetch
+* byWho =  1 = I Made ; 2 = I Was Reported
+* params: { from : idLogin from currentUser}
+*/
 Future<dynamic> getAllServiceTickets(
     String toFetch, int statusVal, int byWho) async {
   String startDate = toFetch.replaceAll('-', '');
@@ -1378,6 +1386,7 @@ Future<dynamic> getAllServiceTickets(
   }
 }
 
+//* Retrieves history of support ticket request
 Future<dynamic> getRequestticketHistory(int ticketId) async {
   try {
     SharedPreferences devicePrefs = await SharedPreferences.getInstance();
@@ -1397,8 +1406,7 @@ Future<dynamic> getRequestticketHistory(int ticketId) async {
   }
 }
 
-
-
+//* Update support by kind of flag, can be status or assignated to a user
 Future<dynamic> updateSupportTicket(Map<String, dynamic> body, int flag) async {
   try {
     SharedPreferences devicePrefs = await SharedPreferences.getInstance();
@@ -1419,7 +1427,6 @@ Future<dynamic> updateSupportTicket(Map<String, dynamic> body, int flag) async {
     return e;
   }
 }
-
 
 Future<dynamic> getUsersForTicket(int filter, String dept) async {
   try {
@@ -1445,28 +1452,25 @@ Future<dynamic> getUsersForTicket(int filter, String dept) async {
 //Function to validate a detail from an user
 //* dept, campus
 Future<dynamic> getUsersListByDeptCall(int loginId, String param) async {
-  try{
+  try {
     SharedPreferences devicePrefs = await SharedPreferences.getInstance();
     var apiCall = await Requests.get(
-      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/users/detail/$param',
-headers: {
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/users/detail/$param',
+        headers: {
           'Authorization': devicePrefs.getString('token')!,
           'Content-Type': 'application/json',
         },
-        queryParameters: {
-          "user" : loginId
-        },
+        queryParameters: {"user": loginId},
         persistCookies: false,
-        timeoutSeconds: 10
-    );
+        timeoutSeconds: 10);
     apiCall.raiseForStatus();
     return apiCall;
-  } catch(e){
+  } catch (e) {
     rethrow;
   }
 }
 
-
+//*
 Future<dynamic> createNewTicketServices(Map<String, dynamic> body) async {
   try {
     SharedPreferences devicePrefs = await SharedPreferences.getInstance();
