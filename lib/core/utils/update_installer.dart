@@ -7,9 +7,13 @@ import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:oxschool/core/utils/loader_indicator.dart';
-import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
+/*
+ * Widget that downloads latest version 
+ * Then open zip file and execute update script
+ * Only works for Windows and MacOS for now
+ */
 class UpdateInstaller extends StatefulWidget {
   const UpdateInstaller({super.key});
 
@@ -231,8 +235,7 @@ class _UpdateInstallerState extends State<UpdateInstaller> {
         filePath,
         options: Options(
           headers: {
-            'Authorization':
-                'Bearer ${dotenv.env['GITHUBHEADER']!}', // 'Bearer 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',
+            'Authorization': 'Bearer ${dotenv.env['GITHUBHEADER']!}',
             'Accept': 'application/octet-stream'
           },
         ),
@@ -342,69 +345,4 @@ class _UpdateInstallerState extends State<UpdateInstaller> {
       ),
     );
   }
-
-  // @override
-  // Widget build(BuildContext context) {
-  //   return Scaffold(
-  //     appBar: AppBar(
-  //       title: Text(
-  //         "\nActualizacion en curso, por favor espere...",
-  //         style: TextStyle(fontFamily: 'Sora'),
-  //       ),
-  //     ),
-  //     body: Center(
-  //       child: StreamBuilder<double>(
-  //         stream: _isUnzipping
-  //             ? _unzipProgressController.stream
-  //             : _progressController.stream,
-  //         builder: (context, snapshot) {
-  //           if (_showWaitMessage) {
-  //             return Column(
-  //               mainAxisAlignment: MainAxisAlignment.center,
-  //               crossAxisAlignment: CrossAxisAlignment.center,
-  //               children: [
-  //                 CircularProgressIndicator(),
-  //               ],
-  //             );
-  //           } else if (snapshot.hasData) {
-  //             return Column(
-  //               mainAxisAlignment: MainAxisAlignment.center,
-  //               crossAxisAlignment: CrossAxisAlignment.center,
-  //               children: [
-  //                 CircularProgressIndicator(value: snapshot.data! / 100),
-  //                 SizedBox(height: 20),
-  //                 Text("${snapshot.data!.toStringAsFixed(0)}%"),
-  //               ],
-  //             );
-  //           } else if (snapshot.hasError) {
-  //             setState(() {
-  //               _showWaitMessage = false;
-  //             });
-  //             return Column(
-  //                 mainAxisAlignment: MainAxisAlignment.center,
-  //                 crossAxisAlignment: CrossAxisAlignment.center,
-  //                 children: [
-  //                   Text(snapshot.error.toString()),
-  //                   ElevatedButton(
-  //                       onPressed: () {
-  //                         runUpdateScript();
-  //                       },
-  //                       child: Text('Reintentar'))
-  //                 ]);
-  //           } else {
-  //             return Center(
-  //                 child: Column(
-  //               crossAxisAlignment: CrossAxisAlignment.center,
-  //               mainAxisAlignment: MainAxisAlignment.center,
-  //               children: [
-  //                 Text('Por favor espere, actualización en curso,'),
-  //                 CustomLoadingIndicator()
-  //               ],
-  //             ));
-  //           }
-  //         },
-  //       ),
-  //     ),
-  //   );
-  // }
 }

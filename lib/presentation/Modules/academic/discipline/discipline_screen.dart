@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
+import 'package:oxschool/presentation/Modules/academic/discipline/discipline_history_grid.dart';
 
 class DisciplineScreen extends StatefulWidget {
   const DisciplineScreen({super.key});
@@ -25,11 +27,16 @@ class _DisciplineScreenState extends State<DisciplineScreen>
 
   @override
   Widget build(BuildContext context) {
+    List<dynamic> data = [];
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Disciplina académica'),
+        title: const Text('Disciplina académica',
+            style: TextStyle(color: Colors.white)),
+        backgroundColor: FlutterFlowTheme.of(context).primary,
         bottom: TabBar(
           indicatorColor: Color.fromARGB(255, 37, 127, 245),
+          labelColor: Colors.white,
           controller: _tabController,
           tabs: const <Widget>[
             Tab(
@@ -49,10 +56,10 @@ class _DisciplineScreenState extends State<DisciplineScreen>
       ),
       body: TabBarView(
         controller: _tabController,
-        children: const <Widget>[
-          Center(child: Text("It's cloudy here")),
-          Center(child: Text("It's rainy here")),
-          Center(child: Text("It's sunny here")),
+        children: <Widget>[
+          DisciplineHistoryGrid(gridData: data),
+          Center(child: Text("Crear reporte")),
+          Center(child: Text("Otra opción")),
         ],
       ),
     );

@@ -1428,6 +1428,7 @@ Future<dynamic> updateSupportTicket(Map<String, dynamic> body, int flag) async {
   }
 }
 
+//* Retrieves users and idLogin, to be used when assign support ticket to an user
 Future<dynamic> getUsersForTicket(int filter, String dept) async {
   try {
     SharedPreferences devicePrefs = await SharedPreferences.getInstance();
@@ -1470,7 +1471,7 @@ Future<dynamic> getUsersListByDeptCall(int loginId, String param) async {
   }
 }
 
-//*
+//*Creates a support ticket
 Future<dynamic> createNewTicketServices(Map<String, dynamic> body) async {
   try {
     SharedPreferences devicePrefs = await SharedPreferences.getInstance();
