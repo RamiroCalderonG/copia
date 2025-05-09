@@ -248,7 +248,7 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
                                   onSelected: (String? value) {
                                     setState(() {
                                       whoRequest = value!;
-                                      dropDownValue = value!;
+                                      dropDownValue = value;
                                     });
                                   },
                                   hint: 'Nombre de qien solicita'),

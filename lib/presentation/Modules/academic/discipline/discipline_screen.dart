@@ -57,7 +57,7 @@ class _DisciplineScreenState extends State<DisciplineScreen>
       body: TabBarView(
         controller: _tabController,
         children: <Widget>[
-          DisciplineHistoryGrid(gridData: data),
+          DisciplineHistoryGrid(),
           Center(child: Text("Crear reporte")),
           Center(child: Text("Otra opción")),
         ],

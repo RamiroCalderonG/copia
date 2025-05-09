@@ -88,13 +88,17 @@ dependencies:
   archive: ^4.0.4
       #ref: 927f8cbc09b35d85245c095f2db8f9b186f6618
 
+  collection: any
+  http: any
+  http_parser: any
+  flutter_test:
+    sdk: flutter
+  flutter_web_plugins: 
+    sdk: flutter
 dev_dependencies:
 
   flutter_lints: ^5.0.0
-  flutter_test:
-    sdk: flutter
   flutter_launcher_icons: ^0.14.1 
-  msix: ^3.16.7
 
 flutter_launcher_icons:
   android: "launcher_icon"

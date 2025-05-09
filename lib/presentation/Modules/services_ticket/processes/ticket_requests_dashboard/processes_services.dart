@@ -198,7 +198,7 @@ class _ProcessesState extends State<Processes> {
         await getServiceTicketsByDate(_dateController.text, status!, byWho)
             .then((value) {
           setState(() {
-            servicesGridRows = value!;
+            servicesGridRows = value;
             isLoading = false;
           });
         }).onError((stacktrace, error) {

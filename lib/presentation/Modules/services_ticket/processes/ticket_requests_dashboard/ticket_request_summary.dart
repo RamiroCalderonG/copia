@@ -5,11 +5,8 @@ import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/core/reusable_methods/services_functions.dart';
 import 'package:oxschool/core/reusable_methods/user_functions.dart';
-import 'package:oxschool/data/Models/ServiceTicketRequest.dart';
 import 'package:oxschool/data/datasources/temp/services_temp.dart';
 import 'package:oxschool/presentation/Modules/services_ticket/processes/ticket_requests_dashboard/processes_services.dart';
-import 'package:oxschool/presentation/components/confirm_dialogs.dart';
-import 'package:oxschool/presentation/components/custom_icon_button.dart';
 
 class TicketRequestSummary extends StatefulWidget {
   const TicketRequestSummary({Key? key, required this.isSelectedRequestsIMade})

@@ -3,7 +3,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
-import 'package:oxschool/core/utils/loader_indicator.dart';
 
 void showEmptyFieldAlertDialog(BuildContext context, String contentText) {
   showDialog(

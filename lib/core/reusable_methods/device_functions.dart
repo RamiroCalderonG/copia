@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:oxschool/core/utils/device_information.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> storeCurrentDeviceIsMobile() async {

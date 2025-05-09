@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/data/Models/ServiceTicketRequest.dart';
 import 'package:oxschool/data/datasources/temp/services_temp.dart';
@@ -122,15 +121,13 @@ void refreshTicketsCuantity() {
       }
     }
 
-    if (item.serviceRequestDate != null) {
-      DateTime requesttedDate = item.serviceRequestDate!;
-      if (today.isAfter(requesttedDate) && item.status != 3) {
-        //If the service is overdue
-        overdue++;
-        overdueTickets.add(item);
-      }
-    } else {}
-    //Count items by status
+    DateTime requesttedDate = item.serviceRequestDate;
+    if (today.isAfter(requesttedDate) && item.status != 3) {
+      //If the service is overdue
+      overdue++;
+      overdueTickets.add(item);
+    }
+      //Count items by status
     if (item.status == 0) {
       unassigned++;
       unassignedTickets.add(item);

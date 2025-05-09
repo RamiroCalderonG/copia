@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/data/DataTransferObjects/Role_module_relationship_dto.dart';
 

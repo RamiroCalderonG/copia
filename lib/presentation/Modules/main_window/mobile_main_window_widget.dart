@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 // ignore: depend_on_referenced_packages
-import 'package:http/http.dart' as http;
 import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/core/reusable_methods/temp_data_functions.dart';
 import 'package:oxschool/core/reusable_methods/user_functions.dart';

@@ -9,7 +9,6 @@ import 'package:oxschool/core/utils/device_information.dart';
 import 'package:oxschool/core/utils/temp_data.dart';
 import 'package:oxschool/data/services/backend/validate_user_permissions.dart';
 import 'package:oxschool/presentation/Modules/user/user_view_screen.dart';
-import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
 import 'package:oxschool/presentation/components/confirm_dialogs.dart';
 import 'package:shared_preferences/shared_preferences.dart';

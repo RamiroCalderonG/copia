@@ -96,16 +96,10 @@ class _UpdateInstallerState extends State<UpdateInstaller> {
         if (Platform.isMacOS) {
           // Get the temporary directory
           tempDir = await getLibraryDirectory();
-          if (tempDir == null) {
-            throw Exception("Failed to get temporary directory");
-          }
         }
         if (Platform.isWindows) {
           // Get the temporary directory
           tempDir = await getTemporaryDirectory();
-          if (tempDir == null) {
-            throw Exception("Failed to get temporary directory");
-          }
         }
 
         setState(() {

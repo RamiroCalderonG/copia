@@ -49,8 +49,14 @@ dynamic loadStartGrading(int employeeNumber, String schoolYear, bool isAdmin,
   }
 }
 
-Future<dynamic> loadStartGradingAsAdminOrAcademicCoord(String schoolYear, String? campus,
-    bool initialFetch, int? subject, int? group, bool isAcademicCoord, bool isAdmin ) async {
+Future<dynamic> loadStartGradingAsAdminOrAcademicCoord(
+    String schoolYear,
+    String? campus,
+    bool initialFetch,
+    int? subject,
+    int? group,
+    bool isAcademicCoord,
+    bool isAdmin) async {
   try {
     DateTime now = DateTime.now();
     int month = now.month;
@@ -58,8 +64,8 @@ Future<dynamic> loadStartGradingAsAdminOrAcademicCoord(String schoolYear, String
     List<String> originalList = [];
     if (initialFetch) {
       //First time loading screen, to display all grades, groups, campus and assignatures to dispaly at DropdownSelector
-      await getTeacherGradeAndCoursesAsAdmin(month,
-              isAdmin, isAdmin ? null : campus, currentCycle!.claCiclo, isAcademicCoord)
+      await getTeacherGradeAndCoursesAsAdmin(month, isAdmin,
+              isAdmin ? null : campus, currentCycle!.claCiclo, isAcademicCoord)
           .then((response) {
         jsonList = json.decode(utf8.decode(response.bodyBytes));
         jsonDataForDropDownMenuClass = jsonList;
@@ -262,7 +268,8 @@ Future<List<StudentEval>> getSubjectsAndGradesByStudent(
     var subjectsGradesList =
         await getSubjectsAndGradeByStuent(group, grade, cycle, campus, month);
 
-    List<dynamic> jsonList = json.decode(utf8.decode(subjectsGradesList.bodyBytes) );
+    List<dynamic> jsonList =
+        json.decode(utf8.decode(subjectsGradesList.bodyBytes));
     List<StudentEval> evaluations = getEvalFromJSON(jsonList, true);
     uniqueStudentsList.clear();
     uniqueStudents.clear();
@@ -438,18 +445,19 @@ void composeBodyToUpdateGradeBySTudent(
   }
 }
 
-void composeUpdateStudentGradesBody(String key, dynamic value, int idEval) async {
+void composeUpdateStudentGradesBody(
+    String key, dynamic value, int idEval) async {
   bool idExists = false;
-   SharedPreferences devicePrefs = await SharedPreferences.getInstance();
-      int? idSesion = devicePrefs.getInt("idSession");
-
+  SharedPreferences devicePrefs = await SharedPreferences.getInstance();
+  int? idSesion = devicePrefs.getInt("idSession");
 
   if (key == 'Calif') {
     key = 'eval';
   }
 
   if (studentGradesBodyToUpgrade.isEmpty) {
-    studentGradesBodyToUpgrade.add({'idEval': idEval, key: value, 'idSesion' : idSesion});
+    studentGradesBodyToUpgrade
+        .add({'idEval': idEval, key: value, 'idSesion': idSesion});
   } else {
     for (var obj in studentGradesBodyToUpgrade) {
       if (obj['idEval'] == idEval) {
@@ -462,7 +470,8 @@ void composeUpdateStudentGradesBody(String key, dynamic value, int idEval) async
       }
     }
     if (!idExists) {
-      studentGradesBodyToUpgrade.add({'idEval': idEval, key: value, 'idSesion' : idSesion});
+      studentGradesBodyToUpgrade
+          .add({'idEval': idEval, key: value, 'idSesion': idSesion});
     }
   }
 }
@@ -623,4 +632,15 @@ Future<List<String>> getStudentsListForFodac27(
     tempStudentMap.add(itemMap);
   }
   return resultData;
+}
+
+Future<dynamic> getStudentsDisciplinaryReportsByDates(
+    String cycle, String initialDate, String finalDate) async {
+  try {
+    var response =
+        await getDisciplinaryReportsByDate(cycle, initialDate, finalDate);
+    return response;
+  } catch (e) {
+    rethrow;
+  }
 }
