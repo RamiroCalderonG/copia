@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/reusable_methods/academic_functions.dart';
 import 'package:oxschool/core/utils/loader_indicator.dart';
 import 'package:oxschool/presentation/components/confirm_dialogs.dart';
@@ -14,7 +15,13 @@ class DisciplineHistoryGrid extends StatefulWidget {
 
 class _DisciplineHistoryGridState extends State<DisciplineHistoryGrid> {
   List<PlutoRow> plutoRows = [];
+  dynamic apiResponse;
   var disciplinaryData;
+  final TextEditingController initialDateController = TextEditingController();
+  DateTime? initialDateTime;
+  DateTime? finalDateTime;
+  final TextEditingController finalDateController = TextEditingController();
+  DateTime? _selectedDate;
 
   final List<PlutoColumn> columns = [
     PlutoColumn(
@@ -43,73 +50,235 @@ class _DisciplineHistoryGridState extends State<DisciplineHistoryGrid> {
   }
 
   @override
+  void dispose() {
+    initialDateController.dispose();
+    finalDateController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final buttonsMenu = Padding(
+    final initialDateField = Padding(
       padding: const EdgeInsets.all(5),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [Text('Buscador')],
-              )
-            ],
-          ),
-          Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  RefreshButton(onPressed: () {}),
-                  SizedBox(
-                    width: 5,
-                  ),
-                  EditItemButton(onPressed: () {})
-                ],
-              )
-            ],
-          )
-        ],
+      child: TextFormField(
+        controller: initialDateController,
+        decoration: const InputDecoration(
+          label: Text("Fecha inicial "),
+          border: OutlineInputBorder(),
+          contentPadding: EdgeInsets.symmetric(horizontal: 8),
+        ),
+        readOnly: true,
+        onTap: () async {
+          final DateTime? picked = await showDatePicker(
+            context: context,
+            initialDate: _selectedDate ?? DateTime.now(),
+            firstDate: DateTime(2000),
+            lastDate: DateTime(2101),
+          );
+          if (picked != null) {
+            setState(() {
+              initialDateTime = picked;
+              initialDateController.text =
+                  "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}";
+            });
+          }
+        },
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Por favor, seleccione una fecha';
+          }
+          return null;
+        },
       ),
     );
 
-    return FutureBuilder(
-        future: disciplinaryData,
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Center(
-              child: Text('Error: ${snapshot.error}'),
-            );
-          } else if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
-              child: CustomLoadingIndicator(),
-            );
-          } else {
-            return Column(
+    final finalDateField = Padding(
+      padding: const EdgeInsets.all(5),
+      child: TextFormField(
+        controller: finalDateController,
+        decoration: const InputDecoration(
+          label: Text("Fecha Final "),
+          border: OutlineInputBorder(),
+          contentPadding: EdgeInsets.symmetric(horizontal: 8),
+        ),
+        readOnly: true,
+        onTap: () async {
+          final DateTime? picked = await showDatePicker(
+            context: context,
+            initialDate: _selectedDate ?? DateTime.now(),
+            firstDate: DateTime(2000),
+            lastDate: DateTime(2101),
+          );
+          if (picked != null) {
+            setState(() {
+              finalDateTime = picked;
+              finalDateController.text =
+                  "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}";
+            });
+          }
+        },
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Por favor, seleccione una fecha';
+          }
+          return null;
+        },
+      ),
+    );
+
+    final buttonsMenu = Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          flex: 2,
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Expanded(child: initialDateField),
+                  Expanded(child: finalDateField)
+                ],
+              )
+            ],
+          ),
+        ),
+        Expanded(
+            flex: 3,
+            child: Column(
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: buttonsMenu,
-                ),
-                const Divider(thickness: 2),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.vertical,
-                        child: PlutoGrid(columns: columns, rows: plutoRows),
-                      ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    RefreshButton(onPressed: () {
+                      if ((initialDateTime != null && finalDateTime != null)) {
+                        if (initialDateTime!.isAfter(finalDateTime!)) {
+                          showErrorFromBackend(context,
+                              "Fecha inicial no puede ser mayor que la final");
+                        } else {
+                          handleRefresh(currentCycle!.claCiclo!,
+                              initialDateTime!, finalDateTime!);
+                        }
+                      } else {
+                        showEmptyFieldAlertDialog(context,
+                            "Favor de seleccionar un rango de fechas correcto");
+                      }
+                    }),
+                    SizedBox(width: 5),
+                    PrintButton(onPressed: () {}),
+                    SizedBox(width: 5),
+                    ExportButton(onPressed: () {}),
+                    SizedBox(
+                      width: 5,
                     ),
+                    AddItemButton(
+                      onPressed: () {},
+                    )
+                  ],
+                )
+              ],
+            ))
+      ],
+    );
+
+    return LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+      if (apiResponse != null) {
+        return SafeArea(
+            child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(
+                  left: 15, top: 10, right: 15, bottom: 10),
+              child: buttonsMenu,
+            ),
+            const Divider(thickness: 2),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    child: PlutoGrid(columns: columns, rows: plutoRows),
                   ),
                 ),
-              ],
-            );
-          }
-        });
+              ),
+            ),
+          ],
+        ));
+      } else {
+        return Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(
+                  left: 15, top: 10, right: 15, bottom: 10),
+              child: buttonsMenu,
+            ),
+            const Divider(thickness: 2),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Placeholder(),
+              ),
+            ),
+          ],
+        );
+      }
+    });
+
+    // return FutureBuilder(
+    //   future: disciplinaryData,
+    //   builder: (context, snapshot) {
+    //     if (snapshot.hasError) {
+    //       return Center(
+    //         child: Text('Error: ${snapshot.error}'),
+    //       );
+    //     } else if (snapshot.connectionState == ConnectionState.waiting) {
+    //       return Center(
+    //         child: CustomLoadingIndicator(),
+    //       );
+    //     } else if (snapshot.hasData && snapshot.data != null) {
+    //       return Column(
+    //         children: [
+    //           Padding(
+    //             padding: const EdgeInsets.only(
+    //                 left: 15, top: 10, right: 15, bottom: 10),
+    //             child: buttonsMenu,
+    //           ),
+    //           const Divider(thickness: 2),
+    //           Expanded(
+    //             child: Padding(
+    //               padding: const EdgeInsets.all(20),
+    //               child: SingleChildScrollView(
+    //                 scrollDirection: Axis.horizontal,
+    //                 child: SingleChildScrollView(
+    //                   scrollDirection: Axis.vertical,
+    //                   child: PlutoGrid(columns: columns, rows: plutoRows),
+    //                 ),
+    //               ),
+    //             ),
+    //           ),
+    //         ],
+    //       );
+    //     } else {
+    //       return Column(
+    //         children: [
+    //           Padding(
+    //             padding: const EdgeInsets.all(10),
+    //             child: buttonsMenu,
+    //           ),
+    //           Divider(
+    //             thickness: 2,
+    //           ),
+    //           Center(
+    //             child: Text('No data available.'),
+    //           )
+    //         ],
+    //       );
+    //     }
+    //   },
+    // );
   }
 
   void populateGrid(List<dynamic> data) {
@@ -118,7 +287,7 @@ class _DisciplineHistoryGridState extends State<DisciplineHistoryGrid> {
       String cycle = item['ClaCiclo'];
       String studentName = item['Alumno'];
       String campus = item['claun'];
-      String academicLevel = item['GradoSecuencia'];
+      int academicLevel = item['GradoSecuencia'];
       String group = item['Grupo'];
       int minors = item['Menores'];
       int mayor = item['Mayores'];
@@ -145,21 +314,29 @@ class _DisciplineHistoryGridState extends State<DisciplineHistoryGrid> {
   }
 
   Future<void> handleRefresh(
-      String cycle, String initialDate, String finalDate) async {
+      String cycle, DateTime initialDate, DateTime finalDate) async {
     try {
-      await getStudentsDisciplinaryReportsByDates(cycle, initialDate, finalDate)
+      await getStudentsDisciplinaryReportsByDates(
+              cycle,
+              "${initialDate.year}${initialDate.month.toString().padLeft(2, '0')}${initialDate.day.toString().padLeft(2, '0')}",
+              "${finalDate.year}${finalDate.month.toString().padLeft(2, '0')}${finalDate.day.toString().padLeft(2, '0')}")
           .then((value) {
         setState(() {
-          disciplinaryData = value;
-          populateGrid(disciplinaryData);
+          plutoRows.clear();
+          populateGrid(value);
+          apiResponse = value;
         });
       }).onError((error, stackTrace) {
         setState(() {
-          showErrorFromBackend(context, error.toString());
+          print(error);
+          //showErrorFromBackend(context, error.toString());
         });
       });
     } catch (e) {
       rethrow;
     }
   }
+
+  void getStudentDisciplinaryDetails(
+      String initialDate, String finalDate, String cycle) {}
 }

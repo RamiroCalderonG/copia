@@ -1513,7 +1513,7 @@ Future<dynamic> getDisciplinaryReportsByDate(
   try {
     SharedPreferences devicePrefs = await SharedPreferences.getInstance();
     var apiCall = await Requests.get(
-      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/services/ticket',
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/discipline/reports/',
       headers: {
         'Authorization': devicePrefs.getString('token')!,
         'Content-Type': 'application/json',
@@ -1521,7 +1521,7 @@ Future<dynamic> getDisciplinaryReportsByDate(
       queryParameters: {
         'initialDate': initialDate,
         'finalDate': finalDate,
-        'cycle': cycle
+        'cycle': "2022-2023" //cycle
       },
       persistCookies: true,
       timeoutSeconds: 20,
