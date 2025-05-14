@@ -1,9 +1,16 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:csv/csv.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/reusable_methods/academic_functions.dart';
 import 'package:oxschool/core/utils/loader_indicator.dart';
+import 'package:oxschool/presentation/Modules/academic/discipline/create_discipline_screen.dart';
 import 'package:oxschool/presentation/components/confirm_dialogs.dart';
 import 'package:oxschool/presentation/components/custom_icon_button.dart';
+import 'package:oxschool/presentation/components/pdf/discipline_report.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
 class DisciplineHistoryGrid extends StatefulWidget {
@@ -22,25 +29,136 @@ class _DisciplineHistoryGridState extends State<DisciplineHistoryGrid> {
   DateTime? finalDateTime;
   final TextEditingController finalDateController = TextEditingController();
   DateTime? _selectedDate;
+  bool isLoading = false;
 
   final List<PlutoColumn> columns = [
     PlutoColumn(
-        title: "Matrícula", field: "studentId", type: PlutoColumnType.text()),
-    PlutoColumn(title: "Ciclo", field: "cycle", type: PlutoColumnType.text()),
+        title: "Matrícula",
+        field: "studentId",
+        type: PlutoColumnType.text(),
+        readOnly: true,
+        width: 110),
     PlutoColumn(
-        title: "Alumno", field: "student", type: PlutoColumnType.text()),
-    PlutoColumn(title: "Campus", field: "campus", type: PlutoColumnType.text()),
+        title: "Ciclo",
+        field: "cycle",
+        type: PlutoColumnType.text(),
+        readOnly: true,
+        width: 120),
     PlutoColumn(
-        title: "Grado", field: "academicLevel", type: PlutoColumnType.text()),
-    PlutoColumn(title: "Group", field: "group", type: PlutoColumnType.text()),
-    PlutoColumn(title: "Total", field: "total", type: PlutoColumnType.number()),
+        title: "Alumno",
+        field: "student",
+        type: PlutoColumnType.text(),
+        readOnly: true),
     PlutoColumn(
-        title: "Menores", field: "minors", type: PlutoColumnType.text()),
+        title: "Campus",
+        field: "campus",
+        type: PlutoColumnType.text(),
+        readOnly: true,
+        width: 110),
     PlutoColumn(
-        title: "Mayores", field: "mayors", type: PlutoColumnType.text()),
-    PlutoColumn(title: "Notif1", field: "notif1", type: PlutoColumnType.text()),
-    PlutoColumn(title: "Notif2", field: "notif2", type: PlutoColumnType.text()),
-    PlutoColumn(title: "Notif3", field: "notif3", type: PlutoColumnType.text())
+        title: "Grado",
+        field: "academicLevel",
+        type: PlutoColumnType.number(),
+        readOnly: true,
+        width: 80),
+    PlutoColumn(
+        title: "Grupo",
+        field: "group",
+        type: PlutoColumnType.text(),
+        readOnly: true,
+        width: 80),
+    PlutoColumn(
+      title: "Total",
+      field: "total",
+      type: PlutoColumnType.number(),
+      readOnly: true,
+      width: 80,
+      footerRenderer: (context) {
+        final sum = context.stateManager.refRows.fold<int>(
+          0,
+          (previousValue, row) =>
+              previousValue + ((row.cells['total']?.value ?? 0) as int),
+        );
+        return Text(
+          '$sum',
+          textAlign: TextAlign.center,
+          style:
+              const TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+        );
+      },
+    ),
+    PlutoColumn(
+        title: "Menores",
+        field: "minors",
+        type: PlutoColumnType.text(),
+        readOnly: true,
+        width: 100),
+    PlutoColumn(
+      title: "Mayores",
+      field: "mayors",
+      type: PlutoColumnType.text(),
+      readOnly: true,
+      width: 100,
+      footerRenderer: (context) {
+        final sum = context.stateManager.refRows.fold<int>(
+          0,
+          (previousValue, row) =>
+              previousValue + ((row.cells['mayors']?.value ?? 0) as int),
+        );
+        return Text(
+          '$sum',
+          textAlign: TextAlign.center,
+          style:
+              const TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+        );
+      },
+    ),
+    PlutoColumn(
+      title: "Notif1",
+      field: "notif1",
+      type: PlutoColumnType.number(),
+      readOnly: true,
+      width: 90,
+      footerRenderer: (context) {
+        final sum = context.stateManager.refRows.fold<int>(
+          0,
+          (previousValue, row) =>
+              previousValue + ((row.cells['notif1']?.value ?? 0) as int),
+        );
+        return Text(
+          '$sum',
+          textAlign: TextAlign.center,
+          style:
+              const TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+        );
+      },
+    ),
+    PlutoColumn(
+      title: "Notif2",
+      field: "notif2",
+      type: PlutoColumnType.number(),
+      readOnly: true,
+      width: 90,
+      footerRenderer: (context) {
+        final sum = context.stateManager.refRows.fold<int>(
+          0,
+          (previousValue, row) =>
+              previousValue + ((row.cells['notif2']?.value ?? 0) as int),
+        );
+        return Text(
+          '$sum',
+          textAlign: TextAlign.center,
+          style:
+              const TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+        );
+      },
+    ),
+    PlutoColumn(
+        title: "Notif3",
+        field: "notif3",
+        type: PlutoColumnType.number(),
+        readOnly: true,
+        width: 90)
   ];
 
   @override
@@ -53,6 +171,9 @@ class _DisciplineHistoryGridState extends State<DisciplineHistoryGrid> {
   void dispose() {
     initialDateController.dispose();
     finalDateController.dispose();
+    apiResponse = null;
+    plutoRows.clear();
+    columns.clear();
     super.dispose();
   }
 
@@ -151,28 +272,87 @@ class _DisciplineHistoryGridState extends State<DisciplineHistoryGrid> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     RefreshButton(onPressed: () {
+                      setState(() {
+                        isLoading = true;
+                      });
                       if ((initialDateTime != null && finalDateTime != null)) {
                         if (initialDateTime!.isAfter(finalDateTime!)) {
+                          setState(() {
+                            isLoading = false;
+                          });
                           showErrorFromBackend(context,
                               "Fecha inicial no puede ser mayor que la final");
                         } else {
-                          handleRefresh(currentCycle!.claCiclo!,
-                              initialDateTime!, finalDateTime!);
+                          setState(() {
+                            isLoading = true;
+                            handleRefresh(currentCycle!.claCiclo!,
+                                    initialDateTime!, finalDateTime!)
+                                .whenComplete(() => setState(() {
+                                      isLoading = false;
+                                    }));
+                          });
                         }
                       } else {
+                        setState(() {
+                          isLoading = false;
+                        });
                         showEmptyFieldAlertDialog(context,
                             "Favor de seleccionar un rango de fechas correcto");
                       }
+                      setState(() {
+                        isLoading = false;
+                      });
                     }),
                     SizedBox(width: 5),
-                    PrintButton(onPressed: () {}),
+                    ExcelActionButton(onPressed: () {
+                      if (apiResponse == null) {
+                        showErrorFromBackend(
+                            context, "No hay datos para generar el reporte");
+                        setState(() {
+                          isLoading = false;
+                        });
+                        return;
+                      } else {
+                        setState(() {
+                          isLoading = true;
+                        });
+                        exportPlutoGridToCsv(context)
+                            .whenComplete(() => setState(() {
+                                  isLoading = false;
+                                }));
+                      }
+                    }),
                     SizedBox(width: 5),
-                    ExportButton(onPressed: () {}),
+                    ExportButton(onPressed: () {
+                      if (apiResponse == null) {
+                        showErrorFromBackend(
+                            context, "No hay datos para generar el reporte");
+                        setState(() {
+                          isLoading = false;
+                        });
+                        return;
+                      } else {
+                        setState(() {
+                          isLoading = true;
+                        });
+                        generateDisciplinaryReport(
+                                currentCycle!.claCiclo!, apiResponse, context)
+                            .whenComplete(() => setState(() {
+                                  isLoading = false;
+                                }));
+                      }
+                    }),
                     SizedBox(
                       width: 5,
                     ),
                     AddItemButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    const CreateDisciplineScreen()));
+                      },
                     )
                   ],
                 )
@@ -181,127 +361,57 @@ class _DisciplineHistoryGridState extends State<DisciplineHistoryGrid> {
       ],
     );
 
-    return LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-      if (apiResponse != null) {
-        return SafeArea(
-            child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(
-                  left: 15, top: 10, right: 15, bottom: 10),
-              child: buttonsMenu,
-            ),
-            const Divider(thickness: 2),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.vertical,
-                    child: PlutoGrid(columns: columns, rows: plutoRows),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ));
-      } else {
-        return Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(
-                  left: 15, top: 10, right: 15, bottom: 10),
-              child: buttonsMenu,
-            ),
-            const Divider(thickness: 2),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Placeholder(),
-              ),
-            ),
-          ],
-        );
-      }
-    });
-
-    // return FutureBuilder(
-    //   future: disciplinaryData,
-    //   builder: (context, snapshot) {
-    //     if (snapshot.hasError) {
-    //       return Center(
-    //         child: Text('Error: ${snapshot.error}'),
-    //       );
-    //     } else if (snapshot.connectionState == ConnectionState.waiting) {
-    //       return Center(
-    //         child: CustomLoadingIndicator(),
-    //       );
-    //     } else if (snapshot.hasData && snapshot.data != null) {
-    //       return Column(
-    //         children: [
-    //           Padding(
-    //             padding: const EdgeInsets.only(
-    //                 left: 15, top: 10, right: 15, bottom: 10),
-    //             child: buttonsMenu,
-    //           ),
-    //           const Divider(thickness: 2),
-    //           Expanded(
-    //             child: Padding(
-    //               padding: const EdgeInsets.all(20),
-    //               child: SingleChildScrollView(
-    //                 scrollDirection: Axis.horizontal,
-    //                 child: SingleChildScrollView(
-    //                   scrollDirection: Axis.vertical,
-    //                   child: PlutoGrid(columns: columns, rows: plutoRows),
-    //                 ),
-    //               ),
-    //             ),
-    //           ),
-    //         ],
-    //       );
-    //     } else {
-    //       return Column(
-    //         children: [
-    //           Padding(
-    //             padding: const EdgeInsets.all(10),
-    //             child: buttonsMenu,
-    //           ),
-    //           Divider(
-    //             thickness: 2,
-    //           ),
-    //           Center(
-    //             child: Text('No data available.'),
-    //           )
-    //         ],
-    //       );
-    //     }
-    //   },
-    // );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+          child: buttonsMenu,
+        ),
+        const Divider(thickness: 2),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: apiResponse != null
+                ? LayoutBuilder(
+                    builder:
+                        (BuildContext context, BoxConstraints constraints) {
+                      return isLoading
+                          ? Center(
+                              child: CustomLoadingIndicator(),
+                            )
+                          : Center(
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: SizedBox(
+                                  width: constraints.maxWidth,
+                                  height: constraints.maxHeight,
+                                  child: PlutoGrid(
+                                      mode: PlutoGridMode.readOnly,
+                                      columns: columns,
+                                      rows: plutoRows),
+                                ),
+                              ),
+                            );
+                    },
+                  )
+                : const Center(child: Placeholder()),
+          ),
+        ),
+      ],
+    );
   }
 
   void populateGrid(List<dynamic> data) {
     for (var item in data) {
-      String studentId = item['Matricula'];
-      String cycle = item['ClaCiclo'];
-      String studentName = item['Alumno'];
-      String campus = item['claun'];
-      int academicLevel = item['GradoSecuencia'];
-      String group = item['Grupo'];
-      int minors = item['Menores'];
-      int mayor = item['Mayores'];
-      int notif1 = item['Notif1'];
-      int notif2 = item['Notif2'];
-      int notif3 = item['Notif3'];
-      int total = item['Reportes'];
-
       plutoRows.add(PlutoRow(cells: {
-        'studentId': PlutoCell(value: item['Matricula'] ?? ''),
-        'cycle': PlutoCell(value: item['ClaCiclo'] ?? ''),
-        'student': PlutoCell(value: item['Alumno'] ?? ''),
-        'campus': PlutoCell(value: item['claun'] ?? ''),
-        'academicLevel': PlutoCell(value: item['NomGradoEscolar'] ?? ''),
+        'studentId':
+            PlutoCell(value: item['Matricula'].toString().trim() ?? ''),
+        'cycle': PlutoCell(value: item['ClaCiclo'].toString().trim() ?? ''),
+        'student': PlutoCell(value: item['Alumno'].toString().trim() ?? ''),
+        'campus': PlutoCell(value: item['claun'].toString().trim() ?? ''),
+        'academicLevel':
+            PlutoCell(value: item['NomGradoEscolar'].toString().trim() ?? ''),
         'group': PlutoCell(value: item['Grupo'] ?? ''),
         'total': PlutoCell(value: item['Reportes'] ?? 0),
         'minors': PlutoCell(value: item['Menores'] ?? 0),
@@ -316,6 +426,9 @@ class _DisciplineHistoryGridState extends State<DisciplineHistoryGrid> {
   Future<void> handleRefresh(
       String cycle, DateTime initialDate, DateTime finalDate) async {
     try {
+      setState(() {
+        isLoading = true;
+      });
       await getStudentsDisciplinaryReportsByDates(
               cycle,
               "${initialDate.year}${initialDate.month.toString().padLeft(2, '0')}${initialDate.day.toString().padLeft(2, '0')}",
@@ -328,12 +441,55 @@ class _DisciplineHistoryGridState extends State<DisciplineHistoryGrid> {
         });
       }).onError((error, stackTrace) {
         setState(() {
-          print(error);
-          //showErrorFromBackend(context, error.toString());
+          isLoading = false;
+          showErrorFromBackend(context, error.toString());
         });
       });
     } catch (e) {
       rethrow;
+    }
+  }
+
+  Future<void> exportPlutoGridToCsv(BuildContext context) async {
+    if (plutoRows.isEmpty) {
+      showErrorFromBackend(context, "No hay datos para exportar.");
+      return;
+    }
+
+    // Prepare CSV data
+    List<List<dynamic>> csvData = [];
+
+    // Add headers
+    csvData.add(columns.map((col) => col.title).toList());
+
+    // Add rows
+    for (var row in plutoRows) {
+      csvData.add(
+          columns.map((col) => row.cells[col.field]?.value ?? '').toList());
+    }
+
+    String csv = const ListToCsvConverter().convert(csvData);
+
+    // Let user pick the save location
+    String? outputFile = await FilePicker.platform.saveFile(
+      dialogTitle: 'Guardar archivo CSV',
+      fileName: 'reporteDisciplina.csv',
+      type: FileType.custom,
+      allowedExtensions: ['csv'],
+    );
+
+    if (outputFile != null) {
+      final file = File(outputFile);
+      await file.writeAsString(csv, encoding: utf8);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Archivo CSV guardado exitosamente en $outputFile',
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          ),
+          backgroundColor: Colors.green,
+        ),
+      );
     }
   }
 

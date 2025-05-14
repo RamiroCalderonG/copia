@@ -2,10 +2,11 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class CustomIconButton extends StatelessWidget {
   final VoidCallback onPressed;
-  final Icon icon;
+  final Icon? icon;
   final String tooltip;
 
   const CustomIconButton({
@@ -99,7 +100,7 @@ class RefreshButton extends StatelessWidget {
   }
 }
 
-class PrintButton extends StatelessWidget{
+class PrintButton extends StatelessWidget {
   final VoidCallback onPressed;
 
   const PrintButton({super.key, required this.onPressed});
@@ -114,7 +115,7 @@ class PrintButton extends StatelessWidget{
   }
 }
 
-class ExportButton extends StatelessWidget{
+class ExportButton extends StatelessWidget {
   final VoidCallback onPressed;
 
   const ExportButton({super.key, required this.onPressed});
@@ -125,6 +126,21 @@ class ExportButton extends StatelessWidget{
       onPressed: onPressed,
       icon: const Icon(Icons.file_download),
       tooltip: 'Exportar',
+    );
+  }
+}
+
+class ExcelActionButton extends StatelessWidget {
+  final VoidCallback onPressed;
+
+  const ExcelActionButton({super.key, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomIconButton(
+      onPressed: onPressed,
+      icon: Icon(Icons.file_present),
+      tooltip: 'Excel',
     );
   }
 }
@@ -157,5 +173,4 @@ class ShowHistoryButton extends StatelessWidget {
       tooltip: 'Historial',
     );
   }
-  
 }

@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
+import 'package:oxschool/data/Models/Student.dart';
 
 import 'package:oxschool/data/Models/Student_eval.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
@@ -641,6 +642,21 @@ Future<dynamic> getStudentsDisciplinaryReportsByDates(
         await getDisciplinaryReportsByDate(cycle, initialDate, finalDate);
     return response;
   } catch (e) {
+    rethrow;
+  }
+}
+
+Future<dynamic> getSimpleStudentsByCycle(String cycle) async {
+  try {
+    var response = await getStudentsByDynamicParam("cycle", cycle);
+    List<Student> resultData = [];
+    for (var item in response) {
+      resultData.add(Student.fromJson(item));
+    }
+
+    return resultData;
+  } catch (e) {
+    insertErrorLog(e.toString(), 'getSimpleStudentsByCycle($cycle)');
     rethrow;
   }
 }

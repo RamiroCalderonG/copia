@@ -1508,6 +1508,8 @@ Future<dynamic> createNewTicketServices(Map<String, dynamic> body) async {
   }
 }
 
+//* Retrieves a list of disciplinary reports by date
+// TODO: Edit cycle parameter to be dynamic
 Future<dynamic> getDisciplinaryReportsByDate(
     String cycle, String initialDate, String finalDate) async {
   try {
@@ -1537,6 +1539,39 @@ Future<dynamic> getDisciplinaryReportsByDate(
   } catch (e) {
     insertErrorLog(e.toString(),
         'getDisciplinaryReportsByDate($cycle, $initialDate, $finalDate)');
+    throw e.toString();
+  }
+}
+
+//* Retrieves students by dynamic params
+Future<dynamic> getStudentsByDynamicParam(
+    String paramkey, String paramValue) async {
+  try {
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
+    var apiCall = await Requests.get(
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/students/all/simple',
+      headers: {
+        'Authorization': devicePrefs.getString('token')!,
+        'Content-Type': 'application/json',
+      },
+      queryParameters: {
+        'Param': paramkey,
+        'param2': paramValue,
+      },
+      persistCookies: false,
+      timeoutSeconds: 20,
+    );
+    apiCall.raiseForStatus();
+    if (apiCall.statusCode == 200) {
+      return json.decode(utf8.decode(apiCall
+          .bodyBytes)); //* Returns data formated and decoded using utf8 encoding for latin and spanish characteres
+    } else {
+      insertErrorLog(apiCall.body, 'getStudentsByDynamicParam()');
+      throw Future.error(apiCall.body);
+    }
+  } catch (e) {
+    insertErrorLog(
+        e.toString(), 'getStudentsByDynamicParam($paramkey, $paramValue)');
     throw e.toString();
   }
 }
