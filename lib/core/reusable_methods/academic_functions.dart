@@ -646,7 +646,7 @@ Future<dynamic> getStudentsDisciplinaryReportsByDates(
   }
 }
 
-Future<dynamic> getSimpleStudentsByCycle(String cycle) async {
+Future<List<Student>> getSimpleStudentsByCycle(String cycle) async {
   try {
     var response = await getStudentsByDynamicParam("cycle", cycle);
     List<Student> resultData = [];
@@ -657,6 +657,18 @@ Future<dynamic> getSimpleStudentsByCycle(String cycle) async {
     return resultData;
   } catch (e) {
     insertErrorLog(e.toString(), 'getSimpleStudentsByCycle($cycle)');
+    rethrow;
+  }
+}
+
+Future<dynamic> getTeachersListByCycle(String cycle) async {
+  try {
+    var response = await getTeachersGradeGroupSubjectsByCycle(cycle);
+
+    // List<Map<String, dynamic>> data = response;
+    return response;
+  } catch (e) {
+    insertErrorLog(e.toString(), 'getTeachersListByCycle($cycle)');
     rethrow;
   }
 }

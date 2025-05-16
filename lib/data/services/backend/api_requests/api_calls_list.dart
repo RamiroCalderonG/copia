@@ -1576,6 +1576,37 @@ Future<dynamic> getStudentsByDynamicParam(
   }
 }
 
+//* gets teachers name,subject,grade and group by cycle to be used on disciplinary reports
+Future<dynamic> getTeachersGradeGroupSubjectsByCycle(
+  String cycle,
+) async {
+  try {
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
+    var apiCall = await Requests.get(
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/teachers/list/$cycle',
+      headers: {
+        'Authorization': devicePrefs.getString('token')!,
+        'Content-Type': 'application/json',
+      },
+      persistCookies: false,
+      timeoutSeconds: 20,
+    );
+    apiCall.raiseForStatus();
+    if (apiCall.statusCode == 200) {
+      return json.decode(utf8.decode(apiCall
+          .bodyBytes)); //* Returns data formated and decoded using utf8 encoding for latin and spanish characteres
+    } else {
+      insertErrorLog(
+          apiCall.body, 'getTeachersGradeGroupSubjectsByCycle($cycle)');
+      throw Future.error(apiCall.body);
+    }
+  } catch (e) {
+    insertErrorLog(
+        e.toString(), 'getTeachersGradeGroupSubjectsByCycle($cycle)');
+    throw e.toString();
+  }
+}
+
 //!Not using for now
 //Function to get a list of acces items by a role
 /* Future<http.Response> getUserRoleAndAcces(int roleId) async {

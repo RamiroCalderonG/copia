@@ -20,6 +20,10 @@ class _CreateDisciplineScreenState extends State<CreateDisciplineScreen> {
   late Future<dynamic> studentsList;
   List<Student> students = [];
   List<String> studentsNames = [];
+  List<dynamic> teachers = [];
+  Student? selectedStudent;
+  List<Map<String, dynamic>> filteredTeachers = [];
+  String? selectedTeacherId;
 
   @override
   void initState() {
@@ -50,9 +54,19 @@ class _CreateDisciplineScreenState extends State<CreateDisciplineScreen> {
     final studentSelector = SearchableDropdown(
       items: studentsNames,
       label: 'Buscar estudiante por nombre',
-      onSelected: (p0) {
-        // Handle the selected student
-        print('Selected student: $p0');
+      onSelected: (selectedName) {
+        final student = students.firstWhere((s) => s.nombre == selectedName);
+        setState(() {
+          selectedStudent = student;
+          filteredTeachers = teachers
+              .where((teacher) =>
+                  teacher['ClaUN'].toString().trim() == student.claUn &&
+                  teacher['Gradosecuencia'] == student.gradoSecuencia &&
+                  teacher['Grupo'] == student.grupo)
+              .toList()
+              .cast<Map<String, dynamic>>();
+          selectedTeacherId = null;
+        });
       },
       hint: 'Buscar estudiante por nombre',
     );
@@ -117,20 +131,36 @@ class _CreateDisciplineScreenState extends State<CreateDisciplineScreen> {
       },
     );
 
-    final teacherSelector = DropdownButtonFormField(
-      items: const [
-        DropdownMenuItem(
-          value: 'teacher1',
-          child: Text('Teacher 1'),
-        ),
-        DropdownMenuItem(
-          value: 'teacher2',
-          child: Text('Teacher 2'),
-        ),
-      ],
-      onChanged: (value) {},
+    final teacherSelector = DropdownButtonFormField<String>(
+      value: filteredTeachers
+              .any((t) => t['NoEmpleado'].toString() == selectedTeacherId)
+          ? selectedTeacherId
+          : null, // Only set if value exists in filtered list
+      items: filteredTeachers
+          .map((teacher) {
+            final value = teacher['NoEmpleado'].toString();
+            final display =
+                '${teacher['teacher'] ?? ''}  | ${teacher['NomMateria']?.toString().trim() ?? ''}';
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(
+                display,
+                style: TextStyle(fontSize: 12),
+              ),
+            );
+          })
+          .toSet()
+          .toList(),
+      onChanged: (value) {
+        setState(() {
+          selectedTeacherId = value;
+          print('selectedTeacherId: $selectedTeacherId');
+          print(
+              'filteredTeachers: ${filteredTeachers.map((t) => t['NoEmpleado'].toString()).toList()}');
+        });
+      },
       decoration: InputDecoration(
-        labelText: 'Select Teacher',
+        labelText: 'Selecciona Docente',
         border: OutlineInputBorder(),
       ),
     );
@@ -251,15 +281,11 @@ class _CreateDisciplineScreenState extends State<CreateDisciplineScreen> {
                               border: Border.all(
                                   color: FlutterFlowTheme.of(context).accent3),
                               borderRadius: BorderRadius.circular(8.0),
-                              boxShadow: [
-                                // BoxShadow(
-                                //   color: Colors.blue.shade100,
-                                //   blurRadius: 4.0,
-                                //   offset: const Offset(0, 2),
-                                // ),
-                              ],
+                              boxShadow: [],
                             ),
-                            child: teacherSelector,
+                            child: filteredTeachers.isEmpty
+                                ? const Text('No hay docentes para este grupo.')
+                                : teacherSelector,
                           ),
                         )
                       ],
@@ -301,17 +327,30 @@ class _CreateDisciplineScreenState extends State<CreateDisciplineScreen> {
   }
 
   Future<dynamic> handleReload(String cycle) async {
-    var response = await getSimpleStudentsByCycle(cycle);
-    setState(() {
-      studentsNames.clear();
-      students = response;
-      for (var element in students) {
-        studentsNames.add(element.nombre!);
+    try {
+      var response = await getSimpleStudentsByCycle(cycle);
+      var teachersList = await getTeachersListByCycle(cycle);
+      setState(() {
+        if (studentsNames.isNotEmpty) {
+          studentsNames.clear();
+        }
+        if (students.isNotEmpty) {
+          students.clear();
+        }
+        students = response;
+        teachers = teachersList;
+        for (var element in students) {
+          studentsNames.add(element.nombre!);
+        }
+      });
+      if (response == null) {
+        return [];
       }
-    });
-    if (response == null) {
-      return [];
+      return response;
+    } catch (e) {
+      // Handle error
+      print('Error fetching students: $e');
+      return null;
     }
-    return response;
   }
 }
