@@ -13,7 +13,7 @@ import 'package:oxschool/core/constants/date_constants.dart';
 import 'package:oxschool/core/reusable_methods/academic_functions.dart';
 import 'package:oxschool/data/datasources/temp/teacher_grades_temp.dart';
 
-import 'package:pluto_grid/pluto_grid.dart';
+import 'package:trina_grid/trina_grid.dart';
 
 import '../../../../core/utils/loader_indicator.dart';
 import '../../../../data/datasources/temp/studens_temp.dart';
@@ -34,14 +34,14 @@ class GradesByStudent extends StatefulWidget {
 
 String? subjectSelected = oneTeacherAssignatures.first;
 
-List<PlutoRow> rows = [];
+List<TrinaRow> rows = [];
 
 class _GradesByStudentState extends State<GradesByStudent> {
   bool isUserAdmin = false;
   bool isUserAcademicCoord = false;
   var commentsController = TextEditingController();
-  late PlutoGridStateManager stateManager;
-  late PlutoGridStateManager gridAStateManager;
+  late TrinaGridStateManager stateManager;
+  late TrinaGridStateManager gridAStateManager;
   String currentMonth = DateFormat.MMMM('es').format(DateTime.now());
 
   Key? currentRowKey;
@@ -114,10 +114,10 @@ class _GradesByStudentState extends State<GradesByStudent> {
     }
     setState(() {
       rows = uniqueStudents.map((item) {
-        return PlutoRow(
+        return TrinaRow(
           cells: {
-            'studentID': PlutoCell(value: item.containsKey('StudentID')),
-            'studentName': PlutoCell(value: item.containsKey('studentName')),
+            'studentID': TrinaCell(value: item.containsKey('StudentID')),
+            'studentName': TrinaCell(value: item.containsKey('studentName')),
           },
         );
       }).toList();
@@ -128,9 +128,9 @@ class _GradesByStudentState extends State<GradesByStudent> {
     if (studentsGradesCommentsRows.isNotEmpty) {
       setState(() {
         evaluationComments = comments.map((item) {
-          return PlutoRow(cells: {
-            'idcomment': PlutoCell(value: item['idcomment']),
-            'comentname': PlutoCell(value: item['comentname']),
+          return TrinaRow(cells: {
+            'idcomment': TrinaCell(value: item['idcomment']),
+            'comentname': TrinaCell(value: item['comentname']),
           });
         }).toList();
       });
@@ -161,11 +161,11 @@ class _GradesByStudentState extends State<GradesByStudent> {
         studentEvaluationRows.clear();
         var index = 0;
         for (var item in uniqueStudentsList) {
-          studentEvaluationRows.add(PlutoRow(cells: {
-            'No': PlutoCell(value: index + 1),
-            'studentID': PlutoCell(value: item['studentID']!.trim()),
+          studentEvaluationRows.add(TrinaRow(cells: {
+            'No': TrinaCell(value: index + 1),
+            'studentID': TrinaCell(value: item['studentID']!.trim()),
             'studentName':
-                PlutoCell(value: item['studentName']!.trim().toTitleCase),
+                TrinaCell(value: item['studentName']!.trim().toTitleCase),
           }));
         }
       });
@@ -382,11 +382,11 @@ class _GradesByStudentState extends State<GradesByStudent> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Expanded(
-                              child: PlutoGrid(
+                              child: TrinaGrid(
                                   //Grid for students name and ID
                                   columns: studentColumnsToEvaluateByStudent,
                                   rows: studentEvaluationRows,
-                                  mode: PlutoGridMode.select,
+                                  mode: TrinaGridMode.select,
                                   onRowDoubleTap: (event) async {
                                     var gradeInt = getKeyFromValue(
                                         teacherGradesMap,
@@ -414,16 +414,16 @@ class _GradesByStudentState extends State<GradesByStudent> {
                                   },
                                   onLoaded: (event) {
                                     event.stateManager.setSelectingMode(
-                                        PlutoGridSelectingMode.cell);
-                                    PlutoGridStateManager stateManager =
+                                        TrinaGridSelectingMode.cell);
+                                    TrinaGridStateManager stateManager =
                                         event.stateManager;
 
                                     // Select the row where the 'nameColumn' matches 'John Doe'
                                     selectRowByName(stateManager, 'studentName',
                                         selectedStudentName);
                                   },
-                                  configuration: const PlutoGridConfiguration(
-                                    style: PlutoGridStyleConfig(
+                                  configuration: const TrinaGridConfiguration(
+                                    style: TrinaGridStyleConfig(
                                       enableColumnBorderVertical: false,
                                       enableCellBorderVertical: false,
                                     ),
@@ -431,7 +431,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
                                   createFooter: (stateManager) {
                                     stateManager.setPageSize(20,
                                         notify: false); // default 40
-                                    return PlutoPagination(stateManager);
+                                    return TrinaPagination(stateManager);
                                   })),
                           const SizedBox(
                             width: 20,
@@ -445,8 +445,8 @@ class _GradesByStudentState extends State<GradesByStudent> {
                                   children: [
                                     Expanded(
                                       child: selectedStudentRows.isNotEmpty
-                                          ? PlutoGrid(
-                                              // mode: PlutoGridMode.select,
+                                          ? TrinaGrid(
+                                              // mode: TrinaGridMode.select,
                                               columns: gradesByStudentColumns,
                                               rows: selectedStudentRows,
                                               onChanged: (event) {
@@ -507,24 +507,24 @@ class _GradesByStudentState extends State<GradesByStudent> {
                                               //         'Sin comentarios disponibles a asignar al alumno seleccionado');
                                               //   }
                                               // },
-                                              onLoaded: (PlutoGridOnLoadedEvent
+                                              onLoaded: (TrinaGridOnLoadedEvent
                                                   event) {
                                                 gridAStateManager =
                                                     event.stateManager;
                                               },
                                               configuration:
-                                                  const PlutoGridConfiguration(
-                                                style: PlutoGridStyleConfig(
+                                                  const TrinaGridConfiguration(
+                                                style: TrinaGridStyleConfig(
                                                   enableColumnBorderVertical:
                                                       false,
                                                   enableCellBorderVertical:
                                                       false,
                                                 ),
                                                 columnSize:
-                                                    PlutoGridColumnSizeConfig(
+                                                    TrinaGridColumnSizeConfig(
                                                   autoSizeMode:
-                                                      PlutoAutoSizeMode.scale,
-                                                  resizeMode: PlutoResizeMode
+                                                      TrinaAutoSizeMode.scale,
+                                                  resizeMode: TrinaResizeMode
                                                       .pushAndPull,
                                                 ),
                                               ),
@@ -579,7 +579,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
     }
   }
 
-  void selectRowByName(PlutoGridStateManager stateManager, String columnField,
+  void selectRowByName(TrinaGridStateManager stateManager, String columnField,
       String storedName) {
     for (var i = 0; i < stateManager.rows.length; i++) {
       final cellValue = stateManager.rows[i].cells[columnField]?.value;
@@ -593,7 +593,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
         stateManager.setCurrentCell(firstCell, i);
 
         // Ensure the row with the selected cell is visible (optional)
-        stateManager.moveScrollByRow(PlutoMoveDirection.up, i);
+        stateManager.moveScrollByRow(TrinaMoveDirection.up, i);
 
         break;
       }
@@ -703,20 +703,20 @@ class _GradesByStudentState extends State<GradesByStudent> {
     setState(() {
       selectedStudentRows.clear();
       for (var student in selectedStudentList) {
-        selectedStudentRows.add(PlutoRow(cells: {
-          'subject': PlutoCell(value: student.subject),
+        selectedStudentRows.add(TrinaRow(cells: {
+          'subject': TrinaCell(value: student.subject),
           'subject_name':
-              PlutoCell(value: student.subjectName!.trim().toTitleCase),
-          'evaluation': PlutoCell(value: student.evaluation),
-          // 'eval_type': PlutoCell(value: student.),
-          'absence_eval': PlutoCell(value: student.absence),
-          'homework_eval': PlutoCell(value: student.homework),
-          'discipline_eval': PlutoCell(value: student.discipline),
-          // 'comment': PlutoCell(value: student.comment),
-          'habit_eval': PlutoCell(value: student.habits_evaluation),
-          'other': PlutoCell(value: student.other),
-          'outfit': PlutoCell(value: student.outfit),
-          'idCicloEscolar': PlutoCell(value: student.rateID),
+              TrinaCell(value: student.subjectName!.trim().toTitleCase),
+          'evaluation': TrinaCell(value: student.evaluation),
+          // 'eval_type': TrinaCell(value: student.),
+          'absence_eval': TrinaCell(value: student.absence),
+          'homework_eval': TrinaCell(value: student.homework),
+          'discipline_eval': TrinaCell(value: student.discipline),
+          // 'comment': TrinaCell(value: student.comment),
+          'habit_eval': TrinaCell(value: student.habits_evaluation),
+          'other': TrinaCell(value: student.other),
+          'outfit': TrinaCell(value: student.outfit),
+          'idCicloEscolar': TrinaCell(value: student.rateID),
         }));
       }
     });
@@ -727,7 +727,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
     // }
   }
 
-  Future<List<PlutoRow>> populateAsignatedComments(
+  Future<List<TrinaRow>> populateAsignatedComments(
       int grade, month, bool byStudent, String studentid) async {
     commentsAsignated.clear();
     commentsAsignated =

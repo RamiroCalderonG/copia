@@ -7,7 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
 
 import 'package:oxschool/presentation/components/custom_icon_button.dart';
-import 'package:pluto_grid/pluto_grid.dart';
+import 'package:trina_grid/trina_grid.dart';
 
 import '../../../../data/datasources/temp/studens_temp.dart';
 import '../../../../data/datasources/temp/teacher_grades_temp.dart';
@@ -29,8 +29,8 @@ class FoDac27 extends StatefulWidget {
 
 class _FoDac27State extends State<FoDac27> {
   late Future<dynamic> _studentsFuture;
-  List<PlutoRow> fodac27HistoryRows = [];
-  late PlutoGridStateManager stateManager;
+  List<TrinaRow> fodac27HistoryRows = [];
+  late TrinaGridStateManager stateManager;
 
   final TextEditingController studentSelectorController =
       TextEditingController();
@@ -74,34 +74,34 @@ class _FoDac27State extends State<FoDac27> {
   //   tooltip: 'Exportar a Excel',
   // );
 
-  final List<PlutoColumn> fodac27Columns = [
-    PlutoColumn(
+  final List<TrinaColumn> fodac27Columns = [
+    TrinaColumn(
         title: 'id',
         field: 'fodac27',
-        type: PlutoColumnType.number(
+        type: TrinaColumnType.number(
           format: '####',
           negative: false,
         ),
         readOnly: true,
-        sort: PlutoColumnSort.ascending,
+        sort: TrinaColumnSort.ascending,
         enableColumnDrag: true,
         enableRowDrag: true),
-    PlutoColumn(
+    TrinaColumn(
       title: 'Fecha',
       field: 'date',
-      type: PlutoColumnType.text(),
+      type: TrinaColumnType.text(),
       readOnly: true,
     ),
-    PlutoColumn(
+    TrinaColumn(
       title: 'Matricula',
       field: 'studentID',
-      type: PlutoColumnType.text(),
+      type: TrinaColumnType.text(),
       readOnly: true,
     ),
-    PlutoColumn(
+    TrinaColumn(
         title: 'Obs',
         field: 'Obs',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         renderer: (rendererContext) {
           return Tooltip(
             message: rendererContext.cell.value,
@@ -120,15 +120,15 @@ class _FoDac27State extends State<FoDac27> {
           );
         },
         readOnly: true),
-    PlutoColumn(
+    TrinaColumn(
         title: 'Materia',
         field: 'subject',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         readOnly: true),
-    PlutoColumn(
+    TrinaColumn(
         title: 'Maestro',
         field: 'teacher',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         readOnly: true),
   ];
 
@@ -145,7 +145,7 @@ class _FoDac27State extends State<FoDac27> {
             return Column(
               children: [
                 buildStudentSelector(),
-                Expanded(child: buildPlutoGrid())
+                Expanded(child: buildTrinaGrid())
               ],
             );
           }
@@ -238,22 +238,22 @@ class _FoDac27State extends State<FoDac27> {
     );
   }
 
-  Widget buildPlutoGrid() {
+  Widget buildTrinaGrid() {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-      child: PlutoGrid(
-        mode: PlutoGridMode.selectWithOneTap,
+      child: TrinaGrid(
+        mode: TrinaGridMode.selectWithOneTap,
         columns: fodac27Columns,
         rows: fodac27HistoryRows,
         onLoaded: (event) {
-          event.stateManager.setSelectingMode(PlutoGridSelectingMode.cell);
+          event.stateManager.setSelectingMode(TrinaGridSelectingMode.cell);
           stateManager = event.stateManager;
         },
         onSelected: handleSelectedCell,
         // createHeader: (stateManager) =>
-        //     PlutoGridHeader(stateManager: stateManager),
-        configuration: const PlutoGridConfiguration(
-          style: PlutoGridStyleConfig(
+        //     TrinaGridHeader(stateManager: stateManager),
+        configuration: const TrinaGridConfiguration(
+          style: TrinaGridStyleConfig(
             enableColumnBorderVertical: false,
             enableCellBorderVertical: false,
           ),
@@ -316,7 +316,7 @@ class _FoDac27State extends State<FoDac27> {
     }
   }
 
-  void handleSelectedCell(PlutoGridOnSelectedEvent event) {
+  void handleSelectedCell(TrinaGridOnSelectedEvent event) {
     var selectedRow = event.row;
     selectedEvalID = selectedRow?.cells['fodac27']?.value;
     selectedCommentToEdit = selectedRow?.cells['Obs']?.value;
@@ -342,14 +342,14 @@ class _FoDac27State extends State<FoDac27> {
     if (apiResponse != null) {
       var decodedResponse =
           json.decode(utf8.decode(apiResponse.codeUnits)) as List;
-      List<PlutoRow> newRows = decodedResponse.map((item) {
-        return PlutoRow(cells: {
-          'date': PlutoCell(value: item['date']),
-          'studentID': PlutoCell(value: item['studentId']),
-          'Obs': PlutoCell(value: item['observation']),
-          'subject': PlutoCell(value: item['subjectName']),
-          'teacher': PlutoCell(value: item['teacherName']),
-          'fodac27': PlutoCell(value: item['fodacId']),
+      List<TrinaRow> newRows = decodedResponse.map((item) {
+        return TrinaRow(cells: {
+          'date': TrinaCell(value: item['date']),
+          'studentID': TrinaCell(value: item['studentId']),
+          'Obs': TrinaCell(value: item['observation']),
+          'subject': TrinaCell(value: item['subjectName']),
+          'teacher': TrinaCell(value: item['teacherName']),
+          'fodac27': TrinaCell(value: item['fodacId']),
         });
       }).toList();
 
@@ -389,7 +389,7 @@ class _FoDac27State extends State<FoDac27> {
 }
 
 class EditCellDialog extends StatelessWidget {
-  final PlutoCell cell;
+  final TrinaCell cell;
   final Function(String) onSave;
 
   const EditCellDialog({

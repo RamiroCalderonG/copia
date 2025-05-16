@@ -10,7 +10,7 @@ import 'package:oxschool/core/reusable_methods/reusable_functions.dart';
 import 'package:oxschool/core/reusable_methods/user_functions.dart';
 import 'package:oxschool/data/datasources/temp/users_temp_data.dart';
 import 'package:oxschool/presentation/components/confirm_dialogs.dart';
-import 'package:pluto_grid/pluto_grid.dart';
+import 'package:trina_grid/trina_grid.dart';
 
 class UsersTableView extends StatefulWidget {
   const UsersTableView({super.key});
@@ -20,13 +20,13 @@ class UsersTableView extends StatefulWidget {
 }
 
 class _UsersTableViewState extends State<UsersTableView> {
-  // List<PlutoRow> userRows = [];
+  // List<TrinaRow> userRows = [];
   // ignore: prefer_typing_uninitialized_variables
   var toSee;
   bool isUserAdmin = currentUser!.isCurrentUserAdmin();
   bool confirmation = false;
   bool isSearching = true;
-  late final PlutoGridStateManager stateManager;
+  late final TrinaGridStateManager stateManager;
   //Key usrsTableKey = UniqueKey();
   // ignore: prefer_typing_uninitialized_variables
   var listOfUsers;
@@ -34,20 +34,20 @@ class _UsersTableViewState extends State<UsersTableView> {
   @override
   void initState() {
     for (var line in listOfUsersForGrid) {
-      userRows.add(PlutoRow(
+      userRows.add(TrinaRow(
         cells: {
-          'id': PlutoCell(value: line.userId.toString()),
-          'employeeName': PlutoCell(value: line.employeeName),
-          'employeeNumber': PlutoCell(value: line.employeeNumber),
-          'userRole': PlutoCell(value: line.role),
-          'isActive': PlutoCell(value: line.isActive),
-          'campus': PlutoCell(value: line.claUn),
-          // 'area': PlutoCell(value: user),
-          'mail': PlutoCell(value: line.userEmail),
-          'creation': PlutoCell(value: line.creationDate),
-          'birthdate': PlutoCell(value: line.birthdate),
-          'position': PlutoCell(value: line.work_area),
-          'idLogin': PlutoCell(value: line.idLogin)
+          'id': TrinaCell(value: line.userId.toString()),
+          'employeeName': TrinaCell(value: line.employeeName),
+          'employeeNumber': TrinaCell(value: line.employeeNumber),
+          'userRole': TrinaCell(value: line.role),
+          'isActive': TrinaCell(value: line.isActive),
+          'campus': TrinaCell(value: line.claUn),
+          // 'area': TrinaCell(value: user),
+          'mail': TrinaCell(value: line.userEmail),
+          'creation': TrinaCell(value: line.creationDate),
+          'birthdate': TrinaCell(value: line.birthdate),
+          'position': TrinaCell(value: line.work_area),
+          'idLogin': TrinaCell(value: line.idLogin)
         },
       ));
     }
@@ -101,64 +101,64 @@ class _UsersTableViewState extends State<UsersTableView> {
               child: Column(
                 children: [
                   Expanded(
-                    child: PlutoGrid(
-                        columns: <PlutoColumn>[
-                          PlutoColumn(
+                    child: TrinaGrid(
+                        columns: <TrinaColumn>[
+                          TrinaColumn(
                               title: 'Id',
                               field: 'id',
-                              type: PlutoColumnType.number(),
+                              type: TrinaColumnType.number(),
                               readOnly: true,
-                              sort: PlutoColumnSort.ascending,
+                              sort: TrinaColumnSort.ascending,
                               width: 80,
-                              frozen: PlutoColumnFrozen.start),
-                          PlutoColumn(
+                              frozen: TrinaColumnFrozen.start),
+                          TrinaColumn(
                               title: 'Nombre',
                               field: 'employeeName',
-                              type: PlutoColumnType.text(),
+                              type: TrinaColumnType.text(),
                               readOnly: true),
-                          PlutoColumn(
+                          TrinaColumn(
                               title: 'Numero de empleado',
                               field: 'employeeNumber',
-                              type: PlutoColumnType.number(
+                              type: TrinaColumnType.number(
                                 format: '####',
                               ),
                               readOnly: true),
-                          PlutoColumn(
+                          TrinaColumn(
                               title: 'Rol del usuario',
                               field: 'userRole',
-                              type: PlutoColumnType.text(),
+                              type: TrinaColumnType.text(),
                               readOnly: true),
-                          PlutoColumn(
+                          TrinaColumn(
                               title: 'Campus',
                               field: 'campus',
-                              type: PlutoColumnType.text(),
+                              type: TrinaColumnType.text(),
                               readOnly: true),
-                          PlutoColumn(
+                          TrinaColumn(
                               title: 'Baja',
                               field: 'isActive',
-                              type: PlutoColumnType.text(),
+                              type: TrinaColumnType.text(),
                               width: 70,
                               readOnly: true),
-                          PlutoColumn(
+                          TrinaColumn(
                               title: 'e-mail',
                               field: 'mail',
-                              type: PlutoColumnType.text(),
+                              type: TrinaColumnType.text(),
                               readOnly: true),
-                          PlutoColumn(
+                          TrinaColumn(
                               title: 'idLogin',
                               field: 'idLogin',
-                              type: PlutoColumnType.number(),
+                              type: TrinaColumnType.number(),
                               readOnly: true),
-                          // PlutoColumn(
+                          // TrinaColumn(
                           //   title: 'Fecha de alta',
                           //   field: 'creation',
-                          //   type: PlutoColumnType.text(),
+                          //   type: TrinaColumnType.text(),
                           //   readOnly: true,
                           // ),
-                          // PlutoColumn(
+                          // TrinaColumn(
                           //     title: 'Posición',
                           //     field: 'position',
-                          //     type: PlutoColumnType.text(),
+                          //     type: TrinaColumnType.text(),
                           //     readOnly: true)
                         ],
                         rows: userRows,
@@ -269,39 +269,39 @@ class _UsersTableViewState extends State<UsersTableView> {
                                                                 for (var line
                                                                     in listOfUsersForGrid) {
                                                                   userRows.add(
-                                                                      PlutoRow(
+                                                                      TrinaRow(
                                                                     cells: {
-                                                                      'id': PlutoCell(
+                                                                      'id': TrinaCell(
                                                                           value: line
                                                                               .userId
                                                                               .toString()),
                                                                       'employeeName':
-                                                                          PlutoCell(
+                                                                          TrinaCell(
                                                                               value: line.employeeName),
                                                                       'employeeNumber':
-                                                                          PlutoCell(
+                                                                          TrinaCell(
                                                                               value: line.employeeNumber),
                                                                       'userRole':
-                                                                          PlutoCell(
+                                                                          TrinaCell(
                                                                               value: line.role),
                                                                       'isActive':
-                                                                          PlutoCell(
+                                                                          TrinaCell(
                                                                               value: line.isActive),
-                                                                      'campus': PlutoCell(
+                                                                      'campus': TrinaCell(
                                                                           value:
                                                                               line.claUn),
-                                                                      // 'area': PlutoCell(value: user),
-                                                                      'mail': PlutoCell(
+                                                                      // 'area': TrinaCell(value: user),
+                                                                      'mail': TrinaCell(
                                                                           value:
                                                                               line.userEmail),
                                                                       'creation':
-                                                                          PlutoCell(
+                                                                          TrinaCell(
                                                                               value: line.creationDate),
                                                                       'birthdate':
-                                                                          PlutoCell(
+                                                                          TrinaCell(
                                                                               value: line.birthdate),
                                                                       // 'position':
-                                                                      //     PlutoCell(
+                                                                      //     TrinaCell(
                                                                       //         value: line.work_area)
                                                                     },
                                                                   ));
@@ -400,8 +400,8 @@ class _UsersTableViewState extends State<UsersTableView> {
                         //   tmpRolesList = jsonDecode(response);
                         //   updateUserScreen(context);
                         // },
-                        mode: PlutoGridMode.select,
-                        configuration: const PlutoGridConfiguration(),
+                        mode: TrinaGridMode.select,
+                        configuration: const TrinaGridConfiguration(),
                         rowColorCallback: (rowColorContext) {
                           if (rowColorContext.row.cells.entries
                                   .elementAt(5)
@@ -419,13 +419,13 @@ class _UsersTableViewState extends State<UsersTableView> {
                           return Colors.transparent;
                         },
                         // createHeader: (stateManager) =>
-                        //     PlutoGridHeader(stateManager: stateManager),
+                        //     TrinaGridHeader(stateManager: stateManager),
                         createFooter: (stateManager) {
                           stateManager.setPageSize(50,
                               notify: false); // default 40
-                          return PlutoPagination(stateManager);
+                          return TrinaPagination(stateManager);
                         },
-                        onLoaded: (PlutoGridOnLoadedEvent event) {
+                        onLoaded: (TrinaGridOnLoadedEvent event) {
                           stateManager = event.stateManager;
                           stateManager.setShowColumnFilter(true);
                         }),
@@ -479,19 +479,19 @@ Future<void> updateActiveUserStatus(User selectedUser) async {
 //   }
 
 //   for (var line in listOfUsersForGrid) {
-//     userRows.add(PlutoRow(
+//     userRows.add(TrinaRow(
 //       cells: {
-//         'id': PlutoCell(value: line.userId.toString()),
-//         'employeeName': PlutoCell(value: line.employeeName),
-//         'employeeNumber': PlutoCell(value: line.employeeNumber),
-//         'userRole': PlutoCell(value: line.role),
-//         'isActive': PlutoCell(value: line.isActive),
-//         'campus': PlutoCell(value: line.claUn),
-//         // 'area': PlutoCell(value: user),
-//         'mail': PlutoCell(value: line.userEmail),
-//         'creation': PlutoCell(value: line.creationDate),
-//         'birthdate': PlutoCell(value: line.birthdate),
-//         'position': PlutoCell(value: line.work_area)
+//         'id': TrinaCell(value: line.userId.toString()),
+//         'employeeName': TrinaCell(value: line.employeeName),
+//         'employeeNumber': TrinaCell(value: line.employeeNumber),
+//         'userRole': TrinaCell(value: line.role),
+//         'isActive': TrinaCell(value: line.isActive),
+//         'campus': TrinaCell(value: line.claUn),
+//         // 'area': TrinaCell(value: user),
+//         'mail': TrinaCell(value: line.userEmail),
+//         'creation': TrinaCell(value: line.creationDate),
+//         'birthdate': TrinaCell(value: line.birthdate),
+//         'position': TrinaCell(value: line.work_area)
 //       },
 //     ));
 //   }

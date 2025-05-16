@@ -4,11 +4,11 @@ import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/data/Models/ServiceTicketRequest.dart';
 import 'package:oxschool/data/datasources/temp/services_temp.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
-import 'package:pluto_grid/pluto_grid.dart';
+import 'package:trina_grid/trina_grid.dart';
 
-Future<List<PlutoRow>> getServiceTicketsByDate(
+Future<List<TrinaRow>> getServiceTicketsByDate(
     String fromDate, int statusValue, int byWho) async {
-  List<PlutoRow> newRows = [];
+  List<TrinaRow> newRows = [];
   try {
     final response = await getAllServiceTickets(fromDate, statusValue, byWho);
     if (response.statusCode == 200) {
@@ -34,31 +34,31 @@ Future<List<PlutoRow>> getServiceTicketsByDate(
           isRequesttedDateOnTime = false;
         }
 
-        return PlutoRow(cells: {
-          'id': PlutoCell(value: item['idReqServ']),
-          'reportedBy': PlutoCell(
+        return TrinaRow(cells: {
+          'id': TrinaCell(value: item['idReqServ']),
+          'reportedBy': TrinaCell(
               value: item['reportedBy'].toString().trim().toTitleCase),
-          'departmentWhoRequest': PlutoCell(
+          'departmentWhoRequest': TrinaCell(
               value: item['requestFromDept'].toString().trim().toTitleCase),
-          'capturedBy': PlutoCell(
+          'capturedBy': TrinaCell(
               value: item['capturedBy'].toString().trim().toTitleCase),
-          'depRequestIsMadeTo': PlutoCell(
+          'depRequestIsMadeTo': TrinaCell(
               value: item['requestToDept'].toString().trim().toTitleCase),
-          'assignedTo': PlutoCell(
+          'assignedTo': TrinaCell(
               value: item['assignedTo'].toString().trim().toTitleCase),
           'campus':
-              PlutoCell(value: item['campus'].toString().trim().toTitleCase),
-          'requestCreationDate': PlutoCell(value: item['serviceCreationDate']),
-          'requesDate': PlutoCell(value: item['serviceRequestDate']),
-          'deadline': PlutoCell(value: item['deadLine']),
-          'closureDate': PlutoCell(value: item['closureDate']),
+              TrinaCell(value: item['campus'].toString().trim().toTitleCase),
+          'requestCreationDate': TrinaCell(value: item['serviceCreationDate']),
+          'requesDate': TrinaCell(value: item['serviceRequestDate']),
+          'deadline': TrinaCell(value: item['deadLine']),
+          'closureDate': TrinaCell(value: item['closureDate']),
           'description':
-              PlutoCell(value: item['description'].toString().trim()),
+              TrinaCell(value: item['description'].toString().trim()),
           'observations':
-              PlutoCell(value: item['observations'].toString().trim()),
-          'status': PlutoCell(value: item['status']),
-          'deadLineOnTime': PlutoCell(value: isDeadLineOnTime),
-          'requesttedDateOnTime': PlutoCell(value: isRequesttedDateOnTime),
+              TrinaCell(value: item['observations'].toString().trim()),
+          'status': TrinaCell(value: item['status']),
+          'deadLineOnTime': TrinaCell(value: isDeadLineOnTime),
+          'requesttedDateOnTime': TrinaCell(value: isRequesttedDateOnTime),
         });
       }).toList(); */
 

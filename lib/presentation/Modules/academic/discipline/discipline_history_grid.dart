@@ -11,7 +11,7 @@ import 'package:oxschool/presentation/Modules/academic/discipline/create_discipl
 import 'package:oxschool/presentation/components/confirm_dialogs.dart';
 import 'package:oxschool/presentation/components/custom_icon_button.dart';
 import 'package:oxschool/presentation/components/pdf/discipline_report.dart';
-import 'package:pluto_grid/pluto_grid.dart';
+import 'package:trina_grid/trina_grid.dart';
 
 class DisciplineHistoryGrid extends StatefulWidget {
   const DisciplineHistoryGrid({super.key});
@@ -21,7 +21,7 @@ class DisciplineHistoryGrid extends StatefulWidget {
 }
 
 class _DisciplineHistoryGridState extends State<DisciplineHistoryGrid> {
-  List<PlutoRow> plutoRows = [];
+  List<TrinaRow> plutoRows = [];
   dynamic apiResponse;
   var disciplinaryData;
   final TextEditingController initialDateController = TextEditingController();
@@ -31,46 +31,46 @@ class _DisciplineHistoryGridState extends State<DisciplineHistoryGrid> {
   DateTime? _selectedDate;
   bool isLoading = false;
 
-  final List<PlutoColumn> columns = [
-    PlutoColumn(
+  final List<TrinaColumn> columns = [
+    TrinaColumn(
         title: "Matrícula",
         field: "studentId",
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         readOnly: true,
         width: 110),
-    PlutoColumn(
+    TrinaColumn(
         title: "Ciclo",
         field: "cycle",
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         readOnly: true,
         width: 120),
-    PlutoColumn(
+    TrinaColumn(
         title: "Alumno",
         field: "student",
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         readOnly: true),
-    PlutoColumn(
+    TrinaColumn(
         title: "Campus",
         field: "campus",
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         readOnly: true,
         width: 110),
-    PlutoColumn(
+    TrinaColumn(
         title: "Grado",
         field: "academicLevel",
-        type: PlutoColumnType.number(),
+        type: TrinaColumnType.number(),
         readOnly: true,
         width: 80),
-    PlutoColumn(
+    TrinaColumn(
         title: "Grupo",
         field: "group",
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         readOnly: true,
         width: 80),
-    PlutoColumn(
+    TrinaColumn(
       title: "Total",
       field: "total",
-      type: PlutoColumnType.number(),
+      type: TrinaColumnType.number(),
       readOnly: true,
       width: 80,
       footerRenderer: (context) {
@@ -87,16 +87,16 @@ class _DisciplineHistoryGridState extends State<DisciplineHistoryGrid> {
         );
       },
     ),
-    PlutoColumn(
+    TrinaColumn(
         title: "Menores",
         field: "minors",
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         readOnly: true,
         width: 100),
-    PlutoColumn(
+    TrinaColumn(
       title: "Mayores",
       field: "mayors",
-      type: PlutoColumnType.text(),
+      type: TrinaColumnType.text(),
       readOnly: true,
       width: 100,
       footerRenderer: (context) {
@@ -113,10 +113,10 @@ class _DisciplineHistoryGridState extends State<DisciplineHistoryGrid> {
         );
       },
     ),
-    PlutoColumn(
+    TrinaColumn(
       title: "Notif1",
       field: "notif1",
-      type: PlutoColumnType.number(),
+      type: TrinaColumnType.number(),
       readOnly: true,
       width: 90,
       footerRenderer: (context) {
@@ -133,10 +133,10 @@ class _DisciplineHistoryGridState extends State<DisciplineHistoryGrid> {
         );
       },
     ),
-    PlutoColumn(
+    TrinaColumn(
       title: "Notif2",
       field: "notif2",
-      type: PlutoColumnType.number(),
+      type: TrinaColumnType.number(),
       readOnly: true,
       width: 90,
       footerRenderer: (context) {
@@ -153,10 +153,10 @@ class _DisciplineHistoryGridState extends State<DisciplineHistoryGrid> {
         );
       },
     ),
-    PlutoColumn(
+    TrinaColumn(
         title: "Notif3",
         field: "notif3",
-        type: PlutoColumnType.number(),
+        type: TrinaColumnType.number(),
         readOnly: true,
         width: 90)
   ];
@@ -316,7 +316,7 @@ class _DisciplineHistoryGridState extends State<DisciplineHistoryGrid> {
                         setState(() {
                           isLoading = true;
                         });
-                        exportPlutoGridToCsv(context)
+                        exportTrinaGridToCsv(context)
                             .whenComplete(() => setState(() {
                                   isLoading = false;
                                 }));
@@ -386,8 +386,8 @@ class _DisciplineHistoryGridState extends State<DisciplineHistoryGrid> {
                                 child: SizedBox(
                                   width: constraints.maxWidth,
                                   height: constraints.maxHeight,
-                                  child: PlutoGrid(
-                                      mode: PlutoGridMode.readOnly,
+                                  child: TrinaGrid(
+                                      mode: TrinaGridMode.readOnly,
                                       columns: columns,
                                       rows: plutoRows),
                                 ),
@@ -404,21 +404,21 @@ class _DisciplineHistoryGridState extends State<DisciplineHistoryGrid> {
 
   void populateGrid(List<dynamic> data) {
     for (var item in data) {
-      plutoRows.add(PlutoRow(cells: {
+      plutoRows.add(TrinaRow(cells: {
         'studentId':
-            PlutoCell(value: item['Matricula'].toString().trim() ?? ''),
-        'cycle': PlutoCell(value: item['ClaCiclo'].toString().trim() ?? ''),
-        'student': PlutoCell(value: item['Alumno'].toString().trim() ?? ''),
-        'campus': PlutoCell(value: item['claun'].toString().trim() ?? ''),
+            TrinaCell(value: item['Matricula'].toString().trim() ?? ''),
+        'cycle': TrinaCell(value: item['ClaCiclo'].toString().trim() ?? ''),
+        'student': TrinaCell(value: item['Alumno'].toString().trim() ?? ''),
+        'campus': TrinaCell(value: item['claun'].toString().trim() ?? ''),
         'academicLevel':
-            PlutoCell(value: item['NomGradoEscolar'].toString().trim() ?? ''),
-        'group': PlutoCell(value: item['Grupo'] ?? ''),
-        'total': PlutoCell(value: item['Reportes'] ?? 0),
-        'minors': PlutoCell(value: item['Menores'] ?? 0),
-        'mayors': PlutoCell(value: item['Mayores'] ?? 0),
-        'notif1': PlutoCell(value: item['Notif1'] ?? 0),
-        'notif2': PlutoCell(value: item['Notif2'] ?? 0),
-        'notif3': PlutoCell(value: item['Notif3'] ?? 0)
+            TrinaCell(value: item['NomGradoEscolar'].toString().trim() ?? ''),
+        'group': TrinaCell(value: item['Grupo'] ?? ''),
+        'total': TrinaCell(value: item['Reportes'] ?? 0),
+        'minors': TrinaCell(value: item['Menores'] ?? 0),
+        'mayors': TrinaCell(value: item['Mayores'] ?? 0),
+        'notif1': TrinaCell(value: item['Notif1'] ?? 0),
+        'notif2': TrinaCell(value: item['Notif2'] ?? 0),
+        'notif3': TrinaCell(value: item['Notif3'] ?? 0)
       }));
     }
   }
@@ -450,7 +450,7 @@ class _DisciplineHistoryGridState extends State<DisciplineHistoryGrid> {
     }
   }
 
-  Future<void> exportPlutoGridToCsv(BuildContext context) async {
+  Future<void> exportTrinaGridToCsv(BuildContext context) async {
     if (plutoRows.isEmpty) {
       showErrorFromBackend(context, "No hay datos para exportar.");
       return;

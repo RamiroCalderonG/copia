@@ -6,7 +6,7 @@ import 'package:oxschool/core/reusable_methods/reusable_functions.dart';
 import 'package:oxschool/core/utils/loader_indicator.dart';
 import 'package:oxschool/core/reusable_methods/translate_messages.dart';
 import 'package:oxschool/presentation/components/custom_icon_button.dart';
-import 'package:pluto_grid/pluto_grid.dart';
+import 'package:trina_grid/trina_grid.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../data/Models/Student_eval.dart';
@@ -55,7 +55,7 @@ bool isUserAdmin = false;
 bool isUserAcademicCoord = false;
 
 /// The list of rows in the grid.
-List<PlutoRow> rows = [];
+List<TrinaRow> rows = [];
 
 class _GradesByAsignatureState extends State<GradesByAsignature> {
   String? asignatureNameListener;
@@ -95,13 +95,13 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
   Future<void> fillGrid(List<StudentEval> evaluationList) async {
     setState(() {
       rows = evaluationList.map((item) {
-        return PlutoRow(
+        return TrinaRow(
           cells: {
-            // 'Matricula': PlutoCell(value: item.studentID),
-            'Nombre': PlutoCell(value: item.studentName),
-            'Apellido paterno': PlutoCell(value: item.student1LastName),
-            'Apellido materno': PlutoCell(value: item.student2LastName),
-            'idCalif': PlutoCell(value: item.rateID),
+            // 'Matricula': TrinaCell(value: item.studentID),
+            'Nombre': TrinaCell(value: item.studentName),
+            'Apellido paterno': TrinaCell(value: item.student1LastName),
+            'Apellido materno': TrinaCell(value: item.student2LastName),
+            'idCalif': TrinaCell(value: item.rateID),
           },
         );
       }).toList();
@@ -134,14 +134,14 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
         assignatureRows.clear();
         var index = 0;
         for (var item in studentList) {
-          assignatureRows.add(PlutoRow(cells: {
-            'No': PlutoCell(value: index + 1),
-            'Matricula': PlutoCell(value: item.studentID),
-            'Nombre': PlutoCell(value: item.studentName),
-            'Apellido paterno': PlutoCell(value: item.student1LastName),
-            'Apellido materno': PlutoCell(value: item.student2LastName),
-            'Calif': PlutoCell(value: item.evaluation),
-            'idCalif': PlutoCell(value: item.rateID),
+          assignatureRows.add(TrinaRow(cells: {
+            'No': TrinaCell(value: index + 1),
+            'Matricula': TrinaCell(value: item.studentID),
+            'Nombre': TrinaCell(value: item.studentName),
+            'Apellido paterno': TrinaCell(value: item.student1LastName),
+            'Apellido materno': TrinaCell(value: item.student2LastName),
+            'Calif': TrinaCell(value: item.evaluation),
+            'idCalif': TrinaCell(value: item.rateID),
           }));
         }
       });
@@ -368,8 +368,8 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                 } else {
                   return StatefulBuilder(
                     builder: (context, setState) {
-                      return PlutoGrid(
-                        mode: PlutoGridMode.normal,
+                      return TrinaGrid(
+                        mode: TrinaGridMode.normal,
                         columns: assignaturesColumns,
                         rows: assignatureRows,
                         onChanged: (event) {
@@ -383,16 +383,17 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                           composeUpdateStudentGradesBody(
                               event.column.title, newValue, idEval);
                         },
-                        configuration: PlutoGridConfiguration(
-                            columnSize: PlutoGridColumnSizeConfig(
-                                autoSizeMode: PlutoAutoSizeMode.scale),
-                            scrollbar: PlutoGridScrollbarConfig(
-                                isAlwaysShown: true,
-                                scrollBarColor: Colors.red)),
+                        configuration: TrinaGridConfiguration(
+                            columnSize: TrinaGridColumnSizeConfig(
+                                autoSizeMode: TrinaAutoSizeMode.scale),
+                            scrollbar: TrinaGridScrollbarConfig(
+                              isAlwaysShown: true,
+                              //scrollBarColor: Colors.red
+                            )),
                         createFooter: (stateManager) {
                           stateManager.setPageSize(30,
                               notify: false); // default 40
-                          return PlutoPagination(stateManager);
+                          return TrinaPagination(stateManager);
                         },
                       );
                     },
@@ -409,15 +410,15 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
   /// [studentList] is the list of students to display in the grid.
   /// [assignatureRows] is the list of rows to display in the grid.
   void updateGrid(
-      List<StudentEval> studentList, List<PlutoRow> assignatureRows) {
+      List<StudentEval> studentList, List<TrinaRow> assignatureRows) {
     setState(() {
       rows = studentList.map((item) {
-        return PlutoRow(
+        return TrinaRow(
           cells: {
-            'Matricula': PlutoCell(value: item.studentID),
-            'Nombre': PlutoCell(value: item.studentName),
-            'Apellido paterno': PlutoCell(value: item.student1LastName),
-            'Apellido materno': PlutoCell(value: item.student2LastName),
+            'Matricula': TrinaCell(value: item.studentID),
+            'Nombre': TrinaCell(value: item.studentName),
+            'Apellido paterno': TrinaCell(value: item.student1LastName),
+            'Apellido materno': TrinaCell(value: item.student2LastName),
           },
         );
       }).toList();
