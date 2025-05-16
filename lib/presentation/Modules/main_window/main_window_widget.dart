@@ -37,11 +37,11 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
   bool isHovered = false;
 
-  late MainWindowModel _model;
+  //late MainWindowModel _model;
 
   @override
   void dispose() {
-    _model.dispose();
+    //_model.dispose();
     currentUser?.clear();
     eventsList?.clear();
     deviceData.clear();
@@ -54,7 +54,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
   @override
   void initState() {
     super.initState();
-    _model = createModel(context, () => MainWindowModel());
+    //_model = createModel(context, () => MainWindowModel());
     saveUserRoleToSharedPref();
     WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {}));
     insertAlertLog('USER LOGED IN: ${currentUser!.employeeNumber.toString()}');

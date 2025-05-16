@@ -30,13 +30,13 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
 
   @override
   void dispose() {
-    _model.dispose();
+    // _model.dispose();
     super.dispose();
   }
 
   @override
   void initState() {
-    _model = createModel(context, () => MainWindowModel());
+    //_model = createModel(context, () => MainWindowModel());
 
     super.initState();
 

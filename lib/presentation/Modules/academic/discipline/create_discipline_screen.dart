@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get_utils/src/extensions/export.dart';
+import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/reusable_methods/academic_functions.dart';
+import 'package:oxschool/core/utils/searchable_drop_down.dart';
 import 'package:oxschool/data/Models/Student.dart';
 
 class CreateDisciplineScreen extends StatefulWidget {
@@ -17,6 +19,7 @@ class _CreateDisciplineScreenState extends State<CreateDisciplineScreen> {
   int? _value = 1;
   late Future<dynamic> studentsList;
   List<Student> students = [];
+  List<String> studentsNames = [];
 
   @override
   void initState() {
@@ -28,47 +31,46 @@ class _CreateDisciplineScreenState extends State<CreateDisciplineScreen> {
   void dispose() {
     students.clear();
     _selectedChips.clear();
+    studentsNames.clear();
     studentsList = Future.value(null);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final studentSelector = DropdownButtonFormField(
-      items: students.map((toElement) {
-        return DropdownMenuItem(
-          value: toElement.nombre,
-          child: Text(toElement.nombre!),
-        );
-      }).toList(),
-      // const [
-      //   DropdownMenuItem(
-      //     value: 'student1',
-      //     child: Text('Student 1'),
-      //   ),
-      //   DropdownMenuItem(
-      //     value: 'student2',
-      //     child: Text('Student 2'),
-      //   ),
-      // ],
-      onChanged: (value) {},
-      decoration: InputDecoration(
-        labelText: 'Selecciona estudiante',
-        border: OutlineInputBorder(),
-      ),
+    final List<String> kindOfReportList = [
+      'Menor', //0
+      'Mayor', //1
+      'Notificación 1', //2
+      'Notificación 2', //3
+      'Notificación 3', //4
+      'Aviso Sana Conducta', //5
+    ];
+
+    final studentSelector = SearchableDropdown(
+      items: studentsNames,
+      label: 'Buscar estudiante por nombre',
+      onSelected: (p0) {
+        // Handle the selected student
+        print('Selected student: $p0');
+      },
+      hint: 'Buscar estudiante por nombre',
     );
 
-    final kindOfReport = List<Widget>.generate(3, (int index) {
-      return ChoiceChip(
-        label: Text('Item $index'),
-        selected: _value == index,
-        onSelected: (bool selected) {
-          setState(() {
-            _value = selected ? index : null;
-          });
-        },
-      );
-    }).toList();
+    final kindOfReport = List<Widget>.generate(6, (int index) {
+      return Padding(
+          padding: const EdgeInsets.all(5.0),
+          child: ChoiceChip(
+            label: Text(kindOfReportList[index]),
+            selectedColor: Colors.blue,
+            selected: _value == index,
+            onSelected: (bool selected) {
+              setState(() {
+                _value = selected ? index : null;
+              });
+            },
+          ));
+    });
 
     final dateTimePicker = TextFormField(
       decoration: InputDecoration(
@@ -153,8 +155,11 @@ class _CreateDisciplineScreenState extends State<CreateDisciplineScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Crear reporte disciplinario'),
-        // backgroundColor: Colors.blue,
+        title: Text(
+          'Captura reporte disciplinario',
+          style: const TextStyle(color: Colors.white),
+        ),
+        backgroundColor: FlutterFlowTheme.of(context).primary,
       ),
       body: FutureBuilder(
           future: studentsList,
@@ -176,25 +181,114 @@ class _CreateDisciplineScreenState extends State<CreateDisciplineScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
-                          child: studentSelector,
+                          child: Container(
+                              padding: const EdgeInsets.all(8.0),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                    color:
+                                        FlutterFlowTheme.of(context).accent3),
+                                borderRadius: BorderRadius.circular(8.0),
+                                boxShadow: [
+                                  // BoxShadow(
+                                  //   color: Colors.blue.shade100,
+                                  //   blurRadius: 4.0,
+                                  //   offset: const Offset(0, 2),
+                                  // ),
+                                ],
+                              ),
+                              child: studentSelector),
                         ),
-                        const SizedBox(width: 16),
+                        SizedBox(width: 20),
                         Expanded(
+                            child: Container(
+                          padding: const EdgeInsets.all(8.0),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                                color: FlutterFlowTheme.of(context).accent3),
+                            borderRadius: BorderRadius.circular(8.0),
+                            boxShadow: [
+                              // BoxShadow(
+                              //   color: Colors.blue.shade100,
+                              //   blurRadius: 4.0,
+                              //   offset: const Offset(0, 2),
+                              // ),
+                            ],
+                          ),
                           child: Wrap(
                             spacing: 8.0,
                             children: kindOfReport,
                           ),
-                        ),
+                        )),
+                        const SizedBox(width: 16),
+                      ],
+                    ),
+                    const SizedBox(height: 25),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                            child: Container(
+                                padding: const EdgeInsets.all(8.0),
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                      color:
+                                          FlutterFlowTheme.of(context).accent3),
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  boxShadow: [
+                                    // BoxShadow(
+                                    //   color: Colors.blue.shade100,
+                                    //   blurRadius: 4.0,
+                                    //   offset: const Offset(0, 2),
+                                    // ),
+                                  ],
+                                ),
+                                child: dateTimePicker)),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.all(8.0),
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                  color: FlutterFlowTheme.of(context).accent3),
+                              borderRadius: BorderRadius.circular(8.0),
+                              boxShadow: [
+                                // BoxShadow(
+                                //   color: Colors.blue.shade100,
+                                //   blurRadius: 4.0,
+                                //   offset: const Offset(0, 2),
+                                // ),
+                              ],
+                            ),
+                            child: teacherSelector,
+                          ),
+                        )
                       ],
                     ),
                     const SizedBox(height: 16),
-                    dateTimePicker,
-                    const SizedBox(height: 16),
-                    teacherSelector,
-                    const SizedBox(height: 16),
-                    Wrap(
-                      spacing: 8.0,
-                      children: causeMultiSelector,
+                    const SizedBox(height: 30),
+                    Divider(
+                      color: FlutterFlowTheme.of(context).accent3,
+                      thickness: 2,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const Text(
+                          'Causas que aplican en el reporte',
+                          // style: TextStyle(fontFamily: 'Sora'),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Wrap(
+                          spacing: 8.0,
+                          children: causeMultiSelector,
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 16),
                     observationsField,
@@ -209,7 +303,11 @@ class _CreateDisciplineScreenState extends State<CreateDisciplineScreen> {
   Future<dynamic> handleReload(String cycle) async {
     var response = await getSimpleStudentsByCycle(cycle);
     setState(() {
+      studentsNames.clear();
       students = response;
+      for (var element in students) {
+        studentsNames.add(element.nombre!);
+      }
     });
     if (response == null) {
       return [];

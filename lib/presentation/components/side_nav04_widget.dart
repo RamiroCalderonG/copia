@@ -1,6 +1,5 @@
 import '../../core/config/flutter_flow/flutter_flow_theme.dart';
 import '../../core/config/flutter_flow/flutter_flow_util.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'side_nav04_model.dart';
@@ -372,17 +371,18 @@ class _SideNav04WidgetState extends State<SideNav04Widget> {
                                     2.0, 2.0, 2.0, 2.0),
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(10.0),
-                                  child: CachedNetworkImage(
-                                    fadeInDuration:
-                                        const Duration(milliseconds: 500),
-                                    fadeOutDuration:
-                                        const Duration(milliseconds: 500),
-                                    imageUrl:
-                                        'https://images.unsplash.com/photo-1624561172888-ac93c696e10c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NjJ8fHVzZXJzfGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=900&q=60',
-                                    width: 44.0,
-                                    height: 44.0,
-                                    fit: BoxFit.cover,
-                                  ),
+                                  // child:
+                                  // CachedNetworkImage(
+                                  //   fadeInDuration:
+                                  //       const Duration(milliseconds: 500),
+                                  //   fadeOutDuration:
+                                  //       const Duration(milliseconds: 500),
+                                  //   imageUrl:
+                                  //       'https://images.unsplash.com/photo-1624561172888-ac93c696e10c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NjJ8fHVzZXJzfGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=900&q=60',
+                                  //   width: 44.0,
+                                  //   height: 44.0,
+                                  //   fit: BoxFit.cover,
+                                  // ),
                                 ),
                               ),
                             ),

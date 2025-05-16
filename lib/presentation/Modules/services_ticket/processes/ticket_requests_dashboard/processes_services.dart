@@ -12,7 +12,7 @@ import 'package:oxschool/presentation/Modules/services_ticket/processes/ticket_r
 import 'package:oxschool/presentation/Modules/services_ticket/processes/ticket_requests_dashboard/ticket_request_summary.dart';
 import 'package:oxschool/presentation/components/confirm_dialogs.dart';
 import 'package:oxschool/presentation/components/custom_icon_button.dart';
-import 'package:pluto_grid/pluto_grid.dart';
+import 'package:trina_grid/trina_grid.dart';
 
 class Processes extends StatefulWidget {
   const Processes({super.key});
@@ -48,7 +48,7 @@ enum SingingCharacter { iWasReported, madeByMe }
 
 class _ProcessesState extends State<Processes> {
   SingingCharacter? _character = SingingCharacter.iWasReported;
-  List<PlutoRow> servicesGridRows = <PlutoRow>[];
+  List<TrinaRow> servicesGridRows = <TrinaRow>[];
   bool isLoading = false;
   bool displayError = false;
   String? errorMessage;
@@ -73,69 +73,69 @@ class _ProcessesState extends State<Processes> {
     ]);
   }
 
-  final List<PlutoColumn> ticketServicesColumns = <PlutoColumn>[
-    PlutoColumn(
+  final List<TrinaColumn> ticketServicesColumns = <TrinaColumn>[
+    TrinaColumn(
         title: 'Id',
         field: 'id',
-        type: PlutoColumnType.number(),
+        type: TrinaColumnType.number(),
         readOnly: true,
         enableRowChecked: true),
-    PlutoColumn(
+    TrinaColumn(
         title: 'Reportado por',
         field: 'reportedBy',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         readOnly: true),
-    PlutoColumn(
+    TrinaColumn(
         title: 'Departamento que solicita',
         field: 'departmentWhoRequest',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         readOnly: true),
-    PlutoColumn(
+    TrinaColumn(
         title: 'Capturado por',
         field: 'capturedBy',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         readOnly: true),
-    PlutoColumn(
+    TrinaColumn(
         title: 'Departamento al que se solicita',
         field: 'depRequestIsMadeTo',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         readOnly: true),
-    PlutoColumn(
+    TrinaColumn(
         title: 'Asignado a ',
         field: 'assignedTo',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         readOnly: true),
-    PlutoColumn(
+    TrinaColumn(
         title: 'Campus',
         field: 'campus',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         readOnly: true),
-    PlutoColumn(
+    TrinaColumn(
         title: 'Fecha de elaboración',
         field: 'requestCreationDate',
-        type: PlutoColumnType.date(format: 'yyy-MM-dd'),
-        sort: PlutoColumnSort.ascending,
+        type: TrinaColumnType.date(format: 'yyy-MM-dd'),
+        sort: TrinaColumnSort.ascending,
         enableSorting: true,
         readOnly: true),
-    PlutoColumn(
+    TrinaColumn(
         title: 'Fecha para cuando se solicita',
         field: 'requesDate',
-        type: PlutoColumnType.date(format: 'yyy-MM-dd'),
+        type: TrinaColumnType.date(format: 'yyy-MM-dd'),
         readOnly: true),
-    PlutoColumn(
+    TrinaColumn(
         title: 'Fecha compromiso',
         field: 'deadline',
-        type: PlutoColumnType.date(format: 'yyy-MM-dd'),
+        type: TrinaColumnType.date(format: 'yyy-MM-dd'),
         readOnly: true),
-    PlutoColumn(
+    TrinaColumn(
         title: 'Fecha de término',
         field: 'closureDate',
-        type: PlutoColumnType.date(format: 'yyy-MM-dd'),
+        type: TrinaColumnType.date(format: 'yyy-MM-dd'),
         readOnly: true),
-    PlutoColumn(
+    TrinaColumn(
         title: 'Descripción',
         field: 'description',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         renderer: (rendererContext) {
           final description = rendererContext.cell.value ?? 'Sin description';
           return Tooltip(
@@ -147,7 +147,7 @@ class _ProcessesState extends State<Processes> {
               ));
         },
         readOnly: true),
-    PlutoColumn(
+    TrinaColumn(
         title: 'Observaciones',
         field: 'observations',
         renderer: (rendererContext) {
@@ -160,24 +160,24 @@ class _ProcessesState extends State<Processes> {
                 maxLines: 4,
               ));
         },
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         readOnly: true),
-    PlutoColumn(
+    TrinaColumn(
         title: 'Estatus',
         field: 'status',
-        type: PlutoColumnType.number(),
+        type: TrinaColumnType.number(),
         readOnly: true,
         hide: true),
-    PlutoColumn(
+    TrinaColumn(
       title: '¿Fecha compromiso en tiempo?',
       field: 'deadLineOnTime',
-      type: PlutoColumnType.text(),
+      type: TrinaColumnType.text(),
       readOnly: true,
     ),
-    PlutoColumn(
+    TrinaColumn(
         title: '¿Fecha de solicitud en tiempo?',
         field: 'requesttedDateOnTime',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         readOnly: true)
   ];
 
