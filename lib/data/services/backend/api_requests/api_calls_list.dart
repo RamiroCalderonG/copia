@@ -1607,6 +1607,36 @@ Future<dynamic> getTeachersGradeGroupSubjectsByCycle(
   }
 }
 
+Future<dynamic> getDisciplinaryCauses(
+    int gradeSequence, int kindOfReport) async {
+  try {
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
+    var apiCall = await Requests.get(
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/discipline/causes/',
+      headers: {
+        'Authorization': devicePrefs.getString('token')!,
+        'Content-Type': 'application/json',
+      },
+      queryParameters: {"grade": gradeSequence, "report": kindOfReport},
+      persistCookies: false,
+      timeoutSeconds: 20,
+    );
+    apiCall.raiseForStatus();
+    if (apiCall.statusCode == 200) {
+      return json.decode(utf8.decode(apiCall
+          .bodyBytes)); //* Returns data formated and decoded using utf8 encoding for latin and spanish characteres
+    } else {
+      insertErrorLog(apiCall.body,
+          'getDisciplinaryCauses( Kind of report: $kindOfReport , grade: $gradeSequence)');
+      throw Future.error(apiCall.body);
+    }
+  } catch (e) {
+    insertErrorLog(e.toString(),
+        'getDisciplinaryCauses( Kind of report: $kindOfReport , grade: $gradeSequence)');
+    throw e.toString();
+  }
+}
+
 //!Not using for now
 //Function to get a list of acces items by a role
 /* Future<http.Response> getUserRoleAndAcces(int roleId) async {

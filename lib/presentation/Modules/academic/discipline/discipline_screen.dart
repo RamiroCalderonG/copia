@@ -16,7 +16,7 @@ class _DisciplineScreenState extends State<DisciplineScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 1, vsync: this);
   }
 
   @override
@@ -43,14 +43,14 @@ class _DisciplineScreenState extends State<DisciplineScreen>
               icon: Icon(Icons.list),
               text: 'Listado de reportes',
             ),
-            Tab(
-              icon: Icon(Icons.add),
-              text: 'Nuevo reporte',
-            ),
-            Tab(
-              icon: Icon(Icons.crop_square_sharp),
-              text: 'Próximamente',
-            ),
+            // Tab(
+            //   icon: Icon(Icons.add),
+            //   text: 'Nuevo reporte',
+            // ),
+            // Tab(
+            //   icon: Icon(Icons.crop_square_sharp),
+            //   text: 'Próximamente',
+            // ),
           ],
         ),
       ),
@@ -58,8 +58,8 @@ class _DisciplineScreenState extends State<DisciplineScreen>
         controller: _tabController,
         children: <Widget>[
           DisciplineHistoryGrid(),
-          Center(child: Text("Crear reporte")),
-          Center(child: Text("Otra opción")),
+          // Center(child: Text("Crear reporte")),
+          // Center(child: Text("Otra opción")),
         ],
       ),
     );

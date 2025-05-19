@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:get/get_utils/src/extensions/export.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
+import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/core/reusable_methods/academic_functions.dart';
 import 'package:oxschool/core/utils/searchable_drop_down.dart';
 import 'package:oxschool/data/Models/Student.dart';
+import 'package:oxschool/presentation/components/confirm_dialogs.dart';
+import 'package:oxschool/presentation/components/custom_icon_button.dart';
 
 class CreateDisciplineScreen extends StatefulWidget {
   const CreateDisciplineScreen({super.key});
@@ -16,7 +20,7 @@ class CreateDisciplineScreen extends StatefulWidget {
 class _CreateDisciplineScreenState extends State<CreateDisciplineScreen> {
   DateTime? selectedDateTime;
   Set<int> _selectedChips = {};
-  int? _value = 1;
+  int? kindOfReportValue = 1;
   late Future<dynamic> studentsList;
   List<Student> students = [];
   List<String> studentsNames = [];
@@ -24,6 +28,11 @@ class _CreateDisciplineScreenState extends State<CreateDisciplineScreen> {
   Student? selectedStudent;
   List<Map<String, dynamic>> filteredTeachers = [];
   String? selectedTeacherId;
+  List<Map<String, dynamic>> causesList = [];
+  TextEditingController observationsController = TextEditingController();
+  var selectedTeacher;
+
+  
 
   @override
   void initState() {
@@ -77,10 +86,10 @@ class _CreateDisciplineScreenState extends State<CreateDisciplineScreen> {
           child: ChoiceChip(
             label: Text(kindOfReportList[index]),
             selectedColor: Colors.blue,
-            selected: _value == index,
+            selected: kindOfReportValue == index,
             onSelected: (bool selected) {
               setState(() {
-                _value = selected ? index : null;
+                kindOfReportValue = selected ? index : null;
               });
             },
           ));
@@ -132,31 +141,37 @@ class _CreateDisciplineScreenState extends State<CreateDisciplineScreen> {
     );
 
     final teacherSelector = DropdownButtonFormField<String>(
-      value: filteredTeachers
-              .any((t) => t['NoEmpleado'].toString() == selectedTeacherId)
+      value: filteredTeachers.any((t) =>
+              '${t['NoEmpleado']}_${t['NomMateria']}' == selectedTeacherId)
           ? selectedTeacherId
-          : null, // Only set if value exists in filtered list
-      items: filteredTeachers
-          .map((teacher) {
-            final value = teacher['NoEmpleado'].toString();
-            final display =
-                '${teacher['teacher'] ?? ''}  | ${teacher['NomMateria']?.toString().trim() ?? ''}';
-            return DropdownMenuItem<String>(
-              value: value,
-              child: Text(
-                display,
-                style: TextStyle(fontSize: 12),
-              ),
-            );
-          })
-          .toSet()
-          .toList(),
+          : null,
+      items: filteredTeachers.asMap().entries.map((entry) {
+        final idx = entry.key;
+        final teacher = entry.value;
+        // Combine NoEmpleado and NomMateria to make a unique value
+        final value = '${teacher['NoEmpleado']}_${teacher['NomMateria']}';
+        final display =
+            '${teacher['teacher'].toString().trim() ?? ''}  | ${teacher['NomMateria']?.toString().trim() ?? ''}';
+        return DropdownMenuItem<String>(
+          value: value,
+          child: Text(
+            display,
+            style: TextStyle(fontSize: 14),
+          ),
+        );
+      }).toList(),
       onChanged: (value) {
         setState(() {
-          selectedTeacherId = value;
-          print('selectedTeacherId: $selectedTeacherId');
-          print(
-              'filteredTeachers: ${filteredTeachers.map((t) => t['NoEmpleado'].toString()).toList()}');
+          
+          selectedTeacher =  filteredTeachers .where((teacher) =>
+                  teacher['NoEmpleado'].toString().trim() == value!.split('_')[0]  &&
+                  teacher['NomMateria'] == value!.split('_')[1])
+              .toList()
+              .cast<Map<String, dynamic>>();
+
+          selectedTeacherId = value; 
+          handleDisciplinaryReport(
+              kindOfReportValue! + 1, selectedStudent!.gradoSecuencia!);
         });
       },
       decoration: InputDecoration(
@@ -165,23 +180,47 @@ class _CreateDisciplineScreenState extends State<CreateDisciplineScreen> {
       ),
     );
 
-    final causeMultiSelector = List<Widget>.generate(3, (int index) {
-      return ChoiceChip(
-        label: Text('Item $index'),
-        selected: _selectedChips.contains(index),
-        onSelected: (bool selected) {
-          setState(() {
-            if (selected) {
-              _selectedChips.add(index);
-            } else {
-              _selectedChips.remove(index);
-            }
-          });
-        },
-      );
-    }).toList();
+    List<Widget> buildCauseMultiSelector() {
+      if (causesList.isEmpty) {
+        return [
+          Placeholder(
+            fallbackHeight: 50,
+            color: Colors.transparent,
+            child: const Center(
+              child: Text(
+                'No hay causas disponibles, seleccione un docente.',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          )
+        ];
+      }
+      return List<Widget>.generate(causesList.length, (int index) {
+        return ChoiceChip(
+          label: Text('${causesList[index]['NomCausa']}'),
+          selected: _selectedChips.contains(index),
+          selectedColor: Colors.blue,
+          onSelected: (bool selected) {
+            setState(() {
+              if (selected) {
+                _selectedChips.add(index);
+              } else {
+                _selectedChips.remove(index);
+              }
+            });
+          },
+        );
+      });
+    }
 
-    final observationsField = TextFormField();
+    final observationsField = TextFormField(
+      decoration: InputDecoration(
+        labelText: 'Observaciones',
+        border: OutlineInputBorder(),
+      ),
+      controller: observationsController,
+      maxLines: 3,
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -218,17 +257,20 @@ class _CreateDisciplineScreenState extends State<CreateDisciplineScreen> {
                                     color:
                                         FlutterFlowTheme.of(context).accent3),
                                 borderRadius: BorderRadius.circular(8.0),
-                                boxShadow: [
-                                  // BoxShadow(
-                                  //   color: Colors.blue.shade100,
-                                  //   blurRadius: 4.0,
-                                  //   offset: const Offset(0, 2),
-                                  // ),
-                                ],
                               ),
-                              child: studentSelector),
+                              child: Column(
+                                children: [
+                                  const Text(
+                                    'Selecciona estudiante',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  studentSelector
+                                ],
+                              )),
                         ),
-                        SizedBox(width: 20),
+                        const SizedBox(width: 20),
                         Expanded(
                             child: Container(
                           padding: const EdgeInsets.all(8.0),
@@ -236,17 +278,20 @@ class _CreateDisciplineScreenState extends State<CreateDisciplineScreen> {
                             border: Border.all(
                                 color: FlutterFlowTheme.of(context).accent3),
                             borderRadius: BorderRadius.circular(8.0),
-                            boxShadow: [
-                              // BoxShadow(
-                              //   color: Colors.blue.shade100,
-                              //   blurRadius: 4.0,
-                              //   offset: const Offset(0, 2),
-                              // ),
-                            ],
                           ),
-                          child: Wrap(
-                            spacing: 8.0,
-                            children: kindOfReport,
+                          child: Column(
+                            children: [
+                              const Text(
+                                'Selecciona tipo de reporte',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(height: 8),
+                              Wrap(
+                                spacing: 8.0,
+                                runSpacing: 8.0,
+                                children: kindOfReport,
+                              ),
+                            ],
                           ),
                         )),
                         const SizedBox(width: 16),
@@ -274,24 +319,31 @@ class _CreateDisciplineScreenState extends State<CreateDisciplineScreen> {
                                 ),
                                 child: dateTimePicker)),
                         const SizedBox(width: 16),
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.all(8.0),
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                  color: FlutterFlowTheme.of(context).accent3),
-                              borderRadius: BorderRadius.circular(8.0),
-                              boxShadow: [],
-                            ),
-                            child: filteredTeachers.isEmpty
-                                ? const Text('No hay docentes para este grupo.')
-                                : teacherSelector,
-                          ),
-                        )
                       ],
                     ),
                     const SizedBox(height: 16),
-                    const SizedBox(height: 30),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                              padding: const EdgeInsets.all(8.0),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                    color:
+                                        FlutterFlowTheme.of(context).accent3),
+                                borderRadius: BorderRadius.circular(8.0),
+                                boxShadow: [],
+                              ),
+                              child: filteredTeachers.isEmpty
+                                  ? const Text(
+                                      'No hay docentes para este grupo, por favor seleccione un estudiante.',
+                                      style: TextStyle(fontFamily: 'Sora'),
+                                    )
+                                  : teacherSelector),
+                        )
+                      ],
+                    ),
+                    // const SizedBox(height: 30),
                     Divider(
                       color: FlutterFlowTheme.of(context).accent3,
                       thickness: 2,
@@ -302,22 +354,36 @@ class _CreateDisciplineScreenState extends State<CreateDisciplineScreen> {
                       children: [
                         const Text(
                           'Causas que aplican en el reporte',
-                          // style: TextStyle(fontFamily: 'Sora'),
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16),
                         ),
                       ],
                     ),
+                    const SizedBox(height: 18),
+                    Wrap(
+                        spacing: 8.0,
+                        runSpacing: 8.0,
+                        children: buildCauseMultiSelector()),
+                    const SizedBox(height: 16),
+                    Divider(
+                      color: FlutterFlowTheme.of(context).accent3,
+                      thickness: 2,
+                    ),
+                    const SizedBox(height: 5),
+                    observationsField,
+                    const SizedBox(height: 30),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Wrap(
-                          spacing: 8.0,
-                          children: causeMultiSelector,
-                        ),
+                        SaveItemButton(onPressed: () {
+                          showConfirmationDialog(context, 'Seguro(a) Generar Reporte Disciplinario', 'Alumno: ${selectedStudent!.nombre} , Maestro : ${selectedTeacher!['teacher']}')
+                        }),
+                        CancelActionButton(onPressed: () {
+                          Navigator.pop(context);
+                        })
                       ],
-                    ),
-                    const SizedBox(height: 16),
-                    observationsField,
+                    )
                   ],
                 ),
               ),
@@ -349,8 +415,49 @@ class _CreateDisciplineScreenState extends State<CreateDisciplineScreen> {
       return response;
     } catch (e) {
       // Handle error
-      print('Error fetching students: $e');
+      // print('Error fetching students: $e');
       return null;
+    }
+  }
+
+  void handleDisciplinaryReport(int kindOfReport, int gradeSequence) {
+    populateDisciplinaryReport(kindOfReport, gradeSequence)
+        .onError((error, stackTrace) {
+      if (mounted) {
+        showErrorFromBackend(context, error.toString());
+      }
+    });
+  }
+
+  Future<dynamic> populateDisciplinaryReport(
+      int kindOfReport, int gradeSequence) async {
+    try {
+      await getDisciplinaryCausesToPopulateScreen(kindOfReport, gradeSequence)
+          .then((response) {
+        if (response != null) {
+          Map<int, String> causes = {};
+          for (var item in response) {
+            causes.addAll({
+              item['idcausa']: item['NomCausa'].toString().trim() ?? '',
+            });
+          }
+
+          setState(() {
+            causesList = causes.entries
+                .map((entry) => {
+                      'idcausa': entry.key,
+                      'NomCausa': entry.value,
+                    })
+                .toList();
+          });
+        } else {
+          throw Exception('Server returned null value');
+        }
+      }).onError((error, stackTrace) {
+        throw Future.error(error.toString());
+      });
+    } catch (e) {
+      throw Future.error(e.toString());
     }
   }
 }
