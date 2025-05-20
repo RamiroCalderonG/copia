@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:oxschool/data/Models/Family.dart';
 import 'package:oxschool/data/Models/Student.dart';
-import 'package:pluto_grid/pluto_grid.dart';
+import 'package:trina_grid/trina_grid.dart';
 
 late Student? nurseryStudent; //Student data getted from nursery/student
 var selectedStudent; //Student data getted from nursery/student
@@ -31,11 +31,11 @@ void clearStudentData() {
   studentAllowedMedicines = null;
 }
 
-final List<PlutoColumn> studentColumnsToEvaluateByStudent = <PlutoColumn>[
-   PlutoColumn(
+final List<TrinaColumn> studentColumnsToEvaluateByStudent = <TrinaColumn>[
+   TrinaColumn(
     title: 'No',
     field: 'No',
-    type: PlutoColumnType.number(),
+    type: TrinaColumnType.number(),
     width: 25,
     readOnly: true,
     renderer: (rendererContext) {
@@ -46,33 +46,33 @@ final List<PlutoColumn> studentColumnsToEvaluateByStudent = <PlutoColumn>[
         ),
       );
     },
-    // sort: PlutoColumnSort.ascending
+    // sort: TrinaColumnSort.ascending
   ), 
-  PlutoColumn(
+  TrinaColumn(
       title: 'Matricula',
       field: 'studentID',
-      type: PlutoColumnType.text(),
+      type: TrinaColumnType.text(),
       readOnly: true,
-      // sort: PlutoColumnSort.ascending,
+      // sort: TrinaColumnSort.ascending,
       width: 120),
-  PlutoColumn(
+  TrinaColumn(
     title: 'Nombre de alumno',
     field: 'studentName',
-    type: PlutoColumnType.text(),
+    type: TrinaColumnType.text(),
     readOnly: true,
-    sort: PlutoColumnSort.ascending,
+    sort: TrinaColumnSort.ascending,
   ),
 ];
 
-final List<PlutoColumn> evaluationColumnsToEvaluateByStudent = <PlutoColumn>[];
+final List<TrinaColumn> evaluationColumnsToEvaluateByStudent = <TrinaColumn>[];
 
-final List<PlutoColumn> assignaturesColumns = <PlutoColumn>[
+final List<TrinaColumn> assignaturesColumns = <TrinaColumn>[
   //TO USE at grades_by_assignature
-  PlutoColumn(
+  TrinaColumn(
     title: 'No',
     field: 'No',
     width: 12,
-    type: PlutoColumnType.number(),
+    type: TrinaColumnType.number(),
     readOnly: true, 
     renderer: (rendererContext) {
       return Center(
@@ -83,155 +83,155 @@ final List<PlutoColumn> assignaturesColumns = <PlutoColumn>[
       );
     },
   ),
-  PlutoColumn(
+  TrinaColumn(
       title: 'Matricula',
       field: 'Matricula',
-      type: PlutoColumnType.text(),
+      type: TrinaColumnType.text(),
       readOnly: true,
       width: 100),
-  PlutoColumn(
+  TrinaColumn(
     title: 'Nombre del alumno',
     field: 'Nombre',
-    type: PlutoColumnType.text(),
+    type: TrinaColumnType.text(),
     readOnly: true,
-    //sort: PlutoColumnSort.ascending,
+    //sort: TrinaColumnSort.ascending,
   ),
-  PlutoColumn(
+  TrinaColumn(
       title: 'Apellido paterno',
       field: 'Apellido paterno',
-      type: PlutoColumnType.text(),
+      type: TrinaColumnType.text(),
       readOnly: true,
-      sort: PlutoColumnSort.ascending,
+      sort: TrinaColumnSort.ascending,
       width: 150),
-  PlutoColumn(
+  TrinaColumn(
       title: 'Apellido materno',
       field: 'Apellido materno',
-      type: PlutoColumnType.text(),
+      type: TrinaColumnType.text(),
       readOnly: true,
-      //sort: PlutoColumnSort.ascending,
+      //sort: TrinaColumnSort.ascending,
       width: 150),
-  PlutoColumn(
+  TrinaColumn(
       title: 'Calif',
       field: 'Calif',
-      type: PlutoColumnType.number(negative: false),
+      type: TrinaColumnType.number(negative: false),
       readOnly: false,
       width: 100),
-  PlutoColumn(
+  TrinaColumn(
       title: 'idCalif',
       field: 'idCalif',
-      type: PlutoColumnType.number(negative: false),
+      type: TrinaColumnType.number(negative: false),
       hide: true)
-  // PlutoColumn(
+  // TrinaColumn(
   //     hide: true,
   //     title: 'Faltas',
   //     field: 'Ausencia',
-  //     type: PlutoColumnType.number(negative: false, format: '#'),
+  //     type: TrinaColumnType.number(negative: false, format: '#'),
   //     readOnly: false,
   //     width: 100),
-  // PlutoColumn(
+  // TrinaColumn(
   //     hide: true,
   //     title: 'Tareas',
   //     field: 'Tareas',
-  //     type: PlutoColumnType.number(negative: false),
+  //     type: TrinaColumnType.number(negative: false),
   //     readOnly: false,
   //     width: 100),
-  // PlutoColumn(
+  // TrinaColumn(
   //     hide: true,
   //     title: 'Conducta',
   //     field: 'Conducta',
-  //     type: PlutoColumnType.number(negative: false),
+  //     type: TrinaColumnType.number(negative: false),
   //     readOnly: false,
   //     width: 100),
-  // PlutoColumn(
+  // TrinaColumn(
   //     hide: true,
   //     title: 'Uniforme',
   //     field: 'Uniforme',
-  //     type: PlutoColumnType.number(negative: false),
+  //     type: TrinaColumnType.number(negative: false),
   //     readOnly: false,
   //     width: 100),
-  // PlutoColumn(
+  // TrinaColumn(
   //     hide: true,
   //     title: 'Comentarios',
   //     field: 'Comentarios',
-  //     type: PlutoColumnType.text(),
+  //     type: TrinaColumnType.text(),
   //     readOnly: false,
   //     width: 200),
 ];
 
-final List<PlutoColumn> gradesByStudentColumns = [
-  PlutoColumn(
+final List<TrinaColumn> gradesByStudentColumns = [
+  TrinaColumn(
       title: 'Materia',
       field: 'subject',
-      type: PlutoColumnType.text(),
+      type: TrinaColumnType.text(),
       readOnly: true,
       hide: true),
-  PlutoColumn(
+  TrinaColumn(
     title: 'Materia',
     field: 'subject_name',
-    type: PlutoColumnType.text(),
+    type: TrinaColumnType.text(),
     width: 80,
-    frozen: PlutoColumnFrozen.start,
-    sort: PlutoColumnSort.ascending,
+    frozen: TrinaColumnFrozen.start,
+    sort: TrinaColumnSort.ascending,
     readOnly: true,
   ),
-  PlutoColumn(
+  TrinaColumn(
     title: 'Calif',
     field: 'evaluation',
-    type: PlutoColumnType.number(negative: false),
+    type: TrinaColumnType.number(negative: false),
   ),
-  PlutoColumn(
+  TrinaColumn(
       title: 'idCalif',
       field: 'idCicloEscolar',
-      type: PlutoColumnType.number(negative: false),
+      type: TrinaColumnType.number(negative: false),
       hide: true,
       readOnly: true),
-  PlutoColumn(
+  TrinaColumn(
       title: 'Faltas',
       hide: true,
       field: 'absence_eval',
-      type: PlutoColumnType.number(negative: false)),
-  PlutoColumn(
+      type: TrinaColumnType.number(negative: false)),
+  TrinaColumn(
       title: 'Tareas',
       hide: true,
       field: 'homework_eval',
-      type: PlutoColumnType.number(negative: false)),
-  PlutoColumn(
+      type: TrinaColumnType.number(negative: false)),
+  TrinaColumn(
       title: 'Conducta',
       hide: true,
       field: 'discipline_eval',
-      type: PlutoColumnType.number(negative: false)),
-  // PlutoColumn(
+      type: TrinaColumnType.number(negative: false)),
+  // TrinaColumn(
   //     title: 'Comentarios',
   //     field: 'comment',
   //     hide: true,
   //     type:
-  //         PlutoColumnType.select(commentStringEval, enableColumnFilter: true)),
-  PlutoColumn(
+  //         TrinaColumnType.select(commentStringEval, enableColumnFilter: true)),
+  TrinaColumn(
       title: 'Habitos',
       hide: true,
       field: 'habit_eval',
-      type: PlutoColumnType.number(negative: false)),
-  PlutoColumn(
+      type: TrinaColumnType.number(negative: false)),
+  TrinaColumn(
       title: 'Uniforme',
       hide: true,
       field: 'outfit',
-      type: PlutoColumnType.number(negative: false)),
+      type: TrinaColumnType.number(negative: false)),
 ];
 
-final List<PlutoColumn> commentsCollumns = [
-  PlutoColumn(
+final List<TrinaColumn> commentsCollumns = [
+  TrinaColumn(
       title: 'id',
       field: 'idcomment',
-      type: PlutoColumnType.number(),
+      type: TrinaColumnType.number(),
       width: 10,
       hide: true,
       enableRowChecked: true,
       readOnly: true),
-  PlutoColumn(
+  TrinaColumn(
       title: 'Comentario',
       field: 'comentname',
-      type: PlutoColumnType.text(),
+      type: TrinaColumnType.text(),
       enableRowChecked: true,
       readOnly: true),
-  PlutoColumn(title: 'Selec', field: 'active', type: PlutoColumnType.text())
+  TrinaColumn(title: 'Selec', field: 'active', type: TrinaColumnType.text())
 ];

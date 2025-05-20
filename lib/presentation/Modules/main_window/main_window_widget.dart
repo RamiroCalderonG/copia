@@ -9,7 +9,6 @@ import 'package:oxschool/core/utils/device_information.dart';
 import 'package:oxschool/core/utils/temp_data.dart';
 import 'package:oxschool/data/services/backend/validate_user_permissions.dart';
 import 'package:oxschool/presentation/Modules/user/user_view_screen.dart';
-import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
 import 'package:oxschool/presentation/components/confirm_dialogs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -38,11 +37,11 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
   bool isHovered = false;
 
-  late MainWindowModel _model;
+  //late MainWindowModel _model;
 
   @override
   void dispose() {
-    _model.dispose();
+    //_model.dispose();
     currentUser?.clear();
     eventsList?.clear();
     deviceData.clear();
@@ -55,7 +54,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
   @override
   void initState() {
     super.initState();
-    _model = createModel(context, () => MainWindowModel());
+    //_model = createModel(context, () => MainWindowModel());
     saveUserRoleToSharedPref();
     WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {}));
     insertAlertLog('USER LOGED IN: ${currentUser!.employeeNumber.toString()}');
@@ -682,6 +681,10 @@ class _DrawerState extends State<MyExpansionTileList> {
             title: Text(
               screen,
               style: const TextStyle(fontFamily: 'Sora', fontSize: 15),
+            ),
+            trailing: Icon(
+              Icons.arrow_right_sharp,
+              size: 15,
             ),
             onTap: () {
               // Find the appropriate route from accessRoutes

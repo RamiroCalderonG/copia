@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
+/*
+ * CUSTOM WIDGET THAT DSPLAYS A LOADING INDICATOR 
+*/
 class CustomLoadingIndicator extends StatelessWidget {
   const CustomLoadingIndicator({super.key});
 

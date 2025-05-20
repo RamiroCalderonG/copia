@@ -1,4 +1,5 @@
-import '../../components/side_nav04_widget.dart';
+import 'package:oxschool/presentation/components/side_nav04_model.dart';
+
 import '../../../core/config/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
 

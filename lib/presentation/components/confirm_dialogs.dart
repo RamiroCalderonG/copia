@@ -167,6 +167,36 @@ void showInformationDialog(
       });
 }
 
+//To display loading indicator
+void showIsLoadingAlertDialog(BuildContext context) {
+  showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Por favor espere'),
+          content: Center(
+            child: CustomLoadingIndicator(),
+          ),
+          icon: Icon(
+            Icons.timer,
+            color: Colors.blue,
+          ),
+          actions: [
+            // TextButton(
+            //   onPressed: () {
+            //     Navigator.of(context).pop();
+            //   },
+            //   child: Text('Cerrar',
+            //       style: TextStyle(
+            //         fontFamily: 'Sora',
+            //         // backgroundColor: Colors.blue[50],
+            //       )),
+            // )
+          ],
+        );
+      });
+}
+
 Future<int> showDeleteConfirmationAlertDialog(BuildContext context) async {
   Completer<int> completer = Completer<int>();
   showDialog(
