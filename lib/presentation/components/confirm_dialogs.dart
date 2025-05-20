@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
+import 'package:oxschool/core/utils/loader_indicator.dart';
 
 void showEmptyFieldAlertDialog(BuildContext context, String contentText) {
   showDialog(
@@ -161,6 +162,36 @@ void showInformationDialog(
                     // backgroundColor: Colors.blue[50],
                   )),
             )
+          ],
+        );
+      });
+}
+
+//To display loading indicator
+void showIsLoadingAlertDialog(BuildContext context) {
+  showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Por favor espere'),
+          content: Center(
+            child: CustomLoadingIndicator(),
+          ),
+          icon: Icon(
+            Icons.timer,
+            color: Colors.blue,
+          ),
+          actions: [
+            // TextButton(
+            //   onPressed: () {
+            //     Navigator.of(context).pop();
+            //   },
+            //   child: Text('Cerrar',
+            //       style: TextStyle(
+            //         fontFamily: 'Sora',
+            //         // backgroundColor: Colors.blue[50],
+            //       )),
+            // )
           ],
         );
       });

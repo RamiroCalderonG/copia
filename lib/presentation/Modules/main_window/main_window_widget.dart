@@ -682,6 +682,10 @@ class _DrawerState extends State<MyExpansionTileList> {
               screen,
               style: const TextStyle(fontFamily: 'Sora', fontSize: 15),
             ),
+            trailing: Icon(
+              Icons.arrow_right_sharp,
+              size: 15,
+            ),
             onTap: () {
               // Find the appropriate route from accessRoutes
               var route = accessRoutes.firstWhere(

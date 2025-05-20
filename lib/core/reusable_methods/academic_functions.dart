@@ -655,6 +655,14 @@ Future<dynamic> getDisciplinaryCausesToPopulateScreen(
   }
 }
 
+Future<dynamic> createDisciplinaryReportF(Map<String, dynamic> body) async {
+  try {
+    return await createDisciplinaryReport(body);
+  } catch (e) {
+    rethrow;
+  }
+}
+
 Future<List<Student>> getSimpleStudentsByCycle(String cycle) async {
   try {
     var response = await getStudentsByDynamicParam("cycle", cycle);

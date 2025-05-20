@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:get/get_utils/src/extensions/export.dart';
@@ -20,7 +22,8 @@ class CreateDisciplineScreen extends StatefulWidget {
 class _CreateDisciplineScreenState extends State<CreateDisciplineScreen> {
   DateTime? selectedDateTime;
   Set<int> _selectedChips = {};
-  int? kindOfReportValue = 1;
+  Set<String> selectedCausesId = {};
+  int? kindOfReportValue = 0;
   late Future<dynamic> studentsList;
   List<Student> students = [];
   List<String> studentsNames = [];
@@ -28,11 +31,14 @@ class _CreateDisciplineScreenState extends State<CreateDisciplineScreen> {
   Student? selectedStudent;
   List<Map<String, dynamic>> filteredTeachers = [];
   String? selectedTeacherId;
-  List<Map<String, dynamic>> causesList = [];
+  List<Map<dynamic, dynamic>> causesList = [];
+  Map<dynamic, dynamic> auxCausesList = {};
+  dynamic responseBackend;
   TextEditingController observationsController = TextEditingController();
-  var selectedTeacher;
-
-  
+  Map<String, dynamic>? selectedTeacher;
+  String? selectedSubject;
+  int? selectedSubjectId;
+  Map<String, dynamic> body = {};
 
   @override
   void initState() {
@@ -162,14 +168,17 @@ class _CreateDisciplineScreenState extends State<CreateDisciplineScreen> {
       }).toList(),
       onChanged: (value) {
         setState(() {
-          
-          selectedTeacher =  filteredTeachers .where((teacher) =>
-                  teacher['NoEmpleado'].toString().trim() == value!.split('_')[0]  &&
-                  teacher['NomMateria'] == value!.split('_')[1])
-              .toList()
-              .cast<Map<String, dynamic>>();
+          selectedTeacher = filteredTeachers.firstWhere(
+            (teacher) =>
+                teacher['NoEmpleado'].toString().trim() ==
+                    value!.split('_')[0] &&
+                teacher['NomMateria'] == value.split('_')[1],
+            orElse: () => {},
+          );
+          selectedSubject = value!.split('_')[1].trim();
+          selectedSubjectId = selectedTeacher!['ClaMateria'];
 
-          selectedTeacherId = value; 
+          selectedTeacherId = value;
           handleDisciplinaryReport(
               kindOfReportValue! + 1, selectedStudent!.gradoSecuencia!);
         });
@@ -204,8 +213,28 @@ class _CreateDisciplineScreenState extends State<CreateDisciplineScreen> {
             setState(() {
               if (selected) {
                 _selectedChips.add(index);
+                // Find the cause in responseBackend by NomCausa
+                final cause = (responseBackend as List).firstWhere(
+                  (item) =>
+                      item['NomCausa'].toString().trim() ==
+                      causesList[index]['NomCausa'].toString().trim(),
+                  orElse: () => null,
+                );
+                if (cause != null) {
+                  selectedCausesId.add(cause['clacausa'].toString().trim());
+                }
               } else {
                 _selectedChips.remove(index);
+                // Remove the cause from selectedCausesId
+                final cause = (responseBackend as List).firstWhere(
+                  (item) =>
+                      item['NomCausa'].toString().trim() ==
+                      causesList[index]['NomCausa'].toString().trim(),
+                  orElse: () => null,
+                );
+                if (cause != null) {
+                  selectedCausesId.remove(cause['clacausa'].toString().trim());
+                }
               }
             });
           },
@@ -309,13 +338,6 @@ class _CreateDisciplineScreenState extends State<CreateDisciplineScreen> {
                                       color:
                                           FlutterFlowTheme.of(context).accent3),
                                   borderRadius: BorderRadius.circular(8.0),
-                                  boxShadow: [
-                                    // BoxShadow(
-                                    //   color: Colors.blue.shade100,
-                                    //   blurRadius: 4.0,
-                                    //   offset: const Offset(0, 2),
-                                    // ),
-                                  ],
                                 ),
                                 child: dateTimePicker)),
                         const SizedBox(width: 16),
@@ -377,7 +399,45 @@ class _CreateDisciplineScreenState extends State<CreateDisciplineScreen> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         SaveItemButton(onPressed: () {
-                          showConfirmationDialog(context, 'Seguro(a) Generar Reporte Disciplinario', 'Alumno: ${selectedStudent!.nombre} , Maestro : ${selectedTeacher!['teacher']}')
+                          if (selectedStudent == null ||
+                              selectedTeacher == null ||
+                              selectedSubject == null) {
+                            showErrorFromBackend(context, 'Campo(s) vacio(s)');
+                            return;
+                          } else {
+                            showConfirmationDialog(
+                                    context,
+                                    'Seguro(a) Generar Reporte Disciplinario',
+                                    'Alumno: ${selectedStudent!.nombre} \nMaestro: ${selectedTeacher!['teacher']} \nMateria: $selectedSubject')
+                                .then((response) {
+                              if (response == 1) {
+                                try {
+                                  composeBody(
+                                      selectedCausesId,
+                                      selectedStudent!.matricula!,
+                                      kindOfReportValue! + 1,
+                                      selectedDateTime!.year.toString() +
+                                          selectedDateTime!.month
+                                              .toString()
+                                              .padLeft(2, '0') +
+                                          selectedDateTime!.day
+                                              .toString()
+                                              .padLeft(2, '0'),
+                                      selectedTeacher!['NoEmpleado'],
+                                      '${selectedDateTime!.hour}:${selectedDateTime!.minute}',
+                                      observationsController.text,
+                                      selectedSubjectId!,
+                                      selectedStudent!.gradoSecuencia!,
+                                      selectedStudent!.claUn!);
+                                  handleCreateDisciplinaryReport();
+                                } catch (e) {
+                                  if (mounted) {
+                                    showErrorFromBackend(context, e.toString());
+                                  }
+                                }
+                              }
+                            });
+                          }
                         }),
                         CancelActionButton(onPressed: () {
                           Navigator.pop(context);
@@ -435,7 +495,8 @@ class _CreateDisciplineScreenState extends State<CreateDisciplineScreen> {
       await getDisciplinaryCausesToPopulateScreen(kindOfReport, gradeSequence)
           .then((response) {
         if (response != null) {
-          Map<int, String> causes = {};
+          responseBackend = response;
+          Map<dynamic, String> causes = {};
           for (var item in response) {
             causes.addAll({
               item['idcausa']: item['NomCausa'].toString().trim() ?? '',
@@ -458,6 +519,66 @@ class _CreateDisciplineScreenState extends State<CreateDisciplineScreen> {
       });
     } catch (e) {
       throw Future.error(e.toString());
+    }
+  }
+
+  void handleCreateDisciplinaryReport() async {
+    await createDisciplinaryReportF(body).then((response) {
+      clearForm();
+      Navigator.pop(context);
+      showInformationDialog(context, "Éxito",
+          "Registro creado con éxito, reporte numero: ${response['record']}");
+      clearForm();
+    }).onError((error, stackTrace) {
+      showErrorFromBackend(context, error.toString());
+    });
+  }
+
+  void clearForm() {
+    setState(() {
+      selectedStudent = null;
+      selectedTeacher = null;
+      selectedSubject = null;
+      selectedTeacherId = null;
+      selectedSubjectId = null;
+      selectedDateTime = null;
+      observationsController.clear();
+      _selectedChips.clear();
+      selectedCausesId.clear();
+      kindOfReportValue = 0;
+    });
+  }
+
+  void composeBody(
+      Set<String> causes,
+      String studentId,
+      int kindOfReport,
+      String date,
+      int teacherNumber,
+      String time,
+      String observations,
+      int subjectId,
+      int gradeSeq,
+      String campus) {
+    try {
+      showIsLoadingAlertDialog(context);
+      setState(() {
+        body.clear();
+        body.addAll({
+          'causes': causes.toList(),
+          'studentId': studentId,
+          'kindOfReport': kindOfReport,
+          'date': date,
+          'teacherNumber': teacherNumber,
+          'time': time,
+          'observations': observations,
+          'subjectId': subjectId,
+          'gradeSequence': gradeSeq,
+          'campus': campus
+        });
+      });
+    } catch (e) {
+      throw Error.safeToString(e);
     }
   }
 }

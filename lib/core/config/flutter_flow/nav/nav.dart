@@ -2,6 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:oxschool/core/utils/update_installer.dart';
+import 'package:oxschool/presentation/Modules/academic/academic_awards/academic_awards_main.dart';
+import 'package:oxschool/presentation/Modules/academic/academic_reports/academic_report_main_screen.dart';
+import 'package:oxschool/presentation/Modules/academic/academic_reports/poor_performance.dart';
 import 'package:oxschool/presentation/Modules/academic/discipline/discipline_screen.dart';
 import 'package:oxschool/presentation/Modules/academic/school%20grades/fo_dac_27.dart';
 import 'package:oxschool/presentation/Modules/academic/school%20grades/grades_main_screen.dart';
@@ -92,6 +95,18 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
             name: 'DisciplineScreen()',
             path: '/discipline',
             builder: (context, params) => const DisciplineScreen()),
+        FFRoute(
+            name: 'AcademicReportMainScreen()',
+            path: '/academicReports',
+            builder: (context, params) => const AcademicReportMainScreen()),
+        FFRoute(
+            name: 'PoorPerformance()',
+            path: '/poorAcademicPerformance',
+            builder: (context, params) => const PoorPerformance()),
+        FFRoute(
+            name: 'AcademicAwards()',
+            path: '/academicAwards',
+            builder: (context, params) => const AcademicAwards()),
         FFRoute(
             name: 'UpdaterScreen',
             path: '/updater',

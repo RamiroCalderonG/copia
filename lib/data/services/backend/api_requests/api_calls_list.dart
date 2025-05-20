@@ -1637,6 +1637,34 @@ Future<dynamic> getDisciplinaryCauses(
   }
 }
 
+Future<dynamic> createDisciplinaryReport(Map<String, dynamic> body) async {
+  try {
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
+    var apiCall = await Requests.post(
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/discipline/report',
+      headers: {
+        'Authorization': devicePrefs.getString('token')!,
+        'Content-Type': 'application/json',
+      },
+      bodyEncoding: RequestBodyEncoding.JSON,
+      body: body,
+      persistCookies: false,
+      timeoutSeconds: 20,
+    );
+    apiCall.raiseForStatus();
+    if (apiCall.statusCode == 200) {
+      return json.decode(utf8.decode(apiCall
+          .bodyBytes)); //* Returns data formated and decoded using utf8 encoding for latin and spanish characteres
+    } else {
+      insertErrorLog(apiCall.body, 'createDisciplinaryReport($body)');
+      throw Future.error(apiCall.body);
+    }
+  } catch (e) {
+    insertErrorLog(e.toString(), 'createDisciplinaryReport($body)');
+    throw e.toString();
+  }
+}
+
 //!Not using for now
 //Function to get a list of acces items by a role
 /* Future<http.Response> getUserRoleAndAcces(int roleId) async {
