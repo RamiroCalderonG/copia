@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pluto_grid/pluto_grid.dart';
+import 'package:trina_grid/trina_grid.dart';
 
 import '../../../core/constants/Student.dart';
 
@@ -11,105 +11,105 @@ class StudentHistoryGrid extends StatefulWidget {
 }
 
 class _StudentHistoryGridState extends State<StudentHistoryGrid> {
-  final List<PlutoRow> nurseryHistoryRows = [];
+  final List<TrinaRow> nurseryHistoryRows = [];
   bool isSearching = true;
-  late final PlutoGridStateManager stateManager;
-  List<PlutoColumn> nurseryHistoryColumns = <PlutoColumn>[];
+  late final TrinaGridStateManager stateManager;
+  List<TrinaColumn> nurseryHistoryColumns = <TrinaColumn>[];
 
   @override
   void initState() {
     super.initState();
 
-    nurseryHistoryColumns = <PlutoColumn>[
-      PlutoColumn(
+    nurseryHistoryColumns = <TrinaColumn>[
+      TrinaColumn(
         title: 'idReporteEnfermeria',
         field: 'idReporteEnfermeria',
-        type: PlutoColumnType.number(),
+        type: TrinaColumnType.number(),
       ),
-      PlutoColumn(
+      TrinaColumn(
         title: 'Matricula',
         field: 'Matricula',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
       ),
-      PlutoColumn(
+      TrinaColumn(
         title: 'Fecha',
         field: 'Fecha',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
       ),
-      PlutoColumn(
+      TrinaColumn(
         title: 'Alumno',
         field: 'Alumno',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
       ),
-      PlutoColumn(
+      TrinaColumn(
         title: 'Causa',
         field: 'Causa',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
       ),
-      PlutoColumn(
+      TrinaColumn(
         title: 'Hora',
         field: 'Hora',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
       ),
-      PlutoColumn(
+      TrinaColumn(
         title: 'Grado',
         field: 'Gradosecuencia',
-        type: PlutoColumnType.number(),
+        type: TrinaColumnType.number(),
       ),
-      PlutoColumn(
+      TrinaColumn(
         title: 'Campus',
         field: 'ClaUn',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
       ),
-      PlutoColumn(
+      TrinaColumn(
         title: 'Grupo',
         field: 'Grupo',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
       ),
-      PlutoColumn(
+      TrinaColumn(
         title: 'Valoracion',
         field: 'valoracionenfermeria',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
       ),
-      PlutoColumn(
+      TrinaColumn(
         title: 'Observaciones',
         field: 'obsGenerales',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
       ),
-      PlutoColumn(
+      TrinaColumn(
         title: 'Canalizacion medico',
         field: 'irconmedico',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
       ),
-      PlutoColumn(
+      TrinaColumn(
           title: 'Envio a clinica',
           field: 'envioclinica',
-          type: PlutoColumnType.text()),
-      PlutoColumn(
+          type: TrinaColumnType.text()),
+      TrinaColumn(
         title: 'tx',
         field: 'tx',
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
       )
     ];
 
     for (var line in nurseryHistoryStudent) {
       nurseryHistoryRows.add(
-        PlutoRow(
+        TrinaRow(
           cells: {
-            'idReporteEnfermeria': PlutoCell(value: line.idReport),
-            'Matricula': PlutoCell(value: line.studentId),
-            'Fecha': PlutoCell(value: line.date),
-            'Alumno': PlutoCell(value: line.studentName),
-            'Causa': PlutoCell(value: line.cause),
-            'Hora': PlutoCell(value: line.time),
-            'Gradosecuencia': PlutoCell(value: line.grade),
-            'ClaUn': PlutoCell(value: line.campuse),
-            'Grupo': PlutoCell(value: line.group),
-            'valoracionenfermeria': PlutoCell(value: line.diagnosis),
-            'obsGenerales': PlutoCell(value: line.observations),
-            'irconmedico': PlutoCell(value: line.canalization),
-            'envioclinica': PlutoCell(value: line.hospitalize),
-            'tx': PlutoCell(value: line.tx)
+            'idReporteEnfermeria': TrinaCell(value: line.idReport),
+            'Matricula': TrinaCell(value: line.studentId),
+            'Fecha': TrinaCell(value: line.date),
+            'Alumno': TrinaCell(value: line.studentName),
+            'Causa': TrinaCell(value: line.cause),
+            'Hora': TrinaCell(value: line.time),
+            'Gradosecuencia': TrinaCell(value: line.grade),
+            'ClaUn': TrinaCell(value: line.campuse),
+            'Grupo': TrinaCell(value: line.group),
+            'valoracionenfermeria': TrinaCell(value: line.diagnosis),
+            'obsGenerales': TrinaCell(value: line.observations),
+            'irconmedico': TrinaCell(value: line.canalization),
+            'envioclinica': TrinaCell(value: line.hospitalize),
+            'tx': TrinaCell(value: line.tx)
           },
         ),
       );
@@ -159,82 +159,82 @@ class _StudentHistoryGridState extends State<StudentHistoryGrid> {
                         const SizedBox(height: 8.0),
                         const Divider(),
                         Expanded(
-                            child: PlutoGrid(
-                          // configuration: const PlutoGridConfiguration.dark(),
-                          columns: <PlutoColumn>[
-                            PlutoColumn(
+                            child: TrinaGrid(
+                          // configuration: const TrinaGridConfiguration.dark(),
+                          columns: <TrinaColumn>[
+                            TrinaColumn(
                               title: 'idReporteEnfermeria',
                               field: 'idReporteEnfermeria',
-                              type: PlutoColumnType.number(),
+                              type: TrinaColumnType.number(),
                             ),
-                            PlutoColumn(
+                            TrinaColumn(
                               title: 'Matricula',
                               field: 'Matricula',
-                              type: PlutoColumnType.text(),
+                              type: TrinaColumnType.text(),
                             ),
-                            PlutoColumn(
+                            TrinaColumn(
                               title: 'Fecha',
                               field: 'Fecha',
-                              type: PlutoColumnType.text(),
+                              type: TrinaColumnType.text(),
                             ),
-                            PlutoColumn(
+                            TrinaColumn(
                               title: 'Alumno',
                               field: 'Alumno',
-                              type: PlutoColumnType.text(),
+                              type: TrinaColumnType.text(),
                             ),
-                            PlutoColumn(
+                            TrinaColumn(
                               title: 'Causa',
                               field: 'Causa',
-                              type: PlutoColumnType.text(),
+                              type: TrinaColumnType.text(),
                             ),
-                            PlutoColumn(
+                            TrinaColumn(
                               title: 'Hora',
                               field: 'Hora',
-                              type: PlutoColumnType.text(),
+                              type: TrinaColumnType.text(),
                             ),
-                            PlutoColumn(
+                            TrinaColumn(
                               title: 'Grado',
                               field: 'Gradosecuencia',
-                              type: PlutoColumnType.number(),
+                              type: TrinaColumnType.number(),
                             ),
-                            PlutoColumn(
+                            TrinaColumn(
                               title: 'Campus',
                               field: 'ClaUn',
-                              type: PlutoColumnType.text(),
+                              type: TrinaColumnType.text(),
                             ),
-                            PlutoColumn(
+                            TrinaColumn(
                               title: 'Grupo',
                               field: 'Grupo',
-                              type: PlutoColumnType.text(),
+                              type: TrinaColumnType.text(),
                             ),
-                            PlutoColumn(
+                            TrinaColumn(
                               title: 'Valoracion',
                               field: 'valoracionenfermeria',
-                              type: PlutoColumnType.text(),
+                              type: TrinaColumnType.text(),
                             ),
-                            PlutoColumn(
+                            TrinaColumn(
                               title: 'Observaciones',
                               field: 'obsGenerales',
-                              type: PlutoColumnType.text(),
+                              type: TrinaColumnType.text(),
                             ),
-                            PlutoColumn(
+                            TrinaColumn(
                               title: 'Canalizacion medico',
                               field: 'irconmedico',
-                              type: PlutoColumnType.text(),
+                              type: TrinaColumnType.text(),
                             ),
-                            PlutoColumn(
+                            TrinaColumn(
                                 title: 'Envio a clinica',
                                 field: 'envioclinica',
-                                type: PlutoColumnType.text()),
-                            PlutoColumn(
+                                type: TrinaColumnType.text()),
+                            TrinaColumn(
                               title: 'tx',
                               field: 'tx',
-                              type: PlutoColumnType.text(),
+                              type: TrinaColumnType.text(),
                             )
                           ],
                           // nurseryHistoryColumns,
                           rows: nurseryHistoryRows,
-                          onLoaded: (PlutoGridOnLoadedEvent event) {
+                          onLoaded: (TrinaGridOnLoadedEvent event) {
                             stateManager = event.stateManager;
                             stateManager.setShowColumnFilter(true);
                           },

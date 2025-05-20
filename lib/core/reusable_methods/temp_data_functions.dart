@@ -14,7 +14,7 @@ import '../../data/services/backend/api_requests/api_calls_list.dart';
 
 void clearTempData() {
   listOfUsersForGrid.clear();
-  //usersPlutoRowList.clear();
+  //usersTrinaRowList.clear();
   selectedUser = null;
   tempUserId = null;
   tempSelectedUsr = null;
@@ -161,8 +161,6 @@ Future<dynamic> fetchEventsByRole(int roleId) async {
           RoleModuleRelationshipDto roleDetails = RoleModuleRelationshipDto.fromJSON(item);
            roleDetailedList.add(roleDetails);
          }
-
-
       return roleDetailedList;
     } else {
       return Future.error('Value is null');

@@ -15,32 +15,41 @@ import 'package:requests/requests.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+//* Post a login request, send into body devide details
 Future<dynamic> loginUser(var jsonBody) async {
   try {
     var apiCall = await Requests.post(
-        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/auth/login',
-        json: jsonBody,
-        persistCookies: false,
-        timeoutSeconds: 12);
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/auth/login', // Host addres from .env file
+        json: jsonBody, // body as json
+        persistCookies:
+            false, // not using cookies for any of the rest request for now
+        timeoutSeconds:
+            12); // timeout before it cancels the request if the server doesnt respond and throw TimeOutException error
 
-    apiCall.raiseForStatus();
-    return apiCall;
+    apiCall.raiseForStatus(); // Perform the call request
+    return apiCall; // return the Request class instance
   } catch (e) {
-    insertErrorLog(e.toString(), '/login/userlogin/');
+    insertErrorLog(
+        e.toString(), '/login/userlogin/'); //Insert into log the error
     if (e is HTTPException) {
+      // Validate if the error is a HTTPException class type
       var statusCode = e.response.statusCode;
-      var message = returnsMessageToDisplay(statusCode);
-      return Future.error(message);
+      var message = returnsMessageToDisplay(
+          statusCode); // get a friendly message for user
+      return Future.error(message); //Return error message
     } else {
-      return Future.error(e.toString());
+      return Future.error(e
+          .toString()); // Returns a Future.error() that contains the error message
     }
   }
 }
 
 Future<void> logOutUser(String token, String employee) async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  String? device = prefs.getString('device');
-  String? ipAddres = prefs.getString('ip');
+  SharedPreferences prefs = await SharedPreferences
+      .getInstance(); //Init SharedPreferences to get an instance
+  String? device =
+      prefs.getString('device'); //Gets device details from prefs instance
+  String? ipAddres = prefs.getString('ip'); // Gets ipAddres from prefs instance
 
   var apiCall = await Requests.post(
       '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/auth/logout',
@@ -51,6 +60,7 @@ Future<void> logOutUser(String token, String employee) async {
       persistCookies: false,
       timeoutSeconds: 10);
   apiCall.raiseForStatus();
+  prefs.clear(); // Deletes prefs instance
 }
 
 Future<dynamic> getCycle(int month) async {
@@ -78,47 +88,6 @@ Future<dynamic> getCycle(int month) async {
     }
   }
 }
-
-// Future<dynamic> getCycle(
-//   int month,
-// ) async {
-//   String response;
-//   if (month == 0) {
-//     try {
-//       var apiCall = await Requests.get(
-//           '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/cycles/1',
-//           headers: {
-//             //'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-//             'Authorization': currentUser!.token,
-//           },
-//           persistCookies: false,
-//           timeoutSeconds: 12);
-//       apiCall.raiseForStatus();
-//       response = apiCall.content();
-//       return response;
-//     } catch (e) {
-//       insertErrorLog(e.toString(), '/api/cycles/1');
-//       throw FormatException(e.toString());
-//     }
-//   } else {
-//     try {
-//       var apiCall = await Requests.get(
-//           '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/cycles/',
-//           headers: {
-//             'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-//             'Auth': currentUser!.token,
-//           },
-//           persistCookies: false,
-//           timeoutSeconds: 12);
-//       apiCall.raiseForStatus();
-//       response = apiCall.content();
-//       return response;
-//     } catch (e) {
-//       insertErrorLog(e.toString(), '/api/cycles/$month');
-//       throw FormatException(e.toString());
-//     }
-//   }
-// }
 
 //!Not using this function for now
 //Function to post new visit from a student to nursery
@@ -199,47 +168,6 @@ Future<int> deleteMedicineStudent(var idValue) async {
   }
   // return responseCode;
 }
-
-// Future<dynamic> getEvents(String? param) async {
-//   String responseCode;
-
-//   if (param == null) {
-//     try {
-//       var apiCall = await Requests.get(
-//           '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/events',
-//           headers: {
-//             'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-//             'Auth': currentUser!.token
-//           },
-//           persistCookies: false,
-//           timeoutSeconds: 8);
-
-//       apiCall.raiseForStatus();
-//       responseCode = apiCall.content();
-//       return responseCode;
-//     } catch (e) {
-//       throw FormatException(e.toString());
-//     }
-//   } else {
-//     try {
-//       var apiCall = await Requests.get(
-//           '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/events',
-//           headers: {
-//             'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-//             'Auth': currentUser!.token
-//           },
-//           queryParameters: {'detail': param},
-//           persistCookies: false,
-//           timeoutSeconds: 8);
-
-//       apiCall.raiseForStatus();
-//       responseCode = apiCall.content();
-//       return responseCode;
-//     } catch (e) {
-//       throw FormatException(e.toString());
-//     }
-//   }
-// }
 
 //Function to activate/deactive an event by role
 Future<dynamic> modifyActiveOfEventRole(
@@ -619,7 +547,7 @@ Future<dynamic> getWorkDepartments() async {
         persistCookies: false,
         timeoutSeconds: 15);
     apiCall.raiseForStatus();
-    return apiCall.content();
+    return apiCall.body;
   } catch (e) {
     throw Future.error(e.toString());
   }
@@ -1419,6 +1347,7 @@ Future<dynamic> getScreenAccessRoutes() async {
   }
 }
 
+//* Retrieves latest app version
 Future<dynamic> getLatestAppVersion() async {
   try {
     var apiCall = await Requests.get(
@@ -1430,6 +1359,309 @@ Future<dynamic> getLatestAppVersion() async {
   } catch (e) {
     insertErrorLog(e.toString(), 'getLatestAppVersion()');
     return Future.error(e.toString());
+  }
+}
+
+//* Fetch for all support tickets,
+/*
+* toFetch = initial date to fetch
+* statusVal = status of ticket to fetch
+* byWho =  1 = I Made ; 2 = I Was Reported
+* params: { from : idLogin from currentUser}
+*/
+Future<dynamic> getAllServiceTickets(
+    String toFetch, int statusVal, int byWho) async {
+  String startDate = toFetch.replaceAll('-', '');
+  try {
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
+    var apiCall = await Requests.get(
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/services/ticket/',
+        headers: {
+          'Authorization': devicePrefs.getString('token')!,
+          'Content-Type': 'application/json',
+        },
+        queryParameters: {
+          'toFetch': startDate.toString(),
+          'from': currentUser!.idLogin,
+          'status': statusVal,
+          'flag': byWho
+        },
+        persistCookies: true,
+        timeoutSeconds: 120);
+    apiCall.raiseForStatus();
+    return apiCall;
+  } catch (e) {
+    insertErrorLog(e.toString(), 'getAllServiceTickets $toFetch');
+    return Future.error(e.toString());
+  }
+}
+
+//* Retrieves history of support ticket request
+Future<dynamic> getRequestticketHistory(int ticketId) async {
+  try {
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
+    var apiCall = await Requests.get(
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/services/ticket/$ticketId',
+        headers: {
+          'Authorization': devicePrefs.getString('token')!,
+          'Content-Type': 'application/json',
+        },
+        persistCookies: true,
+        timeoutSeconds: 35);
+    apiCall.raiseForStatus();
+    return apiCall;
+  } catch (e) {
+    insertErrorLog(e.toString(), 'getAllServiceTickets $ticketId');
+    return Future.error(e.toString());
+  }
+}
+
+//* Update support by kind of flag, can be status or assignated to a user
+Future<dynamic> updateSupportTicket(Map<String, dynamic> body, int flag) async {
+  try {
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
+    var apiCall = await Requests.put(
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/services/ticket/',
+        headers: {
+          'Authorization': devicePrefs.getString('token')!,
+          'Content-Type': 'application/json',
+        },
+        queryParameters: {"update": flag},
+        json: body,
+        persistCookies: true,
+        timeoutSeconds: 35);
+    apiCall.raiseForStatus();
+    return apiCall;
+  } catch (e) {
+    insertErrorLog(e.toString(), 'updateSupportTicket()');
+    return e;
+  }
+}
+
+//* Retrieves users and idLogin, to be used when assign support ticket to an user
+Future<dynamic> getUsersForTicket(int filter, String dept) async {
+  try {
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
+    var apiCall = await Requests.get(
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/users/ticket/users',
+      headers: {
+        'Authorization': devicePrefs.getString('token')!,
+        'Content-Type': 'application/json',
+      },
+      queryParameters: {'filter': filter, 'item': dept},
+      persistCookies: false,
+      timeoutSeconds: 10,
+    );
+    apiCall.raiseForStatus();
+    return apiCall;
+  } catch (e) {
+    insertErrorLog(e.toString(), 'getUsersForTicket()');
+    return Future.error(e.toString());
+  }
+}
+
+//Function to validate a detail from an user
+//* dept, campus
+Future<dynamic> getUsersListByDeptCall(int loginId, String param) async {
+  try {
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
+    var apiCall = await Requests.get(
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/users/detail/$param',
+        headers: {
+          'Authorization': devicePrefs.getString('token')!,
+          'Content-Type': 'application/json',
+        },
+        queryParameters: {"user": loginId},
+        persistCookies: false,
+        timeoutSeconds: 10);
+    apiCall.raiseForStatus();
+    return apiCall;
+  } catch (e) {
+    rethrow;
+  }
+}
+
+//*Creates a support ticket
+Future<dynamic> createNewTicketServices(Map<String, dynamic> body) async {
+  try {
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
+    var apiCall = await Requests.post(
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/services/ticket',
+      headers: {
+        'Authorization': devicePrefs.getString('token')!,
+        'Content-Type': 'application/json',
+      },
+      json: body,
+      persistCookies: false,
+      timeoutSeconds: 15,
+    );
+    apiCall.raiseForStatus();
+    if (apiCall.statusCode == 200) {
+      return apiCall;
+    } else {
+      insertErrorLog(apiCall.body, 'createNewTicketServices()');
+      throw Future.error(apiCall.body);
+    }
+  } catch (e) {
+    insertErrorLog(e.toString(), 'createNewTicketServices()');
+    throw e.toString();
+  }
+}
+
+//* Retrieves a list of disciplinary reports by date
+// TODO: Edit cycle parameter to be dynamic
+Future<dynamic> getDisciplinaryReportsByDate(
+    String cycle, String initialDate, String finalDate) async {
+  try {
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
+    var apiCall = await Requests.get(
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/discipline/reports/',
+      headers: {
+        'Authorization': devicePrefs.getString('token')!,
+        'Content-Type': 'application/json',
+      },
+      queryParameters: {
+        'initialDate': initialDate,
+        'finalDate': finalDate,
+        'cycle': "2022-2023" //cycle
+      },
+      persistCookies: true,
+      timeoutSeconds: 20,
+    );
+    apiCall.raiseForStatus();
+    if (apiCall.statusCode == 200) {
+      return json.decode(utf8.decode(apiCall
+          .bodyBytes)); //* Returns data formated and decoded using utf8 encoding for latin and spanish characteres
+    } else {
+      insertErrorLog(apiCall.body, 'getDisciplinaryReportsByDate()');
+      throw Future.error(apiCall.body);
+    }
+  } catch (e) {
+    insertErrorLog(e.toString(),
+        'getDisciplinaryReportsByDate($cycle, $initialDate, $finalDate)');
+    throw e.toString();
+  }
+}
+
+//* Retrieves students by dynamic params
+Future<dynamic> getStudentsByDynamicParam(
+    String paramkey, String paramValue) async {
+  try {
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
+    var apiCall = await Requests.get(
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/students/all/simple',
+      headers: {
+        'Authorization': devicePrefs.getString('token')!,
+        'Content-Type': 'application/json',
+      },
+      queryParameters: {
+        'Param': paramkey,
+        'param2': paramValue,
+      },
+      persistCookies: false,
+      timeoutSeconds: 20,
+    );
+    apiCall.raiseForStatus();
+    if (apiCall.statusCode == 200) {
+      return json.decode(utf8.decode(apiCall
+          .bodyBytes)); //* Returns data formated and decoded using utf8 encoding for latin and spanish characteres
+    } else {
+      insertErrorLog(apiCall.body, 'getStudentsByDynamicParam()');
+      throw Future.error(apiCall.body);
+    }
+  } catch (e) {
+    insertErrorLog(
+        e.toString(), 'getStudentsByDynamicParam($paramkey, $paramValue)');
+    throw e.toString();
+  }
+}
+
+//* gets teachers name,subject,grade and group by cycle to be used on disciplinary reports
+Future<dynamic> getTeachersGradeGroupSubjectsByCycle(
+  String cycle,
+) async {
+  try {
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
+    var apiCall = await Requests.get(
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/teachers/list/$cycle',
+      headers: {
+        'Authorization': devicePrefs.getString('token')!,
+        'Content-Type': 'application/json',
+      },
+      persistCookies: false,
+      timeoutSeconds: 20,
+    );
+    apiCall.raiseForStatus();
+    if (apiCall.statusCode == 200) {
+      return json.decode(utf8.decode(apiCall
+          .bodyBytes)); //* Returns data formated and decoded using utf8 encoding for latin and spanish characteres
+    } else {
+      insertErrorLog(
+          apiCall.body, 'getTeachersGradeGroupSubjectsByCycle($cycle)');
+      throw Future.error(apiCall.body);
+    }
+  } catch (e) {
+    insertErrorLog(
+        e.toString(), 'getTeachersGradeGroupSubjectsByCycle($cycle)');
+    throw e.toString();
+  }
+}
+
+Future<dynamic> getDisciplinaryCauses(
+    int gradeSequence, int kindOfReport) async {
+  try {
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
+    var apiCall = await Requests.get(
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/discipline/causes/',
+      headers: {
+        'Authorization': devicePrefs.getString('token')!,
+        'Content-Type': 'application/json',
+      },
+      queryParameters: {"grade": gradeSequence, "report": kindOfReport},
+      persistCookies: false,
+      timeoutSeconds: 20,
+    );
+    apiCall.raiseForStatus();
+    if (apiCall.statusCode == 200) {
+      return json.decode(utf8.decode(apiCall
+          .bodyBytes)); //* Returns data formated and decoded using utf8 encoding for latin and spanish characteres
+    } else {
+      insertErrorLog(apiCall.body,
+          'getDisciplinaryCauses( Kind of report: $kindOfReport , grade: $gradeSequence)');
+      throw Future.error(apiCall.body);
+    }
+  } catch (e) {
+    insertErrorLog(e.toString(),
+        'getDisciplinaryCauses( Kind of report: $kindOfReport , grade: $gradeSequence)');
+    throw e.toString();
+  }
+}
+
+Future<dynamic> createDisciplinaryReport(Map<String, dynamic> body) async {
+  try {
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
+    var apiCall = await Requests.post(
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/discipline/report',
+      headers: {
+        'Authorization': devicePrefs.getString('token')!,
+        'Content-Type': 'application/json',
+      },
+      bodyEncoding: RequestBodyEncoding.JSON,
+      body: body,
+      persistCookies: false,
+      timeoutSeconds: 20,
+    );
+    apiCall.raiseForStatus();
+    if (apiCall.statusCode == 200) {
+      return json.decode(utf8.decode(apiCall
+          .bodyBytes)); //* Returns data formated and decoded using utf8 encoding for latin and spanish characteres
+    } else {
+      insertErrorLog(apiCall.body, 'createDisciplinaryReport($body)');
+      throw Future.error(apiCall.body);
+    }
+  } catch (e) {
+    insertErrorLog(e.toString(), 'createDisciplinaryReport($body)');
+    throw e.toString();
   }
 }
 

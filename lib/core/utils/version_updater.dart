@@ -6,6 +6,11 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 import 'dart:io';
 
+/*
+ * Widget that verify for latest version
+ * if a new version is found, display an update option dialog 
+ * so the user can update now or dismiss 
+ */
 class UpdateChecker {
   static Future<void> checkForUpdate(BuildContext context) async {
     try {
@@ -38,31 +43,34 @@ class UpdateChecker {
         context: context,
         barrierDismissible: false,
         builder: (context) => AlertDialog(
-                title: Text("Actualización disponible! 🚀"),
-                content:  
-                    Text("Una nueva versión se encuentra disponible, desea actualizar ahora?"),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text("Posponer"),
-                  ),
-                  TextButton(
-                    onPressed: () async {
-                      context.goNamed('UpdaterScreen', extra: <String, dynamic>{
-                      kTransitionInfoKey: const TransitionInfo(
-                        hasTransition: true,
-                        transitionType: PageTransitionType.fade,
-                      ),
-                    },); 
-                    },
-                    child: Text("Actualizar"),
-                  ),
-                ],
-              ));
+              title: Text("Actualización disponible! 🚀"),
+              content: Text(
+                  "Una nueva versión se encuentra disponible, desea actualizar ahora?"),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text("Posponer"),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    context.goNamed(
+                      'UpdaterScreen',
+                      extra: <String, dynamic>{
+                        kTransitionInfoKey: const TransitionInfo(
+                          hasTransition: true,
+                          transitionType: PageTransitionType.fade,
+                        ),
+                      },
+                    );
+                  },
+                  child: Text("Actualizar"),
+                ),
+              ],
+            ));
   }
 }
 
-    String get platformExt {
+String get platformExt {
   switch (Platform.operatingSystem) {
     case 'windows':
       {

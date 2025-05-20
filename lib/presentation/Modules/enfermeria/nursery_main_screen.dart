@@ -18,7 +18,7 @@ import 'package:oxschool/presentation/Modules/enfermeria/student_history_grid.da
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
 import 'package:oxschool/presentation/Modules/main_window/main_window_widget.dart';
 import 'package:oxschool/core/utils/loader_indicator.dart';
-import 'package:pluto_grid/pluto_grid.dart';
+import 'package:trina_grid/trina_grid.dart';
 
 import 'expandable_fab.dart';
 
@@ -40,14 +40,14 @@ class _NurseryMainScreenState extends State<NurseryMainScreen>
   ApiCallResponse? apiResultxgr;
   bool _showClearButton = true;
   List<String> listOfStudents = [];
-  final List<PlutoRow> nurseryHistoryRows = [];
+  final List<TrinaRow> nurseryHistoryRows = [];
   late final TabController _tabController;
 
   late String dropdownValue;
-  late final PlutoGridStateManager stateManager;
+  late final TrinaGridStateManager stateManager;
   late AnimationController controller;
 
-  late List<PlutoRow> nurseryHRows;
+  late List<TrinaRow> nurseryHRows;
 
   bool isSateManagerActive = false;
 
@@ -61,36 +61,36 @@ class _NurseryMainScreenState extends State<NurseryMainScreen>
     // }
   }
 
-  final List<PlutoColumn> columns = <PlutoColumn>[
-    PlutoColumn(
+  final List<TrinaColumn> columns = <TrinaColumn>[
+    TrinaColumn(
       title: 'Relacion',
       field: 'Relacion',
-      type: PlutoColumnType.text(),
+      type: TrinaColumnType.text(),
       enableRowChecked: true,
     ),
-    PlutoColumn(
+    TrinaColumn(
       title: 'Nombre',
       field: 'Nombre',
-      type: PlutoColumnType.text(),
+      type: TrinaColumnType.text(),
     ),
-    PlutoColumn(
+    TrinaColumn(
       title: 'Tutor',
       field: 'Tutor',
-      type: PlutoColumnType.number(),
+      type: TrinaColumnType.number(),
     ),
-    PlutoColumn(
+    TrinaColumn(
       title: 'Fecha de Alta',
       field: 'Fecha de Alta',
-      type: PlutoColumnType.date(),
+      type: TrinaColumnType.date(),
     ),
-    PlutoColumn(
+    TrinaColumn(
       title: 'Celular',
       field: 'Celular',
-      type: PlutoColumnType.text(),
+      type: TrinaColumnType.text(),
     ),
   ];
 
-  final List<PlutoRow> rows = [];
+  final List<TrinaRow> rows = [];
 
   @override
   void initState() {
@@ -345,22 +345,22 @@ class _NurseryMainScreenState extends State<NurseryMainScreen>
                             jsonList.clear();
                             for (var line in selectedFamily) {
                               rows.add(
-                                PlutoRow(
+                                TrinaRow(
                                   cells: {
                                     'Relacion':
-                                        PlutoCell(value: line.relationship),
-                                    'Nombre': PlutoCell(
+                                        TrinaCell(value: line.relationship),
+                                    'Nombre': TrinaCell(
                                         value: line.name +
                                             ' ' +
                                             line.firstLastName +
                                             ' ' +
                                             line.secondLastName),
-                                    'Tutor': PlutoCell(value: line.isParent),
+                                    'Tutor': TrinaCell(value: line.isParent),
                                     'Fecha de Alta':
-                                        PlutoCell(value: line.registrationDate),
+                                        TrinaCell(value: line.registrationDate),
                                     'Celular':
-                                        PlutoCell(value: line.cellPhoneNumber),
-                                    // 'Email': PlutoCell(value: line.email)
+                                        TrinaCell(value: line.cellPhoneNumber),
+                                    // 'Email': TrinaCell(value: line.email)
                                   },
                                 ),
                               );
@@ -379,30 +379,30 @@ class _NurseryMainScreenState extends State<NurseryMainScreen>
 
                               for (var line in nurseryHistoryStudent) {
                                 nurseryHistoryRows.add(
-                                  PlutoRow(
+                                  TrinaRow(
                                     cells: {
                                       'idReporteEnfermeria':
-                                          PlutoCell(value: line.idReport),
+                                          TrinaCell(value: line.idReport),
                                       'Matricula':
-                                          PlutoCell(value: line.studentId),
-                                      'Fecha': PlutoCell(value: line.date),
+                                          TrinaCell(value: line.studentId),
+                                      'Fecha': TrinaCell(value: line.date),
                                       'Alumno':
-                                          PlutoCell(value: line.studentName),
-                                      'Causa': PlutoCell(value: line.cause),
-                                      'Hora': PlutoCell(value: line.time),
+                                          TrinaCell(value: line.studentName),
+                                      'Causa': TrinaCell(value: line.cause),
+                                      'Hora': TrinaCell(value: line.time),
                                       'Gradosecuencia':
-                                          PlutoCell(value: line.grade),
-                                      'ClaUn': PlutoCell(value: line.campuse),
-                                      'Grupo': PlutoCell(value: line.group),
+                                          TrinaCell(value: line.grade),
+                                      'ClaUn': TrinaCell(value: line.campuse),
+                                      'Grupo': TrinaCell(value: line.group),
                                       'valoracionenfermeria':
-                                          PlutoCell(value: line.diagnosis),
+                                          TrinaCell(value: line.diagnosis),
                                       'obsGenerales':
-                                          PlutoCell(value: line.observations),
+                                          TrinaCell(value: line.observations),
                                       'irconmedico':
-                                          PlutoCell(value: line.canalization),
+                                          TrinaCell(value: line.canalization),
                                       'envioclinica':
-                                          PlutoCell(value: line.hospitalize),
-                                      'tx': PlutoCell(value: line.tx)
+                                          TrinaCell(value: line.hospitalize),
+                                      'tx': TrinaCell(value: line.tx)
                                     },
                                   ),
                                 );
@@ -616,12 +616,12 @@ class _NurseryMainScreenState extends State<NurseryMainScreen>
                         const SizedBox(height: 8.0),
                         const Divider(),
                         Expanded(
-                            child: PlutoGrid(
-                          // configuration: const PlutoGridConfiguration.dark(),
+                            child: TrinaGrid(
+                          // configuration: const TrinaGridConfiguration.dark(),
                           columns: columns,
-                          mode: PlutoGridMode.readOnly,
+                          mode: TrinaGridMode.readOnly,
                           rows: rows,
-                          onLoaded: (PlutoGridOnLoadedEvent event) {
+                          onLoaded: (TrinaGridOnLoadedEvent event) {
                             stateManager = event.stateManager;
                             stateManager.setShowColumnFilter(true);
                           },

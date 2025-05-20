@@ -110,6 +110,34 @@ void showErrorFromBackend(BuildContext context, String errorMessage) {
       });
 }
 
+void showSuccessDialog(
+    BuildContext context, String header, String bodyMessage) {
+  showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(header),
+          content: Text(bodyMessage),
+          icon: const Icon(
+            Icons.check,
+            color: Colors.green,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cerrar',
+                  style: TextStyle(
+                    fontFamily: 'Sora',
+                    // backgroundColor: Colors.blue[50],
+                  )),
+            )
+          ],
+        );
+      });
+}
+
 //To display information
 void showInformationDialog(
     BuildContext context, String header, String bodyMessage) {
@@ -134,6 +162,36 @@ void showInformationDialog(
                     // backgroundColor: Colors.blue[50],
                   )),
             )
+          ],
+        );
+      });
+}
+
+//To display loading indicator
+void showIsLoadingAlertDialog(BuildContext context) {
+  showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Por favor espere'),
+          content: Center(
+            child: CustomLoadingIndicator(),
+          ),
+          icon: Icon(
+            Icons.timer,
+            color: Colors.blue,
+          ),
+          actions: [
+            // TextButton(
+            //   onPressed: () {
+            //     Navigator.of(context).pop();
+            //   },
+            //   child: Text('Cerrar',
+            //       style: TextStyle(
+            //         fontFamily: 'Sora',
+            //         // backgroundColor: Colors.blue[50],
+            //       )),
+            // )
           ],
         );
       });

@@ -1,13 +1,13 @@
 import 'package:oxschool/data/Models/Role.dart';
 import 'package:oxschool/data/Models/User.dart';
-import 'package:pluto_grid/pluto_grid.dart';
+import 'package:trina_grid/trina_grid.dart';
 
 List<User> listOfUsersForGrid = [];
-late List<PlutoRow> usersPlutoRowList;
+late List<TrinaRow> usersTrinaRowList;
 late dynamic selectedUser;
 int? tempUserId;
 User? tempSelectedUsr;
-List<PlutoRow> userRows = [];
+List<TrinaRow> userRows = [];
 List<dynamic> tmpRolesList = [];
 List<Role> tmpRoleObjectslist = [];
 List<dynamic> userRoles = [];
@@ -20,7 +20,7 @@ List<String> areaList = [];
 
 void cleatTempData() async {
   listOfUsersForGrid.clear();
-  usersPlutoRowList.clear();
+  usersTrinaRowList.clear();
   selectedUser = null;
   tempUserId = null;
   tempSelectedUsr?.clear();

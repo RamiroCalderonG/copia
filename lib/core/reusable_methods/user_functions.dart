@@ -1,9 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:oxschool/core/constants/screens.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
-import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/data/Models/Cycle.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
@@ -204,3 +202,33 @@ void setUserDataForDebug() {
   //   'Content-Type': 'application/json',
   // });
 }
+
+dynamic validateEventStatus(int eventValue)async{
+  //! THIS FUNCTIONS NEEDS TO BE REFACTORIZED, VALIDATE EVENT STSATUS FROM BACKEND, NOT FROM LOCAL
+  bool status = false;
+
+  for (var element in currentUser!.userRole!.roleModuleRelationships!) {
+    if (element.eventId == eventValue) {
+       status =  element.canAccessEvent!;   
+    }
+  }
+
+   var deptMembers = await geDeptMembers(currentUser!.idLogin!);
+   print(deptMembers);
+   return deptMembers;
+   
+
+
+}
+
+Future<dynamic> geDeptMembers(int idlogin) async {
+  var members = await getUsersListByDeptCall(idlogin, "dept");
+  return json.decode(utf8.decode(members.bodyBytes));
+
+
+
+}
+
+
+
+

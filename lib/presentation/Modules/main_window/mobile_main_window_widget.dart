@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 // ignore: depend_on_referenced_packages
-import 'package:http/http.dart' as http;
 import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/core/reusable_methods/temp_data_functions.dart';
 import 'package:oxschool/core/reusable_methods/user_functions.dart';
@@ -31,13 +30,13 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
 
   @override
   void dispose() {
-    _model.dispose();
+    // _model.dispose();
     super.dispose();
   }
 
   @override
   void initState() {
-    _model = createModel(context, () => MainWindowModel());
+    //_model = createModel(context, () => MainWindowModel());
 
     super.initState();
 

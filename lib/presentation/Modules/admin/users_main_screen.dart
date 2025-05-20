@@ -63,7 +63,7 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
         if (response != null) {
           List<dynamic> jsonList = json.decode(response);
           setState(() {
-            usersPlutoRowList = userRows;
+            usersTrinaRowList = userRows;
             for (var item in jsonList) {
               User newUser = User.usersSimplifiedList(item);
               listOfUsersForGrid.add(newUser);
@@ -178,6 +178,9 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
                                   Role newRole = Role.fromJson(item);
                                   tmpRoleObjectslist.add(newRole);
                                 }
+                                setState(() {
+                                    buildNewUserScreen(context);
+                                  });
 
                                 //TODO: IMPLEMENT A FETCH FOR EVENTS
                                 /* await getEventsList().then((onValue) {

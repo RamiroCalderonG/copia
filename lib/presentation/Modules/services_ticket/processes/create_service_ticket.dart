@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
+import 'package:oxschool/core/constants/user_consts.dart';
+import 'package:oxschool/core/reusable_methods/logger_actions.dart';
+import 'package:oxschool/core/reusable_methods/services_functions.dart';
 import 'package:oxschool/core/utils/loader_indicator.dart';
+import 'package:oxschool/core/utils/searchable_drop_down.dart';
+import 'package:oxschool/presentation/components/confirm_dialogs.dart';
+import 'package:oxschool/presentation/components/custom_icon_button.dart';
 
 class CreateServiceTicket extends StatefulWidget {
   const CreateServiceTicket({super.key});
@@ -10,41 +17,74 @@ class CreateServiceTicket extends StatefulWidget {
 }
 
 class _CreateServiceTicketState extends State<CreateServiceTicket> {
-  final _nameController = TextEditingController();
-  final _employeeNumberController = TextEditingController();
-  final _departmentController = TextEditingController();
-  final _dueDateController = TextEditingController();
-  final _requirementController = TextEditingController();
-  final _employeeNameController = TextEditingController();
   final _date = TextEditingController();
   final _descriptionController = TextEditingController();
   final _observationsController = TextEditingController();
-  late DateTime selectedDateTime;
+  List<String> employeeList = <String>[];
+  String? deptSelected;
+  late Future<dynamic> usersListFuture;
+  List<String> deptsList = <String>[];
+  String campusSelected = '';
+  DateTime? finalDateTime;
+  String whoRequest = '';
 
-  // bool _showSearchIcon = false;
+  Map<int, dynamic> deptsMap = {};
+  List<Map<String, dynamic>> usersMapsL = [];
+
   bool _isDescriptionFieldEmpty = false;
   bool _isObservationsFieldEmpty = false;
-  // bool _showSearchEmployee = false;
-  // ignore: prefer_final_fields
-  bool _isSearching = false;
 
   @override
   void dispose() {
-    _nameController.dispose();
-    _employeeNumberController.dispose();
-    _departmentController.dispose();
-    _dueDateController.dispose();
-    _requirementController.dispose();
     _date.dispose();
-    _employeeNameController.dispose();
     _descriptionController.dispose();
     _observationsController.dispose();
     super.dispose();
   }
 
   @override
+  void initState() {
+    fetchUsersList(1, '');
+    _isDescriptionFieldEmpty = false;
+    _isObservationsFieldEmpty = false;
+    super.initState();
+  }
+
+  void fetchUsersList(int filter, String item) {
+    usersListFuture = getUsersList(filter, item).then((value) {
+      usersMapsL = value;
+      getEmployeesNames(value);
+      getDepartments().then((onValue) {
+        deptsMap = onValue;
+        deptsMap.forEach((key, value) {
+          setState(() {
+            deptsList.add(value);
+          });
+        });
+      }).onError((error, StackTrace) {
+        insertErrorLog(error.toString(), 'getDepartments()');
+        throw Future.error(error.toString());
+      });
+    }).onError((error, stacktrace) {
+      insertErrorLog(error.toString(),
+          'Error al obtener la lista de empleados | fetchUsersList()');
+    });
+  }
+
+  void getEmployeesNames(List<Map<String, dynamic>> usersLists) {
+    setState(() {
+      employeeList.clear();
+      for (var element in usersLists) {
+        if (element['name'] != null) {
+          employeeList.add(element['name'].toString());
+        }
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    const List<String> months = <String>[
+    const List<String> campusList = <String>[
       'Anahuac',
       'Barragan',
       'Concordia',
@@ -52,30 +92,7 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
       'Sendero'
     ];
 
-    const List<String> deptsList = <String>[
-      'IT',
-      'Calidad',
-      'Mantenimiento',
-      'Coord Academica'
-    ];
-    const List<String> employeeList = <String>['Fulano', 'Mengano', 'Sutano'];
-
-    // ignore: unused_local_variable
     String? dropDownValue;
-
-    final DropdownMenu employeSelectorName = DropdownMenu<String>(
-        initialSelection: employeeList.first,
-        enableFilter: true,
-        label: const Text('Nombre del empleado que solicita'),
-        onSelected: (String? value) {
-          setState(() {
-            dropDownValue = value!;
-          });
-        },
-        dropdownMenuEntries:
-            employeeList.map<DropdownMenuEntry<String>>((String value) {
-          return DropdownMenuEntry<String>(value: value, label: value);
-        }).toList());
 
     final descriptionField = TextFormField(
       controller: _descriptionController,
@@ -169,8 +186,8 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
                 lastDate: DateTime(2101))
             .then((pickedDate) {
           if (pickedDate != null) {
-            // selectedDateTime = DateTime.now();
             setState(() {
+              finalDateTime = pickedDate;
               _date.text = DateFormat('yyyy-MM-dd').format(pickedDate);
             });
           }
@@ -180,173 +197,201 @@ class _CreateServiceTicketState extends State<CreateServiceTicket> {
     );
 
     final DropdownMenu campusSelectorDropDown = DropdownMenu<String>(
-        initialSelection: months.first,
+        initialSelection: campusList.first,
         label: const Text('Campus'),
         onSelected: (String? value) {
           setState(() {
-            dropDownValue = value;
+            campusSelected = value!;
           });
         },
         dropdownMenuEntries:
-            months.map<DropdownMenuEntry<String>>((String value) {
+            campusList.map<DropdownMenuEntry<String>>((String value) {
           return DropdownMenuEntry<String>(value: value, label: value);
         }).toList());
 
-    final DropdownMenu deptSelectorDropDown = DropdownMenu<String>(
-        initialSelection: deptsList.first,
-        label: const Text('Departamento al que solicita'),
-        onSelected: (String? value) {
-          setState(() {
-            dropDownValue = value;
-          });
-        },
-        dropdownMenuEntries:
-            deptsList.map<DropdownMenuEntry<String>>((String value) {
-          return DropdownMenuEntry<String>(value: value, label: value);
-        }).toList());
-
-    return    SizedBox(
-            width: MediaQuery.of(context).size.width * 3 / 5,
-            child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints){
-              if (_isSearching) {
-                return CustomLoadingIndicator();
+    return SizedBox(
+        width: MediaQuery.of(context).size.width * 3 / 5,
+        child: FutureBuilder(
+            future: usersListFuture,
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return Center(
+                  child: Text(snapshot.error.toString()),
+                );
+              } else if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CustomLoadingIndicator());
               } else {
-                return  SingleChildScrollView(
-                  child: Column(
-                        //mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        //crossAxisAlignment: CrossAxisAlignment.start,
-                        // crossAxisAlignment
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                            Flexible(child: employeSelectorName,), 
-                            Flexible(child: campusSelectorDropDown), 
-                            Flexible(child: deptSelectorDropDown), 
-                            Flexible(child: dateAndTimeField,)],
-                          ),
-                          SizedBox(
-                            height: 18,
-                          ),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              Flexible(
-                                child: descriptionField,
-                              )
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 14,
-                          ),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              Flexible(child: observationsField),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 14,
-                          ),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              Flexible(
-                                  child: Column(
-                                children: [
-                                  IconButton(
-                                      onPressed: () {
-                                        Navigator.pop(context);
+                return Scaffold(
+                  appBar: AppBar(
+                    title: Text(
+                      'Crear Ticket de Servicio',
+                      style:
+                          TextStyle(color: FlutterFlowTheme.of(context).info),
+                    ),
+                    backgroundColor: FlutterFlowTheme.of(context).secondary,
+                  ),
+                  body: SingleChildScrollView(
+                      child: SafeArea(
+                          child: Padding(
+                    padding: const EdgeInsets.only(
+                        top: 30, bottom: 10, left: 10, right: 10),
+                    child: Column(
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Flexible(
+                              child: SearchableDropdown(
+                                  items: employeeList,
+                                  label: 'Nombre de quien solicita',
+                                  onSelected: (String? value) {
+                                    setState(() {
+                                      whoRequest = value!;
+                                      dropDownValue = value;
+                                    });
+                                  },
+                                  hint: 'Nombre de qien solicita'),
+                            ),
+                            Flexible(child: campusSelectorDropDown),
+                            Flexible(
+                              child: SearchableDropdown(
+                                  items: deptsList,
+                                  label: 'Departamento al que solicita',
+                                  onSelected: (String? value) {
+                                    setState(() {
+                                      deptSelected = value!;
+                                    });
+                                  },
+                                  hint: 'Departamento al que solicita'),
+                            ),
+                            Flexible(
+                              child: dateAndTimeField,
+                            )
+                          ],
+                        ),
+                        SizedBox(
+                          height: 18,
+                        ),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Flexible(
+                              child: descriptionField,
+                            )
+                          ],
+                        ),
+                        const SizedBox(
+                          height: 14,
+                        ),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Flexible(child: observationsField),
+                          ],
+                        ),
+                        const SizedBox(
+                          height: 14,
+                        ),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Flexible(
+                                child: Column(
+                              children: [
+                                CancelActionButton(onPressed: () {
+                                  Navigator.pop(context);
+                                })
+                              ],
+                            )),
+                            Flexible(
+                                child: Column(
+                              children: [
+                                SaveItemButton(onPressed: () {
+                                  if ((whoRequest == null) ||
+                                      (campusSelected.isEmpty) ||
+                                      (deptSelected == null) ||
+                                      (_descriptionController.text.isEmpty) ||
+                                      (_date.text.isEmpty)) {
+                                    showEmptyFieldAlertDialog(context,
+                                        'Verificar que ningun campo quede vacio');
+                                  } else {
+                                    Map<String, dynamic> bodyComposed = {};
+                                    int deptFromWhereRequests = 0;
+                                    int deptId = 0;
+                                    int idLoginUser = 0;
+
+                                    deptFromWhereRequests = deptsMap.entries
+                                        .firstWhere((entry) =>
+                                            entry.value.trim() ==
+                                            currentUser!.work_area!
+                                                .toUpperCase())
+                                        .key;
+                                    deptId = deptsMap.entries
+                                        .firstWhere((entry) =>
+                                            entry.value == deptSelected)
+                                        .key;
+                                    idLoginUser = usersMapsL
+                                            .firstWhere(
+                                                (item) =>
+                                                    item["name"] == whoRequest,
+                                                orElse: () => {})
+                                            .containsKey("userN")
+                                        ? usersMapsL.firstWhere((item) =>
+                                            item["name"] == whoRequest)["userN"]
+                                        : -1;
+
+                                    bodyComposed.addAll({
+                                      "whoRequests": idLoginUser,
+                                      "campus": campusSelected.toUpperCase(),
+                                      "requestedToDept": deptId,
+                                      "description":
+                                          _descriptionController.text,
+                                      "observations":
+                                          _observationsController.text,
+                                      "dateRequest": finalDateTime.toString(),
+                                      "whoRegisteredLogin":
+                                          currentUser!.idLogin,
+                                      "deptWhoRequests": deptFromWhereRequests,
+                                      "whoRegisteredNumber":
+                                          currentUser!.employeeNumber
+                                    });
+                                    createRequestTicket(bodyComposed).then(
+                                      (value) {
+                                        print(value);
+                                        setState(() {
+                                          bodyComposed.clear();
+                                          _descriptionController.text = '';
+                                          _date.text = '';
+                                          _observationsController.text = '';
+                                          whoRequest = '';
+                                          campusSelected = '';
+                                          showSuccessDialog(context, 'Éxito',
+                                              'El ticket fue registrado con el número:  ${value["idReqSerDepto"]}');
+                                        });
                                       },
-                                      icon: Icon(
-                                        Icons.cancel,
-                                        color: Colors.red,
-                                      )),
-                                  Text('Cancelar')
-                                ],
-                              )),
-                              Flexible(
-                                  child: Column(
-                                children: [
-                                  IconButton(
-                                      onPressed: () {},
-                                      icon: Icon(
-                                        Icons.save,
-                                      )),
-                                  Text('Guardar')
-                                ],
-                              )),
-                            ],
-                          ),
-                        ],
-                      ),
-                      
-                );  
+                                    ).onError((error, stackTrace) {
+                                      setState(() {
+                                        showErrorFromBackend(
+                                            context, error.toString());
+                                      });
+                                    });
+                                  }
+                                })
+                              ],
+                            )),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ))),
+                );
               }
-            }),
-
-             
-    );
+            }));
   }
-
-  //TODO: DO NOT DELETE, CAN BE USED  FOR SEARCHING EMPLOYEES
-  // Widget _buildEmployeeNumberField() {
-  //   return Expanded(
-  //     flex: 5,
-  //     child: TextFormField(
-  //       controller: _employeeNumberController,
-  //       onChanged: (value) {
-  //         setState(() {
-  //           _showSearchIcon = value.length >= 3;
-  //         });
-  //       },
-  //       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-  //       keyboardType: TextInputType.number,
-  //       autofocus: true,
-  //       // textInputAction: TextInputAction.next,
-  //       onFieldSubmitted: (value) async {
-  //         // ignore: unused_local_variable
-  //         var apiResponse;
-  //         setState(() {
-  //           _isSearching = true;
-  //         });
-  //         apiResponse = await searchEmployee(_employeeNumberController.text)
-  //             .whenComplete(() {
-  //           setState(() {
-  //             _isSearching = false;
-  //           });
-  //         });
-  //       },
-  //       decoration: InputDecoration(
-  //         label: const Text('No. Empleado que solicita servicio'),
-  //         prefixIcon: const Icon(Icons.numbers),
-  //         suffixIcon: _showSearchIcon
-  //             ? GestureDetector(
-  //                 onTap: () async {
-  //                   // ignore: unused_local_variable
-  //                   var apiResponse;
-  //                   setState(() {
-  //                     _isSearching = true;
-  //                   });
-  //                   apiResponse =
-  //                       await searchEmployee(_employeeNumberController.text)
-  //                           .whenComplete(() {
-  //                     setState(() {
-  //                       _isSearching = false;
-  //                     });
-  //                   });
-  //                 },
-  //                 child: const Icon(Icons.search),
-  //               )
-  //             : null,
-  //       ),
-  //     ),
-  //   );
-  // }
 
   final ButtonStyle raisedButtonStyle = ElevatedButton.styleFrom(
     foregroundColor: Colors.black87,

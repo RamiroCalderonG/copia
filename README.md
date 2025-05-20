@@ -103,6 +103,9 @@ To run this project, you will need to add the following environment variables to
 
 
 ## Versioning
+  **Dart SDK: 3.9.0 (build 3.9.0-100.2.beta)**
+  **Flutter: 3.33.0-1.0.pre.11 • channel main**
+  
 
 
 ## Documentation

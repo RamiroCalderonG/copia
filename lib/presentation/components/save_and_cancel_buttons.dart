@@ -13,7 +13,7 @@ class CustomSaveButton extends StatelessWidget {
             if (Theme.of(context).brightness == Brightness.dark) {
               return Colors.white;
             } else {
-              return Colors.white; // or any color for light mode
+              return Colors.white;
             }
           }),
         ),
@@ -46,7 +46,7 @@ class CustomCancelButton extends StatelessWidget {
             if (Theme.of(context).brightness == Brightness.dark) {
               return Colors.white;
             } else {
-              return Colors.white; // or any color for light mode
+              return Colors.white;
             }
           }),
         ),
