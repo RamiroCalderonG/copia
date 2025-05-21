@@ -23,8 +23,8 @@ Migración de sistema ERP para multiplataforma.
   *Pendiente crear script que ubique archivos y permisos necesarios que se ejecute con sudo*
 
 ### Versioning
-Para el manejo de versiones el concepto para aplciacion de escritorio es el siguiente:
-* Se contruye el proyecto para Windows y MacOS, posteriormente se carga en Github la nueva version como un release y en app_versions se crea un nuevo registro con la nueva version
+Para el manejo de versiones el procedimiento para aplciacion de escritorio es el siguiente:
+* Se contruye el proyecto para Windows y MacOS, posteriormente se carga en Github la nueva version como un release y en la tabla app_versions se crea un nuevo registro con la nueva version
 
 Pasos para Windows
 - Modificar Runner.rc con la version a contruir
@@ -38,7 +38,7 @@ Pasos para Windows
   flutter build windows --release
     ```
   
-- Comprimir
+- Comprimir archivos generados en zip junto con script 
 - Cargar en Release de Github 
 
 **NOTA:**
@@ -46,7 +46,11 @@ Pasos para Windows
 
 Pasos para MacOS
 - Construir .app
-- Comprimir
+     ```bash
+  flutter build windows --release
+    ```
+  
+- Comprimir archivo .app en un archivo .zip
 - Cargar en Release de Github
 
 **NOTA:**
