@@ -29,6 +29,10 @@ Para el manejo de versiones el concepto para aplciacion de escritorio es el sigu
 Pasos para Windows
 - Modificar Runner.rc con la version a contruir
 - Construir .exe
+    ```bash
+  flutter build windows --release
+```
+  
 - Comprimir
 - Cargar en Release de Github 
 
