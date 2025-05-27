@@ -276,12 +276,11 @@ Future<List<StudentEval>> getSubjectsAndGradesByStudent(
     uniqueStudents.clear();
 
     for (var student in jsonList) {
-      uniqueStudents[student['studentID']] = student['student'] +
+      uniqueStudents[student['studentID']] = student['firstlastName'] +
           ' ' +
-          student['1lastName'] +
+          student['secondlastName'] +
           ' ' +
-          student['2lastName'];
-      // uniqueStudents[student['studentName']] = student['studentName'];
+          student['student'];
     }
 
     // Convert the map to a list of maps

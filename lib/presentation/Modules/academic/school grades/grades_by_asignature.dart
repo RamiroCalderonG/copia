@@ -135,7 +135,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
         var index = 0;
         for (var item in studentList) {
           assignatureRows.add(TrinaRow(cells: {
-            'No': TrinaCell(value: index + 1),
+            'No': TrinaCell(value: item.sequentialNumber ?? 0),
             'Matricula': TrinaCell(value: item.studentID),
             'Nombre': TrinaCell(value: item.studentName),
             'Apellido paterno': TrinaCell(value: item.student1LastName),

@@ -50,6 +50,8 @@ class _GradesByStudentState extends State<GradesByStudent> {
   String selectedStudentName = '';
   var fetchedData;
   bool isFetching = true;
+  bool displayComments = false;
+  bool displayAbsencesColumn = false;
   int? monthNumber;
   String dropDownValue = ''; //oneTeacherAssignatures.first;
   int? assignatureID;
@@ -57,6 +59,66 @@ class _GradesByStudentState extends State<GradesByStudent> {
   DateFormat? dateFormat;
 
   String? selectedStudentID;
+
+  final List<TrinaColumn> gradesByStudentColumns = [
+    TrinaColumn(
+        title: 'Materia',
+        field: 'subject',
+        type: TrinaColumnType.text(),
+        readOnly: true,
+        hide: true),
+    TrinaColumn(
+      title: 'Materia',
+      field: 'subject_name',
+      type: TrinaColumnType.text(),
+      width: 80,
+      frozen: TrinaColumnFrozen.start,
+      sort: TrinaColumnSort.ascending,
+      readOnly: true,
+    ),
+    TrinaColumn(
+      title: 'Calif',
+      field: 'evaluation',
+      type: TrinaColumnType.number(negative: false),
+    ),
+    TrinaColumn(
+        title: 'idCalif',
+        field: 'idCicloEscolar',
+        type: TrinaColumnType.number(negative: false),
+        hide: true,
+        readOnly: true),
+    TrinaColumn(
+        title: 'Faltas',
+        hide: true,
+        field: 'absence_eval',
+        type: TrinaColumnType.number(negative: false)),
+    TrinaColumn(
+        title: 'Tareas',
+        hide: true,
+        field: 'homework_eval',
+        type: TrinaColumnType.number(negative: false)),
+    TrinaColumn(
+        title: 'Conducta',
+        hide: true,
+        field: 'discipline_eval',
+        type: TrinaColumnType.number(negative: false)),
+    // TrinaColumn(
+    //     title: 'Comentarios',
+    //     field: 'comment',
+    //     hide: true,
+    //     type:
+    //         TrinaColumnType.select(commentStringEval, enableColumnFilter: true)),
+    TrinaColumn(
+        title: 'Habitos',
+        hide: true,
+        field: 'habit_eval',
+        type: TrinaColumnType.number(negative: false)),
+    TrinaColumn(
+        title: 'Uniforme',
+        hide: true,
+        field: 'outfit',
+        type: TrinaColumnType.number(negative: false)),
+  ];
 
   @override
   void initState() {
@@ -109,6 +171,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
         uniqueStudents.add({
           'studentID': student.studentID,
           'student': student.fulllName!,
+          'sequentialNumber': student.sequentialNumber.toString(),
         });
       }
     }
@@ -118,6 +181,10 @@ class _GradesByStudentState extends State<GradesByStudent> {
           cells: {
             'studentID': TrinaCell(value: item.containsKey('StudentID')),
             'studentName': TrinaCell(value: item.containsKey('studentName')),
+            'No': TrinaCell(
+                value: item.containsKey('sequentialNumber')
+                    ? item['sequentialNumber']
+                    : '0'),
           },
         );
       }).toList();
@@ -159,10 +226,17 @@ class _GradesByStudentState extends State<GradesByStudent> {
 
       setState(() {
         studentEvaluationRows.clear();
-        var index = 0;
+        // var index = 0;
         for (var item in uniqueStudentsList) {
+          String sequentialNumber = studentList
+              .firstWhere((student) => student.studentID == item['studentID'])
+              .sequentialNumber
+              .toString();
           studentEvaluationRows.add(TrinaRow(cells: {
-            'No': TrinaCell(value: index + 1),
+            'No': TrinaCell(
+                value: sequentialNumber.isNotEmpty
+                    ? sequentialNumber
+                    : '0'), //Sequential number of student
             'studentID': TrinaCell(value: item['studentID']!.trim()),
             'studentName':
                 TrinaCell(value: item['studentName']!.trim().toTitleCase),
