@@ -12,6 +12,7 @@ import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/constants/date_constants.dart';
 import 'package:oxschool/core/reusable_methods/academic_functions.dart';
 import 'package:oxschool/data/datasources/temp/teacher_grades_temp.dart';
+import 'package:oxschool/presentation/Modules/login_view/login_view_widget.dart';
 
 import 'package:trina_grid/trina_grid.dart';
 
@@ -50,8 +51,15 @@ class _GradesByStudentState extends State<GradesByStudent> {
   String selectedStudentName = '';
   var fetchedData;
   bool isFetching = true;
-  bool displayComments = false;
-  bool displayAbsencesColumn = false;
+  bool hideCommentsColumn = true;
+  bool hideAbsencesColumn = true;
+  bool hideHomeworksColumn = true;
+  bool hideDisciplineColumn = true;
+  bool hideHabitsColumn = true;
+  bool hideOutfitColumn = true;
+
+  String? homeWorkColumnTitle;
+  String? disciplineColumnTitle;
   int? monthNumber;
   String dropDownValue = ''; //oneTeacherAssignatures.first;
   int? assignatureID;
@@ -59,66 +67,6 @@ class _GradesByStudentState extends State<GradesByStudent> {
   DateFormat? dateFormat;
 
   String? selectedStudentID;
-
-  final List<TrinaColumn> gradesByStudentColumns = [
-    TrinaColumn(
-        title: 'Materia',
-        field: 'subject',
-        type: TrinaColumnType.text(),
-        readOnly: true,
-        hide: true),
-    TrinaColumn(
-      title: 'Materia',
-      field: 'subject_name',
-      type: TrinaColumnType.text(),
-      width: 80,
-      frozen: TrinaColumnFrozen.start,
-      sort: TrinaColumnSort.ascending,
-      readOnly: true,
-    ),
-    TrinaColumn(
-      title: 'Calif',
-      field: 'evaluation',
-      type: TrinaColumnType.number(negative: false),
-    ),
-    TrinaColumn(
-        title: 'idCalif',
-        field: 'idCicloEscolar',
-        type: TrinaColumnType.number(negative: false),
-        hide: true,
-        readOnly: true),
-    TrinaColumn(
-        title: 'Faltas',
-        hide: true,
-        field: 'absence_eval',
-        type: TrinaColumnType.number(negative: false)),
-    TrinaColumn(
-        title: 'Tareas',
-        hide: true,
-        field: 'homework_eval',
-        type: TrinaColumnType.number(negative: false)),
-    TrinaColumn(
-        title: 'Conducta',
-        hide: true,
-        field: 'discipline_eval',
-        type: TrinaColumnType.number(negative: false)),
-    // TrinaColumn(
-    //     title: 'Comentarios',
-    //     field: 'comment',
-    //     hide: true,
-    //     type:
-    //         TrinaColumnType.select(commentStringEval, enableColumnFilter: true)),
-    TrinaColumn(
-        title: 'Habitos',
-        hide: true,
-        field: 'habit_eval',
-        type: TrinaColumnType.number(negative: false)),
-    TrinaColumn(
-        title: 'Uniforme',
-        hide: true,
-        field: 'outfit',
-        type: TrinaColumnType.number(negative: false)),
-  ];
 
   @override
   void initState() {
@@ -161,6 +109,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
     });
   }
 
+  //* Populates Grid that only contains the students names and IDs
   Future<void> fillGrid(List<StudentEval> evaluationList) async {
     Set<String> studentSet = {};
     List<Map<String, String>> uniqueStudents = [];
@@ -219,8 +168,20 @@ class _GradesByStudentState extends State<GradesByStudent> {
         studentList.clear();
         studentsGradesCommentsRows.clear();
       }
+      // Get the students list by group, grade, cycle, campus and month
       studentList = await getSubjectsAndGradesByStudent(grade, groupSelected,
           currentCycle!.claCiclo!, campusSelected, monthSelected);
+
+      // Get evaluations comments by gradeSequence
+      if (studentList.isNotEmpty) {
+        studentsGradesCommentsRows =
+            await getEvaluationsCommentsByGradeSequence(grade);
+      } else {
+        throw Exception(
+            'No se encontraron alumnos para el grupo seleccionado: $groupSelected, grado: $grade, ciclo: ${currentCycle!.claCiclo}, campus: $campusSelected, mes: $monthSelected');
+      }
+
+      displayColumnsByGrade(grade);
 
       fillGrid(studentList); //Fill student list by unque values
 
@@ -236,7 +197,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
             'No': TrinaCell(
                 value: sequentialNumber.isNotEmpty
                     ? sequentialNumber
-                    : '0'), //Sequential number of student
+                    : '0'), //* Sequential number of student (NoLista)
             'studentID': TrinaCell(value: item['studentID']!.trim()),
             'studentName':
                 TrinaCell(value: item['studentName']!.trim().toTitleCase),
@@ -267,6 +228,66 @@ class _GradesByStudentState extends State<GradesByStudent> {
       throw Future.error(onError.toString);
     });
   }
+
+  List<TrinaColumn> get gradesByStudentColumns => [
+        TrinaColumn(
+            title: 'Materia',
+            field: 'subject',
+            type: TrinaColumnType.text(),
+            readOnly: true,
+            hide: true),
+        TrinaColumn(
+          title: 'Materia',
+          field: 'subject_name',
+          type: TrinaColumnType.text(),
+          // width: 80,
+          frozen: TrinaColumnFrozen.start,
+          sort: TrinaColumnSort.ascending,
+          readOnly: true,
+        ),
+        TrinaColumn(
+          title: 'Calif',
+          field: 'evaluation',
+          type: TrinaColumnType.number(negative: false),
+        ),
+        TrinaColumn(
+            title: 'idCalif',
+            field: 'idCicloEscolar',
+            type: TrinaColumnType.number(negative: false),
+            hide: true,
+            readOnly: true),
+        TrinaColumn(
+            title: 'Faltas',
+            hide: hideAbsencesColumn,
+            field: 'absence_eval',
+            type: TrinaColumnType.number(negative: false)),
+        TrinaColumn(
+            title: homeWorkColumnTitle ?? 'Tareas',
+            hide: hideHomeworksColumn,
+            field: 'homework_eval',
+            type: TrinaColumnType.number(negative: false)),
+        TrinaColumn(
+            title: disciplineColumnTitle ?? 'Disciplina',
+            hide: hideDisciplineColumn,
+            field: 'discipline_eval',
+            type: TrinaColumnType.number(negative: false)),
+        TrinaColumn(
+            title: 'Comentarios',
+            field: 'comment',
+            hide: true,
+            type: TrinaColumnType.select(commentStringEval,
+                enableColumnFilter: true)),
+        TrinaColumn(
+            title: 'Habitos',
+            hide: hideHabitsColumn,
+            field: 'habit_eval',
+            type: TrinaColumnType.number(negative: false)),
+        TrinaColumn(
+            title: 'Uniforme',
+            hide: hideOutfitColumn,
+            field: 'outfit',
+            type: TrinaColumnType.number(negative: false)),
+      ];
 
   @override
   Widget build(BuildContext context) {
@@ -315,6 +336,9 @@ class _GradesByStudentState extends State<GradesByStudent> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Flexible(child: RefreshButton(onPressed: () async {
+                  setState(() {
+                    isFetching = true;
+                  });
                   studentGradesBodyToUpgrade.clear();
                   if (isUserAdmin || isUserAcademicCoord) {
                     //Calendar month number
@@ -341,9 +365,6 @@ class _GradesByStudentState extends State<GradesByStudent> {
                     return showEmptyFieldAlertDialog(
                         context, 'Seleccionar un mes a evaluar');
                   } else {
-                    setState(() {
-                      isFetching = true;
-                    });
                     await searchBUttonAction(
                       selectedTempGroup!,
                       selectedTempGrade!,
@@ -653,6 +674,10 @@ class _GradesByStudentState extends State<GradesByStudent> {
     }
   }
 
+  void handleCommentsRefresh(int gradeSequence) async {
+    try {} catch (e) {}
+  }
+
   void selectRowByName(TrinaGridStateManager stateManager, String columnField,
       String storedName) {
     for (var i = 0; i < stateManager.rows.length; i++) {
@@ -786,7 +811,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
           'absence_eval': TrinaCell(value: student.absence),
           'homework_eval': TrinaCell(value: student.homework),
           'discipline_eval': TrinaCell(value: student.discipline),
-          // 'comment': TrinaCell(value: student.comment),
+          'comment': TrinaCell(value: student.comment),
           'habit_eval': TrinaCell(value: student.habits_evaluation),
           'other': TrinaCell(value: student.other),
           'outfit': TrinaCell(value: student.outfit),
@@ -801,12 +826,31 @@ class _GradesByStudentState extends State<GradesByStudent> {
     // }
   }
 
-  Future<List<TrinaRow>> populateAsignatedComments(
-      int grade, month, bool byStudent, String studentid) async {
-    commentsAsignated.clear();
-    commentsAsignated =
-        await getCommentsAsignatedToStudent(grade, byStudent, studentid, month);
-
-    return rows;
+  void displayColumnsByGrade(int grade) {
+    if (grade < 12) {
+      hideCommentsColumn = false;
+      hideAbsencesColumn = true; // Faltas
+      hideHomeworksColumn = true; // Tareas
+      hideDisciplineColumn = false; //Disciplina
+      hideHabitsColumn = false;
+      hideOutfitColumn = false;
+      homeWorkColumnTitle = 'Hab';
+      disciplineColumnTitle = 'Con';
+    } else if (grade < 6) {
+      hideCommentsColumn = false;
+      hideAbsencesColumn = true; // Faltas
+      hideHomeworksColumn = true; // Tareas
+      hideDisciplineColumn = true; //Disciplina
+      hideHabitsColumn = true;
+      hideOutfitColumn = true;
+    } else {
+      hideCommentsColumn = false;
+      hideAbsencesColumn = false; // Faltas
+      hideHomeworksColumn = false; // Tareas
+      hideDisciplineColumn = false; //Disciplina
+      hideHabitsColumn = true;
+      hideOutfitColumn = true;
+      homeWorkColumnTitle = 'R';
+    }
   }
 }

@@ -71,6 +71,15 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
   bool isLoading = true;
   var fetchedData;
 
+  bool hideCommentsColumn = true;
+  bool hideAbsencesColumn = true;
+  bool hideHomeworksColumn = true;
+  bool hideDisciplineColumn = true;
+  bool hideHabitsColumn = true;
+  bool hideOutfitColumn = true;
+  String? homeWorkColumnTitle;
+  String? disciplineColumnTitle;
+
   /// Whether the teacher teaches multiple campuses.
   bool teacherTeachMultipleCampuses = false;
 
@@ -88,6 +97,89 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
     selectedCurrentTempMonth = null;
     super.dispose();
   }
+
+  final List<TrinaColumn> assignaturesColumns = <TrinaColumn>[
+    //TO USE at grades_by_assignature
+    TrinaColumn(
+      title: 'No.Lista',
+      field: 'No',
+      width: 12,
+      type: TrinaColumnType.number(),
+      readOnly: true,
+    ),
+    TrinaColumn(
+        title: 'Matricula',
+        field: 'Matricula',
+        type: TrinaColumnType.text(),
+        readOnly: true,
+        width: 100),
+    TrinaColumn(
+      title: 'Nombre del alumno',
+      field: 'Nombre',
+      type: TrinaColumnType.text(),
+      readOnly: true,
+    ),
+    TrinaColumn(
+        title: 'Apellido paterno',
+        field: 'Apellido paterno',
+        type: TrinaColumnType.text(),
+        readOnly: true,
+        sort: TrinaColumnSort.ascending,
+        width: 150),
+    TrinaColumn(
+        title: 'Apellido materno',
+        field: 'Apellido materno',
+        type: TrinaColumnType.text(),
+        readOnly: true,
+        //sort: TrinaColumnSort.ascending,
+        width: 150),
+    TrinaColumn(
+        title: 'Calif',
+        field: 'Calif',
+        type: TrinaColumnType.number(negative: false),
+        readOnly: false,
+        width: 100),
+    TrinaColumn(
+        title: 'idCalif',
+        field: 'idCalif',
+        type: TrinaColumnType.number(negative: false),
+        hide: true)
+    // TrinaColumn(
+    //     hide: true,
+    //     title: 'Faltas',
+    //     field: 'Ausencia',
+    //     type: TrinaColumnType.number(negative: false, format: '#'),
+    //     readOnly: false,
+    //     width: 100),
+    // TrinaColumn(
+    //     hide: true,
+    //     title: 'Tareas',
+    //     field: 'Tareas',
+    //     type: TrinaColumnType.number(negative: false),
+    //     readOnly: false,
+    //     width: 100),
+    // TrinaColumn(
+    //     hide: true,
+    //     title: 'Conducta',
+    //     field: 'Conducta',
+    //     type: TrinaColumnType.number(negative: false),
+    //     readOnly: false,
+    //     width: 100),
+    // TrinaColumn(
+    //     hide: true,
+    //     title: 'Uniforme',
+    //     field: 'Uniforme',
+    //     type: TrinaColumnType.number(negative: false),
+    //     readOnly: false,
+    //     width: 100),
+    // TrinaColumn(
+    //     hide: true,
+    //     title: 'Comentarios',
+    //     field: 'Comentarios',
+    //     type: TrinaColumnType.text(),
+    //     readOnly: false,
+    //     width: 200),
+  ];
 
   /// Fills the grid with data from the backend.
   ///
@@ -498,5 +590,33 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
             subjectName: subjectName,
           );
         });
+  }
+
+  void displayColumnsByGrade(int grade) {
+    if (grade < 12) {
+      hideCommentsColumn = false;
+      hideAbsencesColumn = true; // Faltas
+      hideHomeworksColumn = true; // Tareas
+      hideDisciplineColumn = false; //Disciplina
+      hideHabitsColumn = false;
+      hideOutfitColumn = false;
+      homeWorkColumnTitle = 'Hab';
+      disciplineColumnTitle = 'Con';
+    } else if (grade < 6) {
+      hideCommentsColumn = false;
+      hideAbsencesColumn = true; // Faltas
+      hideHomeworksColumn = true; // Tareas
+      hideDisciplineColumn = true; //Disciplina
+      hideHabitsColumn = true;
+      hideOutfitColumn = true;
+    } else {
+      hideCommentsColumn = false;
+      hideAbsencesColumn = false; // Faltas
+      hideHomeworksColumn = false; // Tareas
+      hideDisciplineColumn = false; //Disciplina
+      hideHabitsColumn = true;
+      hideOutfitColumn = true;
+      homeWorkColumnTitle = 'R';
+    }
   }
 }

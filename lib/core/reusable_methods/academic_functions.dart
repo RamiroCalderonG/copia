@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
+import 'package:oxschool/data/Models/AcademicEvaluationsComment.dart';
 import 'package:oxschool/data/Models/Student.dart';
 
 import 'package:oxschool/data/Models/Student_eval.dart';
@@ -299,64 +300,64 @@ Future<List<StudentEval>> getSubjectsAndGradesByStudent(
   }
 }
 
-Future<void> getCommentsForEvals(int grade) async {
-  List<dynamic> commentsList;
+// Future<void> getCommentsForEvals(int grade) async {
+//   List<dynamic> commentsList;
 
-  Map<String, String> currentValue = {};
+//   Map<String, String> currentValue = {};
 
-  try {
-    var response = await getStudentsGradesComments(grade, false, null, null);
-    commentsList = json.decode(response.body);
-    if (studentsGradesCommentsRows.isNotEmpty && commentStringEval.isNotEmpty) {
-      studentsGradesCommentsRows.clear();
-      commentStringEval.clear();
-    }
+//   try {
+//     var response = await getStudentsGradesComments(grade, false, null, null);
+//     commentsList = json.decode(response.body);
+//     if (studentsGradesCommentsRows.isNotEmpty && commentStringEval.isNotEmpty) {
+//       studentsGradesCommentsRows.clear();
+//       commentStringEval.clear();
+//     }
 
-    for (var item in commentsList) {
-      String id = item['Comment'].toString();
-      String comment = item['Name'];
-      commentStringEval.add(comment);
+//     for (var item in commentsList) {
+//       String id = item['Comment'].toString();
+//       String comment = item['Name'];
+//       commentStringEval.add(comment);
 
-      currentValue = {'idcomment': id.toString(), 'comentname': comment};
+//       currentValue = {'idcomment': id.toString(), 'comentname': comment};
 
-      studentsGradesCommentsRows.add(currentValue);
-    }
-  } catch (e) {
-    throw ErrorDescription(e.toString());
-  }
-}
+//       studentsGradesCommentsRows.add(currentValue);
+//     }
+//   } catch (e) {
+//     throw ErrorDescription(e.toString());
+//   }
+// }
 
-Future<List<Map<String, dynamic>>> getCommentsAsignatedToStudent(
-    int grade, bool byStudent, String? studentid, int? month) async {
-  List<Map<String, dynamic>> assignatedComments = [];
-  Map<String, dynamic> currentValue = {};
-  try {
-    var response = await getStudentsGradesComments(
-        grade, byStudent, studentid!.trim(), month);
-    var commentsResponse = json.decode(response.body);
+// Future<List<Map<String, dynamic>>> getCommentsAsignatedToStudent(
+//     int grade, bool byStudent, String? studentid, int? month) async {
+//   List<Map<String, dynamic>> assignatedComments = [];
+//   Map<String, dynamic> currentValue = {};
+//   try {
+//     var response = await getStudentsGradesComments(
+//         grade, byStudent, studentid!.trim(), month);
+//     var commentsResponse = json.decode(response.body);
 
-    for (var item in commentsResponse) {
-      int evalId = item['student_rate'];
-      int commentid = item['comment'];
-      // var month = item['month'];
-      bool active = item['active'];
-      String subject = item['subject'];
-      String commentName = item['commentName'];
-      currentValue = {
-        'student_rate': evalId,
-        'comment': commentid,
-        'active': active,
-        'subject': subject,
-        'commentName': commentName
-      };
-      assignatedComments.add(currentValue);
-    }
+//     for (var item in commentsResponse) {
+//       int evalId = item['student_rate'];
+//       int commentid = item['comment'];
+//       // var month = item['month'];
+//       bool active = item['active'];
+//       String subject = item['subject'];
+//       String commentName = item['commentName'];
+//       currentValue = {
+//         'student_rate': evalId,
+//         'comment': commentid,
+//         'active': active,
+//         'subject': subject,
+//         'commentName': commentName
+//       };
+//       assignatedComments.add(currentValue);
+//     }
 
-    return assignatedComments;
-  } catch (e) {
-    throw ErrorDescription(e.toString());
-  }
-}
+//     return assignatedComments;
+//   } catch (e) {
+//     throw ErrorDescription(e.toString());
+//   }
+// }
 
 List<Map<String, dynamic>> mergeCommentsData(
     List<Map<String, dynamic>> allItemAvailables,
@@ -581,21 +582,21 @@ void getTeacherEvalCampuses(List<dynamic> jsonData) {
   }
 }
 
-void searchGradesBySubjectButton(
-  String grade,
-  String group,
-  String subject,
-  String month,
-  String? campus,
-) async {
-  try {
-    studentList =
-        await getStudentsByAssinature(group, grade, subject, month, campus!);
-    await getCommentsForEvals(int.parse(grade));
-  } catch (e) {
-    throw FormatException(e.toString());
-  }
-}
+// void searchGradesBySubjectButton(
+//   String grade,
+//   String group,
+//   String subject,
+//   String month,
+//   String? campus,
+// ) async {
+//   try {
+//     studentList =
+//         await getStudentsByAssinature(group, grade, subject, month, campus!);
+//     await getCommentsForEvals(int.parse(grade));
+//   } catch (e) {
+//     throw FormatException(e.toString());
+//   }
+// }
 
 List<Map<String, dynamic>> filterCommentsBySubject(
   List<Map<String, dynamic>> comments,
@@ -685,6 +686,35 @@ Future<dynamic> getTeachersListByCycle(String cycle) async {
     return response;
   } catch (e) {
     insertErrorLog(e.toString(), 'getTeachersListByCycle($cycle)');
+    rethrow;
+  }
+}
+
+Future<List<Academicevaluationscomment>> getEvaluationsCommentsByGradeSequence(
+    int gradeSequence) async {
+  try {
+    var response = await getStudentsGradesComments(gradeSequence);
+    List<Academicevaluationscomment> commentsList = [];
+    if (response != null) {
+      for (var element in response) {
+        Academicevaluationscomment comment =
+            Academicevaluationscomment.fromJson(element);
+        if (commentsList.isEmpty) {
+          commentsList.add(comment);
+        } else {
+          // Check if the comment already exists in the list
+          bool exists =
+              commentsList.any((c) => c.commentId == comment.commentId);
+          if (!exists) {
+            commentsList.add(comment);
+          }
+        }
+      }
+    }
+    return commentsList;
+  } catch (e) {
+    insertErrorLog(
+        e.toString(), 'getEvaluationsCommentsByGradeSequence($gradeSequence)');
     rethrow;
   }
 }

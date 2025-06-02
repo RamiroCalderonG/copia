@@ -1,3 +1,4 @@
+import 'package:oxschool/data/Models/AcademicEvaluationsComment.dart';
 import 'package:oxschool/data/Models/Student_eval.dart';
 import 'package:trina_grid/trina_grid.dart';
 
@@ -21,7 +22,7 @@ List<Map<String, dynamic>> studentGradesBodyToUpgrade =
     []; //user at grades_by_assignature.dart
 List<Map<String, dynamic>> gradesByStudentBodyToUpgrade =
     []; //used at grades_per_student.dart
-List<Map<String, String>> studentsGradesCommentsRows = [];
+List<Academicevaluationscomment> studentsGradesCommentsRows = [];
 List<Map<String, dynamic>> commentsAsignated = [];
 List<TrinaRow> evaluationComments = [];
 
@@ -46,4 +47,4 @@ List<String> teacherGradesListFODAC27 = [];
 List<String> teacherGroupsListFODAC27 = [];
 List<String> teacherGradeNamesListFODAC27 = [];
 Map<String, int> gradesMapFODAC27 =
-    {}; //Stores gradeName : gradeSequence from teacher 
+    {}; //Stores gradeName : gradeSequence from teacher

@@ -865,44 +865,28 @@ Future<dynamic> patchStudentsGrades(
   }
 }
 
-//!Not using for now
-Future<dynamic> getStudentsGradesComments(
-    int grade, bool searchById, String? id, int? month) async {
-  http.Response response;
+//* Function to get evaluations comments by gradeSequence
+// Used to get all available comments for a grade
+Future<dynamic> getStudentsGradesComments(int grade) async {
   try {
-    if (searchById) {
-      var apiCall = await Requests.get(
-          '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student/comments',
-          headers: {
-            'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-            // 'ip_address': deviceIp.toString(),
-            'Auth': currentUser!.token
-          },
-          queryParameters: {
-            "student": id,
-            "cycle": currentCycle!.claCiclo,
-            "month": month
-          },
-          timeoutSeconds: 20,
-          persistCookies: false);
-      apiCall.raiseForStatus();
-      response = apiCall;
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
+    var apiCall = await Requests.get(
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/evaluations/comments/',
+        headers: {
+          'Authorization': devicePrefs.getString('token')!,
+          'Content-Type': 'application/json',
+        },
+        queryParameters: {"grade": grade},
+        persistCookies: false);
+    apiCall.raiseForStatus();
+    if (apiCall.statusCode == 200) {
+      return json.decode(utf8.decode(apiCall
+          .bodyBytes)); //* Returns data formated and decoded using utf8 encoding for latin and spanish characteres
     } else {
-      var apiCall = await Requests.get(
-          '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/school-rating/comments',
-          headers: {
-            'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-            // 'ip_address': deviceIp.toString(),
-            'Auth': currentUser!.token
-          },
-          queryParameters: {"grade": grade},
-          persistCookies: false);
-      apiCall.raiseForStatus();
-      response = apiCall;
+      throw Future.error(apiCall.body);
     }
-    return response;
   } catch (e) {
-    return throw FormatException(e.toString());
+    throw FormatException(e.toString());
   }
 }
 
