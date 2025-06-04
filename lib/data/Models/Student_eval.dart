@@ -8,7 +8,7 @@ class StudentEval {
   int? absence;
   int? homework;
   int? discipline;
-  int comment;
+  int? comment;
   int? habits_evaluation;
   int? outfit;
   int? subject;
@@ -55,7 +55,7 @@ dynamic getEvalFromJSON(List<dynamic> jsonList, bool isByStudent) {
         int absence = item['absence_eval'];
         int homework = item['homework_eval'];
         int discipline = item['discipline_eval'];
-        int comment = item['comment'];
+        int? comment = item['comment'] ?? 0;
         int habitsEvaluation = item['habit_eval'];
         //int outfit = item['outfit'];
         int subject = item['subjectId'];

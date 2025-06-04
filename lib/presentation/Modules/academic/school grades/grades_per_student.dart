@@ -282,11 +282,11 @@ class _GradesByStudentState extends State<GradesByStudent> {
             hide: hideHabitsColumn,
             field: 'habit_eval',
             type: TrinaColumnType.number(negative: false)),
-        TrinaColumn(
-            title: 'Uniforme',
-            hide: hideOutfitColumn,
-            field: 'outfit',
-            type: TrinaColumnType.number(negative: false)),
+        // TrinaColumn(
+        //     title: 'Uniforme',
+        //     hide: hideOutfitColumn,
+        //     field: 'outfit',
+        //     type: TrinaColumnType.number(negative: false)),
       ];
 
   @override

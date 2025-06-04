@@ -98,88 +98,94 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
     super.dispose();
   }
 
-  final List<TrinaColumn> assignaturesColumns = <TrinaColumn>[
-    //TO USE at grades_by_assignature
-    TrinaColumn(
-      title: 'No.Lista',
-      field: 'No',
-      width: 12,
-      type: TrinaColumnType.number(),
-      readOnly: true,
-    ),
-    TrinaColumn(
-        title: 'Matricula',
-        field: 'Matricula',
-        type: TrinaColumnType.text(),
-        readOnly: true,
-        width: 100),
-    TrinaColumn(
-      title: 'Nombre del alumno',
-      field: 'Nombre',
-      type: TrinaColumnType.text(),
-      readOnly: true,
-    ),
-    TrinaColumn(
-        title: 'Apellido paterno',
-        field: 'Apellido paterno',
-        type: TrinaColumnType.text(),
-        readOnly: true,
-        sort: TrinaColumnSort.ascending,
-        width: 150),
-    TrinaColumn(
-        title: 'Apellido materno',
-        field: 'Apellido materno',
-        type: TrinaColumnType.text(),
-        readOnly: true,
-        //sort: TrinaColumnSort.ascending,
-        width: 150),
-    TrinaColumn(
-        title: 'Calif',
-        field: 'Calif',
-        type: TrinaColumnType.number(negative: false),
-        readOnly: false,
-        width: 100),
-    TrinaColumn(
-        title: 'idCalif',
-        field: 'idCalif',
-        type: TrinaColumnType.number(negative: false),
-        hide: true)
-    // TrinaColumn(
-    //     hide: true,
-    //     title: 'Faltas',
-    //     field: 'Ausencia',
-    //     type: TrinaColumnType.number(negative: false, format: '#'),
-    //     readOnly: false,
-    //     width: 100),
-    // TrinaColumn(
-    //     hide: true,
-    //     title: 'Tareas',
-    //     field: 'Tareas',
-    //     type: TrinaColumnType.number(negative: false),
-    //     readOnly: false,
-    //     width: 100),
-    // TrinaColumn(
-    //     hide: true,
-    //     title: 'Conducta',
-    //     field: 'Conducta',
-    //     type: TrinaColumnType.number(negative: false),
-    //     readOnly: false,
-    //     width: 100),
-    // TrinaColumn(
-    //     hide: true,
-    //     title: 'Uniforme',
-    //     field: 'Uniforme',
-    //     type: TrinaColumnType.number(negative: false),
-    //     readOnly: false,
-    //     width: 100),
-    // TrinaColumn(
-    //     hide: true,
-    //     title: 'Comentarios',
-    //     field: 'Comentarios',
-    //     type: TrinaColumnType.text(),
-    //     readOnly: false,
-    //     width: 200),
-  ];
+  List<TrinaColumn> get assignaturesColumns => [
+        //TO USE at grades_by_assignature
+        TrinaColumn(
+          title: 'No.Lista',
+          field: 'No',
+          width: 12,
+          type: TrinaColumnType.number(),
+          readOnly: true,
+        ),
+        TrinaColumn(
+            title: 'Matricula',
+            field: 'Matricula',
+            type: TrinaColumnType.text(),
+            readOnly: true,
+            width: 100),
+        TrinaColumn(
+          title: 'Nombre del alumno',
+          field: 'Nombre',
+          type: TrinaColumnType.text(),
+          readOnly: true,
+        ),
+        TrinaColumn(
+            title: 'Apellido paterno',
+            field: 'Apellido paterno',
+            type: TrinaColumnType.text(),
+            readOnly: true,
+            sort: TrinaColumnSort.ascending,
+            width: 150),
+        TrinaColumn(
+            title: 'Apellido materno',
+            field: 'Apellido materno',
+            type: TrinaColumnType.text(),
+            readOnly: true,
+            //sort: TrinaColumnSort.ascending,
+            width: 150),
+        TrinaColumn(
+            title: 'Calif',
+            field: 'Calif',
+            type: TrinaColumnType.number(negative: false),
+            readOnly: false,
+            width: 100),
+        TrinaColumn(
+            title: 'idCalif',
+            field: 'idCalif',
+            type: TrinaColumnType.number(negative: false),
+            hide: true),
+        TrinaColumn(
+            hide: true,
+            title: 'Faltas',
+            field: 'Ausencia',
+            type: TrinaColumnType.number(negative: false, format: '#'),
+            readOnly: hideAbsencesColumn,
+            width: 100),
+        TrinaColumn(
+            hide: true,
+            title: homeWorkColumnTitle ?? 'Tareas',
+            field: 'Tareas',
+            type: TrinaColumnType.number(negative: false),
+            readOnly: hideHomeworksColumn,
+            width: 100),
+        TrinaColumn(
+            hide: true,
+            title: disciplineColumnTitle ?? 'Conducta',
+            field: 'Conducta',
+            type: TrinaColumnType.number(negative: false),
+            readOnly: hideDisciplineColumn,
+            width: 100),
+        // TrinaColumn(
+        //     hide: true,
+        //     title: 'Uniforme',
+        //     field: 'Uniforme',
+        //     type: TrinaColumnType.number(negative: false),
+        //     readOnly: hideOutfitColumn,
+        //     width: 100),
+        TrinaColumn(
+            title: 'Habitos',
+            hide: hideHabitsColumn,
+            field: 'habit_eval',
+            readOnly: true,
+            type: TrinaColumnType.number(negative: false)),
+        TrinaColumn(
+            hide: true,
+            title: 'Comentarios',
+            field: 'Comentarios',
+            type: TrinaColumnType.text(),
+            readOnly: hideCommentsColumn,
+            width: 200),
+      ];
 
   /// Fills the grid with data from the backend.
   ///
@@ -220,6 +226,16 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
       studentList = await getStudentsByAssinature(
           groupSelected, gradeInt, assignatureID, month, campus);
 
+      // Get evaluations comments by gradeSequence
+      if (studentList.isNotEmpty) {
+        studentsGradesCommentsRows =
+            await getEvaluationsCommentsByGradeSequence(selectedTempGrade!);
+      } else {
+        throw Exception(
+            'No se encontraron alumnos para el grupo seleccionado: $groupSelected, grado: $gradeInt, ciclo: ${currentCycle!.claCiclo}, campus: $campusSelected, mes: $month');
+      }
+      displayColumnsByGrade(selectedTempGrade!);
+
       await fillGrid(studentList);
       setState(() {
         isLoading = true;
@@ -234,6 +250,14 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
             'Apellido materno': TrinaCell(value: item.student2LastName),
             'Calif': TrinaCell(value: item.evaluation),
             'idCalif': TrinaCell(value: item.rateID),
+            'Ausencia': TrinaCell(value: item.absence ?? 0),
+            'Tareas': TrinaCell(value: item.homework ?? 0),
+            'Conducta': TrinaCell(value: item.discipline ?? 0),
+            'habit_eval': TrinaCell(value: item.habits_evaluation ?? 0),
+            'Comentarios': TrinaCell(
+                value: item.comment != null && item.comment != 0
+                    ? item.comment.toString()
+                    : ''),
           }));
         }
       });
@@ -607,13 +631,13 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
       hideAbsencesColumn = true; // Faltas
       hideHomeworksColumn = true; // Tareas
       hideDisciplineColumn = true; //Disciplina
-      hideHabitsColumn = true;
+      hideHabitsColumn = true; //Habits
       hideOutfitColumn = true;
-    } else {
-      hideCommentsColumn = false;
+    } else if (grade > 11) {
+      hideCommentsColumn = true;
       hideAbsencesColumn = false; // Faltas
       hideHomeworksColumn = false; // Tareas
-      hideDisciplineColumn = false; //Disciplina
+      hideDisciplineColumn = true; //Disciplina
       hideHabitsColumn = true;
       hideOutfitColumn = true;
       homeWorkColumnTitle = 'R';
