@@ -136,7 +136,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
         TrinaColumn(
             title: 'Calif',
             field: 'Calif',
-            type: TrinaColumnType.number(negative: false),
+            type: TrinaColumnType.number(negative: false, format: '##'),
             readOnly: false,
             width: 100),
         TrinaColumn(
@@ -489,6 +489,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                         columns: assignaturesColumns,
                         rows: assignatureRows,
                         onChanged: (event) {
+                          // Validator to avoid double type numbers for 'Calif' column
                           final idEval =
                               event.row.cells['idCalif']?.value as int;
 

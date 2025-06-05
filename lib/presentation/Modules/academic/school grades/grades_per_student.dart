@@ -229,6 +229,15 @@ class _GradesByStudentState extends State<GradesByStudent> {
     });
   }
 
+  String validateTwoDigitNumber(dynamic value) {
+    final stringValue = value.toString();
+    if (RegExp(r'^\d{1,2}$').hasMatch(stringValue)) {
+      return stringValue;
+    }
+    // If more than 2 digits, return only the first 2 digits
+    return stringValue.substring(0, 2);
+  }
+
   List<TrinaColumn> get gradesByStudentColumns => [
         TrinaColumn(
             title: 'Materia',
@@ -248,7 +257,9 @@ class _GradesByStudentState extends State<GradesByStudent> {
         TrinaColumn(
           title: 'Calif',
           field: 'evaluation',
-          type: TrinaColumnType.number(negative: false),
+          type: TrinaColumnType.number(
+            negative: false,
+          ),
         ),
         TrinaColumn(
             title: 'idCalif',
@@ -336,44 +347,56 @@ class _GradesByStudentState extends State<GradesByStudent> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Flexible(child: RefreshButton(onPressed: () async {
-                  setState(() {
-                    isFetching = true;
-                  });
-                  studentGradesBodyToUpgrade.clear();
-                  if (isUserAdmin || isUserAcademicCoord) {
-                    //Calendar month number
-                    monthNumber =
-                        getKeyFromValue(spanishMonthsMap, selectedTempMonth!);
-                  } else {
-                    //Calendar month number
-                    monthNumber = getKeyFromValue(
-                        spanishMonthsMap, selectedCurrentTempMonth!);
-                  }
-                  if (selectedTempGroup == null || selectedTempGroup == '') {
-                    return showEmptyFieldAlertDialog(
-                        context, 'Seleccionar un grupo a evaluar');
-                  }
-                  if (selectedTempGrade == null || selectedTempGrade == '') {
-                    return showEmptyFieldAlertDialog(
-                        context, 'Seleccionar un grado a evaluar');
-                  }
-                  if (selectedTempCampus == null || selectedTempCampus == '') {
-                    return showEmptyFieldAlertDialog(
-                        context, 'Seleccionar un campus a evaluar');
-                  }
-                  if (monthNumber == null || monthNumber == '') {
-                    return showEmptyFieldAlertDialog(
-                        context, 'Seleccionar un mes a evaluar');
-                  } else {
-                    await searchBUttonAction(
-                      selectedTempGroup!,
-                      selectedTempGrade!,
-                      monthNumber!,
-                      selectedTempCampus!,
-                    ).whenComplete(() {
+                  try {
+                    setState(() {
+                      isFetching = true;
+                    });
+                    studentGradesBodyToUpgrade.clear();
+                    if (isUserAdmin || isUserAcademicCoord) {
+                      //Calendar month number
+                      monthNumber =
+                          getKeyFromValue(spanishMonthsMap, selectedTempMonth!);
+                    } else {
                       setState(() {
-                        isFetching = false;
+                        selectedCurrentTempMonth = currentMonth.toCapitalized;
                       });
+                      //Calendar month number
+                      monthNumber = getKeyFromValue(
+                          spanishMonthsMap, selectedCurrentTempMonth!);
+                    }
+                    if (selectedTempGroup == null || selectedTempGroup == '') {
+                      return showEmptyFieldAlertDialog(
+                          context, 'Seleccionar un grupo a evaluar');
+                    }
+                    if (selectedTempGrade == null || selectedTempGrade == '') {
+                      return showEmptyFieldAlertDialog(
+                          context, 'Seleccionar un grado a evaluar');
+                    }
+                    if (selectedTempCampus == null ||
+                        selectedTempCampus == '') {
+                      return showEmptyFieldAlertDialog(
+                          context, 'Seleccionar un campus a evaluar');
+                    }
+                    if (monthNumber == null || monthNumber == '') {
+                      return showEmptyFieldAlertDialog(
+                          context, 'Seleccionar un mes a evaluar');
+                    } else {
+                      await searchBUttonAction(
+                        selectedTempGroup!,
+                        selectedTempGrade!,
+                        monthNumber!,
+                        selectedTempCampus!,
+                      ).whenComplete(() {
+                        setState(() {
+                          isFetching = false;
+                        });
+                      });
+                    }
+                  } catch (e) {
+                    setState(() {
+                      isFetching = false;
+                      insertErrorLog(e.toString(), 'REFRESH BUTTON');
+                      showErrorFromBackend(context, e.toString());
                     });
                   }
                 })),
@@ -545,6 +568,29 @@ class _GradesByStudentState extends State<GradesByStudent> {
                                               columns: gradesByStudentColumns,
                                               rows: selectedStudentRows,
                                               onChanged: (event) {
+                                                // Validator to avoid double type numbers for 'Calif' column
+                                                if (event.column.field ==
+                                                    'evaluation') {
+                                                  // Only allow integers (no decimals)
+                                                  if (event.value is double ||
+                                                      (event.value is String &&
+                                                          event.value
+                                                              .contains('.'))) {
+                                                    showErrorFromBackend(
+                                                        context,
+                                                        'Solo se permiten números enteros en la calificación.');
+                                                    return; // Prevent further processing
+                                                  }
+                                                  // Optionally, also check if it's not a number at all
+                                                  if (int.tryParse(
+                                                          event.toString()) ==
+                                                      null) {
+                                                    showErrorFromBackend(
+                                                        context,
+                                                        'Ingrese solo números enteros válidos.');
+                                                    return;
+                                                  }
+                                                }
                                                 var newValue =
                                                     validateNewGradeValue(
                                                         event.value,

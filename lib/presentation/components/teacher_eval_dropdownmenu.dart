@@ -206,10 +206,20 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                   return DropdownMenuEntry<String>(value: value, label: value);
                 }).toList(),
               ),
+            SizedBox(
+              width: 10,
+            ),
 
-            if (unityList.length == 1) Text(unityList.first),
+            if (unityList.length == 1)
+              Padding(
+                padding: const EdgeInsets.all(10),
+                child: Text(unityList.first),
+              ),
             // Flexible(
             //    child:
+            SizedBox(
+              width: 10,
+            ),
             DropdownMenu<String>(
               label: const Text(
                 ' Grado ',
@@ -312,11 +322,13 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                             value: value, label: value);
                       }).toList())
                 else
-                  Text(
-                    currentMonth,
-                    style: const TextStyle(
-                        fontFamily: 'Sora', fontWeight: FontWeight.bold),
-                  )
+                  Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: Text(
+                        currentMonth,
+                        style: const TextStyle(
+                            fontFamily: 'Sora', fontWeight: FontWeight.bold),
+                      )),
               ],
             ),
             // ),

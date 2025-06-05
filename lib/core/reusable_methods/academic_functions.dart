@@ -142,11 +142,11 @@ Future<void> getSingleTeacherGrades(List<dynamic> apiResponse) async {
     for (var i = 0; i < apiResponse.length; i++) {
       // String grade = apiResponse[i]['Grade'];
       // int gradeSequence = apiResponse[i]['Sequence'];
-      originalList.add(apiResponse[i]['grade']);
+      originalList.add(apiResponse[i]['Grade']);
       oneTeacherGrades = originalList.toSet().toList();
 
       Map<int, String> currentMapValue = {
-        apiResponse[i]['sequence']: apiResponse[i]['grade']
+        apiResponse[i]['Sequence']: apiResponse[i]['Grade']
       };
 
       teacherGradesMap.addEntries(currentMapValue.entries);
@@ -163,7 +163,7 @@ Future<void> getSingleTeacherGroups(List<dynamic> apiResponse) async {
     for (var i = 0; i < apiResponse.length; i++) {
       // String group = apiResponse[i]['School_group'];
 
-      originalList.add(apiResponse[i]['school_group']);
+      originalList.add(apiResponse[i]['School_group']);
       oneTeacherGroups = originalList.toSet().toList();
     }
   }
@@ -178,12 +178,12 @@ Future<void> getSingleTeacherAssignatures(List<dynamic> apiResponse) async {
     for (var i = 0; i < apiResponse.length; i++) {
       // String assignature = apiResponse[i]['Subject'];
       // int assignatureID = apiResponse[i]['Subject_id'];
-      originalList.add(apiResponse[i]['subject']);
+      originalList.add(apiResponse[i]['Subject']);
 
       oneTeacherAssignatures = originalList.toSet().toList();
 
       Map<int, String> currentMapValue = {
-        apiResponse[i]['subject_id']: apiResponse[i]['subject']
+        apiResponse[i]['Subject_id']: apiResponse[i]['Subject']
       };
       assignaturesMap.addEntries(currentMapValue.entries);
     }
@@ -269,29 +269,32 @@ Future<List<StudentEval>> getSubjectsAndGradesByStudent(
   try {
     var subjectsGradesList =
         await getSubjectsAndGradeByStuent(group, grade, cycle, campus, month);
+    if (subjectsGradesList != null) {
+      List<dynamic> jsonList =
+          json.decode(utf8.decode(subjectsGradesList.bodyBytes));
+      List<StudentEval> evaluations = getEvalFromJSON(jsonList, true);
+      uniqueStudentsList.clear();
+      uniqueStudents.clear();
 
-    List<dynamic> jsonList =
-        json.decode(utf8.decode(subjectsGradesList.bodyBytes));
-    List<StudentEval> evaluations = getEvalFromJSON(jsonList, true);
-    uniqueStudentsList.clear();
-    uniqueStudents.clear();
+      for (var student in jsonList) {
+        uniqueStudents[student['studentID']] = student['firstlastName'] +
+            ' ' +
+            student['secondlastName'] +
+            ' ' +
+            student['student'];
+      }
 
-    for (var student in jsonList) {
-      uniqueStudents[student['studentID']] = student['firstlastName'] +
-          ' ' +
-          student['secondlastName'] +
-          ' ' +
-          student['student'];
+      // Convert the map to a list of maps
+      uniqueStudentsList = uniqueStudents.entries
+          .map((entry) => {'studentID': entry.key, 'studentName': entry.value})
+          .toList();
+
+      // print(uniqueStudentsList);
+
+      return evaluations;
+    } else {
+      throw Exception('No data found for the given parameters.');
     }
-
-    // Convert the map to a list of maps
-    uniqueStudentsList = uniqueStudents.entries
-        .map((entry) => {'studentID': entry.key, 'studentName': entry.value})
-        .toList();
-
-    // print(uniqueStudentsList);
-
-    return evaluations;
   } catch (e) {
     if (e is TimeoutException) {
       return throw TimeoutException(e.toString());
@@ -528,7 +531,7 @@ Future<Map<String, dynamic>> populateSubjectsDropDownSelector(
 }
 
 //Function that validate that value can´t be less than 50 and more than 100
-int validateNewGradeValue(int newValue, String columnNameToFind) {
+int validateNewGradeValue(dynamic newValue, String columnNameToFind) {
   //If value < 50 -> returns 50
   List<String> columnName = [
     'Calif',
@@ -542,6 +545,10 @@ int validateNewGradeValue(int newValue, String columnNameToFind) {
   bool isContained = columnName.contains(columnNameToFind);
 
   if (isContained) {
+    if (newValue is double) {
+      newValue = newValue.toInt();
+    }
+
     if (newValue <= 50) {
       //Validate that value can´t be less than 50
       newValue = 50;

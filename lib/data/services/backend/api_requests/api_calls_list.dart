@@ -547,7 +547,7 @@ Future<dynamic> getWorkDepartments() async {
         persistCookies: false,
         timeoutSeconds: 15);
     apiCall.raiseForStatus();
-    return apiCall.body;
+    return apiCall;
   } catch (e) {
     throw Future.error(e.toString());
   }
