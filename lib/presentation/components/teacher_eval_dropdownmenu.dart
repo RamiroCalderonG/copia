@@ -50,15 +50,21 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
       selectedTempCampus = unityList.first;
       selectedUnity = unityList.first;
     }
+    if (preSelectedGrade != null) {
+      selectedGrade = preSelectedGrade;
+    }
+    if (preSelectedGroup != null) {
+      selectedGroup = preSelectedGroup;
+    }
+    if (preSelectedSubject != null) {
+      selectedSubject = preSelectedSubject;
+    }
     filterData();
     super.initState();
   }
 
   @override
   void dispose() {
-    //monthValue = '';
-    //selectedCurrentTempMonth = null;
-    //selectedTempMonth = null;
     super.dispose();
   }
 
@@ -82,7 +88,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
   }
 
   void filterData() {
-    filteredSubjectMap.clear();
+    //filteredSubjectMap.clear();
     if (selectedUnity != null) {
       // Filter grades based on Campus
       filteredGrade = widget.jsonData
@@ -243,10 +249,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                 return DropdownMenuEntry<String>(value: value, label: value);
               }).toList(),
             ),
-            // ),
 
-            //  Flexible(
-            //      child:
             DropdownMenu<String>(
               label: const Text(
                 ' Grupo ',
@@ -270,12 +273,8 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                 return DropdownMenuEntry<String>(value: value, label: value);
               }).toList(),
             ),
-            //    ),
             if (!widget.byStudent) //Not by student
-              //Flexible(
-              //   flex: 2,
-              //  fit: FlexFit.loose,
-              //  child:
+
               DropdownMenu<String>(
                 label: const Text(
                   ' Materia ',
@@ -296,10 +295,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                   return DropdownMenuEntry<String>(value: value, label: value);
                 }).toList(),
               ),
-//),
 
-            // Flexible(
-            //  child:
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -331,7 +327,6 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                       )),
               ],
             ),
-            // ),
           ],
         ));
   }
