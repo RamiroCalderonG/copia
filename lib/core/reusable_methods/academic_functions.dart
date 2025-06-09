@@ -28,7 +28,7 @@ dynamic loadStartGrading(int employeeNumber, String schoolYear, bool isAdmin,
     await getTeacherGradeAndCourses(currentUser!.employeeNumber, currentCycle,
             month, isAdmin, isAcademicCoordinator, campus)
         .then((onValue) {
-      jsonList = json.decode(onValue);
+      jsonList = json.decode(utf8.decode(onValue.bodyBytes));
       jsonDataForDropDownMenuClass = jsonList;
       fetchedDataFromloadStartGrading = jsonList;
       try {

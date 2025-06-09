@@ -690,7 +690,7 @@ Future<dynamic> getTeacherGradeAndCourses(var employee, var year, int month,
         persistCookies: false,
         timeoutSeconds: 40);
     apiCall.raiseForStatus();
-    return apiCall.body;
+    return apiCall;
   } catch (e) {
     if (e is TimeoutException) {
       insertErrorLog(e.toString(), 'acad/teacher/start-student-rating');

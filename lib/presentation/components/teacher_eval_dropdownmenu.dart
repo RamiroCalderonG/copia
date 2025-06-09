@@ -88,7 +88,6 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
   }
 
   void filterData() {
-    //filteredSubjectMap.clear();
     if (selectedUnity != null) {
       // Filter grades based on Campus
       filteredGrade = widget.jsonData

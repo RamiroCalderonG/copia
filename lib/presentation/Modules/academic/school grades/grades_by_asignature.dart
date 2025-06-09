@@ -13,7 +13,7 @@ import '../../../../data/Models/Student_eval.dart';
 
 import '../../../../data/datasources/temp/studens_temp.dart';
 import '../../../../data/services/backend/api_requests/api_calls_list.dart';
-import '../../../../core/constants/Student.dart';
+
 import '../../../../core/constants/date_constants.dart';
 
 import '../../../../core/config/flutter_flow/flutter_flow_util.dart';
@@ -103,7 +103,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
         TrinaColumn(
           title: 'No.Lista',
           field: 'No',
-          width: 12,
+          width: 20,
           type: TrinaColumnType.number(),
           readOnly: true,
         ),
@@ -124,7 +124,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
             field: 'Apellido paterno',
             type: TrinaColumnType.text(),
             readOnly: true,
-            sort: TrinaColumnSort.ascending,
+            //sort: TrinaColumnSort.ascending,
             width: 150),
         TrinaColumn(
             title: 'Apellido materno',
@@ -546,7 +546,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                 } else {
                   return StatefulBuilder(
                     builder: (context, setState) {
-                      return TrinaGrid(
+                      return TrinaGrid(                        
                         mode: TrinaGridMode.normal,
                         columns: assignaturesColumns,
                         rows: assignatureRows,
