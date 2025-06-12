@@ -288,14 +288,14 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
       setState(() {
         isLoading = true;
       });
-
+      int? teacherNumber;
+      if (isUserAdmin || isUserAcademicCoord) {
+        teacherNumber = null;
+      } else {
+        teacherNumber = currentUser!.employeeNumber;
+      }
       studentList = await getStudentsByAssinature(
-        groupSelected,
-        gradeInt,
-        assignatureID,
-        month,
-        campus,
-      );
+          groupSelected, gradeInt, assignatureID, month, campus, teacherNumber);
 
       // Get evaluations comments by gradeSequence
       if (studentList.isNotEmpty) {
@@ -546,7 +546,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                 } else {
                   return StatefulBuilder(
                     builder: (context, setState) {
-                      return TrinaGrid(                        
+                      return TrinaGrid(
                         mode: TrinaGridMode.normal,
                         columns: assignaturesColumns,
                         rows: assignatureRows,

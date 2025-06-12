@@ -733,8 +733,16 @@ Future<dynamic> getTeacherGradeAndCoursesAsAdmin(int month, bool isAdmin,
 }
 
 //Function to get all students grades/evaluations value by group, subjects, grades, month and cycle
-Future<dynamic> getStudentsToGrade(String assignature, String group,
-    String grade, String? cycle, String? campus, String month) async {
+Future<dynamic> getStudentsToGrade(
+    String assignature,
+    String group,
+    String grade,
+    String? cycle,
+    String? campus,
+    String month,
+    bool isAdmin,
+    bool isAcademicCoord,
+    int? teacher) async {
   try {
     SharedPreferences devicePrefs = await SharedPreferences.getInstance();
     var apiCall = await Requests.get(
@@ -749,10 +757,13 @@ Future<dynamic> getStudentsToGrade(String assignature, String group,
           "subject": assignature,
           "cycle": cycle,
           "campus": campus,
-          "month": month
+          "month": month,
+          "flag1": isAdmin,
+          "flag2": isAcademicCoord,
+          "teacher": teacher
         },
         persistCookies: false,
-        timeoutSeconds: 20);
+        timeoutSeconds: 25);
     apiCall.raiseForStatus();
     return apiCall;
   } catch (e) {

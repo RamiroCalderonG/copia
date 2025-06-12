@@ -248,10 +248,19 @@ Future<List<StudentEval>> getStudentsByAssinature(
     String gradeSelected,
     String assignature,
     String month,
-    String campus) async {
+    String campus,
+    int? teacher) async {
   try {
-    var studentsList = await getStudentsToGrade(assignature, group,
-        gradeSelected, currentCycle!.claCiclo, campus, month);
+    var studentsList = await getStudentsToGrade(
+        assignature,
+        group,
+        gradeSelected,
+        currentCycle!.claCiclo,
+        campus,
+        month,
+        currentUser!.isCurrentUserAdmin(),
+        currentUser!.isCurrentUserAcademicCoord(),
+        teacher);
     var jsonList = json.decode(utf8.decode(studentsList.bodyBytes));
     List<StudentEval> evaluations = getEvalFromJSON(jsonList, false);
 
