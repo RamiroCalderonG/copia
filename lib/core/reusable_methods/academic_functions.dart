@@ -274,10 +274,17 @@ Future<List<StudentEval>> getStudentsByAssinature(
 }
 
 Future<List<StudentEval>> getSubjectsAndGradesByStudent(
-    int grade, String group, String cycle, String campus, int month) async {
+    int grade,
+    String group,
+    String cycle,
+    String campus,
+    int month,
+    bool isAdmin,
+    bool isAcademicCoord,
+    int? teacher) async {
   try {
-    var subjectsGradesList =
-        await getSubjectsAndGradeByStuent(group, grade, cycle, campus, month);
+    var subjectsGradesList = await getSubjectsAndGradeByStuent(
+        group, grade, cycle, campus, month, isAdmin, isAcademicCoord, teacher);
     if (subjectsGradesList != null) {
       List<dynamic> jsonList =
           json.decode(utf8.decode(subjectsGradesList.bodyBytes));

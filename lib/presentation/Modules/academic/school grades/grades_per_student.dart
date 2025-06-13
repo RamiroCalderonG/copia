@@ -44,6 +44,8 @@ class _GradesByStudentState extends State<GradesByStudent> {
   late TrinaGridStateManager stateManager;
   late TrinaGridStateManager gridAStateManager;
   String currentMonth = DateFormat.MMMM('es').format(DateTime.now());
+  Key? studentsGridKey;
+  Key? evalsGridKey;
 
   Key? currentRowKey;
   Timer? _debounce;
@@ -90,6 +92,8 @@ class _GradesByStudentState extends State<GradesByStudent> {
     //selectedTempCampus = null;
     //selectedTempMonth = null;
     //selectedCurrentTempMonth = null;
+    fetchedData = null;
+    rows.clear();
     super.dispose();
   }
 
@@ -169,8 +173,17 @@ class _GradesByStudentState extends State<GradesByStudent> {
         studentsGradesCommentsRows.clear();
       }
       // Get the students list by group, grade, cycle, campus and month
-      studentList = await getSubjectsAndGradesByStudent(grade, groupSelected,
-          currentCycle!.claCiclo!, campusSelected, monthSelected);
+      studentList = await getSubjectsAndGradesByStudent(
+          grade,
+          groupSelected,
+          currentCycle!.claCiclo!,
+          campusSelected,
+          monthSelected,
+          currentUser!.isAdmin!,
+          currentUser!.isAcademicCoord!,
+          currentUser!.isAdmin! || currentUser!.isAcademicCoord!
+              ? null
+              : currentUser!.employeeNumber!);
 
       // Get evaluations comments by gradeSequence
       if (studentList.isNotEmpty) {
@@ -501,6 +514,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
                         children: [
                           Expanded(
                               child: TrinaGrid(
+                                  key: studentsGridKey,
                                   //Grid for students name and ID
                                   columns: studentColumnsToEvaluateByStudent,
                                   rows: studentEvaluationRows,
@@ -564,6 +578,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
                                     Expanded(
                                       child: selectedStudentRows.isNotEmpty
                                           ? TrinaGrid(
+                                              key: evalsGridKey,
                                               // mode: TrinaGridMode.select,
                                               columns: gradesByStudentColumns,
                                               rows: selectedStudentRows,

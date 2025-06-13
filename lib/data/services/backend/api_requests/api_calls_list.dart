@@ -810,8 +810,8 @@ Future<dynamic> getStudentsGrades(
 }
 
 //getSubjectsAndGradeByStuent will get based on the current teacher consuming the API.
-Future<dynamic> getSubjectsAndGradeByStuent(
-    String? group, grade, cycle, campus, month) async {
+Future<dynamic> getSubjectsAndGradeByStuent(String? group, grade, cycle, campus,
+    month, bool isAdmin, bool isAcademicCoord, int? teacher) async {
   try {
     SharedPreferences devicePrefs = await SharedPreferences.getInstance();
     var apiCall = await Requests.get(
@@ -829,7 +829,10 @@ Future<dynamic> getSubjectsAndGradeByStuent(
           "history":
               0, //0 means all students, if history : 1 , will return all history from a single student and youll need to send studenID as param
           "assignature": "null", //Set null to return all subjects
-          "value": "all" //set all to return all students by cycle and
+          "value": "all", //set all to return all students by cycle and
+          "flag1": isAdmin,
+          "flag2": isAcademicCoord,
+          "teacher": teacher
         },
         timeoutSeconds: 20,
         persistCookies: false);
