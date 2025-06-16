@@ -6,14 +6,14 @@ import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart'
 import 'package:oxschool/data/datasources/temp/users_temp_data.dart';
 
 Future<dynamic> getAllCampuse() async {
-  await getCampuseList().then((response){
+  await getCampuseList().then((response) {
     var campusList = jsonDecode(response);
-     for (var item in campusList) {
-    String name = item['campusName'].toString().trim().toCapitalized;
-    campuseList.add(name); //.add(name);
-  }
-  return campuseList;
-  }).onError((error, stackTrace){ 
+    for (var item in campusList) {
+      String name = item['campusName'].toString().trim().toCapitalized;
+      campuseList.add(name); //.add(name);
+    }
+    return campuseList;
+  }).onError((error, stackTrace) {
     insertErrorLog(error.toString(), 'getAllCampuse() | ');
     return Future.error(error.toString());
   });
@@ -23,7 +23,7 @@ Future<dynamic> getWorkDepartmentList() async {
   try {
     areaList.clear();
     await getWorkDepartments().then((response) {
-      var jsonList = jsonDecode(response);
+      var jsonList = jsonDecode(response.body);
       for (var item in jsonList) {
         areaList.add(item['bureauName'].toString().trim().toTitleCase);
       }

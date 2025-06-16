@@ -8,7 +8,7 @@ class StudentEval {
   int? absence;
   int? homework;
   int? discipline;
-  // String comment;
+  int? comment;
   int? habits_evaluation;
   int? outfit;
   int? subject;
@@ -16,6 +16,7 @@ class StudentEval {
   double? evaluation;
   int? other;
   String? fulllName;
+  int? sequentialNumber;
 
   StudentEval(
       this.rateID,
@@ -27,14 +28,15 @@ class StudentEval {
       this.absence,
       this.homework,
       this.discipline,
-      // this.comment,
+      this.comment,
       this.habits_evaluation,
       this.outfit,
       this.subject,
       this.subjectName,
       this.evaluation,
       this.other,
-      this.fulllName);
+      this.fulllName,
+      this.sequentialNumber);
 }
 
 dynamic getEvalFromJSON(List<dynamic> jsonList, bool isByStudent) {
@@ -46,20 +48,21 @@ dynamic getEvalFromJSON(List<dynamic> jsonList, bool isByStudent) {
       for (var item in jsonList) {
         int rateID = item['idCicloEscolar'];
         String studentName = item['student'];
-        String student1LastName = item['1lastName'];
-        String student2LastName = item['2lastName'];
+        String student1LastName = item['firstlastName'];
+        String student2LastName = item['secondlastName'];
         String studentID = item['studentID'];
         //int grades = item['eval_type'];
         int absence = item['absence_eval'];
         int homework = item['homework_eval'];
         int discipline = item['discipline_eval'];
-        // String comment = item['comment'];
+        int? comment = item['comment'] ?? 0;
         int habitsEvaluation = item['habit_eval'];
         //int outfit = item['outfit'];
         int subject = item['subjectId'];
         String? subjectName = item['subject_name'];
         double evaluation = item['evaluation'];
         int? other = item['other'];
+        int? sequentialNumber = item['NumLista'];
         studentEval.add(StudentEval(
             rateID,
             studentName,
@@ -70,14 +73,15 @@ dynamic getEvalFromJSON(List<dynamic> jsonList, bool isByStudent) {
             absence,
             homework,
             discipline,
-            // comment,
+            comment,
             habitsEvaluation,
             0,
             subject,
             subjectName,
             evaluation,
             other,
-            '$studentName $student1LastName $student2LastName'));
+            '$student1LastName $student2LastName $studentName',
+            sequentialNumber));
       }
       return studentEval;
     } else {
@@ -91,15 +95,19 @@ dynamic getEvalFromJSON(List<dynamic> jsonList, bool isByStudent) {
         int? absence = item['absence_eval'];
         int? homework = item['homework_eval'];
         int? discipline = item['discipline_eval'];
-        // String comment = item['comment'];
+        int comment = item['comment'];
         int? habitsEvaluation = item['habit_eval'];
         int? outfit = 0;
         int? subject = item['subjectId'];
         String? subjectName = item['subject_name'];
         double? evaluation = item['evaluation'];
         int? other = item['other'];
-        String fullName =
-            item['student'] + ' ' + item['1lastName'] + ' ' + item['2lastName'];
+        String fullName = item['student'] +
+            ' ' +
+            item['firstlastName'] +
+            ' ' +
+            item['secondlastName'];
+        int? sequentialNumber = item['NumLista'];
         studentEval.add(StudentEval(
             rateID,
             '',
@@ -110,14 +118,15 @@ dynamic getEvalFromJSON(List<dynamic> jsonList, bool isByStudent) {
             absence,
             homework,
             discipline,
-            // comment,
+            comment,
             habitsEvaluation,
             outfit,
             subject,
             subjectName,
             evaluation,
             other,
-            fullName));
+            fullName,
+            sequentialNumber));
       }
       return studentEval;
     }

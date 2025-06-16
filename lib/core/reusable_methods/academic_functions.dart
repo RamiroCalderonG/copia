@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
+import 'package:oxschool/data/Models/AcademicEvaluationsComment.dart';
 import 'package:oxschool/data/Models/Student.dart';
 
 import 'package:oxschool/data/Models/Student_eval.dart';
@@ -27,7 +28,7 @@ dynamic loadStartGrading(int employeeNumber, String schoolYear, bool isAdmin,
     await getTeacherGradeAndCourses(currentUser!.employeeNumber, currentCycle,
             month, isAdmin, isAcademicCoordinator, campus)
         .then((onValue) {
-      jsonList = json.decode(onValue);
+      jsonList = json.decode(utf8.decode(onValue.bodyBytes));
       jsonDataForDropDownMenuClass = jsonList;
       fetchedDataFromloadStartGrading = jsonList;
       try {
@@ -141,11 +142,11 @@ Future<void> getSingleTeacherGrades(List<dynamic> apiResponse) async {
     for (var i = 0; i < apiResponse.length; i++) {
       // String grade = apiResponse[i]['Grade'];
       // int gradeSequence = apiResponse[i]['Sequence'];
-      originalList.add(apiResponse[i]['grade']);
+      originalList.add(apiResponse[i]['Grade']);
       oneTeacherGrades = originalList.toSet().toList();
 
       Map<int, String> currentMapValue = {
-        apiResponse[i]['sequence']: apiResponse[i]['grade']
+        apiResponse[i]['Sequence']: apiResponse[i]['Grade']
       };
 
       teacherGradesMap.addEntries(currentMapValue.entries);
@@ -162,7 +163,7 @@ Future<void> getSingleTeacherGroups(List<dynamic> apiResponse) async {
     for (var i = 0; i < apiResponse.length; i++) {
       // String group = apiResponse[i]['School_group'];
 
-      originalList.add(apiResponse[i]['school_group']);
+      originalList.add(apiResponse[i]['School_group']);
       oneTeacherGroups = originalList.toSet().toList();
     }
   }
@@ -177,12 +178,12 @@ Future<void> getSingleTeacherAssignatures(List<dynamic> apiResponse) async {
     for (var i = 0; i < apiResponse.length; i++) {
       // String assignature = apiResponse[i]['Subject'];
       // int assignatureID = apiResponse[i]['Subject_id'];
-      originalList.add(apiResponse[i]['subject']);
+      originalList.add(apiResponse[i]['Subject']);
 
       oneTeacherAssignatures = originalList.toSet().toList();
 
       Map<int, String> currentMapValue = {
-        apiResponse[i]['subject_id']: apiResponse[i]['subject']
+        apiResponse[i]['Subject_id']: apiResponse[i]['Subject']
       };
       assignaturesMap.addEntries(currentMapValue.entries);
     }
@@ -247,10 +248,19 @@ Future<List<StudentEval>> getStudentsByAssinature(
     String gradeSelected,
     String assignature,
     String month,
-    String campus) async {
+    String campus,
+    int? teacher) async {
   try {
-    var studentsList = await getStudentsToGrade(assignature, group,
-        gradeSelected, currentCycle!.claCiclo, campus, month);
+    var studentsList = await getStudentsToGrade(
+        assignature,
+        group,
+        gradeSelected,
+        currentCycle!.claCiclo,
+        campus,
+        month,
+        currentUser!.isCurrentUserAdmin(),
+        currentUser!.isCurrentUserAcademicCoord(),
+        teacher);
     var jsonList = json.decode(utf8.decode(studentsList.bodyBytes));
     List<StudentEval> evaluations = getEvalFromJSON(jsonList, false);
 
@@ -264,34 +274,43 @@ Future<List<StudentEval>> getStudentsByAssinature(
 }
 
 Future<List<StudentEval>> getSubjectsAndGradesByStudent(
-    int grade, String group, String cycle, String campus, int month) async {
+    int grade,
+    String group,
+    String cycle,
+    String campus,
+    int month,
+    bool isAdmin,
+    bool isAcademicCoord,
+    int? teacher) async {
   try {
-    var subjectsGradesList =
-        await getSubjectsAndGradeByStuent(group, grade, cycle, campus, month);
+    var subjectsGradesList = await getSubjectsAndGradeByStuent(
+        group, grade, cycle, campus, month, isAdmin, isAcademicCoord, teacher);
+    if (subjectsGradesList != null) {
+      List<dynamic> jsonList =
+          json.decode(utf8.decode(subjectsGradesList.bodyBytes));
+      List<StudentEval> evaluations = getEvalFromJSON(jsonList, true);
+      uniqueStudentsList.clear();
+      uniqueStudents.clear();
 
-    List<dynamic> jsonList =
-        json.decode(utf8.decode(subjectsGradesList.bodyBytes));
-    List<StudentEval> evaluations = getEvalFromJSON(jsonList, true);
-    uniqueStudentsList.clear();
-    uniqueStudents.clear();
+      for (var student in jsonList) {
+        uniqueStudents[student['studentID']] = student['firstlastName'] +
+            ' ' +
+            student['secondlastName'] +
+            ' ' +
+            student['student'];
+      }
 
-    for (var student in jsonList) {
-      uniqueStudents[student['studentID']] = student['student'] +
-          ' ' +
-          student['1lastName'] +
-          ' ' +
-          student['2lastName'];
-      // uniqueStudents[student['studentName']] = student['studentName'];
+      // Convert the map to a list of maps
+      uniqueStudentsList = uniqueStudents.entries
+          .map((entry) => {'studentID': entry.key, 'studentName': entry.value})
+          .toList();
+
+      // print(uniqueStudentsList);
+
+      return evaluations;
+    } else {
+      throw Exception('No data found for the given parameters.');
     }
-
-    // Convert the map to a list of maps
-    uniqueStudentsList = uniqueStudents.entries
-        .map((entry) => {'studentID': entry.key, 'studentName': entry.value})
-        .toList();
-
-    // print(uniqueStudentsList);
-
-    return evaluations;
   } catch (e) {
     if (e is TimeoutException) {
       return throw TimeoutException(e.toString());
@@ -300,64 +319,64 @@ Future<List<StudentEval>> getSubjectsAndGradesByStudent(
   }
 }
 
-Future<void> getCommentsForEvals(int grade) async {
-  List<dynamic> commentsList;
+// Future<void> getCommentsForEvals(int grade) async {
+//   List<dynamic> commentsList;
 
-  Map<String, String> currentValue = {};
+//   Map<String, String> currentValue = {};
 
-  try {
-    var response = await getStudentsGradesComments(grade, false, null, null);
-    commentsList = json.decode(response.body);
-    if (studentsGradesCommentsRows.isNotEmpty && commentStringEval.isNotEmpty) {
-      studentsGradesCommentsRows.clear();
-      commentStringEval.clear();
-    }
+//   try {
+//     var response = await getStudentsGradesComments(grade, false, null, null);
+//     commentsList = json.decode(response.body);
+//     if (studentsGradesCommentsRows.isNotEmpty && commentStringEval.isNotEmpty) {
+//       studentsGradesCommentsRows.clear();
+//       commentStringEval.clear();
+//     }
 
-    for (var item in commentsList) {
-      String id = item['Comment'].toString();
-      String comment = item['Name'];
-      commentStringEval.add(comment);
+//     for (var item in commentsList) {
+//       String id = item['Comment'].toString();
+//       String comment = item['Name'];
+//       commentStringEval.add(comment);
 
-      currentValue = {'idcomment': id.toString(), 'comentname': comment};
+//       currentValue = {'idcomment': id.toString(), 'comentname': comment};
 
-      studentsGradesCommentsRows.add(currentValue);
-    }
-  } catch (e) {
-    throw ErrorDescription(e.toString());
-  }
-}
+//       studentsGradesCommentsRows.add(currentValue);
+//     }
+//   } catch (e) {
+//     throw ErrorDescription(e.toString());
+//   }
+// }
 
-Future<List<Map<String, dynamic>>> getCommentsAsignatedToStudent(
-    int grade, bool byStudent, String? studentid, int? month) async {
-  List<Map<String, dynamic>> assignatedComments = [];
-  Map<String, dynamic> currentValue = {};
-  try {
-    var response = await getStudentsGradesComments(
-        grade, byStudent, studentid!.trim(), month);
-    var commentsResponse = json.decode(response.body);
+// Future<List<Map<String, dynamic>>> getCommentsAsignatedToStudent(
+//     int grade, bool byStudent, String? studentid, int? month) async {
+//   List<Map<String, dynamic>> assignatedComments = [];
+//   Map<String, dynamic> currentValue = {};
+//   try {
+//     var response = await getStudentsGradesComments(
+//         grade, byStudent, studentid!.trim(), month);
+//     var commentsResponse = json.decode(response.body);
 
-    for (var item in commentsResponse) {
-      int evalId = item['student_rate'];
-      int commentid = item['comment'];
-      // var month = item['month'];
-      bool active = item['active'];
-      String subject = item['subject'];
-      String commentName = item['commentName'];
-      currentValue = {
-        'student_rate': evalId,
-        'comment': commentid,
-        'active': active,
-        'subject': subject,
-        'commentName': commentName
-      };
-      assignatedComments.add(currentValue);
-    }
+//     for (var item in commentsResponse) {
+//       int evalId = item['student_rate'];
+//       int commentid = item['comment'];
+//       // var month = item['month'];
+//       bool active = item['active'];
+//       String subject = item['subject'];
+//       String commentName = item['commentName'];
+//       currentValue = {
+//         'student_rate': evalId,
+//         'comment': commentid,
+//         'active': active,
+//         'subject': subject,
+//         'commentName': commentName
+//       };
+//       assignatedComments.add(currentValue);
+//     }
 
-    return assignatedComments;
-  } catch (e) {
-    throw ErrorDescription(e.toString());
-  }
-}
+//     return assignatedComments;
+//   } catch (e) {
+//     throw ErrorDescription(e.toString());
+//   }
+// }
 
 List<Map<String, dynamic>> mergeCommentsData(
     List<Map<String, dynamic>> allItemAvailables,
@@ -528,7 +547,7 @@ Future<Map<String, dynamic>> populateSubjectsDropDownSelector(
 }
 
 //Function that validate that value can´t be less than 50 and more than 100
-int validateNewGradeValue(int newValue, String columnNameToFind) {
+int validateNewGradeValue(dynamic newValue, String columnNameToFind) {
   //If value < 50 -> returns 50
   List<String> columnName = [
     'Calif',
@@ -542,6 +561,10 @@ int validateNewGradeValue(int newValue, String columnNameToFind) {
   bool isContained = columnName.contains(columnNameToFind);
 
   if (isContained) {
+    if (newValue is double) {
+      newValue = newValue.toInt();
+    }
+
     if (newValue <= 50) {
       //Validate that value can´t be less than 50
       newValue = 50;
@@ -582,21 +605,21 @@ void getTeacherEvalCampuses(List<dynamic> jsonData) {
   }
 }
 
-void searchGradesBySubjectButton(
-  String grade,
-  String group,
-  String subject,
-  String month,
-  String? campus,
-) async {
-  try {
-    studentList =
-        await getStudentsByAssinature(group, grade, subject, month, campus!);
-    await getCommentsForEvals(int.parse(grade));
-  } catch (e) {
-    throw FormatException(e.toString());
-  }
-}
+// void searchGradesBySubjectButton(
+//   String grade,
+//   String group,
+//   String subject,
+//   String month,
+//   String? campus,
+// ) async {
+//   try {
+//     studentList =
+//         await getStudentsByAssinature(group, grade, subject, month, campus!);
+//     await getCommentsForEvals(int.parse(grade));
+//   } catch (e) {
+//     throw FormatException(e.toString());
+//   }
+// }
 
 List<Map<String, dynamic>> filterCommentsBySubject(
   List<Map<String, dynamic>> comments,
@@ -686,6 +709,35 @@ Future<dynamic> getTeachersListByCycle(String cycle) async {
     return response;
   } catch (e) {
     insertErrorLog(e.toString(), 'getTeachersListByCycle($cycle)');
+    rethrow;
+  }
+}
+
+Future<List<Academicevaluationscomment>> getEvaluationsCommentsByGradeSequence(
+    int gradeSequence) async {
+  try {
+    var response = await getStudentsGradesComments(gradeSequence);
+    List<Academicevaluationscomment> commentsList = [];
+    if (response != null) {
+      for (var element in response) {
+        Academicevaluationscomment comment =
+            Academicevaluationscomment.fromJson(element);
+        if (commentsList.isEmpty) {
+          commentsList.add(comment);
+        } else {
+          // Check if the comment already exists in the list
+          bool exists =
+              commentsList.any((c) => c.commentId == comment.commentId);
+          if (!exists) {
+            commentsList.add(comment);
+          }
+        }
+      }
+    }
+    return commentsList;
+  } catch (e) {
+    insertErrorLog(
+        e.toString(), 'getEvaluationsCommentsByGradeSequence($gradeSequence)');
     rethrow;
   }
 }

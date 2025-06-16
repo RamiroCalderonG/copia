@@ -12,6 +12,7 @@ import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/constants/date_constants.dart';
 import 'package:oxschool/core/reusable_methods/academic_functions.dart';
 import 'package:oxschool/data/datasources/temp/teacher_grades_temp.dart';
+import 'package:oxschool/presentation/Modules/login_view/login_view_widget.dart';
 
 import 'package:trina_grid/trina_grid.dart';
 
@@ -43,6 +44,8 @@ class _GradesByStudentState extends State<GradesByStudent> {
   late TrinaGridStateManager stateManager;
   late TrinaGridStateManager gridAStateManager;
   String currentMonth = DateFormat.MMMM('es').format(DateTime.now());
+  Key? studentsGridKey;
+  Key? evalsGridKey;
 
   Key? currentRowKey;
   Timer? _debounce;
@@ -50,6 +53,15 @@ class _GradesByStudentState extends State<GradesByStudent> {
   String selectedStudentName = '';
   var fetchedData;
   bool isFetching = true;
+  bool hideCommentsColumn = true;
+  bool hideAbsencesColumn = true;
+  bool hideHomeworksColumn = true;
+  bool hideDisciplineColumn = true;
+  bool hideHabitsColumn = true;
+  bool hideOutfitColumn = true;
+
+  String? homeWorkColumnTitle;
+  String? disciplineColumnTitle;
   int? monthNumber;
   String dropDownValue = ''; //oneTeacherAssignatures.first;
   int? assignatureID;
@@ -80,6 +92,8 @@ class _GradesByStudentState extends State<GradesByStudent> {
     //selectedTempCampus = null;
     //selectedTempMonth = null;
     //selectedCurrentTempMonth = null;
+    fetchedData = null;
+    rows.clear();
     super.dispose();
   }
 
@@ -99,6 +113,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
     });
   }
 
+  //* Populates Grid that only contains the students names and IDs
   Future<void> fillGrid(List<StudentEval> evaluationList) async {
     Set<String> studentSet = {};
     List<Map<String, String>> uniqueStudents = [];
@@ -109,6 +124,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
         uniqueStudents.add({
           'studentID': student.studentID,
           'student': student.fulllName!,
+          'sequentialNumber': student.sequentialNumber.toString(),
         });
       }
     }
@@ -118,6 +134,10 @@ class _GradesByStudentState extends State<GradesByStudent> {
           cells: {
             'studentID': TrinaCell(value: item.containsKey('StudentID')),
             'studentName': TrinaCell(value: item.containsKey('studentName')),
+            'No': TrinaCell(
+                value: item.containsKey('sequentialNumber')
+                    ? item['sequentialNumber']
+                    : '0'),
           },
         );
       }).toList();
@@ -152,17 +172,45 @@ class _GradesByStudentState extends State<GradesByStudent> {
         studentList.clear();
         studentsGradesCommentsRows.clear();
       }
-      studentList = await getSubjectsAndGradesByStudent(grade, groupSelected,
-          currentCycle!.claCiclo!, campusSelected, monthSelected);
+      // Get the students list by group, grade, cycle, campus and month
+      studentList = await getSubjectsAndGradesByStudent(
+          grade,
+          groupSelected,
+          currentCycle!.claCiclo!,
+          campusSelected,
+          monthSelected,
+          currentUser!.isAdmin!,
+          currentUser!.isAcademicCoord!,
+          currentUser!.isAdmin! || currentUser!.isAcademicCoord!
+              ? null
+              : currentUser!.employeeNumber!);
+
+      // Get evaluations comments by gradeSequence
+      if (studentList.isNotEmpty) {
+        studentsGradesCommentsRows =
+            await getEvaluationsCommentsByGradeSequence(grade);
+      } else {
+        throw Exception(
+            'No se encontraron alumnos para el grupo seleccionado: $groupSelected, grado: $grade, ciclo: ${currentCycle!.claCiclo}, campus: $campusSelected, mes: $monthSelected');
+      }
+
+      displayColumnsByGrade(grade);
 
       fillGrid(studentList); //Fill student list by unque values
 
       setState(() {
         studentEvaluationRows.clear();
-        var index = 0;
+        // var index = 0;
         for (var item in uniqueStudentsList) {
+          String sequentialNumber = studentList
+              .firstWhere((student) => student.studentID == item['studentID'])
+              .sequentialNumber
+              .toString();
           studentEvaluationRows.add(TrinaRow(cells: {
-            'No': TrinaCell(value: index + 1),
+            'No': TrinaCell(
+                value: sequentialNumber.isNotEmpty
+                    ? sequentialNumber
+                    : '0'), //* Sequential number of student (NoLista)
             'studentID': TrinaCell(value: item['studentID']!.trim()),
             'studentName':
                 TrinaCell(value: item['studentName']!.trim().toTitleCase),
@@ -193,6 +241,77 @@ class _GradesByStudentState extends State<GradesByStudent> {
       throw Future.error(onError.toString);
     });
   }
+
+  String validateTwoDigitNumber(dynamic value) {
+    final stringValue = value.toString();
+    if (RegExp(r'^\d{1,2}$').hasMatch(stringValue)) {
+      return stringValue;
+    }
+    // If more than 2 digits, return only the first 2 digits
+    return stringValue.substring(0, 2);
+  }
+
+  List<TrinaColumn> get gradesByStudentColumns => [
+        TrinaColumn(
+            title: 'Materia',
+            field: 'subject',
+            type: TrinaColumnType.text(),
+            readOnly: true,
+            hide: true),
+        TrinaColumn(
+          title: 'Materia',
+          field: 'subject_name',
+          type: TrinaColumnType.text(),
+          // width: 80,
+          frozen: TrinaColumnFrozen.start,
+          sort: TrinaColumnSort.ascending,
+          readOnly: true,
+        ),
+        TrinaColumn(
+          title: 'Calif',
+          field: 'evaluation',
+          type: TrinaColumnType.number(
+            negative: false,
+          ),
+        ),
+        TrinaColumn(
+            title: 'idCalif',
+            field: 'idCicloEscolar',
+            type: TrinaColumnType.number(negative: false),
+            hide: true,
+            readOnly: true),
+        TrinaColumn(
+            title: 'Faltas',
+            hide: hideAbsencesColumn,
+            field: 'absence_eval',
+            type: TrinaColumnType.number(negative: false)),
+        TrinaColumn(
+            title: homeWorkColumnTitle ?? 'Tareas',
+            hide: hideHomeworksColumn,
+            field: 'homework_eval',
+            type: TrinaColumnType.number(negative: false)),
+        TrinaColumn(
+            title: disciplineColumnTitle ?? 'Disciplina',
+            hide: hideDisciplineColumn,
+            field: 'discipline_eval',
+            type: TrinaColumnType.number(negative: false)),
+        TrinaColumn(
+            title: 'Comentarios',
+            field: 'comment',
+            hide: true,
+            type: TrinaColumnType.select(commentStringEval,
+                enableColumnFilter: true)),
+        TrinaColumn(
+            title: 'Habitos',
+            hide: hideHabitsColumn,
+            field: 'habit_eval',
+            type: TrinaColumnType.number(negative: false)),
+        // TrinaColumn(
+        //     title: 'Uniforme',
+        //     hide: hideOutfitColumn,
+        //     field: 'outfit',
+        //     type: TrinaColumnType.number(negative: false)),
+      ];
 
   @override
   Widget build(BuildContext context) {
@@ -241,44 +360,56 @@ class _GradesByStudentState extends State<GradesByStudent> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Flexible(child: RefreshButton(onPressed: () async {
-                  studentGradesBodyToUpgrade.clear();
-                  if (isUserAdmin || isUserAcademicCoord) {
-                    //Calendar month number
-                    monthNumber =
-                        getKeyFromValue(spanishMonthsMap, selectedTempMonth!);
-                  } else {
-                    //Calendar month number
-                    monthNumber = getKeyFromValue(
-                        spanishMonthsMap, selectedCurrentTempMonth!);
-                  }
-                  if (selectedTempGroup == null || selectedTempGroup == '') {
-                    return showEmptyFieldAlertDialog(
-                        context, 'Seleccionar un grupo a evaluar');
-                  }
-                  if (selectedTempGrade == null || selectedTempGrade == '') {
-                    return showEmptyFieldAlertDialog(
-                        context, 'Seleccionar un grado a evaluar');
-                  }
-                  if (selectedTempCampus == null || selectedTempCampus == '') {
-                    return showEmptyFieldAlertDialog(
-                        context, 'Seleccionar un campus a evaluar');
-                  }
-                  if (monthNumber == null || monthNumber == '') {
-                    return showEmptyFieldAlertDialog(
-                        context, 'Seleccionar un mes a evaluar');
-                  } else {
+                  try {
                     setState(() {
                       isFetching = true;
                     });
-                    await searchBUttonAction(
-                      selectedTempGroup!,
-                      selectedTempGrade!,
-                      monthNumber!,
-                      selectedTempCampus!,
-                    ).whenComplete(() {
+                    studentGradesBodyToUpgrade.clear();
+                    if (isUserAdmin || isUserAcademicCoord) {
+                      //Calendar month number
+                      monthNumber =
+                          getKeyFromValue(spanishMonthsMap, selectedTempMonth!);
+                    } else {
                       setState(() {
-                        isFetching = false;
+                        selectedCurrentTempMonth = currentMonth.toCapitalized;
                       });
+                      //Calendar month number
+                      monthNumber = getKeyFromValue(
+                          spanishMonthsMap, selectedCurrentTempMonth!);
+                    }
+                    if (selectedTempGroup == null || selectedTempGroup == '') {
+                      return showEmptyFieldAlertDialog(
+                          context, 'Seleccionar un grupo a evaluar');
+                    }
+                    if (selectedTempGrade == null || selectedTempGrade == '') {
+                      return showEmptyFieldAlertDialog(
+                          context, 'Seleccionar un grado a evaluar');
+                    }
+                    if (selectedTempCampus == null ||
+                        selectedTempCampus == '') {
+                      return showEmptyFieldAlertDialog(
+                          context, 'Seleccionar un campus a evaluar');
+                    }
+                    if (monthNumber == null || monthNumber == '') {
+                      return showEmptyFieldAlertDialog(
+                          context, 'Seleccionar un mes a evaluar');
+                    } else {
+                      await searchBUttonAction(
+                        selectedTempGroup!,
+                        selectedTempGrade!,
+                        monthNumber!,
+                        selectedTempCampus!,
+                      ).whenComplete(() {
+                        setState(() {
+                          isFetching = false;
+                        });
+                      });
+                    }
+                  } catch (e) {
+                    setState(() {
+                      isFetching = false;
+                      insertErrorLog(e.toString(), 'REFRESH BUTTON');
+                      showErrorFromBackend(context, e.toString());
                     });
                   }
                 })),
@@ -383,6 +514,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
                         children: [
                           Expanded(
                               child: TrinaGrid(
+                                  key: studentsGridKey,
                                   //Grid for students name and ID
                                   columns: studentColumnsToEvaluateByStudent,
                                   rows: studentEvaluationRows,
@@ -446,10 +578,34 @@ class _GradesByStudentState extends State<GradesByStudent> {
                                     Expanded(
                                       child: selectedStudentRows.isNotEmpty
                                           ? TrinaGrid(
+                                              key: evalsGridKey,
                                               // mode: TrinaGridMode.select,
                                               columns: gradesByStudentColumns,
                                               rows: selectedStudentRows,
                                               onChanged: (event) {
+                                                // Validator to avoid double type numbers for 'Calif' column
+                                                if (event.column.field ==
+                                                    'evaluation') {
+                                                  // Only allow integers (no decimals)
+                                                  if (event.value is double ||
+                                                      (event.value is String &&
+                                                          event.value
+                                                              .contains('.'))) {
+                                                    showErrorFromBackend(
+                                                        context,
+                                                        'Solo se permiten números enteros en la calificación.');
+                                                    return; // Prevent further processing
+                                                  }
+                                                  // Optionally, also check if it's not a number at all
+                                                  if (int.tryParse(
+                                                          event.toString()) ==
+                                                      null) {
+                                                    showErrorFromBackend(
+                                                        context,
+                                                        'Ingrese solo números enteros válidos.');
+                                                    return;
+                                                  }
+                                                }
                                                 var newValue =
                                                     validateNewGradeValue(
                                                         event.value,
@@ -577,6 +733,10 @@ class _GradesByStudentState extends State<GradesByStudent> {
         showEmptyFieldAlertDialog(context, 'Seleccionar mes a evaluar');
       }
     }
+  }
+
+  void handleCommentsRefresh(int gradeSequence) async {
+    try {} catch (e) {}
   }
 
   void selectRowByName(TrinaGridStateManager stateManager, String columnField,
@@ -712,7 +872,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
           'absence_eval': TrinaCell(value: student.absence),
           'homework_eval': TrinaCell(value: student.homework),
           'discipline_eval': TrinaCell(value: student.discipline),
-          // 'comment': TrinaCell(value: student.comment),
+          'comment': TrinaCell(value: student.comment),
           'habit_eval': TrinaCell(value: student.habits_evaluation),
           'other': TrinaCell(value: student.other),
           'outfit': TrinaCell(value: student.outfit),
@@ -727,12 +887,31 @@ class _GradesByStudentState extends State<GradesByStudent> {
     // }
   }
 
-  Future<List<TrinaRow>> populateAsignatedComments(
-      int grade, month, bool byStudent, String studentid) async {
-    commentsAsignated.clear();
-    commentsAsignated =
-        await getCommentsAsignatedToStudent(grade, byStudent, studentid, month);
-
-    return rows;
+  void displayColumnsByGrade(int grade) {
+    if ((grade < 12) && (grade > 6)) {
+      hideCommentsColumn = false; // Comentarios
+      hideAbsencesColumn = true; // Faltas
+      hideHomeworksColumn = false; // Tareas
+      hideDisciplineColumn = false; //Disciplina
+      hideHabitsColumn = true;
+      hideOutfitColumn = true;
+      homeWorkColumnTitle = 'Hab';
+      disciplineColumnTitle = 'Con';
+    } else if ((grade < 6 && grade > 0)) {
+      hideCommentsColumn = true;
+      hideAbsencesColumn = true; // Faltas
+      hideHomeworksColumn = true; // Tareas
+      hideDisciplineColumn = true; //Disciplina
+      hideHabitsColumn = true; //Habits
+      hideOutfitColumn = true;
+    } else if (grade > 11) {
+      hideCommentsColumn = true;
+      hideAbsencesColumn = false; // Faltas
+      hideHomeworksColumn = false; // Tareas
+      hideDisciplineColumn = true; //Disciplina
+      hideHabitsColumn = true;
+      hideOutfitColumn = true;
+      homeWorkColumnTitle = 'R';
+    }
   }
 }

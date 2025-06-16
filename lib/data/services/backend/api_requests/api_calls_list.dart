@@ -547,7 +547,7 @@ Future<dynamic> getWorkDepartments() async {
         persistCookies: false,
         timeoutSeconds: 15);
     apiCall.raiseForStatus();
-    return apiCall.body;
+    return apiCall;
   } catch (e) {
     throw Future.error(e.toString());
   }
@@ -690,7 +690,7 @@ Future<dynamic> getTeacherGradeAndCourses(var employee, var year, int month,
         persistCookies: false,
         timeoutSeconds: 40);
     apiCall.raiseForStatus();
-    return apiCall.body;
+    return apiCall;
   } catch (e) {
     if (e is TimeoutException) {
       insertErrorLog(e.toString(), 'acad/teacher/start-student-rating');
@@ -733,8 +733,16 @@ Future<dynamic> getTeacherGradeAndCoursesAsAdmin(int month, bool isAdmin,
 }
 
 //Function to get all students grades/evaluations value by group, subjects, grades, month and cycle
-Future<dynamic> getStudentsToGrade(String assignature, String group,
-    String grade, String? cycle, String? campus, String month) async {
+Future<dynamic> getStudentsToGrade(
+    String assignature,
+    String group,
+    String grade,
+    String? cycle,
+    String? campus,
+    String month,
+    bool isAdmin,
+    bool isAcademicCoord,
+    int? teacher) async {
   try {
     SharedPreferences devicePrefs = await SharedPreferences.getInstance();
     var apiCall = await Requests.get(
@@ -749,10 +757,13 @@ Future<dynamic> getStudentsToGrade(String assignature, String group,
           "subject": assignature,
           "cycle": cycle,
           "campus": campus,
-          "month": month
+          "month": month,
+          "flag1": isAdmin,
+          "flag2": isAcademicCoord,
+          "teacher": teacher
         },
         persistCookies: false,
-        timeoutSeconds: 20);
+        timeoutSeconds: 25);
     apiCall.raiseForStatus();
     return apiCall;
   } catch (e) {
@@ -799,8 +810,8 @@ Future<dynamic> getStudentsGrades(
 }
 
 //getSubjectsAndGradeByStuent will get based on the current teacher consuming the API.
-Future<dynamic> getSubjectsAndGradeByStuent(
-    String? group, grade, cycle, campus, month) async {
+Future<dynamic> getSubjectsAndGradeByStuent(String? group, grade, cycle, campus,
+    month, bool isAdmin, bool isAcademicCoord, int? teacher) async {
   try {
     SharedPreferences devicePrefs = await SharedPreferences.getInstance();
     var apiCall = await Requests.get(
@@ -818,7 +829,10 @@ Future<dynamic> getSubjectsAndGradeByStuent(
           "history":
               0, //0 means all students, if history : 1 , will return all history from a single student and youll need to send studenID as param
           "assignature": "null", //Set null to return all subjects
-          "value": "all" //set all to return all students by cycle and
+          "value": "all", //set all to return all students by cycle and
+          "flag1": isAdmin,
+          "flag2": isAcademicCoord,
+          "teacher": teacher
         },
         timeoutSeconds: 20,
         persistCookies: false);
@@ -865,44 +879,28 @@ Future<dynamic> patchStudentsGrades(
   }
 }
 
-//!Not using for now
-Future<dynamic> getStudentsGradesComments(
-    int grade, bool searchById, String? id, int? month) async {
-  http.Response response;
+//* Function to get evaluations comments by gradeSequence
+// Used to get all available comments for a grade
+Future<dynamic> getStudentsGradesComments(int grade) async {
   try {
-    if (searchById) {
-      var apiCall = await Requests.get(
-          '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/student/comments',
-          headers: {
-            'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-            // 'ip_address': deviceIp.toString(),
-            'Auth': currentUser!.token
-          },
-          queryParameters: {
-            "student": id,
-            "cycle": currentCycle!.claCiclo,
-            "month": month
-          },
-          timeoutSeconds: 20,
-          persistCookies: false);
-      apiCall.raiseForStatus();
-      response = apiCall;
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
+    var apiCall = await Requests.get(
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/evaluations/comments/',
+        headers: {
+          'Authorization': devicePrefs.getString('token')!,
+          'Content-Type': 'application/json',
+        },
+        queryParameters: {"grade": grade},
+        persistCookies: false);
+    apiCall.raiseForStatus();
+    if (apiCall.statusCode == 200) {
+      return json.decode(utf8.decode(apiCall
+          .bodyBytes)); //* Returns data formated and decoded using utf8 encoding for latin and spanish characteres
     } else {
-      var apiCall = await Requests.get(
-          '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/school-rating/comments',
-          headers: {
-            'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-            // 'ip_address': deviceIp.toString(),
-            'Auth': currentUser!.token
-          },
-          queryParameters: {"grade": grade},
-          persistCookies: false);
-      apiCall.raiseForStatus();
-      response = apiCall;
+      throw Future.error(apiCall.body);
     }
-    return response;
   } catch (e) {
-    return throw FormatException(e.toString());
+    throw FormatException(e.toString());
   }
 }
 

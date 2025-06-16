@@ -17,7 +17,7 @@ var deviceInformation = <String, dynamic>{};
 String? deviceIp;
 
 void clearUserData() {
-  currentUser?.clear();
+  currentUser = null;
   currentCycle?.clear();
   currentUser = null;
   _grades = null;
