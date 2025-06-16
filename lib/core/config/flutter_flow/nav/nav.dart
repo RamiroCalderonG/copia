@@ -5,6 +5,7 @@ import 'package:oxschool/core/utils/update_installer.dart';
 import 'package:oxschool/presentation/Modules/academic/academic_awards/academic_awards_main.dart';
 import 'package:oxschool/presentation/Modules/academic/academic_reports/academic_report_main_screen.dart';
 import 'package:oxschool/presentation/Modules/academic/academic_reports/poor_performance.dart';
+import 'package:oxschool/presentation/Modules/academic/academic_reports/reports_screen.dart';
 import 'package:oxschool/presentation/Modules/academic/discipline/discipline_screen.dart';
 import 'package:oxschool/presentation/Modules/academic/school%20grades/fo_dac_27.dart';
 import 'package:oxschool/presentation/Modules/academic/school%20grades/grades_main_screen.dart';
@@ -98,7 +99,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
             name: 'AcademicReportMainScreen()',
             path: '/academicReports',
-            builder: (context, params) => const AcademicReportMainScreen()),
+            builder: (context, params) => ReportSelectionScreen()),
         FFRoute(
             name: 'PoorPerformance()',
             path: '/poorAcademicPerformance',

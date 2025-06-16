@@ -5,6 +5,7 @@ import 'package:oxschool/core/reusable_methods/device_functions.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/core/reusable_methods/translate_messages.dart';
 import 'package:oxschool/core/utils/loader_indicator.dart';
+import 'package:oxschool/data/datasources/temp/studens_temp.dart';
 import 'package:oxschool/presentation/Modules/academic/school%20grades/fo_dac_27.dart';
 import 'package:oxschool/presentation/Modules/academic/school%20grades/grades_by_asignature.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
@@ -96,6 +97,7 @@ class _GradesMainScreenState extends State<GradesMainScreen>
     preSelectedUnity = null;
     jsonDataForDropDownMenuClass.clear();
     _tabController?.dispose();
+    selectedTempMonth = null;
     super.dispose();
   }
 
@@ -111,8 +113,12 @@ class _GradesMainScreenState extends State<GradesMainScreen>
         isSearching = true;
       });
       if (isUserAdmin || isUserAcdemicCoord) {
-        canEvaluateNow = true;
-        campus = currentUser!.claUn;
+        setState(() {
+          canEvaluateNow = true;
+          campus = currentUser!.claUn;
+        });
+        // canEvaluateNow = true;
+        // campus = currentUser!.claUn;
       } else {
         //Fetch dates for evaluations, if not current date will not fetch student data
         canEvaluateNow = await isDateToEvaluateStudents().catchError((onError) {

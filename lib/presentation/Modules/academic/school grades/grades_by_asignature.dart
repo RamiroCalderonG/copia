@@ -13,7 +13,7 @@ import '../../../../data/Models/Student_eval.dart';
 
 import '../../../../data/datasources/temp/studens_temp.dart';
 import '../../../../data/services/backend/api_requests/api_calls_list.dart';
-import '../../../../core/constants/Student.dart';
+
 import '../../../../core/constants/date_constants.dart';
 
 import '../../../../core/config/flutter_flow/flutter_flow_util.dart';
@@ -61,6 +61,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
   String? asignatureNameListener;
   String? selectedStudentName;
   // var gradeInt;
+  Key trinaGridKey = UniqueKey();
   int? monthNumber;
   String monthValue = isUserAdmin || isUserAcademicCoord
       ? academicMonthsList.first
@@ -70,6 +71,15 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
   String campusSelected = '';
   bool isLoading = true;
   var fetchedData;
+
+  bool hideCommentsColumn = false;
+  bool hideAbsencesColumn = false;
+  bool hideHomeworksColumn = false;
+  bool hideDisciplineColumn = false;
+  bool hideHabitsColumn = false;
+  bool hideOutfitColumn = false;
+  String? homeWorkColumnTitle;
+  String? disciplineColumnTitle;
 
   /// Whether the teacher teaches multiple campuses.
   bool teacherTeachMultipleCampuses = false;
@@ -88,6 +98,95 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
     selectedCurrentTempMonth = null;
     super.dispose();
   }
+
+  List<TrinaColumn> get assignaturesColumns => [
+        //TO USE at grades_by_assignature
+        TrinaColumn(
+          title: 'No.Lista',
+          field: 'No',
+          width: 20,
+          type: TrinaColumnType.number(),
+          readOnly: true,
+        ),
+        TrinaColumn(
+            title: 'Matricula',
+            field: 'Matricula',
+            type: TrinaColumnType.text(),
+            readOnly: true,
+            width: 100),
+        TrinaColumn(
+          title: 'Nombre del alumno',
+          field: 'Nombre',
+          type: TrinaColumnType.text(),
+          readOnly: true,
+        ),
+        TrinaColumn(
+            title: 'Apellido paterno',
+            field: 'Apellido paterno',
+            type: TrinaColumnType.text(),
+            readOnly: true,
+            //sort: TrinaColumnSort.ascending,
+            width: 150),
+        TrinaColumn(
+            title: 'Apellido materno',
+            field: 'Apellido materno',
+            type: TrinaColumnType.text(),
+            readOnly: true,
+            //sort: TrinaColumnSort.ascending,
+            width: 150),
+        TrinaColumn(
+            title: 'Calif',
+            field: 'Calif',
+            type: TrinaColumnType.number(negative: false, format: '##'),
+            readOnly: false,
+            width: 100),
+        TrinaColumn(
+            title: 'idCalif',
+            field: 'idCalif',
+            type: TrinaColumnType.number(negative: false),
+            hide: true),
+        TrinaColumn(
+            hide: hideAbsencesColumn,
+            title: 'Faltas',
+            field: 'Ausencia',
+            type: TrinaColumnType.number(negative: false, format: '#'),
+            readOnly: false,
+            width: 100),
+        TrinaColumn(
+            hide: hideHomeworksColumn,
+            title: homeWorkColumnTitle ?? 'Tareas',
+            field: 'Tareas',
+            type: TrinaColumnType.number(negative: false),
+            readOnly: false,
+            width: 100),
+        TrinaColumn(
+            hide: hideDisciplineColumn,
+            title: disciplineColumnTitle ?? 'Conducta',
+            field: 'Conducta',
+            type: TrinaColumnType.number(negative: false),
+            readOnly: false,
+            width: 100),
+        // TrinaColumn(
+        //     hide: true,
+        //     title: 'Uniforme',
+        //     field: 'Uniforme',
+        //     type: TrinaColumnType.number(negative: false),
+        //     readOnly: hideOutfitColumn,
+        //     width: 100),
+        TrinaColumn(
+            title: 'Habitos',
+            hide: hideHabitsColumn,
+            field: 'habit_eval',
+            readOnly: true,
+            type: TrinaColumnType.number(negative: false)),
+        TrinaColumn(
+            hide: hideCommentsColumn,
+            title: 'Comentarios',
+            field: 'Comentarios',
+            type: TrinaColumnType.text(),
+            readOnly: false,
+            width: 200),
+      ];
 
   /// Fills the grid with data from the backend.
   ///
@@ -115,38 +214,78 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
     });
   }
 
-  /// Searches for grades based on the selected parameters.
-  ///
-  /// [groupSelected] is the selected group.
-  /// [gradeInt] is the selected grade.
-  /// [assignatureID] is the selected assignature ID.
-  /// [monthNumber] is the selected month number.
-  /// [campus] is the selected campus.
-  Future<void> searchBUttonAction(String groupSelected, String gradeInt,
-      String assignatureID, String month, String campus) async {
+  Future<void> searchBUttonAction(
+    String groupSelected,
+    String gradeInt,
+    String assignatureID,
+    String month,
+    String campus,
+  ) async {
     try {
-      studentList = await getStudentsByAssinature(
-          groupSelected, gradeInt, assignatureID, month, campus);
-
-      await fillGrid(studentList);
       setState(() {
         isLoading = true;
+      });
+      int? teacherNumber;
+      if (isUserAdmin || isUserAcademicCoord) {
+        teacherNumber = null;
+      } else {
+        teacherNumber = currentUser!.employeeNumber;
+      }
+      studentList = await getStudentsByAssinature(
+          groupSelected, gradeInt, assignatureID, month, campus, teacherNumber);
+
+      // Get evaluations comments by gradeSequence
+      if (studentList.isNotEmpty) {
+        studentsGradesCommentsRows =
+            await getEvaluationsCommentsByGradeSequence(selectedTempGrade!);
+      } else {
+        throw Exception(
+          'No se encontraron alumnos para el grupo seleccionado: $groupSelected, grado: $gradeInt, ciclo: ${currentCycle!.claCiclo}, campus: $campusSelected, mes: $month',
+        );
+      }
+
+      await fillGrid(studentList);
+
+      setState(() {
+        displayColumnsByGrade(selectedTempGrade!);
         assignatureRows.clear();
-        var index = 0;
         for (var item in studentList) {
           assignatureRows.add(TrinaRow(cells: {
-            'No': TrinaCell(value: index + 1),
+            'No': TrinaCell(value: item.sequentialNumber ?? 0),
             'Matricula': TrinaCell(value: item.studentID),
             'Nombre': TrinaCell(value: item.studentName),
             'Apellido paterno': TrinaCell(value: item.student1LastName),
             'Apellido materno': TrinaCell(value: item.student2LastName),
             'Calif': TrinaCell(value: item.evaluation),
             'idCalif': TrinaCell(value: item.rateID),
+            'Ausencia': TrinaCell(value: item.absence ?? 0),
+            'Tareas': TrinaCell(value: item.homework ?? 0),
+            'Conducta': TrinaCell(value: item.discipline ?? 0),
+            'habit_eval': TrinaCell(value: item.habits_evaluation ?? 0),
+            'Comentarios': TrinaCell(
+              value: item.comment != null && item.comment != 0
+                  ? item.comment.toString()
+                  : '',
+            ),
           }));
         }
-      });
-      setState(() {
-        isLoading = false;
+        setState(() {
+          selectedTempCampus = campus;
+          selectedTempGrade = int.parse(gradeInt);
+          selectedTempSubjectId = int.parse(assignatureID);
+
+          // Call displayColumnsByGrade BEFORE updating trinaGridKey
+          displayColumnsByGrade(selectedTempGrade!);
+
+          // Force grid rebuild with new key AFTER visibility flags are set
+          trinaGridKey = UniqueKey();
+
+          isLoading = false;
+        });
+        // selectedTempCampus = campus;
+        // selectedTempGrade = int.parse(gradeInt);
+        // selectedTempSubjectId = int.parse(assignatureID);
+        // isLoading = false;
       });
     } catch (e) {
       setState(() {
@@ -180,6 +319,34 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
 
   @override
   Widget build(BuildContext context) {
+    // dynamic gradesGridWidget = TrinaGrid(
+    //   key: trinaGridKey,
+    //   mode: TrinaGridMode.normal,
+    //   columns: assignaturesColumns,
+    //   rows: assignatureRows,
+    //   onChanged: (event) {
+    //     // Validator to avoid double type numbers for 'Calif' column
+    //     final idEval = event.row.cells['idCalif']?.value as int;
+
+    //     var newValue = validateNewGradeValue(
+    //         //Validate values cant be les that 50
+    //         event.value,
+    //         event.column.title);
+    //     composeUpdateStudentGradesBody(event.column.title, newValue, idEval);
+    //   },
+    //   configuration: TrinaGridConfiguration(
+    //       columnSize:
+    //           TrinaGridColumnSizeConfig(autoSizeMode: TrinaAutoSizeMode.scale),
+    //       scrollbar: TrinaGridScrollbarConfig(
+    //         isAlwaysShown: true,
+    //         //scrollBarColor: Colors.red
+    //       )),
+    //   createFooter: (stateManager) {
+    //     stateManager.setPageSize(30, notify: false); // default 40
+    //     return TrinaPagination(stateManager);
+    //   },
+    // );
+
     return isLoading
         ? const CustomLoadingIndicator()
         : SizedBox(
@@ -234,14 +401,12 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Flexible(
-                  child: RefreshButton(onPressed: () {
+                  child: RefreshButton(onPressed: () async {
                     studentGradesBodyToUpgrade.clear();
                     setState(() {
                       isLoading = true;
                     });
                     try {
-                      // isUserAdmin = currentUser!.isCurrentUserAdmin();
-
                       if (isUserAdmin || isUserAcademicCoord) {
                         //Get month number
                         monthNumber = getKeyFromValue(
@@ -253,11 +418,8 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                       // get assignature id number
                       var assignatureID = selectedTempSubjectId;
 
-                      // var gradeInt = getKeyFromValue(
-                      //     teacherGradesMap, selectedTempGrade!.toString());
-
                       if (assignatureID != null && assignatureID != 0) {
-                        searchBUttonAction(
+                        await searchBUttonAction(
                             selectedTempGroup!,
                             selectedTempGrade.toString(),
                             assignatureID.toString(),
@@ -268,10 +430,6 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                         showInformationDialog(context, 'Alerta!',
                             'No se detectó una asignatura, vuelva a intentar.');
                       }
-
-                      // setState(() {
-                      //   isLoading = false;
-                      // });
                     } catch (e) {
                       insertErrorLog(
                           e.toString(), 'SEARCH STUDENTS BY SUBJECTS ');
@@ -288,9 +446,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                 const SizedBox(width: 10),
                 Flexible(
                   child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                        // backgroundColor: Colors.red[400],
-                        ),
+                    style: ElevatedButton.styleFrom(),
                     onPressed: () async {
                       setState(() {
                         isLoading = true;
@@ -366,38 +522,83 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                     ),
                   );
                 } else {
-                  return StatefulBuilder(
-                    builder: (context, setState) {
-                      return TrinaGrid(
-                        mode: TrinaGridMode.normal,
-                        columns: assignaturesColumns,
-                        rows: assignatureRows,
-                        onChanged: (event) {
-                          final idEval =
-                              event.row.cells['idCalif']?.value as int;
+                  // return StatefulBuilder(
+                  //   // key: trinaGridKey,
+                  //   builder: (context, setState) {
+                  return TrinaGrid(
+                    key: trinaGridKey,
+                    mode: TrinaGridMode.normal,
+                    columns: assignaturesColumns,
+                    rows: assignatureRows,
+                    onChanged: (event) {
+                      // Validator to avoid double type numbers for 'Calif' column
+                      final idEval = event.row.cells['idCalif']?.value as int;
 
-                          var newValue = validateNewGradeValue(
-                              //Validate values cant be les that 50
-                              event.value,
-                              event.column.title);
-                          composeUpdateStudentGradesBody(
-                              event.column.title, newValue, idEval);
-                        },
-                        configuration: TrinaGridConfiguration(
-                            columnSize: TrinaGridColumnSizeConfig(
-                                autoSizeMode: TrinaAutoSizeMode.scale),
-                            scrollbar: TrinaGridScrollbarConfig(
-                              isAlwaysShown: true,
-                              //scrollBarColor: Colors.red
-                            )),
-                        createFooter: (stateManager) {
-                          stateManager.setPageSize(30,
-                              notify: false); // default 40
-                          return TrinaPagination(stateManager);
-                        },
-                      );
+                      var newValue = validateNewGradeValue(
+                          //Validate values cant be les that 50
+                          event.value,
+                          event.column.title);
+                      composeUpdateStudentGradesBody(
+                          event.column.title, newValue, idEval);
+                    },
+                    onLoaded: (event) {
+                      event.stateManager
+                          .setSelectingMode(TrinaGridSelectingMode.cell);
+                      TrinaGridStateManager stateManager = event.stateManager;
+
+                      // Apply column visibility based on selectedTempGrade
+                      if (selectedTempGrade != null) {
+                        // Safe column finder helper function
+                        void safeSetColumnVisibility(
+                            String fieldName, bool hide) {
+                          final columnIndex = stateManager.columns
+                              .indexWhere((col) => col.field == fieldName);
+                          if (columnIndex >= 0) {
+                            stateManager.hideColumn(
+                                stateManager.columns[columnIndex], hide,
+                                notify: true); // Changed to notify: true
+                          }
+                        }
+
+                        // Comments column
+                        safeSetColumnVisibility(
+                            'Comentarios', hideCommentsColumn);
+
+                        // Absences column
+                        safeSetColumnVisibility('Ausencia', hideAbsencesColumn);
+
+                        // Homeworks column
+                        safeSetColumnVisibility('Tareas', hideHomeworksColumn);
+
+                        // Discipline column
+                        safeSetColumnVisibility(
+                            'Conducta', hideDisciplineColumn);
+
+                        // Habits column
+                        safeSetColumnVisibility('habit_eval', hideHabitsColumn);
+                      }
+
+                      // Apply any other grid configurations you need
+                      stateManager.setPageSize(30, notify: true);
+                    },
+                    configuration: TrinaGridConfiguration(
+                        style: TrinaGridStyleConfig(
+                          borderColor: Colors.grey.shade300,
+                        ),
+                        columnSize: TrinaGridColumnSizeConfig(
+                            autoSizeMode: TrinaAutoSizeMode.scale),
+                        scrollbar: TrinaGridScrollbarConfig(
+                          isAlwaysShown: true,
+                          //scrollBarColor: Colors.red
+                        )),
+                    createFooter: (stateManager) {
+                      stateManager.setPageSize(30, notify: false); // default 40
+                      return TrinaPagination(stateManager);
                     },
                   );
+                  //     },
+                  //   );
+                  // }
                 }
               })),
         ],
@@ -498,5 +699,36 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
             subjectName: subjectName,
           );
         });
+  }
+
+  void displayColumnsByGrade(int grade) {
+    // setState(() {
+    if ((grade < 12) && (grade > 6)) {
+      hideCommentsColumn = false; // Comentarios
+      hideAbsencesColumn = true; // Faltas
+      hideHomeworksColumn = false; // Tareas
+      hideDisciplineColumn = false; //Disciplina
+      hideHabitsColumn = true;
+      hideOutfitColumn = true;
+      homeWorkColumnTitle = 'Hab';
+      disciplineColumnTitle = 'Con';
+    } else if ((grade < 6 && grade > 0)) {
+      hideCommentsColumn = true;
+      hideAbsencesColumn = true; // Faltas
+      hideHomeworksColumn = true; // Tareas
+      hideDisciplineColumn = true; //Disciplina
+      hideHabitsColumn = true; //Habits
+      hideOutfitColumn = true;
+    } else if (grade > 11) {
+      hideCommentsColumn = true;
+      hideAbsencesColumn = false; // Faltas
+      hideHomeworksColumn = false; // Tareas
+      hideDisciplineColumn = true; //Disciplina
+      hideHabitsColumn = true;
+      hideOutfitColumn = true;
+      homeWorkColumnTitle = 'R';
+    }
+    trinaGridKey = UniqueKey();
+    // });
   }
 }
