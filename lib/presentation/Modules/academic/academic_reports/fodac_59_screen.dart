@@ -19,6 +19,7 @@ class Fodac59Screen extends StatefulWidget {
 
 class _Fodac59ScreenState extends State<Fodac59Screen> {
   bool? includeDeactivatedStudent = false;
+  List<DropdownMenuItem<String>> groups = [];
   bool? includeValidation = false;
   String? selectedGrade;
   String? selectedGroup;
@@ -30,9 +31,18 @@ class _Fodac59ScreenState extends State<Fodac59Screen> {
     super.initState();
     setState(() {
       selectedGrade = widget.gardesGroups.values.first;
-      selectedGroup = widget.gradeSeqGroup.values.first;
+      // selectedGroup = widget.gradeSeqGroup.values.first;
       selectedStudent = ' ';
       selectedMonth = 'Enero';
+      var groupsList = widget.gradeSeqGroup.values.toSet().toList();
+
+      groups = groupsList
+          .map((item) => DropdownMenuItem<String>(
+                value: item,
+                child: Text(item ?? ''),
+              ))
+          .toList();
+      // selectedGroup = groups.first.value;
     });
   }
 
@@ -84,22 +94,21 @@ class _Fodac59ScreenState extends State<Fodac59Screen> {
             ),
             const SizedBox(width: 10),
             Column(
-              // crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 DropdownButton<String>(
                   value: selectedGrade,
                   hint: Text('Grado...'),
-                  items: ['Item 1', 'Item 2', 'Item 3']
+                  items: widget.gardesGroups.keys
+                      .toSet() // Convert to Set to get unique values
                       .map((item) => DropdownMenuItem<String>(
-                            value: item,
-                            child: Text(item),
+                            value: item?.toString(),
+                            child: Text(widget.gardesGroups[item] ?? ''),
                           ))
                       .toList(),
                   onChanged: (String? value) {
                     setState(() {
                       selectedGrade = value;
                     });
-                    // selectedGrade = value;
                   },
                 ),
                 Text('Grado'),
@@ -107,22 +116,23 @@ class _Fodac59ScreenState extends State<Fodac59Screen> {
             ),
             const SizedBox(width: 10),
             Column(
-              // crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 DropdownButton<String>(
-                  value: selectedGroup,
+                  value: '',
                   hint: Text('Grupo...'),
-                  items: ['Item 1', 'Item 2', 'Item 3']
-                      .map((item) => DropdownMenuItem<String>(
-                            value: item,
-                            child: Text(item),
-                          ))
-                      .toList(),
+                  items: groups,
+                  // widget.gradeSeqGroup.values
+                  //     .toSet() // Convert to Set to get unique values
+                  //     .toList() // Convert back to List
+                  //     .map((item) => DropdownMenuItem<String>(
+                  //           value: item,
+                  //           child: Text(item ?? ''),
+                  //         ))
+                  //     .toList(),
                   onChanged: (String? value) {
                     setState(() {
                       selectedGroup = value;
                     });
-                    // selectedGroup = value;
                   },
                 ),
                 Text('Grupo'),
@@ -166,22 +176,21 @@ class _Fodac59ScreenState extends State<Fodac59Screen> {
             ),
             const SizedBox(width: 10),
             Column(
-              // crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 DropdownButton<String>(
                   value: selectedStudent,
                   hint: Text('Alumno...'),
-                  items: ['Item 1', 'Item 2', 'Item 3']
-                      .map((item) => DropdownMenuItem<String>(
-                            value: item,
-                            child: Text(item),
-                          ))
-                      .toList(),
+                  items:
+                      [' ', ...widget.studentsList.map((s) => s.nombre ?? '')]
+                          .map((item) => DropdownMenuItem<String>(
+                                value: item,
+                                child: Text(item),
+                              ))
+                          .toList(),
                   onChanged: (String? value) {
                     setState(() {
                       selectedStudent = value;
                     });
-                    // selectedStudent = value;
                   },
                 ),
                 Text('Alumno'),

@@ -888,27 +888,27 @@ class _GradesByStudentState extends State<GradesByStudent> {
   }
 
   void displayColumnsByGrade(int grade) {
-    if (grade < 12) {
-      hideCommentsColumn = false;
+    if ((grade < 12) && (grade > 6)) {
+      hideCommentsColumn = false; // Comentarios
       hideAbsencesColumn = true; // Faltas
-      hideHomeworksColumn = true; // Tareas
+      hideHomeworksColumn = false; // Tareas
       hideDisciplineColumn = false; //Disciplina
-      hideHabitsColumn = false;
-      hideOutfitColumn = false;
+      hideHabitsColumn = true;
+      hideOutfitColumn = true;
       homeWorkColumnTitle = 'Hab';
       disciplineColumnTitle = 'Con';
-    } else if (grade < 6) {
-      hideCommentsColumn = false;
+    } else if ((grade < 6 && grade > 0)) {
+      hideCommentsColumn = true;
       hideAbsencesColumn = true; // Faltas
       hideHomeworksColumn = true; // Tareas
       hideDisciplineColumn = true; //Disciplina
-      hideHabitsColumn = true;
+      hideHabitsColumn = true; //Habits
       hideOutfitColumn = true;
-    } else {
-      hideCommentsColumn = false;
+    } else if (grade > 11) {
+      hideCommentsColumn = true;
       hideAbsencesColumn = false; // Faltas
       hideHomeworksColumn = false; // Tareas
-      hideDisciplineColumn = false; //Disciplina
+      hideDisciplineColumn = true; //Disciplina
       hideHabitsColumn = true;
       hideOutfitColumn = true;
       homeWorkColumnTitle = 'R';

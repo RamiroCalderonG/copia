@@ -27,13 +27,13 @@ class _AcademicReportMainScreenState extends State<AcademicReportMainScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
-    handleInitialLoading();
+    // _tabController = TabController(length: 4, vsync: this);
+    // handleInitialLoading();
   }
 
   @override
   void dispose() {
-    _tabController?.dispose();
+    // _tabController?.dispose();
     super.dispose();
   }
 
