@@ -23,13 +23,22 @@ Migración de sistema ERP para multiplataforma.
   *Pendiente crear script que ubique archivos y permisos necesarios que se ejecute con sudo*
 
 ### Versioning
-Para el manejo de versiones el concepto para aplciacion de escritorio es el siguiente:
-* Se contruye el proyecto para Windows y MacOS, posteriormente se carga en Github la nueva version como un release y en app_versions se crea un nuevo registro con la nueva version
+Para el manejo de versiones el procedimiento para aplciacion de escritorio es el siguiente:
+* Se contruye el proyecto para Windows y MacOS, posteriormente se carga en Github la nueva version como un release y en la tabla app_versions se crea un nuevo registro con la nueva version
 
 Pasos para Windows
 - Modificar Runner.rc con la version a contruir
+  - Modificar linea :
+   ```bash
+   define VERSION_AS_NUMBER [NEW_VERSION_NUMBER]
+  ```
+  
 - Construir .exe
-- Comprimir
+    ```bash
+  flutter build windows --release
+    ```
+  
+- Comprimir archivos generados en zip junto con script 
 - Cargar en Release de Github 
 
 **NOTA:**
@@ -37,7 +46,11 @@ Pasos para Windows
 
 Pasos para MacOS
 - Construir .app
-- Comprimir
+     ```bash
+  flutter build windows --release
+    ```
+  
+- Comprimir archivo .app en un archivo .zip
 - Cargar en Release de Github
 
 **NOTA:**
@@ -106,6 +119,12 @@ To run this project, you will need to add the following environment variables to
   **Dart SDK: 3.9.0 (build 3.9.0-100.2.beta)**
   **Flutter: 3.33.0-1.0.pre.11 • channel main**
   
+
+
+## Documentation
+[Dart Docs:](https://dart.dev/docs)
+[Java 23 Docs](https://docs.oracle.com/en/java/javase/23/)
+[Flutter Docs:](https://docs.flutter.dev/)
 
 
 ## Contributions
