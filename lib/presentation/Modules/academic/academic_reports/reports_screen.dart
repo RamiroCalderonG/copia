@@ -9,6 +9,7 @@ class ReportType {
   final IconData icon;
   final List<String> features;
   final Color iconColor;
+  final ReportParameters parameters;
 
   ReportType({
     required this.title,
@@ -16,6 +17,23 @@ class ReportType {
     required this.icon,
     required this.features,
     required this.iconColor,
+    this.parameters = const ReportParameters(),
+  });
+}
+
+class ReportParameters {
+  final bool needsGrade;
+  final bool needsGroup;
+  final bool needsMonth;
+  final bool needsStudent;
+  final bool needsDeactivatedOption;
+
+  const ReportParameters({
+    this.needsGrade = false,
+    this.needsGroup = false,
+    this.needsMonth = false,
+    this.needsStudent = false,
+    this.needsDeactivatedOption = false,
   });
 }
 
@@ -35,6 +53,35 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
   late List<AnimationController> _cardControllers;
   late List<Animation<double>> _cardAnimations;
 
+  String? selectedGrade;
+  String? selectedGroup;
+  String? selectedMonth;
+  String? selectedStudent;
+  bool includeDeactivatedStudents = false;
+
+  final List<String> grades = ['Kinder 1', 'Kinder 2', 'Kinder 3'];
+  final List<String> groups = ['A', 'B', 'C'];
+  final List<String> months = [
+    'Enero',
+    'Febrero',
+    'Marzo',
+    'Abril',
+    'Mayo',
+    'Junio',
+    'Julio',
+    'Agosto',
+    'Septiembre',
+    'Octubre',
+    'Noviembre',
+    'Diciembre'
+  ];
+  final List<String> students = [
+    'Todos',
+    'Estudiante 1',
+    'Estudiante 2',
+    'Estudiante 3'
+  ];
+
   final List<ReportType> reportTypes = [
     ReportType(
       title: 'FO-DAC-59 Kinder',
@@ -43,6 +90,13 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
       icon: Icons.analytics,
       features: ['PDF', 'Excel', 'Print'],
       iconColor: Color(0xFF174C93),
+      parameters: ReportParameters(
+        needsGrade: true,
+        needsGroup: true,
+        needsMonth: true,
+        needsStudent: true,
+        needsDeactivatedOption: true,
+      ),
     ),
     ReportType(
       title: 'FO-DAC-60 y 04 Semestral',
@@ -51,6 +105,13 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
       icon: Icons.bar_chart_rounded,
       features: ['PDF', 'Excel', 'Print'],
       iconColor: Color(0xFFEB3045),
+      parameters: ReportParameters(
+        needsGrade: false,
+        needsGroup: false,
+        needsMonth: false,
+        needsStudent: false,
+        needsDeactivatedOption: false,
+      ),
     ),
     ReportType(
       title: 'Faltantes Captura y Deudores',
@@ -59,6 +120,13 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
       icon: Icons.search_off,
       features: ['PDF', 'Excel', 'Print'],
       iconColor: Color(0xFF174C93),
+      parameters: ReportParameters(
+        needsGrade: false,
+        needsGroup: false,
+        needsMonth: false,
+        needsStudent: false,
+        needsDeactivatedOption: false,
+      ),
     ),
     ReportType(
       title: 'FO-DAC-15 Por Campus/Gdo/Alum.',
@@ -67,6 +135,13 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
       icon: Icons.palette,
       features: ['PDF', 'Excel', 'Print'],
       iconColor: Color(0xFFEB3045),
+      parameters: ReportParameters(
+        needsGrade: false,
+        needsGroup: false,
+        needsMonth: false,
+        needsStudent: false,
+        needsDeactivatedOption: false,
+      ),
     ),
     ReportType(
       title: 'FO-DAC-62 Anual',
@@ -75,6 +150,13 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
       icon: Icons.view_week_rounded,
       features: ['PDF', 'Excel', 'Print'],
       iconColor: Color(0xFF174C93),
+      parameters: ReportParameters(
+        needsGrade: false,
+        needsGroup: false,
+        needsMonth: false,
+        needsStudent: false,
+        needsDeactivatedOption: false,
+      ),
     ),
     ReportType(
       title: 'FO-DAC-29 y FO-DAC-31',
@@ -83,6 +165,13 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
       icon: Icons.workspace_premium_rounded,
       features: ['PDF', 'Excel', 'Print'],
       iconColor: Color(0xFFEB3045),
+      parameters: ReportParameters(
+        needsGrade: false,
+        needsGroup: false,
+        needsMonth: false,
+        needsStudent: false,
+        needsDeactivatedOption: false,
+      ),
     ),
     ReportType(
       title: 'FO-DAC-32  Gdo y Gpo',
@@ -91,6 +180,13 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
       icon: Icons.adjust_rounded,
       features: ['PDF', 'Excel', 'Print'],
       iconColor: Color(0xFF174C93),
+      parameters: ReportParameters(
+        needsGrade: false,
+        needsGroup: false,
+        needsMonth: false,
+        needsStudent: false,
+        needsDeactivatedOption: false,
+      ),
     ),
     ReportType(
       title: 'FO-DAC-57 por Alumno',
@@ -99,6 +195,13 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
       icon: Icons.workspace_premium_rounded,
       features: ['PDF', 'Excel', 'Print'],
       iconColor: Color(0xFFEB3045),
+      parameters: ReportParameters(
+        needsGrade: false,
+        needsGroup: false,
+        needsMonth: false,
+        needsStudent: false,
+        needsDeactivatedOption: false,
+      ),
     ),
   ];
 
@@ -139,73 +242,6 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
     _startAnimations();
   }
 
-  Future<void> _selectStartDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: startDate ?? DateTime.now(),
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2030),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: Color(0xFF174C93),
-              onPrimary: Colors.white,
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-
-    if (picked != null && picked != startDate) {
-      setState(() {
-        startDate = picked;
-        // If end date is before start date, update end date
-        if (endDate == null || endDate!.isBefore(startDate!)) {
-          endDate = startDate;
-        }
-      });
-    }
-  }
-
-  Future<void> _selectEndDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: endDate ?? DateTime.now(),
-      firstDate: startDate ?? DateTime(2020),
-      lastDate: DateTime(2030),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: Color(0xFFEB3045),
-              onPrimary: Colors.white,
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-
-    if (picked != null && picked != endDate) {
-      setState(() {
-        endDate = picked;
-      });
-    }
-  }
-
-  void _startAnimations() async {
-    _fadeController.forward();
-    await Future.delayed(Duration(milliseconds: 200));
-    _slideController.forward();
-
-    for (int i = 0; i < _cardControllers.length; i++) {
-      await Future.delayed(Duration(milliseconds: 100));
-      _cardControllers[i].forward();
-    }
-  }
-
   @override
   void dispose() {
     _fadeController.dispose();
@@ -214,153 +250,6 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
       controller.dispose();
     }
     super.dispose();
-  }
-
-  void _selectReport(int index) {
-    setState(() {
-      selectedIndex = index;
-    });
-  }
-
-  void _generateReport() async {
-    if (selectedIndex == null) return;
-
-    // Validate date selection
-    if (startDate == null || endDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content:
-              Text('Por favor, selecciona un rango de fechas para el reporte'),
-          backgroundColor: Color(0xFFEB3045),
-          behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
-      );
-      return;
-    }
-
-    setState(() {
-      isGenerating = true;
-    });
-
-    // Simulate report generation
-    await Future.delayed(Duration(seconds: 2));
-
-    setState(() {
-      isGenerating = false;
-    });
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text('Reporte Generado'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-                '${reportTypes[selectedIndex!].title} ha sido generado con éxito.'),
-            SizedBox(height: 8),
-            Text(
-              'Periodo: ${startDate!.day}/${startDate!.month}/${startDate!.year} - ${endDate!.day}/${endDate!.month}/${endDate!.year}',
-              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showPreview() {
-    if (selectedIndex == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Por favor, selecciona un tipo de reporte primero'),
-          backgroundColor: Color(0xFFEB3045),
-          behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
-      );
-      return;
-    }
-
-    // Validate date selection
-    if (startDate == null || endDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content:
-              Text('Por favor, selecciona un rango de fechas para el reporte'),
-          backgroundColor: Color(0xFFEB3045),
-          behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
-      );
-      return;
-    }
-
-    // Format date range for display
-    final dateRangeText =
-        '${startDate!.day}/${startDate!.month}/${startDate!.year} - ${endDate!.day}/${endDate!.month}/${endDate!.year}';
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        height: MediaQuery.of(context).size.height * 0.6,
-        decoration: BoxDecoration(
-          color: FlutterFlowTheme.of(context).secondaryBackground,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
-        ),
-        child: Column(
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              margin: EdgeInsets.symmetric(vertical: 12),
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Previsualización del Reporte',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    reportTypes[selectedIndex!].title,
-                    style: TextStyle(
-                        fontSize: 16,
-                        color: FlutterFlowTheme.of(context).primaryText),
-                  ),
-                  SizedBox(height: 30),
-                  _buildPreviewOption('Date Range', dateRangeText),
-                  _buildPreviewOption('Output Format', 'PDF'),
-                  _buildPreviewOption('Template', 'Standard'),
-                  _buildPreviewOption('Filters', 'All data'),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   Widget _buildPreviewOption(String title, String value) {
@@ -643,6 +532,22 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
                         ),
                         child: Text('PREVISUALIZAR'),
                       ),
+                      OutlinedButton.icon(
+                        onPressed:
+                            selectedIndex != null ? _showParametersPanel : null,
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          side:
+                              BorderSide(color: Colors.white.withOpacity(0.5)),
+                          padding: EdgeInsets.symmetric(
+                              vertical: 16, horizontal: 24),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        icon: Icon(Icons.settings),
+                        label: Text('CONFIGURAR PARÁMETROS'),
+                      ),
                     ],
                   ),
                 ),
@@ -652,6 +557,513 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
         ),
       ),
     );
+  }
+
+  void _selectReport(int index) {
+    setState(() {
+      selectedIndex = index;
+
+      // Reset parameters when changing reports
+      if (reportTypes[index].parameters.needsGrade && selectedGrade == null) {
+        selectedGrade = grades.first;
+      }
+      if (reportTypes[index].parameters.needsGroup && selectedGroup == null) {
+        selectedGroup = groups.first;
+      }
+      if (reportTypes[index].parameters.needsMonth && selectedMonth == null) {
+        selectedMonth = months[DateTime.now().month - 1];
+      }
+      if (reportTypes[index].parameters.needsStudent &&
+          selectedStudent == null) {
+        selectedStudent = students.first;
+      }
+    });
+
+    // Show parameters panel
+    _showParametersPanel();
+  }
+
+  void _showParametersPanel() {
+    if (selectedIndex == null) return;
+
+    final reportParams = reportTypes[selectedIndex!].parameters;
+
+    // Skip if no parameters needed
+    if (!reportParams.needsGrade &&
+        !reportParams.needsGroup &&
+        !reportParams.needsMonth &&
+        !reportParams.needsStudent &&
+        !reportParams.needsDeactivatedOption) {
+      return;
+    }
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) => Container(
+          padding:
+              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          height: MediaQuery.of(context).size.height *
+              (reportParams.needsDeactivatedOption ? 0.65 : 0.6),
+          decoration: BoxDecoration(
+            color: FlutterFlowTheme.of(context).secondaryBackground,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+          ),
+          child: Column(
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                margin: EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Parámetros del Reporte',
+                      style:
+                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      reportTypes[selectedIndex!].title,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: FlutterFlowTheme.of(context).primaryText,
+                      ),
+                    ),
+                    SizedBox(height: 30),
+
+                    // Grade parameter
+                    if (reportParams.needsGrade)
+                      _buildParameterDropdown(
+                        'Grado',
+                        selectedGrade,
+                        grades,
+                        (value) {
+                          setModalState(() {
+                            setState(() {
+                              selectedGrade = value;
+                            });
+                          });
+                        },
+                      ),
+
+                    // Group parameter
+                    if (reportParams.needsGroup)
+                      _buildParameterDropdown(
+                        'Grupo',
+                        selectedGroup,
+                        groups,
+                        (value) {
+                          setModalState(() {
+                            setState(() {
+                              selectedGroup = value;
+                            });
+                          });
+                        },
+                      ),
+
+                    // Month parameter
+                    if (reportParams.needsMonth)
+                      _buildParameterDropdown(
+                        'Mes',
+                        selectedMonth,
+                        months,
+                        (value) {
+                          setModalState(() {
+                            setState(() {
+                              selectedMonth = value;
+                            });
+                          });
+                        },
+                      ),
+
+                    // Student parameter
+                    if (reportParams.needsStudent)
+                      _buildParameterDropdown(
+                        'Estudiante',
+                        selectedStudent,
+                        students,
+                        (value) {
+                          setModalState(() {
+                            setState(() {
+                              selectedStudent = value;
+                            });
+                          });
+                        },
+                      ),
+
+                    // Include deactivated students
+                    if (reportParams.needsDeactivatedOption)
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8),
+                        child: Row(
+                          children: [
+                            Checkbox(
+                              value: includeDeactivatedStudents,
+                              activeColor: Color(0xFF174C93),
+                              onChanged: (value) {
+                                setModalState(() {
+                                  setState(() {
+                                    includeDeactivatedStudents = value ?? false;
+                                  });
+                                });
+                              },
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              'Incluir estudiantes desactivados',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                    SizedBox(height: 20),
+
+                    // Confirmation button
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFF174C93),
+                        foregroundColor: Colors.white,
+                        minimumSize: Size(double.infinity, 50),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(
+                        'Confirmar parámetros',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildParameterDropdown(
+    String label,
+    String? value,
+    List<String> items,
+    Function(String?) onChanged,
+  ) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          SizedBox(height: 8),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey.shade300),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: DropdownButton<String>(
+              value: value,
+              isExpanded: true,
+              icon: Icon(Icons.arrow_drop_down),
+              underline: SizedBox(),
+              items: items.map((String item) {
+                return DropdownMenuItem<String>(
+                  value: item,
+                  child: Text(item),
+                );
+              }).toList(),
+              onChanged: onChanged,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _generateReport() async {
+    if (selectedIndex == null) return;
+
+    // Validate date selection
+    if (startDate == null || endDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content:
+              Text('Por favor, selecciona un rango de fechas para el reporte'),
+          backgroundColor: Color(0xFFEB3045),
+          behavior: SnackBarBehavior.floating,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+      return;
+    }
+
+    // Validate required parameters
+    final params = reportTypes[selectedIndex!].parameters;
+    if ((params.needsGrade && selectedGrade == null) ||
+        (params.needsGroup && selectedGroup == null) ||
+        (params.needsMonth && selectedMonth == null) ||
+        (params.needsStudent && selectedStudent == null)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Por favor, configura todos los parámetros necesarios'),
+          backgroundColor: Color(0xFFEB3045),
+          behavior: SnackBarBehavior.floating,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+
+      // Show parameter panel
+      _showParametersPanel();
+      return;
+    }
+
+    setState(() {
+      isGenerating = true;
+    });
+
+    // Simulate report generation
+    await Future.delayed(Duration(seconds: 2));
+
+    setState(() {
+      isGenerating = false;
+    });
+
+    // Show success dialog with parameters
+    _showSuccessDialog();
+  }
+
+  void _showSuccessDialog() {
+    final report = reportTypes[selectedIndex!];
+    final params = report.parameters;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text('Reporte Generado'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('${report.title} ha sido generado con éxito.'),
+            SizedBox(height: 8),
+            Text(
+              'Periodo: ${startDate!.day}/${startDate!.month}/${startDate!.year} - ${endDate!.day}/${endDate!.month}/${endDate!.year}',
+              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+            ),
+            if (params.needsGrade)
+              Text(
+                'Grado: $selectedGrade',
+                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+              ),
+            if (params.needsGroup)
+              Text(
+                'Grupo: $selectedGroup',
+                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+              ),
+            if (params.needsMonth)
+              Text(
+                'Mes: $selectedMonth',
+                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+              ),
+            if (params.needsStudent)
+              Text(
+                'Estudiante: $selectedStudent',
+                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+              ),
+            if (params.needsDeactivatedOption)
+              Text(
+                'Incluir desactivados: ${includeDeactivatedStudents ? "Sí" : "No"}',
+                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+              ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showPreview() {
+    if (selectedIndex == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Por favor, selecciona un tipo de reporte primero'),
+          backgroundColor: Color(0xFFEB3045),
+          behavior: SnackBarBehavior.floating,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+      return;
+    }
+
+    // Validate date selection
+    if (startDate == null || endDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content:
+              Text('Por favor, selecciona un rango de fechas para el reporte'),
+          backgroundColor: Color(0xFFEB3045),
+          behavior: SnackBarBehavior.floating,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+      return;
+    }
+
+    // Format date range for display
+    final dateRangeText =
+        '${startDate!.day}/${startDate!.month}/${startDate!.year} - ${endDate!.day}/${endDate!.month}/${endDate!.year}';
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.6,
+        decoration: BoxDecoration(
+          color: FlutterFlowTheme.of(context).secondaryBackground,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+        ),
+        child: Column(
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: EdgeInsets.symmetric(vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Previsualización del Reporte',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    reportTypes[selectedIndex!].title,
+                    style: TextStyle(
+                        fontSize: 16,
+                        color: FlutterFlowTheme.of(context).primaryText),
+                  ),
+                  SizedBox(height: 30),
+                  _buildPreviewOption('Date Range', dateRangeText),
+                  _buildPreviewOption('Output Format', 'PDF'),
+                  _buildPreviewOption('Template', 'Standard'),
+                  _buildPreviewOption('Filters', 'All data'),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _selectStartDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: startDate ?? DateTime.now(),
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2030),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: Color(0xFF174C93),
+              onPrimary: Colors.white,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null && picked != startDate) {
+      setState(() {
+        startDate = picked;
+        // If end date is before start date, update end date
+        if (endDate == null || endDate!.isBefore(startDate!)) {
+          endDate = startDate;
+        }
+      });
+    }
+  }
+
+  Future<void> _selectEndDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: endDate ?? DateTime.now(),
+      firstDate: startDate ?? DateTime(2020),
+      lastDate: DateTime(2030),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: Color(0xFFEB3045),
+              onPrimary: Colors.white,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null && picked != endDate) {
+      setState(() {
+        endDate = picked;
+      });
+    }
+  }
+
+  void _startAnimations() async {
+    _fadeController.forward();
+    await Future.delayed(Duration(milliseconds: 200));
+    _slideController.forward();
+
+    for (int i = 0; i < _cardControllers.length; i++) {
+      await Future.delayed(Duration(milliseconds: 100));
+      _cardControllers[i].forward();
+    }
   }
 }
 

@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:oxschool/core/utils/update_installer.dart';
 import 'package:oxschool/presentation/Modules/academic/academic_awards/academic_awards_main.dart';
-import 'package:oxschool/presentation/Modules/academic/academic_reports/academic_report_main_screen.dart';
 import 'package:oxschool/presentation/Modules/academic/academic_reports/poor_performance.dart';
 import 'package:oxschool/presentation/Modules/academic/academic_reports/reports_screen.dart';
 import 'package:oxschool/presentation/Modules/academic/discipline/discipline_screen.dart';
