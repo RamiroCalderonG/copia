@@ -27,6 +27,10 @@ class ReportParameters {
   final bool needsMonth;
   final bool needsStudent;
   final bool needsDeactivatedOption;
+  final bool needCampus;
+  final bool requireReportCard;
+  final bool includeValidation;
+  final bool applyFODAC05;
 
   const ReportParameters({
     this.needsGrade = false,
@@ -34,6 +38,10 @@ class ReportParameters {
     this.needsMonth = false,
     this.needsStudent = false,
     this.needsDeactivatedOption = false,
+    this.needCampus = false,
+    this.requireReportCard = false,
+    this.includeValidation = false,
+    this.applyFODAC05 = false,
   });
 }
 
@@ -58,6 +66,26 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
   String? selectedMonth;
   String? selectedStudent;
   bool includeDeactivatedStudents = false;
+
+  String? selectedDeactivatedOption;
+  final List<String> deactivatedOptions = ['Sí', 'No'];
+
+  String? selectedCampus;
+  final List<String> campuses = [
+    'ANAHUAC',
+    'BARRAGAN',
+    'CONCORDIA',
+    'SENDERO',
+  ];
+
+  String? selectedReportCard;
+  final List<String> reportCards = ['Sí', 'No'];
+
+  String? selectedValidation;
+  final List<String> validations = ['Sí', 'No'];
+
+  String? selectedFODAC05;
+  final List<String> FODAC05Options = ['Sí', 'No'];
 
   final List<String> grades = ['Kinder 1', 'Kinder 2', 'Kinder 3'];
   final List<String> groups = ['A', 'B', 'C'];
@@ -96,6 +124,10 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
         needsMonth: true,
         needsStudent: true,
         needsDeactivatedOption: true,
+        needCampus: true,
+        requireReportCard: true,
+        includeValidation: true,
+        applyFODAC05: true,
       ),
     ),
     ReportType(
@@ -106,11 +138,15 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
       features: ['PDF', 'Excel', 'Print'],
       iconColor: Color(0xFFEB3045),
       parameters: ReportParameters(
-        needsGrade: false,
-        needsGroup: false,
-        needsMonth: false,
-        needsStudent: false,
-        needsDeactivatedOption: false,
+        needsGrade: true,
+        needsGroup: true,
+        needsMonth: true,
+        needsStudent: true,
+        needsDeactivatedOption: true,
+        needCampus: true,
+        requireReportCard: true,
+        includeValidation: true,
+        applyFODAC05: true,
       ),
     ),
     ReportType(
@@ -121,11 +157,15 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
       features: ['PDF', 'Excel', 'Print'],
       iconColor: Color(0xFF174C93),
       parameters: ReportParameters(
-        needsGrade: false,
-        needsGroup: false,
-        needsMonth: false,
-        needsStudent: false,
-        needsDeactivatedOption: false,
+        needsGrade: true,
+        needsGroup: true,
+        needsMonth: true,
+        needsStudent: true,
+        needsDeactivatedOption: true,
+        needCampus: true,
+        requireReportCard: true,
+        includeValidation: true,
+        applyFODAC05: true,
       ),
     ),
     ReportType(
@@ -136,11 +176,15 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
       features: ['PDF', 'Excel', 'Print'],
       iconColor: Color(0xFFEB3045),
       parameters: ReportParameters(
-        needsGrade: false,
-        needsGroup: false,
-        needsMonth: false,
-        needsStudent: false,
-        needsDeactivatedOption: false,
+        needsGrade: true,
+        needsGroup: true,
+        needsMonth: true,
+        needsStudent: true,
+        needsDeactivatedOption: true,
+        needCampus: true,
+        requireReportCard: true,
+        includeValidation: true,
+        applyFODAC05: true,
       ),
     ),
     ReportType(
@@ -151,11 +195,15 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
       features: ['PDF', 'Excel', 'Print'],
       iconColor: Color(0xFF174C93),
       parameters: ReportParameters(
-        needsGrade: false,
-        needsGroup: false,
-        needsMonth: false,
-        needsStudent: false,
-        needsDeactivatedOption: false,
+        needsGrade: true,
+        needsGroup: true,
+        needsMonth: true,
+        needsStudent: true,
+        needsDeactivatedOption: true,
+        needCampus: true,
+        requireReportCard: true,
+        includeValidation: true,
+        applyFODAC05: true,
       ),
     ),
     ReportType(
@@ -166,11 +214,15 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
       features: ['PDF', 'Excel', 'Print'],
       iconColor: Color(0xFFEB3045),
       parameters: ReportParameters(
-        needsGrade: false,
-        needsGroup: false,
-        needsMonth: false,
-        needsStudent: false,
-        needsDeactivatedOption: false,
+        needsGrade: true,
+        needsGroup: true,
+        needsMonth: true,
+        needsStudent: true,
+        needsDeactivatedOption: true,
+        needCampus: true,
+        requireReportCard: true,
+        includeValidation: true,
+        applyFODAC05: true,
       ),
     ),
     ReportType(
@@ -181,11 +233,15 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
       features: ['PDF', 'Excel', 'Print'],
       iconColor: Color(0xFF174C93),
       parameters: ReportParameters(
-        needsGrade: false,
-        needsGroup: false,
-        needsMonth: false,
-        needsStudent: false,
-        needsDeactivatedOption: false,
+        needsGrade: true,
+        needsGroup: true,
+        needsMonth: true,
+        needsStudent: true,
+        needsDeactivatedOption: true,
+        needCampus: true,
+        requireReportCard: true,
+        includeValidation: true,
+        applyFODAC05: true,
       ),
     ),
     ReportType(
@@ -196,11 +252,15 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
       features: ['PDF', 'Excel', 'Print'],
       iconColor: Color(0xFFEB3045),
       parameters: ReportParameters(
-        needsGrade: false,
-        needsGroup: false,
-        needsMonth: false,
-        needsStudent: false,
-        needsDeactivatedOption: false,
+        needsGrade: true,
+        needsGroup: true,
+        needsMonth: true,
+        needsStudent: true,
+        needsDeactivatedOption: true,
+        needCampus: true,
+        requireReportCard: true,
+        includeValidation: true,
+        applyFODAC05: true,
       ),
     ),
   ];
@@ -269,6 +329,10 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
 
   @override
   Widget build(BuildContext context) {
+    // Get screen size for responsive calculations
+    final Size screenSize = MediaQuery.of(context).size;
+    final bool isSmallScreen = screenSize.width < 600;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -292,26 +356,27 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
         child: SafeArea(
           child: Column(
             children: [
-              // Header
+              // Header - make text size responsive
               FadeTransition(
                 opacity: _fadeController,
                 child: Padding(
-                  padding: EdgeInsets.all(24),
+                  padding: EdgeInsets.all(isSmallScreen ? 16 : 24),
                   child: Column(
                     children: [
                       Text(
                         'Generar reportes académicos',
                         style: TextStyle(
-                          fontSize: 32,
+                          fontSize: isSmallScreen ? 24 : 32,
                           fontWeight: FontWeight.bold,
                           color: FlutterFlowTheme.of(context).primaryText,
                         ),
+                        textAlign: TextAlign.center,
                       ),
                       SizedBox(height: 8),
                       Text(
                         'Elige el tipo de reporte que te gustaría crear',
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: isSmallScreen ? 14 : 16,
                           color: FlutterFlowTheme.of(context).primaryText,
                         ),
                         textAlign: TextAlign.center,
@@ -320,128 +385,53 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
                   ),
                 ),
               ),
+
+              // Date picker - make it responsive
               FadeTransition(
                 opacity: _fadeController,
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                  padding: EdgeInsets.symmetric(
+                      horizontal: isSmallScreen ? 16 : 24, vertical: 8),
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    padding: EdgeInsets.all(16),
+                    padding: EdgeInsets.all(isSmallScreen ? 12 : 16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           'Periodo del reporte',
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: isSmallScreen ? 14 : 16,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                           ),
                         ),
                         SizedBox(height: 12),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: GestureDetector(
-                                onTap: () => _selectStartDate(context),
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 16, vertical: 12),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(8),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.1),
-                                        blurRadius: 4,
-                                        offset: Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.calendar_today,
-                                          color: Color(0xFF174C93), size: 18),
-                                      SizedBox(width: 8),
-                                      Expanded(
-                                        child: Text(
-                                          startDate != null
-                                              ? '${startDate!.day}/${startDate!.month}/${startDate!.year}'
-                                              : 'Fecha inicial',
-                                          style: TextStyle(
-                                            color: startDate != null
-                                                ? Colors.black87
-                                                : Colors.grey,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: 12),
-                            Expanded(
-                              child: GestureDetector(
-                                onTap: () => _selectEndDate(context),
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 16, vertical: 12),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(8),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.1),
-                                        blurRadius: 4,
-                                        offset: Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.calendar_today,
-                                          color: Color(0xFFEB3045), size: 18),
-                                      SizedBox(width: 8),
-                                      Expanded(
-                                        child: Text(
-                                          endDate != null
-                                              ? '${endDate!.day}/${endDate!.month}/${endDate!.year}'
-                                              : 'Fecha final',
-                                          style: TextStyle(
-                                            color: endDate != null
-                                                ? Colors.black87
-                                                : Colors.grey,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                        // Convert to Column on very small screens
+                        if (screenSize.width < 400)
+                          _buildVerticalDatePickers()
+                        else
+                          _buildHorizontalDatePickers(),
                       ],
                     ),
                   ),
                 ),
               ),
 
-              // Report Cards
+              // Report Cards - improve responsiveness
               Expanded(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: isSmallScreen ? 12 : 16),
                   child: GridView.builder(
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount:
-                          MediaQuery.of(context).size.width > 600 ? 2 : 1,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
-                      childAspectRatio: 1.9,
+                      crossAxisCount: _getGridCrossAxisCount(screenSize.width),
+                      crossAxisSpacing: isSmallScreen ? 8 : 10,
+                      mainAxisSpacing: isSmallScreen ? 8 : 10,
+                      childAspectRatio: isSmallScreen ? 1.6 : 1.9,
                     ),
                     itemCount: reportTypes.length,
                     itemBuilder: (context, index) {
@@ -463,7 +453,7 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
                 ),
               ),
 
-              // Action Buttons
+              // Action Buttons - make responsive
               SlideTransition(
                 position: Tween<Offset>(
                   begin: Offset(0, 1),
@@ -473,83 +463,8 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
                   curve: Curves.easeOutCubic,
                 )),
                 child: Padding(
-                  padding: EdgeInsets.all(24),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: selectedIndex != null && !isGenerating
-                              ? _generateReport
-                              : null,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: Color(0xFF174C93),
-                            padding: EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            elevation: 8,
-                          ),
-                          child: isGenerating
-                              ? Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        valueColor: AlwaysStoppedAnimation(
-                                          Color(0xFF174C93),
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(width: 12),
-                                    Text('GENERANDO...'),
-                                  ],
-                                )
-                              : Text(
-                                  'Generar Reporte',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                        ),
-                      ),
-                      SizedBox(width: 16),
-                      OutlinedButton(
-                        onPressed: _showPreview,
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          side:
-                              BorderSide(color: Colors.white.withOpacity(0.5)),
-                          padding: EdgeInsets.symmetric(
-                              vertical: 16, horizontal: 24),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: Text('PREVISUALIZAR'),
-                      ),
-                      OutlinedButton.icon(
-                        onPressed:
-                            selectedIndex != null ? _showParametersPanel : null,
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          side:
-                              BorderSide(color: Colors.white.withOpacity(0.5)),
-                          padding: EdgeInsets.symmetric(
-                              vertical: 16, horizontal: 24),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        icon: Icon(Icons.settings),
-                        label: Text('CONFIGURAR PARÁMETROS'),
-                      ),
-                    ],
-                  ),
+                  padding: EdgeInsets.all(isSmallScreen ? 16 : 24),
+                  child: _buildResponsiveActionButtons(isSmallScreen),
                 ),
               ),
             ],
@@ -557,6 +472,274 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
         ),
       ),
     );
+  }
+
+  // Helper method to determine grid columns based on screen width
+  int _getGridCrossAxisCount(double width) {
+    if (width > 1200) return 3;
+    if (width > 800) return 2;
+    return 1;
+  }
+
+  // Vertical date pickers for very small screens
+  Widget _buildVerticalDatePickers() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _buildDatePickerButton(
+          label: startDate != null
+              ? '${startDate!.day}/${startDate!.month}/${startDate!.year}'
+              : 'Fecha inicial',
+          icon: Icons.calendar_today,
+          iconColor: Color(0xFF174C93),
+          onTap: () => _selectStartDate(context),
+        ),
+        SizedBox(height: 8),
+        _buildDatePickerButton(
+          label: endDate != null
+              ? '${endDate!.day}/${endDate!.month}/${endDate!.year}'
+              : 'Fecha final',
+          icon: Icons.calendar_today,
+          iconColor: Color(0xFFEB3045),
+          onTap: () => _selectEndDate(context),
+        ),
+      ],
+    );
+  }
+
+  // Horizontal date pickers for larger screens
+  Widget _buildHorizontalDatePickers() {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildDatePickerButton(
+            label: startDate != null
+                ? '${startDate!.day}/${startDate!.month}/${startDate!.year}'
+                : 'Fecha inicial',
+            icon: Icons.calendar_today,
+            iconColor: Color(0xFF174C93),
+            onTap: () => _selectStartDate(context),
+          ),
+        ),
+        SizedBox(width: 12),
+        Expanded(
+          child: _buildDatePickerButton(
+            label: endDate != null
+                ? '${endDate!.day}/${endDate!.month}/${endDate!.year}'
+                : 'Fecha final',
+            icon: Icons.calendar_today,
+            iconColor: Color(0xFFEB3045),
+            onTap: () => _selectEndDate(context),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Date picker button
+  Widget _buildDatePickerButton({
+    required String label,
+    required IconData icon,
+    required Color iconColor,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 4,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: iconColor, size: 18),
+            SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(
+                  color: label.contains('/') ? Colors.black87 : Colors.grey,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Responsive action buttons
+  Widget _buildResponsiveActionButtons(bool isSmallScreen) {
+    if (isSmallScreen) {
+      // Stack buttons vertically on small screens
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ElevatedButton(
+            onPressed:
+                selectedIndex != null && !isGenerating ? _generateReport : null,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: Color(0xFF174C93),
+              padding: EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 8,
+            ),
+            child: isGenerating
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation(
+                            Color(0xFF174C93),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 12),
+                      Text('GENERANDO...'),
+                    ],
+                  )
+                : Text(
+                    'Generar Reporte',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+          ),
+          SizedBox(height: 12),
+          Row(
+            children: [
+              // Expanded(
+              //   child: OutlinedButton(
+              //     onPressed: _showPreview,
+              //     style: OutlinedButton.styleFrom(
+              //       foregroundColor: Colors.white,
+              //       side: BorderSide(color: Colors.white.withOpacity(0.5)),
+              //       padding: EdgeInsets.symmetric(vertical: 16),
+              //       shape: RoundedRectangleBorder(
+              //         borderRadius: BorderRadius.circular(12),
+              //       ),
+              //     ),
+              //     child: Text('PREVISUALIZAR'),
+              //   ),
+              // ),
+              SizedBox(width: 8),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed:
+                      selectedIndex != null ? _showParametersPanel : null,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    side: BorderSide(color: Colors.white.withOpacity(0.5)),
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  icon: Icon(Icons.settings, size: 16),
+                  label: Text('PARÁMETROS'),
+                ),
+              ),
+            ],
+          ),
+        ],
+      );
+    } else {
+      // Row layout for larger screens
+      return Row(
+        children: [
+          Expanded(
+            flex: 2,
+            child: ElevatedButton(
+              onPressed: selectedIndex != null && !isGenerating
+                  ? _generateReport
+                  : null,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: Color(0xFF174C93),
+                padding: EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 8,
+              ),
+              child: isGenerating
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation(
+                              Color(0xFF174C93),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 12),
+                        Text('GENERANDO...'),
+                      ],
+                    )
+                  : Text(
+                      'Generar Reporte',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+            ),
+          ),
+          SizedBox(width: 16),
+          // Expanded(
+          //   child: OutlinedButton(
+          //     onPressed: _showPreview,
+          //     style: OutlinedButton.styleFrom(
+          //       foregroundColor: Colors.white,
+          //       side: BorderSide(color: Colors.white.withOpacity(0.5)),
+          //       padding: EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+          //       shape: RoundedRectangleBorder(
+          //         borderRadius: BorderRadius.circular(12),
+          //       ),
+          //     ),
+          //     child: Text('PREVISUALIZAR'),
+          //   ),
+          // ),
+          SizedBox(width: 16),
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: selectedIndex != null ? _showParametersPanel : null,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.white,
+                side: BorderSide(color: Colors.white.withOpacity(0.5)),
+                padding: EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              icon: Icon(Icons.settings),
+              label: Text('PARÁMETROS'),
+            ),
+          ),
+        ],
+      );
+    }
   }
 
   void _selectReport(int index) {
@@ -587,6 +770,7 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
     if (selectedIndex == null) return;
 
     final reportParams = reportTypes[selectedIndex!].parameters;
+    final bool isSmallScreen = MediaQuery.of(context).size.width < 600;
 
     // Skip if no parameters needed
     if (!reportParams.needsGrade &&
@@ -602,159 +786,223 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => StatefulBuilder(
-        builder: (context, setModalState) => Container(
-          padding:
-              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-          height: MediaQuery.of(context).size.height *
-              (reportParams.needsDeactivatedOption ? 0.65 : 0.6),
-          decoration: BoxDecoration(
-            color: FlutterFlowTheme.of(context).secondaryBackground,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+        builder: (context, setModalState) => Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
-          child: Column(
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                margin: EdgeInsets.symmetric(vertical: 12),
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
+          child: Container(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.8,
+            ),
+            decoration: BoxDecoration(
+              color: FlutterFlowTheme.of(context).secondaryBackground,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Drag handle
+                Container(
+                  width: 40,
+                  height: 4,
+                  margin: EdgeInsets.symmetric(vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
-              ),
-              Padding(
-                padding: EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Parámetros del Reporte',
-                      style:
-                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(height: 10),
-                    Text(
-                      reportTypes[selectedIndex!].title,
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: FlutterFlowTheme.of(context).primaryText,
-                      ),
-                    ),
-                    SizedBox(height: 30),
+                // Main content in a scrollable container
+                Flexible(
+                  child: SingleChildScrollView(
+                    physics: BouncingScrollPhysics(),
+                    child: Padding(
+                      padding: EdgeInsets.all(isSmallScreen ? 16 : 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Parámetros del Reporte',
+                            style: TextStyle(
+                                fontSize: isSmallScreen ? 20 : 24,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          SizedBox(height: 10),
+                          Text(
+                            reportTypes[selectedIndex!].title,
+                            style: TextStyle(
+                              fontSize: isSmallScreen ? 14 : 16,
+                              color: FlutterFlowTheme.of(context).primaryText,
+                            ),
+                          ),
+                          SizedBox(height: isSmallScreen ? 20 : 30),
 
-                    // Grade parameter
-                    if (reportParams.needsGrade)
-                      _buildParameterDropdown(
-                        'Grado',
-                        selectedGrade,
-                        grades,
-                        (value) {
-                          setModalState(() {
-                            setState(() {
-                              selectedGrade = value;
-                            });
-                          });
-                        },
-                      ),
-
-                    // Group parameter
-                    if (reportParams.needsGroup)
-                      _buildParameterDropdown(
-                        'Grupo',
-                        selectedGroup,
-                        groups,
-                        (value) {
-                          setModalState(() {
-                            setState(() {
-                              selectedGroup = value;
-                            });
-                          });
-                        },
-                      ),
-
-                    // Month parameter
-                    if (reportParams.needsMonth)
-                      _buildParameterDropdown(
-                        'Mes',
-                        selectedMonth,
-                        months,
-                        (value) {
-                          setModalState(() {
-                            setState(() {
-                              selectedMonth = value;
-                            });
-                          });
-                        },
-                      ),
-
-                    // Student parameter
-                    if (reportParams.needsStudent)
-                      _buildParameterDropdown(
-                        'Estudiante',
-                        selectedStudent,
-                        students,
-                        (value) {
-                          setModalState(() {
-                            setState(() {
-                              selectedStudent = value;
-                            });
-                          });
-                        },
-                      ),
-
-                    // Include deactivated students
-                    if (reportParams.needsDeactivatedOption)
-                      Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8),
-                        child: Row(
-                          children: [
-                            Checkbox(
-                              value: includeDeactivatedStudents,
-                              activeColor: Color(0xFF174C93),
-                              onChanged: (value) {
+                          // Parameter fields here
+                          if (reportParams.needsGrade)
+                            _buildParameterDropdown(
+                              'Grado',
+                              selectedGrade,
+                              grades,
+                              (value) {
                                 setModalState(() {
                                   setState(() {
-                                    includeDeactivatedStudents = value ?? false;
+                                    selectedGrade = value;
                                   });
                                 });
                               },
+                              isSmallScreen: isSmallScreen,
                             ),
-                            SizedBox(width: 8),
-                            Text(
-                              'Incluir estudiantes desactivados',
-                              style: TextStyle(fontSize: 16),
+
+                          // Remaining parameters with isSmallScreen param
+                          if (reportParams.needsGroup)
+                            _buildParameterDropdown(
+                              'Grupo',
+                              selectedGroup,
+                              groups,
+                              (value) {
+                                setModalState(() {
+                                  setState(() {
+                                    selectedGroup = value;
+                                  });
+                                });
+                              },
+                              isSmallScreen: isSmallScreen,
                             ),
-                          ],
-                        ),
-                      ),
 
-                    SizedBox(height: 20),
+                          if (reportParams.needsMonth)
+                            _buildParameterDropdown(
+                              'Mes',
+                              selectedMonth,
+                              months,
+                              (value) {
+                                setModalState(() {
+                                  setState(() {
+                                    selectedMonth = value;
+                                  });
+                                });
+                              },
+                              isSmallScreen: isSmallScreen,
+                            ),
+                          if (reportParams.needsStudent)
+                            _buildParameterDropdown(
+                              'Alumno',
+                              selectedStudent,
+                              students,
+                              (value) {
+                                setModalState(() {
+                                  setState(() {
+                                    selectedStudent = value;
+                                  });
+                                });
+                              },
+                              isSmallScreen: isSmallScreen,
+                            ),
+                          if (reportParams.needsDeactivatedOption)
+                            _buildParameterDropdown(
+                              'Incluir bajas',
+                              selectedDeactivatedOption,
+                              deactivatedOptions,
+                              (value) {
+                                setModalState(() {
+                                  setState(() {
+                                    selectedDeactivatedOption = value;
+                                  });
+                                });
+                              },
+                              isSmallScreen: isSmallScreen,
+                            ),
 
-                    // Confirmation button
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF174C93),
-                        foregroundColor: Colors.white,
-                        minimumSize: Size(double.infinity, 50),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Text(
-                        'Confirmar parámetros',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
+                          if (reportParams.needCampus)
+                            _buildParameterDropdown(
+                              'Campus',
+                              selectedCampus,
+                              campuses,
+                              (value) {
+                                setModalState(() {
+                                  setState(() {
+                                    selectedCampus = value;
+                                  });
+                                });
+                              },
+                              isSmallScreen: isSmallScreen,
+                            ),
+                          if (reportParams.requireReportCard)
+                            _buildParameterDropdown(
+                              'Boleta',
+                              selectedReportCard,
+                              reportCards,
+                              (value) {
+                                setModalState(() {
+                                  setState(() {
+                                    selectedReportCard = value;
+                                  });
+                                });
+                              },
+                              isSmallScreen: isSmallScreen,
+                            ),
+                          if (reportParams.includeValidation)
+                            _buildParameterDropdown(
+                              'N.V.',
+                              selectedValidation,
+                              validations,
+                              (value) {
+                                setModalState(() {
+                                  setState(() {
+                                    selectedValidation = value;
+                                  });
+                                });
+                              },
+                              isSmallScreen: isSmallScreen,
+                            ),
+                          if (reportParams.applyFODAC05)
+                            _buildParameterDropdown(
+                              'Sábana FODAC05',
+                              selectedFODAC05,
+                              FODAC05Options,
+                              (value) {
+                                setModalState(() {
+                                  setState(() {
+                                    selectedFODAC05 = value;
+                                  });
+                                });
+                              },
+                              isSmallScreen: isSmallScreen,
+                            ),
+
+                          SizedBox(height: isSmallScreen ? 16 : 20),
+
+                          // Confirmation button - full width
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Color(0xFF174C93),
+                                foregroundColor: Colors.white,
+                                padding: EdgeInsets.symmetric(
+                                    vertical: isSmallScreen ? 14 : 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: Text(
+                                'Confirmar parámetros',
+                                style: TextStyle(
+                                  fontSize: isSmallScreen ? 14 : 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 16),
+                        ],
                       ),
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -765,23 +1013,27 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
     String label,
     String? value,
     List<String> items,
-    Function(String?) onChanged,
-  ) {
+    Function(String?) onChanged, {
+    bool isSmallScreen = false,
+  }) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8),
+      padding: EdgeInsets.symmetric(vertical: isSmallScreen ? 6 : 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             label,
             style: TextStyle(
-              fontSize: 16,
+              fontSize: isSmallScreen ? 14 : 16,
               fontWeight: FontWeight.w500,
             ),
           ),
-          SizedBox(height: 8),
+          SizedBox(height: isSmallScreen ? 6 : 8),
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 16),
+            padding: EdgeInsets.symmetric(
+              horizontal: isSmallScreen ? 12 : 16,
+              vertical: isSmallScreen ? 0 : 2,
+            ),
             decoration: BoxDecoration(
               border: Border.all(color: Colors.grey.shade300),
               borderRadius: BorderRadius.circular(8),
@@ -790,11 +1042,15 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
               value: value,
               isExpanded: true,
               icon: Icon(Icons.arrow_drop_down),
+              iconSize: isSmallScreen ? 20 : 24,
               underline: SizedBox(),
               items: items.map((String item) {
                 return DropdownMenuItem<String>(
                   value: item,
-                  child: Text(item),
+                  child: Text(
+                    item,
+                    style: TextStyle(fontSize: isSmallScreen ? 14 : 16),
+                  ),
                 );
               }).toList(),
               onChanged: onChanged,
@@ -900,7 +1156,7 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
               ),
             if (params.needsDeactivatedOption)
               Text(
-                'Incluir desactivados: ${includeDeactivatedStudents ? "Sí" : "No"}',
+                'Incluir bajas: ${includeDeactivatedStudents ? "Sí" : "No"}',
                 style: TextStyle(fontSize: 14, color: Colors.grey[600]),
               ),
           ],
@@ -1114,6 +1370,8 @@ class _ReportCardState extends State<ReportCard>
 
   @override
   Widget build(BuildContext context) {
+    final bool isSmallScreen = MediaQuery.of(context).size.width < 600;
+
     return AnimatedBuilder(
       animation: _hoverController,
       builder: (context, child) {
@@ -1145,14 +1403,14 @@ class _ReportCardState extends State<ReportCard>
                 ],
               ),
               child: Padding(
-                padding: EdgeInsets.all(20),
+                padding: EdgeInsets.all(isSmallScreen ? 12 : 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Icon
+                    // Icon - make smaller on small screens
                     Container(
-                      width: 60,
-                      height: 60,
+                      width: isSmallScreen ? 50 : 60,
+                      height: isSmallScreen ? 50 : 60,
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
@@ -1165,44 +1423,46 @@ class _ReportCardState extends State<ReportCard>
                       child: Icon(
                         widget.reportType.icon,
                         color: Colors.white,
-                        size: 30,
+                        size: isSmallScreen ? 24 : 30,
                       ),
                     ),
-                    SizedBox(height: 16),
+                    SizedBox(height: isSmallScreen ? 12 : 16),
 
-                    // Title
+                    // Title - responsive font size
                     Text(
                       widget.reportType.title,
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: isSmallScreen ? 16 : 18,
                         fontWeight: FontWeight.bold,
                         color: Colors.grey[800],
                       ),
                     ),
                     SizedBox(height: 8),
 
-                    // Description
+                    // Description - responsive font and fewer lines on small screens
                     Expanded(
                       child: Text(
                         widget.reportType.description,
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: isSmallScreen ? 12 : 14,
                           color: Colors.grey[600],
                           height: 1.4,
                         ),
+                        maxLines: isSmallScreen ? 3 : null,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    SizedBox(height: 12),
+                    SizedBox(height: isSmallScreen ? 8 : 12),
 
-                    // Feature Tags
+                    // Feature Tags - smaller on small screens
                     Wrap(
-                      spacing: 6,
-                      runSpacing: 4,
+                      spacing: isSmallScreen ? 4 : 6,
+                      runSpacing: isSmallScreen ? 2 : 4,
                       children: widget.reportType.features
                           .map((feature) => Container(
                                 padding: EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
+                                  horizontal: isSmallScreen ? 6 : 8,
+                                  vertical: isSmallScreen ? 2 : 4,
                                 ),
                                 decoration: BoxDecoration(
                                   color: widget.reportType.iconColor
@@ -1212,7 +1472,7 @@ class _ReportCardState extends State<ReportCard>
                                 child: Text(
                                   feature,
                                   style: TextStyle(
-                                    fontSize: 12,
+                                    fontSize: isSmallScreen ? 10 : 12,
                                     color: widget.reportType.iconColor,
                                     fontWeight: FontWeight.w500,
                                   ),
