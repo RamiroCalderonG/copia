@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:oxschool/core/utils/update_installer.dart';
 import 'package:oxschool/presentation/Modules/academic/academic_awards/academic_awards_main.dart';
+import 'package:oxschool/presentation/Modules/academic/academic_reports/fodac_59_screen.dart';
 import 'package:oxschool/presentation/Modules/academic/academic_reports/poor_performance.dart';
 import 'package:oxschool/presentation/Modules/academic/academic_reports/reports_screen.dart';
 import 'package:oxschool/presentation/Modules/academic/discipline/discipline_screen.dart';
@@ -111,6 +112,10 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
             name: 'UpdaterScreen',
             path: '/updater',
             builder: (context, params) => const UpdateInstaller()),
+        FFRoute(
+            name: 'Fodac59',
+            path: '/fodac59',
+            builder: (context, params) => const Fodac59Screen()),
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
     );
 

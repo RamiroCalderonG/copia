@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:flutter/material.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
+import 'package:oxschool/core/config/flutter_flow/flutter_flow_util.dart';
 
 class ReportType {
   final String title;
@@ -9,6 +9,7 @@ class ReportType {
   final IconData icon;
   final List<String> features;
   final Color iconColor;
+  final String? route;
   final ReportParameters parameters;
 
   ReportType({
@@ -17,6 +18,7 @@ class ReportType {
     required this.icon,
     required this.features,
     required this.iconColor,
+    this.route,
     this.parameters = const ReportParameters(),
   });
 }
@@ -118,6 +120,7 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
       icon: Icons.analytics,
       features: ['PDF', 'Excel', 'Print'],
       iconColor: Color(0xFF174C93),
+      route: 'Fodac59',
       parameters: ReportParameters(
         needsGrade: true,
         needsGroup: true,
@@ -761,9 +764,24 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
         selectedStudent = students.first;
       }
     });
+    //Navigate to report screen
+    context.pushNamed(
+      '${reportTypes[index].route}',
+      extra: <String, dynamic>{
+        kTransitionInfoKey: const TransitionInfo(
+          hasTransition: true,
+          transitionType: PageTransitionType.leftToRight,
+        ),
+      },
+    );
+
+    // Navigator.pushNamed(
+    //   context,
+    //   reportTypes[index].route ?? '',
+    // );
 
     // Show parameters panel
-    _showParametersPanel();
+    // _showParametersPanel();
   }
 
   void _showParametersPanel() {

@@ -1635,6 +1635,35 @@ Future<dynamic> getDisciplinaryCauses(
   }
 }
 
+Future<dynamic> getFodac59List(String campus, String cycle) async {
+  try {
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
+    var apiCall = await Requests.get(
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/fodac59/filters/',
+      headers: {
+        'Authorization': devicePrefs.getString('token')!,
+        'Content-Type': 'application/json',
+      },
+      queryParameters: {
+        'campus': campus,
+        'cycle': cycle,
+      },
+      persistCookies: false,
+      timeoutSeconds: 20,
+    );
+    apiCall.raiseForStatus();
+    if (apiCall.statusCode == 200) {
+      return json.decode(utf8.decode(apiCall.bodyBytes));
+    } else {
+      insertErrorLog(apiCall.body, 'getFodac59List($campus, $cycle)');
+      throw Future.error(apiCall.body);
+    }
+  } catch (e) {
+    insertErrorLog(e.toString(), 'getFodac59List($campus, $cycle)');
+    throw e.toString();
+  }
+}
+
 Future<dynamic> createDisciplinaryReport(Map<String, dynamic> body) async {
   try {
     SharedPreferences devicePrefs = await SharedPreferences.getInstance();
