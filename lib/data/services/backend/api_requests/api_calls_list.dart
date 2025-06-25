@@ -1635,7 +1635,8 @@ Future<dynamic> getDisciplinaryCauses(
   }
 }
 
-Future<dynamic> getFodac59List(String campus, String cycle) async {
+Future<dynamic> getFodac59FiltersData(String campus, String cycle,
+    bool? includeNonActive, bool? noValidates) async {
   try {
     SharedPreferences devicePrefs = await SharedPreferences.getInstance();
     var apiCall = await Requests.get(
@@ -1647,6 +1648,8 @@ Future<dynamic> getFodac59List(String campus, String cycle) async {
       queryParameters: {
         'campus': campus,
         'cycle': cycle,
+        'noActive': includeNonActive.toString(),
+        'noValidates': noValidates.toString(),
       },
       persistCookies: false,
       timeoutSeconds: 20,
@@ -1660,6 +1663,56 @@ Future<dynamic> getFodac59List(String campus, String cycle) async {
     }
   } catch (e) {
     insertErrorLog(e.toString(), 'getFodac59List($campus, $cycle)');
+    throw e.toString();
+  }
+}
+
+Future<dynamic> getFodac59Response(
+    String cycle,
+    String campus,
+    int gradeSeq,
+    String group,
+    int month,
+    int idSesion,
+    String computerName,
+    bool includeNonActive) async {
+  try {
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
+    String device = devicePrefs.getString('device')!;
+
+    // Parse the device string as JSON
+    Map<String, dynamic> deviceData = json.decode(device);
+    String computerName = deviceData['computerName'] ?? 'Unknown';
+
+    var apiCall = await Requests.get(
+      '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/fodac59/result',
+      headers: {
+        'Authorization': devicePrefs.getString('token')!,
+        'Content-Type': 'application/json',
+      },
+      body: {
+        'cycle': cycle,
+        'campus': campus,
+        'gradeSeq': gradeSeq,
+        'group': group,
+        'month': month,
+        'idSesion': devicePrefs.getInt('idSession'),
+        'computerName': computerName,
+        'includeNonActive': includeNonActive.toString(),
+      },
+      bodyEncoding: RequestBodyEncoding.JSON,
+      persistCookies: false,
+      timeoutSeconds: 20,
+    );
+    apiCall.raiseForStatus();
+    if (apiCall.statusCode == 200) {
+      return json.decode(utf8.decode(apiCall.bodyBytes));
+    } else {
+      insertErrorLog(apiCall.body, 'getFodac59Response()');
+      throw Future.error(apiCall.body);
+    }
+  } catch (e) {
+    insertErrorLog(e.toString(), 'getFodac59Response()');
     throw e.toString();
   }
 }
