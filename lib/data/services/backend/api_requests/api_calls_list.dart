@@ -967,7 +967,7 @@ Future<dynamic> getStudentsByRole(String cycle) async {
         timeoutSeconds: 25);
 
     apiCall.raiseForStatus();
-    return apiCall.body;
+    return apiCall;
   } catch (e) {
     return Future.error(e);
   }

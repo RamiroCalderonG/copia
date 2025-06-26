@@ -192,7 +192,7 @@ Future<void> getSingleTeacherAssignatures(List<dynamic> apiResponse) async {
 
 Future<List<dynamic>> getStudentsByTeacher(String selectedCycle) async {
   var response = await getStudentsByRole(selectedCycle);
-  List<dynamic> jsonList = json.decode(response);
+  List<dynamic> jsonList = json.decode(utf8.decode(response.bodyBytes));
 
   for (var item in jsonList) {
     String campus = item['Claun'];

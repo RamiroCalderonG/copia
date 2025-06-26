@@ -12,7 +12,6 @@ import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/constants/date_constants.dart';
 import 'package:oxschool/core/reusable_methods/academic_functions.dart';
 import 'package:oxschool/data/datasources/temp/teacher_grades_temp.dart';
-import 'package:oxschool/presentation/Modules/login_view/login_view_widget.dart';
 
 import 'package:trina_grid/trina_grid.dart';
 
@@ -23,7 +22,6 @@ import '../../../../core/constants/Student.dart';
 import '../../../../core/config/flutter_flow/flutter_flow_theme.dart';
 import '../../../../core/reusable_methods/reusable_functions.dart';
 import '../../../components/confirm_dialogs.dart';
-import '../../../components/custom_icon_button.dart';
 import '../../../components/teacher_eval_dropdownmenu.dart';
 
 class GradesByStudent extends StatefulWidget {
@@ -65,7 +63,6 @@ class _GradesByStudentState extends State<GradesByStudent> {
   int? monthNumber;
   String dropDownValue = ''; //oneTeacherAssignatures.first;
   int? assignatureID;
-  late Future<dynamic> _fetchedDataFromRequest;
   DateFormat? dateFormat;
 
   String? selectedStudentID;
@@ -315,121 +312,499 @@ class _GradesByStudentState extends State<GradesByStudent> {
 
   @override
   Widget build(BuildContext context) {
-    return isFetching
-        ? const CustomLoadingIndicator()
-        : SizedBox(
-            width: MediaQuery.of(context).size.width,
-            child: LayoutBuilder(
-                builder: (BuildContext context, BoxConstraints constraints) {
-              if (fetchedData is Error || fetchedData is FormatException) {
-                return Placeholder(
-                  color: Colors.transparent,
-                  child: Center(
-                    child: Text('Error en la conección: $fetchedData'),
-                  ),
-                );
-              } else {
-                return SingleChildScrollView(
-                    child: Padding(
-                  padding: EdgeInsets.all(10),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [_buildGradesPerStudent()],
-                      )
-                    ],
-                  ),
-                ));
-              }
-            }),
-          );
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            colorScheme.primaryContainer.withOpacity(0.05),
+            colorScheme.surface,
+          ],
+        ),
+      ),
+      child: isFetching
+          ? _buildLoadingState(theme)
+          : LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) {
+                if (fetchedData is Error || fetchedData is FormatException) {
+                  return _buildErrorState(theme);
+                } else {
+                  return _buildMainContent(theme, colorScheme);
+                }
+              },
+            ),
+    );
   }
 
-  Widget _buildGradesPerStudent() {
-    return Expanded(
+  Widget _buildLoadingState(ThemeData theme) {
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.all(32),
+        margin: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: theme.colorScheme.shadow.withOpacity(0.1),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.person_search_outlined,
+              size: 48,
+              color: theme.colorScheme.primary,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Cargando calificaciones por alumno',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 24),
+            const CustomLoadingIndicator(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorState(ThemeData theme) {
+    return Center(
+      child: Card(
+        elevation: 0,
+        color: theme.colorScheme.surfaceContainerHighest,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+          side: BorderSide(
+            color: theme.colorScheme.outline.withOpacity(0.2),
+          ),
+        ),
+        margin: const EdgeInsets.all(24),
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.errorContainer,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Icon(
+                  Icons.wifi_off_rounded,
+                  size: 48,
+                  color: theme.colorScheme.onErrorContainer,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Error de conexión',
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Error en la conexión: $fetchedData',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 32),
+              FilledButton.icon(
+                onPressed: () {
+                  setState(() {
+                    isFetching = true;
+                    _fetchData();
+                  });
+                },
+                icon: const Icon(Icons.refresh),
+                label: const Text('Reintentar'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMainContent(ThemeData theme, ColorScheme colorScheme) {
+    return Padding(
+      padding: const EdgeInsets.all(5),
+      child: _buildGradesPerStudent(theme, colorScheme),
+    );
+  }
+
+  Widget _buildGradesPerStudent(ThemeData theme, ColorScheme colorScheme) {
+    return Card(
+      elevation: 0,
+      color: colorScheme.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: colorScheme.outlineVariant,
+          width: 1,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildFiltersSection(theme, colorScheme),
+            const SizedBox(height: 6),
+            _buildActionButtons(theme, colorScheme),
+            const SizedBox(height: 6),
+            _buildStudentNameSection(theme, colorScheme),
+            const SizedBox(height: 6),
+            Expanded(
+              child: _buildGradesGrids(theme, colorScheme),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFiltersSection(ThemeData theme, ColorScheme colorScheme) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+      ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
+          Row(
+            children: [
+              Icon(
+                Icons.filter_list_rounded,
+                color: colorScheme.primary,
+                size: 18,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                'Filtros',
+                style: theme.textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: colorScheme.onSurface,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
           TeacherEvalDropDownMenu(
             jsonData: jsonDataForDropDownMenuClass,
             campusesList: campusesWhereTeacherTeach,
             byStudent: true,
           ),
-          Padding(
-            padding: const EdgeInsets.only(top: 5, right: 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Flexible(child: RefreshButton(onPressed: () async {
-                  try {
-                    setState(() {
-                      isFetching = true;
-                    });
-                    studentGradesBodyToUpgrade.clear();
-                    if (isUserAdmin || isUserAcademicCoord) {
-                      //Calendar month number
-                      monthNumber =
-                          getKeyFromValue(spanishMonthsMap, selectedTempMonth!);
-                    } else {
-                      setState(() {
-                        selectedCurrentTempMonth = currentMonth.toCapitalized;
-                      });
-                      //Calendar month number
-                      monthNumber = getKeyFromValue(
-                          spanishMonthsMap, selectedCurrentTempMonth!);
-                    }
-                    if (selectedTempGroup == null || selectedTempGroup == '') {
-                      return showEmptyFieldAlertDialog(
-                          context, 'Seleccionar un grupo a evaluar');
-                    }
-                    if (selectedTempGrade == null || selectedTempGrade == '') {
-                      return showEmptyFieldAlertDialog(
-                          context, 'Seleccionar un grado a evaluar');
-                    }
-                    if (selectedTempCampus == null ||
-                        selectedTempCampus == '') {
-                      return showEmptyFieldAlertDialog(
-                          context, 'Seleccionar un campus a evaluar');
-                    }
-                    if (monthNumber == null || monthNumber == '') {
-                      return showEmptyFieldAlertDialog(
-                          context, 'Seleccionar un mes a evaluar');
-                    } else {
-                      await searchBUttonAction(
-                        selectedTempGroup!,
-                        selectedTempGrade!,
-                        monthNumber!,
-                        selectedTempCampus!,
-                      ).whenComplete(() {
-                        setState(() {
-                          isFetching = false;
-                        });
-                      });
-                    }
-                  } catch (e) {
-                    setState(() {
-                      isFetching = false;
-                      insertErrorLog(e.toString(), 'REFRESH BUTTON');
-                      showErrorFromBackend(context, e.toString());
-                    });
-                  }
-                })),
-                const SizedBox(
-                  width: 10,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButtons(ThemeData theme, ColorScheme colorScheme) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        _buildRefreshButton(theme, colorScheme),
+        const SizedBox(width: 12),
+        _buildSaveButton(theme, colorScheme),
+      ],
+    );
+  }
+
+  Widget _buildRefreshButton(ThemeData theme, ColorScheme colorScheme) {
+    return OutlinedButton.icon(
+      onPressed: () async {
+        try {
+          setState(() {
+            isFetching = true;
+          });
+          studentGradesBodyToUpgrade.clear();
+          if (isUserAdmin || isUserAcademicCoord) {
+            //Calendar month number
+            monthNumber = getKeyFromValue(spanishMonthsMap, selectedTempMonth!);
+          } else {
+            setState(() {
+              selectedCurrentTempMonth = currentMonth.toCapitalized;
+            });
+            //Calendar month number
+            monthNumber =
+                getKeyFromValue(spanishMonthsMap, selectedCurrentTempMonth!);
+          }
+          if (selectedTempGroup == null || selectedTempGroup == '') {
+            return showEmptyFieldAlertDialog(
+                context, 'Seleccionar un grupo a evaluar');
+          }
+          if (selectedTempGrade == null || selectedTempGrade == '') {
+            return showEmptyFieldAlertDialog(
+                context, 'Seleccionar un grado a evaluar');
+          }
+          if (selectedTempCampus == null || selectedTempCampus == '') {
+            return showEmptyFieldAlertDialog(
+                context, 'Seleccionar un campus a evaluar');
+          }
+          if (monthNumber == null || monthNumber == '') {
+            return showEmptyFieldAlertDialog(
+                context, 'Seleccionar un mes a evaluar');
+          } else {
+            await searchBUttonAction(
+              selectedTempGroup!,
+              selectedTempGrade!,
+              monthNumber!,
+              selectedTempCampus!,
+            ).whenComplete(() {
+              setState(() {
+                isFetching = false;
+              });
+            });
+          }
+        } catch (e) {
+          setState(() {
+            isFetching = false;
+            insertErrorLog(e.toString(), 'REFRESH BUTTON');
+            showErrorFromBackend(context, e.toString());
+          });
+        }
+      },
+      icon: const Icon(Icons.refresh, size: 18),
+      label: const Text('Actualizar'),
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        side: BorderSide(color: colorScheme.outline),
+        textStyle: theme.textTheme.labelMedium,
+      ),
+    );
+  }
+
+  Widget _buildSaveButton(ThemeData theme, ColorScheme colorScheme) {
+    return FilledButton.icon(
+      onPressed: () {
+        setState(() {
+          isFetching = true;
+        });
+        if (studentGradesBodyToUpgrade.isEmpty) {
+          showEmptyFieldAlertDialog(
+              context, 'No se detectó ningun cambio a realizar');
+          setState(() {
+            isFetching = false;
+          });
+        } else {
+          try {
+            if (isUserAdmin || isUserAcademicCoord) {
+              monthNumber =
+                  getKeyFromValue(spanishMonthsMap, selectedTempMonth!);
+            } else {
+              monthNumber =
+                  getKeyFromValue(spanishMonthsMap, selectedCurrentTempMonth!);
+            }
+            saveButtonAction(monthNumber).whenComplete(() async {
+              studentGradesBodyToUpgrade.clear();
+              await searchBUttonAction(
+                selectedTempGroup!,
+                selectedTempGrade!,
+                monthNumber!,
+                selectedTempCampus!,
+              );
+              setState(() {
+                isFetching = false;
+                showInformationDialog(context, 'Éxito', 'Cambios realizados!');
+              });
+            });
+          } catch (e) {
+            setState(() {
+              isFetching = false;
+              showErrorFromBackend(context, e.toString());
+            });
+          }
+        }
+      },
+      icon: const Icon(Icons.save, size: 18),
+      label: const Text('Guardar'),
+      style: FilledButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        textStyle: theme.textTheme.labelMedium,
+      ),
+    );
+  }
+
+  Widget _buildStudentNameSection(ThemeData theme, ColorScheme colorScheme) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: colorScheme.primaryContainer.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: colorScheme.primary.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.person,
+            color: colorScheme.primary,
+            size: 20,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: selectedStudentName.isNotEmpty
+                ? Text(
+                    'Evaluando a: ${selectedStudentName.trim()}',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: colorScheme.primary,
+                    ),
+                  )
+                : Text(
+                    'Seleccione un alumno para evaluar',
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGradesGrids(ThemeData theme, ColorScheme colorScheme) {
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        if (studentEvaluationRows.isEmpty) {
+          return _buildEmptyGridState(theme, colorScheme);
+        } else {
+          return _buildGridsContent(theme, colorScheme, constraints);
+        }
+      },
+    );
+  }
+
+  Widget _buildEmptyGridState(ThemeData theme, ColorScheme colorScheme) {
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: colorScheme.outlineVariant,
+            width: 1,
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.school_outlined,
+              size: 48,
+              color: colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No hay estudiantes disponibles',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Favor de actualizar la información con los filtros seleccionados',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGridsContent(
+      ThemeData theme, ColorScheme colorScheme, BoxConstraints constraints) {
+    final availableHeight = constraints.maxHeight;
+
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Students Grid (Left Panel)
+            Expanded(
+              flex: 1,
+              child: Container(
+                height: availableHeight,
+                decoration: BoxDecoration(
+                  color: colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: colorScheme.outlineVariant,
+                    width: 1,
+                  ),
                 ),
-                Flexible(
-                  child: SaveItemButton(
-                    onPressed: () {
-                      setState(() {
-                        isFetching = true;
-                      });
-                      if (studentGradesBodyToUpgrade.isEmpty) {
-                        showEmptyFieldAlertDialog(
-                            context, 'No se detectó ningun cambio a realizar');
-                        setState(() {
-                          isFetching = false;
-                        });
-                      } else {
-                        try {
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: colorScheme.primaryContainer.withOpacity(0.3),
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(12),
+                          topRight: Radius.circular(12),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.groups_outlined,
+                            color: colorScheme.primary,
+                            size: 18,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Lista de Estudiantes',
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: colorScheme.onSurface,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: TrinaGrid(
+                        key: studentsGridKey,
+                        columns: studentColumnsToEvaluateByStudent,
+                        rows: studentEvaluationRows,
+                        mode: TrinaGridMode.select,
+                        onRowDoubleTap: (event) async {
+                          var gradeInt = getKeyFromValue(
+                              teacherGradesMap, selectedTempGrade!.toString());
+                          int? monthNumber;
+
                           if (isUserAdmin || isUserAcademicCoord) {
                             monthNumber = getKeyFromValue(
                                 spanishMonthsMap, selectedTempMonth!);
@@ -437,275 +812,186 @@ class _GradesByStudentState extends State<GradesByStudent> {
                             monthNumber = getKeyFromValue(
                                 spanishMonthsMap, selectedCurrentTempMonth!);
                           }
-                          saveButtonAction(monthNumber).whenComplete(() async {
-                            studentGradesBodyToUpgrade.clear();
-                            await searchBUttonAction(
-                              selectedTempGroup!,
-                              selectedTempGrade!,
-                              monthNumber!,
-                              selectedTempCampus!,
-                            );
-                            setState(() {
-                              isFetching = false;
-                              showInformationDialog(
-                                  context, 'Èxito', 'Cambios realizados!');
-                            });
-                          });
-                        } catch (e) {
-                          setState(() {
-                            isFetching = false;
-                            showErrorFromBackend(context, e.toString());
-                          });
-                        }
-                      }
-                    },
+                          selectedStudentID =
+                              event.row.cells['studentID']!.value;
+                          selectedStudentName =
+                              event.row.cells['studentName']!.value.toString();
+
+                          await loadSelectedStudent(
+                              selectedStudentID!, gradeInt, monthNumber!);
+                        },
+                        onLoaded: (event) {
+                          event.stateManager
+                              .setSelectingMode(TrinaGridSelectingMode.cell);
+                          TrinaGridStateManager stateManager =
+                              event.stateManager;
+
+                          selectRowByName(
+                              stateManager, 'studentName', selectedStudentName);
+                        },
+                        configuration: const TrinaGridConfiguration(
+                          style: TrinaGridStyleConfig(
+                            enableColumnBorderVertical: false,
+                            enableCellBorderVertical: false,
+                          ),
+                        ),
+                        createFooter: (stateManager) {
+                          stateManager.setPageSize(20, notify: false);
+                          return TrinaPagination(stateManager);
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            // Grades Grid (Right Panel)
+            Expanded(
+              flex: 2,
+              child: Container(
+                height: availableHeight,
+                decoration: BoxDecoration(
+                  color: colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: colorScheme.outlineVariant,
+                    width: 1,
                   ),
                 ),
-              ],
-            ),
-          ),
-          // const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Center(
-                child: selectedStudentName.isNotEmpty
-                    ? Text(
-                        'Evaluando a : ${selectedStudentName.trim()}',
-                        style: const TextStyle(
-                            fontFamily: 'Sora',
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue),
-                      )
-                    : const Text(
-                        ' ',
-                        style: TextStyle(
-                            fontFamily: 'Sora',
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: colorScheme.secondaryContainer.withOpacity(0.3),
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(12),
+                          topRight: Radius.circular(12),
+                        ),
                       ),
-              ),
-            ],
-          ),
-          const Divider(thickness: 1),
-          Container(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height / 1.8,
-              margin: const EdgeInsets.only(right: 10, left: 10, bottom: 10),
-              child: LayoutBuilder(
-                  builder: (BuildContext context, BoxConstraints constraints) {
-                if (studentEvaluationRows.isEmpty) {
-                  return const Placeholder(
-                    child: Column(
-                      children: [
-                        Center(
-                          child: Text('Favor de refrescar información'),
-                        )
-                      ],
-                    ),
-                  );
-                } else {
-                  return StatefulBuilder(
-                    builder: (context, setState) {
-                      return Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
+                      child: Row(
                         children: [
-                          Expanded(
-                              child: TrinaGrid(
-                                  key: studentsGridKey,
-                                  //Grid for students name and ID
-                                  columns: studentColumnsToEvaluateByStudent,
-                                  rows: studentEvaluationRows,
-                                  mode: TrinaGridMode.select,
-                                  onRowDoubleTap: (event) async {
-                                    var gradeInt = getKeyFromValue(
-                                        teacherGradesMap,
-                                        selectedTempGrade!.toString());
-                                    int? monthNumber;
-
-                                    if (isUserAdmin || isUserAcademicCoord) {
-                                      monthNumber = getKeyFromValue(
-                                          spanishMonthsMap, selectedTempMonth!);
-                                    } else {
-                                      monthNumber = getKeyFromValue(
-                                          spanishMonthsMap,
-                                          selectedCurrentTempMonth!);
-                                    }
-                                    selectedStudentID =
-                                        event.row.cells['studentID']!.value;
-                                    selectedStudentName = event
-                                        .row.cells['studentName']!.value
-                                        .toString();
-
-                                    await loadSelectedStudent(
-                                        selectedStudentID!,
-                                        gradeInt,
-                                        monthNumber!);
-                                  },
-                                  onLoaded: (event) {
-                                    event.stateManager.setSelectingMode(
-                                        TrinaGridSelectingMode.cell);
-                                    TrinaGridStateManager stateManager =
-                                        event.stateManager;
-
-                                    // Select the row where the 'nameColumn' matches 'John Doe'
-                                    selectRowByName(stateManager, 'studentName',
-                                        selectedStudentName);
-                                  },
-                                  configuration: const TrinaGridConfiguration(
-                                    style: TrinaGridStyleConfig(
-                                      enableColumnBorderVertical: false,
-                                      enableCellBorderVertical: false,
-                                    ),
-                                  ),
-                                  createFooter: (stateManager) {
-                                    stateManager.setPageSize(20,
-                                        notify: false); // default 40
-                                    return TrinaPagination(stateManager);
-                                  })),
-                          const SizedBox(
-                            width: 20,
+                          Icon(
+                            Icons.grade_outlined,
+                            color: colorScheme.secondary,
+                            size: 18,
                           ),
-                          Expanded(
-                            flex: 2,
-                            child: LayoutBuilder(
-                              builder: (BuildContext context,
-                                  BoxConstraints constraints) {
-                                return Column(
-                                  children: [
-                                    Expanded(
-                                      child: selectedStudentRows.isNotEmpty
-                                          ? TrinaGrid(
-                                              key: evalsGridKey,
-                                              // mode: TrinaGridMode.select,
-                                              columns: gradesByStudentColumns,
-                                              rows: selectedStudentRows,
-                                              onChanged: (event) {
-                                                // Validator to avoid double type numbers for 'Calif' column
-                                                if (event.column.field ==
-                                                    'evaluation') {
-                                                  // Only allow integers (no decimals)
-                                                  if (event.value is double ||
-                                                      (event.value is String &&
-                                                          event.value
-                                                              .contains('.'))) {
-                                                    showErrorFromBackend(
-                                                        context,
-                                                        'Solo se permiten números enteros en la calificación.');
-                                                    return; // Prevent further processing
-                                                  }
-                                                  // Optionally, also check if it's not a number at all
-                                                  if (int.tryParse(
-                                                          event.toString()) ==
-                                                      null) {
-                                                    showErrorFromBackend(
-                                                        context,
-                                                        'Ingrese solo números enteros válidos.');
-                                                    return;
-                                                  }
-                                                }
-                                                var newValue =
-                                                    validateNewGradeValue(
-                                                        event.value,
-                                                        event.column.title);
-
-                                                final subjectID = event.row
-                                                    .cells['subject']?.value;
-                                                final evalId = event
-                                                    .row
-                                                    .cells['idCicloEscolar']
-                                                    ?.value;
-                                                int? monthNumber;
-                                                if (isUserAdmin ||
-                                                    isUserAcademicCoord) {
-                                                  monthNumber = getKeyFromValue(
-                                                      spanishMonthsMap,
-                                                      selectedTempMonth!
-                                                          .toCapitalized);
-                                                } else {
-                                                  monthNumber = getKeyFromValue(
-                                                      spanishMonthsMap,
-                                                      currentMonth
-                                                          .toCapitalized);
-                                                }
-
-                                                validator();
-                                                composeBodyToUpdateGradeBySTudent(
-                                                  event.column.title,
-                                                  selectedStudentID!,
-                                                  newValue,
-                                                  evalId,
-                                                  monthNumber,
-                                                );
-                                              },
-                                              // onRowSecondaryTap: (event) async {
-                                              //   var gradeInt = getKeyFromValue(
-                                              //       teacherGradesMap,
-                                              //       selectedTempGrade!);
-                                              //   asignatureNameListener = '';
-                                              //   asignatureNameListener = event
-                                              //       .row
-                                              //       .cells['subject_name']
-                                              //       ?.value
-                                              //       .toString();
-
-                                              //   if (gradeInt! >= 6) {
-                                              //     await showCommentsDialog(
-                                              //         context,
-                                              //         commentsAsignated,
-                                              //         asignatureNameListener!);
-                                              //   } else {
-                                              //     showInformationDialog(
-                                              //         context,
-                                              //         'Aviso',
-                                              //         'Sin comentarios disponibles a asignar al alumno seleccionado');
-                                              //   }
-                                              // },
-                                              onLoaded: (TrinaGridOnLoadedEvent
-                                                  event) {
-                                                gridAStateManager =
-                                                    event.stateManager;
-                                              },
-                                              configuration:
-                                                  const TrinaGridConfiguration(
-                                                style: TrinaGridStyleConfig(
-                                                  enableColumnBorderVertical:
-                                                      false,
-                                                  enableCellBorderVertical:
-                                                      false,
-                                                ),
-                                                columnSize:
-                                                    TrinaGridColumnSizeConfig(
-                                                  autoSizeMode:
-                                                      TrinaAutoSizeMode.scale,
-                                                  resizeMode: TrinaResizeMode
-                                                      .pushAndPull,
-                                                ),
-                                              ),
-                                            )
-                                          : const Center(
-                                              child: Text(
-                                                  'Seleccione un alumno dando doble click para evaluar'),
-                                            ),
-                                    ),
-                                  ],
-                                );
-                              },
+                          const SizedBox(width: 8),
+                          Text(
+                            'Calificaciones del Estudiante',
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: colorScheme.onSurface,
                             ),
                           ),
-                          const SizedBox(
-                            width: 10,
-                          ),
                         ],
-                      );
-                    },
-                  );
-                }
-              })),
-        ],
-      ),
+                      ),
+                    ),
+                    Expanded(
+                      child: selectedStudentRows.isNotEmpty
+                          ? TrinaGrid(
+                              key: evalsGridKey,
+                              columns: gradesByStudentColumns,
+                              rows: selectedStudentRows,
+                              onChanged: (event) {
+                                // Validator to avoid double type numbers for 'Calif' column
+                                if (event.column.field == 'evaluation') {
+                                  // Only allow integers (no decimals)
+                                  if (event.value is double ||
+                                      (event.value is String &&
+                                          event.value.contains('.'))) {
+                                    showErrorFromBackend(context,
+                                        'Solo se permiten números enteros en la calificación.');
+                                    return;
+                                  }
+                                  if (int.tryParse(event.toString()) == null) {
+                                    showErrorFromBackend(context,
+                                        'Ingrese solo números enteros válidos.');
+                                    return;
+                                  }
+                                }
+                                var newValue = validateNewGradeValue(
+                                    event.value, event.column.title);
+
+                                final evalId =
+                                    event.row.cells['idCicloEscolar']?.value;
+                                int? monthNumber;
+                                if (isUserAdmin || isUserAcademicCoord) {
+                                  monthNumber = getKeyFromValue(
+                                      spanishMonthsMap,
+                                      selectedTempMonth!.toCapitalized);
+                                } else {
+                                  monthNumber = getKeyFromValue(
+                                      spanishMonthsMap,
+                                      currentMonth.toCapitalized);
+                                }
+
+                                validator();
+                                composeBodyToUpdateGradeBySTudent(
+                                  event.column.title,
+                                  selectedStudentID!,
+                                  newValue,
+                                  evalId,
+                                  monthNumber,
+                                );
+                              },
+                              onLoaded: (TrinaGridOnLoadedEvent event) {
+                                gridAStateManager = event.stateManager;
+                              },
+                              configuration: const TrinaGridConfiguration(
+                                style: TrinaGridStyleConfig(
+                                  enableColumnBorderVertical: false,
+                                  enableCellBorderVertical: false,
+                                ),
+                                columnSize: TrinaGridColumnSizeConfig(
+                                  autoSizeMode: TrinaAutoSizeMode.scale,
+                                  resizeMode: TrinaResizeMode.pushAndPull,
+                                ),
+                              ),
+                            )
+                          : Center(
+                              child: Container(
+                                padding: const EdgeInsets.all(24),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.touch_app_outlined,
+                                      size: 40,
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Text(
+                                      'Seleccione un estudiante',
+                                      style:
+                                          theme.textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.w500,
+                                        color: colorScheme.onSurface,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Haga doble clic en un estudiante para ver y editar sus calificaciones',
+                                      textAlign: TextAlign.center,
+                                      style:
+                                          theme.textTheme.bodyMedium?.copyWith(
+                                        color: colorScheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
