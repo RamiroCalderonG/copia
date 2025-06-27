@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/core/reusable_methods/temp_data_functions.dart';
 import 'package:oxschool/core/reusable_methods/user_functions.dart';
+import 'package:oxschool/presentation/Modules/main_window/main_window_model.dart';
 import 'package:oxschool/presentation/Modules/services_ticket/processes/create_service_ticket.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
 
@@ -174,14 +175,14 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
                   Uri url = Uri.parse(oxlinks[index]);
                   launchUrlDirection(url);
                 },
-                child: HoverCard(
+                child: Material3HoverCard(
+                  onTap: () {
+                    Uri url = Uri.parse(oxlinks[index]);
+                    launchUrlDirection(url);
+                  },
                   imagePath: gridMainWindowIcons[index],
-                  backgroundColor:
-                      Theme.of(context).brightness == Brightness.light
-                          ? gridMainWindowColors[index] //igth theme image
-                          : gridDarkColorsMainWindow[index], //Dark theme image
-
                   title: mainWindowGridTitles[index],
+                  index: index,
                 ),
               );
             }),
@@ -395,13 +396,14 @@ final menuListItems = Center(
               Uri url = Uri.parse(oxlinks[index]);
               launchUrlDirection(url);
             },
-            child: HoverCard(
+            child: Material3HoverCard(
+              onTap: () {
+                Uri url = Uri.parse(oxlinks[index]);
+                launchUrlDirection(url);
+              },
               imagePath: gridMainWindowIcons[index],
-              backgroundColor: Theme.of(context).brightness == Brightness.light
-                  ? gridMainWindowColors[index] //igth theme image
-                  : gridDarkColorsMainWindow[index], //Dark theme image
-
               title: mainWindowGridTitles[index],
+              index: index,
             ),
           );
         }),

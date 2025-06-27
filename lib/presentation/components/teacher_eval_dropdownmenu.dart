@@ -180,7 +180,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
   Widget build(BuildContext context) {
     return Padding(
         padding:
-            const EdgeInsets.only(bottom: 20, top: 25, right: 20, left: 20),
+            const EdgeInsets.only(bottom: 10, top: 10, right: 20, left: 20),
         child: Wrap(
           spacing: 8.0,
           runSpacing: 4.0,
@@ -192,7 +192,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
               DropdownMenu<String>(
                 label: const Text(
                   ' Campus ',
-                  style: TextStyle(fontSize: 12),
+                  style: TextStyle(fontSize: 10, fontFamily: 'Sora'),
                 ),
                 trailingIcon: const Icon(Icons.arrow_drop_down),
                 initialSelection: selectedUnity,
@@ -228,7 +228,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
             DropdownMenu<String>(
               label: const Text(
                 ' Grado ',
-                style: TextStyle(fontSize: 12),
+                style: TextStyle(fontSize: 10, fontFamily: 'Sora'),
               ),
               trailingIcon: const Icon(Icons.arrow_drop_down),
               initialSelection: preSelectedGrade ?? selectedGrade,
@@ -252,7 +252,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
             DropdownMenu<String>(
               label: const Text(
                 ' Grupo ',
-                style: TextStyle(fontSize: 12),
+                style: TextStyle(fontSize: 10, fontFamily: 'Sora'),
               ),
               trailingIcon: const Icon(Icons.arrow_drop_down),
               initialSelection: preSelectedGroup ?? selectedGroup,
@@ -277,7 +277,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
               DropdownMenu<String>(
                 label: const Text(
                   ' Materia ',
-                  style: TextStyle(fontSize: 12),
+                  style: TextStyle(fontSize: 10, fontFamily: 'Sora'),
                 ),
                 trailingIcon: const Icon(Icons.arrow_drop_down),
                 initialSelection: preSelectedSubject ?? selectedSubject,
@@ -301,7 +301,8 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                 if (currentUser!.isCurrentUserAdmin() ||
                     currentUser!.isCurrentUserAcademicCoord())
                   DropdownMenu<String>(
-                      label: const Text(' Mes '),
+                      label: const Text(' Mes ',
+                          style: TextStyle(fontSize: 10, fontFamily: 'Sora')),
                       trailingIcon: const Icon(Icons.arrow_drop_down),
                       initialSelection: monthValue,
                       onSelected: (String? value) {
