@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
 import 'package:oxschool/core/reusable_methods/device_functions.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/core/reusable_methods/translate_messages.dart';
@@ -10,9 +11,7 @@ import 'package:oxschool/presentation/Modules/academic/school%20grades/fo_dac_27
 import 'package:oxschool/presentation/Modules/academic/school%20grades/grades_by_asignature.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/presentation/components/confirm_dialogs.dart';
-import 'package:oxschool/presentation/components/mobile_FloatingActionButton.dart';
 
-import '../../../../core/config/flutter_flow/flutter_flow_theme.dart';
 import '../../../../core/reusable_methods/academic_functions.dart';
 import '../../../../data/datasources/temp/teacher_grades_temp.dart';
 import 'grades_per_student.dart';
@@ -171,157 +170,461 @@ class _GradesMainScreenState extends State<GradesMainScreen>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     bool isDesktop = !kIsWeb &&
         (defaultTargetPlatform == TargetPlatform.macOS ||
             defaultTargetPlatform == TargetPlatform.windows ||
             defaultTargetPlatform == TargetPlatform.linux);
-    //_tabController = TabController(length: 3, vsync: this);
 
     return FutureBuilder<void>(
       future: _initializationFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(
-              child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Flexible(
-                child: Text(
-                  'Por favor, espere mientras se cargan los datos',
-                  style: TextStyle(
-                      fontFamily: 'Sora',
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      fontStyle: FontStyle.italic,
-                      color: FlutterFlowTheme.of(context).secondary),
-                ),
-              ),
-              Flexible(
-                child: CustomLoadingIndicator(),
-              )
-            ],
-          ));
+          return _buildLoadingScaffold(theme);
         } else if (snapshot.hasError) {
-          return Scaffold(
-            appBar: AppBar(
-              leading: IconButton(
-                icon: Icon(Icons.arrow_back),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-              automaticallyImplyLeading: false,
-              title: const Text('Error'),
-              backgroundColor: FlutterFlowTheme.of(context).primary,
-              foregroundColor: FlutterFlowTheme.of(context).primaryText,
-            ),
-            body: Placeholder(
-              child: Center(
-                  child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    ' ${snapshot.error.toString()}',
-                    style: TextStyle(
-                      fontFamily: 'Sora',
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        _initializationFuture = validateDateAndUserPriv();
-                      });
-                    },
-                    child: Text('Reintentar'),
-                  )
-                ],
-              )),
-            ),
-          );
+          return _buildErrorScaffold(theme, snapshot.error.toString());
         } else {
-          return Scaffold(
-            appBar: AppBar(
-              actions: const [],
-              bottom: TabBar(
-                labelColor: Colors.white,
-                controller: _tabController,
-                tabs: const <Widget>[
-                  Tab(
-                    icon: Icon(Icons.abc),
-                    text: 'Carga por materia',
-                  ),
-                  Tab(
-                    icon: Icon(
-                      Icons.boy,
-                      // size: 40,
-                    ),
-                    text: 'Carga por alumno',
-                  ),
-                  Tab(
-                    icon: FaIcon(
-                      FontAwesomeIcons.sheetPlastic,
-                    ),
-                    text: 'FO-DAC-27',
-                  )
-                ],
-                indicatorColor: Colors.blueAccent,
-              ),
-              title: const Text('Calificaciones',
-                  style: TextStyle(color: Colors.white)),
-              backgroundColor: FlutterFlowTheme.of(context).primary,
-            ),
-            body: isSearching
-                ? const CustomLoadingIndicator()
-                : displayEvaluateGrids
-                    ? Container(
-                        constraints: BoxConstraints(
-                          minHeight: isDesktop ? 600 : 0,
-                        ),
-                        child: TabBarView(
-                          key: const PageStorageKey('value'),
-                          controller: _tabController,
-                          children: const <Widget>[
-                            GradesByAsignature(),
-                            GradesByStudent(),
-                            FoDac27()
-                          ],
-                        ),
-                      )
-                    : Placeholder(
-                        color: Colors.transparent,
-                        child: Center(
-                            child: Center(
-                          child: displayErrorMessage
-                              ? Text(
-                                  errorMessage!,
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                      fontFamily: 'Sora', fontSize: 20),
-                                )
-                              : const Text(
-                                  'Sin información, consulte con el administrador',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                      fontFamily: 'Sora', fontSize: 20),
-                                ),
-                        )),
-                      ),
-            floatingActionButtonLocation:
-                FloatingActionButtonLocation.miniEndDocked,
-            floatingActionButton:
-                isDeviceMobile ? mobileFloatingActionButton(context) : null,
-          );
+          return _buildMainScaffold(theme, colorScheme, isDesktop);
         }
       },
     );
   }
 
-  // void initSharedPref() async {
-  //   final SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   setState(() {
-  //     isUserAdmin = prefs.getBool('isUserAdmin')!;
-  //   });
-  // }
+  Widget _buildLoadingScaffold(ThemeData theme) {
+    return Scaffold(
+      backgroundColor: theme.colorScheme.surface,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              theme.colorScheme.primaryContainer.withOpacity(0.1),
+              theme.colorScheme.surface,
+            ],
+          ),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(32),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: theme.colorScheme.shadow.withOpacity(0.1),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.school_outlined,
+                      size: 56,
+                      color: theme.colorScheme.primary,
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      'Cargando calificaciones',
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Por favor, espere mientras se cargan los datos',
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    const CustomLoadingIndicator(),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorScaffold(ThemeData theme, String error) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Error'),
+        centerTitle: true,
+        backgroundColor: theme.colorScheme.surface,
+        foregroundColor: theme.colorScheme.onSurface,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+      ),
+      backgroundColor: theme.colorScheme.surface,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              theme.colorScheme.errorContainer.withOpacity(0.1),
+              theme.colorScheme.surface,
+            ],
+          ),
+        ),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Card(
+              elevation: 0,
+              color: theme.colorScheme.surfaceContainerHighest,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+                side: BorderSide(
+                  color: theme.colorScheme.outline.withOpacity(0.2),
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.errorContainer,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Icon(
+                        Icons.error_outline_rounded,
+                        size: 48,
+                        color: theme.colorScheme.onErrorContainer,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      'Error al cargar datos',
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      error,
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    FilledButton.icon(
+                      onPressed: () {
+                        setState(() {
+                          _initializationFuture = validateDateAndUserPriv();
+                        });
+                      },
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Reintentar'),
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMainScaffold(
+      ThemeData theme, ColorScheme colorScheme, bool isDesktop) {
+    return Scaffold(
+      backgroundColor: theme.colorScheme.surface,
+      appBar: _buildModernAppBar(theme, colorScheme),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              theme.colorScheme.primaryContainer.withOpacity(0.05),
+              theme.colorScheme.surface,
+            ],
+          ),
+        ),
+        child: isSearching
+            ? const Center(child: CustomLoadingIndicator())
+            : displayEvaluateGrids
+                ? _buildTabContent(theme, isDesktop)
+                : _buildEmptyState(theme),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButton: isDeviceMobile
+          ? FloatingActionButton.extended(
+              onPressed: () {
+                // Add action for mobile FAB
+              },
+              icon: const Icon(Icons.add),
+              label: const Text('Acción'),
+              backgroundColor: theme.colorScheme.primaryContainer,
+              foregroundColor: theme.colorScheme.onPrimaryContainer,
+            )
+          : null,
+    );
+  }
+
+  PreferredSizeWidget _buildModernAppBar(
+      ThemeData theme, ColorScheme colorScheme) {
+    return AppBar(
+      title: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: colorScheme.primaryContainer,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              Icons.school,
+              color: colorScheme.onPrimaryContainer,
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Calificaciones',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+              Text(
+                'Sistema académico',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+      backgroundColor: FlutterFlowTheme.of(context).primary,
+      foregroundColor: colorScheme.onSurface,
+      elevation: 0,
+      scrolledUnderElevation: 4,
+      centerTitle: false,
+      bottom:
+          displayEvaluateGrids ? _buildModernTabBar(theme, colorScheme) : null,
+    );
+  }
+
+  PreferredSizeWidget _buildModernTabBar(
+      ThemeData theme, ColorScheme colorScheme) {
+    return TabBar(
+      controller: _tabController,
+      labelColor: colorScheme.primary,
+      unselectedLabelColor: colorScheme.onSurfaceVariant,
+      indicatorColor: colorScheme.primary,
+      indicatorWeight: 3,
+      dividerColor: colorScheme.outlineVariant,
+      labelStyle: theme.textTheme.titleSmall?.copyWith(
+        fontWeight: FontWeight.w600,
+      ),
+      unselectedLabelStyle: theme.textTheme.titleSmall?.copyWith(
+        fontWeight: FontWeight.w500,
+      ),
+      tabs: [
+        Tab(
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: colorScheme.primaryContainer.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              Icons.subject,
+              size: 20,
+              color: Colors.white54,
+            ),
+          ),
+          // text: 'Por Materia',
+          child: Text(
+            'Por Materia',
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+        ),
+        Tab(
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: colorScheme.secondaryContainer.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              Icons.person,
+              size: 20,
+              color: Colors.white,
+            ),
+          ),
+          child: Text(
+            'Por Alumno',
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+          // text: 'Por Alumno',
+        ),
+        Tab(
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: colorScheme.tertiaryContainer.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: FaIcon(
+              FontAwesomeIcons.fileLines,
+              size: 16,
+              color: Colors.white,
+            ),
+          ),
+          // text: 'FO-DAC-27',
+          child: Text(
+            'FO-DAC-27',
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTabContent(ThemeData theme, bool isDesktop) {
+    return Container(
+      margin: const EdgeInsets.all(8),
+      child: Card(
+        elevation: 0,
+        color: theme.colorScheme.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(
+            color: theme.colorScheme.outlineVariant,
+            width: 1,
+          ),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
+            constraints: BoxConstraints(
+              minHeight: isDesktop ? 600 : 0,
+            ),
+            child: TabBarView(
+              key: const PageStorageKey('grades_tab_view'),
+              controller: _tabController,
+              children: const [
+                GradesByAsignature(),
+                GradesByStudent(),
+                FoDac27(),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(ThemeData theme) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Card(
+          elevation: 0,
+          color: theme.colorScheme.surfaceContainerHighest,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+            side: BorderSide(
+              color: theme.colorScheme.outline.withOpacity(0.2),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(40),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surfaceContainerHigh,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Icon(
+                    displayErrorMessage
+                        ? Icons.warning_amber_rounded
+                        : Icons.info_outline,
+                    size: 64,
+                    color: displayErrorMessage
+                        ? theme.colorScheme.error
+                        : theme.colorScheme.primary,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  displayErrorMessage ? 'Error' : 'Sin información',
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  displayErrorMessage
+                      ? errorMessage!
+                      : 'Sin información disponible, consulte con el administrador',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                if (displayErrorMessage) ...[
+                  const SizedBox(height: 32),
+                  FilledButton.icon(
+                    onPressed: () {
+                      setState(() {
+                        _initializationFuture = validateDateAndUserPriv();
+                      });
+                    },
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Reintentar'),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }

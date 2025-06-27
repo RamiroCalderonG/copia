@@ -3,15 +3,12 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
 import 'package:oxschool/core/constants/version.dart';
 import 'package:oxschool/core/reusable_methods/device_functions.dart';
 import 'package:oxschool/core/reusable_methods/temp_data_functions.dart';
-import 'package:oxschool/core/utils/loader_indicator.dart';
 import 'package:oxschool/core/utils/version_updater.dart';
 import 'package:oxschool/data/Models/Cycle.dart';
 import 'package:oxschool/data/Models/User.dart';
@@ -260,35 +257,29 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
         decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage('assets/images/background-header.jpg'),
-            fit: BoxFit.cover,
+            fit: BoxFit.fill,
           ),
         ),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 2.0, sigmaY: 2.0),
-          child: Container(
-            color: Colors.black.withOpacity(0.1),
-            child: SafeArea(
-              child: Center(
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: isMobile ? 20 : 40,
-                    vertical: 20,
-                  ),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxWidth: isMobile ? double.infinity : 450,
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _buildLogo(),
-                        const SizedBox(height: 32),
-                        _buildLoginForm(theme, colorScheme, isMobile),
-                        const SizedBox(height: 24),
-                        _buildVersionInfo(theme, colorScheme),
-                      ],
-                    ),
-                  ),
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(
+                horizontal: isMobile ? 20 : 40,
+                vertical: 20,
+              ),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: isMobile ? double.infinity : 450,
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buildLogo(),
+                    const SizedBox(height: 32),
+                    _buildLoginForm(theme, colorScheme, isMobile),
+                    const SizedBox(height: 24),
+                    _buildVersionInfo(theme, colorScheme),
+                  ],
                 ),
               ),
             ),
@@ -312,8 +303,8 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
       borderRadius: BorderRadius.circular(12),
       child: Image.asset(
         'assets/images/logoRedondoOx.png',
-        width: 180,
-        height: 180,
+        width: 100,
+        height: 100,
         fit: BoxFit.contain,
       ),
     );
@@ -460,20 +451,42 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                 counterText: '',
               ),
               validator: _model.textController2Validator.asValidator(context),
-              onFieldSubmitted: (_) async {
-                isLoading ? null : await _handleLogin();
-              },
+              onFieldSubmitted: (_) => _handleLogin(),
             ),
             const SizedBox(height: 32),
 
             // Login Button
             FilledButton(
               onPressed: () async {
-                isLoading ? null : await _handleLogin();
+                if (kDebugMode &&
+                    _model.textController1!.text.isEmpty &&
+                    _model.textController2!.text.isEmpty) {
+                  setState(() {
+                    isDebugging = true;
+                    setUserDataForDebug();
+                    isLoading = false;
+                  });
+                  if (Platform.isAndroid || Platform.isIOS) {
+                    context.goNamed('MobileMainView', extra: <String, dynamic>{
+                      kTransitionInfoKey: const TransitionInfo(
+                        hasTransition: true,
+                        transitionType: PageTransitionType.fade,
+                      ),
+                    });
+                  } else {
+                    context.goNamed('MainWindow', extra: <String, dynamic>{
+                      kTransitionInfoKey: const TransitionInfo(
+                        hasTransition: true,
+                        transitionType: PageTransitionType.fade,
+                      ),
+                    });
+                  }
+                } else {
+                  await _handleLogin();
+                }
               },
               style: FilledButton.styleFrom(
-                backgroundColor:
-                    FlutterFlowTheme.of(context).primary, //colorScheme.primary,
+                backgroundColor: colorScheme.primary,
                 foregroundColor: colorScheme.onPrimary,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
@@ -481,19 +494,16 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
                 ),
                 elevation: 2,
               ),
-              child: isLoading
-                  ? CircularProgressIndicator(
-                      color: colorScheme.primary,
-                    )
-                  : Text(
-                      'Ingresar',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: colorScheme.onPrimary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+              child: Text(
+                'Ingresar',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: colorScheme.onPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
             const SizedBox(height: 20),
+
             // Forgot Password Button
             TextButton(
               onPressed: () {
@@ -527,14 +537,14 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
   Widget _buildVersionInfo(ThemeData theme, ColorScheme colorScheme) {
     return Container(
       padding: const EdgeInsets.all(16),
-      // decoration: BoxDecoration(
-      //   color: Colors.white.withOpacity(0.1),
-      //   borderRadius: BorderRadius.circular(12),
-      //   border: Border.all(
-      //     color: Colors.white.withOpacity(0.2),
-      //     width: 1,
-      //   ),
-      // ),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
       child: Column(
         children: [
           Text(

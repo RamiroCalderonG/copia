@@ -43,7 +43,8 @@ const Map<String, Icon> moduleIcons = {
   'Nominas': Icon(Icons.groups),
   'Contraloria': Icon(Icons.payments),
   'Archivo Escolar': Icon(Icons.folder),
-  'Administracion': Icon(Icons.admin_panel_settings)
+  'Administracion': Icon(Icons.admin_panel_settings),
+  'Cafeteria': Icon(Icons.fastfood_sharp)
 };
 
 const Map<String, Icon> eventsIcons = {
