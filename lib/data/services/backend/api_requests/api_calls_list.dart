@@ -1521,7 +1521,7 @@ Future<dynamic> getDisciplinaryReportsByDate(
       queryParameters: {
         'initialDate': initialDate,
         'finalDate': finalDate,
-        'cycle': "2022-2023" //cycle
+        'cycle': cycle
       },
       persistCookies: true,
       timeoutSeconds: 20,

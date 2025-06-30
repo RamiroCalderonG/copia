@@ -393,18 +393,18 @@ class _GradesMainScreenState extends State<GradesMainScreen>
     return AppBar(
       title: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: colorScheme.primaryContainer,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              Icons.school,
-              color: colorScheme.onPrimaryContainer,
-              size: 24,
-            ),
-          ),
+          // Container(
+          //   padding: const EdgeInsets.all(8),
+          //   decoration: BoxDecoration(
+          //     color: colorScheme.primaryContainer,
+          //     borderRadius: BorderRadius.circular(12),
+          //   ),
+          //   child: Icon(
+          //     Icons.school,
+          //     color: colorScheme.onPrimaryContainer,
+          //     size: 24,
+          //   ),
+          // ),
           const SizedBox(width: 12),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,

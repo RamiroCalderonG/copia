@@ -1,10 +1,16 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:get/get_connect/http/src/utils/utils.dart';
+import 'package:get/get_utils/src/extensions/export.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
+import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/core/reusable_methods/academic_functions.dart';
 import 'package:oxschool/core/utils/searchable_drop_down.dart';
 import 'package:oxschool/data/Models/Student.dart';
 import 'package:oxschool/presentation/components/confirm_dialogs.dart';
+import 'package:oxschool/presentation/components/custom_icon_button.dart';
 
 class CreateDisciplineScreen extends StatefulWidget {
   const CreateDisciplineScreen({super.key});
@@ -46,6 +52,7 @@ class _CreateDisciplineScreenState extends State<CreateDisciplineScreen> {
     _selectedChips.clear();
     studentsNames.clear();
     studentsList = Future.value(null);
+    observationsController.dispose();
     super.dispose();
   }
 
@@ -64,7 +71,7 @@ class _CreateDisciplineScreenState extends State<CreateDisciplineScreen> {
     ];
 
     return Scaffold(
-      // backgroundColor: theme.colorScheme.surfaceContainerLowest,
+      backgroundColor: theme.colorScheme.surfaceContainerLowest,
       extendBodyBehindAppBar: true,
       appBar: _buildAppBar(theme),
       body: _buildBody(theme, isSmallScreen, kindOfReportList),
@@ -80,16 +87,16 @@ class _CreateDisciplineScreenState extends State<CreateDisciplineScreen> {
           fontWeight: FontWeight.bold,
         ),
       ),
-      backgroundColor: FlutterFlowTheme.of(context).primary,
+      backgroundColor: theme.colorScheme.primary,
       foregroundColor: Colors.white,
       elevation: 0,
-      // centerTitle: true,
-      // shape: const RoundedRectangleBorder(
-      //   borderRadius: BorderRadius.only(
-      //     bottomLeft: Radius.circular(28),
-      //     bottomRight: Radius.circular(28),
-      //   ),
-      // ),
+      centerTitle: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(28),
+          bottomRight: Radius.circular(28),
+        ),
+      ),
       leading: IconButton(
         icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
         onPressed: () => Navigator.pop(context),
@@ -268,20 +275,20 @@ class _CreateDisciplineScreenState extends State<CreateDisciplineScreen> {
               Text(
                 'Seleccionar Estudiante',
                 style: theme.textTheme.titleMedium?.copyWith(
-                  color: FlutterFlowTheme.of(context).primaryText,
+                  color: theme.colorScheme.primary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ],
           ),
           const SizedBox(height: 16),
-          _buildStudentSelector(theme),
+          _buildStudentSelector(),
         ],
       ),
     );
   }
 
-  Widget _buildStudentSelector(ThemeData theme) {
+  Widget _buildStudentSelector() {
     return SearchableDropdown(
       items: studentsNames,
       label: 'Buscar estudiante por nombre',
@@ -334,7 +341,7 @@ class _CreateDisciplineScreenState extends State<CreateDisciplineScreen> {
               Text(
                 'Tipo de Reporte',
                 style: theme.textTheme.titleMedium?.copyWith(
-                  color: FlutterFlowTheme.of(context).primaryText,
+                  color: theme.colorScheme.primary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -412,7 +419,7 @@ class _CreateDisciplineScreenState extends State<CreateDisciplineScreen> {
               Text(
                 'Fecha y Hora',
                 style: theme.textTheme.titleMedium?.copyWith(
-                  color: FlutterFlowTheme.of(context).primaryText,
+                  color: theme.colorScheme.primary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -526,7 +533,7 @@ class _CreateDisciplineScreenState extends State<CreateDisciplineScreen> {
               Text(
                 'Docente y Materia',
                 style: theme.textTheme.titleMedium?.copyWith(
-                  color: FlutterFlowTheme.of(context).primaryText,
+                  color: theme.colorScheme.primary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -656,7 +663,7 @@ class _CreateDisciplineScreenState extends State<CreateDisciplineScreen> {
               Text(
                 'Causas del Reporte',
                 style: theme.textTheme.titleMedium?.copyWith(
-                  color: FlutterFlowTheme.of(context).primaryText,
+                  color: theme.colorScheme.primary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -783,7 +790,7 @@ class _CreateDisciplineScreenState extends State<CreateDisciplineScreen> {
               Text(
                 'Observaciones',
                 style: theme.textTheme.titleMedium?.copyWith(
-                  color: FlutterFlowTheme.of(context).primaryText,
+                  color: theme.colorScheme.primary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -936,10 +943,11 @@ class _CreateDisciplineScreenState extends State<CreateDisciplineScreen> {
           studentsNames.add(element.nombre!);
         }
       });
+      if (response.isEmpty) {
+        return [];
+      }
       return response;
     } catch (e) {
-      // Handle error
-      // print('Error fetching students: $e');
       return null;
     }
   }
