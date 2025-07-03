@@ -5,6 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/extensions/api_call_error_message.dart';
+import 'package:oxschool/core/reusable_methods/device_functions.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/core/reusable_methods/translate_messages.dart';
 import 'package:oxschool/data/services/backend/api_requests/status_code_manager.dart';
@@ -1675,14 +1676,15 @@ Future<dynamic> getFodac59Response(
     int month,
     int idSesion,
     String computerName,
-    bool includeNonActive) async {
+    bool includeNonActive,
+    String studentId) async {
   try {
     SharedPreferences devicePrefs = await SharedPreferences.getInstance();
-    String device = devicePrefs.getString('device')!;
+    var device = await getDeviceDetails();
 
     // Parse the device string as JSON
-    Map<String, dynamic> deviceData = json.decode(device);
-    String computerName = deviceData['computerName'] ?? 'Unknown';
+    // Map<String, dynamic> deviceData = json.decode(device);
+    String computerName = device['computerName'] ?? 'Unknown';
 
     var apiCall = await Requests.get(
       '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/academic/fodac59/result',
@@ -1690,17 +1692,19 @@ Future<dynamic> getFodac59Response(
         'Authorization': devicePrefs.getString('token')!,
         'Content-Type': 'application/json',
       },
-      body: {
+      queryParameters: {
         'cycle': cycle,
         'campus': campus,
         'gradeSeq': gradeSeq,
         'group': group,
         'month': month,
+        'student': studentId,
         'idSesion': devicePrefs.getInt('idSession'),
         'computerName': computerName,
-        'includeNonActive': includeNonActive.toString(),
+        'includeNonActive': includeNonActive,
       },
-      bodyEncoding: RequestBodyEncoding.JSON,
+      // body: requestBody,
+      // bodyEncoding: RequestBodyEncoding.JSON,
       persistCookies: false,
       timeoutSeconds: 20,
     );

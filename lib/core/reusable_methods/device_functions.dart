@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:oxschool/core/utils/device_information.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> storeCurrentDeviceIsMobile() async {
@@ -42,6 +43,49 @@ dynamic isCurrentDeviceMobile() async {
 Future<bool> getIsMobileFromPrefs() async {
   SharedPreferences devicePrefs = await SharedPreferences.getInstance();
   return devicePrefs.getBool('isMobile') ?? false;
+}
+
+Future<dynamic> getDeviceDetails() async {
+  var deviceData = <String, dynamic>{};
+  try {
+    if (kIsWeb) {
+      deviceData = readWebBrowserInfo(await deviceInfoPlugin.webBrowserInfo);
+    } else {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.android:
+          var androidInfo = await deviceInfoPlugin.androidInfo;
+          deviceData = readAndroidBuildData(androidInfo);
+          break;
+        case TargetPlatform.iOS:
+          var iosInfo = await deviceInfoPlugin.iosInfo;
+          deviceData = readIosDeviceInfo(iosInfo);
+          break;
+        case TargetPlatform.linux:
+          var linuxInfo = await deviceInfoPlugin.linuxInfo;
+          deviceData = readLinuxDeviceInfo(linuxInfo);
+          break;
+        case TargetPlatform.windows:
+          var windowsInfo = await deviceInfoPlugin.windowsInfo;
+          deviceData = readWindowsDeviceInfo(windowsInfo);
+          break;
+        case TargetPlatform.macOS:
+          var macOsInfo = await deviceInfoPlugin.macOsInfo;
+          deviceData = readMacOsDeviceInfo(macOsInfo);
+          break;
+        case TargetPlatform.fuchsia:
+          deviceData = <String, dynamic>{
+            'Error:': 'Fuchsia platform isn\'t supported'
+          };
+          break;
+      }
+
+      return deviceData;
+      // SharedPreferences devicePrefs = await SharedPreferences.getInstance();
+      // devicePrefs.setString('device', currentDeviceData);
+    }
+  } on PlatformException {
+    deviceData = <String, dynamic>{'Error:': 'Failed to get platform version.'};
+  }
 }
 
 

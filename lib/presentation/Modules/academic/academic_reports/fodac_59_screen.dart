@@ -130,18 +130,18 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
                           style: theme.textTheme.bodyMedium,
                         ),
                         const SizedBox(height: 24),
-                        FilledButton.icon(
-                          onPressed: () {
-                            if (selectedCampus != null) {
-                              setState(() {
-                                future = fetchFiltersData(
-                                    selectedCampus!, currentCycle!.claCiclo!);
-                              });
-                            }
-                          },
-                          icon: const Icon(Icons.refresh),
-                          label: const Text('Reintentar'),
-                        ),
+                        // FilledButton.icon(
+                        //   onPressed: () {
+                        //     if (selectedCampus != null) {
+                        //       setState(() {
+                        //         // future = fetchFiltersData(
+                        //         //     selectedCampus!, currentCycle!.claCiclo!);
+                        //       });
+                        //     }
+                        //   },
+                        //   icon: const Icon(Icons.refresh),
+                        //   label: const Text('Reintentar'),
+                        // ),
                       ],
                     ),
                   );
@@ -558,28 +558,28 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            IconButton(
-                              icon: Icon(
-                                Icons.refresh,
-                                color: theme.colorScheme.onSecondaryContainer,
-                              ),
-                              onPressed: selectedCampus != null
-                                  ? () {
-                                      setState(() {
-                                        future = fetchFiltersData(
-                                            selectedCampus!,
-                                            currentCycle!.claCiclo!);
-                                      });
-                                    }
-                                  : null,
-                              tooltip: selectedCampus == null
-                                  ? 'Seleccione un campus primero'
-                                  : 'Refrescar filtros',
-                            ),
+                            // IconButton(
+                            //   icon: Icon(
+                            //     Icons.refresh,
+                            //     color: theme.colorScheme.onSecondaryContainer,
+                            //   ),
+                            //   onPressed: selectedCampus != null
+                            //       ? () {
+                            //           setState(() {
+                            //             // future = fetchFiltersData(
+                            //             //     selectedCampus!,
+                            //             //     currentCycle!.claCiclo!);
+                            //           });
+                            //         }
+                            //       : null,
+                            //   tooltip: selectedCampus == null
+                            //       ? 'Seleccione un campus primero'
+                            //       : 'Refrescar filtros',
+                            // ),
                             const SizedBox(width: 4),
                             IconButton(
                               icon: Icon(
-                                Icons.analytics,
+                                Icons.refresh,
                                 color: theme.colorScheme.onSecondaryContainer,
                               ),
                               onPressed: _canGenerateReport()
@@ -817,27 +817,27 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                IconButton(
-                  icon: Icon(
-                    Icons.refresh,
-                    color: theme.colorScheme.onSecondaryContainer,
-                  ),
-                  onPressed: selectedCampus != null
-                      ? () {
-                          setState(() {
-                            future = fetchFiltersData(
-                                selectedCampus!, currentCycle!.claCiclo!);
-                          });
-                        }
-                      : null,
-                  tooltip: selectedCampus == null
-                      ? 'Seleccione un campus primero'
-                      : 'Refrescar filtros',
-                ),
+                // IconButton(
+                //   icon: Icon(
+                //     Icons.refresh,
+                //     color: theme.colorScheme.onSecondaryContainer,
+                //   ),
+                //   onPressed: selectedCampus != null
+                //       ? () {
+                //           setState(() {
+                //             // future = fetchFiltersData(
+                //             //     selectedCampus!, currentCycle!.claCiclo!);
+                //           });
+                //         }
+                //       : null,
+                //   tooltip: selectedCampus == null
+                //       ? 'Seleccione un campus primero'
+                //       : 'Refrescar filtros',
+                // ),
                 const SizedBox(width: 4),
                 IconButton(
                   icon: Icon(
-                    Icons.analytics,
+                    Icons.refresh,
                     color: theme.colorScheme.onSecondaryContainer,
                   ),
                   onPressed: _canGenerateReport()
@@ -1158,6 +1158,8 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
               onChanged: (String? value) {
                 setState(() {
                   selectedCampus = value;
+                  future = fetchFiltersData(
+                      selectedCampus!, currentCycle!.claCiclo!);
                 });
               },
               icon: Icon(
@@ -1378,7 +1380,7 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.analytics,
+              Icons.refresh,
               size: 64,
               color: theme.colorScheme.primary.withOpacity(0.5),
             ),
@@ -1570,17 +1572,23 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
       // Get the gradeSeq for the selected grade
       int gradeSeq = _getGradeSeq(selectedGrade!);
       int monthIndex = _getMonthIndex(selectedMonth);
+      if (selectedStudent == null) {
+        selectedStudent = 'ND'; // Default value if no student is selected
+      } else {
+        selectedStudent = selectedStudent!.trim();
+      }
 
       await getFodac59Response(
-        currentCycle!.claCiclo!,
-        selectedCampus!,
-        gradeSeq,
-        selectedGroup!,
-        monthIndex,
-        0,
-        'NONAME', // computerName
-        includeDeactivatedStudent ?? false,
-      ).then((value) {
+              currentCycle!.claCiclo!,
+              selectedCampus!,
+              gradeSeq,
+              selectedGroup!,
+              monthIndex,
+              0,
+              'NONAME', // computerName
+              includeDeactivatedStudent ?? false,
+              selectedStudent!)
+          .then((value) {
         setState(() {
           _reportData = List<dynamic>.from(value);
         });
