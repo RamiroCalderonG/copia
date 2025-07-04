@@ -2,15 +2,17 @@ import 'package:flutter/material.dart';
 
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_util.dart';
+import 'package:oxschool/core/constants/user_consts.dart';
 
 class ReportType {
-  final String title;
-  final String description;
-  final IconData icon;
-  final List<String> features;
-  final Color iconColor;
-  final String? route;
-  final ReportParameters parameters;
+  final String title; //Title to display on the card
+  final String description; //Description to display on the card
+  final IconData icon; //Icon to display on the card
+  final List<String> features; //List of features to display on the card
+  final Color iconColor; //Color of the icon
+  final String? route; //Route to navigate when the card is tapped
+  final ReportParameters parameters; //Parameters required for the report
+  final int idKey; //EventId
 
   ReportType({
     required this.title,
@@ -20,6 +22,7 @@ class ReportType {
     required this.iconColor,
     this.route,
     this.parameters = const ReportParameters(),
+    required this.idKey,
   });
 }
 
@@ -121,6 +124,7 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
       features: ['PDF', 'Excel', 'Print'],
       iconColor: Color(0xFF174C93),
       route: 'Fodac59',
+      idKey: 30, //eventId
       parameters: ReportParameters(
         needsGrade: true,
         needsGroup: true,
@@ -140,6 +144,7 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
       icon: Icons.bar_chart_rounded,
       features: ['PDF', 'Excel', 'Print'],
       iconColor: Color(0xFFEB3045),
+      idKey: 0,
       parameters: ReportParameters(
         needsGrade: true,
         needsGroup: true,
@@ -159,6 +164,7 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
       icon: Icons.search_off,
       features: ['PDF', 'Excel', 'Print'],
       iconColor: Color(0xFF174C93),
+      idKey: 0,
       parameters: ReportParameters(
         needsGrade: true,
         needsGroup: true,
@@ -178,6 +184,7 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
       icon: Icons.palette,
       features: ['PDF', 'Excel', 'Print'],
       iconColor: Color(0xFFEB3045),
+      idKey: 0,
       parameters: ReportParameters(
         needsGrade: true,
         needsGroup: true,
@@ -197,6 +204,7 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
       icon: Icons.view_week_rounded,
       features: ['PDF', 'Excel', 'Print'],
       iconColor: Color(0xFF174C93),
+      idKey: 0,
       parameters: ReportParameters(
         needsGrade: true,
         needsGroup: true,
@@ -216,6 +224,7 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
       icon: Icons.workspace_premium_rounded,
       features: ['PDF', 'Excel', 'Print'],
       iconColor: Color(0xFFEB3045),
+      idKey: 0,
       parameters: ReportParameters(
         needsGrade: true,
         needsGroup: true,
@@ -235,6 +244,7 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
       icon: Icons.adjust_rounded,
       features: ['PDF', 'Excel', 'Print'],
       iconColor: Color(0xFF174C93),
+      idKey: 0,
       parameters: ReportParameters(
         needsGrade: true,
         needsGroup: true,
@@ -254,6 +264,7 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
       icon: Icons.workspace_premium_rounded,
       features: ['PDF', 'Excel', 'Print'],
       iconColor: Color(0xFFEB3045),
+      idKey: 0,
       parameters: ReportParameters(
         needsGrade: true,
         needsGroup: true,
@@ -389,40 +400,40 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
                 ),
               ),
 
-              // Date picker - make it responsive
-              FadeTransition(
-                opacity: _fadeController,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: isSmallScreen ? 16 : 24, vertical: 8),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    padding: EdgeInsets.all(isSmallScreen ? 12 : 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Periodo del reporte',
-                          style: TextStyle(
-                            fontSize: isSmallScreen ? 14 : 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        SizedBox(height: 12),
-                        // Convert to Column on very small screens
-                        if (screenSize.width < 400)
-                          _buildVerticalDatePickers()
-                        else
-                          _buildHorizontalDatePickers(),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+              // // Date picker - make it responsive
+              // FadeTransition(
+              //   opacity: _fadeController,
+              //   child: Padding(
+              //     padding: EdgeInsets.symmetric(
+              //         horizontal: isSmallScreen ? 16 : 24, vertical: 8),
+              //     child: Container(
+              //       decoration: BoxDecoration(
+              //         color: Colors.white.withOpacity(0.15),
+              //         borderRadius: BorderRadius.circular(16),
+              //       ),
+              //       padding: EdgeInsets.all(isSmallScreen ? 12 : 16),
+              //       child: Column(
+              //         crossAxisAlignment: CrossAxisAlignment.start,
+              //         children: [
+              //           Text(
+              //             'Periodo del reporte',
+              //             style: TextStyle(
+              //               fontSize: isSmallScreen ? 14 : 16,
+              //               fontWeight: FontWeight.bold,
+              //               color: Colors.white,
+              //             ),
+              //           ),
+              //           SizedBox(height: 12),
+              //           // Convert to Column on very small screens
+              //           if (screenSize.width < 400)
+              //             _buildVerticalDatePickers()
+              //           else
+              //             _buildHorizontalDatePickers(),
+              //         ],
+              //       ),
+              //     ),
+              //   ),
+              // ),
 
               // Report Cards - improve responsiveness
               Expanded(
@@ -455,21 +466,22 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
                   ),
                 ),
               ),
+              SizedBox(height: isSmallScreen ? 12 : 16),
 
               // Action Buttons - make responsive
-              SlideTransition(
-                position: Tween<Offset>(
-                  begin: Offset(0, 1),
-                  end: Offset.zero,
-                ).animate(CurvedAnimation(
-                  parent: _slideController,
-                  curve: Curves.easeOutCubic,
-                )),
-                child: Padding(
-                  padding: EdgeInsets.all(isSmallScreen ? 16 : 24),
-                  child: _buildResponsiveActionButtons(isSmallScreen),
-                ),
-              ),
+              // SlideTransition(
+              //   position: Tween<Offset>(
+              //     begin: Offset(0, 1),
+              //     end: Offset.zero,
+              //   ).animate(CurvedAnimation(
+              //     parent: _slideController,
+              //     curve: Curves.easeOutCubic,
+              //   )),
+              //   child: Padding(
+              //     padding: EdgeInsets.all(isSmallScreen ? 16 : 24),
+              //     child: _buildResponsiveActionButtons(isSmallScreen),
+              //   ),
+              // ),
             ],
           ),
         ),
@@ -625,42 +637,42 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
                     ),
                   ),
           ),
-          SizedBox(height: 12),
-          Row(
-            children: [
-              // Expanded(
-              //   child: OutlinedButton(
-              //     onPressed: _showPreview,
-              //     style: OutlinedButton.styleFrom(
-              //       foregroundColor: Colors.white,
-              //       side: BorderSide(color: Colors.white.withOpacity(0.5)),
-              //       padding: EdgeInsets.symmetric(vertical: 16),
-              //       shape: RoundedRectangleBorder(
-              //         borderRadius: BorderRadius.circular(12),
-              //       ),
-              //     ),
-              //     child: Text('PREVISUALIZAR'),
-              //   ),
-              // ),
-              SizedBox(width: 8),
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed:
-                      selectedIndex != null ? _showParametersPanel : null,
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    side: BorderSide(color: Colors.white.withOpacity(0.5)),
-                    padding: EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  icon: Icon(Icons.settings, size: 16),
-                  label: Text('PARÁMETROS'),
-                ),
-              ),
-            ],
-          ),
+          // SizedBox(height: 12),
+          // Row(
+          //   children: [
+          //     // Expanded(
+          //     //   child: OutlinedButton(
+          //     //     onPressed: _showPreview,
+          //     //     style: OutlinedButton.styleFrom(
+          //     //       foregroundColor: Colors.white,
+          //     //       side: BorderSide(color: Colors.white.withOpacity(0.5)),
+          //     //       padding: EdgeInsets.symmetric(vertical: 16),
+          //     //       shape: RoundedRectangleBorder(
+          //     //         borderRadius: BorderRadius.circular(12),
+          //     //       ),
+          //     //     ),
+          //     //     child: Text('PREVISUALIZAR'),
+          //     //   ),
+          //     // ),
+          //     // SizedBox(width: 8),
+          //     // Expanded(
+          //     //   child: OutlinedButton.icon(
+          //     //     onPressed:
+          //     //         selectedIndex != null ? _showParametersPanel : null,
+          //     //     style: OutlinedButton.styleFrom(
+          //     //       foregroundColor: Colors.white,
+          //     //       side: BorderSide(color: Colors.white.withOpacity(0.5)),
+          //     //       padding: EdgeInsets.symmetric(vertical: 16),
+          //     //       shape: RoundedRectangleBorder(
+          //     //         borderRadius: BorderRadius.circular(12),
+          //     //       ),
+          //     //     ),
+          //     //     icon: Icon(Icons.settings, size: 16),
+          //     //     label: Text('PARÁMETROS'),
+          //     //   ),
+          //     // ),
+          //   ],
+          // ),
         ],
       );
     } else {
@@ -724,22 +736,22 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
           //     child: Text('PREVISUALIZAR'),
           //   ),
           // ),
-          SizedBox(width: 16),
-          Expanded(
-            child: OutlinedButton.icon(
-              onPressed: selectedIndex != null ? _showParametersPanel : null,
-              style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.white,
-                side: BorderSide(color: Colors.white.withOpacity(0.5)),
-                padding: EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              icon: Icon(Icons.settings),
-              label: Text('PARÁMETROS'),
-            ),
-          ),
+          // SizedBox(width: 16),
+          // Expanded(
+          //   child: OutlinedButton.icon(
+          //     onPressed: selectedIndex != null ? _showParametersPanel : null,
+          //     style: OutlinedButton.styleFrom(
+          //       foregroundColor: Colors.white,
+          //       side: BorderSide(color: Colors.white.withOpacity(0.5)),
+          //       padding: EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+          //       shape: RoundedRectangleBorder(
+          //         borderRadius: BorderRadius.circular(12),
+          //       ),
+          //     ),
+          //     icon: Icon(Icons.settings),
+          //     label: Text('PARÁMETROS'),
+          //   ),
+          // ),
         ],
       );
     }
@@ -764,16 +776,36 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
         selectedStudent = students.first;
       }
     });
-    //Navigate to report screen
-    context.pushNamed(
-      '${reportTypes[index].route}',
-      extra: <String, dynamic>{
-        kTransitionInfoKey: const TransitionInfo(
-          hasTransition: true,
-          transitionType: PageTransitionType.leftToRight,
+    // Valdiate if user has access to the report
+    if (currentUser!.hasAccesToEventByName('Acceder  FODAC59')) {
+      //Navigate to report screen
+      context.pushNamed(
+        '${reportTypes[index].route}',
+        extra: <String, dynamic>{
+          kTransitionInfoKey: const TransitionInfo(
+            hasTransition: true,
+            transitionType: PageTransitionType.leftToRight,
+          ),
+        },
+      );
+    } else {
+      // Show access denied message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 5),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          content: Text('No tienes acceso a este reporte.',
+              style: TextStyle(
+                  color: Colors.white,
+                  fontFamily: 'Sora',
+                  fontWeight: FontWeight.bold)),
         ),
-      },
-    );
+      );
+    }
 
     // Navigator.pushNamed(
     //   context,

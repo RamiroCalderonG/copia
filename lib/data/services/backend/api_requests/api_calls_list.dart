@@ -1706,7 +1706,7 @@ Future<dynamic> getFodac59Response(
       // body: requestBody,
       // bodyEncoding: RequestBodyEncoding.JSON,
       persistCookies: false,
-      timeoutSeconds: 20,
+      timeoutSeconds: 35,
     );
     apiCall.raiseForStatus();
     if (apiCall.statusCode == 200) {

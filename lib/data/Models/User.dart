@@ -1,6 +1,8 @@
 // ignore_for_file: file_names, non_constant_identifier_names
 
+import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/extensions/capitalize_strings.dart';
+import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/data/Models/Role.dart';
 
 class User {
@@ -107,6 +109,59 @@ class User {
 
   bool isCurrentUserAcademicCoord() {
     return isAcademicCoord!;
+  }
+
+  bool hasAccesToEventById(int eventId) {
+    try {
+      if (userRole != null && userRole!.roleModuleRelationships != null) {
+        // Use where() to find matching events, then check if any exist
+        var matchingEvents = userRole!.roleModuleRelationships!
+            .where((event) => event.eventId == eventId);
+
+        if (matchingEvents.isNotEmpty) {
+          var eventSelected = matchingEvents.first;
+          return eventSelected.canAccessEvent ?? false;
+        } else {
+          // Event not found in user's permissions
+          insertAlertLog(
+              'Event not found in user\'s permissions for eventId $eventId , ${currentUser!.employeeName} | ${currentUser!.userEmail} | ');
+          return false;
+        }
+      } else {
+        return false;
+      }
+    } catch (e) {
+      insertErrorLog('Error in hasAccesToEventById for eventId $eventId: $e',
+          'hasAccesToEventById');
+      // Log the error for debugging
+      // print('Error in hasAccesToEventById for eventId $eventId: $e');
+      return false;
+    }
+  }
+
+  bool hasAccesToEventByName(String eventName) {
+    try {
+      if (userRole != null && userRole!.roleModuleRelationships != null) {
+        // Use where() to find matching events, then check if any exist
+        var matchingEvents = userRole!.roleModuleRelationships!.where(
+          (event) => event.eventName.toString().trim() == eventName.trim(),
+        );
+
+        if (matchingEvents.isNotEmpty) {
+          var eventSelected = matchingEvents.first;
+          return eventSelected.canAccessEvent ?? false;
+        } else {
+          // Event not found in user's permissions
+          return false;
+        }
+      } else {
+        return false;
+      }
+    } catch (e) {
+      // Log the error for debugging
+      print('Error in hasAccesToEventByName for eventName "$eventName": $e');
+      return false;
+    }
   }
 
   /*
