@@ -107,7 +107,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
         _model.textController1!.text =
             currentText.substring(0, atIndex + 1) + _suggestedDomain!;
       } else {
-        _model.textController1!.text = currentText + '@' + _suggestedDomain!;
+        _model.textController1!.text = '$currentText@${_suggestedDomain!}';
       }
       setState(() {
         _suggestedDomain = null;

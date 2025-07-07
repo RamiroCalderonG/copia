@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:file_saver/file_saver.dart';
@@ -38,7 +37,7 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
   List<dynamic> _rawData = []; // Store the original response
   List<String> _filteredGroups = []; // For filtered groups
   List<String> _filteredStudents = []; // For filtered students
-  Map<String, String> _studentNameToIdMap = {}; // Map student names to IDs
+  final Map<String, String> _studentNameToIdMap = {}; // Map student names to IDs
   Map<String, String> _filteredStudentNameToIdMap =
       {}; // Map for filtered students
   List<dynamic> _reportData = []; // Store the report response data

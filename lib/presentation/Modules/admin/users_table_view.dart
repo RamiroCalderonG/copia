@@ -26,6 +26,7 @@ class _UsersTableViewState extends State<UsersTableView> {
   bool isUserAdmin = currentUser!.isCurrentUserAdmin();
   bool confirmation = false;
   bool isSearching = true;
+  bool isUpdatingIdLogin = false;
   late final TrinaGridStateManager stateManager;
   //Key usrsTableKey = UniqueKey();
   // ignore: prefer_typing_uninitialized_variables
@@ -163,18 +164,22 @@ class _UsersTableViewState extends State<UsersTableView> {
                         ],
                         rows: userRows,
                         onRowSecondaryTap: (event) {
-                          final RenderBox overlay = Overlay.of(context)
-                              .context
-                              .findRenderObject() as RenderBox;
+                          // Calculate position relative to the screen
+                          final Offset globalPosition = event.offset;
+
                           showMenu(
                               context: context,
-                              position: RelativeRect.fromRect(
-                                  Rect.fromPoints(
-                                    overlay.localToGlobal(event.offset),
-                                    overlay.localToGlobal(
-                                        overlay.size.bottomRight(event.offset)),
-                                  ),
-                                  Offset.zero & overlay.size),
+                              position: RelativeRect.fromLTRB(
+                                globalPosition.dx,
+                                globalPosition.dy,
+                                globalPosition.dx + 1,
+                                globalPosition.dy + 1,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              elevation: 8,
+                              color: Colors.white,
                               items: <PopupMenuEntry>[
                                 PopupMenuItem(
                                   onTap: () async {
@@ -332,13 +337,50 @@ class _UsersTableViewState extends State<UsersTableView> {
                                     });
                                   },
                                   enabled: isUserAdmin,
-                                  child: event.row.cells.values
-                                              .elementAt(4)
-                                              .value ==
-                                          1
-                                      ? const Text('Activar usuario')
-                                      : const Text('Desactivar usuario'),
+                                  height: 48,
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        event.row.cells.values
+                                                    .elementAt(4)
+                                                    .value ==
+                                                1
+                                            ? Icons.person_add
+                                            : Icons.person_remove,
+                                        size: 20,
+                                        color: event.row.cells.values
+                                                    .elementAt(4)
+                                                    .value ==
+                                                1
+                                            ? Colors.green
+                                            : Colors.red,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          event.row.cells.values
+                                                      .elementAt(4)
+                                                      .value ==
+                                                  1
+                                              ? 'Activar usuario'
+                                              : 'Desactivar usuario',
+                                          style: TextStyle(
+                                            color: event.row.cells.values
+                                                        .elementAt(4)
+                                                        .value ==
+                                                    1
+                                                ? Colors.green
+                                                : Colors.red,
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: 14,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
+                                const PopupMenuDivider(),
                                 PopupMenuItem(
                                   onTap: () async {
                                     tempUserId =
@@ -380,26 +422,180 @@ class _UsersTableViewState extends State<UsersTableView> {
                                     }
                                   },
                                   enabled: currentUser!.isCurrentUserAdmin(),
-                                  child: const Text('Modificar ususario'),
+                                  height: 48,
+                                  child: const Row(
+                                    children: [
+                                      Icon(
+                                        Icons.edit,
+                                        size: 20,
+                                        color: Colors.blue,
+                                      ),
+                                      SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          'Modificar usuario',
+                                          style: TextStyle(
+                                            color: Colors.blue,
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: 14,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                                 PopupMenuItem(
-                                  child: const Text('Cambiar contraseña'),
                                   onTap: () {},
+                                  enabled: false,
+                                  height: 48,
+                                  child: const Row(
+                                    children: [
+                                      Icon(
+                                        Icons.lock_reset,
+                                        size: 20,
+                                        color: Colors.grey,
+                                      ),
+                                      SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          'Cambiar contraseña (Próximamente)',
+                                          style: TextStyle(
+                                            color: Colors.grey,
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: 14,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                PopupMenuItem(
+                                  onTap: () {
+                                    showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title: const Text(
+                                                'Historial de usuario'),
+                                            content: const Text(
+                                                'Historial de cambios del usuario'),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.of(context).pop();
+                                                },
+                                                child: const Text('Cerrar'),
+                                              )
+                                            ],
+                                          );
+                                        });
+                                  },
+                                  height: 48,
+                                  child: const Row(
+                                    children: [
+                                      Icon(
+                                        Icons.history,
+                                        size: 20,
+                                        color: Colors.purple,
+                                      ),
+                                      SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          'Ver historial',
+                                          style: TextStyle(
+                                            color: Colors.purple,
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: 14,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const PopupMenuDivider(),
+                                PopupMenuItem(
+                                  onTap: () async {
+                                    bool hasError = false;
+                                    try {
+                                      setState(() {
+                                        isUpdatingIdLogin = true;
+                                      });
+                                      User selectedUser = listOfUsersForGrid
+                                          .firstWhere((iterableItem) =>
+                                              iterableItem.employeeNumber ==
+                                              event.row.cells.values
+                                                  .elementAt(2)
+                                                  .value);
+                                      await updateUserIdLoginProcedure(
+                                              selectedUser.employeeNumber!)
+                                          .catchError((error) {
+                                        hasError = true;
+                                        showErrorFromBackend(
+                                            context, error.toString());
+                                      });
+                                      setState(() {
+                                        isUpdatingIdLogin = false;
+                                      });
+
+                                      // Only show success dialog if there was no error
+                                      if (!hasError) {
+                                        showSuccessDialog(context, 'Éxito',
+                                            'IdLogin actualizado correctamente');
+                                      }
+                                    } catch (e) {
+                                      setState(() {
+                                        isUpdatingIdLogin = false;
+                                      });
+                                      showErrorFromBackend(
+                                          context, e.toString());
+                                    }
+                                  },
+                                  enabled: currentUser!.isCurrentUserAdmin() &&
+                                      !isUpdatingIdLogin,
+                                  height: 48,
+                                  child: Row(
+                                    children: [
+                                      if (isUpdatingIdLogin)
+                                        const SizedBox(
+                                          width: 16,
+                                          height: 16,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                    Colors.orange),
+                                          ),
+                                        )
+                                      else
+                                        const Icon(
+                                          Icons.refresh,
+                                          size: 20,
+                                          color: Colors.orange,
+                                        ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          isUpdatingIdLogin
+                                              ? 'Actualizando...'
+                                              : 'Actualizar idLogin',
+                                          style: TextStyle(
+                                            color: isUpdatingIdLogin
+                                                ? Colors.grey
+                                                : Colors.orange,
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: 14,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 )
                               ]);
                         },
-
-                        // onRowDoubleTap: (event) async {
-                        //   tempUserId = event.row.cells.values.first.value;
-                        //   tmpRolesList.clear();
-                        //   tempSelectedUsr?.clear();
-                        //   await getSingleUser(null);
-                        //   areaList.clear();
-                        //   await getWorkDepartmentList();
-                        //   var response = await getRolesList();
-                        //   tmpRolesList = jsonDecode(response);
-                        //   updateUserScreen(context);
-                        // },
                         mode: TrinaGridMode.select,
                         configuration: const TrinaGridConfiguration(),
                         rowColorCallback: (rowColorContext) {
@@ -418,8 +614,6 @@ class _UsersTableViewState extends State<UsersTableView> {
                           }
                           return Colors.transparent;
                         },
-                        // createHeader: (stateManager) =>
-                        //     TrinaGridHeader(stateManager: stateManager),
                         createFooter: (stateManager) {
                           stateManager.setPageSize(50,
                               notify: false); // default 40

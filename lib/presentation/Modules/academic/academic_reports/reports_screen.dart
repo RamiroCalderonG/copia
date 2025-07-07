@@ -51,6 +51,8 @@ class ReportParameters {
 }
 
 class ReportSelectionScreen extends StatefulWidget {
+  const ReportSelectionScreen({super.key});
+
   @override
   _ReportSelectionScreenState createState() => _ReportSelectionScreenState();
 }
@@ -1379,11 +1381,11 @@ class ReportCard extends StatefulWidget {
   final VoidCallback onTap;
 
   const ReportCard({
-    Key? key,
+    super.key,
     required this.reportType,
     required this.isSelected,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   _ReportCardState createState() => _ReportCardState();

@@ -9,8 +9,7 @@ import 'package:oxschool/data/datasources/temp/services_temp.dart';
 import 'package:oxschool/presentation/Modules/services_ticket/processes/ticket_requests_dashboard/processes_services.dart';
 
 class TicketRequestSummary extends StatefulWidget {
-  const TicketRequestSummary({Key? key, required this.isSelectedRequestsIMade})
-      : super(key: key);
+  const TicketRequestSummary({super.key, required this.isSelectedRequestsIMade});
   final bool isSelectedRequestsIMade;
 
   @override

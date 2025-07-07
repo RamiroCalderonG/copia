@@ -20,7 +20,7 @@ List<DataCell> cells = [];
 
 class _CafeteriaUserConsumptionState extends State<CafeteriaUserConsumption> {
   late Future<dynamic> cafeteriaConsumption;
-  late List<CafeteriaconsumptionDto> _cafeteriaConsumptionList = [];
+  late final List<CafeteriaconsumptionDto> _cafeteriaConsumptionList = [];
   double total = 0;
   List<DataRow> dataRows = [];
 

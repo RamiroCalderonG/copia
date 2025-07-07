@@ -15,7 +15,7 @@ class CreateDisciplineScreen extends StatefulWidget {
 
 class _CreateDisciplineScreenState extends State<CreateDisciplineScreen> {
   DateTime? selectedDateTime;
-  Set<int> _selectedChips = {};
+  final Set<int> _selectedChips = {};
   Set<String> selectedCausesId = {};
   int? kindOfReportValue = 0;
   late Future<dynamic> studentsList;

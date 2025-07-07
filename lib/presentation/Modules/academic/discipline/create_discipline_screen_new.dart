@@ -1,16 +1,10 @@
-import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:get/get_connect/http/src/utils/utils.dart';
-import 'package:get/get_utils/src/extensions/export.dart';
-import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
-import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/core/reusable_methods/academic_functions.dart';
 import 'package:oxschool/core/utils/searchable_drop_down.dart';
 import 'package:oxschool/data/Models/Student.dart';
 import 'package:oxschool/presentation/components/confirm_dialogs.dart';
-import 'package:oxschool/presentation/components/custom_icon_button.dart';
 
 class CreateDisciplineScreen extends StatefulWidget {
   const CreateDisciplineScreen({super.key});
@@ -21,7 +15,7 @@ class CreateDisciplineScreen extends StatefulWidget {
 
 class _CreateDisciplineScreenState extends State<CreateDisciplineScreen> {
   DateTime? selectedDateTime;
-  Set<int> _selectedChips = {};
+  final Set<int> _selectedChips = {};
   Set<String> selectedCausesId = {};
   int? kindOfReportValue = 0;
   late Future<dynamic> studentsList;

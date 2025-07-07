@@ -457,23 +457,44 @@ Future<dynamic> getUsers() async {
   }
 }
 
-//!Not using for now
-Future<dynamic> deleteUser(String id) async {
-  int response;
+// Update idLogin from MSSQL TO PG
+Future<dynamic> getIdLoginByUser(int employeeNumber) async {
+  SharedPreferences devicePrefs = await SharedPreferences.getInstance();
   try {
-    var apiCall = await Requests.delete(
-        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/api/user/$id',
+    var apiCall = await Requests.get(
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/users/loginid/$employeeNumber',
         headers: {
-          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-          'Auth': currentUser!.token
+          'Authorization': devicePrefs.getString('token')!,
+          'Content-Type': 'application/json'
         },
         persistCookies: false,
         timeoutSeconds: 10);
     apiCall.raiseForStatus();
-    response = apiCall.statusCode;
-    return response;
+    return apiCall.body;
   } catch (e) {
-    throw FormatException(e.toString());
+    insertErrorLog(e.toString(), 'updateIdLoginToPg() | $employeeNumber');
+    throw Future.error(e.toString());
+  }
+}
+
+// Function to retrieve idLogin
+Future<dynamic> getIdLoginByEmployeeNumber(int employeeNumber) async {
+  SharedPreferences devicePrefs = await SharedPreferences.getInstance();
+  try {
+    var apiCall = await Requests.get(
+        '${dotenv.env['HOSTURL']!}${dotenv.env['PORT']!}/users/loginid/$employeeNumber',
+        headers: {
+          'Authorization': devicePrefs.getString('token')!,
+          'Content-Type': 'application/json',
+        },
+        persistCookies: false,
+        timeoutSeconds: 10);
+    apiCall.raiseForStatus();
+    return apiCall.body;
+  } catch (e) {
+    insertErrorLog(
+        e.toString(), 'getIdLoginByEmployeeNumber() | $employeeNumber');
+    return Future.error(e.toString());
   }
 }
 

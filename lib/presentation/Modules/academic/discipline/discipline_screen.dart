@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
 import 'package:oxschool/presentation/Modules/academic/discipline/discipline_history_grid.dart';
-import 'package:oxschool/presentation/Modules/academic/discipline/create_discipline_screen.dart';
 
 class DisciplineScreen extends StatefulWidget {
   const DisciplineScreen({super.key});
