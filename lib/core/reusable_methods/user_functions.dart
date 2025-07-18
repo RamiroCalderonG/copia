@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
+import 'package:oxschool/data/DataTransferObjects/AttendanceHistory.dart';
 import 'package:oxschool/data/Models/Cycle.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
 import 'package:oxschool/data/datasources/temp/users_temp_data.dart';
@@ -239,5 +240,21 @@ Future<dynamic> updateUserIdLoginProcedure(int employeeNumber) async {
     insertErrorLog(
         e.toString(), 'updateUserIdLoginProcedure() | $employeeNumber');
     return Future.error(e.toString());
+  }
+}
+
+Future<dynamic> getUserAttendanceHistoryByDates(
+    String initialDate, String finalDate) async {
+  var response = await getEmployeeAttendanceHistory(initialDate, finalDate);
+  if (response != null) {
+    List<AttendanceHistory> attendanceHistory = [];
+    for (var item in response) {
+      attendanceHistory.add(AttendanceHistory.fromJson(item));
+    }
+    return attendanceHistory;
+  } else {
+    insertErrorLog('Error al obtener el historial de asistencia',
+        'getUserAttendanceHistoryByDates()');
+    return Future.error('Error al obtener el historial de asistencia');
   }
 }

@@ -1,10 +1,10 @@
-
 import 'package:flutter/material.dart';
 import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/core/reusable_methods/user_functions.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
+import 'package:oxschool/presentation/Modules/user/user_attendance_screen.dart';
 import 'package:oxschool/presentation/components/confirm_dialogs.dart';
 
 import 'cafeteria_user_consumption.dart';
@@ -195,22 +195,40 @@ class UserWindow extends StatelessWidget {
               Icons.person_rounded,
               isMobile,
             ),
-            const SizedBox(height: 16),
-            _buildInfoField(
-              theme,
-              colorScheme,
-              'Número de Empleado',
-              currentUser!.employeeNumber.toString(),
-              Icons.badge_rounded,
-              isMobile,
-            ),
-            const SizedBox(height: 16),
+            // const SizedBox(height: 5),
+            // _buildInfoField(
+            //   theme,
+            //   colorScheme,
+            //   'Número de Empleado',
+            //   currentUser!.employeeNumber.toString(),
+            //   Icons.badge_rounded,
+            //   isMobile,
+            // ),
+            const SizedBox(height: 5),
             _buildInfoField(
               theme,
               colorScheme,
               'Campus',
               currentUser!.claUn!.toTitleCase,
               Icons.location_city_rounded,
+              isMobile,
+            ),
+            const SizedBox(height: 5),
+            _buildInfoField(
+              theme,
+              colorScheme,
+              'Departamento',
+              currentUser!.work_area!.toTitleCase,
+              Icons.business_center_rounded,
+              isMobile,
+            ),
+            const SizedBox(height: 5),
+            _buildInfoField(
+              theme,
+              colorScheme,
+              'Rol',
+              currentUser!.role!.toTitleCase,
+              Icons.face_rounded,
               isMobile,
             ),
           ],
@@ -317,7 +335,7 @@ class UserWindow extends StatelessWidget {
                 Colors.green,
                 true,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 5),
               _buildActionCard(
                 theme,
                 colorScheme,
@@ -334,7 +352,7 @@ class UserWindow extends StatelessWidget {
                 Colors.orange,
                 false,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 5),
               _buildActionCard(
                 theme,
                 colorScheme,
@@ -352,6 +370,17 @@ class UserWindow extends StatelessWidget {
                 Colors.blue,
                 false,
               ),
+              const SizedBox(height: 5),
+              _buildActionCard(
+                theme,
+                colorScheme,
+                'Evaluaciones de desempeño',
+                'Consultar historial de evaluaciones(Proximamente)',
+                Icons.attach_money_rounded,
+                () {},
+                Colors.green,
+                true,
+              ),
             ] else ...[
               Row(
                 children: [
@@ -367,7 +396,7 @@ class UserWindow extends StatelessWidget {
                       true,
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: _buildActionCard(
                       theme,
@@ -387,9 +416,61 @@ class UserWindow extends StatelessWidget {
                       false,
                     ),
                   ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _buildActionCard(
+                      theme,
+                      colorScheme,
+                      'Evaluaciones de desempeño',
+                      'Consultar historial de evaluaciones (Próximamente)',
+                      Icons.grade,
+                      () {},
+                      Colors.blueAccent,
+                      true,
+                    ),
+                  ),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildActionCard(
+                      theme,
+                      colorScheme,
+                      'Historial de Asistencia',
+                      'Consultar historial de asistencia (Próximamente)',
+                      Icons.watch_later_rounded,
+                      () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const UserAttendanceHistoryScreen(),
+                          ),
+                        );
+                      },
+                      Colors.purple,
+                      false,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _buildActionCard(
+                      theme,
+                      colorScheme,
+                      'Prestamos y Créditos',
+                      'Consultar historial de préstamos y créditos (Próximamente)',
+                      Icons.monetization_on,
+                      () {
+                        // TODO: Implementar acción para préstamos y créditos
+                      },
+                      Colors.teal,
+                      true,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
               _buildActionCard(
                 theme,
                 colorScheme,
