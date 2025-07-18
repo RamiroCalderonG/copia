@@ -13,6 +13,7 @@ import 'package:oxschool/presentation/Modules/academic/school%20grades/grades_mo
 import 'package:oxschool/presentation/Modules/enfermeria/nursery_main_screen.dart';
 import 'package:oxschool/presentation/Modules/services_ticket/processes/services_main_screen.dart';
 import 'package:oxschool/presentation/Modules/main_window/mobile_main_window_widget.dart';
+import 'package:oxschool/presentation/Modules/user/user_attendance_screen.dart';
 import 'package:oxschool/presentation/Modules/user/user_view_screen.dart';
 
 import '../../../../presentation/Modules/admin/users_main_screen.dart';
@@ -116,6 +117,11 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
             name: 'Fodac59',
             path: '/fodac59',
             builder: (context, params) => const Fodac59Screen()),
+        FFRoute(
+          name: 'UserAttendanceHistoryScreen',
+          path: '/userAttendanceHistory',
+          builder: (context, params) => const UserAttendanceHistoryScreen(),
+        )
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
     );
 

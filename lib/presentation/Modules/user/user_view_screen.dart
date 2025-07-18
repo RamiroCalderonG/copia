@@ -4,6 +4,7 @@ import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/core/reusable_methods/user_functions.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
+import 'package:oxschool/presentation/Modules/user/user_attendance_screen.dart';
 import 'package:oxschool/presentation/components/confirm_dialogs.dart';
 
 import 'cafeteria_user_consumption.dart';
@@ -441,10 +442,15 @@ class UserWindow extends StatelessWidget {
                       'Consultar historial de asistencia (Próximamente)',
                       Icons.watch_later_rounded,
                       () {
-                        // Implementar acción para contactar a RRHH
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const UserAttendanceHistoryScreen(),
+                          ),
+                        );
                       },
                       Colors.purple,
-                      true,
+                      false,
                     ),
                   ),
                   const SizedBox(width: 8),
