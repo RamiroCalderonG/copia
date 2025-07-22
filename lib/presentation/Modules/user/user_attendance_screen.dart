@@ -7,6 +7,10 @@ import 'package:oxschool/core/utils/loader_indicator.dart';
 import 'package:oxschool/data/DataTransferObjects/AttendanceHistory.dart';
 import 'package:oxschool/presentation/components/confirm_dialogs.dart';
 import 'package:trina_grid/trina_grid.dart';
+import 'package:csv/csv.dart';
+import 'package:file_saver/file_saver.dart';
+import 'dart:typed_data';
+import 'dart:convert';
 
 class UserAttendanceHistoryScreen extends StatefulWidget {
   const UserAttendanceHistoryScreen({super.key});
@@ -277,6 +281,104 @@ class _UserAttendanceHistoryScreenState
         backgroundColor: Theme.of(context).colorScheme.primary,
       ),
     );
+  }
+
+  Future<void> _exportToExcel() async {
+    if (attendanceData.isEmpty) {
+      showErrorFromBackend(context, "No hay datos para exportar");
+      return;
+    }
+
+    try {
+      // Create header row
+      List<String> headerValues = [];
+      for (var column in columns) {
+        if (!column.hide) {
+          headerValues.add(column.title);
+        }
+      }
+
+      // Create data rows
+      List<List<String>> csvData = [headerValues];
+
+      for (var attendance in attendanceData) {
+        List<String> rowData = [];
+        for (var column in columns) {
+          if (!column.hide) {
+            String value = '';
+            switch (column.field) {
+              case 'employee':
+                value = attendance.employee ?? '';
+                break;
+              case 'employeeNumber':
+                value = attendance.employeeNumber ?? '';
+                break;
+              case 'date':
+                value = attendance.date ?? '';
+                break;
+              case 'day':
+                value = attendance.day ?? '';
+                break;
+              case 'where':
+                value = attendance.where ?? '';
+                break;
+              case 'record':
+                value = attendance.record?.toString() ?? '';
+                break;
+              case 'origin':
+                value = (attendance.origin ?? false) ? 'Sí' : 'No';
+                break;
+            }
+            rowData.add(value);
+          }
+        }
+        csvData.add(rowData);
+      }
+
+      // Convert to CSV format
+      String csvContent = const ListToCsvConverter().convert(csvData);
+
+      // Convert to bytes
+      Uint8List bytes = Uint8List.fromList(utf8.encode(csvContent));
+
+      // Generate default filename with current date
+      String dateRange = '';
+      if (initialDateTime != null && finalDateTime != null) {
+        dateRange =
+            '_${initialDateTime!.year}${initialDateTime!.month.toString().padLeft(2, '0')}${initialDateTime!.day.toString().padLeft(2, '0')}_${finalDateTime!.year}${finalDateTime!.month.toString().padLeft(2, '0')}${finalDateTime!.day.toString().padLeft(2, '0')}';
+      }
+      String defaultFileName = 'historial_asistencia$dateRange';
+
+      // Save file with dialog (allows user to choose location and filename)
+      await FileSaver.instance.saveAs(
+        name: defaultFileName,
+        bytes: bytes,
+        ext: 'csv',
+        mimeType: MimeType.csv,
+      );
+
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text(
+            '👍Archivo exportado exitosamente',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+          duration: const Duration(seconds: 3),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      // Show error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al exportar archivo: ${e.toString()}'),
+          duration: const Duration(seconds: 3),
+          backgroundColor: Colors.red,
+        ),
+      );
+      insertErrorLog(e.toString(), '_exportToExcel()');
+    }
   }
 
   @override
@@ -557,6 +659,20 @@ class _UserAttendanceHistoryScreenState
           icon: const Icon(Icons.select_all, size: 18),
           label: const Text('Copiar Todo'),
         ),
+        // Export to Excel button
+        ElevatedButton.icon(
+          onPressed: attendanceData.isNotEmpty ? _exportToExcel : null,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.green,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          icon: const Icon(Icons.file_download, size: 18),
+          label: const Text('Exportar'),
+        ),
         // Search button
         ElevatedButton.icon(
           onPressed: isLoading ? null : fetchAttendanceHistory,
@@ -605,7 +721,7 @@ class _UserAttendanceHistoryScreenState
             ),
             const SizedBox(height: 8),
             Text(
-              'Seleccione un rango de fechas y presione "Consultar". Use los controles de paginación para navegar entre páginas. Use Ctrl+C, "Copiar" para filas seleccionadas o "Copiar Todo" para todos los datos.',
+              'Seleccione un rango de fechas y presione "Consultar". Use los controles de paginación para navegar entre páginas. Use Ctrl+C, "Copiar" para filas seleccionadas, "Copiar Todo" para todos los datos, o "Exportar" para descargar como archivo CSV.',
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),

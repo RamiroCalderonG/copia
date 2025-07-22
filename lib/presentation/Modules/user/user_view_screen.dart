@@ -439,7 +439,7 @@ class UserWindow extends StatelessWidget {
                       theme,
                       colorScheme,
                       'Historial de Asistencia',
-                      'Consultar historial de asistencia (Próximamente)',
+                      'Consultar historial de asistencia',
                       Icons.watch_later_rounded,
                       () {
                         Navigator.of(context).push(
