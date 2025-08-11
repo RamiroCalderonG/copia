@@ -1360,7 +1360,7 @@ Future<dynamic> getScreenAccessRoutes() async {
         persistCookies: false,
         timeoutSeconds: 15);
     apiCall.raiseForStatus();
-    return apiCall.body;
+    return apiCall;
   } catch (e) {
     insertErrorLog(e.toString(), 'getScreenAccessRoutes()');
     return Future.error(e.toString());
