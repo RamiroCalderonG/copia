@@ -121,6 +121,12 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           name: 'UserAttendanceHistoryScreen',
           path: '/userAttendanceHistory',
           builder: (context, params) => const UserAttendanceHistoryScreen(),
+        ),
+        FFRoute(
+          name: 'EmployeePerformanceEvaluationDashboard()',
+          path: '/performanceEvaluation',
+          builder: (context, params) =>
+              const EmployeePerformanceEvaluationDashboard(),
         )
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
     );
