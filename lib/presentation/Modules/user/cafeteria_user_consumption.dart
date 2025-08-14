@@ -78,60 +78,274 @@ class _CafeteriaUserConsumptionState extends State<CafeteriaUserConsumption> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-        future: cafeteriaConsumption,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CustomLoadingIndicator());
-          } else if (!snapshot.hasData) {
-            return Scaffold(
-                appBar: AppBar(
-                  title: const Text('Historal de compras de cafetería'),
-                  backgroundColor: FlutterFlowTheme.of(context).primary,
-                  foregroundColor: FlutterFlowTheme.of(context).primaryText,
-                  automaticallyImplyLeading: false,
-                  leading: IconButton(
-                    icon: Icon(Icons.arrow_back),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final screenSize = MediaQuery.of(context).size;
+    final isMobile = screenSize.width < 600;
+
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        title: const Text('Consumos de Cafetería',
+            style: TextStyle(color: Colors.white)),
+        centerTitle: false,
+        backgroundColor: FlutterFlowTheme.of(context).primary,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        //surfaceTintColor: Colors.white,
+      ),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              colorScheme.primary.withOpacity(0.12),
+              colorScheme.secondary.withOpacity(0.10),
+              colorScheme.surface,
+            ],
+          ),
+          image: const DecorationImage(
+            image: AssetImage('assets/images/cafe.png'),
+            fit: BoxFit.contain,
+            alignment: Alignment.bottomRight,
+            opacity: 0.07,
+          ),
+        ),
+        child: SafeArea(
+          child: FutureBuilder(
+            future: cafeteriaConsumption,
+            builder: (context, snapshot) {
+              Widget content;
+
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                content = const Center(child: CustomLoadingIndicator());
+              } else if (snapshot.hasError) {
+                content = Center(
+                  child: Card(
+                    margin: const EdgeInsets.all(16),
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.error_outline_rounded,
+                            color: colorScheme.error,
+                            size: 64,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Ocurrió un error al cargar los datos',
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              color: colorScheme.error,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            '${snapshot.error}',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 16),
+                          FilledButton.icon(
+                            onPressed: () {
+                              setState(() {
+                                cafeteriaConsumption = obtainUserData();
+                              });
+                            },
+                            icon: const Icon(Icons.refresh_rounded),
+                            label: const Text('Reintentar'),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-                body: const Placeholder(
-                    color: Colors.transparent,
-                    child: Center(child: Text('Sin información disponible'))));
-          } else if (snapshot.hasError) {
-            return Scaffold(
-                appBar: AppBar(
-                  title: const Text('Historal de compras de cafetería'),
-                  backgroundColor: FlutterFlowTheme.of(context).primary,
-                  foregroundColor: FlutterFlowTheme.of(context).primaryText,
-                  automaticallyImplyLeading: false,
-                  leading: IconButton(
-                    icon: Icon(Icons.arrow_back),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
+                );
+              } else {
+                content = Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isMobile ? 16 : 32,
+                    vertical: isMobile ? 16 : 24,
                   ),
-                ),
-                body: Placeholder(
-                    child: Center(child: Text('Error: ${snapshot.error}'))));
-          } else {
-            return Scaffold(
-                appBar: AppBar(
-                  title: const Text('Historial de consumo de cafetería'),
-                  backgroundColor: FlutterFlowTheme.of(context).primary,
-                  foregroundColor: FlutterFlowTheme.of(context).primaryText,
-                ),
-                body: Padding(
-                    padding: EdgeInsets.all(15),
-                    child: CafeteriaUserHistoryTable(
-                      cafeteriaConsumptionList: _cafeteriaConsumptionList,
-                      dataRows: dataRows,
-                      total: total,
-                    )));
-          }
-        });
+                  child: Card(
+                    elevation: isMobile ? 2 : 6,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    color: colorScheme.surface,
+                    surfaceTintColor: colorScheme.surfaceTint,
+                    child: Padding(
+                      padding: EdgeInsets.all(isMobile ? 16 : 24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // Header with title and total
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  'Historial de consumo',
+                                  style:
+                                      theme.textTheme.headlineSmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: colorScheme.onSurface,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 8,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: colorScheme.primaryContainer,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  'Total: \$${total.toStringAsFixed(2)}',
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    color: colorScheme.onPrimaryContainer,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
+
+                          // Data table
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color:
+                                    colorScheme.surfaceVariant.withOpacity(0.3),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: colorScheme.outline.withOpacity(0.2),
+                                ),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(16),
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: DataTable(
+                                    headingRowColor: WidgetStateProperty.all(
+                                      colorScheme.primaryContainer,
+                                    ),
+                                    dataRowColor:
+                                        WidgetStateProperty.resolveWith<Color?>(
+                                      (states) {
+                                        if (states
+                                            .contains(WidgetState.selected)) {
+                                          return colorScheme.primary
+                                              .withOpacity(0.12);
+                                        }
+                                        if (states
+                                            .contains(WidgetState.hovered)) {
+                                          return colorScheme.onSurface
+                                              .withOpacity(0.08);
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                    border: TableBorder.all(
+                                      color:
+                                          colorScheme.outline.withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    showBottomBorder: true,
+                                    dividerThickness: 1,
+                                    headingTextStyle:
+                                        theme.textTheme.titleSmall?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      color: colorScheme.onPrimaryContainer,
+                                    ),
+                                    dataTextStyle:
+                                        theme.textTheme.bodyMedium?.copyWith(
+                                      color: colorScheme.onSurface,
+                                    ),
+                                    columns: const <DataColumn>[
+                                      DataColumn(
+                                        label: Text('Artículo'),
+                                      ),
+                                      DataColumn(
+                                        label: Text('Fecha'),
+                                      ),
+                                      DataColumn(
+                                        numeric: true,
+                                        label: Text('Costo'),
+                                      ),
+                                    ],
+                                    rows: dataRows,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          // Note
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color:
+                                  colorScheme.surfaceVariant.withOpacity(0.5),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.info_outline_rounded,
+                                  size: 16,
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Nota: Valores solo con estatus 0 (pendientes de cobrar)',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              }
+
+              // Responsive layout
+              if (isMobile) {
+                return content;
+              } else {
+                return Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 900),
+                    child: content,
+                  ),
+                );
+              }
+            },
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -139,6 +353,7 @@ class CafeteriaUserHistoryTable extends StatelessWidget {
   final List<CafeteriaconsumptionDto> cafeteriaConsumptionList;
   final List<DataRow> dataRows;
   final double total;
+
   const CafeteriaUserHistoryTable({
     super.key,
     required this.cafeteriaConsumptionList,
@@ -148,67 +363,132 @@ class CafeteriaUserHistoryTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return SingleChildScrollView(
-          child: Column(
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: DataTable(
-                        headingRowColor: WidgetStateColor.resolveWith(
-                            (states) => Colors.blueGrey),
-                        border: TableBorder.all(),
-                        showBottomBorder: true,
-                        dividerThickness: 2,
-                        columns: <DataColumn>[
-                          const DataColumn(
-                            label: Expanded(
-                              child: Text(
-                                'Articulo',
-                                style: TextStyle(fontStyle: FontStyle.italic),
-                              ),
-                            ),
-                          ),
-                          const DataColumn(
-                            label: Expanded(
-                              child: Text(
-                                'Fecha',
-                                style: TextStyle(fontStyle: FontStyle.italic),
-                              ),
-                            ),
-                          ),
-                          const DataColumn(
-                            numeric: true,
-                            label: Expanded(
-                              child: Text(
-                                'Costo',
-                                style: TextStyle(fontStyle: FontStyle.italic),
-                              ),
-                            ),
-                          ),
-                        ],
-                        rows: dataRows,
-                      ),
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Historial de consumo',
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: colorScheme.onSurface,
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    'Total: \$${total.toStringAsFixed(2)}',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: colorScheme.onPrimaryContainer,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(width: 40),
-                  Flexible(
-                    child: Text(
-                      'Total: $total \n  \t* Nota: Valores solo con estatus 0',
-                      style: TextStyle(color: Colors.white),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // Data table
+            Expanded(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: colorScheme.outline.withOpacity(0.2),
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: DataTable(
+                    headingRowColor: WidgetStateProperty.all(
+                      colorScheme.primaryContainer,
+                    ),
+                    dataRowColor: WidgetStateProperty.resolveWith<Color?>(
+                      (states) {
+                        if (states.contains(WidgetState.selected)) {
+                          return colorScheme.primary.withOpacity(0.12);
+                        }
+                        if (states.contains(WidgetState.hovered)) {
+                          return colorScheme.onSurface.withOpacity(0.08);
+                        }
+                        return null;
+                      },
+                    ),
+                    border: TableBorder.all(
+                      color: colorScheme.outline.withOpacity(0.2),
+                    ),
+                    showBottomBorder: true,
+                    dividerThickness: 1,
+                    headingTextStyle: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: colorScheme.onPrimaryContainer,
+                    ),
+                    dataTextStyle: theme.textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurface,
+                    ),
+                    columns: const <DataColumn>[
+                      DataColumn(label: Text('Artículo')),
+                      DataColumn(label: Text('Fecha')),
+                      DataColumn(
+                        numeric: true,
+                        label: Text('Costo'),
+                      ),
+                    ],
+                    rows: dataRows,
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            // Note
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceVariant.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    size: 16,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Nota: Valores solo con estatus 0 (pendientes de cobrar)',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
               ),
-            ],
-          ),
-        );
-      },
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

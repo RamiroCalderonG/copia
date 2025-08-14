@@ -1,5 +1,8 @@
 // ignore_for_file: file_names, non_constant_identifier_names
 
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
@@ -26,6 +29,7 @@ class User {
   bool? isAcademicCoord;
   Role? userRole;
   int? idLogin;
+  Uint8List? userPicture;
 
   // late final notActive;
 
@@ -49,7 +53,8 @@ class User {
       this.canUpdatePassword,
       this.isAcademicCoord,
       this.userRole,
-      this.idLogin);
+      this.idLogin,
+      this.userPicture);
 
   Map<dynamic, dynamic> toJson() => {
         "employeeNumber": employeeNumber,
@@ -89,7 +94,8 @@ class User {
         roleID = json['userRole']['id'],
         canUpdatePassword = json['userCanUpdatePassword'],
         isAcademicCoord = json['userRole']['isAcademicCoordinator'],
-        idLogin = json['idLogin'];
+        idLogin = json['idLogin'],
+        userPicture = base64Decode(json['userPicture']);
 
   void clear() {
     employeeName = null;

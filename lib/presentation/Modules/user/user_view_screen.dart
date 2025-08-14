@@ -36,7 +36,7 @@ class UserWindow extends StatelessWidget {
           slivers: [
             SliverAppBar.medium(
               backgroundColor: Colors.transparent,
-              surfaceTintColor: Colors.transparent,
+              surfaceTintColor: Colors.white,
               title: Text(
                 'Mi Perfil',
                 style: theme.textTheme.headlineMedium?.copyWith(
@@ -47,7 +47,8 @@ class UserWindow extends StatelessWidget {
               actions: [
                 IconButton.filledTonal(
                   onPressed: () {},
-                  icon: const Icon(Icons.notifications_rounded),
+                  icon: const Icon(Icons.notifications_rounded,
+                      color: Colors.white),
                   tooltip: 'Notificaciones',
                   style: IconButton.styleFrom(
                     backgroundColor: Colors.white.withOpacity(0.2),
@@ -100,8 +101,10 @@ class UserWindow extends StatelessWidget {
         child: Column(
           children: [
             Container(
+              /*
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
+                /*
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -109,7 +112,8 @@ class UserWindow extends StatelessWidget {
                     colorScheme.primary,
                     colorScheme.primary.withOpacity(0.7),
                   ],
-                ),
+                ), 
+                */
                 boxShadow: [
                   BoxShadow(
                     color: colorScheme.shadow.withOpacity(0.2),
@@ -118,18 +122,29 @@ class UserWindow extends StatelessWidget {
                   ),
                 ],
               ),
+
+              */
               child: CircleAvatar(
                 radius: isMobile ? 60 : 80,
                 backgroundColor: Colors.transparent,
-                child: Text(
-                  currentUser!.employeeName!.initials,
-                  style: theme.textTheme.headlineLarge?.copyWith(
-                    fontSize: isMobile ? 32 : 40,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    fontFamily: 'Sora',
-                  ),
-                ),
+                child: currentUser!.userPicture != null
+                    ? ClipOval(
+                        child: Image.memory(
+                          currentUser!.userPicture!,
+                          width: (isMobile ? 120 : 160),
+                          height: (isMobile ? 120 : 160),
+                          fit: BoxFit.scaleDown,
+                        ),
+                      )
+                    : Text(
+                        currentUser!.employeeName!.initials,
+                        style: theme.textTheme.headlineLarge?.copyWith(
+                          fontSize: isMobile ? 32 : 40,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontFamily: 'Sora',
+                        ),
+                      ),
               ),
             ),
             const SizedBox(height: 16),
