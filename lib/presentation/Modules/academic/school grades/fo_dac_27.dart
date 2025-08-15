@@ -780,10 +780,10 @@ class EditCellDialog extends StatelessWidget {
   final Function(String) onSave;
 
   const EditCellDialog({
-    Key? key,
+    super.key,
     required this.cell,
     required this.onSave,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

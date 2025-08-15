@@ -905,12 +905,12 @@ class _GradesByStudentState extends State<GradesByStudent> {
                                     showErrorFromBackend(context,
                                         'Solo se permiten números enteros en la calificación.');
                                     return;
-                                  }
+                                  } /*
                                   if (int.tryParse(event.toString()) == null) {
                                     showErrorFromBackend(context,
                                         'Ingrese solo números enteros válidos.');
                                     return;
-                                  }
+                                  } */
                                 }
                                 var newValue = validateNewGradeValue(
                                     event.value, event.column.title);

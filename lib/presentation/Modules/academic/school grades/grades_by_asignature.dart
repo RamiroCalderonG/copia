@@ -650,16 +650,19 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
           if (success) {
             try {
               studentGradesBodyToUpgrade.clear();
+              /*
               await searchBUttonAction(
                   selectedTempGroup!,
                   selectedTempGrade.toString(),
                   selectedTempSubjectId.toString(),
                   monthNumber.toString(),
                   selectedTempCampus!);
+                  */
 
               setState(() {
                 isLoading = false;
-                showInformationDialog(context, 'Éxito', 'Cambios realizados!');
+                showInformationDialog(context, 'Éxito',
+                    'Cambios realizados!, actualice la página.');
               });
             } catch (e) {
               setState(() {
