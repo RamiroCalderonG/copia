@@ -25,9 +25,8 @@ void clearTempData() {
 }
 
 List<Map<String, List<String>>> getUniqueItems(
-    List<Map<String, dynamic>> moduleScreenList, 
+    List<Map<String, dynamic>> moduleScreenList,
     List<Map<String, dynamic>> screenEventList) {
-
   // Initialize the uniqueItemsList
   List<Map<String, List<String>>> uniqueItemsList = [];
 
@@ -65,59 +64,59 @@ List<Map<String, List<String>>> getUniqueItems(
   return uniqueItemsList;
 }
 
-
 //Function that retrieves user permissions and add them into currentUser.userRole
 Future<void> getRoleListOfPermissions(Map<String, dynamic> jsonuserInfo) async {
   try {
-    getRolePermissions().then((onValue){
-      Map<String, dynamic> jsonResponse = json.decode(utf8.decode(onValue.bodyBytes));
-      
+    getRolePermissions().then((onValue) {
+      Map<String, dynamic> jsonResponse =
+          json.decode(utf8.decode(onValue.bodyBytes));
+
       //Create Role object to then insert it into currentUser.userRole
       Role userRole = Role(
-        roleID: jsonuserInfo['userRole']['id'],
-        roleName: jsonuserInfo['userRole']['softName'],
-        roleDescription: jsonuserInfo['userRole']['description'],
-        isActive: jsonuserInfo['userRole']['isActive']
-      );
+          roleID: jsonuserInfo['userRole']['id'],
+          roleName: jsonuserInfo['userRole']['softName'],
+          roleDescription: jsonuserInfo['userRole']['description'],
+          isActive: jsonuserInfo['userRole']['isActive']);
 
       List<dynamic> moduleScreenListMap = jsonResponse['moduleScreen'];
       List<dynamic> eventScreenListMap = jsonResponse['screenEvents'];
 
       // Get unique moduleScreen relations and screenEvents relations
-       uniqueItems = getUniqueItems(
-        moduleScreenListMap.map((item) => Map<String, dynamic>.from(item)).toList(),
-        eventScreenListMap.map((item) => Map<String, dynamic>.from(item)).toList()
-      );
+      uniqueItems = getUniqueItems(
+          moduleScreenListMap
+              .map((item) => Map<String, dynamic>.from(item))
+              .toList(),
+          eventScreenListMap
+              .map((item) => Map<String, dynamic>.from(item))
+              .toList());
 
       // Assign the unique items to the userRole
       userRole.moduleScreenList = uniqueItems;
 
       currentUser!.userRole = userRole; // Insert Role into currentUser.userRole
       return;
-    }).onError((error, stackTrace){
+    }).onError((error, stackTrace) {
       insertErrorLog(error.toString(), 'getRolePermissions');
       throw Future.error(error.toString());
-      
     });
   } catch (e) {
     insertErrorLog(e.toString(), 'getRoleListOfPermissions() | ');
     throw Future.error(e.toString());
   }
-  
 }
 
-  Future<void> getUserAccessRoutes() async {
-    var response = await getScreenAccessRoutes();
-    var tmpResponse = json.decode(response);
-    for (var item in tmpResponse ) {
-      accessRoutes.add(item);
-    }
-
-    //accessRoutes = json.decode(response);
-    
-    //accessRoutes = tempResponse.;
-    return;
+Future<void> getUserAccessRoutes() async {
+  var response = await getScreenAccessRoutes();
+  var tmpResponse = json.decode(utf8.decode((response.bodyBytes)));
+  for (var item in tmpResponse) {
+    accessRoutes.add(item);
   }
+
+  //accessRoutes = json.decode(response);
+
+  //accessRoutes = tempResponse.;
+  return;
+}
 
 int getEventIDbyName(String eventName) {
   var idValue;
@@ -156,11 +155,12 @@ Future<dynamic> fetchEventsByRole(int roleId) async {
     if (eventsByRole != null && eventsByRole.body != '[]') {
       // var evenntsList = eventsByRole.body;
       var jsonList = json.decode(utf8.decode(eventsByRole.bodyBytes));
-       List<RoleModuleRelationshipDto> roleDetailedList = [];
-         for (var item in jsonList) {
-          RoleModuleRelationshipDto roleDetails = RoleModuleRelationshipDto.fromJSON(item);
-           roleDetailedList.add(roleDetails);
-         }
+      List<RoleModuleRelationshipDto> roleDetailedList = [];
+      for (var item in jsonList) {
+        RoleModuleRelationshipDto roleDetails =
+            RoleModuleRelationshipDto.fromJSON(item);
+        roleDetailedList.add(roleDetails);
+      }
       return roleDetailedList;
     } else {
       return Future.error('Value is null');

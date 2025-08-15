@@ -7,7 +7,6 @@ import 'package:oxschool/presentation/components/confirm_dialogs.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:open_file/open_file.dart';
 
 Future<void> generateDisciplinaryReport(
     String cycle, List<dynamic> data, BuildContext context) async {

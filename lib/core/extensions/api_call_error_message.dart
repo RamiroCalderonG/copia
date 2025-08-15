@@ -24,7 +24,7 @@ extension ApiErrorHandler on Exception {
 
       return '$description ,Status: $status';
     } else {
-      return 'An unexpected error occurred: ${this.toString()}';
+      return 'An unexpected error occurred: ${toString()}';
     }
   }
 }

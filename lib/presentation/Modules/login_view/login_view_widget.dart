@@ -11,7 +11,6 @@ import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
 import 'package:oxschool/core/constants/version.dart';
 import 'package:oxschool/core/reusable_methods/device_functions.dart';
 import 'package:oxschool/core/reusable_methods/temp_data_functions.dart';
-import 'package:oxschool/core/utils/loader_indicator.dart';
 import 'package:oxschool/core/utils/version_updater.dart';
 import 'package:oxschool/data/Models/Cycle.dart';
 import 'package:oxschool/data/Models/User.dart';
@@ -22,7 +21,6 @@ import 'package:oxschool/presentation/Modules/login_view/recover_password_screen
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/reusable_methods/logger_actions.dart';
-import '../../../core/reusable_methods/user_functions.dart';
 import '../../components/confirm_dialogs.dart';
 import '../../components/custom_scaffold_messenger.dart';
 import '../../../core/utils/device_information.dart';
@@ -110,7 +108,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
         _model.textController1!.text =
             currentText.substring(0, atIndex + 1) + _suggestedDomain!;
       } else {
-        _model.textController1!.text = currentText + '@' + _suggestedDomain!;
+        _model.textController1!.text = '$currentText@${_suggestedDomain!}';
       }
       setState(() {
         _suggestedDomain = null;
@@ -311,7 +309,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
       child: Image.asset(
-        'assets/images/logoRedondoOx.png',
+        'assets/images/1_OS_color.png',
         width: 180,
         height: 180,
         fit: BoxFit.contain,

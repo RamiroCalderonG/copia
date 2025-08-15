@@ -245,14 +245,14 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
                 label: 'Actualizar',
                 onPressed: _restartScreen,
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 8),
             ],
           ],
           floating: true,
           snap: true,
         ),
         SliverPadding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(8),
           sliver: SliverToBoxAdapter(
             child: Card(
               child: Padding(
@@ -274,7 +274,7 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const Spacer(),
+                        // const Spacer(),
                         if (isDeviceMobile) ...[
                           IconButton.filledTonal(
                             onPressed: _navigateToRoles,
@@ -296,12 +296,12 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
                         ],
                       ],
                     ),
-                    const SizedBox(height: 16),
-                    const Divider(),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 5),
+                    // const Divider(),
+                    // const SizedBox(height: 16),
                     SizedBox(
                       width: double.infinity,
-                      height: MediaQuery.of(context).size.height - 300,
+                      height: MediaQuery.of(context).size.height - 240,
                       child: const UsersTableView(),
                     ),
                   ],

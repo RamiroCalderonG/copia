@@ -9,7 +9,6 @@ import 'package:oxschool/core/reusable_methods/academic_functions.dart';
 import 'package:oxschool/core/utils/loader_indicator.dart';
 import 'package:oxschool/presentation/Modules/academic/discipline/create_discipline_screen.dart';
 import 'package:oxschool/presentation/components/confirm_dialogs.dart';
-import 'package:oxschool/presentation/components/custom_icon_button.dart';
 import 'package:oxschool/presentation/components/pdf/discipline_report.dart';
 import 'package:trina_grid/trina_grid.dart';
 
@@ -73,19 +72,6 @@ class _DisciplineHistoryGridState extends State<DisciplineHistoryGrid> {
       type: TrinaColumnType.number(),
       readOnly: true,
       width: 80,
-      footerRenderer: (context) {
-        final sum = context.stateManager.refRows.fold<int>(
-          0,
-          (previousValue, row) =>
-              previousValue + ((row.cells['total']?.value ?? 0) as int),
-        );
-        return Text(
-          '$sum',
-          textAlign: TextAlign.center,
-          style:
-              const TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
-        );
-      },
     ),
     TrinaColumn(
         title: "Menores",
@@ -99,19 +85,6 @@ class _DisciplineHistoryGridState extends State<DisciplineHistoryGrid> {
       type: TrinaColumnType.text(),
       readOnly: true,
       width: 100,
-      footerRenderer: (context) {
-        final sum = context.stateManager.refRows.fold<int>(
-          0,
-          (previousValue, row) =>
-              previousValue + ((row.cells['mayors']?.value ?? 0) as int),
-        );
-        return Text(
-          '$sum',
-          textAlign: TextAlign.center,
-          style:
-              const TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
-        );
-      },
     ),
     TrinaColumn(
       title: "Notif1",
@@ -119,19 +92,6 @@ class _DisciplineHistoryGridState extends State<DisciplineHistoryGrid> {
       type: TrinaColumnType.number(),
       readOnly: true,
       width: 90,
-      footerRenderer: (context) {
-        final sum = context.stateManager.refRows.fold<int>(
-          0,
-          (previousValue, row) =>
-              previousValue + ((row.cells['notif1']?.value ?? 0) as int),
-        );
-        return Text(
-          '$sum',
-          textAlign: TextAlign.center,
-          style:
-              const TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
-        );
-      },
     ),
     TrinaColumn(
       title: "Notif2",
@@ -139,19 +99,6 @@ class _DisciplineHistoryGridState extends State<DisciplineHistoryGrid> {
       type: TrinaColumnType.number(),
       readOnly: true,
       width: 90,
-      footerRenderer: (context) {
-        final sum = context.stateManager.refRows.fold<int>(
-          0,
-          (previousValue, row) =>
-              previousValue + ((row.cells['notif2']?.value ?? 0) as int),
-        );
-        return Text(
-          '$sum',
-          textAlign: TextAlign.center,
-          style:
-              const TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
-        );
-      },
     ),
     TrinaColumn(
         title: "Notif3",
@@ -179,226 +126,507 @@ class _DisciplineHistoryGridState extends State<DisciplineHistoryGrid> {
 
   @override
   Widget build(BuildContext context) {
-    final initialDateField = Padding(
-      padding: const EdgeInsets.all(5),
-      child: TextFormField(
-        controller: initialDateController,
-        decoration: const InputDecoration(
-          label: Text("Fecha inicial "),
-          border: OutlineInputBorder(),
-          contentPadding: EdgeInsets.symmetric(horizontal: 8),
-        ),
-        readOnly: true,
-        onTap: () async {
-          final DateTime? picked = await showDatePicker(
-            context: context,
-            initialDate: _selectedDate ?? DateTime.now(),
-            firstDate: DateTime(2000),
-            lastDate: DateTime(2101),
-          );
-          if (picked != null) {
-            setState(() {
-              initialDateTime = picked;
-              initialDateController.text =
-                  "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}";
-            });
-          }
-        },
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return 'Por favor, seleccione una fecha';
-          }
-          return null;
-        },
-      ),
-    );
-
-    final finalDateField = Padding(
-      padding: const EdgeInsets.all(5),
-      child: TextFormField(
-        controller: finalDateController,
-        decoration: const InputDecoration(
-          label: Text("Fecha Final "),
-          border: OutlineInputBorder(),
-          contentPadding: EdgeInsets.symmetric(horizontal: 8),
-        ),
-        readOnly: true,
-        onTap: () async {
-          final DateTime? picked = await showDatePicker(
-            context: context,
-            initialDate: _selectedDate ?? DateTime.now(),
-            firstDate: DateTime(2000),
-            lastDate: DateTime(2101),
-          );
-          if (picked != null) {
-            setState(() {
-              finalDateTime = picked;
-              finalDateController.text =
-                  "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}";
-            });
-          }
-        },
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return 'Por favor, seleccione una fecha';
-          }
-          return null;
-        },
-      ),
-    );
-
-    final buttonsMenu = Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Expanded(
-          flex: 2,
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Expanded(child: initialDateField),
-                  Expanded(child: finalDateField)
-                ],
-              )
-            ],
-          ),
-        ),
-        Expanded(
-            flex: 3,
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    RefreshButton(onPressed: () {
-                      setState(() {
-                        isLoading = true;
-                      });
-                      if ((initialDateTime != null && finalDateTime != null)) {
-                        if (initialDateTime!.isAfter(finalDateTime!)) {
-                          setState(() {
-                            isLoading = false;
-                          });
-                          showErrorFromBackend(context,
-                              "Fecha inicial no puede ser mayor que la final");
-                        } else {
-                          setState(() {
-                            isLoading = true;
-                            handleRefresh(currentCycle!.claCiclo!,
-                                    initialDateTime!, finalDateTime!)
-                                .whenComplete(() => setState(() {
-                                      isLoading = false;
-                                    }));
-                          });
-                        }
-                      } else {
-                        setState(() {
-                          isLoading = false;
-                        });
-                        showEmptyFieldAlertDialog(context,
-                            "Favor de seleccionar un rango de fechas correcto");
-                      }
-                      setState(() {
-                        isLoading = false;
-                      });
-                    }),
-                    SizedBox(width: 5),
-                    ExcelActionButton(onPressed: () {
-                      if (apiResponse == null) {
-                        showErrorFromBackend(
-                            context, "No hay datos para generar el reporte");
-                        setState(() {
-                          isLoading = false;
-                        });
-                        return;
-                      } else {
-                        setState(() {
-                          isLoading = true;
-                        });
-                        exportTrinaGridToCsv(context)
-                            .whenComplete(() => setState(() {
-                                  isLoading = false;
-                                }));
-                      }
-                    }),
-                    SizedBox(width: 5),
-                    ExportButton(onPressed: () {
-                      if (apiResponse == null) {
-                        showErrorFromBackend(
-                            context, "No hay datos para generar el reporte");
-                        setState(() {
-                          isLoading = false;
-                        });
-                        return;
-                      } else {
-                        setState(() {
-                          isLoading = true;
-                        });
-                        generateDisciplinaryReport(
-                                currentCycle!.claCiclo!, apiResponse, context)
-                            .whenComplete(() => setState(() {
-                                  isLoading = false;
-                                }));
-                      }
-                    }),
-                    SizedBox(
-                      width: 5,
-                    ),
-                    AddItemButton(
-                      onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    const CreateDisciplineScreen()));
-                      },
-                    )
-                  ],
-                )
-              ],
-            ))
-      ],
-    );
+    final theme = Theme.of(context);
+    final isSmallScreen = MediaQuery.of(context).size.width < 900;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-          child: buttonsMenu,
-        ),
-        const Divider(thickness: 2),
+        // Filter and Action Panel
+        _buildFilterPanel(theme, isSmallScreen),
+        const SizedBox(height: 16),
+
+        // Data Grid Section
         Expanded(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: apiResponse != null
-                ? LayoutBuilder(
-                    builder:
-                        (BuildContext context, BoxConstraints constraints) {
-                      return isLoading
-                          ? Center(
-                              child: CustomLoadingIndicator(),
-                            )
-                          : Center(
-                              child: SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                child: SizedBox(
-                                  width: constraints.maxWidth,
-                                  height: constraints.maxHeight,
-                                  child: TrinaGrid(
-                                      mode: TrinaGridMode.readOnly,
-                                      columns: columns,
-                                      rows: plutoRows),
-                                ),
-                              ),
-                            );
-                    },
-                  )
-                : const Center(child: Placeholder()),
+          child: _buildDataSection(theme),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFilterPanel(ThemeData theme, bool isSmallScreen) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: theme.colorScheme.outline.withOpacity(0.2),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionTitle('Filtros de Consulta', theme),
+          const SizedBox(height: 8),
+          if (isSmallScreen)
+            Column(
+              children: [
+                _buildDateFilters(theme),
+                const SizedBox(height: 16),
+                _buildActionButtons(theme),
+              ],
+            )
+          else
+            Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: _buildDateFilters(theme),
+                ),
+                const SizedBox(width: 24),
+                Expanded(
+                  flex: 3,
+                  child: _buildActionButtons(theme),
+                ),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title, ThemeData theme) {
+    return Row(
+      children: [
+        Icon(
+          Icons.filter_list,
+          color: theme.colorScheme.primary,
+          size: 20,
+        ),
+        const SizedBox(width: 8),
+        Text(
+          title,
+          style: theme.textTheme.titleMedium?.copyWith(
+            color: theme.colorScheme.primary,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildDateFilters(ThemeData theme) {
+    return Row(
+      children: [
+        Expanded(
+            child: _buildDateField(
+                'Fecha Inicial', initialDateController, theme, true)),
+        const SizedBox(width: 16),
+        Expanded(
+            child: _buildDateField(
+                'Fecha Final', finalDateController, theme, false)),
+      ],
+    );
+  }
+
+  Widget _buildDateField(String label, TextEditingController controller,
+      ThemeData theme, bool isInitial) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(
+              Icons.calendar_today,
+              size: 16,
+              color: theme.colorScheme.primary,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          decoration: InputDecoration(
+            hintText: 'dd/mm/aaaa',
+            prefixIcon: Icon(
+              Icons.date_range,
+              color: theme.colorScheme.primary,
+            ),
+            filled: true,
+            fillColor: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: theme.colorScheme.outline.withOpacity(0.2),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: theme.colorScheme.primary,
+                width: 2,
+              ),
+            ),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          ),
+          readOnly: true,
+          onTap: () async {
+            final DateTime? picked = await showDatePicker(
+              context: context,
+              initialDate: _selectedDate ?? DateTime.now(),
+              firstDate: DateTime(2000),
+              lastDate: DateTime(2101),
+            );
+            if (picked != null) {
+              setState(() {
+                if (isInitial) {
+                  initialDateTime = picked;
+                } else {
+                  finalDateTime = picked;
+                }
+                controller.text =
+                    "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}";
+              });
+            }
+          },
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Por favor, seleccione una fecha';
+            }
+            return null;
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionButtons(ThemeData theme) {
+    return Wrap(
+      spacing: 12,
+      runSpacing: 8,
+      alignment: WrapAlignment.end,
+      children: [
+        _buildActionButton(
+          label: isLoading ? 'Cargando...' : 'Consultar',
+          icon: isLoading ? Icons.hourglass_empty : Icons.search,
+          onPressed: isLoading
+              ? null
+              : () {
+                  if (initialDateTime != null && finalDateTime != null) {
+                    if (initialDateTime!.isAfter(finalDateTime!)) {
+                      showErrorFromBackend(context,
+                          "Fecha inicial no puede ser mayor que la final");
+                      return;
+                    }
+
+                    setState(() {
+                      isLoading = true;
+                    });
+
+                    handleRefresh(currentCycle!.claCiclo!, initialDateTime!,
+                            finalDateTime!)
+                        .then((_) {
+                      if (mounted) {
+                        setState(() {
+                          isLoading = false;
+                        });
+                      }
+                    }).catchError((error) {
+                      if (mounted) {
+                        setState(() {
+                          isLoading = false;
+                        });
+                        showErrorFromBackend(context, error.toString());
+                      }
+                    });
+                  } else {
+                    showEmptyFieldAlertDialog(context,
+                        "Favor de seleccionar un rango de fechas correcto");
+                  }
+                },
+          theme: theme,
+          isPrimary: true,
+        ),
+        _buildActionButton(
+          label: 'Excel',
+          icon: Icons.table_chart,
+          onPressed: () {
+            if (apiResponse == null) {
+              showErrorFromBackend(
+                  context, "No hay datos para generar el reporte");
+              setState(() {
+                isLoading = false;
+              });
+              return;
+            } else {
+              setState(() {
+                isLoading = true;
+              });
+              exportTrinaGridToCsv(context).whenComplete(() => setState(() {
+                    isLoading = false;
+                  }));
+            }
+          },
+          theme: theme,
+        ),
+        _buildActionButton(
+          label: 'PDF',
+          icon: Icons.picture_as_pdf,
+          onPressed: () {
+            if (apiResponse == null) {
+              showErrorFromBackend(
+                  context, "No hay datos para generar el reporte");
+              setState(() {
+                isLoading = false;
+              });
+              return;
+            } else {
+              setState(() {
+                isLoading = true;
+              });
+              generateDisciplinaryReport(
+                      currentCycle!.claCiclo!, apiResponse, context)
+                  .whenComplete(() => setState(() {
+                        isLoading = false;
+                      }));
+            }
+          },
+          theme: theme,
+        ),
+        _buildActionButton(
+          label: 'Nuevo',
+          icon: Icons.add,
+          onPressed: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const CreateDisciplineScreen()));
+          },
+          theme: theme,
+          isSecondary: true,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionButton({
+    required String label,
+    required IconData icon,
+    required VoidCallback? onPressed,
+    required ThemeData theme,
+    bool isPrimary = false,
+    bool isSecondary = false,
+  }) {
+    if (isPrimary) {
+      return FilledButton.icon(
+        onPressed: onPressed,
+        icon: onPressed == null
+            ? SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    theme.colorScheme.onPrimary,
+                  ),
+                ),
+              )
+            : Icon(icon, size: 18),
+        label: Text(label),
+        style: FilledButton.styleFrom(
+          backgroundColor: theme.colorScheme.primary,
+          foregroundColor: theme.colorScheme.onPrimary,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      );
+    } else if (isSecondary) {
+      return OutlinedButton.icon(
+        onPressed: onPressed,
+        icon: Icon(icon, size: 18),
+        label: Text(label),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: theme.colorScheme.primary,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          side: BorderSide(color: theme.colorScheme.primary),
+        ),
+      );
+    } else {
+      return FilledButton.tonalIcon(
+        onPressed: onPressed,
+        icon: Icon(icon, size: 18),
+        label: Text(label),
+        style: FilledButton.styleFrom(
+          backgroundColor: theme.colorScheme.secondaryContainer,
+          foregroundColor: theme.colorScheme.onSecondaryContainer,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      );
+    }
+  }
+
+  Widget _buildDataSection(ThemeData theme) {
+    if (isLoading) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CustomLoadingIndicator(),
+            const SizedBox(height: 16),
+            Text(
+              'Cargando datos...',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (apiResponse == null) {
+      return _buildEmptyState(theme);
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: theme.colorScheme.outline.withOpacity(0.2),
+        ),
+      ),
+      child: Column(
+        children: [
+          // Header
+          Container(
+            padding: const EdgeInsets.all(9),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primaryContainer.withOpacity(0.3),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(16),
+                topRight: Radius.circular(16),
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.table_chart,
+                  color: theme.colorScheme.primary,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Resultados de Consulta',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const Spacer(),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.secondaryContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '${plutoRows.length} registros',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSecondaryContainer,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Grid
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: TrinaGrid(
+                mode: TrinaGridMode.readOnly,
+                columns: columns,
+                rows: plutoRows,
+                configuration: const TrinaGridConfiguration(
+                  style: TrinaGridStyleConfig(
+                    enableColumnBorderVertical: false,
+                    enableCellBorderVertical: false,
+                  ),
+                ),
+                onLoaded: (TrinaGridOnLoadedEvent event) {
+                  // Enable column filters
+                  event.stateManager.setShowColumnFilter(true);
+                },
+                createFooter: (stateManager) {
+                  stateManager.setPageSize(25, notify: false);
+                  return TrinaPagination(stateManager);
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(ThemeData theme) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primaryContainer.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.search,
+              size: 48,
+              color: theme.colorScheme.primary.withOpacity(0.5),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Sin datos para mostrar',
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Seleccione un rango de fechas y presione "Consultar"\npara obtener los reportes de disciplina',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
+              height: 1.5,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -406,12 +634,12 @@ class _DisciplineHistoryGridState extends State<DisciplineHistoryGrid> {
     for (var item in data) {
       plutoRows.add(TrinaRow(cells: {
         'studentId':
-            TrinaCell(value: item['Matricula'].toString().trim() ?? ''),
-        'cycle': TrinaCell(value: item['ClaCiclo'].toString().trim() ?? ''),
-        'student': TrinaCell(value: item['Alumno'].toString().trim() ?? ''),
-        'campus': TrinaCell(value: item['claun'].toString().trim() ?? ''),
+            TrinaCell(value: item['Matricula']?.toString().trim() ?? ''),
+        'cycle': TrinaCell(value: item['ClaCiclo']?.toString().trim() ?? ''),
+        'student': TrinaCell(value: item['Alumno']?.toString().trim() ?? ''),
+        'campus': TrinaCell(value: item['claun']?.toString().trim() ?? ''),
         'academicLevel':
-            TrinaCell(value: item['NomGradoEscolar'].toString().trim() ?? ''),
+            TrinaCell(value: item['NomGradoEscolar']?.toString().trim() ?? ''),
         'group': TrinaCell(value: item['Grupo'] ?? ''),
         'total': TrinaCell(value: item['Reportes'] ?? 0),
         'minors': TrinaCell(value: item['Menores'] ?? 0),
@@ -426,9 +654,6 @@ class _DisciplineHistoryGridState extends State<DisciplineHistoryGrid> {
   Future<void> handleRefresh(
       String cycle, DateTime initialDate, DateTime finalDate) async {
     try {
-      setState(() {
-        isLoading = true;
-      });
       await getStudentsDisciplinaryReportsByDates(
               cycle,
               "${initialDate.year}${initialDate.month.toString().padLeft(2, '0')}${initialDate.day.toString().padLeft(2, '0')}",
@@ -438,11 +663,6 @@ class _DisciplineHistoryGridState extends State<DisciplineHistoryGrid> {
           plutoRows.clear();
           populateGrid(value);
           apiResponse = value;
-        });
-      }).onError((error, stackTrace) {
-        setState(() {
-          isLoading = false;
-          showErrorFromBackend(context, error.toString());
         });
       });
     } catch (e) {
