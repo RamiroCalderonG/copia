@@ -203,6 +203,14 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                     selectedGroup = null;
                     selectedSubject = null;
                     selectedTempCampus = value;
+                    // Reset all global temp variables for dependent dropdowns
+                    selectedTempGrade = null;
+                    selectedTempGroup = null;
+                    selectedTempSubject = null;
+                    selectedTempSubjectId = null;
+                    preSelectedGrade = null;
+                    preSelectedGroup = null;
+                    preSelectedSubject = null;
                     filterData();
                   });
                 },
@@ -238,8 +246,15 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                   selectedGrade = value;
                   selectedGroup = null; // Clear dependent selections
                   selectedSubject = null;
-                  selectedTempGrade = getKeyFromValue(
-                      teacherGradesMap, value!); //int.parse(value!);
+                  selectedTempGrade = value != null
+                      ? getKeyFromValue(teacherGradesMap, value)
+                      : null;
+                  // Reset global temp variables for dependent dropdowns
+                  selectedTempGroup = null;
+                  selectedTempSubject = null;
+                  selectedTempSubjectId = null;
+                  preSelectedGroup = null;
+                  preSelectedSubject = null;
                   filterData();
                 });
               },
@@ -260,9 +275,12 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                 setState(() {
                   preSelectedGroup = value;
                   selectedGroup = value;
-                  selectedSubject =
-                      filteredSubject.first; // Clear dependent selections
+                  selectedSubject = null; // Clear dependent selections
                   selectedTempGroup = value;
+                  // Reset global temp variables for subject
+                  selectedTempSubject = null;
+                  selectedTempSubjectId = null;
+                  preSelectedSubject = null;
 
                   filterData();
                 });
@@ -336,9 +354,21 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
     if (studentList.isNotEmpty) {
       studentList.clear();
     }
-    selectedGrade ??= filteredGrade.first;
-    selectedGroup ??= filteredGroup.first;
-    selectedSubject ??= filteredSubject.first;
+    // Only auto-assign if the filtered lists have items and no selection exists
+    // This preserves the null state when dropdowns should remain empty
+    if (selectedGrade == null && filteredGrade.isNotEmpty) {
+      selectedGrade = filteredGrade.first;
+    }
+    if (selectedGroup == null &&
+        filteredGroup.isNotEmpty &&
+        selectedGrade != null) {
+      selectedGroup = filteredGroup.first;
+    }
+    if (selectedSubject == null &&
+        filteredSubject.isNotEmpty &&
+        selectedGroup != null) {
+      selectedSubject = filteredSubject.first;
+    }
 
     if (currentUser!.isCurrentUserAdmin() ||
         currentUser!.isCurrentUserAcademicCoord()) {

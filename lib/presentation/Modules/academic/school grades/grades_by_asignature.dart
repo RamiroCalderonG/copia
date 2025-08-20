@@ -607,17 +607,23 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
           // get assignature id number
           var assignatureID = selectedTempSubjectId;
 
-          if (assignatureID != null && assignatureID != 0) {
-            await searchBUttonAction(
-                selectedTempGroup!,
-                selectedTempGrade.toString(),
-                assignatureID.toString(),
-                monthNumber.toString(),
-                selectedTempCampus!);
+          if (selectedTempGroup != null) {
+            if (assignatureID != null && assignatureID != 0) {
+              await searchBUttonAction(
+                  selectedTempGroup!,
+                  selectedTempGrade.toString(),
+                  assignatureID.toString(),
+                  monthNumber.toString(),
+                  selectedTempCampus!);
+            } else {
+              isLoading = false;
+              showInformationDialog(context, 'Alerta!',
+                  'No se detectó una asignatura, vuelva a intentar.');
+            }
           } else {
             isLoading = false;
             showInformationDialog(context, 'Alerta!',
-                'No se detectó una asignatura, vuelva a intentar.');
+                'No se detectó un grado, vuelva a intentar.');
           }
         } catch (e) {
           insertErrorLog(e.toString(), 'SEARCH STUDENTS BY SUBJECTS ');
@@ -646,6 +652,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
         setState(() {
           isLoading = true;
         });
+
         await updateButtonFunction((success) async {
           if (success) {
             try {
