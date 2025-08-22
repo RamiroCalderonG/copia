@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/data/Models/AcademicEvaluationsComment.dart';
 import 'package:oxschool/data/Models/Student.dart';
@@ -582,14 +581,14 @@ int validateNewGradeValue(dynamic newValue, String columnNameToFind) {
 Future<dynamic> isDateToEvaluateStudents() async {
   try {
     var originDate = await getActualDate().catchError((error) {
-      return error;
+      return Future.error(error);
     });
     var originResponse = jsonDecode(originDate);
     var response = originResponse['Value'];
     return response;
   } catch (e) {
     insertErrorLog(e.toString(), 'FETCH DATE FOR STUDENT EVALUATION');
-    return throw Future.error(e);
+    return Future.error(e);
   }
 }
 

@@ -104,7 +104,7 @@ bool isCurrentUserCoordinator(int employeeNumber) {
 }
 
 Future<void> logOutCurrentUser(User employee) async {
-  insertActionIntoLog('User end session', employee.employeeNumber.toString());
+  // insertActionIntoLog('User end session', employee.employeeNumber.toString());
 
   await logOutUser(employee.token, employee.employeeNumber.toString());
 }

@@ -1101,9 +1101,23 @@ Future<dynamic> getActualDate() async {
     return apiCall.body;
   } catch (e) {
     if (e is HTTPException) {
-      var reasonPhrase = returnsMessageToDisplay(e.response.statusCode);
-      var displayMessage = getMessageToDisplay(reasonPhrase);
-      return throw FormatException(displayMessage);
+      Map<String, dynamic> response =
+          json.decode(utf8.decode(e.response.bodyBytes));
+      int status = response['status'] ?? 0;
+      String currentMessage = response['detail'] ?? '';
+
+      // Remove Java exception class names from error messages
+      if (currentMessage.contains(':')) {
+        // Split by colon and take the part after the last colon (the actual message)
+        List<String> parts = currentMessage.split(':');
+        if (parts.length > 1) {
+          currentMessage = parts.last.trim();
+        }
+      }
+
+      // var reasonPhrase = returnsMessageToDisplay(e.response.statusCode);
+      //var displayMessage = e.message; //getMessageToDisplay(reasonPhrase);
+      return Future.error(currentMessage);
     } else if (e is TimeoutException) {
       insertErrorLog(e.toString(), 'api/date');
       var firstWord = getMessageToDisplay(e.toString());

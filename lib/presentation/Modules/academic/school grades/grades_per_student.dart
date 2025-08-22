@@ -12,6 +12,7 @@ import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/constants/date_constants.dart';
 import 'package:oxschool/core/reusable_methods/academic_functions.dart';
 import 'package:oxschool/data/datasources/temp/teacher_grades_temp.dart';
+import 'package:oxschool/presentation/Modules/academic/school%20grades/fodac_27_dropdownmenu.dart';
 
 import 'package:trina_grid/trina_grid.dart';
 
@@ -169,51 +170,57 @@ class _GradesByStudentState extends State<GradesByStudent> {
         studentList.clear();
         studentsGradesCommentsRows.clear();
       }
-      // Get the students list by group, grade, cycle, campus and month
-      studentList = await getSubjectsAndGradesByStudent(
-          grade,
-          groupSelected,
-          currentCycle!.claCiclo!,
-          campusSelected,
-          monthSelected,
-          currentUser!.isAdmin!,
-          currentUser!.isAcademicCoord!,
-          currentUser!.isAdmin! || currentUser!.isAcademicCoord!
-              ? null
-              : currentUser!.employeeNumber!);
+      // August wont fetch data
+      if (monthSelected != 8) {
+        // Get the students list by group, grade, cycle, campus and month
+        studentList = await getSubjectsAndGradesByStudent(
+            grade,
+            groupSelected,
+            currentCycle!.claCiclo!,
+            campusSelected,
+            monthSelected,
+            currentUser!.isAdmin!,
+            currentUser!.isAcademicCoord!,
+            currentUser!.isAdmin! || currentUser!.isAcademicCoord!
+                ? null
+                : currentUser!.employeeNumber!);
 
-      // Get evaluations comments by gradeSequence
-      if (studentList.isNotEmpty) {
-        studentsGradesCommentsRows =
-            await getEvaluationsCommentsByGradeSequence(grade);
-      } else {
-        throw Exception(
-            'No se encontraron alumnos para el grupo seleccionado: $groupSelected, grado: $grade, ciclo: ${currentCycle!.claCiclo}, campus: $campusSelected, mes: $monthSelected');
-      }
-
-      displayColumnsByGrade(grade);
-
-      fillGrid(studentList); //Fill student list by unque values
-
-      setState(() {
-        studentEvaluationRows.clear();
-        // var index = 0;
-        for (var item in uniqueStudentsList) {
-          String sequentialNumber = studentList
-              .firstWhere((student) => student.studentID == item['studentID'])
-              .sequentialNumber
-              .toString();
-          studentEvaluationRows.add(TrinaRow(cells: {
-            'No': TrinaCell(
-                value: sequentialNumber.isNotEmpty
-                    ? sequentialNumber
-                    : '0'), //* Sequential number of student (NoLista)
-            'studentID': TrinaCell(value: item['studentID']!.trim()),
-            'studentName':
-                TrinaCell(value: item['studentName']!.trim().toTitleCase),
-          }));
+        // Get evaluations comments by gradeSequence
+        if (studentList.isNotEmpty) {
+          studentsGradesCommentsRows =
+              await getEvaluationsCommentsByGradeSequence(grade);
+        } else {
+          throw Exception(
+              'No se encontraron alumnos para el grupo seleccionado: $groupSelected, grado: $grade, ciclo: ${currentCycle!.claCiclo}, campus: $campusSelected, mes: $monthSelected');
         }
-      });
+
+        displayColumnsByGrade(grade);
+
+        fillGrid(studentList); //Fill student list by unque values
+
+        setState(() {
+          studentEvaluationRows.clear();
+          // var index = 0;
+          for (var item in uniqueStudentsList) {
+            String sequentialNumber = studentList
+                .firstWhere((student) => student.studentID == item['studentID'])
+                .sequentialNumber
+                .toString();
+            studentEvaluationRows.add(TrinaRow(cells: {
+              'No': TrinaCell(
+                  value: sequentialNumber.isNotEmpty
+                      ? sequentialNumber
+                      : '0'), //* Sequential number of student (NoLista)
+              'studentID': TrinaCell(value: item['studentID']!.trim()),
+              'studentName':
+                  TrinaCell(value: item['studentName']!.trim().toTitleCase),
+            }));
+          }
+        });
+      } else {
+        return showErrorFromBackend(
+            context, 'Seleccione un mes');
+      }
     } catch (e) {
       insertErrorLog(e.toString(), 'SEARCH GRADES BY STUDENT ');
       var message = getMessageToDisplay(e.toString());
@@ -534,58 +541,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
 
   Widget _buildRefreshButton(ThemeData theme, ColorScheme colorScheme) {
     return OutlinedButton.icon(
-      onPressed: () async {
-        try {
-          setState(() {
-            isFetching = true;
-          });
-          studentGradesBodyToUpgrade.clear();
-          if (isUserAdmin || isUserAcademicCoord) {
-            //Calendar month number
-            monthNumber = getKeyFromValue(spanishMonthsMap, selectedTempMonth!);
-          } else {
-            setState(() {
-              selectedCurrentTempMonth = currentMonth.toCapitalized;
-            });
-            //Calendar month number
-            monthNumber =
-                getKeyFromValue(spanishMonthsMap, selectedCurrentTempMonth!);
-          }
-          if (selectedTempGroup == null || selectedTempGroup == '') {
-            return showEmptyFieldAlertDialog(
-                context, 'Seleccionar un grupo a evaluar');
-          }
-          if (selectedTempGrade == null || selectedTempGrade == '') {
-            return showEmptyFieldAlertDialog(
-                context, 'Seleccionar un grado a evaluar');
-          }
-          if (selectedTempCampus == null || selectedTempCampus == '') {
-            return showEmptyFieldAlertDialog(
-                context, 'Seleccionar un campus a evaluar');
-          }
-          if (monthNumber == null || monthNumber == '') {
-            return showEmptyFieldAlertDialog(
-                context, 'Seleccionar un mes a evaluar');
-          } else {
-            await searchBUttonAction(
-              selectedTempGroup!,
-              selectedTempGrade!,
-              monthNumber!,
-              selectedTempCampus!,
-            ).whenComplete(() {
-              setState(() {
-                isFetching = false;
-              });
-            });
-          }
-        } catch (e) {
-          setState(() {
-            isFetching = false;
-            insertErrorLog(e.toString(), 'REFRESH BUTTON');
-            showErrorFromBackend(context, e.toString());
-          });
-        }
-      },
+      onPressed: _handleRefreshAction,
       icon: const Icon(Icons.refresh, size: 18),
       label: const Text('Actualizar'),
       style: OutlinedButton.styleFrom(
@@ -596,48 +552,83 @@ class _GradesByStudentState extends State<GradesByStudent> {
     );
   }
 
+  /// Handles the refresh button action with optimized validation and error handling
+  Future<void> _handleRefreshAction() async {
+    try {
+      _setLoadingState(true);
+      studentGradesBodyToUpgrade.clear();
+
+      // Calculate month number based on user role
+      final calculatedMonthNumber = _calculateMonthNumber();
+
+      // Validate all required fields
+      final validationError = _validateRequiredFields(calculatedMonthNumber);
+      if (validationError != null) {
+        _setLoadingState(false);
+        return showEmptyFieldAlertDialog(context, validationError);
+      }
+
+      // Perform the search action
+      await searchBUttonAction(
+        selectedTempGroup!,
+        selectedTempGrade!,
+        calculatedMonthNumber!,
+        selectedTempCampus!,
+      );
+    } catch (e) {
+      insertErrorLog(e.toString(), 'REFRESH BUTTON');
+      if (context.mounted) {
+        showErrorFromBackend(context, e.toString());
+      }
+    } finally {
+      _setLoadingState(false);
+    }
+  }
+
+  /// Calculates the month number based on user role and current selection
+  int? _calculateMonthNumber() {
+    if (isUserAdmin || isUserAcademicCoord) {
+      return selectedTempMonth != null
+          ? getKeyFromValue(spanishMonthsMap, selectedTempMonth!)
+          : null;
+    } else {
+      selectedCurrentTempMonth = currentMonth.toCapitalized;
+      return getKeyFromValue(spanishMonthsMap, selectedCurrentTempMonth!);
+    }
+  }
+
+  /// Validates all required fields and returns error message if any field is invalid
+  String? _validateRequiredFields(int? monthNumber) {
+    if (selectedTempGroup == null || selectedTempGroup!.isEmpty) {
+      return 'Seleccionar un grupo a evaluar';
+    }
+    if (selectedTempGrade == null) {
+      return 'Seleccionar un grado a evaluar';
+    }
+    if (selectedTempCampus == null || selectedTempCampus!.isEmpty) {
+      return 'Seleccionar un campus a evaluar';
+    }
+    if (monthNumber == null) {
+      return 'Seleccionar un mes a evaluar';
+    }
+    /* if (selectedCampus == null || selectedCampus!.isEmpty) {
+      return 'Seleccionar un campus a evaluar';
+    } */
+    return null; // All validations passed
+  }
+
+  /// Centralized loading state management
+  void _setLoadingState(bool loading) {
+    if (mounted) {
+      setState(() {
+        isFetching = loading;
+      });
+    }
+  }
+
   Widget _buildSaveButton(ThemeData theme, ColorScheme colorScheme) {
     return FilledButton.icon(
-      onPressed: () {
-        setState(() {
-          isFetching = true;
-        });
-        if (studentGradesBodyToUpgrade.isEmpty) {
-          showEmptyFieldAlertDialog(
-              context, 'No se detectó ningun cambio a realizar');
-          setState(() {
-            isFetching = false;
-          });
-        } else {
-          try {
-            if (isUserAdmin || isUserAcademicCoord) {
-              monthNumber =
-                  getKeyFromValue(spanishMonthsMap, selectedTempMonth!);
-            } else {
-              monthNumber =
-                  getKeyFromValue(spanishMonthsMap, selectedCurrentTempMonth!);
-            }
-            saveButtonAction(monthNumber).whenComplete(() async {
-              studentGradesBodyToUpgrade.clear();
-              await searchBUttonAction(
-                selectedTempGroup!,
-                selectedTempGrade!,
-                monthNumber!,
-                selectedTempCampus!,
-              );
-              setState(() {
-                isFetching = false;
-                showInformationDialog(context, 'Éxito', 'Cambios realizados!');
-              });
-            });
-          } catch (e) {
-            setState(() {
-              isFetching = false;
-              showErrorFromBackend(context, e.toString());
-            });
-          }
-        }
-      },
+      onPressed: _handleSaveAction,
       icon: const Icon(Icons.save, size: 18),
       label: const Text('Guardar'),
       style: FilledButton.styleFrom(
@@ -645,6 +636,42 @@ class _GradesByStudentState extends State<GradesByStudent> {
         textStyle: theme.textTheme.labelMedium,
       ),
     );
+  }
+
+  /// Handles the save button action with optimized validation and error handling
+  Future<void> _handleSaveAction() async {
+    if (studentGradesBodyToUpgrade.isEmpty) {
+      showEmptyFieldAlertDialog(
+          context, 'No se detectó ningun cambio a realizar');
+      return;
+    }
+
+    try {
+      _setLoadingState(true);
+
+      final calculatedMonthNumber = _calculateMonthNumber();
+
+      await saveButtonAction(calculatedMonthNumber);
+
+      // Clear the changes and refresh the data
+      studentGradesBodyToUpgrade.clear();
+      await searchBUttonAction(
+        selectedTempGroup!,
+        selectedTempGrade!,
+        calculatedMonthNumber!,
+        selectedTempCampus!,
+      );
+
+      if (context.mounted) {
+        showInformationDialog(context, 'Éxito', 'Cambios realizados!');
+      }
+    } catch (e) {
+      if (context.mounted) {
+        showErrorFromBackend(context, e.toString());
+      }
+    } finally {
+      _setLoadingState(false);
+    }
   }
 
   Widget _buildStudentNameSection(ThemeData theme, ColorScheme colorScheme) {

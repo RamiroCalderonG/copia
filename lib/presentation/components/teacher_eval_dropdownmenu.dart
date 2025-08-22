@@ -46,10 +46,13 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
   void initState() {
     _isUserAdminResult();
     unityList = widget.campusesList.toList();
-    if (unityList.length == 1) {
-      selectedTempCampus = unityList.first;
+
+    // Auto-select the first campus by default
+    if (unityList.isNotEmpty && selectedUnity == null) {
       selectedUnity = unityList.first;
+      selectedTempCampus = unityList.first;
     }
+
     if (preSelectedGrade != null) {
       selectedGrade = preSelectedGrade;
     }
@@ -97,6 +100,15 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
           .toSet()
           .toList();
 
+      // Auto-select first grade if none is selected and list is not empty
+      if (selectedGrade == null && filteredGrade.isNotEmpty) {
+        selectedGrade = filteredGrade.first;
+        selectedTempGrade = selectedGrade != null
+            ? getKeyFromValue(teacherGradesMap, selectedGrade!)
+            : null;
+        preSelectedGrade = selectedGrade;
+      }
+
       // Reset dependent selections when Campus changes
       if (!filteredGrade.contains(selectedGrade)) {
         selectedGrade = null;
@@ -114,6 +126,15 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
               (item['School_group'] ?? item['school_group'])?.toString() ?? '')
           .toSet()
           .toList();
+
+      // Auto-select first group if none is selected and list is not empty
+      if (selectedGroup == null &&
+          filteredGroup.isNotEmpty &&
+          selectedGrade != null) {
+        selectedGroup = filteredGroup.first;
+        selectedTempGroup = selectedGroup;
+        preSelectedGroup = selectedGroup;
+      }
 
       // Reset dependent selections when Grade changes
       if (!filteredGroup.contains(selectedGroup)) {
@@ -146,6 +167,17 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
           (item['Subject'] ?? item['subject'])?.toString() ?? '':
               (item['Subject_id'] ?? item['subject_id']) ?? ''
       };
+
+      // Auto-select first subject if none is selected and list is not empty (only for !byStudent)
+      if (!widget.byStudent &&
+          selectedSubject == null &&
+          filteredSubject.isNotEmpty &&
+          selectedGroup != null) {
+        selectedSubject = filteredSubject.first;
+        selectedTempSubject = selectedSubject;
+        selectedTempSubjectId = filteredSubjectMap[selectedSubject];
+        preSelectedSubject = selectedSubject;
+      }
 
       // Reset Subject if it doesn't match the new filter
       if (!filteredSubject.contains(selectedSubject)) {

@@ -9,6 +9,7 @@ import 'package:oxschool/data/Models/Event.dart';
 import 'package:oxschool/data/Models/Module.dart';
 import 'package:oxschool/data/Models/Role.dart';
 import 'package:oxschool/data/datasources/temp/users_temp_data.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/services/backend/api_requests/api_calls_list.dart';
 
@@ -22,6 +23,14 @@ void clearTempData() {
   tmpRolesList.clear();
   userRoles.clear();
   uniqueItems.clear();
+  SharedPreferences.getInstance().then((prefs) {
+    prefs.remove('isUserAdmin');
+    prefs.remove('idSession');
+    prefs.remove('ip');
+    prefs.remove('device');
+    prefs.remove('token');
+    prefs.remove('currentUserEmail');
+  });
 }
 
 List<Map<String, List<String>>> getUniqueItems(
