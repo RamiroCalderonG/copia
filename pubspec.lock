@@ -1022,10 +1022,10 @@ packages:
     dependency: "direct main"
     description:
       name: trina_grid
-      sha256: "58e9442492710a60ee4ce55039e7e0bcc659eeac5549f0b1cc6436a99b74e5c7"
+      sha256: f678a3f346488e8db3d4a58bdb860d36e838277c8a77ddb8f556df7943404397
       url: "https://pub.dev"
     source: hosted
-    version: "1.6.8"
+    version: "2.0.0"
   typed_data:
     dependency: transitive
     description:

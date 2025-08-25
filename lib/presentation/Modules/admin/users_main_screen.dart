@@ -18,7 +18,7 @@ import 'package:oxschool/core/reusable_methods/reusable_functions.dart';
 import 'package:oxschool/data/datasources/temp/users_temp_data.dart';
 import 'package:oxschool/presentation/components/confirm_dialogs.dart';
 
-import '../../../data/services/backend/api_requests/api_calls_list.dart';
+import '../../../data/services/backend/api_requests/api_calls_list_dio.dart';
 import '../../../core/reusable_methods/temp_data_functions.dart';
 import '../../../core/reusable_methods/user_functions.dart';
 
@@ -56,7 +56,7 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
     try {
       await getUsers().then((response) {
         if (response != null) {
-          List<dynamic> jsonList = json.decode(response);
+          List<dynamic> jsonList = response.data; //json.decode(response);
           setState(() {
             usersTrinaRowList = userRows;
             for (var item in jsonList) {
@@ -355,7 +355,7 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
       await getAllCampuse().then((response) async {
         await getWorkDepartmentList();
         await getRolesList().then((onValue) async {
-          tmpRolesList = jsonDecode(onValue.body);
+          tmpRolesList = onValue.data; //jsonDecode(onValue.body);
           for (var item in tmpRolesList) {
             Role newRole = Role.fromJson(item);
             tmpRoleObjectslist.add(newRole);

@@ -18,7 +18,7 @@ import 'package:trina_grid/trina_grid.dart';
 
 import '../../../../core/utils/loader_indicator.dart';
 import '../../../../data/datasources/temp/studens_temp.dart';
-import '../../../../data/services/backend/api_requests/api_calls_list.dart';
+import '../../../../data/services/backend/api_requests/api_calls_list_dio.dart';
 import '../../../../core/constants/Student.dart';
 import '../../../../core/config/flutter_flow/flutter_flow_theme.dart';
 import '../../../../core/reusable_methods/reusable_functions.dart';
@@ -218,8 +218,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
           }
         });
       } else {
-        return showErrorFromBackend(
-            context, 'Seleccione un mes');
+        return showErrorFromBackend(context, 'Seleccione un mes');
       }
     } catch (e) {
       insertErrorLog(e.toString(), 'SEARCH GRADES BY STUDENT ');
@@ -1114,8 +1113,8 @@ class _GradesByStudentState extends State<GradesByStudent> {
                               var commentId = comment['comment'];
                               var activevalue = newValue;
 
-                              await putStudentEvaluationsComments(
-                                  studentRateId, commentId, activevalue!);
+                              //await putStudentEvaluationsComments(
+                              //    studentRateId, commentId, activevalue!);
                               setState(() => comment['active'] = newValue!);
                             }),
                       )
