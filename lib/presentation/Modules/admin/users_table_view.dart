@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:oxschool/core/reusable_methods/temp_data_functions.dart';
 import 'package:oxschool/data/Models/User.dart';
+import 'package:oxschool/data/services/backend/api_requests/api_calls_list_dio.dart';
 import 'package:oxschool/presentation/Modules/admin/edit_user_screen.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/presentation/Modules/login_view/login_view_widget.dart';
@@ -408,8 +409,8 @@ class _UsersTableViewState extends State<UsersTableView> {
                                         });
                                         //Get roles from DB
 
-                                        // var response = await getRolesList();
-                                        // tmpRolesList = jsonDecode(response);
+                                        var response = await getRolesList();
+                                        tmpRolesList = response.data;
                                         updateUserScreen(context);
                                       }).catchError((error) {
                                         showErrorFromBackend(

@@ -2,12 +2,12 @@ import 'dart:convert';
 
 import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
-import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
+import 'package:oxschool/data/services/backend/api_requests/api_calls_list_dio.dart';
 import 'package:oxschool/data/datasources/temp/users_temp_data.dart';
 
 Future<dynamic> getAllCampuse() async {
   await getCampuseList().then((response) {
-    var campusList = jsonDecode(response);
+    var campusList = response.data; //jsonDecode(response);
     for (var item in campusList) {
       String name = item['campusName'].toString().trim().toCapitalized;
       campuseList.add(name); //.add(name);
@@ -23,7 +23,7 @@ Future<dynamic> getWorkDepartmentList() async {
   try {
     areaList.clear();
     await getWorkDepartments().then((response) {
-      var jsonList = jsonDecode(response.body);
+      var jsonList = response.data; //jsonDecode(response.body);
       for (var item in jsonList) {
         areaList.add(item['bureauName'].toString().trim().toTitleCase);
       }

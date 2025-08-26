@@ -10,7 +10,7 @@ import 'package:trina_grid/trina_grid.dart';
 
 import '../../../../data/datasources/temp/studens_temp.dart';
 import '../../../../data/datasources/temp/teacher_grades_temp.dart';
-import '../../../../data/services/backend/api_requests/api_calls_list.dart';
+import '../../../../data/services/backend/api_requests/api_calls_list_dio.dart';
 import '../../../components/confirm_dialogs.dart';
 
 import 'fodac_27_dropdownmenu.dart';
@@ -707,8 +707,7 @@ class _FoDac27State extends State<FoDac27> {
           await getStudentFodac27History(cycle, studentID, isByStudent);
 
       if (apiResponse != null) {
-        var decodedResponse =
-            json.decode(utf8.decode(apiResponse.codeUnits)) as List;
+        var decodedResponse = apiResponse.data as List;
         List<TrinaRow> newRows = decodedResponse.map((item) {
           return TrinaRow(cells: {
             'date': TrinaCell(value: item['date']),
