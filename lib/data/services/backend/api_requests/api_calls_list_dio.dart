@@ -8,12 +8,13 @@
 /// - Better timeout management with separate connect, send, and receive timeouts
 /// - Cleaner error handling with DioException instead of HTTPException
 /// - Automatic Java exception message cleanup
+/// - Support for self-signed certificates for HTTPS connections
 /// - All function names are identical to the original for easy migration
 ///
 /// Usage:
 /// 1. Call ApiCallsDio.initialize() once in your app initialization
 /// 2. Simply change your import statement from:
-///    import 'package:oxschool/.../api_calls_list_dio.dart';
+///    import 'package:oxschool/.../api_calls_list.dart';
 ///    to:
 ///    import 'package:oxschool/.../api_calls_list_dio.dart';
 /// 3. All function calls remain exactly the same!
@@ -24,11 +25,14 @@
 /// - Built-in request/response transformation
 /// - Better timeout control
 /// - Support for FormData, File uploads, and other advanced features
+/// - Self-signed certificate support for development/testing environments
 ///
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:oxschool/core/constants/user_consts.dart';
@@ -44,6 +48,13 @@ class ApiCallsDio {
   // Initialize Dio with default configuration
   static void initialize() {
     _dio = Dio();
+
+    // Configure HTTP client adapter to allow self-signed certificates
+    (_dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
+      final client = HttpClient();
+      client.badCertificateCallback = (cert, host, port) => true;
+      return client;
+    };
 
     // Add default headers
     _dio.options.headers = {
