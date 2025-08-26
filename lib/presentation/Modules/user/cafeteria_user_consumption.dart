@@ -6,7 +6,7 @@ import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/core/utils/loader_indicator.dart';
 import 'package:oxschool/data/DataTransferObjects/CafeteriaConsumptionDto.dart';
-import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
+import 'package:oxschool/data/services/backend/api_requests/api_calls_list_dio.dart';
 
 class CafeteriaUserConsumption extends StatefulWidget {
   const CafeteriaUserConsumption({super.key});
@@ -42,7 +42,7 @@ class _CafeteriaUserConsumptionState extends State<CafeteriaUserConsumption> {
     try {
       var responseData;
       await getUserCafeteriaConsumptionHistory().then((value) {
-        var response = json.decode(utf8.decode(value.bodyBytes));
+        var response = value.data; //json.decode(utf8.decode(value.bodyBytes));
         for (var item in response) {
           CafeteriaconsumptionDto cafe = CafeteriaconsumptionDto(
             item['name'],

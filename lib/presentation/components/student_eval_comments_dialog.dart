@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/config/flutter_flow/flutter_flow_theme.dart';
 import '../../core/reusable_methods/academic_functions.dart';
-import '../../data/services/backend/api_requests/api_calls_list.dart';
+import '../../data/services/backend/api_requests/api_calls_list_dio.dart';
 
 class StudentEvalCommentDialog extends StatefulWidget {
   final String studentName;

@@ -7,7 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:multi_select_flutter/dialog/multi_select_dialog_field.dart';
 import 'package:multi_select_flutter/util/multi_select_item.dart';
 import 'package:oxschool/data/Models/Cause.dart';
-import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
+import 'package:oxschool/data/services/backend/api_requests/api_calls_list_dio.dart';
 import 'package:oxschool/presentation/components/confirm_dialogs.dart';
 import 'package:oxschool/core/constants/Student.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
@@ -763,7 +763,7 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
       String responsableTeacherID) async {
     try {
       //String result =
-      await postNurseryStudent(
+      /* await postNurseryStudent(
           employeeID,
           kindOfPain,
           kindOfWound,
@@ -784,7 +784,7 @@ class _NewStudentNurseryVisitState extends State<NewStudentNurseryVisit> {
           dateAndTime,
           notifType,
           deviceInformation,
-          responsableTeacherID);
+          responsableTeacherID); */
     } catch (e) {
       if (kDebugMode) {
         print(e.toString());

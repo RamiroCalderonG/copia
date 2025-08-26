@@ -4,7 +4,7 @@ import 'package:oxschool/core/reusable_methods/temp_data_functions.dart';
 import 'package:oxschool/core/utils/loader_indicator.dart';
 import 'package:oxschool/data/Models/Event.dart';
 import 'package:oxschool/data/Models/Module.dart';
-import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
+import 'package:oxschool/data/services/backend/api_requests/api_calls_list_dio.dart';
 
 class RolesEventsAdministration extends StatefulWidget {
   final String roleName;
@@ -109,8 +109,7 @@ class _RolesEventsAdministrationState extends State<RolesEventsAdministration> {
                               : false;
 
                           event.isActive = isActive;
-                          return 
-                          PolicyCard(
+                          return PolicyCard(
                             policy: event, // Ensure UI reflects API data
                             roleID: widget.roleId,
                             onToggle: (updatedEvent) {
@@ -122,7 +121,7 @@ class _RolesEventsAdministrationState extends State<RolesEventsAdministration> {
                         } else {
                           event.isActive = false;
                           return PolicyCard(
-                            policy: event, 
+                            policy: event,
                             roleID: widget.roleId,
                             onToggle: (updatedEvent) {
                               setState(() {
@@ -216,7 +215,10 @@ class PolicyCard extends StatefulWidget {
   final Function(Event) onToggle;
 
   const PolicyCard(
-      {super.key, required this.policy, required this.roleID, required this.onToggle});
+      {super.key,
+      required this.policy,
+      required this.roleID,
+      required this.onToggle});
 
   @override
   State<PolicyCard> createState() => _PolicyCardState();
@@ -248,7 +250,8 @@ class _PolicyCardState extends State<PolicyCard> {
                 });
                 widget.policy.isActive = value;
                 widget.onToggle(widget.policy);
-                await modifyActiveOfEventRole(widget.policy.eventID, value, widget.roleID);
+                await modifyActiveOfEventRole(
+                    widget.policy.eventID, value, widget.roleID);
               },
             ),
             const Row(

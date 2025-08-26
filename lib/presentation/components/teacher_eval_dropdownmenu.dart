@@ -46,10 +46,13 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
   void initState() {
     _isUserAdminResult();
     unityList = widget.campusesList.toList();
-    if (unityList.length == 1) {
-      selectedTempCampus = unityList.first;
+
+    // Auto-select the first campus by default
+    if (unityList.isNotEmpty && selectedUnity == null) {
       selectedUnity = unityList.first;
+      selectedTempCampus = unityList.first;
     }
+
     if (preSelectedGrade != null) {
       selectedGrade = preSelectedGrade;
     }
@@ -97,6 +100,15 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
           .toSet()
           .toList();
 
+      // Auto-select first grade if none is selected and list is not empty
+      if (selectedGrade == null && filteredGrade.isNotEmpty) {
+        selectedGrade = filteredGrade.first;
+        selectedTempGrade = selectedGrade != null
+            ? getKeyFromValue(teacherGradesMap, selectedGrade!)
+            : null;
+        preSelectedGrade = selectedGrade;
+      }
+
       // Reset dependent selections when Campus changes
       if (!filteredGrade.contains(selectedGrade)) {
         selectedGrade = null;
@@ -114,6 +126,15 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
               (item['School_group'] ?? item['school_group'])?.toString() ?? '')
           .toSet()
           .toList();
+
+      // Auto-select first group if none is selected and list is not empty
+      if (selectedGroup == null &&
+          filteredGroup.isNotEmpty &&
+          selectedGrade != null) {
+        selectedGroup = filteredGroup.first;
+        selectedTempGroup = selectedGroup;
+        preSelectedGroup = selectedGroup;
+      }
 
       // Reset dependent selections when Grade changes
       if (!filteredGroup.contains(selectedGroup)) {
@@ -146,6 +167,17 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
           (item['Subject'] ?? item['subject'])?.toString() ?? '':
               (item['Subject_id'] ?? item['subject_id']) ?? ''
       };
+
+      // Auto-select first subject if none is selected and list is not empty (only for !byStudent)
+      if (!widget.byStudent &&
+          selectedSubject == null &&
+          filteredSubject.isNotEmpty &&
+          selectedGroup != null) {
+        selectedSubject = filteredSubject.first;
+        selectedTempSubject = selectedSubject;
+        selectedTempSubjectId = filteredSubjectMap[selectedSubject];
+        preSelectedSubject = selectedSubject;
+      }
 
       // Reset Subject if it doesn't match the new filter
       if (!filteredSubject.contains(selectedSubject)) {
@@ -203,6 +235,14 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                     selectedGroup = null;
                     selectedSubject = null;
                     selectedTempCampus = value;
+                    // Reset all global temp variables for dependent dropdowns
+                    selectedTempGrade = null;
+                    selectedTempGroup = null;
+                    selectedTempSubject = null;
+                    selectedTempSubjectId = null;
+                    preSelectedGrade = null;
+                    preSelectedGroup = null;
+                    preSelectedSubject = null;
                     filterData();
                   });
                 },
@@ -238,8 +278,15 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                   selectedGrade = value;
                   selectedGroup = null; // Clear dependent selections
                   selectedSubject = null;
-                  selectedTempGrade = getKeyFromValue(
-                      teacherGradesMap, value!); //int.parse(value!);
+                  selectedTempGrade = value != null
+                      ? getKeyFromValue(teacherGradesMap, value)
+                      : null;
+                  // Reset global temp variables for dependent dropdowns
+                  selectedTempGroup = null;
+                  selectedTempSubject = null;
+                  selectedTempSubjectId = null;
+                  preSelectedGroup = null;
+                  preSelectedSubject = null;
                   filterData();
                 });
               },
@@ -260,9 +307,12 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                 setState(() {
                   preSelectedGroup = value;
                   selectedGroup = value;
-                  selectedSubject =
-                      filteredSubject.first; // Clear dependent selections
+                  selectedSubject = null; // Clear dependent selections
                   selectedTempGroup = value;
+                  // Reset global temp variables for subject
+                  selectedTempSubject = null;
+                  selectedTempSubjectId = null;
+                  preSelectedSubject = null;
 
                   filterData();
                 });
@@ -336,9 +386,21 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
     if (studentList.isNotEmpty) {
       studentList.clear();
     }
-    selectedGrade ??= filteredGrade.first;
-    selectedGroup ??= filteredGroup.first;
-    selectedSubject ??= filteredSubject.first;
+    // Only auto-assign if the filtered lists have items and no selection exists
+    // This preserves the null state when dropdowns should remain empty
+    if (selectedGrade == null && filteredGrade.isNotEmpty) {
+      selectedGrade = filteredGrade.first;
+    }
+    if (selectedGroup == null &&
+        filteredGroup.isNotEmpty &&
+        selectedGrade != null) {
+      selectedGroup = filteredGroup.first;
+    }
+    if (selectedSubject == null &&
+        filteredSubject.isNotEmpty &&
+        selectedGroup != null) {
+      selectedSubject = filteredSubject.first;
+    }
 
     if (currentUser!.isCurrentUserAdmin() ||
         currentUser!.isCurrentUserAcademicCoord()) {

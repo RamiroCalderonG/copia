@@ -9,8 +9,9 @@ import 'package:oxschool/data/Models/Event.dart';
 import 'package:oxschool/data/Models/Module.dart';
 import 'package:oxschool/data/Models/Role.dart';
 import 'package:oxschool/data/datasources/temp/users_temp_data.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../data/services/backend/api_requests/api_calls_list.dart';
+import '../../data/services/backend/api_requests/api_calls_list_dio.dart';
 
 void clearTempData() {
   listOfUsersForGrid.clear();
@@ -22,6 +23,14 @@ void clearTempData() {
   tmpRolesList.clear();
   userRoles.clear();
   uniqueItems.clear();
+  SharedPreferences.getInstance().then((prefs) {
+    prefs.remove('isUserAdmin');
+    prefs.remove('idSession');
+    prefs.remove('ip');
+    prefs.remove('device');
+    prefs.remove('token');
+    prefs.remove('currentUserEmail');
+  });
 }
 
 List<Map<String, List<String>>> getUniqueItems(
@@ -68,8 +77,8 @@ List<Map<String, List<String>>> getUniqueItems(
 Future<void> getRoleListOfPermissions(Map<String, dynamic> jsonuserInfo) async {
   try {
     getRolePermissions().then((onValue) {
-      Map<String, dynamic> jsonResponse =
-          json.decode(utf8.decode(onValue.bodyBytes));
+      Map<String, dynamic> jsonResponse = onValue.data;
+      //json.decode(utf8.decode(onValue.bodyBytes));
 
       //Create Role object to then insert it into currentUser.userRole
       Role userRole = Role(
@@ -107,7 +116,7 @@ Future<void> getRoleListOfPermissions(Map<String, dynamic> jsonuserInfo) async {
 
 Future<void> getUserAccessRoutes() async {
   var response = await getScreenAccessRoutes();
-  var tmpResponse = json.decode(utf8.decode((response.bodyBytes)));
+  var tmpResponse = response.data;
   for (var item in tmpResponse) {
     accessRoutes.add(item);
   }
@@ -131,7 +140,7 @@ int getEventIDbyName(String eventName) {
 Future<dynamic> getRolesTempList() async {
   try {
     var response = await getRolesList();
-    tmpRolesList = json.decode(response.body);
+    tmpRolesList = response.data;
     return tmpRolesList;
   } catch (e) {
     insertErrorLog(e.toString(), 'getRolesList()');
@@ -142,7 +151,7 @@ Future<dynamic> getRolesTempList() async {
 Future<void> getEventsTempList() async {
   try {
     var response = await getEventsListRequest();
-    tmpeventsList = json.decode(response.body);
+    tmpeventsList = response.data;
   } catch (e) {
     insertErrorLog(e.toString(), 'getEventsList()');
     throw Future.error(e.toString());
@@ -152,9 +161,9 @@ Future<void> getEventsTempList() async {
 Future<dynamic> fetchEventsByRole(int roleId) async {
   try {
     var eventsByRole = await getEventsByRole(roleId);
-    if (eventsByRole != null && eventsByRole.body != '[]') {
+    if (eventsByRole != null && eventsByRole.data != '[]') {
       // var evenntsList = eventsByRole.body;
-      var jsonList = json.decode(utf8.decode(eventsByRole.bodyBytes));
+      var jsonList = eventsByRole.data;
       List<RoleModuleRelationshipDto> roleDetailedList = [];
       for (var item in jsonList) {
         RoleModuleRelationshipDto roleDetails =
@@ -175,7 +184,7 @@ Future<List<RoleModuleRelationshipDto>> fetchScreensByRoleId(int roleId) async {
   List<RoleModuleRelationshipDto> screensList = [];
   try {
     await getScreenListByRoleId(roleId).then((response) {
-      var jsonList = json.decode(utf8.decode(response.bodyBytes));
+      var jsonList = response.data;
       for (var item in jsonList) {
         RoleModuleRelationshipDto newItem =
             RoleModuleRelationshipDto.fromJSON(item);
@@ -200,7 +209,7 @@ Future<List<Module>> fetchModulesAndEventsDetailed() async {
   List<Module> preSortedModuleList = [];
   try {
     await getEventsAndModulesCall().then((apiResponse) {
-      var eventsModule = json.decode(apiResponse);
+      var eventsModule = apiResponse.data;
       for (var item in eventsModule) {
         Event event = Event(
             item["event_id"],
@@ -213,7 +222,7 @@ Future<List<Module>> fetchModulesAndEventsDetailed() async {
       }
 
       return getModulesListDetailed().then((apiResponse) {
-        var jsonList = json.decode(apiResponse);
+        var jsonList = apiResponse;
         for (var item in jsonList) {
           Module module = Module.fromJsonWithoutEvents(item);
           moduleList.add(module);

@@ -5,7 +5,7 @@ import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/data/DataTransferObjects/AttendanceHistory.dart';
 import 'package:oxschool/data/Models/Cycle.dart';
-import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
+import 'package:oxschool/data/services/backend/api_requests/api_calls_list_dio.dart';
 import 'package:oxschool/data/datasources/temp/users_temp_data.dart';
 import 'package:http/http.dart' as http;
 
@@ -68,7 +68,7 @@ Future<dynamic> getSingleUser(int? userId) async {
     try {
       userId = tempUserId;
       selectedUser = await getUserDetailCall(userId!).then((response) {
-        Map<String, dynamic> jsonList = json.decode(response);
+        Map<String, dynamic> jsonList = response; //json.decode(response);
         selectedUser = jsonList;
 
         tempSelectedUsr = User.fromJson(jsonList);
@@ -99,12 +99,12 @@ bool isCurrentUserCoordinator(int employeeNumber) {
   var isCoordinator;
   var response;
   response = validateIfUserIsCoordinator(employeeNumber)
-      .whenComplete(() => isCoordinator = jsonDecode(response));
+      .whenComplete(() => isCoordinator = response.data);
   return isCoordinator['value'];
 }
 
 Future<void> logOutCurrentUser(User employee) async {
-  insertActionIntoLog('User end session', employee.employeeNumber.toString());
+  // insertActionIntoLog('User end session', employee.employeeNumber.toString());
 
   await logOutUser(employee.token, employee.employeeNumber.toString());
 }
@@ -231,7 +231,7 @@ Future<dynamic> updateUserIdLoginProcedure(int employeeNumber) async {
         await getIdLoginByUser(employeeNumber).then((response) async {
       if (response != null) {
         Map<String, dynamic> body = {
-          'loginId': int.parse(response),
+          'loginId': response,
         };
         await editUser(body, employeeNumber, 3);
       }

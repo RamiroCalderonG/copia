@@ -9,7 +9,7 @@ import 'package:oxschool/data/Models/Medicines.dart';
 import 'package:oxschool/data/Models/NurseryHistory.dart';
 import 'package:oxschool/data/Models/Student.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls.dart';
-import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
+import 'package:oxschool/data/services/backend/api_requests/api_calls_list_dio.dart';
 import 'package:oxschool/presentation/components/confirm_dialogs.dart';
 import 'package:oxschool/core/constants/Student.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
@@ -256,7 +256,7 @@ class _NurseryMainScreenState extends State<NurseryMainScreen>
       ],
     );
 
-    final studentDataTab = Stack(
+/*     final studentDataTab = Stack(
       children: [
         Column(
           children: [
@@ -367,7 +367,7 @@ class _NurseryMainScreenState extends State<NurseryMainScreen>
                             }
                             apiResultxgr = null;
                             //Get student Nursery History
-                            apiResultxgr = await NurseryHistoryCall.call(
+                            /* apiResultxgr = await NurseryHistoryCall.call(
                                     matricula:
                                         selectedStudent.matricula.toString())
                                 .timeout(const Duration(milliseconds: 7000));
@@ -470,7 +470,7 @@ class _NurseryMainScreenState extends State<NurseryMainScreen>
                           );
                           isLoading = false;
                           searchController.clear();
-                        }
+                        } */
                       }),
                 ],
               ),
@@ -577,7 +577,7 @@ class _NurseryMainScreenState extends State<NurseryMainScreen>
         if (isLoading) Center(child: CustomLoadingIndicator())
       ],
     );
-
+ */
     final emergencyContacts = Column(
       children: [
         const Padding(
@@ -685,7 +685,7 @@ class _NurseryMainScreenState extends State<NurseryMainScreen>
               body: TabBarView(
                 controller: _tabController,
                 children: <Widget>[
-                  studentDataTab,
+                  //studentDataTab,
                   emergencyContacts,
                   if (nurseryHistoryStudent != null) const StudentHistoryGrid(),
                   if (nurseryHistoryStudent == null) const NoDataAvailble(),

@@ -121,7 +121,8 @@ class _GradesMainScreenState extends State<GradesMainScreen>
       } else {
         //Fetch dates for evaluations, if not current date will not fetch student data
         canEvaluateNow = await isDateToEvaluateStudents().catchError((onError) {
-          showErrorFromBackend(context, onError);
+          //showErrorFromBackend(context, onError);
+          return Future.error(onError);
         });
       }
       if (canEvaluateNow) {
@@ -417,7 +418,7 @@ class _GradesMainScreenState extends State<GradesMainScreen>
                 ),
               ),
               Text(
-                'Sistema académico',
+                'Captura calificaciones',
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: Colors.white,
                 ),
