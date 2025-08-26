@@ -822,7 +822,9 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                   color: colorScheme.error,
                 ),
                 onTap: () async {
-                  logOutCurrentUser(currentUser!);
+                  insertActionIntoLog('User logged out',
+                      currentUser!.employeeNumber.toString());
+                  logOutCurrentUser(currentUser!).whenComplete(() async {});
                   context.goNamed(
                     '_initialize',
                     extra: <String, dynamic>{

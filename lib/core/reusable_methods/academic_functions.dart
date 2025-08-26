@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/data/Models/AcademicEvaluationsComment.dart';
 import 'package:oxschool/data/Models/Student.dart';
@@ -11,7 +10,7 @@ import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/datasources/temp/studens_temp.dart';
-import '../../data/services/backend/api_requests/api_calls_list.dart';
+import '../../data/services/backend/api_requests/api_calls_list_dio.dart';
 
 import '../../data/datasources/temp/teacher_grades_temp.dart';
 
@@ -27,7 +26,7 @@ dynamic loadStartGrading(int employeeNumber, String schoolYear, bool isAdmin,
     await getTeacherGradeAndCourses(currentUser!.employeeNumber, currentCycle,
             month, isAdmin, isAcademicCoordinator, campus)
         .then((onValue) {
-      jsonList = json.decode(utf8.decode(onValue.bodyBytes));
+      jsonList = onValue.data;
       jsonDataForDropDownMenuClass = jsonList;
       fetchedDataFromloadStartGrading = jsonList;
       try {
@@ -68,7 +67,7 @@ Future<dynamic> loadStartGradingAsAdminOrAcademicCoord(
       await getTeacherGradeAndCoursesAsAdmin(month, isAdmin,
               isAdmin ? null : campus, currentCycle!.claCiclo, isAcademicCoord)
           .then((response) {
-        jsonList = json.decode(utf8.decode(response.bodyBytes));
+        jsonList = response.data;
         jsonDataForDropDownMenuClass = jsonList;
         try {
           for (var item in jsonList) {
@@ -191,7 +190,7 @@ Future<void> getSingleTeacherAssignatures(List<dynamic> apiResponse) async {
 
 Future<List<dynamic>> getStudentsByTeacher(String selectedCycle) async {
   var response = await getStudentsByRole(selectedCycle);
-  List<dynamic> jsonList = json.decode(utf8.decode(response.bodyBytes));
+  List<dynamic> jsonList = response.data;
 
   for (var item in jsonList) {
     String campus = item['Claun'];
@@ -260,7 +259,7 @@ Future<List<StudentEval>> getStudentsByAssinature(
         currentUser!.isCurrentUserAdmin(),
         currentUser!.isCurrentUserAcademicCoord(),
         teacher);
-    var jsonList = json.decode(utf8.decode(studentsList.bodyBytes));
+    var jsonList = studentsList.data;
     List<StudentEval> evaluations = getEvalFromJSON(jsonList, false);
 
     return evaluations;
@@ -285,8 +284,7 @@ Future<List<StudentEval>> getSubjectsAndGradesByStudent(
     var subjectsGradesList = await getSubjectsAndGradeByStuent(
         group, grade, cycle, campus, month, isAdmin, isAcademicCoord, teacher);
     if (subjectsGradesList != null) {
-      List<dynamic> jsonList =
-          json.decode(utf8.decode(subjectsGradesList.bodyBytes));
+      List<dynamic> jsonList = subjectsGradesList.data;
       List<StudentEval> evaluations = getEvalFromJSON(jsonList, true);
       uniqueStudentsList.clear();
       uniqueStudents.clear();
@@ -532,7 +530,7 @@ Future<Map<String, dynamic>> populateSubjectsDropDownSelector(
     // if (subjects.statusCode != 200) {
     //   return {'error': 'Error fetching subjects'};
     // }
-    var subjectsList = json.decode(utf8.decode(subjects.body.codeUnits));
+    var subjectsList = subjects.data;
     Map<String, dynamic> result = {};
 
     for (var item in subjectsList) {
@@ -582,14 +580,14 @@ int validateNewGradeValue(dynamic newValue, String columnNameToFind) {
 Future<dynamic> isDateToEvaluateStudents() async {
   try {
     var originDate = await getActualDate().catchError((error) {
-      return error;
+      return Future.error(error);
     });
-    var originResponse = jsonDecode(originDate);
+    var originResponse = originDate.data; //jsonDecode(originDate);
     var response = originResponse['Value'];
     return response;
   } catch (e) {
     insertErrorLog(e.toString(), 'FETCH DATE FOR STUDENT EVALUATION');
-    return throw Future.error(e);
+    return Future.error(e);
   }
 }
 
@@ -634,7 +632,7 @@ List<Map<String, dynamic>> filterCommentsBySubject(
 Future<List<Map<String, dynamic>>> getGradesAndGroupsByCampus(
     String cycle) async {
   var response = await getGlobalGradesAndGroups(cycle);
-  List<dynamic> data = jsonDecode(response);
+  List<dynamic> data = response.data; //jsonDecode(response);
   List<Map<String, dynamic>> items = List<Map<String, dynamic>>.from(data);
 
   return items;
@@ -643,7 +641,7 @@ Future<List<Map<String, dynamic>>> getGradesAndGroupsByCampus(
 Future<List<String>> getStudentsListForFodac27(
     String campus, String cycle, String grade, String group) async {
   var response = await getStudentsForFodac27(grade, group, campus, cycle);
-  var data = jsonDecode(response);
+  var data = response.data; //jsonDecode(response);
 
   List<String> resultData = [];
 

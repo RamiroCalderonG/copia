@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_util.dart';
-import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
+import 'package:oxschool/data/services/backend/api_requests/api_calls_list_dio.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import 'dart:io';
@@ -16,7 +16,7 @@ class UpdateChecker {
     try {
       final response = await getLatestAppVersion();
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        final data = response.data;
         PackageInfo packageInfo = await PackageInfo.fromPlatform();
         String currentVersion = packageInfo.version;
         String latestVersion = data["version"];

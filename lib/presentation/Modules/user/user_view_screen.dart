@@ -125,15 +125,21 @@ class UserWindow extends StatelessWidget {
 
               */
               child: CircleAvatar(
-                radius: isMobile ? 60 : 80,
+                radius: isMobile ? 60 : 70,
                 backgroundColor: Colors.transparent,
                 child: currentUser!.userPicture != null
                     ? ClipOval(
                         child: Image.memory(
+                          errorBuilder: (context, error, stackTrace) {
+                            return const Icon(
+                              Icons.error,
+                              color: Colors.red,
+                            );
+                          },
                           currentUser!.userPicture!,
-                          width: (isMobile ? 120 : 160),
-                          height: (isMobile ? 120 : 160),
-                          fit: BoxFit.scaleDown,
+                          width: (isMobile ? 120 : 130),
+                          height: (isMobile ? 120 : 130),
+                          fit: BoxFit.contain,
                         ),
                       )
                     : Text(
@@ -202,49 +208,51 @@ class UserWindow extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 20),
-            _buildInfoField(
-              theme,
-              colorScheme,
-              'Nombre Completo',
-              currentUser!.employeeName!.toTitleCase,
-              Icons.person_rounded,
-              isMobile,
-            ),
-            // const SizedBox(height: 5),
-            // _buildInfoField(
-            //   theme,
-            //   colorScheme,
-            //   'Número de Empleado',
-            //   currentUser!.employeeNumber.toString(),
-            //   Icons.badge_rounded,
-            //   isMobile,
-            // ),
-            const SizedBox(height: 5),
-            _buildInfoField(
-              theme,
-              colorScheme,
-              'Campus',
-              currentUser!.claUn!.toTitleCase,
-              Icons.location_city_rounded,
-              isMobile,
-            ),
-            const SizedBox(height: 5),
-            _buildInfoField(
-              theme,
-              colorScheme,
-              'Departamento',
-              currentUser!.work_area!.toTitleCase,
-              Icons.business_center_rounded,
-              isMobile,
-            ),
-            const SizedBox(height: 5),
-            _buildInfoField(
-              theme,
-              colorScheme,
-              'Rol',
-              currentUser!.role!.toTitleCase,
-              Icons.face_rounded,
-              isMobile,
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: [
+                _buildInfoField(
+                  theme,
+                  colorScheme,
+                  'Nombre Completo',
+                  currentUser!.employeeName!.toTitleCase,
+                  Icons.person_rounded,
+                  isMobile,
+                ),
+                /* _buildInfoField(
+                  theme,
+                  colorScheme,
+                  'Email',
+                  currentUser!.userEmail!,
+                  Icons.email_rounded,
+                  isMobile,
+                ), */
+                _buildInfoField(
+                  theme,
+                  colorScheme,
+                  'Campus',
+                  currentUser!.claUn!.toTitleCase,
+                  Icons.location_city_rounded,
+                  isMobile,
+                ),
+                _buildInfoField(
+                  theme,
+                  colorScheme,
+                  'Departamento',
+                  currentUser!.work_area!.toTitleCase,
+                  Icons.business_center_rounded,
+                  isMobile,
+                ),
+                _buildInfoField(
+                  theme,
+                  colorScheme,
+                  'Rol',
+                  currentUser!.role!.toTitleCase,
+                  Icons.face_rounded,
+                  isMobile,
+                ),
+              ],
             ),
           ],
         ),
@@ -260,7 +268,7 @@ class UserWindow extends StatelessWidget {
     IconData icon,
     bool isMobile,
   ) {
-    return Container(
+    final widget = Container(
       padding: EdgeInsets.all(isMobile ? 12 : 16),
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
@@ -308,6 +316,17 @@ class UserWindow extends StatelessWidget {
         ],
       ),
     );
+
+    // On mobile, return the widget as is. On larger screens, constrain the width.
+    if (isMobile) {
+      return widget;
+    } else {
+      return SizedBox(
+        width:
+            300, // Fixed width for larger screens to create consistent columns
+        child: widget,
+      );
+    }
   }
 
   Widget _buildActionButtons(

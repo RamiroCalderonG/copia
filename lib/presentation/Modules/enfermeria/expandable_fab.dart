@@ -217,16 +217,16 @@ class ExpandableFABNurseryState extends State<ExpandableFABNursery> {
 
 Future fetchData() async {
   causesLst = await getCauses(15);
-  painsList = await getPainList('none');
-  woundsList = await getWoundsList('none');
+  // painsList = await getPainList('none');
+  //woundsList = await getWoundsList('none');
   accidentType = await getCauses(14);
-  teachersList = await getTeacherByGradeAndGroup(
+  /* teachersList = await getTeacherByGradeAndGroup(
       selectedStudent.gradoSecuencia,
       selectedStudent.grupo,
       selectedStudent.claUn,
       currentCycle!.claCiclo!,
       currentUser!.employeeNumber!.toString(),
-      deviceIp!);
+      deviceIp!); */
 }
 
 void showFormDialog(BuildContext context) {
