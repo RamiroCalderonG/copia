@@ -8,6 +8,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:oxschool/core/utils/device_information.dart';
 import 'package:oxschool/data/Models/Logger.dart';
+import 'package:oxschool/data/services/backend/api_requests/api_calls_list_dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import "package:window_size/window_size.dart";
 import 'core/config/flutter_flow/flutter_flow_theme.dart';
@@ -21,6 +22,7 @@ void main() async {
   await FileLogger.init();
   insertActionIntoLog('APP STARTED, ', Platform.operatingSystem);
   revealLoggerFileLocation();
+  ApiCallsDio.initialize();
 
   usePathUrlStrategy();
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {

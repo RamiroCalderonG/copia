@@ -7,7 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
 
-Future<List<String>> getPainList(String logger) async {
+/* Future<List<String>> getPainList(String logger) async {
   List<dynamic> jsonList;
   List<String> resultPainList = [];
 
@@ -30,9 +30,9 @@ Future<List<String>> getPainList(String logger) async {
     // Throw an exception or return an empty list based on your error handling strategy
     throw Exception("Failed to fetch");
   }
-}
+} */
 
-Future<List<String>> getWoundsList(String logger) async {
+/* Future<List<String>> getWoundsList(String logger) async {
   List<dynamic> jsonList;
   List<String> resultWoundsList = [];
 
@@ -55,9 +55,9 @@ Future<List<String>> getWoundsList(String logger) async {
     // Throw an exception or return an empty list based on your error handling strategy
     throw Exception("Failed to fetch");
   }
-}
+} */
 
-Future<String> postNurseryStudent(
+/* Future<String> postNurseryStudent(
     int employeeID,
     String? kindOfPain,
     String kindOfWound,
@@ -111,7 +111,7 @@ Future<String> postNurseryStudent(
 
     if (apiResultxgr.succeeded) {
       // Parse the JSON response ID from DB
-      responseID = json.decode(apiResultxgr.response!.body);
+      responseID =  json.decode(apiResultxgr.response!.body);
     }
     return responseID;
   } catch (e) {
@@ -120,7 +120,7 @@ Future<String> postNurseryStudent(
     }
     throw Exception(e.toString());
   }
-}
+} */
 
 Map<String, dynamic> nurseryToJSON(
     int employeeID,

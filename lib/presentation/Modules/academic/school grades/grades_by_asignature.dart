@@ -11,7 +11,7 @@ import 'package:intl/intl.dart';
 import '../../../../data/Models/Student_eval.dart';
 
 import '../../../../data/datasources/temp/studens_temp.dart';
-import '../../../../data/services/backend/api_requests/api_calls_list.dart';
+import '../../../../data/services/backend/api_requests/api_calls_list_dio.dart';
 
 import '../../../../core/constants/date_constants.dart';
 
@@ -223,62 +223,69 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
       } else {
         teacherNumber = currentUser!.employeeNumber;
       }
-      studentList = await getStudentsByAssinature(
-          groupSelected, gradeInt, assignatureID, month, campus, teacherNumber);
+      if (monthNumber != 8) {
+        studentList = await getStudentsByAssinature(groupSelected, gradeInt,
+            assignatureID, month, campus, teacherNumber);
 
-      // Get evaluations comments by gradeSequence
-      if (studentList.isNotEmpty) {
-        studentsGradesCommentsRows =
-            await getEvaluationsCommentsByGradeSequence(selectedTempGrade!);
-      } else {
-        throw Exception(
-          'No se encontraron alumnos para el grupo seleccionado: $groupSelected, grado: $gradeInt, ciclo: ${currentCycle!.claCiclo}, campus: $campusSelected, mes: $month',
-        );
-      }
-
-      await fillGrid(studentList);
-
-      setState(() {
-        displayColumnsByGrade(selectedTempGrade!);
-        assignatureRows.clear();
-        for (var item in studentList) {
-          assignatureRows.add(TrinaRow(cells: {
-            'No': TrinaCell(value: item.sequentialNumber ?? 0),
-            'Matricula': TrinaCell(value: item.studentID),
-            'Nombre': TrinaCell(value: item.studentName),
-            'Apellido paterno': TrinaCell(value: item.student1LastName),
-            'Apellido materno': TrinaCell(value: item.student2LastName),
-            'Calif': TrinaCell(value: item.evaluation),
-            'idCalif': TrinaCell(value: item.rateID),
-            'Ausencia': TrinaCell(value: item.absence ?? 0),
-            'Tareas': TrinaCell(value: item.homework ?? 0),
-            'Conducta': TrinaCell(value: item.discipline ?? 0),
-            'habit_eval': TrinaCell(value: item.habits_evaluation ?? 0),
-            'Comentarios': TrinaCell(
-              value: item.comment != null && item.comment != 0
-                  ? item.comment.toString()
-                  : '',
-            ),
-          }));
+        // Get evaluations comments by gradeSequence
+        if (studentList.isNotEmpty) {
+          studentsGradesCommentsRows =
+              await getEvaluationsCommentsByGradeSequence(selectedTempGrade!);
+        } else {
+          throw Exception(
+            'No se encontraron alumnos para el grupo seleccionado: $groupSelected, grado: $gradeInt, ciclo: ${currentCycle!.claCiclo}, campus: $campusSelected, mes: $month',
+          );
         }
+
+        await fillGrid(studentList);
+
         setState(() {
-          selectedTempCampus = campus;
-          selectedTempGrade = int.parse(gradeInt);
-          selectedTempSubjectId = int.parse(assignatureID);
-
-          // Call displayColumnsByGrade BEFORE updating trinaGridKey
           displayColumnsByGrade(selectedTempGrade!);
+          assignatureRows.clear();
+          for (var item in studentList) {
+            assignatureRows.add(TrinaRow(cells: {
+              'No': TrinaCell(value: item.sequentialNumber ?? 0),
+              'Matricula': TrinaCell(value: item.studentID),
+              'Nombre': TrinaCell(value: item.studentName),
+              'Apellido paterno': TrinaCell(value: item.student1LastName),
+              'Apellido materno': TrinaCell(value: item.student2LastName),
+              'Calif': TrinaCell(value: item.evaluation),
+              'idCalif': TrinaCell(value: item.rateID),
+              'Ausencia': TrinaCell(value: item.absence ?? 0),
+              'Tareas': TrinaCell(value: item.homework ?? 0),
+              'Conducta': TrinaCell(value: item.discipline ?? 0),
+              'habit_eval': TrinaCell(value: item.habits_evaluation ?? 0),
+              'Comentarios': TrinaCell(
+                value: item.comment != null && item.comment != 0
+                    ? item.comment.toString()
+                    : '',
+              ),
+            }));
+          }
+          setState(() {
+            selectedTempCampus = campus;
+            selectedTempGrade = int.parse(gradeInt);
+            selectedTempSubjectId = int.parse(assignatureID);
 
-          // Force grid rebuild with new key AFTER visibility flags are set
-          trinaGridKey = UniqueKey();
+            // Call displayColumnsByGrade BEFORE updating trinaGridKey
+            displayColumnsByGrade(selectedTempGrade!);
 
+            // Force grid rebuild with new key AFTER visibility flags are set
+            trinaGridKey = UniqueKey();
+
+            isLoading = false;
+          });
+          // selectedTempCampus = campus;
+          // selectedTempGrade = int.parse(gradeInt);
+          // selectedTempSubjectId = int.parse(assignatureID);
+          // isLoading = false;
+        });
+      } else {
+        setState(() {
           isLoading = false;
         });
-        // selectedTempCampus = campus;
-        // selectedTempGrade = int.parse(gradeInt);
-        // selectedTempSubjectId = int.parse(assignatureID);
-        // isLoading = false;
-      });
+        return showErrorFromBackend(context, 'Seleccione un mes');
+      }
     } catch (e) {
       setState(() {
         isLoading = false;
@@ -607,17 +614,23 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
           // get assignature id number
           var assignatureID = selectedTempSubjectId;
 
-          if (assignatureID != null && assignatureID != 0) {
-            await searchBUttonAction(
-                selectedTempGroup!,
-                selectedTempGrade.toString(),
-                assignatureID.toString(),
-                monthNumber.toString(),
-                selectedTempCampus!);
+          if (selectedTempGroup != null) {
+            if (assignatureID != null && assignatureID != 0) {
+              await searchBUttonAction(
+                  selectedTempGroup!,
+                  selectedTempGrade.toString(),
+                  assignatureID.toString(),
+                  monthNumber.toString(),
+                  selectedTempCampus!);
+            } else {
+              isLoading = false;
+              showInformationDialog(context, 'Alerta!',
+                  'No se detectó una asignatura, vuelva a intentar.');
+            }
           } else {
             isLoading = false;
             showInformationDialog(context, 'Alerta!',
-                'No se detectó una asignatura, vuelva a intentar.');
+                'No se detectó un grado, vuelva a intentar.');
           }
         } catch (e) {
           insertErrorLog(e.toString(), 'SEARCH STUDENTS BY SUBJECTS ');
@@ -646,6 +659,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
         setState(() {
           isLoading = true;
         });
+
         await updateButtonFunction((success) async {
           if (success) {
             try {

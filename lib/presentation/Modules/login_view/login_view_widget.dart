@@ -14,7 +14,7 @@ import 'package:oxschool/core/reusable_methods/temp_data_functions.dart';
 import 'package:oxschool/core/utils/version_updater.dart';
 import 'package:oxschool/data/Models/Cycle.dart';
 import 'package:oxschool/data/Models/User.dart';
-import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
+import 'package:oxschool/data/services/backend/api_requests/api_calls_list_dio.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:flutter/material.dart';
 import 'package:oxschool/presentation/Modules/login_view/recover_password_screen.dart';
@@ -613,7 +613,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
         if (value.isNotEmpty && emailValue.isNotEmpty) {
           // Attempt login
           var apiResponse = await loginUser(apiBody);
-          Map<String, dynamic> jsonData = jsonDecode(apiResponse.body);
+          Map<String, dynamic> jsonData = apiResponse.data;
           devicePrefs.setString(
               'token', 'Bearer ${jsonData['token']}'); // Store token
           devicePrefs.setInt('idSession', jsonData['idSession']);
@@ -621,7 +621,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
           // GET user data
           apiResponse = await getCurrentUserData(
               devicePrefs.getString('token')!); // Get user information
-          jsonData = json.decode(apiResponse.body);
+          jsonData = apiResponse.data; //json.decode(apiResponse.data);
 
           currentUser = User.fromJson(jsonData);
 
@@ -631,7 +631,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
 
           apiResponse = await getCycle(1);
           if (apiResponse != null) {
-            Map<String, dynamic> jsonList = json.decode(apiResponse.body);
+            Map<String, dynamic> jsonList = apiResponse.data;
             currentCycle = getcurrentCycle(jsonList);
           }
 

@@ -17,7 +17,7 @@ import 'package:oxschool/core/reusable_methods/temp_data_functions.dart';
 import 'package:oxschool/data/datasources/temp/users_temp_data.dart';
 import 'package:oxschool/presentation/components/confirm_dialogs.dart';
 
-import '../../../data/services/backend/api_requests/api_calls_list.dart';
+import '../../../data/services/backend/api_requests/api_calls_list_dio.dart';
 
 class RolesAndProfilesScreen extends StatefulWidget {
   const RolesAndProfilesScreen({super.key});
@@ -604,7 +604,7 @@ class _AddEditRoleScreenState extends State<AddEditRoleScreen> {
   void getRoleDetail(int roleId) async {
     await getRoleDetailCall(roleId).then(
       (value) {
-        var response = json.decode(value);
+        var response = value.data; //json.decode(value);
         setState(() {
           selectedRoleChipValue = response!['value'];
         });

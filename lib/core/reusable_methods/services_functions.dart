@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/data/Models/ServiceTicketRequest.dart';
 import 'package:oxschool/data/datasources/temp/services_temp.dart';
-import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
+import 'package:oxschool/data/services/backend/api_requests/api_calls_list_dio.dart';
 import 'package:trina_grid/trina_grid.dart';
 
 Future<List<TrinaRow>> getServiceTicketsByDate(
@@ -12,8 +12,8 @@ Future<List<TrinaRow>> getServiceTicketsByDate(
   try {
     final response = await getAllServiceTickets(fromDate, statusValue, byWho);
     if (response.statusCode == 200) {
-      servicesTicketsDecodedResponse =
-          json.decode(utf8.decode(response.bodyBytes));
+      servicesTicketsDecodedResponse = response.data;
+      //json.decode(utf8.decode(response.bodyBytes));
 
       /* newRows = servicesTicketsDecodedResponse.map((item) {
         // Calculate if the service is still on time or overdue
@@ -127,7 +127,7 @@ void refreshTicketsCuantity() {
       overdue++;
       overdueTickets.add(item);
     }
-      //Count items by status
+    //Count items by status
     if (item.status == 0) {
       unassigned++;
       unassignedTickets.add(item);
@@ -149,7 +149,8 @@ Future<List<Map<String, dynamic>>> getRequestTicketHistory(int ticketId) async {
     var response = await getRequestticketHistory(ticketId);
     if (response.statusCode == 200) {
       List<Map<String, dynamic>> history = [];
-      var decodedResponse = json.decode(utf8.decode(response.bodyBytes));
+      var decodedResponse =
+          response.data; //json.decode(utf8.decode(response.bodyBytes));
       for (var item in decodedResponse) {
         history.add(item);
       }
@@ -168,7 +169,7 @@ Future<dynamic> getUsersList(int filter, String dept) async {
     var response = await getUsersForTicket(filter, dept);
     if (response.statusCode == 200) {
       List<Map<String, dynamic>> usersList = [];
-      var decodedResponse = json.decode(utf8.decode(response.bodyBytes));
+      var decodedResponse = response.data;
       for (var item in decodedResponse) {
         usersList.add(item);
       }
@@ -187,7 +188,7 @@ Future<dynamic> getDepartments() async {
     var response = await getWorkDepartments();
     if (response.statusCode == 200) {
       Map<int, dynamic> deptsMap = {};
-      var decoded = json.decode(utf8.decode(response.bodyBytes));
+      var decoded = response.data;
       for (var element in decoded) {
         deptsMap.addAll({element['id']: element['bureauName']});
       }
@@ -204,7 +205,7 @@ Future<dynamic> getDepartments() async {
 Future<dynamic> createRequestTicket(Map<String, dynamic> body) async {
   try {
     var response = await createNewTicketServices(body);
-    return json.decode(utf8.decode(response.bodyBytes));
+    return response.data;
   } catch (e) {
     insertErrorLog(e.toString(), 'createRequestTicket');
     throw e.toString();
@@ -215,7 +216,7 @@ Future<dynamic> updateRequestTicket(
     Map<String, dynamic> contents, int flag) async {
   try {
     var response = await updateSupportTicket(contents, flag);
-    return json.decode(utf8.decode(response.bodybytes));
+    return response.data;
   } catch (e) {
     insertErrorLog(e.toString(), 'updateRequestTicket');
     return e;
