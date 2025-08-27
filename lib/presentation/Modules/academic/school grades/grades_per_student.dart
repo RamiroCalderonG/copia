@@ -42,6 +42,12 @@ class _GradesByStudentState extends State<GradesByStudent> {
   late TrinaGridStateManager stateManager;
   late TrinaGridStateManager gridAStateManager;
   String currentMonth = DateFormat.MMMM('es').format(DateTime.now());
+
+  // Change tracking variables
+  TrinaGridStateManager? gradesStateManager;
+  TrinaCell? selectedCell;
+  int dirtyCount = 0;
+  bool _disposed = false;
   Key? studentsGridKey;
   Key? evalsGridKey;
 
@@ -78,6 +84,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
 
   @override
   void dispose() {
+    _disposed = true;
     //studentsGradesCommentsRows.clear();
     //evaluationComments.clear();
     //commentStringEval.clear();
@@ -92,6 +99,87 @@ class _GradesByStudentState extends State<GradesByStudent> {
     fetchedData = null;
     rows.clear();
     super.dispose();
+  }
+
+  // Change tracking methods
+  void commitChanges() {
+    if (_disposed || gradesStateManager == null || !mounted) return;
+    try {
+      gradesStateManager!.commitChanges();
+      updateDirtyCount();
+    } catch (e) {
+      // Handle any errors gracefully
+      insertErrorLog(e.toString(), 'COMMIT_CHANGES_ERROR');
+    }
+  }
+
+  void revertChanges() {
+    if (_disposed || gradesStateManager == null || !mounted) return;
+    try {
+      gradesStateManager!.revertChanges();
+      updateDirtyCount();
+    } catch (e) {
+      // Handle any errors gracefully
+      insertErrorLog(e.toString(), 'REVERT_CHANGES_ERROR');
+    }
+  }
+
+  void commitSelectedCell() {
+    if (_disposed || gradesStateManager == null || !mounted) return;
+    if (selectedCell != null) {
+      try {
+        gradesStateManager!.commitChanges(cell: selectedCell);
+        updateDirtyCount();
+      } catch (e) {
+        // Handle any errors gracefully
+        insertErrorLog(e.toString(), 'COMMIT_SELECTED_CELL_ERROR');
+      }
+    }
+  }
+
+  void revertSelectedCell() {
+    if (_disposed || gradesStateManager == null || !mounted) return;
+    if (selectedCell != null) {
+      try {
+        gradesStateManager!.revertChanges(cell: selectedCell);
+        updateDirtyCount();
+      } catch (e) {
+        // Handle any errors gracefully
+        insertErrorLog(e.toString(), 'REVERT_SELECTED_CELL_ERROR');
+      }
+    }
+  }
+
+  void updateDirtyCount() {
+    if (_disposed || gradesStateManager == null) return;
+
+    // Use Future.microtask to ensure we're not updating during build or dispose
+    Future.microtask(() {
+      if (_disposed || gradesStateManager == null) return;
+
+      int count = 0;
+      try {
+        // Use the state manager's rows instead of selectedStudentRows
+        // This ensures we're working with properly initialized cells
+        for (var row in gradesStateManager!.rows) {
+          for (var cell in row.cells.values) {
+            if (cell.isDirty) {
+              count++;
+            }
+          }
+        }
+      } catch (e) {
+        // If there's an error accessing isDirty (cells not initialized),
+        // just set count to 0
+        count = 0;
+      }
+
+      if (!_disposed && mounted) {
+        setState(() {
+          dirtyCount = count;
+        });
+      }
+    });
   }
 
   void _fetchData() async {
@@ -265,7 +353,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
           field: 'subject_name',
           type: TrinaColumnType.text(),
           // width: 80,
-          frozen: TrinaColumnFrozen.start,
+          //frozen: TrinaColumnFrozen.start,
           sort: TrinaColumnSort.ascending,
           readOnly: true,
         ),
@@ -522,6 +610,8 @@ class _GradesByStudentState extends State<GradesByStudent> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 _buildFiltersSection(theme, colorScheme),
+                SizedBox(height: isMobile ? 4 : 6),
+                _buildCompactChangeTracking(theme, colorScheme),
                 SizedBox(height: isMobile ? 4 : 6),
                 _buildActionButtons(theme, colorScheme),
                 SizedBox(height: isMobile ? 4 : 6),
@@ -1105,14 +1195,40 @@ class _GradesByStudentState extends State<GradesByStudent> {
                         evalId,
                         monthNumber,
                       );
+
+                      // Update dirty count for change tracking
+                      updateDirtyCount();
                     },
                     onLoaded: (TrinaGridOnLoadedEvent event) {
                       gridAStateManager = event.stateManager;
+
+                      // Store state manager reference and enable change tracking
+                      gradesStateManager = event.stateManager;
+                      gradesStateManager?.setChangeTracking(true);
+
+                      // Ensure cells are properly initialized before enabling change tracking
+                      Future.microtask(() {
+                        if (gradesStateManager != null && !_disposed) {
+                          updateDirtyCount();
+                        }
+                      });
                     },
-                    configuration: const TrinaGridConfiguration(
+                    onActiveCellChanged: (event) {
+                      // Track selected cell for change tracking operations
+                      if (!_disposed && mounted) {
+                        setState(() {
+                          selectedCell = event.cell;
+                        });
+                      }
+                    },
+                    configuration: TrinaGridConfiguration(
                       style: TrinaGridStyleConfig(
                         enableColumnBorderVertical: false,
                         enableCellBorderVertical: false,
+                        // Add dirty cell highlighting
+                        cellDirtyColor: Colors.amber[100]!,
+                        // Make rows shorter
+                        rowHeight: 35,
                       ),
                       columnSize: TrinaGridColumnSizeConfig(
                         autoSizeMode: TrinaAutoSizeMode.scale,
@@ -1377,5 +1493,122 @@ class _GradesByStudentState extends State<GradesByStudent> {
       hideOutfitColumn = true;
       homeWorkColumnTitle = 'R';
     }
+  }
+
+  Widget _buildCompactChangeTracking(ThemeData theme, ColorScheme colorScheme) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: colorScheme.outlineVariant,
+          width: 0.5,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.track_changes_rounded,
+            color: colorScheme.secondary,
+            size: 14,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            'Control de Cambios',
+            style: theme.textTheme.labelSmall?.copyWith(
+              fontWeight: FontWeight.w500,
+              color: colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+            decoration: BoxDecoration(
+              color: dirtyCount > 0
+                  ? colorScheme.errorContainer
+                  : colorScheme.surfaceContainerLowest,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              '$dirtyCount',
+              style: theme.textTheme.labelSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: dirtyCount > 0
+                    ? colorScheme.onErrorContainer
+                    : colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          const Spacer(),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildCompactButton(
+                  'Confirmar',
+                  Icons.done_all,
+                  gradesStateManager != null ? commitChanges : null,
+                  colorScheme.primary,
+                  theme),
+              const SizedBox(width: 4),
+              _buildCompactButton(
+                  'Revertir',
+                  Icons.undo,
+                  gradesStateManager != null ? revertChanges : null,
+                  colorScheme.error,
+                  theme),
+              const SizedBox(width: 4),
+              _buildCompactButton(
+                  'C',
+                  Icons.done,
+                  (selectedCell != null && gradesStateManager != null)
+                      ? commitSelectedCell
+                      : null,
+                  colorScheme.tertiary,
+                  theme),
+              const SizedBox(width: 4),
+              _buildCompactButton(
+                  'R',
+                  Icons.restore,
+                  (selectedCell != null && gradesStateManager != null)
+                      ? revertSelectedCell
+                      : null,
+                  colorScheme.secondary,
+                  theme),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCompactButton(String label, IconData icon,
+      VoidCallback? onPressed, Color color, ThemeData theme) {
+    return SizedBox(
+      height: 24,
+      child: OutlinedButton(
+        onPressed: onPressed,
+        style: OutlinedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+          minimumSize: Size.zero,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          side: BorderSide(
+              color: onPressed != null ? color : color.withOpacity(0.3),
+              width: 0.8),
+          foregroundColor: onPressed != null ? color : color.withOpacity(0.3),
+          textStyle: theme.textTheme.labelSmall?.copyWith(fontSize: 10),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 10),
+            if (label.length > 1) ...[
+              const SizedBox(width: 2),
+              Text(label),
+            ],
+          ],
+        ),
+      ),
+    );
   }
 }

@@ -106,25 +106,29 @@ class _UsersTableViewState extends State<UsersTableView> {
                     child: TrinaGrid(
                         columns: <TrinaColumn>[
                           TrinaColumn(
-                              title: 'Id',
-                              field: 'id',
-                              type: TrinaColumnType.number(),
-                              readOnly: true,
-                              sort: TrinaColumnSort.ascending,
-                              width: 80,
-                              frozen: TrinaColumnFrozen.start),
+                            title: 'Id',
+                            field: 'id',
+                            type: TrinaColumnType.number(),
+                            readOnly: true,
+                            hide: true,
+                            //sort: TrinaColumnSort.ascending,
+                            width: 80,
+                            // frozen: TrinaColumnFrozen.start
+                          ),
+                          TrinaColumn(
+                              title: 'Numero de empleado',
+                              field: 'employeeNumber',
+                              width: 100,
+                              type: TrinaColumnType.number(
+                                format: '####',
+                              ),
+                              readOnly: true),
                           TrinaColumn(
                               title: 'Nombre',
                               field: 'employeeName',
                               type: TrinaColumnType.text(),
                               readOnly: true),
-                          TrinaColumn(
-                              title: 'Numero de empleado',
-                              field: 'employeeNumber',
-                              type: TrinaColumnType.number(
-                                format: '####',
-                              ),
-                              readOnly: true),
+
                           TrinaColumn(
                               title: 'Rol del usuario',
                               field: 'userRole',
@@ -149,7 +153,10 @@ class _UsersTableViewState extends State<UsersTableView> {
                           TrinaColumn(
                               title: 'idLogin',
                               field: 'idLogin',
-                              type: TrinaColumnType.number(),
+                              width: 150,
+                              type: TrinaColumnType.number(
+                                format: '####',
+                              ),
                               readOnly: true),
                           // TrinaColumn(
                           //   title: 'Fecha de alta',

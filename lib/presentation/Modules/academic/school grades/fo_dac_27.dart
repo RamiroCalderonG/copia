@@ -506,6 +506,13 @@ class _FoDac27State extends State<FoDac27> {
                 : Padding(
                     padding: const EdgeInsets.all(8),
                     child: TrinaGrid(
+                      rowColorCallback: (rowColorContext) {
+                        return rowColorContext.row.cells['fodac27']?.value %
+                                    2 ==
+                                0
+                            ? const Color.fromARGB(255, 55, 190, 52)
+                            : colorScheme.surface;
+                      },
                       mode: TrinaGridMode.selectWithOneTap,
                       columns: fodac27Columns,
                       rows: fodac27HistoryRows,
@@ -707,7 +714,7 @@ class _FoDac27State extends State<FoDac27> {
           await getStudentFodac27History(cycle, studentID, isByStudent);
 
       if (apiResponse != null) {
-        var decodedResponse = apiResponse.data as List;
+        var decodedResponse = apiResponse as List;
         List<TrinaRow> newRows = decodedResponse.map((item) {
           return TrinaRow(cells: {
             'date': TrinaCell(value: item['date']),
