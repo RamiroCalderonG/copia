@@ -49,7 +49,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
   List<int> tapTimestamps = [];
   int remainingTime = 0;
   Timer? timer;
-  bool isDebugging = false;
+  //bool isDebugging = false;
   final List<String> _suggestedDomains = ['oxschool.edu.mx'];
   String? _suggestedDomain;
 
@@ -542,26 +542,43 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
               fontWeight: FontWeight.w500,
             ),
           ),
-          if (isDebugging) ...[
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: Colors.orange.withOpacity(0.3),
-                ),
-              ),
-              child: Text(
-                'MODO DEBUG',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: Colors.orange,
-                  fontWeight: FontWeight.bold,
-                ),
+          TextButton(
+            onPressed: () {
+              UpdateChecker.manuallyUpdate(context);
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: colorScheme.primary,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            ),
+            child: Text(
+              'Actualizar Manualmente',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w500,
               ),
             ),
-          ],
+          ),
+
+          // if (isDebugging) ...[
+          //   const SizedBox(height: 8),
+          //   Container(
+          //     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          //     decoration: BoxDecoration(
+          //       color: Colors.orange.withOpacity(0.2),
+          //       borderRadius: BorderRadius.circular(8),
+          //       border: Border.all(
+          //         color: Colors.orange.withOpacity(0.3),
+          //       ),
+          //     ),
+          //     child: Text(
+          //       'MODO DEBUG',
+          //       style: theme.textTheme.bodySmall?.copyWith(
+          //         color: Colors.orange,
+          //         fontWeight: FontWeight.bold,
+          //       ),
+          //     ),
+          //   ),
+          // ],
         ],
       ),
     );
