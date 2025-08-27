@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_util.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list_dio.dart';
+import 'package:oxschool/presentation/components/confirm_dialogs.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import 'dart:io';
@@ -27,6 +28,29 @@ class UpdateChecker {
       }
     } catch (e) {
       print("Update check failed: $e");
+    }
+  }
+
+  static Future<void> manuallyUpdate(BuildContext context) async {
+    try {
+      final response = await getLatestAppVersion();
+      if (response.statusCode == 200) {
+        final data = response.data;
+        PackageInfo packageInfo = await PackageInfo.fromPlatform();
+        String currentVersion = packageInfo.version;
+        String latestVersion = data["version"];
+        context.goNamed(
+          'UpdaterScreen',
+          extra: <String, dynamic>{
+            kTransitionInfoKey: const TransitionInfo(
+              hasTransition: true,
+              transitionType: PageTransitionType.fade,
+            ),
+          },
+        );
+      }
+    } catch (e) {
+      print("Manual update check failed: $e");
     }
   }
 
