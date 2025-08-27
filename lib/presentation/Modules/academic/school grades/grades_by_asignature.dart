@@ -709,11 +709,46 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Use most of the available height for the grid
-        // Only set minimum height, let it expand to fill available space
-        final minHeight = 300.0;
-        final maxHeight =
+        // Get screen size for responsive calculations
+        final screenSize = MediaQuery.of(context).size;
+        final isTablet = screenSize.width > 600 && screenSize.width < 1200;
+        final isMobile = screenSize.width <= 600;
+
+        // Calculate responsive heights based on screen size and orientation
+        double minHeight;
+        double maxHeight;
+
+        if (isMobile) {
+          // Mobile: Use more conservative heights
+          minHeight = screenSize.height * 0.3; // 30% of screen height
+          maxHeight = constraints.maxHeight > 0
+              ? constraints.maxHeight * 0.9
+              : screenSize.height * 0.6;
+        } else if (isTablet) {
+          // Tablet: Balanced approach
+          minHeight = 350.0;
+          maxHeight = constraints.maxHeight > 0
+              ? constraints.maxHeight * 0.85
+              : screenSize.height * 0.7;
+        } else {
+          // Desktop: Can use more space
+          minHeight = 400.0;
+          maxHeight = constraints.maxHeight > 0
+              ? constraints.maxHeight * 0.8
+              : screenSize.height * 0.75;
+        }
+
+        // Ensure minimum height doesn't exceed available space
+        final availableHeight =
             constraints.maxHeight > 0 ? constraints.maxHeight : 600.0;
+        final safeMinHeight = 250.0;
+
+        // Ensure we don't violate clamp constraints (min <= max)
+        final effectiveMaxForClamp =
+            availableHeight > safeMinHeight ? availableHeight : safeMinHeight;
+
+        minHeight = minHeight.clamp(safeMinHeight, effectiveMaxForClamp);
+        maxHeight = maxHeight.clamp(minHeight, double.infinity);
 
         return ConstrainedBox(
           constraints: BoxConstraints(

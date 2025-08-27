@@ -12,7 +12,6 @@ import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/constants/date_constants.dart';
 import 'package:oxschool/core/reusable_methods/academic_functions.dart';
 import 'package:oxschool/data/datasources/temp/teacher_grades_temp.dart';
-import 'package:oxschool/presentation/Modules/academic/school%20grades/fodac_27_dropdownmenu.dart';
 
 import 'package:trina_grid/trina_grid.dart';
 
@@ -450,41 +449,92 @@ class _GradesByStudentState extends State<GradesByStudent> {
   }
 
   Widget _buildMainContent(ThemeData theme, ColorScheme colorScheme) {
-    return Padding(
-      padding: const EdgeInsets.all(5),
-      child: _buildGradesPerStudent(theme, colorScheme),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Get screen size for responsive calculations
+        final screenSize = MediaQuery.of(context).size;
+        final isTablet = screenSize.width > 600 && screenSize.width < 1200;
+        final isMobile = screenSize.width <= 600;
+
+        // Calculate responsive padding based on screen size
+        double horizontalPadding;
+        double verticalPadding;
+
+        if (isMobile) {
+          horizontalPadding = 8.0;
+          verticalPadding = 8.0;
+        } else if (isTablet) {
+          horizontalPadding = 12.0;
+          verticalPadding = 12.0;
+        } else {
+          horizontalPadding = 16.0;
+          verticalPadding = 16.0;
+        }
+
+        return Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: horizontalPadding,
+            vertical: verticalPadding,
+          ),
+          child: _buildGradesPerStudent(theme, colorScheme),
+        );
+      },
     );
   }
 
   Widget _buildGradesPerStudent(ThemeData theme, ColorScheme colorScheme) {
-    return Card(
-      elevation: 0,
-      color: colorScheme.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(
-          color: colorScheme.outlineVariant,
-          width: 1,
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildFiltersSection(theme, colorScheme),
-            const SizedBox(height: 6),
-            _buildActionButtons(theme, colorScheme),
-            const SizedBox(height: 6),
-            _buildStudentNameSection(theme, colorScheme),
-            const SizedBox(height: 6),
-            Expanded(
-              child: _buildGradesGrids(theme, colorScheme),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Get screen size for responsive calculations
+        final screenSize = MediaQuery.of(context).size;
+        final isTablet = screenSize.width > 600 && screenSize.width < 1200;
+        final isMobile = screenSize.width <= 600;
+
+        // Calculate responsive card padding and border radius
+        double cardPadding;
+        double borderRadius;
+
+        if (isMobile) {
+          cardPadding = 12.0;
+          borderRadius = 16.0;
+        } else if (isTablet) {
+          cardPadding = 14.0;
+          borderRadius = 18.0;
+        } else {
+          cardPadding = 16.0;
+          borderRadius = 20.0;
+        }
+
+        return Card(
+          elevation: 0,
+          color: colorScheme.surface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(borderRadius),
+            side: BorderSide(
+              color: colorScheme.outlineVariant,
+              width: 1,
             ),
-          ],
-        ),
-      ),
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(cardPadding),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildFiltersSection(theme, colorScheme),
+                SizedBox(height: isMobile ? 4 : 6),
+                _buildActionButtons(theme, colorScheme),
+                SizedBox(height: isMobile ? 4 : 6),
+                _buildStudentNameSection(theme, colorScheme),
+                SizedBox(height: isMobile ? 4 : 6),
+                Expanded(
+                  child: _buildGradesGrids(theme, colorScheme),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -528,13 +578,33 @@ class _GradesByStudentState extends State<GradesByStudent> {
   }
 
   Widget _buildActionButtons(ThemeData theme, ColorScheme colorScheme) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        _buildRefreshButton(theme, colorScheme),
-        const SizedBox(width: 12),
-        _buildSaveButton(theme, colorScheme),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Get screen size for responsive calculations
+        final screenSize = MediaQuery.of(context).size;
+        final isMobile = screenSize.width <= 600;
+
+        // On mobile, stack buttons vertically or reduce spacing
+        if (isMobile && constraints.maxWidth < 400) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildRefreshButton(theme, colorScheme),
+              const SizedBox(height: 8),
+              _buildSaveButton(theme, colorScheme),
+            ],
+          );
+        }
+
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            _buildRefreshButton(theme, colorScheme),
+            SizedBox(width: isMobile ? 8 : 12),
+            _buildSaveButton(theme, colorScheme),
+          ],
+        );
+      },
     );
   }
 
@@ -770,254 +840,320 @@ class _GradesByStudentState extends State<GradesByStudent> {
 
   Widget _buildGridsContent(
       ThemeData theme, ColorScheme colorScheme, BoxConstraints constraints) {
-    final availableHeight = constraints.maxHeight;
+    // Get screen size for responsive calculations
+    final screenSize = MediaQuery.of(context).size;
+    final isTablet = screenSize.width > 600 && screenSize.width < 1200;
+    final isMobile = screenSize.width <= 600;
+
+    // Calculate responsive heights based on screen size
+    double availableHeight;
+    if (isMobile) {
+      availableHeight = constraints.maxHeight * 0.9; // Use 90% on mobile
+    } else if (isTablet) {
+      availableHeight = constraints.maxHeight * 0.95; // Use 95% on tablet
+    } else {
+      availableHeight = constraints.maxHeight; // Use full height on desktop
+    }
+
+    // Ensure minimum height
+    availableHeight = availableHeight.clamp(300.0, double.infinity);
 
     return StatefulBuilder(
       builder: (context, setState) {
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Students Grid (Left Panel)
-            Expanded(
-              flex: 1,
-              child: Container(
-                height: availableHeight,
-                decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: colorScheme.outlineVariant,
-                    width: 1,
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: colorScheme.primaryContainer.withOpacity(0.3),
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(12),
-                          topRight: Radius.circular(12),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.groups_outlined,
-                            color: colorScheme.primary,
-                            size: 18,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Lista de Estudiantes',
-                            style: theme.textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: colorScheme.onSurface,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: TrinaGrid(
-                        key: studentsGridKey,
-                        columns: studentColumnsToEvaluateByStudent,
-                        rows: studentEvaluationRows,
-                        mode: TrinaGridMode.select,
-                        onRowDoubleTap: (event) async {
-                          var gradeInt = getKeyFromValue(
-                              teacherGradesMap, selectedTempGrade!.toString());
-                          int? monthNumber;
+        // On mobile, use vertical layout with tabs or collapsible sections
+        if (isMobile) {
+          return _buildMobileLayout(theme, colorScheme, availableHeight);
+        }
 
-                          if (isUserAdmin || isUserAcademicCoord) {
-                            monthNumber = getKeyFromValue(
-                                spanishMonthsMap, selectedTempMonth!);
-                          } else {
-                            monthNumber = getKeyFromValue(
-                                spanishMonthsMap, selectedCurrentTempMonth!);
-                          }
-                          selectedStudentID =
-                              event.row.cells['studentID']!.value;
-                          selectedStudentName =
-                              event.row.cells['studentName']!.value.toString();
-
-                          await loadSelectedStudent(
-                              selectedStudentID!, gradeInt, monthNumber!);
-                        },
-                        onLoaded: (event) {
-                          event.stateManager
-                              .setSelectingMode(TrinaGridSelectingMode.cell);
-                          TrinaGridStateManager stateManager =
-                              event.stateManager;
-
-                          selectRowByName(
-                              stateManager, 'studentName', selectedStudentName);
-                        },
-                        configuration: const TrinaGridConfiguration(
-                          style: TrinaGridStyleConfig(
-                            enableColumnBorderVertical: false,
-                            enableCellBorderVertical: false,
-                          ),
-                        ),
-                        createFooter: (stateManager) {
-                          stateManager.setPageSize(20, notify: false);
-                          return TrinaPagination(stateManager);
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(width: 16),
-            // Grades Grid (Right Panel)
-            Expanded(
-              flex: 2,
-              child: Container(
-                height: availableHeight,
-                decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: colorScheme.outlineVariant,
-                    width: 1,
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: colorScheme.secondaryContainer.withOpacity(0.3),
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(12),
-                          topRight: Radius.circular(12),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.grade_outlined,
-                            color: colorScheme.secondary,
-                            size: 18,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Calificaciones del Estudiante',
-                            style: theme.textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: colorScheme.onSurface,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: selectedStudentRows.isNotEmpty
-                          ? TrinaGrid(
-                              key: evalsGridKey,
-                              columns: gradesByStudentColumns,
-                              rows: selectedStudentRows,
-                              onChanged: (event) {
-                                // Validator to avoid double type numbers for 'Calif' column
-                                if (event.column.field == 'evaluation') {
-                                  // Only allow integers (no decimals)
-                                  if (event.value is double ||
-                                      (event.value is String &&
-                                          event.value.contains('.'))) {
-                                    showErrorFromBackend(context,
-                                        'Solo se permiten números enteros en la calificación.');
-                                    return;
-                                  } /*
-                                  if (int.tryParse(event.toString()) == null) {
-                                    showErrorFromBackend(context,
-                                        'Ingrese solo números enteros válidos.');
-                                    return;
-                                  } */
-                                }
-                                var newValue = validateNewGradeValue(
-                                    event.value, event.column.title);
-
-                                final evalId =
-                                    event.row.cells['idCicloEscolar']?.value;
-                                int? monthNumber;
-                                if (isUserAdmin || isUserAcademicCoord) {
-                                  monthNumber = getKeyFromValue(
-                                      spanishMonthsMap,
-                                      selectedTempMonth!.toCapitalized);
-                                } else {
-                                  monthNumber = getKeyFromValue(
-                                      spanishMonthsMap,
-                                      currentMonth.toCapitalized);
-                                }
-
-                                validator();
-                                composeBodyToUpdateGradeBySTudent(
-                                  event.column.title,
-                                  selectedStudentID!,
-                                  newValue,
-                                  evalId,
-                                  monthNumber,
-                                );
-                              },
-                              onLoaded: (TrinaGridOnLoadedEvent event) {
-                                gridAStateManager = event.stateManager;
-                              },
-                              configuration: const TrinaGridConfiguration(
-                                style: TrinaGridStyleConfig(
-                                  enableColumnBorderVertical: false,
-                                  enableCellBorderVertical: false,
-                                ),
-                                columnSize: TrinaGridColumnSizeConfig(
-                                  autoSizeMode: TrinaAutoSizeMode.scale,
-                                  resizeMode: TrinaResizeMode.pushAndPull,
-                                ),
-                              ),
-                            )
-                          : Center(
-                              child: Container(
-                                padding: const EdgeInsets.all(24),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.touch_app_outlined,
-                                      size: 40,
-                                      color: colorScheme.onSurfaceVariant,
-                                    ),
-                                    const SizedBox(height: 12),
-                                    Text(
-                                      'Seleccione un estudiante',
-                                      style:
-                                          theme.textTheme.titleMedium?.copyWith(
-                                        fontWeight: FontWeight.w500,
-                                        color: colorScheme.onSurface,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      'Haga doble clic en un estudiante para ver y editar sus calificaciones',
-                                      textAlign: TextAlign.center,
-                                      style:
-                                          theme.textTheme.bodyMedium?.copyWith(
-                                        color: colorScheme.onSurfaceVariant,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        );
+        // On tablet and desktop, use side-by-side layout
+        return _buildDesktopTabletLayout(
+            theme, colorScheme, availableHeight, isTablet);
       },
+    );
+  }
+
+  Widget _buildMobileLayout(
+      ThemeData theme, ColorScheme colorScheme, double availableHeight) {
+    return DefaultTabController(
+      length: 2,
+      child: Column(
+        children: [
+          // Tab Bar
+          Container(
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: TabBar(
+              indicator: BoxDecoration(
+                color: colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              labelColor: colorScheme.onPrimaryContainer,
+              unselectedLabelColor: colorScheme.onSurfaceVariant,
+              tabs: const [
+                Tab(text: 'Estudiantes'),
+                Tab(text: 'Calificaciones'),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          // Tab Views
+          Expanded(
+            child: TabBarView(
+              children: [
+                _buildStudentsGrid(theme, colorScheme, availableHeight),
+                _buildGradesGrid(theme, colorScheme, availableHeight),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDesktopTabletLayout(ThemeData theme, ColorScheme colorScheme,
+      double availableHeight, bool isTablet) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Students Grid (Left Panel)
+        Expanded(
+          flex: isTablet ? 1 : 1, // Equal flex on tablet, 1:2 ratio on desktop
+          child: _buildStudentsGrid(theme, colorScheme, availableHeight),
+        ),
+        SizedBox(width: isTablet ? 12 : 16),
+        // Grades Grid (Right Panel)
+        Expanded(
+          flex: isTablet ? 1 : 2, // Equal flex on tablet, 1:2 ratio on desktop
+          child: _buildGradesGrid(theme, colorScheme, availableHeight),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStudentsGrid(
+      ThemeData theme, ColorScheme colorScheme, double availableHeight) {
+    return Container(
+      height: availableHeight,
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: colorScheme.outlineVariant,
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: colorScheme.primaryContainer.withOpacity(0.3),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(12),
+                topRight: Radius.circular(12),
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.groups_outlined,
+                  color: colorScheme.primary,
+                  size: 18,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Lista de Estudiantes',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: colorScheme.onSurface,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: TrinaGrid(
+              key: studentsGridKey,
+              columns: studentColumnsToEvaluateByStudent,
+              rows: studentEvaluationRows,
+              mode: TrinaGridMode.select,
+              onRowDoubleTap: (event) async {
+                var gradeInt = getKeyFromValue(
+                    teacherGradesMap, selectedTempGrade!.toString());
+                int? monthNumber;
+
+                if (isUserAdmin || isUserAcademicCoord) {
+                  monthNumber =
+                      getKeyFromValue(spanishMonthsMap, selectedTempMonth!);
+                } else {
+                  monthNumber = getKeyFromValue(
+                      spanishMonthsMap, selectedCurrentTempMonth!);
+                }
+                selectedStudentID = event.row.cells['studentID']!.value;
+                selectedStudentName =
+                    event.row.cells['studentName']!.value.toString();
+
+                await loadSelectedStudent(
+                    selectedStudentID!, gradeInt, monthNumber!);
+              },
+              onLoaded: (event) {
+                event.stateManager
+                    .setSelectingMode(TrinaGridSelectingMode.cell);
+                TrinaGridStateManager stateManager = event.stateManager;
+
+                selectRowByName(
+                    stateManager, 'studentName', selectedStudentName);
+              },
+              configuration: const TrinaGridConfiguration(
+                style: TrinaGridStyleConfig(
+                  enableColumnBorderVertical: false,
+                  enableCellBorderVertical: false,
+                ),
+              ),
+              createFooter: (stateManager) {
+                stateManager.setPageSize(20, notify: false);
+                return TrinaPagination(stateManager);
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGradesGrid(
+      ThemeData theme, ColorScheme colorScheme, double availableHeight) {
+    return Container(
+      height: availableHeight,
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: colorScheme.outlineVariant,
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: colorScheme.secondaryContainer.withOpacity(0.3),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(12),
+                topRight: Radius.circular(12),
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.grade_outlined,
+                  color: colorScheme.secondary,
+                  size: 18,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Calificaciones del Estudiante',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: colorScheme.onSurface,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: selectedStudentRows.isNotEmpty
+                ? TrinaGrid(
+                    key: evalsGridKey,
+                    columns: gradesByStudentColumns,
+                    rows: selectedStudentRows,
+                    onChanged: (event) {
+                      // Validator to avoid double type numbers for 'Calif' column
+                      if (event.column.field == 'evaluation') {
+                        // Only allow integers (no decimals)
+                        if (event.value is double ||
+                            (event.value is String &&
+                                event.value.contains('.'))) {
+                          showErrorFromBackend(context,
+                              'Solo se permiten números enteros en la calificación.');
+                          return;
+                        }
+                      }
+                      var newValue = validateNewGradeValue(
+                          event.value, event.column.title);
+
+                      final evalId = event.row.cells['idCicloEscolar']?.value;
+                      int? monthNumber;
+                      if (isUserAdmin || isUserAcademicCoord) {
+                        monthNumber = getKeyFromValue(
+                            spanishMonthsMap, selectedTempMonth!.toCapitalized);
+                      } else {
+                        monthNumber = getKeyFromValue(
+                            spanishMonthsMap, currentMonth.toCapitalized);
+                      }
+
+                      validator();
+                      composeBodyToUpdateGradeBySTudent(
+                        event.column.title,
+                        selectedStudentID!,
+                        newValue,
+                        evalId,
+                        monthNumber,
+                      );
+                    },
+                    onLoaded: (TrinaGridOnLoadedEvent event) {
+                      gridAStateManager = event.stateManager;
+                    },
+                    configuration: const TrinaGridConfiguration(
+                      style: TrinaGridStyleConfig(
+                        enableColumnBorderVertical: false,
+                        enableCellBorderVertical: false,
+                      ),
+                      columnSize: TrinaGridColumnSizeConfig(
+                        autoSizeMode: TrinaAutoSizeMode.scale,
+                        resizeMode: TrinaResizeMode.pushAndPull,
+                      ),
+                    ),
+                  )
+                : Center(
+                    child: Container(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.touch_app_outlined,
+                            size: 40,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'Seleccione un estudiante',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w500,
+                              color: colorScheme.onSurface,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Haga doble clic en un estudiante para ver y editar sus calificaciones',
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1088,50 +1224,66 @@ class _GradesByStudentState extends State<GradesByStudent> {
     await showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(
-              'Asigna comentarios:\nAlumno: $selectedStudentName\nMateria: $subjectName'),
-          titleTextStyle: TextStyle(
-              fontFamily: 'Sora',
-              fontSize: 20,
-              color: FlutterFlowTheme.of(context).primaryText),
-          content: SingleChildScrollView(
-              child: SizedBox(
-            width: MediaQuery.of(context).size.width / 3,
-            child: Column(
-              children: filteredComments.map((comment) {
-                return StatefulBuilder(builder: (context, setState) {
-                  return Column(
-                    children: [
-                      ListTile(
-                        title: Text(comment[
-                            'commentName']), // Assuming 'comment' instead of 'comentname'
-                        trailing: Checkbox(
-                            value: comment['active'],
-                            onChanged: (newValue) async {
-                              var studentRateId = comment['student_rate'];
-                              var commentId = comment['comment'];
-                              var activevalue = newValue;
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            // Get screen size for responsive calculations
+            final screenSize = MediaQuery.of(context).size;
+            final isMobile = screenSize.width <= 600;
 
-                              //await putStudentEvaluationsComments(
-                              //    studentRateId, commentId, activevalue!);
-                              setState(() => comment['active'] = newValue!);
-                            }),
-                      )
-                    ],
-                  );
-                });
-              }).toList(),
-            ),
-          )),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Close'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
+            // Calculate responsive dialog width
+            double dialogWidth;
+            if (isMobile) {
+              dialogWidth = screenSize.width * 0.9; // 90% on mobile
+            } else {
+              dialogWidth = screenSize.width / 3; // 1/3 on larger screens
+            }
+
+            return AlertDialog(
+              title: Text(
+                  'Asigna comentarios:\nAlumno: $selectedStudentName\nMateria: $subjectName'),
+              titleTextStyle: TextStyle(
+                  fontFamily: 'Sora',
+                  fontSize: isMobile ? 16 : 20,
+                  color: FlutterFlowTheme.of(context).primaryText),
+              content: SingleChildScrollView(
+                  child: SizedBox(
+                width: dialogWidth,
+                child: Column(
+                  children: filteredComments.map((comment) {
+                    return StatefulBuilder(builder: (context, setState) {
+                      return Column(
+                        children: [
+                          ListTile(
+                            title: Text(comment['commentName']),
+                            trailing: Checkbox(
+                                value: comment['active'],
+                                onChanged: (newValue) async {
+                                  // Note: Commented out unused variables to fix lint errors
+                                  // var studentRateId = comment['student_rate'];
+                                  // var commentId = comment['comment'];
+                                  // var activevalue = newValue;
+
+                                  //await putStudentEvaluationsComments(
+                                  //    studentRateId, commentId, activevalue!);
+                                  setState(() => comment['active'] = newValue!);
+                                }),
+                          )
+                        ],
+                      );
+                    });
+                  }).toList(),
+                ),
+              )),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('Close'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
         );
       },
     );
