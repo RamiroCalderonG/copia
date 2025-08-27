@@ -1,3 +1,5 @@
+import 'package:oxschool/core/reusable_methods/logger_actions.dart';
+
 class StudentEval {
   int rateID;
   String studentName;
@@ -44,91 +46,95 @@ dynamic getEvalFromJSON(List<dynamic> jsonList, bool isByStudent) {
   if (jsonList.isEmpty) {
     return null;
   } else {
-    if (isByStudent == false) {
-      for (var item in jsonList) {
-        int rateID = item['idCicloEscolar'];
-        String studentName = item['student'];
-        String student1LastName = item['firstlastName'];
-        String student2LastName = item['secondlastName'];
-        String studentID = item['studentID'];
-        //int grades = item['eval_type'];
-        int absence = item['absence_eval'];
-        int homework = item['homework_eval'];
-        int discipline = item['discipline_eval'];
-        int? comment = item['comment'] ?? 0;
-        int habitsEvaluation = item['habit_eval'];
-        //int outfit = item['outfit'];
-        int subject = item['subjectId'];
-        String? subjectName = item['subject_name'];
-        double evaluation = item['evaluation'];
-        int? other = item['other'];
-        int? sequentialNumber = item['NumLista'];
-        studentEval.add(StudentEval(
-            rateID,
-            studentName,
-            student1LastName,
-            student2LastName,
-            studentID,
-            0,
-            absence,
-            homework,
-            discipline,
-            comment,
-            habitsEvaluation,
-            0,
-            subject,
-            subjectName,
-            evaluation,
-            other,
-            '$student1LastName $student2LastName $studentName',
-            sequentialNumber));
+    try {
+      if (isByStudent == false) {
+        for (var item in jsonList) {
+          int rateID = item['idCicloEscolar'];
+          String studentName = item['student'];
+          String student1LastName = item['firstlastName'];
+          String student2LastName = item['secondlastName'];
+          String studentID = item['studentID'];
+          //int grades = item['eval_type'];
+          int absence = item['absence_eval'];
+          int homework = item['homework_eval'];
+          int discipline = item['discipline_eval'];
+          int? comment = item['comment'] ?? 0;
+          int habitsEvaluation = item['habit_eval'];
+          //int outfit = item['outfit'];
+          int subject = item['subjectId'];
+          String? subjectName = item['subject_name'];
+          double evaluation = item['evaluation'];
+          int? other = item['other'];
+          int? sequentialNumber = item['NumLista'];
+          studentEval.add(StudentEval(
+              rateID,
+              studentName,
+              student1LastName,
+              student2LastName,
+              studentID,
+              0,
+              absence,
+              homework,
+              discipline,
+              comment,
+              habitsEvaluation,
+              0,
+              subject,
+              subjectName,
+              evaluation,
+              other,
+              '$student1LastName $student2LastName $studentName',
+              sequentialNumber));
+        }
+        return studentEval;
+      } else {
+        for (var item in jsonList) {
+          int rateID = item['idCicloEscolar'];
+          // String studentName = item['nombre'];
+          // String student1LastName = item['apmaterno'];
+          // String student2LastName = item['apmaterno'];
+          String studentID = item['studentID'];
+          int? grades = 0;
+          int? absence = item['absence_eval'];
+          int? homework = item['homework_eval'];
+          int? discipline = item['discipline_eval'];
+          int comment = item['comment'];
+          int? habitsEvaluation = item['habit_eval'];
+          int? outfit = 0;
+          int? subject = item['subjectId'];
+          String? subjectName = item['subject_name'];
+          double? evaluation = item['evaluation'];
+          int? other = item['other'];
+          String fullName = item['student'] +
+              ' ' +
+              item['firstlastName'] +
+              ' ' +
+              item['secondlastName'];
+          int? sequentialNumber = item['NumLista'];
+          studentEval.add(StudentEval(
+              rateID,
+              '',
+              '',
+              '',
+              studentID,
+              grades,
+              absence,
+              homework,
+              discipline,
+              comment,
+              habitsEvaluation,
+              outfit,
+              subject,
+              subjectName,
+              evaluation,
+              other,
+              fullName,
+              sequentialNumber));
+        }
+        return studentEval;
       }
-      return studentEval;
-    } else {
-      for (var item in jsonList) {
-        int rateID = item['idCicloEscolar'];
-        // String studentName = item['nombre'];
-        // String student1LastName = item['apmaterno'];
-        // String student2LastName = item['apmaterno'];
-        String studentID = item['studentID'];
-        int? grades = 0;
-        int? absence = item['absence_eval'];
-        int? homework = item['homework_eval'];
-        int? discipline = item['discipline_eval'];
-        int comment = item['comment'];
-        int? habitsEvaluation = item['habit_eval'];
-        int? outfit = 0;
-        int? subject = item['subjectId'];
-        String? subjectName = item['subject_name'];
-        double? evaluation = item['evaluation'];
-        int? other = item['other'];
-        String fullName = item['student'] +
-            ' ' +
-            item['firstlastName'] +
-            ' ' +
-            item['secondlastName'];
-        int? sequentialNumber = item['NumLista'];
-        studentEval.add(StudentEval(
-            rateID,
-            '',
-            '',
-            '',
-            studentID,
-            grades,
-            absence,
-            homework,
-            discipline,
-            comment,
-            habitsEvaluation,
-            outfit,
-            subject,
-            subjectName,
-            evaluation,
-            other,
-            fullName,
-            sequentialNumber));
-      }
-      return studentEval;
+    } catch (e) {
+      insertErrorLog(e.toString(), 'getEvalFromJSON');
     }
   }
 }
