@@ -37,14 +37,20 @@ class _UserAttendanceHistoryScreenState
       title: "Empleado",
       field: "employee",
       type: TrinaColumnType.text(),
-      readOnly: true,
+      readOnly: false,
+      checkReadOnly: (row, cell) {
+        return false;
+      },
       width: 200,
     ),
     TrinaColumn(
       title: "No. Empleado",
       field: "employeeNumber",
       type: TrinaColumnType.text(),
-      readOnly: true,
+      readOnly: false,
+      checkReadOnly: (row, cell) {
+        return false;
+      },
       width: 120,
     ),
     TrinaColumn(
@@ -53,21 +59,30 @@ class _UserAttendanceHistoryScreenState
       type: TrinaColumnType.dateTime(
         format: 'yyyy-MM-dd HH:mm:ss',
       ),
-      readOnly: true,
+      readOnly: false,
+      checkReadOnly: (row, cell) {
+        return false;
+      },
       width: 120,
     ),
     TrinaColumn(
       title: "Día",
       field: "day",
       type: TrinaColumnType.text(),
-      readOnly: true,
+      readOnly: false,
+      checkReadOnly: (row, cell) {
+        return false;
+      },
       width: 100,
     ),
     TrinaColumn(
       title: "Ubicación",
       field: "where",
       type: TrinaColumnType.text(),
-      readOnly: true,
+      readOnly: false,
+      checkReadOnly: (row, cell) {
+        return false;
+      },
       width: 150,
     ),
     TrinaColumn(
@@ -77,14 +92,20 @@ class _UserAttendanceHistoryScreenState
         format: '#,##0', // Format for numbers with commas
         negative: false,
       ),
-      readOnly: true,
+      readOnly: false,
+      checkReadOnly: (row, cell) {
+        return false;
+      },
       width: 100,
     ),
     TrinaColumn(
       title: "Origen",
       field: "origin",
       type: TrinaColumnType.text(),
-      readOnly: true,
+      readOnly: false,
+      checkReadOnly: (row, cell) {
+        return false;
+      },
       hide: true,
       width: 100,
     ),

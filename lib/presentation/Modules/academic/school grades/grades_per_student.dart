@@ -346,7 +346,10 @@ class _GradesByStudentState extends State<GradesByStudent> {
             title: 'Materia',
             field: 'subject',
             type: TrinaColumnType.text(),
-            readOnly: true,
+            readOnly: false,
+            checkReadOnly: (row, cell) {
+              return false;
+            },
             hide: true),
         TrinaColumn(
           title: 'Materia',
@@ -355,7 +358,10 @@ class _GradesByStudentState extends State<GradesByStudent> {
           // width: 80,
           //frozen: TrinaColumnFrozen.start,
           sort: TrinaColumnSort.ascending,
-          readOnly: true,
+          readOnly: false,
+          checkReadOnly: (row, cell) {
+            return false;
+          },
         ),
         TrinaColumn(
           title: 'Calif',
@@ -365,11 +371,15 @@ class _GradesByStudentState extends State<GradesByStudent> {
           ),
         ),
         TrinaColumn(
-            title: 'idCalif',
-            field: 'idCicloEscolar',
-            type: TrinaColumnType.number(negative: false),
-            hide: true,
-            readOnly: true),
+          title: 'idCalif',
+          field: 'idCicloEscolar',
+          type: TrinaColumnType.number(negative: false),
+          hide: true,
+          readOnly: false,
+          checkReadOnly: (row, cell) {
+            return false;
+          },
+        ),
         TrinaColumn(
             title: 'Faltas',
             hide: hideAbsencesColumn,
@@ -1049,8 +1059,8 @@ class _GradesByStudentState extends State<GradesByStudent> {
             child: Row(
               children: [
                 Icon(
-                  Icons.groups_outlined,
-                  color: colorScheme.primary,
+                  Icons.groups,
+                  color: Colors.blue,
                   size: 18,
                 ),
                 const SizedBox(width: 8),
@@ -1141,8 +1151,8 @@ class _GradesByStudentState extends State<GradesByStudent> {
             child: Row(
               children: [
                 Icon(
-                  Icons.grade_outlined,
-                  color: colorScheme.secondary,
+                  Icons.grade_rounded,
+                  color: Colors.amber,
                   size: 18,
                 ),
                 const SizedBox(width: 8),
@@ -1163,41 +1173,48 @@ class _GradesByStudentState extends State<GradesByStudent> {
                     columns: gradesByStudentColumns,
                     rows: selectedStudentRows,
                     onChanged: (event) {
-                      // Validator to avoid double type numbers for 'Calif' column
-                      if (event.column.field == 'evaluation') {
-                        // Only allow integers (no decimals)
-                        if (event.value is double ||
-                            (event.value is String &&
-                                event.value.contains('.'))) {
-                          showErrorFromBackend(context,
-                              'Solo se permiten números enteros en la calificación.');
-                          return;
+                      if (_isEditableField(event.column.title)) {
+                        // Process changes for editable columns
+                        // Validator to avoid double type numbers for 'Calif' column
+                        if (event.column.field == 'evaluation') {
+                          // Only allow integers (no decimals)
+                          if (event.value is double ||
+                              (event.value is String &&
+                                  event.value.contains('.'))) {
+                            showErrorFromBackend(context,
+                                'Solo se permiten números enteros en la calificación.');
+                            return;
+                          }
                         }
-                      }
-                      var newValue = validateNewGradeValue(
-                          event.value, event.column.title);
+                        var newValue = validateNewGradeValue(
+                            event.value, event.column.title);
 
-                      final evalId = event.row.cells['idCicloEscolar']?.value;
-                      int? monthNumber;
-                      if (isUserAdmin || isUserAcademicCoord) {
-                        monthNumber = getKeyFromValue(
-                            spanishMonthsMap, selectedTempMonth!.toCapitalized);
+                        final evalId = event.row.cells['idCicloEscolar']?.value;
+                        int? monthNumber;
+                        if (isUserAdmin || isUserAcademicCoord) {
+                          monthNumber = getKeyFromValue(spanishMonthsMap,
+                              selectedTempMonth!.toCapitalized);
+                        } else {
+                          monthNumber = getKeyFromValue(
+                              spanishMonthsMap, currentMonth.toCapitalized);
+                        }
+
+                        validator();
+                        composeBodyToUpdateGradeBySTudent(
+                          event.column.title,
+                          selectedStudentID!,
+                          newValue,
+                          evalId,
+                          monthNumber,
+                        );
+
+                        // Update dirty count for change tracking
+                        updateDirtyCount();
                       } else {
-                        monthNumber = getKeyFromValue(
-                            spanishMonthsMap, currentMonth.toCapitalized);
+                        //revertSelectedCell();
+                        gradesStateManager!.revertChanges(cell: selectedCell);
+                        return;
                       }
-
-                      validator();
-                      composeBodyToUpdateGradeBySTudent(
-                        event.column.title,
-                        selectedStudentID!,
-                        newValue,
-                        evalId,
-                        monthNumber,
-                      );
-
-                      // Update dirty count for change tracking
-                      updateDirtyCount();
                     },
                     onLoaded: (TrinaGridOnLoadedEvent event) {
                       gridAStateManager = event.stateManager;
@@ -1403,6 +1420,16 @@ class _GradesByStudentState extends State<GradesByStudent> {
         );
       },
     );
+  }
+
+  bool _isEditableField(String fieldName) {
+    const restrictedFields = {
+      'No',
+      'Matrícula',
+      'Nombre del alumno',
+      'Materia'
+    };
+    return !restrictedFields.contains(fieldName);
   }
 
   Future<void> saveButtonAction(int? monthNumber) async {

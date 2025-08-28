@@ -1382,105 +1382,150 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
           title: 'Clamateria',
           field: 'Clamateria',
           type: TrinaColumnType.text(),
-          readOnly: true,
+          readOnly: false,
+          checkReadOnly: (row, cell) {
+            return false;
+          },
           width: 100,
         ),
         TrinaColumn(
           title: 'Mes',
           field: 'Mes',
           type: TrinaColumnType.text(),
-          readOnly: true,
+          readOnly: false,
+          checkReadOnly: (row, cell) {
+            return false;
+          },
           width: 80,
         ),
         TrinaColumn(
           title: 'Orden',
           field: 'Orden',
           type: TrinaColumnType.number(),
-          readOnly: true,
+          readOnly: false,
+          checkReadOnly: (row, cell) {
+            return false;
+          },
           width: 80,
         ),
         TrinaColumn(
           title: 'NomGrado',
           field: 'NomGrado',
           type: TrinaColumnType.text(),
-          readOnly: true,
+          readOnly: false,
+          checkReadOnly: (row, cell) {
+            return false;
+          },
           width: 120,
         ),
         TrinaColumn(
           title: 'Valor',
           field: 'Valor',
           type: TrinaColumnType.text(),
-          readOnly: true,
+          readOnly: false,
+          checkReadOnly: (row, cell) {
+            return false;
+          },
           width: 80,
         ),
         TrinaColumn(
           title: 'Tipo',
           field: 'Tipo',
           type: TrinaColumnType.text(),
-          readOnly: true,
+          readOnly: false,
+          checkReadOnly: (row, cell) {
+            return false;
+          },
           width: 80,
         ),
         TrinaColumn(
           title: 'Gp',
           field: 'Gp',
           type: TrinaColumnType.text(),
-          readOnly: true,
+          readOnly: false,
+          checkReadOnly: (row, cell) {
+            return false;
+          },
           width: 60,
         ),
         TrinaColumn(
           title: 'PromedioSiNo',
           field: 'PromedioSiNo',
           type: TrinaColumnType.text(),
-          readOnly: true,
+          readOnly: false,
+          checkReadOnly: (row, cell) {
+            return false;
+          },
           width: 120,
         ),
         TrinaColumn(
           title: 'Nombre',
           field: 'Nombre',
           type: TrinaColumnType.text(),
-          readOnly: true,
+          readOnly: false,
+          checkReadOnly: (row, cell) {
+            return false;
+          },
           width: 200,
         ),
         TrinaColumn(
           title: 'Matricula',
           field: 'Matricula',
           type: TrinaColumnType.text(),
-          readOnly: true,
+          readOnly: false,
+          checkReadOnly: (row, cell) {
+            return false;
+          },
           width: 120,
         ),
         TrinaColumn(
           title: 'Grupo',
           field: 'Grupo',
           type: TrinaColumnType.text(),
-          readOnly: true,
+          readOnly: false,
+          checkReadOnly: (row, cell) {
+            return false;
+          },
           width: 80,
         ),
         TrinaColumn(
           title: 'ClaCiclo',
           field: 'ClaCiclo',
           type: TrinaColumnType.text(),
-          readOnly: true,
+          readOnly: false,
+          checkReadOnly: (row, cell) {
+            return false;
+          },
           width: 100,
         ),
         TrinaColumn(
           title: 'GradoSecuencia',
           field: 'GradoSecuencia',
           type: TrinaColumnType.number(),
-          readOnly: true,
+          readOnly: false,
+          checkReadOnly: (row, cell) {
+            return false;
+          },
           width: 120,
         ),
         TrinaColumn(
           title: 'ClaUN',
           field: 'ClaUN',
           type: TrinaColumnType.text(),
-          readOnly: true,
+          readOnly: false,
+          checkReadOnly: (row, cell) {
+            return false;
+          },
           width: 80,
         ),
         TrinaColumn(
           title: 'NomMateria',
           field: 'NomMateria',
           type: TrinaColumnType.text(),
-          readOnly: true,
+          readOnly: false,
+          checkReadOnly: (row, cell) {
+            return false;
+          },
           width: 200,
         ),
       ];

@@ -36,20 +36,29 @@ final List<TrinaColumn> studentColumnsToEvaluateByStudent = <TrinaColumn>[
       field: 'No',
       type: TrinaColumnType.number(),
       width: 60,
-      readOnly: true,
+      readOnly: false,
+      checkReadOnly: (row, cell) {
+        return false;
+      },
       sort: TrinaColumnSort.ascending),
   TrinaColumn(
       title: 'Matricula',
       field: 'studentID',
       type: TrinaColumnType.text(),
-      readOnly: true,
+      readOnly: false,
+      checkReadOnly: (row, cell) {
+        return false;
+      },
       // sort: TrinaColumnSort.ascending,
       width: 120),
   TrinaColumn(
     title: 'Nombre de alumno',
     field: 'studentName',
     type: TrinaColumnType.text(),
-    readOnly: true,
+    readOnly: false,
+    checkReadOnly: (row, cell) {
+      return false;
+    },
     sort: TrinaColumnSort.ascending,
   ),
 ];
@@ -118,18 +127,26 @@ final List<TrinaColumn> evaluationColumnsToEvaluateByStudent = <TrinaColumn>[];
 
 final List<TrinaColumn> commentsCollumns = [
   TrinaColumn(
-      title: 'id',
-      field: 'idcomment',
-      type: TrinaColumnType.number(),
-      width: 10,
-      hide: true,
-      enableRowChecked: true,
-      readOnly: true),
+    title: 'id',
+    field: 'idcomment',
+    type: TrinaColumnType.number(),
+    width: 10,
+    hide: true,
+    enableRowChecked: true,
+    readOnly: false,
+    checkReadOnly: (row, cell) {
+      return false;
+    },
+  ),
   TrinaColumn(
-      title: 'Comentario',
-      field: 'comentname',
-      type: TrinaColumnType.text(),
-      enableRowChecked: true,
-      readOnly: true),
+    title: 'Comentario',
+    field: 'comentname',
+    type: TrinaColumnType.text(),
+    enableRowChecked: true,
+    readOnly: false,
+    checkReadOnly: (row, cell) {
+      return false;
+    },
+  ),
   TrinaColumn(title: 'Selec', field: 'active', type: TrinaColumnType.text())
 ];

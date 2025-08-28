@@ -110,54 +110,85 @@ class _UsersTableViewState extends State<UsersTableView> {
                             field: 'id',
                             type: TrinaColumnType.number(),
                             readOnly: true,
+                            checkReadOnly: (row, cell) {
+                              return true;
+                            },
                             hide: true,
                             //sort: TrinaColumnSort.ascending,
                             width: 80,
                             // frozen: TrinaColumnFrozen.start
                           ),
                           TrinaColumn(
-                              title: 'Numero de empleado',
-                              field: 'employeeNumber',
-                              width: 100,
-                              type: TrinaColumnType.number(
-                                format: '####',
-                              ),
-                              readOnly: true),
+                            title: 'Numero de empleado',
+                            field: 'employeeNumber',
+                            width: 100,
+                            type: TrinaColumnType.number(
+                              format: '####',
+                            ),
+                            readOnly: false,
+                            checkReadOnly: (row, cell) {
+                              return false;
+                            },
+                          ),
                           TrinaColumn(
-                              title: 'Nombre',
-                              field: 'employeeName',
-                              type: TrinaColumnType.text(),
-                              readOnly: true),
+                            title: 'Nombre',
+                            field: 'employeeName',
+                            type: TrinaColumnType.text(),
+                            readOnly: false,
+                            checkReadOnly: (row, cell) {
+                              return false;
+                            },
+                          ),
 
                           TrinaColumn(
-                              title: 'Rol del usuario',
-                              field: 'userRole',
-                              type: TrinaColumnType.text(),
-                              readOnly: true),
+                            title: 'Rol del usuario',
+                            field: 'userRole',
+                            type: TrinaColumnType.text(),
+                            readOnly: false,
+                            checkReadOnly: (row, cell) {
+                              return false;
+                            },
+                          ),
                           TrinaColumn(
-                              title: 'Campus',
-                              field: 'campus',
-                              type: TrinaColumnType.text(),
-                              readOnly: true),
+                            title: 'Campus',
+                            field: 'campus',
+                            type: TrinaColumnType.text(),
+                            readOnly: false,
+                            checkReadOnly: (row, cell) {
+                              return false;
+                            },
+                          ),
                           TrinaColumn(
-                              title: 'Baja',
-                              field: 'isActive',
-                              type: TrinaColumnType.text(),
-                              width: 70,
-                              readOnly: true),
+                            title: 'Baja',
+                            field: 'isActive',
+                            type: TrinaColumnType.text(),
+                            width: 70,
+                            readOnly: false,
+                            checkReadOnly: (row, cell) {
+                              return false;
+                            },
+                          ),
                           TrinaColumn(
-                              title: 'e-mail',
-                              field: 'mail',
-                              type: TrinaColumnType.text(),
-                              readOnly: true),
+                            title: 'e-mail',
+                            field: 'mail',
+                            type: TrinaColumnType.text(),
+                            readOnly: false,
+                            checkReadOnly: (row, cell) {
+                              return false;
+                            },
+                          ),
                           TrinaColumn(
-                              title: 'idLogin',
-                              field: 'idLogin',
-                              width: 150,
-                              type: TrinaColumnType.number(
-                                format: '####',
-                              ),
-                              readOnly: true),
+                            title: 'idLogin',
+                            field: 'idLogin',
+                            width: 150,
+                            type: TrinaColumnType.number(
+                              format: '####',
+                            ),
+                            readOnly: false,
+                            checkReadOnly: (row, cell) {
+                              return false;
+                            },
+                          ),
                           // TrinaColumn(
                           //   title: 'Fecha de alta',
                           //   field: 'creation',
