@@ -1,13 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/core/reusable_methods/user_functions.dart';
+import 'package:oxschool/core/reusable_methods/temp_data_functions.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
+import 'package:oxschool/core/config/flutter_flow/flutter_flow_util.dart';
 import 'package:oxschool/presentation/Modules/user/user_attendance_screen.dart';
 import 'package:oxschool/presentation/components/confirm_dialogs.dart';
 
 import 'cafeteria_user_consumption.dart';
+
+// Password strength enum for password validation
+enum PasswordStrength {
+  none,
+  weak,
+  fair,
+  good,
+  strong,
+}
 
 class UserWindow extends StatelessWidget {
   const UserWindow({super.key});
@@ -248,7 +260,7 @@ class UserWindow extends StatelessWidget {
                   theme,
                   colorScheme,
                   'Rol',
-                  currentUser!.role!.toTitleCase,
+                  currentUser!.role.toTitleCase,
                   Icons.face_rounded,
                   isMobile,
                 ),
@@ -624,12 +636,18 @@ class UpdateUserPasswordScreen extends StatefulWidget {
 
 class _UpdateUserPasswordScreenState extends State<UpdateUserPasswordScreen> {
   final TextEditingController _newPassword = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
   bool _obscureText = true;
   bool _isLoading = false;
+  bool _isLoggingOut = false; // New state for logout process
 
   @override
   void initState() {
     super.initState();
+    // Add listener to rebuild when password changes for strength indicator
+    _newPassword.addListener(() {
+      setState(() {});
+    });
   }
 
   @override
@@ -638,9 +656,255 @@ class _UpdateUserPasswordScreenState extends State<UpdateUserPasswordScreen> {
     super.dispose();
   }
 
-  Future<dynamic> updateUserPasswordFn(String newPassword) async {
-    var response = await updateUserPassword(newPassword);
-    return response;
+  // Password strength calculator
+  PasswordStrength _getPasswordStrength(String password) {
+    if (password.isEmpty) return PasswordStrength.none;
+    if (password.length < 6) return PasswordStrength.weak;
+    if (password.length < 8) return PasswordStrength.fair;
+
+    int score = 0;
+    if (password.length >= 8) score++;
+    if (RegExp(r'[A-Z]').hasMatch(password)) score++;
+    if (RegExp(r'[a-z]').hasMatch(password)) score++;
+    if (RegExp(r'[0-9]').hasMatch(password)) score++;
+    if (RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password)) score++;
+
+    if (score >= 4) return PasswordStrength.strong;
+    if (score >= 3) return PasswordStrength.good;
+    return PasswordStrength.fair;
+  }
+
+  // Optimized validation method
+  String? _validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'La contraseña es requerida';
+    }
+    if (value.length < 8) {
+      return 'La contraseña debe tener al menos 8 caracteres';
+    }
+    if (value.startsWith(' ') || value.endsWith(' ') || value.contains(' ')) {
+      return 'La contraseña no puede contener espacios en blanco';
+    }
+    if (value.length > 20) {
+      return 'La contraseña no puede exceder 20 caracteres';
+    }
+    return null;
+  }
+
+  // Optimized update function with better error handling and state management
+  Future<void> _updatePassword() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Update password first
+      await updateUserPassword(_newPassword.text.trim());
+
+      if (!mounted) return;
+
+      // Set logout state before showing dialog
+      setState(() {
+        _isLoading = false;
+        _isLoggingOut = true;
+      });
+
+      // Show success dialog and handle user confirmation
+      await _showSuccessAndLogout();
+    } catch (e) {
+      insertErrorLog(e.toString(), 'updateUserPassword() @user_view_screen');
+
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        showErrorFromBackend(context, e.toString());
+      }
+    }
+  }
+
+  // Optimized function to show success dialog and handle logout
+  Future<void> _showSuccessAndLogout() async {
+    try {
+      // Close the password dialog first
+      if (mounted) Navigator.pop(context);
+
+      SnackBar snackBar = SnackBar(
+        backgroundColor: Colors.green,
+        content: Text(
+          'Contraseña Actualizada!! 👍, por favor inicia sesión nuevamente.',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            fontFamily: 'Sora',
+          ),
+        ),
+        duration: Duration(seconds: 5),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      context.goNamed(
+        '_initialize',
+        extra: <String, dynamic>{
+          kTransitionInfoKey: const TransitionInfo(
+            hasTransition: true,
+            transitionType: PageTransitionType.leftToRight,
+          ),
+        },
+      );
+
+      await _performSecureLogout();
+    } catch (e) {
+      insertErrorLog(e.toString(), '_showSuccessAndLogout() @user_view_screen');
+      // Ensure logout happens even if dialog fails
+      await _performSecureLogout();
+    }
+  }
+
+  // Optimized secure logout with proper error handling and cleanup
+  Future<void> _performSecureLogout() async {
+    try {
+      // Log the action for audit trail
+      insertActionIntoLog(
+        'User logged out after password change',
+        currentUser?.employeeNumber?.toString() ?? 'Unknown',
+      );
+
+      // Perform backend logout with timeout
+      if (currentUser != null) {
+        await Future.any([
+          logOutCurrentUser(currentUser!),
+          Future.delayed(const Duration(seconds: 5)), // 5-second timeout
+        ]);
+      }
+
+      // Clear all local data regardless of backend response
+      await _clearAllUserData();
+    } catch (e) {
+      insertErrorLog(e.toString(), '_performSecureLogout() @user_view_screen');
+
+      // Even if logout fails, ensure data is cleared and user is redirected
+      await _clearAllUserData();
+
+      if (mounted) {
+        context.goNamed('_initialize');
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoggingOut = false;
+        });
+      }
+    }
+  }
+
+  // Optimized data clearing with proper error handling
+  Future<void> _clearAllUserData() async {
+    try {
+      // Clear global user data
+      clearUserData();
+      clearTempData();
+
+      // Clear SharedPreferences with error handling
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+    } catch (e) {
+      insertErrorLog(e.toString(), '_clearAllUserData() @user_view_screen');
+      // Continue even if clearing fails - better to have some data left than block the logout
+    }
+  }
+
+  // Helper method to get appropriate button text based on current state
+  String _getButtonText() {
+    if (_isLoggingOut) return 'Cerrando sesión...';
+    if (_isLoading) return 'Guardando...';
+    return 'Cambiar';
+  }
+
+  // Password strength indicator widget
+  Widget _buildPasswordStrengthIndicator() {
+    final strength = _getPasswordStrength(_newPassword.text);
+    if (strength == PasswordStrength.none) return const SizedBox.shrink();
+
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    Color getStrengthColor() {
+      switch (strength) {
+        case PasswordStrength.weak:
+          return Colors.red;
+        case PasswordStrength.fair:
+          return Colors.orange;
+        case PasswordStrength.good:
+          return Colors.blue;
+        case PasswordStrength.strong:
+          return Colors.green;
+        case PasswordStrength.none:
+          return colorScheme.outline;
+      }
+    }
+
+    String getStrengthText() {
+      switch (strength) {
+        case PasswordStrength.weak:
+          return 'Débil';
+        case PasswordStrength.fair:
+          return 'Regular';
+        case PasswordStrength.good:
+          return 'Buena';
+        case PasswordStrength.strong:
+          return 'Fuerte';
+        case PasswordStrength.none:
+          return '';
+      }
+    }
+
+    double getStrengthValue() {
+      switch (strength) {
+        case PasswordStrength.weak:
+          return 0.25;
+        case PasswordStrength.fair:
+          return 0.5;
+        case PasswordStrength.good:
+          return 0.75;
+        case PasswordStrength.strong:
+          return 1.0;
+        case PasswordStrength.none:
+          return 0.0;
+      }
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: LinearProgressIndicator(
+                  value: getStrengthValue(),
+                  backgroundColor: colorScheme.outline.withOpacity(0.2),
+                  valueColor: AlwaysStoppedAnimation<Color>(getStrengthColor()),
+                  minHeight: 4,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                getStrengthText(),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: getStrengthColor(),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -669,102 +933,92 @@ class _UpdateUserPasswordScreenState extends State<UpdateUserPasswordScreen> {
             ),
           ),
           const SizedBox(width: 12),
-          Text(
-            'Cambiar Contraseña',
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
+          Expanded(
+            child: Text(
+              'Cambiar Contraseña',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],
       ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Ingresa tu nueva contraseña para actualizar tus credenciales de acceso.',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
-            controller: _newPassword,
-            obscureText: _obscureText,
-            autofocus: true,
-            autocorrect: false,
-            maxLength: 20,
-            decoration: InputDecoration(
-              labelText: 'Nueva Contraseña',
-              hintText: 'Mínimo 8 caracteres',
-              prefixIcon: const Icon(Icons.lock_rounded),
-              suffixIcon: IconButton(
-                onPressed: () {
-                  setState(() {
-                    _obscureText = !_obscureText;
-                  });
-                },
-                icon: Icon(
-                  _obscureText
-                      ? Icons.visibility_rounded
-                      : Icons.visibility_off_rounded,
-                ),
+      content: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              _isLoggingOut
+                  ? 'Cerrando sesión de forma segura...'
+                  : 'Ingresa tu nueva contraseña para actualizar tus credenciales de acceso.',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: _isLoggingOut
+                    ? colorScheme.primary
+                    : colorScheme.onSurfaceVariant,
+                fontWeight: _isLoggingOut ? FontWeight.w600 : null,
               ),
-              border: const OutlineInputBorder(),
-              filled: true,
-              fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.3),
             ),
-          ),
-        ],
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _newPassword,
+              obscureText: _obscureText,
+              autofocus: true,
+              autocorrect: false,
+              maxLength: 20,
+              enabled:
+                  !(_isLoading || _isLoggingOut), // Disable during operations
+              validator: _validatePassword,
+              textInputAction: TextInputAction.done,
+              onFieldSubmitted: (_) {
+                if (!(_isLoading || _isLoggingOut)) {
+                  _updatePassword();
+                }
+              },
+              decoration: InputDecoration(
+                labelText: 'Nueva Contraseña',
+                hintText: 'Mínimo 8 caracteres',
+                prefixIcon: const Icon(Icons.lock_rounded),
+                suffixIcon: IconButton(
+                  onPressed: (_isLoading || _isLoggingOut)
+                      ? null
+                      : () {
+                          setState(() {
+                            _obscureText = !_obscureText;
+                          });
+                        },
+                  icon: Icon(
+                    _obscureText
+                        ? Icons.visibility_rounded
+                        : Icons.visibility_off_rounded,
+                  ),
+                  tooltip: _obscureText
+                      ? 'Mostrar contraseña'
+                      : 'Ocultar contraseña',
+                ),
+                border: const OutlineInputBorder(),
+                filled: true,
+                fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                counterText: '', // Hide character counter for cleaner look
+              ),
+            ),
+            _buildPasswordStrengthIndicator(),
+          ],
+        ),
       ),
       actions: [
         TextButton(
-          onPressed: () {
-            _newPassword.clear();
-            Navigator.pop(context);
-          },
+          onPressed: (_isLoading || _isLoggingOut)
+              ? null
+              : () {
+                  Navigator.pop(context);
+                },
           child: const Text('Cancelar'),
         ),
         FilledButton.icon(
-          onPressed: _isLoading
-              ? null
-              : () {
-                  if (_newPassword.text.length < 8) {
-                    showErrorFromBackend(context,
-                        'La contraseña debe tener al menos 8 caracteres');
-                    return;
-                  }
-                  if (_newPassword.text.startsWith(' ') ||
-                      _newPassword.text.endsWith(' ') ||
-                      _newPassword.text.contains(' ')) {
-                    showErrorFromBackend(context,
-                        'Su contraseña no puede contener espacios en blanco');
-                    return;
-                  }
-
-                  try {
-                    setState(() {
-                      _isLoading = true;
-                    });
-                    updateUserPasswordFn(_newPassword.text.trim())
-                        .whenComplete(() {
-                      setState(() {
-                        _isLoading = false;
-                      });
-                      Navigator.pop(context);
-                      showConfirmationDialog(
-                          context, 'Éxito', 'Contraseña cambiada con éxito');
-                    });
-                  } catch (e) {
-                    setState(() {
-                      _isLoading = false;
-                    });
-                    insertErrorLog(
-                        e.toString(), 'updateUserPassword() @user_view_screen');
-                    showErrorFromBackend(context, e.toString());
-                  }
-                },
-          icon: _isLoading
+          onPressed: (_isLoading || _isLoggingOut) ? null : _updatePassword,
+          icon: (_isLoading || _isLoggingOut)
               ? SizedBox(
                   width: 16,
                   height: 16,
@@ -774,7 +1028,7 @@ class _UpdateUserPasswordScreenState extends State<UpdateUserPasswordScreen> {
                   ),
                 )
               : const Icon(Icons.save_rounded),
-          label: Text(_isLoading ? 'Guardando...' : 'Cambiar'),
+          label: Text(_getButtonText()),
         ),
       ],
     );

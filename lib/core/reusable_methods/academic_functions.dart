@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/data/Models/AcademicEvaluationsComment.dart';
@@ -190,7 +189,7 @@ Future<void> getSingleTeacherAssignatures(List<dynamic> apiResponse) async {
 
 Future<List<dynamic>> getStudentsByTeacher(String selectedCycle) async {
   var response = await getStudentsByRole(selectedCycle);
-  List<dynamic> jsonList = response.data;
+  dynamic jsonList = response.data;
 
   for (var item in jsonList) {
     String campus = item['Claun'];
@@ -468,7 +467,7 @@ void composeUpdateStudentGradesBody(
   SharedPreferences devicePrefs = await SharedPreferences.getInstance();
   int? idSesion = devicePrefs.getInt("idSession");
 
-  if (key == 'Calif') {
+  if (key == 'Calificación') {
     key = 'eval';
   }
 
