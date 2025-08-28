@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:oxschool/presentation/Modules/login_view/login_view_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';

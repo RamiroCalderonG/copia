@@ -28,7 +28,6 @@
 /// - Self-signed certificate support for development/testing environments
 ///
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';

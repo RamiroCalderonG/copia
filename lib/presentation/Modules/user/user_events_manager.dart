@@ -105,10 +105,10 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
                               onChanged: (value) {
                                 var moduleId;
                                 setState(() {
-                                  moduleEvents.forEach((event) {
+                                  for (var event in moduleEvents) {
                                     event.canAccessModule = value;
                                     moduleId = event.moduleId;
-                                  });
+                                  }
                                 });
                                 updateStatusAccess(
                                     widget.roleID, 0, value, moduleId);
@@ -139,10 +139,10 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
                                 onChanged: (value) {
                                   var screenId;
                                   setState(() {
-                                    screenEvents.forEach((event) {
+                                    for (var event in screenEvents) {
                                       event.canAccessScreen = value;
                                       screenId = event.screenId;
-                                    });
+                                    }
                                   });
                                   updateStatusAccess(
                                       widget.roleID, 1, value, screenId);

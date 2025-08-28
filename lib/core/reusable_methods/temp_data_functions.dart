@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 import 'package:oxschool/core/constants/screens.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
@@ -9,7 +8,6 @@ import 'package:oxschool/data/Models/Event.dart';
 import 'package:oxschool/data/Models/Module.dart';
 import 'package:oxschool/data/Models/Role.dart';
 import 'package:oxschool/data/datasources/temp/users_temp_data.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/services/backend/api_requests/api_calls_list_dio.dart';
 
