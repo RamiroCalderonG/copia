@@ -89,6 +89,48 @@ Future<int> showConfirmationDialog(
   return completer.future;
 }
 
+Future<int> showSuccessWithConfirmationDialog(
+    //Display a confirmation dialog that will wait for the user to click ok to close and continue with the app
+    BuildContext context,
+    String titleText,
+    String contentText) async {
+  Completer<int> completer = Completer<int>();
+  showDialog(
+    barrierDismissible: false,
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        icon: const Icon(
+          Icons.warning,
+          color: Colors.amber,
+        ),
+        title: Text(titleText, style: const TextStyle(fontFamily: 'Sora')),
+        content: Text(contentText),
+        actions: [
+          TextButton(
+            style: ButtonStyle(
+                backgroundColor: WidgetStatePropertyAll(
+                    FlutterFlowTheme.of(context)
+                        .tertiary //Color.fromARGB(255, 203, 242, 173)
+                    )),
+            onPressed: () {
+              Navigator.of(context).pop();
+              completer.complete(1); // User selected 'Yes'
+            },
+            child: Text('Confirmar',
+                style: FlutterFlowTheme.of(context).labelLarge.override(
+                      fontFamily: 'Roboto',
+                      color: FlutterFlowTheme.of(context).primaryText,
+                      fontWeight: FontWeight.w500,
+                    )),
+          ),
+        ],
+      );
+    },
+  );
+  return completer.future;
+}
+
 //To display error from backend
 void showErrorFromBackend(BuildContext context, String errorMessage) {
   showDialog(

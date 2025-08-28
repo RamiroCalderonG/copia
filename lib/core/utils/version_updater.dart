@@ -1,8 +1,6 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_util.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list_dio.dart';
-import 'package:oxschool/presentation/components/confirm_dialogs.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import 'dart:io';
