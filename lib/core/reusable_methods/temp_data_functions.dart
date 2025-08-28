@@ -23,14 +23,14 @@ void clearTempData() {
   tmpRolesList.clear();
   userRoles.clear();
   uniqueItems.clear();
-  SharedPreferences.getInstance().then((prefs) {
-    prefs.remove('isUserAdmin');
-    prefs.remove('idSession');
-    prefs.remove('ip');
-    prefs.remove('device');
-    prefs.remove('token');
-    prefs.remove('currentUserEmail');
-  });
+  // SharedPreferences.getInstance().then((prefs) {
+  //   prefs.remove('isUserAdmin');
+  //   prefs.remove('idSession');
+  //   prefs.remove('ip');
+  //   prefs.remove('device');
+  //   prefs.remove('token');
+  //   prefs.remove('currentUserEmail');
+  // });
 }
 
 List<Map<String, List<String>>> getUniqueItems(

@@ -108,9 +108,9 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
   List<TrinaColumn> get assignaturesColumns => [
         //TO USE at grades_by_assignature
         TrinaColumn(
-          title: 'No.',
+          title: 'No. List',
           field: 'No',
-          width: 80,
+          width: 60,
           type: TrinaColumnType.number(),
           readOnly: true,
         ),

@@ -50,11 +50,11 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           path: '/',
           builder: (context, _) => const LoginViewWidget(),
         ),
-        FFRoute(
-          name: 'LoginView',
-          path: '/loginView',
-          builder: (context, params) => const LoginViewWidget(),
-        ),
+        // FFRoute(
+        //   name: 'LoginView',
+        //   path: '/loginView',
+        //   builder: (context, params) => const LoginViewWidget(),
+        // ),
         FFRoute(
           name: 'MainWindow',
           path: '/mainWindow',
