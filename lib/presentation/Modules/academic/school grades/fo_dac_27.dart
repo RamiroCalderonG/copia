@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import 'package:intl/intl.dart';
@@ -87,46 +86,63 @@ class _FoDac27State extends State<FoDac27> {
       title: 'Fecha',
       field: 'date',
       type: TrinaColumnType.text(),
-      readOnly: true,
+      readOnly: false,
+      checkReadOnly: (row, cell) {
+        return false;
+      },
     ),
     TrinaColumn(
       title: 'Matricula',
       field: 'studentID',
       type: TrinaColumnType.text(),
-      readOnly: true,
+      readOnly: false,
+      checkReadOnly: (row, cell) {
+        return false;
+      },
     ),
     TrinaColumn(
-        title: 'Obs',
-        field: 'Obs',
-        type: TrinaColumnType.text(),
-        renderer: (rendererContext) {
-          return Tooltip(
-            message: rendererContext.cell.value,
-            child: Container(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                rendererContext.cell.value,
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1, // You can adjust this as needed
-                style: const TextStyle(
-                  fontSize: 14, // Adjust font size as needed
-                  color: Colors.black, // Set the text color to black
-                ),
+      title: 'Obs',
+      field: 'Obs',
+      type: TrinaColumnType.text(),
+      renderer: (rendererContext) {
+        return Tooltip(
+          message: rendererContext.cell.value,
+          child: Container(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              rendererContext.cell.value,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1, // You can adjust this as needed
+              style: const TextStyle(
+                fontSize: 14, // Adjust font size as needed
+                color: Colors.black, // Set the text color to black
               ),
             ),
-          );
-        },
-        readOnly: true),
+          ),
+        );
+      },
+      readOnly: false,
+      checkReadOnly: (row, cell) {
+        return false;
+      },
+    ),
     TrinaColumn(
         title: 'Materia',
         field: 'subject',
         type: TrinaColumnType.text(),
-        readOnly: true),
+        readOnly: false,
+        checkReadOnly: (row, cell) {
+          return false;
+        }),
     TrinaColumn(
-        title: 'Maestro',
-        field: 'teacher',
-        type: TrinaColumnType.text(),
-        readOnly: true),
+      title: 'Maestro',
+      field: 'teacher',
+      type: TrinaColumnType.text(),
+      readOnly: false,
+      checkReadOnly: (row, cell) {
+        return false;
+      },
+    ),
   ];
 
   @override

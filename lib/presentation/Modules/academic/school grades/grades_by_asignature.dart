@@ -112,32 +112,47 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
           field: 'No',
           width: 60,
           type: TrinaColumnType.number(),
-          readOnly: true,
+          readOnly: false,
+          checkReadOnly: (row, cell) {
+            return false;
+          },
         ),
         TrinaColumn(
             title: 'Matrícula',
             field: 'Matricula',
             type: TrinaColumnType.text(),
-            readOnly: true,
+            readOnly: false,
+            checkReadOnly: (row, cell) {
+              return false;
+            },
             width: 120),
         TrinaColumn(
           title: 'Nombre',
           field: 'Nombre',
           type: TrinaColumnType.text(),
-          readOnly: true,
+          readOnly: false,
+          checkReadOnly: (row, cell) {
+            return false;
+          },
           width: 180,
         ),
         TrinaColumn(
             title: 'Apellido Paterno',
             field: 'Apellido paterno',
             type: TrinaColumnType.text(),
-            readOnly: true,
+            readOnly: false,
+            checkReadOnly: (row, cell) {
+              return false;
+            },
             width: 150),
         TrinaColumn(
             title: 'Apellido Materno',
             field: 'Apellido materno',
             type: TrinaColumnType.text(),
-            readOnly: true,
+            readOnly: false,
+            checkReadOnly: (row, cell) {
+              return false;
+            },
             width: 150),
         TrinaColumn(
             title: 'Calificación',
@@ -146,10 +161,15 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
             readOnly: false,
             width: 120),
         TrinaColumn(
-            title: 'idCalif',
-            field: 'idCalif',
-            type: TrinaColumnType.number(negative: false),
-            hide: true),
+          title: 'idCalif',
+          field: 'idCalif',
+          type: TrinaColumnType.number(negative: false),
+          hide: true,
+          readOnly: false,
+          checkReadOnly: (row, cell) {
+            return false;
+          },
+        ),
         TrinaColumn(
             hide: hideAbsencesColumn,
             title: 'Faltas',
@@ -175,7 +195,10 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
             title: 'Hábitos',
             hide: hideHabitsColumn,
             field: 'habit_eval',
-            readOnly: true,
+            readOnly: false,
+            checkReadOnly: (row, cell) {
+              return false;
+            },
             type: TrinaColumnType.number(negative: false),
             width: 100),
         TrinaColumn(
@@ -216,29 +239,81 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
   // Change tracking methods
   void commitChanges() {
     if (_disposed || stateManager == null) return;
-    stateManager!.commitChanges();
+
+    // Only commit changes for editable columns
+    for (var row in assignatureRows) {
+      for (var entry in row.cells.entries) {
+        final fieldName = entry.key;
+        final cell = entry.value;
+
+        if (_isEditableField(fieldName) && cell.isDirty) {
+          stateManager!.commitChanges(cell: cell);
+        }
+      }
+    }
     updateDirtyCount();
   }
 
   void revertChanges() {
     if (_disposed || stateManager == null) return;
-    stateManager!.revertChanges();
+
+    // Only revert changes for editable columns
+    for (var row in assignatureRows) {
+      for (var entry in row.cells.entries) {
+        final fieldName = entry.key;
+        final cell = entry.value;
+
+        if (_isEditableField(fieldName) && cell.isDirty) {
+          stateManager!.revertChanges(cell: cell);
+        }
+      }
+    }
     updateDirtyCount();
   }
 
   void commitSelectedCell() {
     if (_disposed || stateManager == null) return;
     if (selectedCell != null) {
-      stateManager!.commitChanges(cell: selectedCell);
-      updateDirtyCount();
+      // Find the field name for the selected cell
+      String? fieldName;
+      for (var row in assignatureRows) {
+        for (var entry in row.cells.entries) {
+          if (entry.value == selectedCell) {
+            fieldName = entry.key;
+            break;
+          }
+        }
+        if (fieldName != null) break;
+      }
+
+      // Only commit if it's an editable field
+      if (fieldName != null && _isEditableField(fieldName)) {
+        stateManager!.commitChanges(cell: selectedCell);
+        updateDirtyCount();
+      }
     }
   }
 
   void revertSelectedCell() {
     if (_disposed || stateManager == null) return;
     if (selectedCell != null) {
-      stateManager!.revertChanges(cell: selectedCell);
-      updateDirtyCount();
+      // Find the field name for the selected cell
+      String? fieldName;
+      for (var row in assignatureRows) {
+        for (var entry in row.cells.entries) {
+          if (entry.value == selectedCell) {
+            fieldName = entry.key;
+            break;
+          }
+        }
+        if (fieldName != null) break;
+      }
+
+      // Only revert if it's an editable field
+      if (fieldName != null && _isEditableField(fieldName)) {
+        stateManager!.revertChanges(cell: selectedCell);
+        updateDirtyCount();
+      }
     }
   }
 
@@ -251,8 +326,12 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
 
       int count = 0;
       for (var row in assignatureRows) {
-        for (var cell in row.cells.values) {
-          if (cell.isDirty) {
+        for (var entry in row.cells.entries) {
+          final fieldName = entry.key;
+          final cell = entry.value;
+
+          // Only count dirty cells for editable columns
+          if (_isEditableField(fieldName) && cell.isDirty) {
             count++;
           }
         }
@@ -263,6 +342,19 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
         });
       }
     });
+  }
+
+  /// Helper method to check if a field is editable (not in the restricted list)
+  bool _isEditableField(String fieldName) {
+    const restrictedFields = {
+      'No. List',
+      'Matrícula',
+      'Nombre',
+      'Apellido Paterno',
+      'Apellido Materno',
+      'idCalif'
+    };
+    return !restrictedFields.contains(fieldName);
   }
 
   Future<void> searchBUttonAction(
@@ -961,18 +1053,24 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                 columns: assignaturesColumns,
                 rows: assignatureRows,
                 onChanged: (event) {
-                  // Validator to avoid double type numbers for 'Calif' column
-                  final idEval = event.row.cells['idCalif']?.value as int;
+                  // Only process changes for editable columns
+                  if (_isEditableField(event.column.title)) {
+                    // Process changes for editable columns
+                    final idEval = event.row.cells['idCalif']?.value as int;
+                    var newValue = validateNewGradeValue(
+                        //Validate values cant be les that 50
+                        event.value,
+                        event.column.title);
+                    composeUpdateStudentGradesBody(
+                        event.column.title, newValue, idEval);
 
-                  var newValue = validateNewGradeValue(
-                      //Validate values cant be les that 50
-                      event.value,
-                      event.column.title);
-                  composeUpdateStudentGradesBody(
-                      event.column.title, newValue, idEval);
-
-                  // Update dirty count for change tracking
-                  updateDirtyCount();
+                    // Update dirty count for change tracking
+                    updateDirtyCount();
+                  } else {
+                    //revertSelectedCell();
+                    stateManager!.revertChanges(cell: selectedCell);
+                    return;
+                  }
                 },
                 onLoaded: (event) {
                   // Store state manager reference and enable change tracking

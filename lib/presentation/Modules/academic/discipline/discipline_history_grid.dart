@@ -35,76 +35,113 @@ class _DisciplineHistoryGridState extends State<DisciplineHistoryGrid> {
         title: "Matrícula",
         field: "studentId",
         type: TrinaColumnType.text(),
-        readOnly: true,
+        readOnly: false,
+        checkReadOnly: (row, cell) {
+          return false;
+        },
         width: 110),
     TrinaColumn(
         title: "Ciclo",
         field: "cycle",
         type: TrinaColumnType.text(),
-        readOnly: true,
+        readOnly: false,
+        checkReadOnly: (row, cell) {
+          return false;
+        },
         width: 120),
     TrinaColumn(
-        title: "Alumno",
-        field: "student",
-        type: TrinaColumnType.text(),
-        readOnly: true),
+      title: "Alumno",
+      field: "student",
+      type: TrinaColumnType.text(),
+      readOnly: false,
+      checkReadOnly: (row, cell) {
+        return false;
+      },
+    ),
     TrinaColumn(
         title: "Campus",
         field: "campus",
         type: TrinaColumnType.text(),
-        readOnly: true,
+        readOnly: false,
+        checkReadOnly: (row, cell) {
+          return false;
+        },
         width: 110),
     TrinaColumn(
         title: "Grado",
         field: "academicLevel",
         type: TrinaColumnType.number(),
-        readOnly: true,
+        readOnly: false,
+        checkReadOnly: (row, cell) {
+          return false;
+        },
         width: 80),
     TrinaColumn(
         title: "Grupo",
         field: "group",
         type: TrinaColumnType.text(),
-        readOnly: true,
+        readOnly: false,
+        checkReadOnly: (row, cell) {
+          return false;
+        },
         width: 80),
     TrinaColumn(
       title: "Total",
       field: "total",
       type: TrinaColumnType.number(),
-      readOnly: true,
+      readOnly: false,
+      checkReadOnly: (row, cell) {
+        return false;
+      },
       width: 80,
     ),
     TrinaColumn(
         title: "Menores",
         field: "minors",
         type: TrinaColumnType.text(),
-        readOnly: true,
+        readOnly: false,
+        checkReadOnly: (row, cell) {
+          return false;
+        },
         width: 100),
     TrinaColumn(
       title: "Mayores",
       field: "mayors",
       type: TrinaColumnType.text(),
-      readOnly: true,
+      readOnly: false,
+      checkReadOnly: (row, cell) {
+        return false;
+      },
       width: 100,
     ),
     TrinaColumn(
       title: "Notif1",
       field: "notif1",
       type: TrinaColumnType.number(),
-      readOnly: true,
+      readOnly: false,
+      checkReadOnly: (row, cell) {
+        return false;
+      },
       width: 90,
     ),
     TrinaColumn(
       title: "Notif2",
       field: "notif2",
       type: TrinaColumnType.number(),
-      readOnly: true,
+      readOnly: false,
+      checkReadOnly: (row, cell) {
+        return false;
+      },
       width: 90,
     ),
     TrinaColumn(
         title: "Notif3",
         field: "notif3",
         type: TrinaColumnType.number(),
-        readOnly: true,
+        readOnly: false,
+        checkReadOnly: (row, cell) {
+          return false;
+        },
         width: 90)
   ];
 

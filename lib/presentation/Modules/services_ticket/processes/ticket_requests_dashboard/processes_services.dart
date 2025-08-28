@@ -562,107 +562,166 @@ class _ProcessesState extends State<Processes> {
         title: 'Id',
         field: 'id',
         type: TrinaColumnType.number(),
-        readOnly: true,
+        readOnly: false,
+        checkReadOnly: (row, cell) {
+          return false;
+        },
         enableRowChecked: true),
     TrinaColumn(
         title: 'Reportado por',
         field: 'reportedBy',
         type: TrinaColumnType.text(),
-        readOnly: true),
+        readOnly: false,
+        checkReadOnly: (row, cell) {
+          return false;
+        }),
     TrinaColumn(
         title: 'Departamento que solicita',
         field: 'departmentWhoRequest',
         type: TrinaColumnType.text(),
-        readOnly: true),
+        readOnly: false,
+        checkReadOnly: (row, cell) {
+          return false;
+        }),
     TrinaColumn(
-        title: 'Capturado por',
-        field: 'capturedBy',
-        type: TrinaColumnType.text(),
-        readOnly: true),
+      title: 'Capturado por',
+      field: 'capturedBy',
+      type: TrinaColumnType.text(),
+      readOnly: false,
+      checkReadOnly: (row, cell) {
+        return false;
+      },
+    ),
     TrinaColumn(
-        title: 'Departamento al que se solicita',
-        field: 'depRequestIsMadeTo',
-        type: TrinaColumnType.text(),
-        readOnly: true),
+      title: 'Departamento al que se solicita',
+      field: 'depRequestIsMadeTo',
+      type: TrinaColumnType.text(),
+      readOnly: false,
+      checkReadOnly: (row, cell) {
+        return false;
+      },
+    ),
     TrinaColumn(
-        title: 'Asignado a ',
-        field: 'assignedTo',
-        type: TrinaColumnType.text(),
-        readOnly: true),
+      title: 'Asignado a ',
+      field: 'assignedTo',
+      type: TrinaColumnType.text(),
+      readOnly: false,
+      checkReadOnly: (row, cell) {
+        return false;
+      },
+    ),
     TrinaColumn(
-        title: 'Campus',
-        field: 'campus',
-        type: TrinaColumnType.text(),
-        readOnly: true),
+      title: 'Campus',
+      field: 'campus',
+      type: TrinaColumnType.text(),
+      readOnly: false,
+      checkReadOnly: (row, cell) {
+        return false;
+      },
+    ),
     TrinaColumn(
-        title: 'Fecha de elaboración',
-        field: 'requestCreationDate',
-        type: TrinaColumnType.date(format: 'yyy-MM-dd'),
-        sort: TrinaColumnSort.ascending,
-        enableSorting: true,
-        readOnly: true),
+      title: 'Fecha de elaboración',
+      field: 'requestCreationDate',
+      type: TrinaColumnType.date(format: 'yyy-MM-dd'),
+      sort: TrinaColumnSort.ascending,
+      enableSorting: true,
+      readOnly: false,
+      checkReadOnly: (row, cell) {
+        return false;
+      },
+    ),
     TrinaColumn(
-        title: 'Fecha para cuando se solicita',
-        field: 'requesDate',
-        type: TrinaColumnType.date(format: 'yyy-MM-dd'),
-        readOnly: true),
+      title: 'Fecha para cuando se solicita',
+      field: 'requesDate',
+      type: TrinaColumnType.date(format: 'yyy-MM-dd'),
+      readOnly: false,
+      checkReadOnly: (row, cell) {
+        return false;
+      },
+    ),
     TrinaColumn(
-        title: 'Fecha compromiso',
-        field: 'deadline',
-        type: TrinaColumnType.date(format: 'yyy-MM-dd'),
-        readOnly: true),
+      title: 'Fecha compromiso',
+      field: 'deadline',
+      type: TrinaColumnType.date(format: 'yyy-MM-dd'),
+      readOnly: false,
+      checkReadOnly: (row, cell) {
+        return false;
+      },
+    ),
     TrinaColumn(
-        title: 'Fecha de término',
-        field: 'closureDate',
-        type: TrinaColumnType.date(format: 'yyy-MM-dd'),
-        readOnly: true),
+      title: 'Fecha de término',
+      field: 'closureDate',
+      type: TrinaColumnType.date(format: 'yyy-MM-dd'),
+      readOnly: false,
+      checkReadOnly: (row, cell) {
+        return false;
+      },
+    ),
     TrinaColumn(
-        title: 'Descripción',
-        field: 'description',
-        type: TrinaColumnType.text(),
-        renderer: (rendererContext) {
-          final description = rendererContext.cell.value ?? 'Sin description';
-          return Tooltip(
-              message: description,
-              child: Text(
-                description,
-                overflow: TextOverflow.clip,
-                maxLines: 4,
-              ));
-        },
-        readOnly: true),
+      title: 'Descripción',
+      field: 'description',
+      type: TrinaColumnType.text(),
+      renderer: (rendererContext) {
+        final description = rendererContext.cell.value ?? 'Sin description';
+        return Tooltip(
+            message: description,
+            child: Text(
+              description,
+              overflow: TextOverflow.clip,
+              maxLines: 4,
+            ));
+      },
+      readOnly: false,
+      checkReadOnly: (row, cell) {
+        return false;
+      },
+    ),
     TrinaColumn(
-        title: 'Observaciones',
-        field: 'observations',
-        renderer: (rendererContext) {
-          final description = rendererContext.cell.value ?? 'Sin Observaciones';
-          return Tooltip(
-              message: description,
-              child: Text(
-                description,
-                overflow: TextOverflow.fade,
-                maxLines: 4,
-              ));
-        },
-        type: TrinaColumnType.text(),
-        readOnly: true),
+      title: 'Observaciones',
+      field: 'observations',
+      renderer: (rendererContext) {
+        final description = rendererContext.cell.value ?? 'Sin Observaciones';
+        return Tooltip(
+            message: description,
+            child: Text(
+              description,
+              overflow: TextOverflow.fade,
+              maxLines: 4,
+            ));
+      },
+      type: TrinaColumnType.text(),
+      readOnly: false,
+      checkReadOnly: (row, cell) {
+        return false;
+      },
+    ),
     TrinaColumn(
         title: 'Estatus',
         field: 'status',
         type: TrinaColumnType.number(),
-        readOnly: true,
+        readOnly: false,
+        checkReadOnly: (row, cell) {
+          return false;
+        },
         hide: true),
     TrinaColumn(
       title: '¿Fecha compromiso en tiempo?',
       field: 'deadLineOnTime',
       type: TrinaColumnType.text(),
-      readOnly: true,
+      readOnly: false,
+      checkReadOnly: (row, cell) {
+        return false;
+      },
     ),
     TrinaColumn(
-        title: '¿Fecha de solicitud en tiempo?',
-        field: 'requesttedDateOnTime',
-        type: TrinaColumnType.text(),
-        readOnly: true)
+      title: '¿Fecha de solicitud en tiempo?',
+      field: 'requesttedDateOnTime',
+      type: TrinaColumnType.text(),
+      readOnly: false,
+      checkReadOnly: (row, cell) {
+        return false;
+      },
+    )
   ];
 
   handleRefresh() async {
