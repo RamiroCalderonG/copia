@@ -1,12 +1,7 @@
 
 # ERP Oxschool
 
-Migración de sistema ERP para multiplataforma.
-
-
-
-
-
+Sistema ERP para Ox School desarrollado en Dart con Flutter, usando Dio para conección para 
 
 
 ## Documentation
@@ -20,9 +15,10 @@ Migración de sistema ERP para multiplataforma.
   Una vez con archivo .exe se crea el instalador con el uso de InnoSetup
 
 - Para MacOS
-  *Pendiente crear script que ubique archivos y permisos necesarios que se ejecute con sudo*
+    Ejecutar InstallerScritpNew -> Seleccionar oxschool.app -> Seleccionar update.scpt -> Seleccionar oxsUpdaterHelper
 
-### Versioning
+
+### Deployment
 Para el manejo de versiones el procedimiento para aplciacion de escritorio es el siguiente:
 * Se contruye el proyecto para Windows y MacOS, posteriormente se carga en Github la nueva version como un release y en la tabla app_versions se crea un nuevo registro con la nueva version
 
@@ -42,8 +38,6 @@ Pasos para Windows
 - Cargar en Release de Github 
 
 **NOTA:**
-
-
 Pasos para MacOS
 - Construir .app
      ```bash
@@ -69,29 +63,27 @@ Y para que este pueda trabajar correctamente se debe incluir los siguientes perm
 ```bash
   ALL ALL=(ALL) NOPASSWD: /usr/bin/xattr -dr com.apple.quarantine
 ```
-
+**Updater Helper Repository** [oxsUpdaterHelper Repo](https://github.com/ericksanr/oxsUpdaterHelper/tree/main)
 - Para insertar presionar i y posteriormente agregar la linea, luego presionar CTRL+C y luego :qw
 
-##TODO 🚀
-*PENDIENTE DE AGREGAR PROCESO EN UN SCRIPT AL MOMENTO DE HACER LA INSTALACION*
+
+ ### Cargar en Github Releases con la siguiente estructura
+  1.- Installer_MacOs.zip : Debe llevar oxschool.app, InstallerScritpNew, oxsUpdaterHelper, update.scpt
+  2.- macOs.zip : Debe llevar oxschool.app
+  3.- windows.zip : Debe llevar oxschool.exe junto con los archivos .dll , carpeta de data y updateHelper.bat
+  4.- Installer_Windows.exe : Debe llevar el instalador (OxsInstaller.exe)
 
 
-**Updater Helper** [oxsUpdaterHelper Repo](https://github.com/ericksanr/oxsUpdaterHelper/tree/main)
+## Development
 
-
-
-
-
-## Deployment
-
-1- Para ejecutar este proyecto es necesario instalar Dart SDK
+1.- Para ejecutar este proyecto es necesario instalar Dart SDK
 https://dart.dev/get-dart
 
 - Windows
 ```bash
   choco install dart-sdk
 ```
-2- Instalar Flutter SDK
+2.- Instalar Flutter SDK
 https://docs.flutter.dev/get-started/install
 
 
@@ -100,22 +92,11 @@ https://docs.flutter.dev/get-started/install
   java -jar [FILE_LOCATION]
 ```
 
-## Environment Variables
-
-To run this project, you will need to add the following environment variables to your .env file
-
-`API_KEY` Pending to update
-
-`ANOTHER_API_KEY` Pending to update
 
 ## Tech Stack
 
 **Client:** Flutter, Dart
-
 **Server:** Java Springboot
-
-
-## Versioning
   **Dart SDK: 3.9.0 (build 3.9.0-100.2.beta)**
   **Flutter: 3.33.0-1.0.pre.11 • channel main**
   
