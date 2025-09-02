@@ -1640,7 +1640,7 @@ Future<dynamic> createNotification(
   try {
     SharedPreferences devicePrefs = await SharedPreferences.getInstance();
     final response = await ApiCallsDio._dio.post(
-      '${ApiCallsDio._baseUrl}/notifications/',
+      '${ApiCallsDio._baseUrl}/notifications/new/',
       data: notificationData,
       options: Options(
         headers: {'Authorization': devicePrefs.getString('token')!},

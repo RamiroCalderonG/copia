@@ -3,7 +3,7 @@ import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/data/Models/Notification.dart' as NotificationModel;
 import 'package:oxschool/data/services/notification_service.dart';
 import 'package:oxschool/presentation/screens/news_view_screen.dart';
-import 'package:oxschool/presentation/components/rich_text_display_widget.dart';
+import 'package:oxschool/presentation/components/quill_content_viewer.dart';
 
 class NewsWidget extends StatefulWidget {
   const NewsWidget({super.key});
@@ -268,14 +268,15 @@ class _NewsWidgetState extends State<NewsWidget> {
                 ),
                 const SizedBox(height: 8),
                 Expanded(
-                  child: RichTextDisplayWidget(
-                    richContent: notification.content,
-                    fallbackText: notification.message,
+                  child: QuillContentViewer(
+                    quillDeltaJson: notification.content,
+                    fallbackText: notification.message ?? '',
                     textStyle: theme.textTheme.bodySmall?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                       height: 1.4,
                     ),
-                    maxHeight: 50.0,
+                    maxLines: 2,
+                    isExpandable: false,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -382,11 +383,23 @@ class _NewsWidgetState extends State<NewsWidget> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(
-          notification.title?.toTitleCase ?? '',
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+        title: Row(
+          children: [
+            Expanded(
+              child: Text(
+                notification.title?.toTitleCase ?? '',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Image.asset(
+              'assets/images/1_OS_color.png',
+              height: 24,
+              fit: BoxFit.contain,
+            ),
+          ],
         ),
         content: SingleChildScrollView(
           child: Column(
@@ -417,13 +430,13 @@ class _NewsWidgetState extends State<NewsWidget> {
                 ),
               ),
               const SizedBox(height: 16),
-              RichTextDisplayWidget(
-                richContent: notification.content,
-                fallbackText: notification.message,
+              QuillContentViewer(
+                quillDeltaJson: notification.content,
+                fallbackText: notification.message ?? '',
                 textStyle: theme.textTheme.bodyMedium?.copyWith(
                   height: 1.6,
                 ),
-                isExpanded: true,
+                isExpandable: true,
               ),
               if ((notification.expires ?? false) &&
                   notification.expirationDate != null)

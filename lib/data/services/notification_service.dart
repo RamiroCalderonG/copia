@@ -64,9 +64,9 @@ class NotificationService {
   /// Fetch notifications from the server
   Future<void> fetchNotifications() async {
     try {
-      print('NotificationService: Starting to fetch notifications...');
+      // print('NotificationService: Starting to fetch notifications...');
       final response = await getActiveNotifications();
-      print('NotificationService: Received response: $response');
+      // print('NotificationService: Received response: $response');
 
       if (response != null) {
         _notifications.clear();
@@ -83,8 +83,8 @@ class NotificationService {
           notificationData = [response];
         }
 
-        print(
-            'NotificationService: Parsed notification data: $notificationData');
+        // print(
+        //     'NotificationService: Parsed notification data: $notificationData');
 
         // Convert to Notification objects
         for (final item in notificationData) {
@@ -100,18 +100,13 @@ class NotificationService {
           }
         }
 
-        // Sort notifications by creation date (newest first), handling nulls
-        _notifications.sort((a, b) {
-          final aDate =
-              a.creationDateTime ?? DateTime.fromMillisecondsSinceEpoch(0);
-          final bDate =
-              b.creationDateTime ?? DateTime.fromMillisecondsSinceEpoch(0);
-          return bDate.compareTo(aDate);
-        });
+        // Sort notifications by priority first, then by creation date (newest first)
+        // Using the new sorting method from Notification model
+        _notifications.sort((a, b) => a.compareTo(b));
 
-        print(
-            'NotificationService: Total notifications: ${_notifications.length}');
-        print('NotificationService: Active news: ${activeNews.length}');
+        // print(
+        //     'NotificationService: Total notifications: ${_notifications.length}');
+        // print('NotificationService: Active news: ${activeNews.length}');
 
         // Notify listeners
         _notificationController.add(_notifications);
@@ -130,7 +125,7 @@ class NotificationService {
   /// Start auto-fetching notifications every 5 minutes
   void _startAutoFetch() {
     _fetchTimer?.cancel();
-    _fetchTimer = Timer.periodic(const Duration(minutes: 5), (timer) {
+    _fetchTimer = Timer.periodic(const Duration(minutes: 35), (timer) {
       fetchNotifications();
     });
   }

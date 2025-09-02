@@ -3,7 +3,7 @@ import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/data/Models/Notification.dart' as NotificationModel;
 import 'package:oxschool/data/services/notification_service.dart';
 import 'package:oxschool/presentation/screens/news_view_screen.dart';
-import 'package:oxschool/presentation/components/rich_text_display_widget.dart';
+import 'package:oxschool/presentation/components/quill_content_viewer.dart';
 
 class ExpandedNewsSection extends StatefulWidget {
   const ExpandedNewsSection({super.key});
@@ -19,10 +19,10 @@ class _ExpandedNewsSectionState extends State<ExpandedNewsSection> {
   void initState() {
     super.initState();
     // Service is already initialized in main window, just log the current state
-    print(
-        'ExpandedNewsSection: Current notifications count: ${_notificationService.notifications.length}');
-    print(
-        'ExpandedNewsSection: Active news count: ${_notificationService.activeNews.length}');
+    // print(
+    //     'ExpandedNewsSection: Current notifications count: ${_notificationService.notifications.length}');
+    // print(
+    //     'ExpandedNewsSection: Active news count: ${_notificationService.activeNews.length}');
   }
 
   @override
@@ -33,16 +33,16 @@ class _ExpandedNewsSectionState extends State<ExpandedNewsSection> {
     return StreamBuilder<List<NotificationModel.Notification>>(
       stream: _notificationService.notificationStream,
       builder: (context, snapshot) {
-        print(
-            'ExpandedNewsSection StreamBuilder: hasData=${snapshot.hasData}, connectionState=${snapshot.connectionState}');
+        // print(
+        //     'ExpandedNewsSection StreamBuilder: hasData=${snapshot.hasData}, connectionState=${snapshot.connectionState}');
         if (snapshot.hasData) {
-          print(
-              'ExpandedNewsSection StreamBuilder: snapshot data length=${snapshot.data?.length}');
+          // print(
+          //     'ExpandedNewsSection StreamBuilder: snapshot data length=${snapshot.data?.length}');
         }
 
         final activeNews = _notificationService.activeNews;
-        print(
-            'ExpandedNewsSection StreamBuilder: activeNews length=${activeNews.length}');
+        // print(
+        //     'ExpandedNewsSection StreamBuilder: activeNews length=${activeNews.length}');
 
         return Card(
           elevation: 0,
@@ -214,23 +214,12 @@ class _ExpandedNewsSectionState extends State<ExpandedNewsSection> {
           const SizedBox(height: 24),
           ElevatedButton.icon(
             onPressed: () async {
-              print('ExpandedNewsSection: Manual refresh from empty state');
+              // print('ExpandedNewsSection: Manual refresh from empty state');
               await _notificationService.fetchNotifications();
               setState(() {}); // Force rebuild
             },
             icon: const Icon(Icons.refresh),
             label: const Text('Actualizar noticias'),
-          ),
-          const SizedBox(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              OutlinedButton.icon(
-                onPressed: () => _notificationService.refresh(),
-                icon: const Icon(Icons.refresh, size: 18),
-                label: const Text('Actualizar'),
-              ),
-            ],
           ),
         ],
       ),
@@ -252,7 +241,8 @@ class _ExpandedNewsSectionState extends State<ExpandedNewsSection> {
       ThemeData theme, ColorScheme colorScheme) {
     final timeAgo =
         _getTimeAgo(notification.creationDateTime ?? DateTime.now());
-    final isExpiring = _isExpiringSoon(notification);
+    final isHighPriority = (notification.priority ?? 1) >= 2; // HIGH or URGENT
+    final isUrgent = (notification.priority ?? 1) == 3; // URGENT
 
     return Container(
       width: double.infinity,
@@ -260,9 +250,11 @@ class _ExpandedNewsSectionState extends State<ExpandedNewsSection> {
         color: colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isExpiring
+          color: isUrgent
               ? colorScheme.error.withOpacity(0.3)
-              : colorScheme.outline.withOpacity(0.2),
+              : isHighPriority
+                  ? Colors.orange.withOpacity(0.3)
+                  : colorScheme.outline.withOpacity(0.2),
           width: 1,
         ),
       ),
@@ -281,16 +273,12 @@ class _ExpandedNewsSectionState extends State<ExpandedNewsSection> {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: isExpiring
-                            ? colorScheme.errorContainer
-                            : colorScheme.primaryContainer,
+                        color: notification.typeColor.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Icon(
-                        isExpiring ? Icons.warning : Icons.announcement,
-                        color: isExpiring
-                            ? colorScheme.onErrorContainer
-                            : colorScheme.onPrimaryContainer,
+                        notification.typeIcon,
+                        color: notification.typeColor,
                         size: 20,
                       ),
                     ),
@@ -306,35 +294,45 @@ class _ExpandedNewsSectionState extends State<ExpandedNewsSection> {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    if (isExpiring)
+                    if (isHighPriority)
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: colorScheme.error,
+                          color: notification.priorityColor,
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: Text(
-                          'Urgente',
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: colorScheme.onError,
-                            fontWeight: FontWeight.w600,
-                          ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              notification.priorityIcon,
+                              color: Colors.white,
+                              size: 12,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              notification.priorityLabel,
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                   ],
                 ),
                 const SizedBox(height: 16),
                 Expanded(
-                  child: RichTextDisplayWidget(
-                    richContent: notification.content,
+                  child: QuillContentViewer(
+                    quillDeltaJson: notification.content,
                     fallbackText: notification.message ?? '',
                     textStyle: theme.textTheme.bodyLarge?.copyWith(
                       height: 1.5,
                       color: colorScheme.onSurface,
                     ),
                     maxLines: 10,
-                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -472,7 +470,7 @@ class _ExpandedNewsSectionState extends State<ExpandedNewsSection> {
       ThemeData theme, ColorScheme colorScheme, bool showDivider) {
     final timeAgo =
         _getTimeAgo(notification.creationDateTime ?? DateTime.now());
-    final isExpiring = _isExpiringSoon(notification);
+    final isHighPriority = (notification.priority ?? 1) >= 2; // HIGH or URGENT
 
     return Column(
       children: [
@@ -489,16 +487,12 @@ class _ExpandedNewsSectionState extends State<ExpandedNewsSection> {
                   Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: isExpiring
-                          ? colorScheme.errorContainer
-                          : colorScheme.primaryContainer,
+                      color: notification.typeColor.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Icon(
-                      isExpiring ? Icons.warning : Icons.announcement,
-                      color: isExpiring
-                          ? colorScheme.onErrorContainer
-                          : colorScheme.onPrimaryContainer,
+                      notification.typeIcon,
+                      color: notification.typeColor,
                       size: 16,
                     ),
                   ),
@@ -520,35 +514,46 @@ class _ExpandedNewsSectionState extends State<ExpandedNewsSection> {
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            if (isExpiring)
+                            if (isHighPriority)
                               Container(
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 6, vertical: 2),
                                 decoration: BoxDecoration(
-                                  color: colorScheme.error,
+                                  color: notification.priorityColor,
                                   borderRadius: BorderRadius.circular(4),
                                 ),
-                                child: Text(
-                                  'Urgente',
-                                  style: theme.textTheme.labelSmall?.copyWith(
-                                    color: colorScheme.onError,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      notification.priorityIcon,
+                                      color: Colors.white,
+                                      size: 8,
+                                    ),
+                                    const SizedBox(width: 2),
+                                    Text(
+                                      notification.priorityLabel,
+                                      style:
+                                          theme.textTheme.labelSmall?.copyWith(
+                                        color: Colors.white,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                           ],
                         ),
                         const SizedBox(height: 4),
-                        RichTextDisplayWidget(
-                          richContent: notification.content,
+                        QuillContentViewer(
+                          quillDeltaJson: notification.content,
                           fallbackText: notification.message!,
                           textStyle: theme.textTheme.bodySmall?.copyWith(
                             color: colorScheme.onSurfaceVariant,
                             height: 1.3,
                           ),
                           maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 6),
                         Row(
@@ -599,11 +604,23 @@ class _ExpandedNewsSectionState extends State<ExpandedNewsSection> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(
-          notification.title?.toTitleCase ?? '',
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+        title: Row(
+          children: [
+            Expanded(
+              child: Text(
+                notification.title?.toTitleCase ?? '',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Image.asset(
+              'assets/images/1_OS_color.png',
+              height: 24,
+              fit: BoxFit.contain,
+            ),
+          ],
         ),
         content: SingleChildScrollView(
           child: Column(
@@ -634,9 +651,10 @@ class _ExpandedNewsSectionState extends State<ExpandedNewsSection> {
                 ),
               ),
               const SizedBox(height: 16),
-              Text(
-                notification.message ?? '',
-                style: theme.textTheme.bodyMedium?.copyWith(
+              QuillContentViewer(
+                quillDeltaJson: notification.content,
+                fallbackText: notification.message ?? '',
+                textStyle: theme.textTheme.bodyMedium?.copyWith(
                   height: 1.6,
                 ),
               ),
@@ -663,7 +681,7 @@ class _ExpandedNewsSectionState extends State<ExpandedNewsSection> {
                               : colorScheme.onPrimaryContainer,
                         ),
                         const SizedBox(width: 8),
-                        Expanded(
+                        Flexible(
                           child: Text(
                             isExpiring
                                 ? '⚠️ Este aviso expira pronto: ${notification.formattedExpirationDate}'

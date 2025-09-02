@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:oxschool/presentation/Modules/academic/school%20grades/grades_modules_configuration.dart';
+import 'package:oxschool/presentation/Modules/admin/create_notification.dart';
 import 'package:oxschool/presentation/Modules/admin/employee_performance_eval.dart';
 import 'package:oxschool/presentation/Modules/admin/users_main_screen.dart';
 
@@ -20,7 +21,8 @@ const Map<String, dynamic> pageRoutes = {
   'Dashboard': UsersMainScreen(),
   'Alumnos con padecimientos': StudentsIlness(),
   'Configuracion Academica': GradesModuleConfiguration(),
-  'Evaluación de desempeño': EmployeePerformanceEvaluationDashboard()
+  'Evaluación de desempeño': EmployeePerformanceEvaluationDashboard(),
+  'Notificaciones': CreateNotificationScreen()
 };
 
 const mobilePages = [

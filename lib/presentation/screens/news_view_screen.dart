@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
+import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/data/Models/Notification.dart' as NotificationModel;
 import 'package:oxschool/data/services/notification_service.dart';
-import 'package:oxschool/presentation/components/rich_text_display_widget.dart';
+import 'package:oxschool/presentation/components/quill_content_viewer.dart';
 
 class NewsViewScreen extends StatefulWidget {
   const NewsViewScreen({super.key});
@@ -21,13 +23,34 @@ class _NewsViewScreenState extends State<NewsViewScreen> {
     return Scaffold(
       backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        title: const Text('Noticias y Avisos'),
-        backgroundColor: colorScheme.surface,
-        surfaceTintColor: colorScheme.surfaceTint,
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.campaign_outlined,
+                color: Colors.white,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Text(
+              'Noticias y Avisos',
+              style: TextStyle(color: Colors.white),
+            ),
+          ],
+        ),
+        centerTitle: false,
+        backgroundColor: FlutterFlowTheme.of(context).primary,
+        surfaceTintColor: Colors.white,
         actions: [
           IconButton(
             onPressed: () => _notificationService.refresh(),
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh, color: Colors.white),
             tooltip: 'Actualizar noticias',
           ),
         ],
@@ -62,17 +85,25 @@ class _NewsViewScreenState extends State<NewsViewScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.newspaper_outlined,
-            size: 80,
-            color: colorScheme.outline,
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainerHighest,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.campaign_outlined,
+              size: 48,
+              color: colorScheme.onSurfaceVariant,
+            ),
           ),
           const SizedBox(height: 16),
           Text(
             'No hay noticias disponibles',
             style: TextStyle(
               fontSize: 18,
-              color: colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w600,
+              color: colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 8),
@@ -82,6 +113,7 @@ class _NewsViewScreenState extends State<NewsViewScreen> {
               fontSize: 14,
               color: colorScheme.onSurfaceVariant,
             ),
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
           FilledButton.icon(
@@ -103,6 +135,7 @@ class _NewsViewScreenState extends State<NewsViewScreen> {
     final timeAgo =
         _getTimeAgo(notification.creationDateTime ?? DateTime.now());
     final isExpiring = _isExpiringSoon(notification);
+    final isHighPriority = (notification.priority ?? 1) >= 2; // HIGH or URGENT
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
@@ -130,47 +163,82 @@ class _NewsViewScreenState extends State<NewsViewScreen> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: colorScheme.primaryContainer,
+                      color: notification.typeColor.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
-                      Icons.article_outlined,
-                      color: colorScheme.primary,
+                      notification.typeIcon,
+                      color: notification.typeColor,
                       size: 16,
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          notification.title ?? '',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: colorScheme.onSurface,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.access_time,
-                              size: 14,
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              timeAgo,
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                    child: Text(
+                      notification.title ?? '',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.onSurface,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
+                  if (isHighPriority)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: notification.priorityColor,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            notification.priorityIcon,
+                            color: Colors.white,
+                            size: 12,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            notification.priorityLabel,
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              QuillContentViewer(
+                quillDeltaJson: notification.content,
+                fallbackText: notification.message ?? '',
+                textStyle: theme.textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                  height: 1.5,
+                ),
+                maxLines: 4,
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Icon(
+                    Icons.access_time,
+                    size: 14,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    timeAgo,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const Spacer(),
                   if (isExpiring)
                     Container(
                       padding: const EdgeInsets.symmetric(
@@ -181,25 +249,26 @@ class _NewsViewScreenState extends State<NewsViewScreen> {
                         color: colorScheme.errorContainer,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Text(
-                        'Expira pronto',
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: colorScheme.onErrorContainer,
-                          fontWeight: FontWeight.w600,
-                        ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.warning,
+                            color: colorScheme.onErrorContainer,
+                            size: 12,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Expira pronto',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: colorScheme.onErrorContainer,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                 ],
-              ),
-              const SizedBox(height: 16),
-              ExpandableRichTextWidget(
-                richContent: notification.content,
-                fallbackText: notification.message,
-                textStyle: theme.textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                  height: 1.5,
-                ),
-                maxCollapsedHeight: 80.0,
               ),
               if ((notification.expires ?? false) &&
                   notification.expirationDate != null)
@@ -240,25 +309,6 @@ class _NewsViewScreenState extends State<NewsViewScreen> {
                     ),
                   ),
                 ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  const Spacer(),
-                  Text(
-                    'Toca para ver detalles',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: colorScheme.primary,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Icon(
-                    Icons.arrow_forward_ios,
-                    size: 12,
-                    color: colorScheme.primary,
-                  ),
-                ],
-              ),
             ],
           ),
         ),
@@ -276,11 +326,23 @@ class _NewsViewScreenState extends State<NewsViewScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(
-          notification.title ?? '',
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+        title: Row(
+          children: [
+            Expanded(
+              child: Text(
+                notification.title?.toTitleCase ?? '',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Image.asset(
+              'assets/images/1_OS_color.png',
+              height: 24,
+              fit: BoxFit.contain,
+            ),
+          ],
         ),
         content: SingleChildScrollView(
           child: Column(
@@ -311,13 +373,12 @@ class _NewsViewScreenState extends State<NewsViewScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              RichTextDisplayWidget(
-                richContent: notification.content,
-                fallbackText: notification.message,
+              QuillContentViewer(
+                quillDeltaJson: notification.content,
+                fallbackText: notification.message ?? '',
                 textStyle: theme.textTheme.bodyMedium?.copyWith(
                   height: 1.6,
                 ),
-                isExpanded: true,
               ),
               if ((notification.expires ?? false) &&
                   notification.expirationDate != null)

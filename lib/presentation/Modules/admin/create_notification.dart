@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
+import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
-import 'package:oxschool/presentation/components/rich_text_editor_widget.dart';
-import 'package:oxschool/data/Models/RichTextContent.dart';
+import 'package:oxschool/presentation/components/quill_rich_text_editor_widget.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list_dio.dart';
 
 class CreateNotificationScreen extends StatefulWidget {
@@ -18,18 +19,19 @@ class _CreateNotificationScreenState extends State<CreateNotificationScreen> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _messageController = TextEditingController();
 
-  RichTextContent? _richContent;
+  String? _richContentJson; // Quill Delta JSON string
   DateTime? _expirationDate;
   String _selectedPriority = 'NORMAL';
-  String _selectedType = 'ANNOUNCEMENT';
+  String _selectedType = 'ANUNCIO';
   bool _isLoading = false;
+  bool _canExpire = true;
 
   final List<String> _priorityOptions = ['LOW', 'NORMAL', 'HIGH', 'URGENT'];
   final List<String> _typeOptions = [
-    'ANNOUNCEMENT',
-    'ALERT',
+    'ANUNCIO',
+    'ALERTA',
     'INFO',
-    'WARNING'
+    'ADVERTENCIA'
   ];
 
   @override
@@ -70,10 +72,43 @@ class _CreateNotificationScreenState extends State<CreateNotificationScreen> {
     }
   }
 
-  void _onRichContentChanged(RichTextContent content) {
+  void _onRichContentChanged(String quillDeltaJson) {
     setState(() {
-      _richContent = content;
+      _richContentJson = quillDeltaJson;
     });
+  }
+
+  int _getPriorityValue(String priority) {
+    switch (priority) {
+      case 'LOW':
+        return 0;
+      case 'NORMAL':
+        return 1;
+      case 'HIGH':
+        return 2;
+      case 'URGENT':
+        return 3;
+      default:
+        return 1; // Default to NORMAL
+    }
+  }
+
+  int _getTypeValue(String type) {
+    switch (type) {
+      case 'ANUNCIO':
+      case 'ANNOUNCEMENT':
+        return 1; // anuncio
+      case 'ALERTA':
+      case 'ALERT':
+        return 2; // alerta
+      case 'INFO':
+        return 3; // info
+      case 'ADVERTENCIA':
+      case 'WARNING':
+        return 4; // advertencia
+      default:
+        return 1; // Default to ANUNCIO
+    }
   }
 
   Future<void> _createNotification() async {
@@ -81,7 +116,7 @@ class _CreateNotificationScreenState extends State<CreateNotificationScreen> {
       return;
     }
 
-    if (_expirationDate == null) {
+    if (_canExpire && _expirationDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please select an expiration date'),
@@ -97,12 +132,16 @@ class _CreateNotificationScreenState extends State<CreateNotificationScreen> {
 
     try {
       final notificationData = {
-        'title': _titleController.text.trim(),
-        'message': _messageController.text.trim(),
-        'content': _richContent?.toJson(),
-        'expirationDateTime': _expirationDate!.toIso8601String(),
-        'priority': _selectedPriority,
-        'type': _selectedType,
+        'header': _titleController.text.trim(),
+        'body': '',
+        'creationDate': null,
+        'createdBy': currentUser!.employeeNumber,
+        'expires': _canExpire,
+        'content': _richContentJson, // Send Quill Delta JSON directly
+        'expirationDate':
+            _canExpire ? _expirationDate?.toIso8601String() : null,
+        'priority': _getPriorityValue(_selectedPriority),
+        'notifType': _getTypeValue(_selectedType),
         'isActive': true,
       };
 
@@ -141,10 +180,11 @@ class _CreateNotificationScreenState extends State<CreateNotificationScreen> {
     _titleController.clear();
     _messageController.clear();
     setState(() {
-      _richContent = null;
+      _richContentJson = null;
       _expirationDate = null;
       _selectedPriority = 'NORMAL';
-      _selectedType = 'ANNOUNCEMENT';
+      _selectedType = 'ANUNCIO';
+      _canExpire = true;
     });
   }
 
@@ -155,9 +195,13 @@ class _CreateNotificationScreenState extends State<CreateNotificationScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create Notification'),
-        backgroundColor: colorScheme.surface,
-        foregroundColor: colorScheme.onSurface,
+        title: const Text(
+          'Nueva Notificación',
+          style: TextStyle(color: Colors.white),
+        ),
+        centerTitle: false,
+        backgroundColor: FlutterFlowTheme.of(context).primary,
+        foregroundColor: Colors.white,
         elevation: 0,
         actions: [
           if (!_isLoading)
@@ -178,49 +222,49 @@ class _CreateNotificationScreenState extends State<CreateNotificationScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Header
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: colorScheme.primaryContainer,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.add_alert,
-                                color: colorScheme.onPrimaryContainer,
-                                size: 28,
-                              ),
-                              const SizedBox(width: 12),
-                              Text(
-                                'New Notification',
-                                style: theme.textTheme.headlineSmall?.copyWith(
-                                  color: colorScheme.onPrimaryContainer,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Create a new notification with rich text content that will be displayed to users.',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: colorScheme.onPrimaryContainer
-                                  .withOpacity(0.8),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    // Container(
+                    //   width: double.infinity,
+                    //   padding: const EdgeInsets.all(20),
+                    //   decoration: BoxDecoration(
+                    //     color: colorScheme.primaryContainer,
+                    //     borderRadius: BorderRadius.circular(12),
+                    //   ),
+                    //   child: Column(
+                    //     crossAxisAlignment: CrossAxisAlignment.start,
+                    //     children: [
+                    //       // Row(
+                    //       //   children: [
+                    //       //     Icon(
+                    //       //       Icons.add_alert,
+                    //       //       color: colorScheme.onPrimaryContainer,
+                    //       //       size: 28,
+                    //       //     ),
+                    //       //     const SizedBox(width: 12),
+                    //       //     Text(
+                    //       //       'Nueva Notificación',
+                    //       //       style: theme.textTheme.headlineSmall?.copyWith(
+                    //       //         color: colorScheme.onPrimaryContainer,
+                    //       //         fontWeight: FontWeight.bold,
+                    //       //       ),
+                    //       //     ),
+                    //       //   ],
+                    //       // ),
+                    //       // const SizedBox(height: 8),
+                    //       // Text(
+                    //       //   'Crea una nueva notificación que se mostrará a los usuarios.',
+                    //       //   style: theme.textTheme.bodyMedium?.copyWith(
+                    //       //     color: colorScheme.onPrimaryContainer
+                    //       //         .withOpacity(0.8),
+                    //       //   ),
+                    //       // ),
+                    //     ],
+                    //   ),
+                    // ),
 
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 12),
 
                     // Basic Information Section
-                    _buildSectionTitle('Basic Information', Icons.info_outline,
+                    _buildSectionTitle('Información Básica', Icons.info_outline,
                         theme, colorScheme),
                     const SizedBox(height: 16),
 
@@ -228,8 +272,8 @@ class _CreateNotificationScreenState extends State<CreateNotificationScreen> {
                     TextFormField(
                       controller: _titleController,
                       decoration: InputDecoration(
-                        labelText: 'Title *',
-                        hintText: 'Enter notification title',
+                        labelText: 'Título *',
+                        hintText: 'Ingrese el título de la notificación',
                         prefixIcon: const Icon(Icons.title),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -237,10 +281,10 @@ class _CreateNotificationScreenState extends State<CreateNotificationScreen> {
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Title is required';
+                          return 'El título es obligatorio';
                         }
                         if (value.trim().length < 3) {
-                          return 'Title must be at least 3 characters';
+                          return 'El título debe tener al menos 3 caracteres';
                         }
                         return null;
                       },
@@ -256,7 +300,7 @@ class _CreateNotificationScreenState extends State<CreateNotificationScreen> {
                           child: DropdownButtonFormField<String>(
                             value: _selectedType,
                             decoration: InputDecoration(
-                              labelText: 'Type',
+                              labelText: 'Tipo',
                               prefixIcon: const Icon(Icons.category),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -280,7 +324,7 @@ class _CreateNotificationScreenState extends State<CreateNotificationScreen> {
                           child: DropdownButtonFormField<String>(
                             value: _selectedPriority,
                             decoration: InputDecoration(
-                              labelText: 'Priority',
+                              labelText: 'Prioridad',
                               prefixIcon: const Icon(Icons.priority_high),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -312,27 +356,94 @@ class _CreateNotificationScreenState extends State<CreateNotificationScreen> {
                       ],
                     ),
 
+                    const SizedBox(height: 15),
+
+                    // Expiration Toggle
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: colorScheme.surfaceVariant.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: colorScheme.outline.withOpacity(0.2),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.timer,
+                            color: colorScheme.primary,
+                            size: 24,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Notificación puede expirar',
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Activar para establecer una fecha de expiración',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Switch(
+                            value: _canExpire,
+                            onChanged: (value) {
+                              setState(() {
+                                _canExpire = value;
+                                if (!value) {
+                                  _expirationDate = null;
+                                }
+                              });
+                            },
+                            activeColor: colorScheme.primary,
+                          ),
+                        ],
+                      ),
+                    ),
+
                     const SizedBox(height: 20),
 
                     // Expiration Date
                     InkWell(
-                      onTap: _selectExpirationDate,
+                      onTap: _canExpire ? _selectExpirationDate : null,
                       child: InputDecorator(
                         decoration: InputDecoration(
-                          labelText: 'Expiration Date & Time *',
-                          prefixIcon: const Icon(Icons.schedule),
+                          labelText:
+                              'Fecha y Hora de Expiración ${_canExpire ? '*' : ''}',
+                          prefixIcon: Icon(
+                            Icons.schedule,
+                            color: _canExpire
+                                ? null
+                                : colorScheme.onSurface.withOpacity(0.38),
+                          ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
+                          enabled: _canExpire,
                         ),
                         child: Text(
-                          _expirationDate != null
-                              ? '${_expirationDate!.day}/${_expirationDate!.month}/${_expirationDate!.year} at ${_expirationDate!.hour.toString().padLeft(2, '0')}:${_expirationDate!.minute.toString().padLeft(2, '0')}'
-                              : 'Tap to select date and time',
+                          _canExpire
+                              ? (_expirationDate != null
+                                  ? '${_expirationDate!.day}/${_expirationDate!.month}/${_expirationDate!.year} at ${_expirationDate!.hour.toString().padLeft(2, '0')}:${_expirationDate!.minute.toString().padLeft(2, '0')}'
+                                  : 'Toca para seleccionar fecha y hora')
+                              : 'Esta notificación no expirará',
                           style: TextStyle(
-                            color: _expirationDate != null
-                                ? colorScheme.onSurface
-                                : colorScheme.onSurface.withOpacity(0.6),
+                            color: _canExpire
+                                ? (_expirationDate != null
+                                    ? colorScheme.onSurface
+                                    : colorScheme.onSurface.withOpacity(0.6))
+                                : colorScheme.onSurface.withOpacity(0.38),
                           ),
                         ),
                       ),
@@ -341,53 +452,75 @@ class _CreateNotificationScreenState extends State<CreateNotificationScreen> {
                     const SizedBox(height: 32),
 
                     // Message Content Section
-                    _buildSectionTitle(
-                        'Message Content', Icons.edit_note, theme, colorScheme),
-                    const SizedBox(height: 16),
+                    // _buildSectionTitle('Contenido del Mensaje', Icons.edit_note,
+                    //     theme, colorScheme),
+                    // const SizedBox(height: 16),
 
-                    // Plain text message (fallback)
-                    TextFormField(
-                      controller: _messageController,
-                      decoration: InputDecoration(
-                        labelText: 'Plain Text Message *',
-                        hintText:
-                            'Enter fallback message (displayed if rich text fails)',
-                        prefixIcon: const Icon(Icons.message),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      maxLines: 3,
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Plain text message is required';
-                        }
-                        if (value.trim().length < 10) {
-                          return 'Message must be at least 10 characters';
-                        }
-                        return null;
-                      },
-                      maxLength: 500,
-                    ),
+                    // // Plain text message (fallback)
+                    // TextFormField(
+                    //   controller: _messageController,
+                    //   decoration: InputDecoration(
+                    //     labelText: 'Mensaje de Texto Plano *',
+                    //     hintText:
+                    //         'Ingrese un mensaje de respaldo (se muestra si el texto enriquecido falla)',
+                    //     prefixIcon: const Icon(Icons.message),
+                    //     border: OutlineInputBorder(
+                    //       borderRadius: BorderRadius.circular(12),
+                    //     ),
+                    //   ),
+                    //   maxLines: 3,
+                    //   validator: (value) {
+                    //     if (value == null || value.trim().isEmpty) {
+                    //       return 'El mensaje de texto plano es obligatorio';
+                    //     }
+                    //     if (value.trim().length < 10) {
+                    //       return 'El mensaje debe tener al menos 10 caracteres';
+                    //     }
+                    //     return null;
+                    //   },
+                    //   maxLength: 500,
+                    // ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 10),
 
                     // Rich Text Editor Section
-                    _buildSectionTitle('Rich Text Content', Icons.format_paint,
-                        theme, colorScheme),
+                    _buildSectionTitle('Editor de Contenido Avanzado (Quill)',
+                        Icons.edit_note, theme, colorScheme),
                     const SizedBox(height: 8),
-                    Text(
-                      'Use the rich text editor below to format your notification with bold, italic, colors, and different font sizes.',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: colorScheme.surfaceContainerLow,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                            color: colorScheme.outline.withOpacity(0.2)),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.info_outline,
+                            size: 16,
+                            color: colorScheme.primary,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Editor avanzado: Seleccione texto para aplicar formato, use la barra de herramientas para estilos y funciones avanzadas.',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 16),
 
                     // Rich Text Editor
-                    RichTextEditorWidget(
+                    QuillRichTextEditorWidget(
                       onContentChanged: _onRichContentChanged,
-                      hintText: 'Enter your rich text message here...',
+                      hintText: 'Ingrese el contenido aquí...',
                       maxLines: 8,
                       textStyle: theme.textTheme.bodyLarge,
                     ),
@@ -401,7 +534,7 @@ class _CreateNotificationScreenState extends State<CreateNotificationScreen> {
                           child: OutlinedButton.icon(
                             onPressed: () => Navigator.pop(context),
                             icon: const Icon(Icons.cancel),
-                            label: const Text('Cancel'),
+                            label: const Text('Cancelar'),
                             style: OutlinedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(
@@ -416,7 +549,7 @@ class _CreateNotificationScreenState extends State<CreateNotificationScreen> {
                           child: ElevatedButton.icon(
                             onPressed: _createNotification,
                             icon: const Icon(Icons.send),
-                            label: const Text('Create Notification'),
+                            label: const Text('Crear Notificación'),
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               backgroundColor: colorScheme.primary,

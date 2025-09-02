@@ -92,7 +92,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
         key: scaffoldKey,
         backgroundColor: colorScheme.surface,
         drawer: _createDrawer(context),
-        floatingActionButton: _buildAdminFAB(context),
+        // floatingActionButton: _buildAdminFAB(context),
         body: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -610,35 +610,35 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
     );
   }
 
-  Widget? _buildAdminFAB(BuildContext context) {
-    // Check if user is admin
-    final isAdmin = verifyUserAdmin(currentUser!);
-    if (!isAdmin) return null;
+  // Widget? _buildAdminFAB(BuildContext context) {
+  //   // Check if user is admin
+  //   final isAdmin = verifyUserAdmin(currentUser!);
+  //   if (!isAdmin) return null;
 
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+  //   final theme = Theme.of(context);
+  //   final colorScheme = theme.colorScheme;
 
-    return FloatingActionButton.extended(
-      onPressed: () async {
-        final result = await Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => const CreateNotificationScreen(),
-          ),
-        );
+  //   return FloatingActionButton.extended(
+  //     onPressed: () async {
+  //       final result = await Navigator.of(context).push(
+  //         MaterialPageRoute(
+  //           builder: (context) => const CreateNotificationScreen(),
+  //         ),
+  //       );
 
-        // If notification was created successfully, refresh the notifications
-        if (result == true) {
-          NotificationService().fetchNotifications();
-        }
-      },
-      backgroundColor: colorScheme.primary,
-      foregroundColor: colorScheme.onPrimary,
-      elevation: 4,
-      icon: const Icon(Icons.add_alert),
-      label: const Text('Create Notification'),
-      tooltip: 'Create a new notification',
-    );
-  }
+  //       // If notification was created successfully, refresh the notifications
+  //       if (result == true) {
+  //         NotificationService().fetchNotifications();
+  //       }
+  //     },
+  //     backgroundColor: colorScheme.primary,
+  //     foregroundColor: colorScheme.onPrimary,
+  //     elevation: 4,
+  //     icon: const Icon(Icons.add_alert),
+  //     label: const Text('Create Notification'),
+  //     tooltip: 'Create a new notification',
+  //   );
+  // }
 
   Widget _createDrawer(BuildContext context) {
     final controller = ScrollController();
