@@ -87,6 +87,8 @@ dependencies:
   csv: ^6.0.0
   archive: ^4.0.4
       #ref: 927f8cbc09b35d85245c095f2db8f9b186f6618
+  flutter_html: ^3.0.0-beta.2
+  html: ^0.15.4
 
   collection: any
   http: any

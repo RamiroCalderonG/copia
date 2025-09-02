@@ -2,16 +2,19 @@
 
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
-import 'package:oxschool/core/constants/url_links.dart';
+
 import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/core/reusable_methods/temp_data_functions.dart';
 import 'package:oxschool/core/reusable_methods/user_functions.dart';
 import 'package:oxschool/core/utils/device_information.dart';
 import 'package:oxschool/core/utils/temp_data.dart';
 import 'package:oxschool/data/services/backend/validate_user_permissions.dart';
+import 'package:oxschool/data/services/notification_service.dart';
 import 'package:oxschool/presentation/Modules/user/user_view_screen.dart';
+import 'package:oxschool/presentation/Modules/admin/create_notification.dart';
 import 'package:get/get.dart';
 import 'package:oxschool/presentation/components/confirm_dialogs.dart';
+import 'package:oxschool/presentation/components/expanded_news_section.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/reusable_methods/logger_actions.dart';
@@ -44,6 +47,9 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
     eventsList?.clear();
     deviceData.clear();
 
+    // Stop notification service
+    NotificationService().stopAutoFetch();
+
     // clearUserData();
 
     super.dispose();
@@ -54,6 +60,10 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
     super.initState();
     //_model = createModel(context, () => MainWindowModel());
     saveUserRoleToSharedPref();
+
+    // Initialize notification service for auto-fetching news
+    NotificationService().initialize();
+
     WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {}));
     insertAlertLog('USER LOGED IN: ${currentUser!.employeeNumber.toString()}');
   }
@@ -82,6 +92,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
         key: scaffoldKey,
         backgroundColor: colorScheme.surface,
         drawer: _createDrawer(context),
+        floatingActionButton: _buildAdminFAB(context),
         body: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -111,8 +122,8 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                           _buildWelcomeSection(theme, colorScheme),
                           const SizedBox(height: 16),
                           Flexible(
-                            flex: 2,
-                            child: _buildIconsLinksGrid(context),
+                            flex: 3,
+                            child: const ExpandedNewsSection(),
                           ),
                           const SizedBox(height: 16),
                           _buildFooterText(context),
@@ -479,109 +490,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
     );
   }
 
-  Widget _buildIconsLinksGrid(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return Card(
-      elevation: 0,
-      color: colorScheme.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: colorScheme.outlineVariant,
-          width: 1,
-        ),
-      ),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.apps_outlined,
-                  color: colorScheme.primary,
-                  size: 24,
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  'Servicios Disponibles',
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.onSurface,
-                  ),
-                ),
-                const Spacer(),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: colorScheme.primary,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Text(
-                    '${oxlinks.length} servicios',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: colorScheme.onPrimary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Expanded(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  int crossAxisCount = 3;
-                  double childAspectRatio = 1.8;
-
-                  if (constraints.maxWidth < 400) {
-                    crossAxisCount = 2;
-                    childAspectRatio = 1.7;
-                  } else if (constraints.maxWidth < 600) {
-                    crossAxisCount = 2;
-                    childAspectRatio = 1.6;
-                  } else if (constraints.maxWidth > 1200) {
-                    crossAxisCount = 4;
-                    childAspectRatio = 1.6;
-                  }
-
-                  return GridView.builder(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: crossAxisCount,
-                      crossAxisSpacing: 8.0,
-                      mainAxisSpacing: 8.0,
-                      childAspectRatio: childAspectRatio,
-                    ),
-                    itemCount: oxlinks.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Material3HoverCard(
-                        onTap: () {
-                          Uri url = Uri.parse(oxlinks[index]);
-                          launchUrlDirection(url);
-                        },
-                        imagePath: gridMainWindowIcons[index],
-                        title: mainWindowGridTitles[index],
-                        index: index,
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildFooterText(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
     return const SizedBox
         .shrink(); // Empty widget since we moved the text to app bar
   }
@@ -698,6 +607,36 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
         backgroundColor: colorScheme.surface,
         foregroundColor: colorScheme.onSurface,
       ),
+    );
+  }
+
+  Widget? _buildAdminFAB(BuildContext context) {
+    // Check if user is admin
+    final isAdmin = verifyUserAdmin(currentUser!);
+    if (!isAdmin) return null;
+
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return FloatingActionButton.extended(
+      onPressed: () async {
+        final result = await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => const CreateNotificationScreen(),
+          ),
+        );
+
+        // If notification was created successfully, refresh the notifications
+        if (result == true) {
+          NotificationService().fetchNotifications();
+        }
+      },
+      backgroundColor: colorScheme.primary,
+      foregroundColor: colorScheme.onPrimary,
+      elevation: 4,
+      icon: const Icon(Icons.add_alert),
+      label: const Text('Create Notification'),
+      tooltip: 'Create a new notification',
     );
   }
 
