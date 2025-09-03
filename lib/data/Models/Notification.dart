@@ -40,7 +40,7 @@ class Notification {
       content:
           json['content']?.toString(), // Store as string (Quill Delta JSON)
       priority: json['priority'],
-      type: json['type'],
+      type: json['notifType'],
     );
   }
 

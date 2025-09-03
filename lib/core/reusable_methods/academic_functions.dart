@@ -581,8 +581,12 @@ Future<dynamic> isDateToEvaluateStudents() async {
     var originDate = await getActualDate().catchError((error) {
       return Future.error(error);
     });
-    var originResponse = originDate.data; //jsonDecode(originDate);
+    var originResponse = originDate; //jsonDecode(originDate);
     var response = originResponse['Value'];
+    if (!response) {
+      return Future.error(
+          'No se puede acceder en este momento, intente más tarde.');
+    }
     return response;
   } catch (e) {
     insertErrorLog(e.toString(), 'FETCH DATE FOR STUDENT EVALUATION');

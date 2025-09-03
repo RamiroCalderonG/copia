@@ -493,7 +493,7 @@ class _ExpandedNewsSectionState extends State<ExpandedNewsSection> {
                     child: Icon(
                       notification.typeIcon,
                       color: notification.typeColor,
-                      size: 16,
+                      size: 26,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -506,7 +506,7 @@ class _ExpandedNewsSectionState extends State<ExpandedNewsSection> {
                             Expanded(
                               child: Text(
                                 (notification.title ?? '').toTitleCase,
-                                style: theme.textTheme.titleSmall?.copyWith(
+                                style: theme.textTheme.titleLarge?.copyWith(
                                   fontWeight: FontWeight.w600,
                                   color: colorScheme.onSurface,
                                 ),
