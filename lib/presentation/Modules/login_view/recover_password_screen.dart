@@ -634,6 +634,7 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
 
     setState(() {
       isLoading = true;
+      tokenValue = _tokenFieldController.text.trim();
     });
 
     try {
@@ -641,7 +642,6 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
           _tokenFieldController.text.trim(), email, deviceData);
 
       if (response.statusCode == 200) {
-        tokenValue = _tokenFieldController.text.trim();
         setState(() {
           isLoading = false;
         });
