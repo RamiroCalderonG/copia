@@ -1609,3 +1609,55 @@ Future<dynamic> getEmployeeAttendanceHistory(
     return ApiCallsDio._handleDioError(e);
   }
 }
+
+Future<dynamic> getActiveNotifications() async {
+  try {
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
+    final response = await ApiCallsDio._dio.get(
+      '${ApiCallsDio._baseUrl}/notifications/active/',
+      options: Options(
+        headers: {'Authorization': devicePrefs.getString('token')!},
+        sendTimeout: const Duration(seconds: 20),
+        receiveTimeout: const Duration(seconds: 20),
+      ),
+    );
+
+    if (response.statusCode == 200) {
+      return response.data;
+    } else {
+      insertErrorLog(response.data.toString(), 'getActiveNotifications()');
+      return Future.error(response.data);
+    }
+  } on DioException catch (e) {
+    insertErrorLog(e.toString(), 'getEmployeeAttendanceHistory()');
+    return ApiCallsDio._handleDioError(e);
+  }
+}
+
+//*Creates a new notification
+Future<dynamic> createNotification(
+    Map<String, dynamic> notificationData) async {
+  try {
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
+    final response = await ApiCallsDio._dio.post(
+      '${ApiCallsDio._baseUrl}/notifications/new/',
+      data: notificationData,
+      options: Options(
+        headers: {'Authorization': devicePrefs.getString('token')!},
+        sendTimeout: const Duration(seconds: 20),
+        receiveTimeout: const Duration(seconds: 20),
+      ),
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return response.data;
+    } else {
+      insertErrorLog(
+          response.data.toString(), 'createNotification($notificationData)');
+      return Future.error(response.data);
+    }
+  } on DioException catch (e) {
+    insertErrorLog(e.toString(), 'createNotification($notificationData)');
+    return ApiCallsDio._handleDioError(e);
+  }
+}

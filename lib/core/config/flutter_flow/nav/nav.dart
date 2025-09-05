@@ -10,6 +10,7 @@ import 'package:oxschool/presentation/Modules/academic/discipline/discipline_scr
 import 'package:oxschool/presentation/Modules/academic/school%20grades/fo_dac_27.dart';
 import 'package:oxschool/presentation/Modules/academic/school%20grades/grades_main_screen.dart';
 import 'package:oxschool/presentation/Modules/academic/school%20grades/grades_modules_configuration.dart';
+import 'package:oxschool/presentation/Modules/admin/create_notification.dart';
 import 'package:oxschool/presentation/Modules/enfermeria/nursery_main_screen.dart';
 import 'package:oxschool/presentation/Modules/services_ticket/processes/services_main_screen.dart';
 import 'package:oxschool/presentation/Modules/main_window/mobile_main_window_widget.dart';
@@ -127,7 +128,11 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           path: '/performanceEvaluation',
           builder: (context, params) =>
               const EmployeePerformanceEvaluationDashboard(),
-        )
+        ),
+        FFRoute(
+            name: 'CreateNotificationScreen()',
+            path: '/createNotification',
+            builder: (context, params) => const CreateNotificationScreen())
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
     );
 

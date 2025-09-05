@@ -148,6 +148,10 @@ class _GradesMainScreenState extends State<GradesMainScreen>
           isSearching = false;
           displayEvaluateGrids = true;
         });
+      } else {
+        setState(() {
+          displayErrorMessage = true;
+        });
       }
 
       setState(() {
