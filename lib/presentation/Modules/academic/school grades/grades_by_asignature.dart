@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'package:oxschool/core/constants/user_consts.dart';
@@ -76,6 +78,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
   TrinaCell? selectedCell;
   int dirtyCount = 0;
   bool _disposed = false;
+  Timer? _validationDebounce;
 
   bool hideCommentsColumn = false;
   bool hideAbsencesColumn = false;
@@ -100,6 +103,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
   @override
   void dispose() {
     _disposed = true;
+    _validationDebounce?.cancel();
     rows.clear();
     selectedCurrentTempMonth = null;
     super.dispose();
@@ -159,7 +163,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
             field: 'Calif',
             type: TrinaColumnType.number(negative: false, format: '##'),
             readOnly: false,
-            width: 120),
+            width: 140),
         TrinaColumn(
           title: 'idCalif',
           field: 'idCalif',
@@ -1057,10 +1061,61 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                   if (_isEditableField(event.column.title)) {
                     // Process changes for editable columns
                     final idEval = event.row.cells['idCalif']?.value as int;
+
+                    // Store original value for comparison
+                    var originalValue = event.value;
+
                     var newValue = validateNewGradeValue(
                         //Validate values cant be les that 50
                         event.value,
-                        event.column.title);
+                        event.column.field);
+
+                    // Show validation message if value was adjusted
+                    if (event.column.field == 'Calif' &&
+                        originalValue != newValue) {
+                      String message = '';
+                      if (originalValue is num && originalValue < 50) {
+                        message =
+                            'La calificación no puede ser menor a 50. Se ajustó automáticamente a 50.';
+                      } else if (originalValue is num && originalValue > 100) {
+                        message =
+                            'La calificación no puede ser mayor a 100. Se ajustó automáticamente a 100.';
+                      }
+
+                      if (message.isNotEmpty && context.mounted) {
+                        // Cancel any existing validation debounce to prevent duplicate messages
+                        _validationDebounce?.cancel();
+
+                        // Show validation message using Timer to avoid setState during build
+                        _validationDebounce =
+                            Timer(const Duration(milliseconds: 100), () {
+                          if (context.mounted && !_disposed) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  '❌ $message ❌',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                backgroundColor: Theme.of(context)
+                                    .colorScheme
+                                    .primary, // Amber background for warnings
+                                duration: const Duration(seconds: 3),
+                              ),
+                            );
+                          }
+                        });
+
+                        // Update the cell value to the validated value
+                        Future.microtask(() {
+                          if (stateManager != null && !_disposed && mounted) {
+                            event.row.cells[event.column.field]?.value =
+                                newValue;
+                            stateManager!.notifyListeners();
+                          }
+                        });
+                      }
+                    }
+
                     composeUpdateStudentGradesBody(
                         event.column.title, newValue, idEval);
 
@@ -1307,7 +1362,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
   void displayColumnsByGrade(int grade) {
     // setState(() {
     if ((grade < 12) && (grade > 6)) {
-      hideCommentsColumn = false; // Comentarios
+      hideCommentsColumn = true; // Comentarios
       hideAbsencesColumn = true; // Faltas
       hideHomeworksColumn = false; // Tareas
       hideDisciplineColumn = false; //Disciplina
@@ -1316,7 +1371,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
       homeWorkColumnTitle = 'Hab';
       disciplineColumnTitle = 'Con';
     } else if ((grade < 6 && grade > 0)) {
-      hideCommentsColumn = true;
+      hideCommentsColumn = true; // Comentarios
       hideAbsencesColumn = true; // Faltas
       hideHomeworksColumn = true; // Tareas
       hideDisciplineColumn = true; //Disciplina

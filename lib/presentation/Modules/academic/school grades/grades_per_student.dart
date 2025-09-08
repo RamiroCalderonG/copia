@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:oxschool/core/extensions/capitalize_strings.dart';
@@ -43,16 +44,13 @@ class _GradesByStudentState extends State<GradesByStudent> {
   late TrinaGridStateManager gridAStateManager;
   String currentMonth = DateFormat.MMMM('es').format(DateTime.now());
 
-  // Change tracking variables
-  TrinaGridStateManager? gradesStateManager;
-  TrinaCell? selectedCell;
-  int dirtyCount = 0;
   bool _disposed = false;
   Key? studentsGridKey;
   Key? evalsGridKey;
 
   Key? currentRowKey;
   Timer? _debounce;
+  Timer? _validationDebounce;
   String? asignatureNameListener;
   String selectedStudentName = '';
   var fetchedData;
@@ -89,6 +87,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
     //evaluationComments.clear();
     //commentStringEval.clear();
     _debounce?.cancel();
+    _validationDebounce?.cancel();
     commentsController.dispose();
     //selectedTempGrade = null;
     //selectedTempGroup = null;
@@ -101,83 +100,25 @@ class _GradesByStudentState extends State<GradesByStudent> {
     super.dispose();
   }
 
-  // Change tracking methods
-  void commitChanges() {
-    if (_disposed || gradesStateManager == null || !mounted) return;
-    try {
-      gradesStateManager!.commitChanges();
-      updateDirtyCount();
-    } catch (e) {
-      // Handle any errors gracefully
-      insertErrorLog(e.toString(), 'COMMIT_CHANGES_ERROR');
-    }
-  }
+  /// Clears student data before switching to prevent TrinaGrid initialization errors
+  void _clearStudentDataBeforeSwitching() {
+    if (_disposed || !mounted) return;
 
-  void revertChanges() {
-    if (_disposed || gradesStateManager == null || !mounted) return;
-    try {
-      gradesStateManager!.revertChanges();
-      updateDirtyCount();
-    } catch (e) {
-      // Handle any errors gracefully
-      insertErrorLog(e.toString(), 'REVERT_CHANGES_ERROR');
-    }
-  }
+    // Clear any pending validation debounce
+    _validationDebounce?.cancel();
 
-  void commitSelectedCell() {
-    if (_disposed || gradesStateManager == null || !mounted) return;
-    if (selectedCell != null) {
-      try {
-        gradesStateManager!.commitChanges(cell: selectedCell);
-        updateDirtyCount();
-      } catch (e) {
-        // Handle any errors gracefully
-        insertErrorLog(e.toString(), 'COMMIT_SELECTED_CELL_ERROR');
-      }
-    }
-  }
+    // Clear any unsaved changes from the current student
+    studentGradesBodyToUpgrade.clear();
 
-  void revertSelectedCell() {
-    if (_disposed || gradesStateManager == null || !mounted) return;
-    if (selectedCell != null) {
-      try {
-        gradesStateManager!.revertChanges(cell: selectedCell);
-        updateDirtyCount();
-      } catch (e) {
-        // Handle any errors gracefully
-        insertErrorLog(e.toString(), 'REVERT_SELECTED_CELL_ERROR');
-      }
-    }
-  }
+    // Force a rebuild of the grades grid by clearing the selected student rows
+    setState(() {
+      selectedStudentRows.clear();
+    });
 
-  void updateDirtyCount() {
-    if (_disposed || gradesStateManager == null) return;
-
-    // Use Future.microtask to ensure we're not updating during build or dispose
+    // Allow the UI to update before loading new student data
     Future.microtask(() {
-      if (_disposed || gradesStateManager == null) return;
-
-      int count = 0;
-      try {
-        // Use the state manager's rows instead of selectedStudentRows
-        // This ensures we're working with properly initialized cells
-        for (var row in gradesStateManager!.rows) {
-          for (var cell in row.cells.values) {
-            if (cell.isDirty) {
-              count++;
-            }
-          }
-        }
-      } catch (e) {
-        // If there's an error accessing isDirty (cells not initialized),
-        // just set count to 0
-        count = 0;
-      }
-
       if (!_disposed && mounted) {
-        setState(() {
-          dirtyCount = count;
-        });
+        // Additional cleanup if needed
       }
     });
   }
@@ -621,8 +562,6 @@ class _GradesByStudentState extends State<GradesByStudent> {
               children: [
                 _buildFiltersSection(theme, colorScheme),
                 SizedBox(height: isMobile ? 4 : 6),
-                _buildCompactChangeTracking(theme, colorScheme),
-                SizedBox(height: isMobile ? 4 : 6),
                 _buildActionButtons(theme, colorScheme),
                 SizedBox(height: isMobile ? 4 : 6),
                 _buildStudentNameSection(theme, colorScheme),
@@ -822,14 +761,16 @@ class _GradesByStudentState extends State<GradesByStudent> {
 
       await saveButtonAction(calculatedMonthNumber);
 
-      // Clear the changes and refresh the data
+      // Clear the changes and refresh only the current student's data
       studentGradesBodyToUpgrade.clear();
-      await searchBUttonAction(
-        selectedTempGroup!,
-        selectedTempGrade!,
-        calculatedMonthNumber!,
-        selectedTempCampus!,
-      );
+
+      // Optionally reload the current student to ensure fresh data
+      if (selectedStudentID != null) {
+        final gradeInt =
+            getKeyFromValue(teacherGradesMap, selectedTempGrade!.toString());
+        await loadSelectedStudent(
+            selectedStudentID!, gradeInt, calculatedMonthNumber!);
+      }
 
       if (context.mounted) {
         showInformationDialog(context, 'Éxito', 'Cambios realizados!');
@@ -1096,6 +1037,12 @@ class _GradesByStudentState extends State<GradesByStudent> {
                 selectedStudentName =
                     event.row.cells['studentName']!.value.toString();
 
+                // Clear any pending changes before switching students
+                _clearStudentDataBeforeSwitching();
+
+                // Add a small delay to ensure UI updates before loading new data
+                await Future.delayed(const Duration(milliseconds: 50));
+
                 await loadSelectedStudent(
                     selectedStudentID!, gradeInt, monthNumber!);
               },
@@ -1169,10 +1116,15 @@ class _GradesByStudentState extends State<GradesByStudent> {
           Expanded(
             child: selectedStudentRows.isNotEmpty
                 ? TrinaGrid(
-                    key: evalsGridKey,
+                    key: ValueKey('grades_grid_$selectedStudentID'),
                     columns: gradesByStudentColumns,
                     rows: selectedStudentRows,
                     onChanged: (event) {
+                      // Ensure we have a valid state before processing changes
+                      if (_disposed || !mounted || selectedStudentID == null) {
+                        return;
+                      }
+
                       if (_isEditableField(event.column.title)) {
                         // Process changes for editable columns
                         // Validator to avoid double type numbers for 'Calif' column
@@ -1181,13 +1133,75 @@ class _GradesByStudentState extends State<GradesByStudent> {
                           if (event.value is double ||
                               (event.value is String &&
                                   event.value.contains('.'))) {
-                            showErrorFromBackend(context,
-                                'Solo se permiten números enteros en la calificación.');
+                            // Use Future.microtask to avoid setState during build
+                            Future.microtask(() {
+                              if (context.mounted && !_disposed) {
+                                showErrorFromBackend(context,
+                                    'Solo se permiten números enteros en la calificación.');
+                              }
+                            });
                             return;
                           }
                         }
+
+                        // Store original value for comparison
+                        var originalValue = event.value;
+
                         var newValue = validateNewGradeValue(
                             event.value, event.column.title);
+
+                        // Show validation message if value was adjusted for evaluation field
+                        if (event.column.field == 'evaluation' &&
+                            originalValue != newValue) {
+                          String message = '';
+                          if (originalValue is num && originalValue < 50) {
+                            message =
+                                'La calificación no puede ser menor a 50. Se ajustó automáticamente a 50.';
+                          } else if (originalValue is num &&
+                              originalValue > 100) {
+                            message =
+                                'La calificación no puede ser mayor a 100. Se ajustó automáticamente a 100.';
+                          }
+
+                          if (message.isNotEmpty && context.mounted) {
+                            // Cancel any existing validation debounce to prevent duplicate messages
+                            _validationDebounce?.cancel();
+
+                            // Show validation message using Future.microtask to avoid setState during build
+                            _validationDebounce =
+                                Timer(const Duration(milliseconds: 100), () {
+                              if (context.mounted && !_disposed) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      '❌ $message ❌',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    backgroundColor: Theme.of(context)
+                                        .colorScheme
+                                        .primary, // Amber background for warnings
+                                    duration: const Duration(seconds: 3),
+                                  ),
+                                );
+                              }
+                            });
+
+                            // Update the cell value to the validated value
+                            Future.microtask(() {
+                              if (!_disposed && mounted) {
+                                try {
+                                  event.row.cells[event.column.field]?.value =
+                                      newValue;
+                                } catch (e) {
+                                  // Handle any cell update errors gracefully
+                                  insertErrorLog(
+                                      e.toString(), 'CELL_UPDATE_ERROR');
+                                }
+                              }
+                            });
+                          }
+                        }
 
                         final evalId = event.row.cells['idCicloEscolar']?.value;
                         int? monthNumber;
@@ -1199,7 +1213,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
                               spanishMonthsMap, currentMonth.toCapitalized);
                         }
 
-                        validator();
+                        //validator();
                         composeBodyToUpdateGradeBySTudent(
                           event.column.title,
                           selectedStudentID!,
@@ -1207,43 +1221,15 @@ class _GradesByStudentState extends State<GradesByStudent> {
                           evalId,
                           monthNumber,
                         );
-
-                        // Update dirty count for change tracking
-                        updateDirtyCount();
-                      } else {
-                        //revertSelectedCell();
-                        gradesStateManager!.revertChanges(cell: selectedCell);
-                        return;
                       }
                     },
                     onLoaded: (TrinaGridOnLoadedEvent event) {
                       gridAStateManager = event.stateManager;
-
-                      // Store state manager reference and enable change tracking
-                      gradesStateManager = event.stateManager;
-                      gradesStateManager?.setChangeTracking(true);
-
-                      // Ensure cells are properly initialized before enabling change tracking
-                      Future.microtask(() {
-                        if (gradesStateManager != null && !_disposed) {
-                          updateDirtyCount();
-                        }
-                      });
-                    },
-                    onActiveCellChanged: (event) {
-                      // Track selected cell for change tracking operations
-                      if (!_disposed && mounted) {
-                        setState(() {
-                          selectedCell = event.cell;
-                        });
-                      }
                     },
                     configuration: TrinaGridConfiguration(
                       style: TrinaGridStyleConfig(
                         enableColumnBorderVertical: false,
                         enableCellBorderVertical: false,
-                        // Add dirty cell highlighting
-                        cellDirtyColor: Colors.amber[100]!,
                         // Make rows shorter
                         rowHeight: 35,
                       ),
@@ -1291,29 +1277,45 @@ class _GradesByStudentState extends State<GradesByStudent> {
   }
 
   dynamic validator() {
+    bool result = false;
     if (studentList.isNotEmpty) {
       studentList.clear();
     }
     if (selectedTempGroup == null || selectedTempGroup == '') {
       return showEmptyFieldAlertDialog(
           context, 'Seleccionar un grupo a evaluar');
+    } else {
+      result = true;
     }
     if (selectedTempGrade == null || selectedTempGrade == '') {
       return showEmptyFieldAlertDialog(
           context, 'Seleccionar un grado a evaluar');
+    } else {
+      result = true;
     }
     if (selectedTempCampus == null || selectedTempCampus == '') {
       return showEmptyFieldAlertDialog(
           context, 'Seleccionar un campus a evaluar');
+    } else {
+      result = true;
     }
     // if (dropDownValue.isEmpty || dropDownValue == '') {
     //   dropDownValue = oneTeacherAssignatures.first;
     // }
-    if (selectedTempMonth == null) {
-      if (context.mounted) {
-        showEmptyFieldAlertDialog(context, 'Seleccionar mes a evaluar');
+    if (currentUser!.isAcademicCoord! || currentUser!.isAdmin!) {
+      if (selectedTempMonth == null || selectedTempMonth == '') {
+        return showEmptyFieldAlertDialog(context, 'Seleccionar mes a evaluar');
+      } else {
+        result = true;
+      }
+    } else {
+      if (monthNumber == null || monthNumber == 0) {
+        return showEmptyFieldAlertDialog(context, 'Seleccionar mes a evaluar');
+      } else {
+        result = true;
       }
     }
+    return result;
   }
 
   void handleCommentsRefresh(int gradeSequence) async {
@@ -1433,31 +1435,13 @@ class _GradesByStudentState extends State<GradesByStudent> {
   }
 
   Future<void> saveButtonAction(int? monthNumber) async {
-    await patchStudentGradesToDB().then((response) {
-      return;
-/* if (response == 200) {
-      if (context.mounted) {
-       showInformationDialog(context, 'Èxito', 'Cambios realizados!');
-
-        searchBUttonAction(
-          selectedTempGroup!,
-          selectedTempGrade!,
-          monthNumber!,
-          selectedTempCampus!,
-        );
-      } else {
-        if (context.mounted) {
-          setState(() {
-            isFetching = false;
-            studentGradesBodyToUpgrade.clear();
-          });
-          showErrorFromBackend(context, response.toString());
-        }
-      }
-    } */
-    }).onError((error, stackTrace) {
-      throw Future.error(error.toString());
-    });
+    if (validator()) {
+      await patchStudentGradesToDB().then((response) {
+        return;
+      }).onError((error, stackTrace) {
+        throw Future.error(error.toString());
+      });
+    }
   }
 
   Future<void> loadSelectedStudent(
@@ -1467,8 +1451,11 @@ class _GradesByStudentState extends State<GradesByStudent> {
     selectedStudentList =
         studentList.where((student) => student.studentID == studentID).toList();
 
+    // Use setState to ensure proper widget rebuild
     setState(() {
       selectedStudentRows.clear();
+
+      // Rebuild the rows with fresh TrinaCell instances
       for (var student in selectedStudentList) {
         selectedStudentRows.add(TrinaRow(cells: {
           'subject': TrinaCell(value: student.subject),
@@ -1520,122 +1507,5 @@ class _GradesByStudentState extends State<GradesByStudent> {
       hideOutfitColumn = true;
       homeWorkColumnTitle = 'R';
     }
-  }
-
-  Widget _buildCompactChangeTracking(ThemeData theme, ColorScheme colorScheme) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(
-          color: colorScheme.outlineVariant,
-          width: 0.5,
-        ),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.track_changes_rounded,
-            color: colorScheme.secondary,
-            size: 14,
-          ),
-          const SizedBox(width: 6),
-          Text(
-            'Control de Cambios',
-            style: theme.textTheme.labelSmall?.copyWith(
-              fontWeight: FontWeight.w500,
-              color: colorScheme.onSurface,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-            decoration: BoxDecoration(
-              color: dirtyCount > 0
-                  ? colorScheme.errorContainer
-                  : colorScheme.surfaceContainerLowest,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              '$dirtyCount',
-              style: theme.textTheme.labelSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: dirtyCount > 0
-                    ? colorScheme.onErrorContainer
-                    : colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ),
-          const Spacer(),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildCompactButton(
-                  'Confirmar',
-                  Icons.done_all,
-                  gradesStateManager != null ? commitChanges : null,
-                  colorScheme.primary,
-                  theme),
-              const SizedBox(width: 4),
-              _buildCompactButton(
-                  'Revertir',
-                  Icons.undo,
-                  gradesStateManager != null ? revertChanges : null,
-                  colorScheme.error,
-                  theme),
-              const SizedBox(width: 4),
-              _buildCompactButton(
-                  'C',
-                  Icons.done,
-                  (selectedCell != null && gradesStateManager != null)
-                      ? commitSelectedCell
-                      : null,
-                  colorScheme.tertiary,
-                  theme),
-              const SizedBox(width: 4),
-              _buildCompactButton(
-                  'R',
-                  Icons.restore,
-                  (selectedCell != null && gradesStateManager != null)
-                      ? revertSelectedCell
-                      : null,
-                  colorScheme.secondary,
-                  theme),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCompactButton(String label, IconData icon,
-      VoidCallback? onPressed, Color color, ThemeData theme) {
-    return SizedBox(
-      height: 24,
-      child: OutlinedButton(
-        onPressed: onPressed,
-        style: OutlinedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-          minimumSize: Size.zero,
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          side: BorderSide(
-              color: onPressed != null ? color : color.withOpacity(0.3),
-              width: 0.8),
-          foregroundColor: onPressed != null ? color : color.withOpacity(0.3),
-          textStyle: theme.textTheme.labelSmall?.copyWith(fontSize: 10),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 10),
-            if (label.length > 1) ...[
-              const SizedBox(width: 2),
-              Text(label),
-            ],
-          ],
-        ),
-      ),
-    );
   }
 }
