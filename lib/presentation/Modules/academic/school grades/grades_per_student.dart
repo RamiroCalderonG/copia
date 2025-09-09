@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/core/reusable_methods/translate_messages.dart';
+import 'package:oxschool/data/Models/AcademicEvaluationsComment.dart';
 import 'package:oxschool/data/Models/Student_eval.dart';
 
 import 'package:oxschool/core/constants/user_consts.dart';
@@ -123,6 +124,18 @@ class _GradesByStudentState extends State<GradesByStudent> {
     });
   }
 
+  /// Populates the commentStringEval list from studentsGradesCommentsRows
+  void populateCommentsForDropdown() {
+    commentStringEval.clear();
+    if (studentsGradesCommentsRows.isNotEmpty) {
+      for (var comment in studentsGradesCommentsRows) {
+        if (!commentStringEval.contains(comment.commentName)) {
+          commentStringEval.add(comment.commentName);
+        }
+      }
+    }
+  }
+
   void _fetchData() async {
     var response = isUserAdmin || isUserAcademicCoord
         ? loadStartGradingAsAdminOrAcademicCoord(currentCycle!.claCiclo!, null,
@@ -217,6 +230,8 @@ class _GradesByStudentState extends State<GradesByStudent> {
         if (studentList.isNotEmpty) {
           studentsGradesCommentsRows =
               await getEvaluationsCommentsByGradeSequence(grade);
+          // Populate comments for dropdown and update visibility
+          populateCommentsForDropdown();
         } else {
           throw Exception(
               'No se encontraron alumnos para el grupo seleccionado: $groupSelected, grado: $grade, ciclo: ${currentCycle!.claCiclo}, campus: $campusSelected, mes: $monthSelected');
@@ -305,7 +320,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
           },
         ),
         TrinaColumn(
-          title: 'Calif',
+          title: 'Calificación',
           field: 'evaluation',
           type: TrinaColumnType.number(
             negative: false,
@@ -337,11 +352,13 @@ class _GradesByStudentState extends State<GradesByStudent> {
             field: 'discipline_eval',
             type: TrinaColumnType.number(negative: false)),
         TrinaColumn(
+            hide: hideCommentsColumn,
             title: 'Comentarios',
-            field: 'comment',
-            hide: true,
+            field: 'Comentarios',
             type: TrinaColumnType.select(commentStringEval,
-                enableColumnFilter: true)),
+                enableColumnFilter: true),
+            readOnly: false,
+            width: 200),
         TrinaColumn(
             title: 'Habitos',
             hide: hideHabitsColumn,
@@ -1120,36 +1137,39 @@ class _GradesByStudentState extends State<GradesByStudent> {
                     columns: gradesByStudentColumns,
                     rows: selectedStudentRows,
                     onChanged: (event) {
-                      // Ensure we have a valid state before processing changes
+                      //* Ensure we have a valid state before processing changes
                       if (_disposed || !mounted || selectedStudentID == null) {
                         return;
                       }
+                      var newValue;
+                      var commentiD = 0;
+                      var originalValue = event.value;
 
+                      //* Only process changes for editable columns
                       if (_isEditableField(event.column.title)) {
-                        // Process changes for editable columns
-                        // Validator to avoid double type numbers for 'Calif' column
-                        if (event.column.field == 'evaluation') {
-                          // Only allow integers (no decimals)
-                          if (event.value is double ||
-                              (event.value is String &&
-                                  event.value.contains('.'))) {
-                            // Use Future.microtask to avoid setState during build
-                            Future.microtask(() {
-                              if (context.mounted && !_disposed) {
-                                showErrorFromBackend(context,
-                                    'Solo se permiten números enteros en la calificación.');
-                              }
-                            });
-                            return;
+                        //* Process changes for editable columns
+
+                        if (event.value is String) {
+                          //* Obtain the id of the comment
+                          if (event.column.field == 'Comentarios') {
+                            if (event.value != null && event.value != '') {
+                              //* Find comment ID based on selected comment text
+                              var matchingComment =
+                                  studentsGradesCommentsRows.firstWhere(
+                                      (comment) =>
+                                          comment.commentName == event.value,
+                                      orElse: () => Academicevaluationscomment(
+                                          0, '', false, 0, 0));
+                              commentiD = matchingComment.commentId ?? 0;
+                              newValue = commentiD;
+                            } else {
+                              commentiD = 0; //! No comment selected
+                            }
                           }
+                        } else {
+                          newValue = validateNewGradeValue(
+                              event.value, event.column.title);
                         }
-
-                        // Store original value for comparison
-                        var originalValue = event.value;
-
-                        var newValue = validateNewGradeValue(
-                            event.value, event.column.title);
-
                         // Show validation message if value was adjusted for evaluation field
                         if (event.column.field == 'evaluation' &&
                             originalValue != newValue) {
@@ -1213,14 +1233,19 @@ class _GradesByStudentState extends State<GradesByStudent> {
                               spanishMonthsMap, currentMonth.toCapitalized);
                         }
 
-                        //validator();
-                        composeBodyToUpdateGradeBySTudent(
-                          event.column.title,
-                          selectedStudentID!,
-                          newValue,
-                          evalId,
-                          monthNumber,
-                        );
+                        // composeBodyToUpdateGradeBySTudent(
+                        //   event.column.title,
+                        //   selectedStudentID!,
+                        //   newValue,
+                        //   evalId,
+                        //   monthNumber,
+                        // );
+
+                        composeUpdateStudentGradesBody(
+                            event.column.title, newValue, evalId);
+                      } else {
+                        //revertSelectedCell();
+                        return;
                       }
                     },
                     onLoaded: (TrinaGridOnLoadedEvent event) {
@@ -1434,9 +1459,11 @@ class _GradesByStudentState extends State<GradesByStudent> {
     return !restrictedFields.contains(fieldName);
   }
 
-  Future<void> saveButtonAction(int? monthNumber) async {
+  Future<void> saveButtonAction(int? monthNumberDefined) async {
+    monthNumber = monthNumberDefined;
     if (validator()) {
       await patchStudentGradesToDB().then((response) {
+        _handleRefreshAction();
         return;
       }).onError((error, stackTrace) {
         throw Future.error(error.toString());
@@ -1466,7 +1493,11 @@ class _GradesByStudentState extends State<GradesByStudent> {
           'absence_eval': TrinaCell(value: student.absence),
           'homework_eval': TrinaCell(value: student.homework),
           'discipline_eval': TrinaCell(value: student.discipline),
-          'comment': TrinaCell(value: student.comment),
+          'Comentarios': TrinaCell(
+            value: student.comment != null && student.comment != 0
+                ? student.comment
+                : '',
+          ),
           'habit_eval': TrinaCell(value: student.habits_evaluation),
           'other': TrinaCell(value: student.other),
           'outfit': TrinaCell(value: student.outfit),
@@ -1482,8 +1513,9 @@ class _GradesByStudentState extends State<GradesByStudent> {
   }
 
   void displayColumnsByGrade(int grade) {
+    bool hasComments = commentStringEval.isNotEmpty;
     if ((grade < 12) && (grade > 6)) {
-      hideCommentsColumn = false; // Comentarios
+      hideCommentsColumn = !hasComments; // Comentarios
       hideAbsencesColumn = true; // Faltas
       hideHomeworksColumn = false; // Tareas
       hideDisciplineColumn = false; //Disciplina
@@ -1492,14 +1524,14 @@ class _GradesByStudentState extends State<GradesByStudent> {
       homeWorkColumnTitle = 'Hab';
       disciplineColumnTitle = 'Con';
     } else if ((grade < 6 && grade > 0)) {
-      hideCommentsColumn = true;
+      hideCommentsColumn = !hasComments;
       hideAbsencesColumn = true; // Faltas
       hideHomeworksColumn = true; // Tareas
       hideDisciplineColumn = true; //Disciplina
       hideHabitsColumn = true; //Habits
       hideOutfitColumn = true;
     } else if (grade > 11) {
-      hideCommentsColumn = true;
+      hideCommentsColumn = !hasComments;
       hideAbsencesColumn = false; // Faltas
       hideHomeworksColumn = false; // Tareas
       hideDisciplineColumn = true; //Disciplina

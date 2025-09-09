@@ -7,6 +7,7 @@ import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/core/reusable_methods/reusable_functions.dart';
 import 'package:oxschool/core/utils/loader_indicator.dart';
 import 'package:oxschool/core/reusable_methods/translate_messages.dart';
+import 'package:oxschool/data/Models/AcademicEvaluationsComment.dart';
 import 'package:trina_grid/trina_grid.dart';
 import 'package:intl/intl.dart';
 
@@ -105,6 +106,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
     _disposed = true;
     _validationDebounce?.cancel();
     rows.clear();
+    commentStringEval.clear(); // Clear comments when disposing
     selectedCurrentTempMonth = null;
     super.dispose();
   }
@@ -209,7 +211,8 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
             hide: hideCommentsColumn,
             title: 'Comentarios',
             field: 'Comentarios',
-            type: TrinaColumnType.text(),
+            type: TrinaColumnType.select(commentStringEval,
+                enableColumnFilter: true),
             readOnly: false,
             width: 200),
       ];
@@ -231,6 +234,18 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
         );
       }).toList();
     });
+  }
+
+  /// Populates the commentStringEval list from studentsGradesCommentsRows
+  void populateCommentsForDropdown() {
+    commentStringEval.clear();
+    if (studentsGradesCommentsRows.isNotEmpty) {
+      for (var comment in studentsGradesCommentsRows) {
+        if (!commentStringEval.contains(comment.commentName)) {
+          commentStringEval.add(comment.commentName);
+        }
+      }
+    }
   }
 
   void _fetchData() async {
@@ -372,6 +387,11 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
       setState(() {
         isLoading = true;
       });
+
+      // Clear previous comments data
+      commentStringEval.clear();
+      studentsGradesCommentsRows.clear();
+
       int? teacherNumber;
       if (isUserAdmin || isUserAcademicCoord) {
         teacherNumber = null;
@@ -386,6 +406,9 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
         if (studentList.isNotEmpty) {
           studentsGradesCommentsRows =
               await getEvaluationsCommentsByGradeSequence(selectedTempGrade!);
+
+          // Populate comments for dropdown and update visibility
+          populateCommentsForDropdown();
         } else {
           throw Exception(
             'No se encontraron alumnos para el grupo seleccionado: $groupSelected, grado: $gradeInt, ciclo: ${currentCycle!.claCiclo}, campus: $campusSelected, mes: $month',
@@ -398,6 +421,17 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
           displayColumnsByGrade(selectedTempGrade!);
           assignatureRows.clear();
           for (var item in studentList) {
+            String comment;
+            if (item.comment != null && item.comment != 0) {
+              // Find comment text based on comment ID
+              var matchingComment = studentsGradesCommentsRows.firstWhere(
+                  (comment) => comment.commentId == item.comment,
+                  orElse: () => Academicevaluationscomment(0, '', false, 0, 0));
+              comment = matchingComment.commentName;
+            } else {
+              comment = '';
+            }
+
             assignatureRows.add(TrinaRow(cells: {
               'No': TrinaCell(value: item.sequentialNumber ?? 0),
               'Matricula': TrinaCell(value: item.studentID),
@@ -411,29 +445,19 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
               'Conducta': TrinaCell(value: item.discipline ?? 0),
               'habit_eval': TrinaCell(value: item.habits_evaluation ?? 0),
               'Comentarios': TrinaCell(
-                value: item.comment != null && item.comment != 0
-                    ? item.comment.toString()
-                    : '',
+                value: item.comment != null && item.comment != 0 ? comment : '',
               ),
             }));
           }
-          setState(() {
-            selectedTempCampus = campus;
-            selectedTempGrade = int.parse(gradeInt);
-            selectedTempSubjectId = int.parse(assignatureID);
 
-            // Call displayColumnsByGrade BEFORE updating trinaGridKey
-            displayColumnsByGrade(selectedTempGrade!);
+          selectedTempCampus = campus;
+          selectedTempGrade = int.parse(gradeInt);
+          selectedTempSubjectId = int.parse(assignatureID);
 
-            // Force grid rebuild with new key AFTER visibility flags are set
-            trinaGridKey = UniqueKey();
+          // Force grid rebuild with new key AFTER visibility flags are set
+          trinaGridKey = UniqueKey();
 
-            isLoading = false;
-          });
-          // selectedTempCampus = campus;
-          // selectedTempGrade = int.parse(gradeInt);
-          // selectedTempSubjectId = int.parse(assignatureID);
-          // isLoading = false;
+          isLoading = false;
         });
       } else {
         setState(() {
@@ -442,6 +466,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
         return showErrorFromBackend(context, 'Seleccione un mes');
       }
     } catch (e) {
+      insertErrorLog(e.toString(), 'SEARCH STUDENTS BY SUBJECTS ');
       setState(() {
         isLoading = false;
       });
@@ -874,6 +899,8 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
     return OutlinedButton.icon(
       onPressed: () async {
         studentGradesBodyToUpgrade.clear();
+        commentStringEval.clear(); // Clear comments when refreshing
+        studentsGradesCommentsRows.clear();
 
         // Revert any pending changes before refreshing
         if (!_disposed && stateManager != null) {
@@ -936,20 +963,26 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
   Widget _buildSaveButton(ThemeData theme, ColorScheme colorScheme) {
     return FilledButton.icon(
       onPressed: () async {
-        setState(() {
-          isLoading = true;
-        });
+        await showConfirmationDialog(
+          context,
+          'Confirmar y Guardar',
+          '¿Está seguro de guardar los cambios realizados?',
+        ).then((value) async {
+          if (value == 1) {
+            // User confirmed
+            setState(() {
+              isLoading = true;
+            });
+            // Commit all changes before saving
+            if (!_disposed && stateManager != null) {
+              commitChanges();
+            }
 
-        // Commit all changes before saving
-        if (!_disposed && stateManager != null) {
-          commitChanges();
-        }
-
-        await updateButtonFunction((success) async {
-          if (success) {
-            try {
-              studentGradesBodyToUpgrade.clear();
-              /*
+            await updateButtonFunction((success) async {
+              if (success) {
+                try {
+                  studentGradesBodyToUpgrade.clear();
+                  /*
               await searchBUttonAction(
                   selectedTempGroup!,
                   selectedTempGrade.toString(),
@@ -958,25 +991,34 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                   selectedTempCampus!);
                   */
 
-              setState(() {
+                  setState(() {
+                    isLoading = false;
+                    showInformationDialog(context, 'Éxito',
+                        'Cambios realizados!, actualice la página.');
+                  });
+                } catch (e) {
+                  setState(() {
+                    isLoading = false;
+                    showErrorFromBackend(context, e.toString());
+                  });
+                }
+              } else {
                 isLoading = false;
-                showInformationDialog(context, 'Éxito',
-                    'Cambios realizados!, actualice la página.');
-              });
-            } catch (e) {
-              setState(() {
-                isLoading = false;
-                showErrorFromBackend(context, e.toString());
-              });
-            }
+                showErrorFromBackend(context, 'Error');
+              }
+            });
+            return;
           } else {
-            isLoading = false;
-            showErrorFromBackend(context, 'Error');
+            // User cancelled
+            setState(() {
+              isLoading = false;
+            });
+            return;
           }
         });
-        setState(() {
-          isLoading = false;
-        });
+        // setState(() {
+        //   isLoading = false;
+        // });
       },
       icon: const Icon(Icons.save, size: 18),
       label: const Text('Confirmar y Guardar'),
@@ -1057,18 +1099,39 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                 columns: assignaturesColumns,
                 rows: assignatureRows,
                 onChanged: (event) {
-                  // Only process changes for editable columns
+                  //* Only process changes for editable columns
                   if (_isEditableField(event.column.title)) {
-                    // Process changes for editable columns
+                    //* Process changes for editable columns
                     final idEval = event.row.cells['idCalif']?.value as int;
 
-                    // Store original value for comparison
+                    //* Store original value for comparison
                     var originalValue = event.value;
-
-                    var newValue = validateNewGradeValue(
-                        //Validate values cant be les that 50
-                        event.value,
-                        event.column.field);
+                    var newValue;
+                    var commentiD = 0;
+                    //! Only validate int values, not String
+                    if (originalValue is String) {
+                      //* Obtain the id of the comment
+                      if (event.column.field == 'Comentarios') {
+                        if (event.value != null && event.value != '') {
+                          //* Find comment ID based on selected comment text
+                          var matchingComment =
+                              studentsGradesCommentsRows.firstWhere(
+                                  (comment) =>
+                                      comment.commentName == event.value,
+                                  orElse: () => Academicevaluationscomment(
+                                      0, '', false, 0, 0));
+                          commentiD = matchingComment.commentId ?? 0;
+                          newValue = commentiD;
+                        } else {
+                          commentiD = 0; //! No comment selected
+                        }
+                      }
+                    } else {
+                      newValue = validateNewGradeValue(
+                          //* Validate values cant be less than 50
+                          event.value,
+                          event.column.field);
+                    }
 
                     // Show validation message if value was adjusted
                     if (event.column.field == 'Calif' &&
@@ -1115,7 +1178,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                         });
                       }
                     }
-
+                    // Prepare body for backend update
                     composeUpdateStudentGradesBody(
                         event.column.title, newValue, idEval);
 
@@ -1360,9 +1423,12 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
   }
 
   void displayColumnsByGrade(int grade) {
+    // Check if comments are available and should be displayed
+    bool hasComments = commentStringEval.isNotEmpty;
+
     // setState(() {
     if ((grade < 12) && (grade > 6)) {
-      hideCommentsColumn = true; // Comentarios
+      hideCommentsColumn = !hasComments; // Show comments only if available
       hideAbsencesColumn = true; // Faltas
       hideHomeworksColumn = false; // Tareas
       hideDisciplineColumn = false; //Disciplina
@@ -1371,14 +1437,14 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
       homeWorkColumnTitle = 'Hab';
       disciplineColumnTitle = 'Con';
     } else if ((grade < 6 && grade > 0)) {
-      hideCommentsColumn = true; // Comentarios
+      hideCommentsColumn = !hasComments; // Show comments only if available
       hideAbsencesColumn = true; // Faltas
       hideHomeworksColumn = true; // Tareas
       hideDisciplineColumn = true; //Disciplina
       hideHabitsColumn = true; //Habits
       hideOutfitColumn = true;
     } else if (grade > 11) {
-      hideCommentsColumn = true;
+      hideCommentsColumn = !hasComments; // Show comments only if available
       hideAbsencesColumn = false; // Faltas
       hideHomeworksColumn = false; // Tareas
       hideDisciplineColumn = true; //Disciplina

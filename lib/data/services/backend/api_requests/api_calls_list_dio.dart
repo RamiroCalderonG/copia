@@ -799,10 +799,6 @@ Future<dynamic> getStudentsGradesComments(int grade) async {
     );
 
     if (response.statusCode == 200) {
-      // Handle UTF-8 decoding for Spanish characters
-      if (response.data is String) {
-        return response.data; //json.decode(response.data);
-      }
       return response.data;
     } else {
       return Future.error(response.data);

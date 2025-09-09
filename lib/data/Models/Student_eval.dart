@@ -55,11 +55,11 @@ dynamic getEvalFromJSON(List<dynamic> jsonList, bool isByStudent) {
           String student2LastName = item['secondlastName'];
           String studentID = item['studentID'];
           //int grades = item['eval_type'];
-          int absence = item['absence_eval'];
-          int homework = item['homework_eval'];
-          int discipline = item['discipline_eval'];
-          int? comment = item['comment'] ?? 0;
-          int habitsEvaluation = item['habit_eval'];
+          int absence = item['absence_eval'] ?? 0;
+          int homework = item['homework_eval'] ?? 0;
+          int discipline = item['discipline_eval'] ?? 0;
+          int? comment = item['Coment'] ?? 0;
+          int habitsEvaluation = item['habit_eval'] ?? 0;
           //int outfit = item['outfit'];
           int subject = item['subjectId'];
           String? subjectName = item['subject_name'];

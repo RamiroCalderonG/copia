@@ -412,10 +412,10 @@ void composeBodyToUpdateGradeBySTudent(
   } else {
     for (var obj in studentGradesBodyToUpgrade) {
       if (obj['student'] == studentID && obj['idEval'] == evalId) {
-        //If already exist data for selected student
+        //*If already exist data for selected student
         idExists = true;
         if (key == 'Comentarios') {
-          //Comentarios are stores diferent
+          //*Comentarios are stores diferent
           var oldValue = obj[key];
           if (oldValue == null) {
             obj[key] = value;
@@ -469,6 +469,21 @@ void composeUpdateStudentGradesBody(
 
   if (key == 'Calificación') {
     key = 'eval';
+  }
+  if (key == 'Hab') {
+    key = 'homework';
+  }
+  if (key == 'Con') {
+    key = 'behavior';
+  }
+  if (key == 'R') {
+    key = 'homework';
+  }
+  if (key == 'Comentarios') {
+    key = 'Comment';
+  }
+  if (key == 'Faltas') {
+    key = 'absences';
   }
 
   if (studentGradesBodyToUpgrade.isEmpty) {
@@ -547,10 +562,10 @@ int validateNewGradeValue(dynamic newValue, String columnNameToFind) {
   //If value < 50 -> returns 50, if value > 100 -> returns 100
   List<String> columnName = [
     'Calif',
-    'Conducta',
+    //'Conducta',
     'Uniforme',
     'Ausencia',
-    'Tareas',
+    //'Tareas'
     // 'Comentarios'
   ];
 
@@ -744,7 +759,7 @@ Future<List<Academicevaluationscomment>> getEvaluationsCommentsByGradeSequence(
   try {
     var response = await getStudentsGradesComments(gradeSequence);
     List<Academicevaluationscomment> commentsList = [];
-    if (response != null) {
+    if ((response.isNotEmpty) || (response.length > 0)) {
       for (var element in response) {
         Academicevaluationscomment comment =
             Academicevaluationscomment.fromJson(element);
@@ -759,8 +774,10 @@ Future<List<Academicevaluationscomment>> getEvaluationsCommentsByGradeSequence(
           }
         }
       }
+      return commentsList;
+    } else {
+      return [];
     }
-    return commentsList;
   } catch (e) {
     insertErrorLog(
         e.toString(), 'getEvaluationsCommentsByGradeSequence($gradeSequence)');
