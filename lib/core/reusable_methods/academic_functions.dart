@@ -563,14 +563,15 @@ int validateNewGradeValue(dynamic newValue, String columnNameToFind) {
   List<String> columnName = [
     'Calif',
     //'Conducta',
-    'Uniforme',
-    'Ausencia',
+    //'Uniforme',
+    //'Ausencia',
     //'Tareas'
     // 'Comentarios'
   ];
 
   bool isContained = columnName.contains(columnNameToFind);
 
+  //! If column name is one of the above, validate the value
   if (isContained) {
     // Convert to integer if it's a double
     if (newValue is double) {

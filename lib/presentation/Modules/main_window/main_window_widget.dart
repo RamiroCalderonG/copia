@@ -305,7 +305,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                 onPressed: () async {
                   scaffoldKey.currentState!.openDrawer();
                 },
-                tooltip: 'Menú principal',
+                tooltip: 'Menú de navegación',
               ),
             ),
             title: Row(
@@ -449,22 +449,22 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      'Ox School',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: colorScheme.primary,
-                      ),
-                    ),
-                    Text(
-                      'ERP Ox School',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                    ),
+                    // Text(
+                    //   'Ox School',
+                    //   style: theme.textTheme.titleMedium?.copyWith(
+                    //     fontWeight: FontWeight.bold,
+                    //     color: colorScheme.primary,
+                    //   ),
+                    // ),
+                    // Text(
+                    //   'ERP Ox School',
+                    //   style: theme.textTheme.bodySmall?.copyWith(
+                    //     color: colorScheme.onSurfaceVariant,
+                    //   ),
+                    // ),
                   ],
                 ),
-                const SizedBox(width: 16),
+                // const SizedBox(width: 16),
                 Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

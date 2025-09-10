@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
@@ -772,25 +773,30 @@ class _GradesByStudentState extends State<GradesByStudent> {
     }
 
     try {
-      _setLoadingState(true);
+      var confirmation = await showConfirmationDialog(
+          context, 'Confirmar', '¿Desea guardar los cambios realizados?');
+      if (confirmation.isEqual(1)) {
+        _setLoadingState(true);
 
-      final calculatedMonthNumber = _calculateMonthNumber();
+        final calculatedMonthNumber = _calculateMonthNumber();
 
-      await saveButtonAction(calculatedMonthNumber);
+        await saveButtonAction(calculatedMonthNumber);
 
-      // Clear the changes and refresh only the current student's data
-      studentGradesBodyToUpgrade.clear();
+        // Optionally reload the current student to ensure fresh data
+        if (selectedStudentID != null) {
+          final gradeInt =
+              getKeyFromValue(teacherGradesMap, selectedTempGrade!.toString());
+          await loadSelectedStudent(
+              selectedStudentID!, gradeInt, calculatedMonthNumber!);
+        }
 
-      // Optionally reload the current student to ensure fresh data
-      if (selectedStudentID != null) {
-        final gradeInt =
-            getKeyFromValue(teacherGradesMap, selectedTempGrade!.toString());
-        await loadSelectedStudent(
-            selectedStudentID!, gradeInt, calculatedMonthNumber!);
-      }
-
-      if (context.mounted) {
-        showInformationDialog(context, 'Éxito', 'Cambios realizados!');
+        if (context.mounted) {
+          showInformationDialog(context, 'Éxito', 'Cambios realizados!');
+          // Clear the changes and refresh only the current student's data
+          studentGradesBodyToUpgrade.clear();
+        }
+      } else {
+        return;
       }
     } catch (e) {
       if (context.mounted) {
@@ -1167,8 +1173,57 @@ class _GradesByStudentState extends State<GradesByStudent> {
                             }
                           }
                         } else {
-                          newValue = validateNewGradeValue(
-                              event.value, event.column.title);
+                          // Handle numeric fields with appropriate validation
+                          if (event.column.field == 'absence_eval' ||
+                              event.column.field == 'homework_eval' ||
+                              event.column.field == 'discipline_eval' ||
+                              event.column.field == 'habit_eval') {
+                            // Validate smallint fields
+                            var validationResult = validateSmallintValue(
+                                event.value, event.column.title);
+                            newValue = validationResult['value'];
+
+                            // Show validation message if value was adjusted
+                            if (validationResult['message'] != null &&
+                                context.mounted) {
+                              _validationDebounce?.cancel();
+                              _validationDebounce =
+                                  Timer(const Duration(milliseconds: 100), () {
+                                if (context.mounted && !_disposed) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        '⚠️ ${validationResult['message']} ⚠️',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      backgroundColor: Theme.of(context)
+                                          .colorScheme
+                                          .tertiary,
+                                      duration: const Duration(seconds: 3),
+                                    ),
+                                  );
+                                }
+                              });
+
+                              // Update the cell value to the validated value
+                              Future.microtask(() {
+                                if (!_disposed && mounted) {
+                                  try {
+                                    event.row.cells[event.column.field]?.value =
+                                        newValue;
+                                  } catch (e) {
+                                    insertErrorLog(e.toString(),
+                                        'SMALLINT_VALIDATION_CELL_UPDATE_ERROR');
+                                  }
+                                }
+                              });
+                            }
+                          } else {
+                            // Use existing validation for grade fields
+                            newValue = validateNewGradeValue(
+                                event.value, event.column.title);
+                          }
                         }
                         // Show validation message if value was adjusted for evaluation field
                         if (event.column.field == 'evaluation' &&
@@ -1457,6 +1512,46 @@ class _GradesByStudentState extends State<GradesByStudent> {
       'Materia'
     };
     return !restrictedFields.contains(fieldName);
+  }
+
+  /// Validates smallint values (0 to 32767 for positive smallint)
+  /// Returns the validated value and a validation message if needed
+  Map<String, dynamic> validateSmallintValue(dynamic value, String fieldName) {
+    if (value == null || value == '') {
+      return {'value': 0, 'message': null};
+    }
+
+    int? intValue;
+    if (value is String) {
+      intValue = int.tryParse(value);
+    } else if (value is num) {
+      intValue = value.toInt();
+    }
+
+    if (intValue == null) {
+      return {
+        'value': 0,
+        'message': 'Valor inválido en $fieldName. Se estableció en 0.'
+      };
+    }
+
+    // Validate smallint range (0 to 32767 for positive values)
+    if (intValue < 0) {
+      return {
+        'value': 0,
+        'message': '$fieldName no puede ser negativo. Se ajustó a 0.'
+      };
+    }
+
+    if (intValue > 32767) {
+      return {
+        'value': 32767,
+        'message':
+            '$fieldName excede el límite máximo (32767). Se ajustó automáticamente.'
+      };
+    }
+
+    return {'value': intValue, 'message': null};
   }
 
   Future<void> saveButtonAction(int? monthNumberDefined) async {

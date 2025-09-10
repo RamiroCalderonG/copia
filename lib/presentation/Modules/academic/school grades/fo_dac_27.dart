@@ -6,6 +6,10 @@ import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/presentation/Modules/academic/school%20grades/fodac_27_new_record_window.dart';
 
 import 'package:trina_grid/trina_grid.dart';
+import 'dart:convert';
+import 'dart:io';
+import 'package:csv/csv.dart';
+import 'package:file_picker/file_picker.dart';
 
 import '../../../../data/datasources/temp/studens_temp.dart';
 import '../../../../data/datasources/temp/teacher_grades_temp.dart';
@@ -86,7 +90,7 @@ class _FoDac27State extends State<FoDac27> {
     TrinaColumn(
       title: 'Fecha',
       field: 'date',
-      type: TrinaColumnType.text(),
+      type: TrinaColumnType.dateTime(),
       readOnly: false,
       checkReadOnly: (row, cell) {
         return false;
@@ -358,6 +362,10 @@ class _FoDac27State extends State<FoDac27> {
         const SizedBox(height: 8),
         _buildAddButton(theme, colorScheme),
         const SizedBox(height: 8),
+        _buildEditButton(theme, colorScheme),
+        const SizedBox(height: 8),
+        _buildExportButton(theme, colorScheme),
+        const SizedBox(height: 8),
         if (isUserAdmin) _buildDeleteButton(theme, colorScheme),
       ],
     );
@@ -365,18 +373,31 @@ class _FoDac27State extends State<FoDac27> {
 
   Widget _buildRefreshButton(ThemeData theme, ColorScheme colorScheme) {
     return OutlinedButton.icon(
-      onPressed: () async {
-        studentGradesBodyToUpgrade.clear();
-        setState(() {
-          isLoading = true;
-        });
-        await handleRefresh();
-        setState(() {
-          isLoading = false;
-        });
-      },
-      icon: const Icon(Icons.refresh, size: 18),
-      label: const Text('Actualizar'),
+      onPressed: isLoading
+          ? null
+          : () async {
+              studentGradesBodyToUpgrade.clear();
+              setState(() {
+                isLoading = true;
+              });
+              await handleRefresh();
+              setState(() {
+                isLoading = false;
+              });
+            },
+      icon: isLoading
+          ? SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  colorScheme.onSurface.withOpacity(0.6),
+                ),
+              ),
+            )
+          : const Icon(Icons.refresh, size: 18),
+      label: Text(isLoading ? 'Actualizando...' : 'Actualizar'),
       style: OutlinedButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         side: BorderSide(color: colorScheme.outline),
@@ -396,6 +417,52 @@ class _FoDac27State extends State<FoDac27> {
       style: FilledButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         textStyle: theme.textTheme.labelMedium,
+      ),
+    );
+  }
+
+  Widget _buildEditButton(ThemeData theme, ColorScheme colorScheme) {
+    return OutlinedButton.icon(
+      onPressed: selectedEvalID == 0
+          ? null
+          : () {
+              _handleEditItem();
+            },
+      icon: const Icon(Icons.edit_outlined, size: 18),
+      label: const Text('Editar'),
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        textStyle: theme.textTheme.labelMedium,
+        side: BorderSide(
+          color: selectedEvalID == 0
+              ? colorScheme.outline.withOpacity(0.5)
+              : colorScheme.primary,
+        ),
+        foregroundColor: selectedEvalID == 0
+            ? colorScheme.onSurface.withOpacity(0.5)
+            : colorScheme.primary,
+      ),
+    );
+  }
+
+  Widget _buildExportButton(ThemeData theme, ColorScheme colorScheme) {
+    return FilledButton.tonalIcon(
+      onPressed: fodac27HistoryRows.isEmpty
+          ? null
+          : () async {
+              await _exportToExcel();
+            },
+      icon: const Icon(Icons.file_download_outlined, size: 18),
+      label: const Text('Exportar'),
+      style: FilledButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        textStyle: theme.textTheme.labelMedium,
+        backgroundColor: fodac27HistoryRows.isEmpty
+            ? colorScheme.surfaceVariant
+            : colorScheme.secondaryContainer,
+        foregroundColor: fodac27HistoryRows.isEmpty
+            ? colorScheme.onSurfaceVariant
+            : colorScheme.onSecondaryContainer,
       ),
     );
   }
@@ -538,6 +605,9 @@ class _FoDac27State extends State<FoDac27> {
                         stateManager = event.stateManager;
                       },
                       onSelected: handleSelectedCell,
+                      onRowDoubleTap: (event) {
+                        _showRowDetailsDialog(event.row);
+                      },
                       configuration: const TrinaGridConfiguration(
                         style: TrinaGridStyleConfig(
                           enableColumnBorderVertical: false,
@@ -687,6 +757,30 @@ class _FoDac27State extends State<FoDac27> {
     }
   }
 
+  void _handleEditItem() {
+    if (selectedEvalID == 0) {
+      showEmptyFieldAlertDialog(
+          context, 'Favor de seleccionar un registro para editar');
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return EditCommentScreen(
+          id: selectedEvalID,
+          comment: selectedCommentToEdit,
+          date: selectedDateToEdit,
+          selectedSubject: selectedSubjectNameToEdit,
+          studentID: selectedStudentIdToEdit,
+        );
+      },
+    ).then((_) {
+      // Refresh the grid after editing
+      _handleRefreshWithLoading();
+    });
+  }
+
   void _handleRefreshWithLoading() {
     setState(() {
       isLoading = true;
@@ -728,6 +822,358 @@ class _FoDac27State extends State<FoDac27> {
     selectedDateToEdit = selectedRow?.cells['date']?.value;
     selectedSubjectNameToEdit = selectedRow?.cells['subject']?.value;
     selectedStudentIdToEdit = selectedRow?.cells['studentID']?.value;
+  }
+
+  void _showRowDetailsDialog(TrinaRow row) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isSmallScreen = screenWidth < 600;
+
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierColor: Colors.black.withOpacity(0.5),
+      builder: (BuildContext context) {
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          child: Dialog(
+            elevation: 24,
+            shadowColor: colorScheme.shadow.withOpacity(0.3),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(isSmallScreen ? 20 : 28),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Container(
+              constraints: BoxConstraints(
+                maxWidth: isSmallScreen ? screenWidth * 0.95 : 650,
+                maxHeight: screenHeight * 0.85,
+              ),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    colorScheme.surface,
+                    colorScheme.surfaceContainer.withOpacity(0.3),
+                  ],
+                ),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Beautiful Header with gradient
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          colorScheme.primaryContainer,
+                          colorScheme.primaryContainer.withOpacity(0.7),
+                        ],
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: colorScheme.primary.withOpacity(0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    padding: EdgeInsets.all(isSmallScreen ? 20 : 24),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: colorScheme.primary.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: colorScheme.primary.withOpacity(0.2),
+                              width: 1,
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.assignment_outlined,
+                            color: colorScheme.primary,
+                            size: isSmallScreen ? 24 : 28,
+                          ),
+                        ),
+                        SizedBox(width: isSmallScreen ? 12 : 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Registro FODAC-27',
+                                style: theme.textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  color: colorScheme.onPrimaryContainer,
+                                  fontSize: isSmallScreen ? 20 : 24,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'ID: ${row.cells['fodac27']?.value?.toString() ?? 'N/A'}',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: colorScheme.onPrimaryContainer
+                                      .withOpacity(0.8),
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: isSmallScreen ? 13 : 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: colorScheme.surface.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: IconButton(
+                            onPressed: () => Navigator.pop(context),
+                            icon: Icon(
+                              Icons.close_rounded,
+                              color: colorScheme.onPrimaryContainer,
+                              size: isSmallScreen ? 22 : 24,
+                            ),
+                            tooltip: 'Cerrar',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Content with better spacing and design
+                  Flexible(
+                    child: Container(
+                      padding: EdgeInsets.all(isSmallScreen ? 16 : 24),
+                      child: SingleChildScrollView(
+                        physics: const BouncingScrollPhysics(),
+                        child: Column(
+                          children: [
+                            _buildBeautifulDetailField(
+                              theme: theme,
+                              colorScheme: colorScheme,
+                              isSmallScreen: isSmallScreen,
+                              label: 'Fecha del Registro',
+                              value:
+                                  row.cells['date']?.value?.toString() ?? 'N/A',
+                              icon: Icons.calendar_today_rounded,
+                            ),
+                            SizedBox(height: isSmallScreen ? 16 : 20),
+                            _buildBeautifulDetailField(
+                              theme: theme,
+                              colorScheme: colorScheme,
+                              isSmallScreen: isSmallScreen,
+                              label: 'Matrícula del Estudiante',
+                              value:
+                                  row.cells['studentID']?.value?.toString() ??
+                                      'N/A',
+                              icon: Icons.person_rounded,
+                            ),
+                            SizedBox(height: isSmallScreen ? 16 : 20),
+                            _buildBeautifulDetailField(
+                              theme: theme,
+                              colorScheme: colorScheme,
+                              isSmallScreen: isSmallScreen,
+                              label: 'Materia',
+                              value: row.cells['subject']?.value?.toString() ??
+                                  'N/A',
+                              icon: Icons.subject_rounded,
+                            ),
+                            SizedBox(height: isSmallScreen ? 16 : 20),
+                            _buildBeautifulDetailField(
+                              theme: theme,
+                              colorScheme: colorScheme,
+                              isSmallScreen: isSmallScreen,
+                              label: 'Profesor',
+                              value: row.cells['teacher']?.value?.toString() ??
+                                  'N/A',
+                              icon: Icons.school_rounded,
+                            ),
+                            SizedBox(height: isSmallScreen ? 16 : 20),
+                            _buildBeautifulDetailField(
+                              theme: theme,
+                              colorScheme: colorScheme,
+                              isSmallScreen: isSmallScreen,
+                              label: 'Observaciones',
+                              value: row.cells['Obs']?.value?.toString() ??
+                                  'Sin observaciones',
+                              icon: Icons.edit_note_rounded,
+                              isMultiLine: true,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // Beautiful action button
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(isSmallScreen ? 16 : 24),
+                    decoration: BoxDecoration(
+                      color:
+                          colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                      border: Border(
+                        top: BorderSide(
+                          color: colorScheme.outlineVariant.withOpacity(0.5),
+                          width: 1,
+                        ),
+                      ),
+                    ),
+                    child: FilledButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: colorScheme.primary,
+                        foregroundColor: colorScheme.onPrimary,
+                        padding: EdgeInsets.symmetric(
+                          vertical: isSmallScreen ? 14 : 16,
+                          horizontal: 32,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        elevation: 2,
+                        shadowColor: colorScheme.primary.withOpacity(0.3),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.check_circle_rounded,
+                            size: isSmallScreen ? 20 : 22,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Entendido',
+                            style: TextStyle(
+                              fontSize: isSmallScreen ? 16 : 17,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildBeautifulDetailField({
+    required ThemeData theme,
+    required ColorScheme colorScheme,
+    required bool isSmallScreen,
+    required String label,
+    required String value,
+    required IconData icon,
+    bool isMultiLine = false,
+  }) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: colorScheme.outlineVariant,
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.shadow.withOpacity(0.05),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Label section with theme-appropriate background
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(isSmallScreen ? 12 : 16),
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainerHighest,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(11),
+                topRight: Radius.circular(11),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: colorScheme.primary.withOpacity(0.2),
+                      width: 1,
+                    ),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: colorScheme.primary,
+                    size: isSmallScreen ? 16 : 18,
+                  ),
+                ),
+                SizedBox(width: isSmallScreen ? 8 : 12),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: colorScheme.onSurface,
+                      fontSize: isSmallScreen ? 13 : 14,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Value section
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(isSmallScreen ? 14 : 16),
+            child: Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(isSmallScreen ? 12 : 14),
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainer,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: colorScheme.outline.withOpacity(0.1),
+                  width: 1,
+                ),
+              ),
+              child: Text(
+                value,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurface,
+                  fontSize: isSmallScreen ? 13 : 14,
+                  height: isMultiLine ? 1.5 : 1.3,
+                  fontWeight: FontWeight.w500,
+                ),
+                maxLines: isMultiLine ? null : 2,
+                overflow: isMultiLine ? null : TextOverflow.ellipsis,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   String? getStudentIdByName(String name) {
@@ -811,6 +1257,86 @@ class _FoDac27State extends State<FoDac27> {
       return Future.error(e);
     }
   }
+
+  Future<void> _exportToExcel() async {
+    if (fodac27HistoryRows.isEmpty) {
+      showErrorFromBackend(context, "No hay datos para exportar.");
+      return;
+    }
+
+    try {
+      setState(() {
+        displayLoading = true;
+      });
+
+      // Prepare CSV data
+      List<List<dynamic>> csvData = [];
+
+      // Add headers with Spanish column names
+      csvData.add(
+          ['ID', 'Fecha', 'Matrícula', 'Materia', 'Maestro', 'Observaciones']);
+
+      // Add rows
+      for (var row in fodac27HistoryRows) {
+        csvData.add([
+          row.cells['fodac27']?.value?.toString() ?? '',
+          row.cells['date']?.value?.toString() ?? '',
+          row.cells['studentID']?.value?.toString() ?? '',
+          row.cells['subject']?.value?.toString() ?? '',
+          row.cells['teacher']?.value?.toString() ?? '',
+          row.cells['Obs']?.value?.toString() ?? '',
+        ]);
+      }
+
+      String csv = const ListToCsvConverter().convert(csvData);
+
+      // Let user pick the save location
+      String? outputFile = await FilePicker.platform.saveFile(
+        dialogTitle: 'Guardar archivo CSV',
+        fileName: 'reporteFODAC27.csv',
+        type: FileType.custom,
+        allowedExtensions: ['csv'],
+      );
+
+      if (outputFile != null) {
+        final file = File(outputFile);
+        await file.writeAsString(csv, encoding: utf8);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Archivo CSV guardado exitosamente en $outputFile',
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold, color: Colors.white),
+              ),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 4),
+              action: SnackBarAction(
+                label: 'OK',
+                textColor: Colors.white,
+                onPressed: () {
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                },
+              ),
+            ),
+          );
+        }
+      }
+
+      setState(() {
+        displayLoading = false;
+      });
+    } catch (error) {
+      setState(() {
+        displayLoading = false;
+      });
+
+      if (mounted) {
+        showErrorFromBackend(context, 'Error al exportar: ${error.toString()}');
+      }
+    }
+  }
 }
 
 class EditCellDialog extends StatelessWidget {
@@ -884,6 +1410,7 @@ class _EditCommentScreenState extends State<EditCommentScreen> {
   DateTime? date;
   List<String> _subjects = [];
   String? _selectedSubject;
+  bool _isSaving = false;
 
   Map<String, dynamic> subjectsMap = {};
   Map<String, dynamic> newObservation = {};
@@ -892,7 +1419,29 @@ class _EditCommentScreenState extends State<EditCommentScreen> {
 
   @override
   void initState() {
-    date = format.parse(widget.date);
+    // Initialize the date controller first
+    _dateController = TextEditingController();
+
+    try {
+      // Handle different date formats that might come from the API
+      if (widget.date.contains('-')) {
+        // Format: 2024-11-29 or 2024-11-29 00:00:00.0
+        DateTime parsedDate = DateTime.parse(widget.date.split(' ')[0]);
+        date = parsedDate;
+        _dateController.text =
+            "${parsedDate.day.toString().padLeft(2, '0')}/${parsedDate.month.toString().padLeft(2, '0')}/${parsedDate.year}";
+      } else {
+        // Format: d/M/y
+        date = format.parse(widget.date);
+        _dateController.text = widget.date;
+      }
+    } catch (e) {
+      // Fallback to current date if parsing fails
+      date = DateTime.now();
+      _dateController.text =
+          "${date!.day.toString().padLeft(2, '0')}/${date!.month.toString().padLeft(2, '0')}/${date!.year}";
+    }
+
     getSubjects();
     _selectedSubject = widget.selectedSubject;
     _commentController = TextEditingController(text: widget.comment);
@@ -922,10 +1471,12 @@ class _EditCommentScreenState extends State<EditCommentScreen> {
     if (picked != null && picked != _selectedDate) {
       setState(() {
         _selectedDate = picked;
+        // Display formatted date for user
         _dateController.text =
-            picked as String; //DateFormat.yMd().format(picked);
+            "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}";
         newDate.clear();
-        newDate = {'date': picked};
+        // Send timestamp (milliseconds since epoch) to backend
+        newDate = {'date': picked.millisecondsSinceEpoch};
       });
     }
   }
@@ -1033,7 +1584,7 @@ class _EditCommentScreenState extends State<EditCommentScreen> {
                 ),
                 onChanged: (value) {
                   newObservation.clear();
-                  newObservation = {'observation': value};
+                  newObservation = {'observation': value.toUpperCase().trim()};
                 },
               ),
             ),
@@ -1058,8 +1609,12 @@ class _EditCommentScreenState extends State<EditCommentScreen> {
                 ),
                 onTap: _selectDate,
                 onChanged: (value) {
-                  newDate.clear();
-                  newDate = {'date': _dateController.text};
+                  // This won't be called since field is readOnly,
+                  // but keeping for consistency
+                  if (_selectedDate != null) {
+                    newDate.clear();
+                    newDate = {'date': _selectedDate!.millisecondsSinceEpoch};
+                  }
                 },
               ),
             ),
@@ -1081,34 +1636,49 @@ class _EditCommentScreenState extends State<EditCommentScreen> {
                 const SizedBox(width: 16),
                 Expanded(
                   child: FilledButton.icon(
-                    onPressed: () async {
-                      Map<String, dynamic> id = {'id': widget.id};
+                    onPressed: _isSaving
+                        ? null
+                        : () async {
+                            setState(() {
+                              _isSaving = true;
+                            });
 
-                      var bodyToEdit = validateEditedFields(
-                        id,
-                        newObservation,
-                        newDate,
-                        newSubject,
-                      );
-                      if (bodyToEdit != null) {
-                        int response = await updateFodac27Record(bodyToEdit);
-                        if (response == 200) {
-                          if (mounted) {
-                            int response = await showConfirmationDialog(
-                                context,
-                                'Realizado',
-                                'Registro modificado exitosamente');
-                            if (response == 1) {
-                              Navigator.pop(context);
+                            try {
+                              Map<String, dynamic> id = {'id': widget.id};
+
+                              var bodyToEdit = validateEditedFields(
+                                id,
+                                newObservation,
+                                newDate,
+                                newSubject,
+                              );
+                              if (bodyToEdit != null) {
+                                int response =
+                                    await updateFodac27Record(bodyToEdit);
+                                if (response == 200) {
+                                  if (mounted) {
+                                    Navigator.pop(context);
+                                    showSuccessDialog(context, 'Éxito',
+                                        'Registro actualizado correctamente.');
+                                  }
+                                }
+                              }
+                            } finally {
+                              if (mounted) {
+                                setState(() {
+                                  _isSaving = false;
+                                });
+                              }
                             }
-                          }
-                        }
-                      } else {
-                        return;
-                      }
-                    },
-                    icon: const Icon(Icons.save, size: 18),
-                    label: const Text('Guardar'),
+                          },
+                    icon: _isSaving
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CustomLoadingIndicator(),
+                          )
+                        : const Icon(Icons.save, size: 18),
+                    label: Text(_isSaving ? 'Guardando...' : 'Guardar'),
                     style: FilledButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),

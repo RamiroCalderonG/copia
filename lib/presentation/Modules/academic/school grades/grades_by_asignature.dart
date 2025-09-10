@@ -376,6 +376,46 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
     return !restrictedFields.contains(fieldName);
   }
 
+  /// Validates smallint values (0 to 32767 for positive smallint)
+  /// Returns the validated value and a validation message if needed
+  Map<String, dynamic> validateSmallintValue(dynamic value, String fieldName) {
+    if (value == null || value == '') {
+      return {'value': 0, 'message': null};
+    }
+
+    int? intValue;
+    if (value is String) {
+      intValue = int.tryParse(value);
+    } else if (value is num) {
+      intValue = value.toInt();
+    }
+
+    if (intValue == null) {
+      return {
+        'value': 0,
+        'message': 'Valor inválido en $fieldName. Se estableció en 0.'
+      };
+    }
+
+    // Validate smallint range (0 to 32767 for positive values)
+    if (intValue < 0) {
+      return {
+        'value': 0,
+        'message': '$fieldName no puede ser negativo. Se ajustó a 0.'
+      };
+    }
+
+    if (intValue > 32767) {
+      return {
+        'value': 32767,
+        'message':
+            '$fieldName excede el límite máximo (32767). Se ajustó automáticamente.'
+      };
+    }
+
+    return {'value': intValue, 'message': null};
+  }
+
   Future<void> searchBUttonAction(
     String groupSelected,
     String gradeInt,
@@ -963,62 +1003,57 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
   Widget _buildSaveButton(ThemeData theme, ColorScheme colorScheme) {
     return FilledButton.icon(
       onPressed: () async {
-        await showConfirmationDialog(
-          context,
-          'Confirmar y Guardar',
-          '¿Está seguro de guardar los cambios realizados?',
-        ).then((value) async {
-          if (value == 1) {
-            // User confirmed
-            setState(() {
-              isLoading = true;
-            });
-            // Commit all changes before saving
-            if (!_disposed && stateManager != null) {
-              commitChanges();
-            }
-
-            await updateButtonFunction((success) async {
-              if (success) {
-                try {
-                  studentGradesBodyToUpgrade.clear();
-                  /*
-              await searchBUttonAction(
-                  selectedTempGroup!,
-                  selectedTempGrade.toString(),
-                  selectedTempSubjectId.toString(),
-                  monthNumber.toString(),
-                  selectedTempCampus!);
-                  */
-
-                  setState(() {
-                    isLoading = false;
-                    showInformationDialog(context, 'Éxito',
-                        'Cambios realizados!, actualice la página.');
-                  });
-                } catch (e) {
-                  setState(() {
-                    isLoading = false;
-                    showErrorFromBackend(context, e.toString());
-                  });
-                }
-              } else {
-                isLoading = false;
-                showErrorFromBackend(context, 'Error');
+        if (studentGradesBodyToUpgrade.isEmpty) {
+          showInformationDialog(
+              context, 'Alerta!', 'No hay cambios para guardar.');
+          return;
+        } else {
+          await showConfirmationDialog(
+            context,
+            'Confirmar y Guardar',
+            '¿Está seguro de guardar los cambios realizados?',
+          ).then((value) async {
+            if (value == 1) {
+              // User confirmed
+              setState(() {
+                isLoading = true;
+              });
+              // Commit all changes before saving
+              if (!_disposed && stateManager != null) {
+                commitChanges();
               }
-            });
-            return;
-          } else {
-            // User cancelled
-            setState(() {
-              isLoading = false;
-            });
-            return;
-          }
-        });
-        // setState(() {
-        //   isLoading = false;
-        // });
+
+              await updateButtonFunction((success) async {
+                if (success) {
+                  try {
+                    studentGradesBodyToUpgrade.clear();
+
+                    setState(() {
+                      isLoading = false;
+                      showInformationDialog(context, 'Éxito',
+                          'Cambios realizados!, actualice la página.');
+                    });
+                  } catch (e) {
+                    setState(() {
+                      isLoading = false;
+                      showErrorFromBackend(context, e.toString());
+                    });
+                  }
+                } else {
+                  isLoading = false;
+                  showErrorFromBackend(context, 'Error');
+                }
+              });
+              return;
+            } else {
+              // User cancelled
+              setState(() {
+                isLoading = false;
+              });
+              return;
+            }
+          });
+        }
       },
       icon: const Icon(Icons.save, size: 18),
       label: const Text('Confirmar y Guardar'),
@@ -1120,17 +1155,61 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                                       comment.commentName == event.value,
                                   orElse: () => Academicevaluationscomment(
                                       0, '', false, 0, 0));
-                          commentiD = matchingComment.commentId ?? 0;
+                          commentiD = matchingComment.commentId;
                           newValue = commentiD;
                         } else {
                           commentiD = 0; //! No comment selected
                         }
                       }
                     } else {
-                      newValue = validateNewGradeValue(
-                          //* Validate values cant be less than 50
-                          event.value,
-                          event.column.field);
+                      // Handle numeric fields with appropriate validation
+                      if (event.column.field == 'Ausencia' ||
+                          event.column.field == 'Tareas' ||
+                          event.column.field == 'Conducta' ||
+                          event.column.field == 'habit_eval') {
+                        // Validate smallint fields
+                        var validationResult = validateSmallintValue(
+                            event.value, event.column.title);
+                        newValue = validationResult['value'];
+
+                        // Show validation message if value was adjusted
+                        if (validationResult['message'] != null &&
+                            context.mounted) {
+                          _validationDebounce?.cancel();
+                          _validationDebounce =
+                              Timer(const Duration(milliseconds: 100), () {
+                            if (context.mounted && !_disposed) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    '⚠️ ${validationResult['message']} ⚠️',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  backgroundColor:
+                                      Theme.of(context).colorScheme.tertiary,
+                                  duration: const Duration(seconds: 3),
+                                ),
+                              );
+                            }
+                          });
+
+                          // Update the cell value to the validated value
+                          Future.microtask(() {
+                            if (stateManager != null && !_disposed && mounted) {
+                              event.row.cells[event.column.field]?.value =
+                                  newValue;
+                              stateManager!.notifyListeners();
+                            }
+                          });
+                        }
+                      } else {
+                        // Use existing validation for grade fields
+                        newValue = validateNewGradeValue(
+                            //* Validate values cant be less than 50
+                            event.value,
+                            event.column.field);
+                      }
                     }
 
                     // Show validation message if value was adjusted
