@@ -1,115 +1,167 @@
 
-# ERP Oxschool
+# 🎓 ERP Oxschool
 
-Sistema ERP para Ox School desarrollado en Dart con Flutter, usando Dio para conección para 
+<p align="center">
+  <img src="assets/images/logoRedondoOx.png" alt="Oxschool Logo" width="200"/>
+</p>
 
+<p align="center">
+  <strong>Sistema ERP para Ox School desarrollado en Dart con Flutter, usando Dio para conexión REST API</strong>
+</p>
 
-## Documentation
+<p align="center">
+  <img src="https://img.shields.io/badge/Flutter-3.33.0--1.0.pre.11-blue?logo=flutter" alt="Flutter Version"/>
+  <img src="https://img.shields.io/badge/Dart-3.9.0-blue?logo=dart" alt="Dart Version"/>
+  <img src="https://img.shields.io/badge/Java-SpringBoot-green?logo=spring" alt="Java SpringBoot"/>
+  <img src="https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Web-lightgrey" alt="Platform Support"/>
+</p>
 
-* Front End:  
-* Backend: REST API Servr API Java SpringBoot
+## 📚 Documentation
 
+- **Front End:** Flutter Application with Dio HTTP Client
+- **Backend:** REST API Server - Java SpringBoot
 
-## Instalacion en cliente
-- Para Windows
-  Una vez con archivo .exe se crea el instalador con el uso de InnoSetup
+## 📦 Instalación en cliente
+### 🖥️ Para Windows
+Una vez generado el archivo `.exe`, se crea el instalador usando **InnoSetup**
 
-- Para MacOS
-    Ejecutar InstallerScritpNew -> Seleccionar oxschool.app -> Seleccionar update.scpt -> Seleccionar oxsUpdaterHelper
+### 🍎 Para macOS
+1. Ejecutar `InstallerScritpNew` 
+2. Seleccionar `oxschool.app` 
+3. Seleccionar `update.scpt` 
+4. Seleccionar `oxsUpdaterHelper`
 
+## 🚀 Deployment
+Para el manejo de versiones, el procedimiento para aplicación de escritorio es el siguiente:
 
-### Deployment
-Para el manejo de versiones el procedimiento para aplciacion de escritorio es el siguiente:
-* Se contruye el proyecto para Windows y MacOS, posteriormente se carga en Github la nueva version como un release y en la tabla app_versions se crea un nuevo registro con la nueva version
+1. Se construye el proyecto para Windows y macOS
+2. Se carga en GitHub la nueva versión como un release
+3. En la tabla `app_versions` se crea un nuevo registro con la nueva versión
 
-Pasos para Windows
-- Modificar Runner.rc con la version a contruir
-  - Modificar linea :
+### 🖥️ Pasos para Windows
+
+1. **Modificar versión en Runner.rc**
    ```bash
    define VERSION_AS_NUMBER [NEW_VERSION_NUMBER]
-  ```
-  
-- Construir .exe
-    ```bash
-  flutter build windows --release
-    ```
-  
-- Comprimir archivos generados en zip junto con script 
-- Cargar en Release de Github 
+   ```
 
-**NOTA:**
-Pasos para MacOS
-- Construir .app
-     ```bash
-  flutter build windows --release
-    ```
-  
-- Comprimir archivo .app en un archivo .zip
-- Cargar en Release de Github
+2. **Construir ejecutable**
+   ```bash
+   flutter build windows --release
+   ```
 
-**NOTA:**
-Debido al SandBox y Gatekeeper de MacOS el archivo .app se elimina el sandbox desde Xcode y asì mismo se creó un ejecutable Comand Line Tools "oxsUpdaterHelper" y este se debe ubicar en */Users/CURRENT_USER/*
-Y para que este pueda trabajar correctamente se debe incluir los siguientes permisos 
+3. **Preparar release**
+   - Comprimir archivos generados en zip junto con script
+   - Cargar en Release de GitHub
+
+### 🍎 Pasos para macOS
+
+1. **Construir aplicación**
+   ```bash
+   flutter build macos --release
+   ```
+
+2. **Preparar release**
+   - Comprimir archivo `.app` en un archivo `.zip`
+   - Cargar en Release de GitHub
+
+### ⚠️ Notas importantes para macOS
+
+Debido al **SandBox** y **Gatekeeper** de macOS:
+
+- El archivo `.app` se debe configurar sin sandbox desde Xcode
+- Se creó un ejecutable Command Line Tools `oxsUpdaterHelper` 
+- Debe ubicarse en `/Users/CURRENT_USER/`
+
+#### Permisos requeridos:
 ```bash
-  sudo chmod +x /path/to/UpdateHelper 
+sudo chmod +x /path/to/UpdateHelper 
 ```
 
--Asì mismo se debe editar visudo para que permita el uso de xattr como sudo sin pedir contraseña:
-1.-
-```bash
-  sudo visudo
-```
-2.- Agregar : 
-```bash
-  ALL ALL=(ALL) NOPASSWD: /usr/bin/xattr -dr com.apple.quarantine
-```
-**Updater Helper Repository** [oxsUpdaterHelper Repo](https://github.com/ericksanr/oxsUpdaterHelper/tree/main)
-- Para insertar presionar i y posteriormente agregar la linea, luego presionar CTRL+C y luego :qw
+#### Configuración de sudoers:
+1. Editar sudoers:
+   ```bash
+   sudo visudo
+   ```
 
+2. Agregar la siguiente línea:
+   ```bash
+   ALL ALL=(ALL) NOPASSWD: /usr/bin/xattr -dr com.apple.quarantine
+   ```
 
- ### Cargar en Github Releases con la siguiente estructura
-  1.- Installer_MacOs.zip : Debe llevar oxschool.app, InstallerScritpNew, oxsUpdaterHelper, update.scpt
-  2.- macOs.zip : Debe llevar oxschool.app
-  3.- windows.zip : Debe llevar oxschool.exe junto con los archivos .dll , carpeta de data y updateHelper.bat
-  4.- Installer_Windows.exe : Debe llevar el instalador (OxsInstaller.exe)
+> **Tip:** Para insertar presionar `i`, agregar la línea, luego `Ctrl+C` y `:wq`
 
+#### 🔗 Repositorio del Helper
+[**oxsUpdaterHelper Repository**](https://github.com/ericksanr/oxsUpdaterHelper/tree/main)
 
-## Development
+### 📦 Estructura de GitHub Releases
+| Archivo | Contenido |
+|---------|-----------|
+| `Installer_MacOs.zip` | oxschool.app, InstallerScritpNew, oxsUpdaterHelper, update.scpt |
+| `macOs.zip` | oxschool.app |
+| `windows.zip` | oxschool.exe + archivos .dll + carpeta data + updateHelper.bat |
+| `Installer_Windows.exe` | Instalador (OxsInstaller.exe) |
 
-1.- Para ejecutar este proyecto es necesario instalar Dart SDK
-https://dart.dev/get-dart
+## 💻 Development
 
-- Windows
-```bash
+### ⚙️ Prerrequisitos
+
+#### 1. Instalar Dart SDK
+- **Sitio oficial:** https://dart.dev/get-dart
+- **Windows (Chocolatey):**
+  ```bash
   choco install dart-sdk
-```
-2.- Instalar Flutter SDK
-https://docs.flutter.dev/get-started/install
+  ```
 
+#### 2. Instalar Flutter SDK
+- **Guía oficial:** https://docs.flutter.dev/get-started/install
 
-3.- Instalar backend server
+#### 3. Backend Server
 ```bash
-  java -jar [FILE_LOCATION]
+java -jar [FILE_LOCATION]
 ```
 
+### 🏃‍♂️ Ejecutar el proyecto
+```bash
+flutter pub get
+flutter run
+```
 
-## Tech Stack
+## 🛠️ Tech Stack
 
-**Client:** Flutter, Dart
-**Server:** Java Springboot
-  **Dart SDK: 3.9.0 (build 3.9.0-100.2.beta)**
-  **Flutter: 3.33.0-1.0.pre.11 • channel main**
-  
+| Categoría | Tecnología | Versión |
+|-----------|------------|---------|
+| **Frontend** | Flutter | 3.33.0-1.0.pre.11 |
+| **Language** | Dart | 3.9.0 (build 3.9.0-100.2.beta) |
+| **Backend** | Java SpringBoot | - |
+| **HTTP Client** | Dio | - |
+| **Platforms** | Windows, macOS, Web | - |
 
+## 📖 Documentation
 
-## Documentation
-[Dart Docs:](https://dart.dev/docs)
-[Java 23 Docs](https://docs.oracle.com/en/java/javase/23/)
-[Flutter Docs:](https://docs.flutter.dev/)
+| Recurso | Enlace |
+|---------|--------|
+| 🎯 **Dart Docs** | https://dart.dev/docs |
+| ☕ **Java 23 Docs** | https://docs.oracle.com/en/java/javase/23/ |
+| 💙 **Flutter Docs** | https://docs.flutter.dev/ |
 
+## 🤝 Contributors
 
-## Contributions
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/ramirocalderong">
+        <img src="https://github.com/ramirocalderong.png" width="100px;" alt="Ramiro Calderon"/><br />
+        <sub><b>Ramiro Calderón G</b></sub>
+      </a>
+    </td>
+  </tr>
+</table>
 
-- [@RamiroCalderonG](https://github.com/ramirocalderong)
+---
+
+<p align="center">
+  Made with ❤️ by the Oxschool Team
+</p>
 
 
