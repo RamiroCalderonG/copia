@@ -85,110 +85,23 @@ class _Fodac27MenuSelectorState extends State<Fodac27MenuSelector> {
             .toList()
         : [];
 
-    return Padding(
-        padding: const EdgeInsets.only(top: 15),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            const SizedBox(width: 10),
-            Flexible(
-                child: DropdownMenu<String>(
-              label: const Text('Campus'),
-              trailingIcon: const Icon(Icons.arrow_drop_down),
-              onSelected: (value) {
-                setState(() {
-                  setState(() {
-                    selectedCampus = value!;
-                    selectedTempCampus = value;
-                    selectedGrade = null;
-                    selectedGroup = null;
-                  });
-                });
-              },
-              dropdownMenuEntries: teacherCampusListFODAC27
-                  .toList()
-                  .map<DropdownMenuEntry<String>>((String value) {
-                return DropdownMenuEntry<String>(value: value, label: value);
-              }).toList(),
-            )),
-            const SizedBox(width: 10),
-            if (selectedCampus != null)
-              Flexible(
-                  child: DropdownMenu(
-                      label: const Text('Grado'),
-                      trailingIcon: const Icon(Icons.arrow_drop_down),
-                      onSelected: (value) {
-                        setState(() {
-                          selectedGradeName = value as String?;
-                          selectedGrade = gradesMapFODAC27[selectedGradeName];
-                          selectedTempGrade = selectedGrade;
-                        });
-                      },
-                      dropdownMenuEntries: gradesValues
-                          .toList()
-                          .map<DropdownMenuEntry<String>>((String value) {
-                        return DropdownMenuEntry<String>(
-                            value: value, label: value.toString());
-                      }).toList())),
-            const SizedBox(width: 10),
-            if (selectedGrade != null)
-              Flexible(
-                child: DropdownMenu(
-                    label: const Text('Grupo'),
-                    trailingIcon: const Icon(Icons.arrow_drop_down),
-                    onSelected: (value) async {
-                      setState(() {
-                        selectedGroup = value as String?;
-                        selectedTempGroup = value;
-                        // studentsList.clear();
-                        selectedStudent = '';
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isSmallScreen = constraints.maxWidth < 800;
+        final isVerySmallScreen = constraints.maxWidth < 600;
+        final spacing = isVerySmallScreen ? 8.0 : 10.0;
+        final topPadding = isVerySmallScreen ? 12.0 : 15.0;
 
-                        // print('simplifiedList: ' +
-                        //     simplifiedStudentsList.toString());
-                      });
-                      // studentsList = await getStudentsListForFodac27(
-                      //     selectedCampus!,
-                      //     currentCycle!.claCiclo!,
-                      //     selectedGrade.toString(),
-                      //     selectedGroup!);
-                      setState(() {
-                        selectedStudentController.text = '';
-                      });
-                    },
-                    dropdownMenuEntries: groupsValues
-                        .toList()
-                        .map<DropdownMenuEntry<String>>((String value) {
-                      return DropdownMenuEntry<String>(
-                          value: value, label: value);
-                    }).toList()),
-              ),
-            const SizedBox(width: 10),
-            if (selectedGroup != null)
-              Flexible(
-                flex: 0,
-                child: DropdownMenu<String>(
-                    label: const Text('Alumno'),
-                    width: 350,
-                    trailingIcon: const Icon(Icons.arrow_drop_down),
-                    controller: selectedStudentController,
-                    onSelected: (student) {
-                      if (student != null) {
-                        setState(() {
-                          // selectedStudent = student;
-                          selectedStudentController.text = student;
-                          selectedTempStudent = student;
-                        });
-                      }
-                    },
-                    dropdownMenuEntries: studentsValues
-                        .toList()
-                        .map<DropdownMenuEntry<String>>((var value) {
-                      return DropdownMenuEntry<String>(
-                          value: value, label: value.toTitleCase);
-                    }).toList()),
-              ),
-          ],
-        ));
+        return Padding(
+          padding: EdgeInsets.only(top: topPadding),
+          child: isSmallScreen
+              ? _buildVerticalLayout(gradesValues, groupsValues, studentsValues,
+                  spacing, isVerySmallScreen)
+              : _buildHorizontalLayout(
+                  gradesValues, groupsValues, studentsValues, spacing),
+        );
+      },
+    );
   }
 
   // void handleAddItem() {
@@ -231,6 +144,169 @@ class _Fodac27MenuSelectorState extends State<Fodac27MenuSelector> {
   //   var response = await deleteFodac27Record(fodac27ID);
   //   return response;
   // }
+
+  Widget _buildHorizontalLayout(List<String> gradesValues,
+      List<String> groupsValues, List<String> studentsValues, double spacing) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          SizedBox(width: spacing),
+          SizedBox(
+            width: 200,
+            child: _buildCampusDropdown(),
+          ),
+          SizedBox(width: spacing),
+          if (selectedCampus != null)
+            SizedBox(
+              width: 150,
+              child: _buildGradeDropdown(gradesValues),
+            ),
+          if (selectedCampus != null) SizedBox(width: spacing),
+          if (selectedGrade != null)
+            SizedBox(
+              width: 120,
+              child: _buildGroupDropdown(groupsValues),
+            ),
+          if (selectedGrade != null) SizedBox(width: spacing),
+          if (selectedGroup != null)
+            SizedBox(
+              width: 300,
+              child: _buildStudentDropdown(studentsValues),
+            ),
+          SizedBox(width: spacing),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVerticalLayout(
+      List<String> gradesValues,
+      List<String> groupsValues,
+      List<String> studentsValues,
+      double spacing,
+      bool isVerySmallScreen) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              flex: isVerySmallScreen ? 1 : 2,
+              child: _buildCampusDropdown(),
+            ),
+            if (selectedCampus != null) SizedBox(width: spacing),
+            if (selectedCampus != null)
+              Expanded(
+                flex: 1,
+                child: _buildGradeDropdown(gradesValues),
+              ),
+          ],
+        ),
+        if (selectedGrade != null) SizedBox(height: spacing),
+        if (selectedGrade != null)
+          Row(
+            children: [
+              Expanded(
+                flex: 1,
+                child: _buildGroupDropdown(groupsValues),
+              ),
+              if (selectedGroup != null) SizedBox(width: spacing),
+              if (selectedGroup != null)
+                Expanded(
+                  flex: isVerySmallScreen ? 1 : 2,
+                  child: _buildStudentDropdown(studentsValues),
+                ),
+            ],
+          ),
+      ],
+    );
+  }
+
+  Widget _buildCampusDropdown() {
+    return DropdownMenu<String>(
+      label: const Text('Campus'),
+      trailingIcon: const Icon(Icons.arrow_drop_down),
+      expandedInsets: EdgeInsets.zero,
+      onSelected: (value) {
+        setState(() {
+          selectedCampus = value!;
+          selectedTempCampus = value;
+          selectedGrade = null;
+          selectedGroup = null;
+        });
+      },
+      dropdownMenuEntries: teacherCampusListFODAC27
+          .toList()
+          .map<DropdownMenuEntry<String>>((String value) {
+        return DropdownMenuEntry<String>(value: value, label: value);
+      }).toList(),
+    );
+  }
+
+  Widget _buildGradeDropdown(List<String> gradesValues) {
+    return DropdownMenu<String>(
+      label: const Text('Grado'),
+      trailingIcon: const Icon(Icons.arrow_drop_down),
+      expandedInsets: EdgeInsets.zero,
+      onSelected: (value) {
+        setState(() {
+          selectedGradeName = value;
+          selectedGrade = gradesMapFODAC27[selectedGradeName];
+          selectedTempGrade = selectedGrade;
+        });
+      },
+      dropdownMenuEntries:
+          gradesValues.toList().map<DropdownMenuEntry<String>>((String value) {
+        return DropdownMenuEntry<String>(value: value, label: value.toString());
+      }).toList(),
+    );
+  }
+
+  Widget _buildGroupDropdown(List<String> groupsValues) {
+    return DropdownMenu<String>(
+      label: const Text('Grupo'),
+      trailingIcon: const Icon(Icons.arrow_drop_down),
+      expandedInsets: EdgeInsets.zero,
+      onSelected: (value) async {
+        setState(() {
+          selectedGroup = value;
+          selectedTempGroup = value;
+          selectedStudent = '';
+        });
+        setState(() {
+          selectedStudentController.text = '';
+        });
+      },
+      dropdownMenuEntries:
+          groupsValues.toList().map<DropdownMenuEntry<String>>((String value) {
+        return DropdownMenuEntry<String>(value: value, label: value);
+      }).toList(),
+    );
+  }
+
+  Widget _buildStudentDropdown(List<String> studentsValues) {
+    return DropdownMenu<String>(
+      label: const Text('Alumno'),
+      trailingIcon: const Icon(Icons.arrow_drop_down),
+      expandedInsets: EdgeInsets.zero,
+      controller: selectedStudentController,
+      onSelected: (student) {
+        if (student != null) {
+          setState(() {
+            selectedStudentController.text = student;
+            selectedTempStudent = student;
+          });
+        }
+      },
+      dropdownMenuEntries:
+          studentsValues.toList().map<DropdownMenuEntry<String>>((var value) {
+        return DropdownMenuEntry<String>(
+            value: value, label: value.toTitleCase);
+      }).toList(),
+    );
+  }
 
   void populateDropDownMenus() {
     if (isUserAdmin) {

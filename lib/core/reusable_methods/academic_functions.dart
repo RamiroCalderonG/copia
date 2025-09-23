@@ -412,10 +412,10 @@ void composeBodyToUpdateGradeBySTudent(
   } else {
     for (var obj in studentGradesBodyToUpgrade) {
       if (obj['student'] == studentID && obj['idEval'] == evalId) {
-        //If already exist data for selected student
+        //*If already exist data for selected student
         idExists = true;
         if (key == 'Comentarios') {
-          //Comentarios are stores diferent
+          //*Comentarios are stores diferent
           var oldValue = obj[key];
           if (oldValue == null) {
             obj[key] = value;
@@ -469,6 +469,21 @@ void composeUpdateStudentGradesBody(
 
   if (key == 'Calificación') {
     key = 'eval';
+  }
+  if (key == 'Hab') {
+    key = 'homework';
+  }
+  if (key == 'Con') {
+    key = 'behavior';
+  }
+  if (key == 'R') {
+    key = 'homework';
+  }
+  if (key == 'Comentarios') {
+    key = 'Comment';
+  }
+  if (key == 'Faltas') {
+    key = 'absences';
   }
 
   if (studentGradesBodyToUpgrade.isEmpty) {
@@ -544,32 +559,59 @@ Future<Map<String, dynamic>> populateSubjectsDropDownSelector(
 
 //Function that validate that value can´t be less than 50 and more than 100
 int validateNewGradeValue(dynamic newValue, String columnNameToFind) {
-  //If value < 50 -> returns 50
+  //If value < 50 -> returns 50, if value > 100 -> returns 100
   List<String> columnName = [
     'Calif',
-    'Conducta',
-    'Uniforme',
-    'Ausencia',
-    'Tareas',
+    //'Conducta',
+    //'Uniforme',
+    //'Ausencia',
+    //'Tareas'
     // 'Comentarios'
   ];
 
   bool isContained = columnName.contains(columnNameToFind);
 
+  //! If column name is one of the above, validate the value
   if (isContained) {
+    // Convert to integer if it's a double
     if (newValue is double) {
       newValue = newValue.toInt();
     }
 
-    if (newValue <= 50) {
-      //Validate that value can´t be less than 50
-      newValue = 50;
-      return newValue;
-    } else if (newValue > 100) {
-      newValue = 100;
-      return newValue;
+    // Convert to int if it's a string number
+    if (newValue is String) {
+      try {
+        newValue = int.parse(newValue);
+      } catch (e) {
+        // If parsing fails, return 50 as default
+        return 50;
+      }
+    }
+
+    // Ensure newValue is an integer
+    if (newValue is! int) {
+      return 50;
+    }
+
+    // For 'Calif' column, enforce stricter validation (50-100)
+    if (columnNameToFind == 'Calif') {
+      if (newValue < 50) {
+        //Validate that value can´t be less than 50
+        return 50;
+      } else if (newValue > 100) {
+        return 100;
+      } else {
+        return newValue;
+      }
     } else {
-      return newValue;
+      // For other columns, use the original logic
+      if (newValue <= 50) {
+        return 50;
+      } else if (newValue > 100) {
+        return 100;
+      } else {
+        return newValue;
+      }
     }
   } else {
     return newValue;
@@ -718,7 +760,7 @@ Future<List<Academicevaluationscomment>> getEvaluationsCommentsByGradeSequence(
   try {
     var response = await getStudentsGradesComments(gradeSequence);
     List<Academicevaluationscomment> commentsList = [];
-    if (response != null) {
+    if ((response.isNotEmpty) || (response.length > 0)) {
       for (var element in response) {
         Academicevaluationscomment comment =
             Academicevaluationscomment.fromJson(element);
@@ -733,8 +775,10 @@ Future<List<Academicevaluationscomment>> getEvaluationsCommentsByGradeSequence(
           }
         }
       }
+      return commentsList;
+    } else {
+      return [];
     }
-    return commentsList;
   } catch (e) {
     insertErrorLog(
         e.toString(), 'getEvaluationsCommentsByGradeSequence($gradeSequence)');

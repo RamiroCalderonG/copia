@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'package:oxschool/core/constants/user_consts.dart';
@@ -5,6 +7,7 @@ import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/core/reusable_methods/reusable_functions.dart';
 import 'package:oxschool/core/utils/loader_indicator.dart';
 import 'package:oxschool/core/reusable_methods/translate_messages.dart';
+import 'package:oxschool/data/Models/AcademicEvaluationsComment.dart';
 import 'package:trina_grid/trina_grid.dart';
 import 'package:intl/intl.dart';
 
@@ -76,6 +79,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
   TrinaCell? selectedCell;
   int dirtyCount = 0;
   bool _disposed = false;
+  Timer? _validationDebounce;
 
   bool hideCommentsColumn = false;
   bool hideAbsencesColumn = false;
@@ -100,7 +104,9 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
   @override
   void dispose() {
     _disposed = true;
+    _validationDebounce?.cancel();
     rows.clear();
+    commentStringEval.clear(); // Clear comments when disposing
     selectedCurrentTempMonth = null;
     super.dispose();
   }
@@ -159,7 +165,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
             field: 'Calif',
             type: TrinaColumnType.number(negative: false, format: '##'),
             readOnly: false,
-            width: 120),
+            width: 140),
         TrinaColumn(
           title: 'idCalif',
           field: 'idCalif',
@@ -205,7 +211,8 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
             hide: hideCommentsColumn,
             title: 'Comentarios',
             field: 'Comentarios',
-            type: TrinaColumnType.text(),
+            type: TrinaColumnType.select(commentStringEval,
+                enableColumnFilter: true),
             readOnly: false,
             width: 200),
       ];
@@ -227,6 +234,18 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
         );
       }).toList();
     });
+  }
+
+  /// Populates the commentStringEval list from studentsGradesCommentsRows
+  void populateCommentsForDropdown() {
+    commentStringEval.clear();
+    if (studentsGradesCommentsRows.isNotEmpty) {
+      for (var comment in studentsGradesCommentsRows) {
+        if (!commentStringEval.contains(comment.commentName)) {
+          commentStringEval.add(comment.commentName);
+        }
+      }
+    }
   }
 
   void _fetchData() async {
@@ -357,6 +376,46 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
     return !restrictedFields.contains(fieldName);
   }
 
+  /// Validates smallint values (0 to 32767 for positive smallint)
+  /// Returns the validated value and a validation message if needed
+  Map<String, dynamic> validateSmallintValue(dynamic value, String fieldName) {
+    if (value == null || value == '') {
+      return {'value': 0, 'message': null};
+    }
+
+    int? intValue;
+    if (value is String) {
+      intValue = int.tryParse(value);
+    } else if (value is num) {
+      intValue = value.toInt();
+    }
+
+    if (intValue == null) {
+      return {
+        'value': 0,
+        'message': 'Valor inválido en $fieldName. Se estableció en 0.'
+      };
+    }
+
+    // Validate smallint range (0 to 32767 for positive values)
+    if (intValue < 0) {
+      return {
+        'value': 0,
+        'message': '$fieldName no puede ser negativo. Se ajustó a 0.'
+      };
+    }
+
+    if (intValue > 32767) {
+      return {
+        'value': 32767,
+        'message':
+            '$fieldName excede el límite máximo (32767). Se ajustó automáticamente.'
+      };
+    }
+
+    return {'value': intValue, 'message': null};
+  }
+
   Future<void> searchBUttonAction(
     String groupSelected,
     String gradeInt,
@@ -368,6 +427,11 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
       setState(() {
         isLoading = true;
       });
+
+      // Clear previous comments data
+      commentStringEval.clear();
+      studentsGradesCommentsRows.clear();
+
       int? teacherNumber;
       if (isUserAdmin || isUserAcademicCoord) {
         teacherNumber = null;
@@ -382,6 +446,9 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
         if (studentList.isNotEmpty) {
           studentsGradesCommentsRows =
               await getEvaluationsCommentsByGradeSequence(selectedTempGrade!);
+
+          // Populate comments for dropdown and update visibility
+          populateCommentsForDropdown();
         } else {
           throw Exception(
             'No se encontraron alumnos para el grupo seleccionado: $groupSelected, grado: $gradeInt, ciclo: ${currentCycle!.claCiclo}, campus: $campusSelected, mes: $month',
@@ -394,6 +461,17 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
           displayColumnsByGrade(selectedTempGrade!);
           assignatureRows.clear();
           for (var item in studentList) {
+            String comment;
+            if (item.comment != null && item.comment != 0) {
+              // Find comment text based on comment ID
+              var matchingComment = studentsGradesCommentsRows.firstWhere(
+                  (comment) => comment.commentId == item.comment,
+                  orElse: () => Academicevaluationscomment(0, '', false, 0, 0));
+              comment = matchingComment.commentName;
+            } else {
+              comment = '';
+            }
+
             assignatureRows.add(TrinaRow(cells: {
               'No': TrinaCell(value: item.sequentialNumber ?? 0),
               'Matricula': TrinaCell(value: item.studentID),
@@ -407,29 +485,19 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
               'Conducta': TrinaCell(value: item.discipline ?? 0),
               'habit_eval': TrinaCell(value: item.habits_evaluation ?? 0),
               'Comentarios': TrinaCell(
-                value: item.comment != null && item.comment != 0
-                    ? item.comment.toString()
-                    : '',
+                value: item.comment != null && item.comment != 0 ? comment : '',
               ),
             }));
           }
-          setState(() {
-            selectedTempCampus = campus;
-            selectedTempGrade = int.parse(gradeInt);
-            selectedTempSubjectId = int.parse(assignatureID);
 
-            // Call displayColumnsByGrade BEFORE updating trinaGridKey
-            displayColumnsByGrade(selectedTempGrade!);
+          selectedTempCampus = campus;
+          selectedTempGrade = int.parse(gradeInt);
+          selectedTempSubjectId = int.parse(assignatureID);
 
-            // Force grid rebuild with new key AFTER visibility flags are set
-            trinaGridKey = UniqueKey();
+          // Force grid rebuild with new key AFTER visibility flags are set
+          trinaGridKey = UniqueKey();
 
-            isLoading = false;
-          });
-          // selectedTempCampus = campus;
-          // selectedTempGrade = int.parse(gradeInt);
-          // selectedTempSubjectId = int.parse(assignatureID);
-          // isLoading = false;
+          isLoading = false;
         });
       } else {
         setState(() {
@@ -438,6 +506,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
         return showErrorFromBackend(context, 'Seleccione un mes');
       }
     } catch (e) {
+      insertErrorLog(e.toString(), 'SEARCH STUDENTS BY SUBJECTS ');
       setState(() {
         isLoading = false;
       });
@@ -870,6 +939,8 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
     return OutlinedButton.icon(
       onPressed: () async {
         studentGradesBodyToUpgrade.clear();
+        commentStringEval.clear(); // Clear comments when refreshing
+        studentsGradesCommentsRows.clear();
 
         // Revert any pending changes before refreshing
         if (!_disposed && stateManager != null) {
@@ -932,47 +1003,57 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
   Widget _buildSaveButton(ThemeData theme, ColorScheme colorScheme) {
     return FilledButton.icon(
       onPressed: () async {
-        setState(() {
-          isLoading = true;
-        });
+        if (studentGradesBodyToUpgrade.isEmpty) {
+          showInformationDialog(
+              context, 'Alerta!', 'No hay cambios para guardar.');
+          return;
+        } else {
+          await showConfirmationDialog(
+            context,
+            'Confirmar y Guardar',
+            '¿Está seguro de guardar los cambios realizados?',
+          ).then((value) async {
+            if (value == 1) {
+              // User confirmed
+              setState(() {
+                isLoading = true;
+              });
+              // Commit all changes before saving
+              if (!_disposed && stateManager != null) {
+                commitChanges();
+              }
 
-        // Commit all changes before saving
-        if (!_disposed && stateManager != null) {
-          commitChanges();
-        }
+              await updateButtonFunction((success) async {
+                if (success) {
+                  try {
+                    studentGradesBodyToUpgrade.clear();
 
-        await updateButtonFunction((success) async {
-          if (success) {
-            try {
-              studentGradesBodyToUpgrade.clear();
-              /*
-              await searchBUttonAction(
-                  selectedTempGroup!,
-                  selectedTempGrade.toString(),
-                  selectedTempSubjectId.toString(),
-                  monthNumber.toString(),
-                  selectedTempCampus!);
-                  */
-
+                    setState(() {
+                      isLoading = false;
+                      showInformationDialog(context, 'Éxito',
+                          'Cambios realizados!, actualice la página.');
+                    });
+                  } catch (e) {
+                    setState(() {
+                      isLoading = false;
+                      showErrorFromBackend(context, e.toString());
+                    });
+                  }
+                } else {
+                  isLoading = false;
+                  showErrorFromBackend(context, 'Error');
+                }
+              });
+              return;
+            } else {
+              // User cancelled
               setState(() {
                 isLoading = false;
-                showInformationDialog(context, 'Éxito',
-                    'Cambios realizados!, actualice la página.');
               });
-            } catch (e) {
-              setState(() {
-                isLoading = false;
-                showErrorFromBackend(context, e.toString());
-              });
+              return;
             }
-          } else {
-            isLoading = false;
-            showErrorFromBackend(context, 'Error');
-          }
-        });
-        setState(() {
-          isLoading = false;
-        });
+          });
+        }
       },
       icon: const Icon(Icons.save, size: 18),
       label: const Text('Confirmar y Guardar'),
@@ -1053,14 +1134,130 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                 columns: assignaturesColumns,
                 rows: assignatureRows,
                 onChanged: (event) {
-                  // Only process changes for editable columns
+                  //* Only process changes for editable columns
                   if (_isEditableField(event.column.title)) {
-                    // Process changes for editable columns
+                    //* Process changes for editable columns
                     final idEval = event.row.cells['idCalif']?.value as int;
-                    var newValue = validateNewGradeValue(
-                        //Validate values cant be les that 50
-                        event.value,
-                        event.column.title);
+
+                    //* Store original value for comparison
+                    var originalValue = event.value;
+                    var newValue;
+                    var commentiD = 0;
+                    //! Only validate int values, not String
+                    if (originalValue is String) {
+                      //* Obtain the id of the comment
+                      if (event.column.field == 'Comentarios') {
+                        if (event.value != null && event.value != '') {
+                          //* Find comment ID based on selected comment text
+                          var matchingComment =
+                              studentsGradesCommentsRows.firstWhere(
+                                  (comment) =>
+                                      comment.commentName == event.value,
+                                  orElse: () => Academicevaluationscomment(
+                                      0, '', false, 0, 0));
+                          commentiD = matchingComment.commentId;
+                          newValue = commentiD;
+                        } else {
+                          commentiD = 0; //! No comment selected
+                        }
+                      }
+                    } else {
+                      // Handle numeric fields with appropriate validation
+                      if (event.column.field == 'Ausencia' ||
+                          event.column.field == 'Tareas' ||
+                          event.column.field == 'Conducta' ||
+                          event.column.field == 'habit_eval') {
+                        // Validate smallint fields
+                        var validationResult = validateSmallintValue(
+                            event.value, event.column.title);
+                        newValue = validationResult['value'];
+
+                        // Show validation message if value was adjusted
+                        if (validationResult['message'] != null &&
+                            context.mounted) {
+                          _validationDebounce?.cancel();
+                          _validationDebounce =
+                              Timer(const Duration(milliseconds: 100), () {
+                            if (context.mounted && !_disposed) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    '⚠️ ${validationResult['message']} ⚠️',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  backgroundColor:
+                                      Theme.of(context).colorScheme.tertiary,
+                                  duration: const Duration(seconds: 3),
+                                ),
+                              );
+                            }
+                          });
+
+                          // Update the cell value to the validated value
+                          Future.microtask(() {
+                            if (stateManager != null && !_disposed && mounted) {
+                              event.row.cells[event.column.field]?.value =
+                                  newValue;
+                              stateManager!.notifyListeners();
+                            }
+                          });
+                        }
+                      } else {
+                        // Use existing validation for grade fields
+                        newValue = validateNewGradeValue(
+                            //* Validate values cant be less than 50
+                            event.value,
+                            event.column.field);
+                      }
+                    }
+
+                    // Show validation message if value was adjusted
+                    if (event.column.field == 'Calif' &&
+                        originalValue != newValue) {
+                      String message = '';
+                      if (originalValue is num && originalValue < 50) {
+                        message =
+                            'La calificación no puede ser menor a 50. Se ajustó automáticamente a 50.';
+                      } else if (originalValue is num && originalValue > 100) {
+                        message =
+                            'La calificación no puede ser mayor a 100. Se ajustó automáticamente a 100.';
+                      }
+
+                      if (message.isNotEmpty && context.mounted) {
+                        // Cancel any existing validation debounce to prevent duplicate messages
+                        _validationDebounce?.cancel();
+
+                        // Show validation message using Timer to avoid setState during build
+                        _validationDebounce =
+                            Timer(const Duration(milliseconds: 100), () {
+                          if (context.mounted && !_disposed) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  '❌ $message ❌',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                backgroundColor: Theme.of(context)
+                                    .colorScheme
+                                    .primary, // Amber background for warnings
+                                duration: const Duration(seconds: 3),
+                              ),
+                            );
+                          }
+                        });
+
+                        // Update the cell value to the validated value
+                        Future.microtask(() {
+                          if (stateManager != null && !_disposed && mounted) {
+                            event.row.cells[event.column.field]?.value =
+                                newValue;
+                            stateManager!.notifyListeners();
+                          }
+                        });
+                      }
+                    }
+                    // Prepare body for backend update
                     composeUpdateStudentGradesBody(
                         event.column.title, newValue, idEval);
 
@@ -1305,9 +1502,12 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
   }
 
   void displayColumnsByGrade(int grade) {
+    // Check if comments are available and should be displayed
+    bool hasComments = commentStringEval.isNotEmpty;
+
     // setState(() {
     if ((grade < 12) && (grade > 6)) {
-      hideCommentsColumn = false; // Comentarios
+      hideCommentsColumn = !hasComments; // Show comments only if available
       hideAbsencesColumn = true; // Faltas
       hideHomeworksColumn = false; // Tareas
       hideDisciplineColumn = false; //Disciplina
@@ -1316,14 +1516,14 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
       homeWorkColumnTitle = 'Hab';
       disciplineColumnTitle = 'Con';
     } else if ((grade < 6 && grade > 0)) {
-      hideCommentsColumn = true;
+      hideCommentsColumn = !hasComments; // Show comments only if available
       hideAbsencesColumn = true; // Faltas
       hideHomeworksColumn = true; // Tareas
       hideDisciplineColumn = true; //Disciplina
       hideHabitsColumn = true; //Habits
       hideOutfitColumn = true;
     } else if (grade > 11) {
-      hideCommentsColumn = true;
+      hideCommentsColumn = !hasComments; // Show comments only if available
       hideAbsencesColumn = false; // Faltas
       hideHomeworksColumn = false; // Tareas
       hideDisciplineColumn = true; //Disciplina
