@@ -1,5 +1,5 @@
 
-# ERP Oxschool
+# 🎓 ERP Oxschool
 
 <div align="center">
   <img src="assets/images/logoBlancoOx.png" alt="Oxschool Logo" width="200"/>
@@ -371,5 +371,3 @@ Para soporte técnico o preguntas:
   <p>Desarrollado para Ox School</p>
   <p>© 2024 Ox School. Todos los derechos reservados.</p>
 </div>
-
-
