@@ -374,9 +374,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Image.asset(
-              Theme.of(context).brightness == Brightness.light
-                  ? 'assets/images/1_OS_color.png'
-                  : 'assets/images/logoBlancoOx.png',
+              getLogoAssetPath(context),
               height: 32,
               filterQuality: FilterQuality.high,
             ),
@@ -438,9 +436,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Image.asset(
-                  Theme.of(context).brightness == Brightness.light
-                      ? 'assets/images/1_OS_color.png'
-                      : 'assets/images/logoBlancoOx.png',
+                  getLogoAssetPath(context),
                   height: 40,
                   filterQuality: FilterQuality.high,
                 ),

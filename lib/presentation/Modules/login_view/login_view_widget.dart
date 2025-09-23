@@ -308,7 +308,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
       child: Image.asset(
-        'assets/images/1_OS_color.png',
+        getLogoAssetPath(context),
         width: 180,
         height: 180,
         fit: BoxFit.contain,
@@ -342,7 +342,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
           children: [
             // Header with optimized logo
             Image.asset(
-              'assets/images/1_OS_color.png',
+              getLogoAssetPath(context),
               width: isMobile ? 100 : 120,
               height: isMobile ? 100 : 120,
               fit: BoxFit.contain,

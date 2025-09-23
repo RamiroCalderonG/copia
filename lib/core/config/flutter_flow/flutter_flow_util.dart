@@ -224,6 +224,21 @@ void setAppLanguage(BuildContext context, String language) =>
 void setDarkModeSetting(BuildContext context, ThemeMode themeMode) =>
     MyApp.of(context).setThemeMode(themeMode);
 
+/// Returns the appropriate logo asset path based on the current theme
+String getLogoAssetPath(BuildContext context, {bool useRoundLogo = false}) {
+  final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+  if (useRoundLogo) {
+    return isDarkMode
+        ? 'assets/images/logoBlancoOx.png'
+        : 'assets/images/logoRedondoOx.png';
+  } else {
+    return isDarkMode
+        ? 'assets/images/logoBlancoOx.png'
+        : 'assets/images/1_OS_color.png';
+  }
+}
+
 void showSnackbar(
   BuildContext context,
   String message, {
