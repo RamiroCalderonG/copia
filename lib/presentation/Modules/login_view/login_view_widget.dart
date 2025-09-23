@@ -265,28 +265,28 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
           child: Container(
             color: Colors.black.withOpacity(0.1),
             child: SafeArea(
-              child: Center(
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: isMobile ? 20 : 40,
-                    vertical: 20,
-                  ),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxWidth: isMobile ? double.infinity : 450,
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _buildLogo(),
-                        const SizedBox(height: 32),
-                        _buildLoginForm(theme, colorScheme, isMobile),
-                        const SizedBox(height: 24),
-                        _buildVersionInfo(theme, colorScheme),
-                      ],
+              child: Column(
+                children: [
+                  // Main content area - login form centered
+                  Expanded(
+                    child: Center(
+                      child: SingleChildScrollView(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isMobile ? 20 : 40,
+                          vertical: 20,
+                        ),
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxWidth: isMobile ? double.infinity : 450,
+                          ),
+                          child: _buildLoginForm(theme, colorScheme, isMobile),
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                  // Version info always at bottom
+                  _buildVersionInfo(theme, colorScheme),
+                ],
               ),
             ),
           ),
@@ -340,18 +340,16 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Header
-            Text(
-              'Ox School',
-              style: theme.textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: colorScheme.onSurface,
-              ),
-              textAlign: TextAlign.center,
+            // Header with optimized logo
+            Image.asset(
+              'assets/images/1_OS_color.png',
+              width: isMobile ? 100 : 120,
+              height: isMobile ? 100 : 120,
+              fit: BoxFit.contain,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 16),
             Text(
-              'Ingresa tus datos de acceso',
+              'Ingrese sus datos de acceso',
               style: theme.textTheme.bodyLarge?.copyWith(
                 color: colorScheme.onSurface.withOpacity(0.7),
               ),

@@ -799,10 +799,6 @@ Future<dynamic> getStudentsGradesComments(int grade) async {
     );
 
     if (response.statusCode == 200) {
-      // Handle UTF-8 decoding for Spanish characters
-      if (response.data is String) {
-        return response.data; //json.decode(response.data);
-      }
       return response.data;
     } else {
       return Future.error(response.data);
@@ -961,17 +957,14 @@ Future<int> deleteFodac27Record(int fodac27ID) async {
   }
 }
 
-//!Not using for now
 Future<int> editFodac27Record(Map<String, dynamic> body) async {
   try {
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
     final response = await ApiCallsDio._dio.patch(
-      '${ApiCallsDio._baseUrl}/academic/student/fodac27',
+      '${ApiCallsDio._baseUrl}/academic/student/fodac27/',
       data: body,
       options: Options(
-        headers: {
-          'X-Embarcadero-App-Secret': dotenv.env['APIKEY']!,
-          'Auth': currentUser!.token
-        },
+        headers: {'Authorization': devicePrefs.getString('token')!},
       ),
     );
     return response.statusCode!;
