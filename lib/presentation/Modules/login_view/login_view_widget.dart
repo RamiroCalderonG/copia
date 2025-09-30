@@ -343,11 +343,11 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
             // Header with optimized logo
             Image.asset(
               getLogoAssetPath(context),
-              width: isMobile ? 100 : 120,
-              height: isMobile ? 100 : 120,
+              width: isMobile ? 60 : 80,
+              height: isMobile ? 60 : 80,
               fit: BoxFit.contain,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 26),
             Text(
               'Ingrese sus datos de acceso',
               style: theme.textTheme.bodyLarge?.copyWith(
@@ -355,7 +355,7 @@ class _LoginViewWidgetState extends State<LoginViewWidget> {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 16),
 
             // Email Field
             TextFormField(
