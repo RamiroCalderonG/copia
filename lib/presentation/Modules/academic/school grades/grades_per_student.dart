@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/core/reusable_methods/translate_messages.dart';
+import 'package:oxschool/core/utils/temp_data.dart';
 import 'package:oxschool/data/Models/AcademicEvaluationsComment.dart';
 import 'package:oxschool/data/Models/Student_eval.dart';
 
@@ -213,7 +214,13 @@ class _GradesByStudentState extends State<GradesByStudent> {
         studentsGradesCommentsRows.clear();
       }
       // August wont fetch data
-      if (monthSelected != 8) {
+      if (monthSelected != 99) {
+        if (!currentUser!.isCurrentUserAdmin() ||
+            !currentUser!.isCurrentUserAcademicCoord()) {
+          monthNumber = monthSelected;
+          selectedTempGradeStr = getValueFromKey(teacherGradesMap, grade);
+        }
+
         // Get the students list by group, grade, cycle, campus and month
         studentList = await getSubjectsAndGradesByStudent(
             grade,
@@ -718,8 +725,8 @@ class _GradesByStudentState extends State<GradesByStudent> {
           ? getKeyFromValue(spanishMonthsMap, selectedTempMonth!)
           : null;
     } else {
-      selectedCurrentTempMonth = currentMonth.toCapitalized;
-      return getKeyFromValue(spanishMonthsMap, selectedCurrentTempMonth!);
+      //selectedCurrentTempMonth = currentMonth.toCapitalized;
+      return evalMonthFromBackend; //getKeyFromValue(spanishMonthsMap, selectedCurrentTempMonth!);
     }
   }
 
@@ -1045,16 +1052,18 @@ class _GradesByStudentState extends State<GradesByStudent> {
               rows: studentEvaluationRows,
               mode: TrinaGridMode.select,
               onRowDoubleTap: (event) async {
-                var gradeInt = getKeyFromValue(
-                    teacherGradesMap, selectedTempGrade!.toString());
+                // selectedTempGradeStr =
+                //     getValueFromKey(teacherGradesMap, selectedTempGrade);
+                var gradeInt = selectedTempGrade;
+                //getKeyFromValue(teacherGradesMap, selectedTempGradeStr);
                 int? monthNumber;
 
                 if (isUserAdmin || isUserAcademicCoord) {
                   monthNumber =
                       getKeyFromValue(spanishMonthsMap, selectedTempMonth!);
                 } else {
-                  monthNumber = getKeyFromValue(
-                      spanishMonthsMap, selectedCurrentTempMonth!);
+                  monthNumber = evalMonthFromBackend; //getKeyFromValue(
+                  // spanishMonthsMap, selectedCurrentTempMonth!);
                 }
                 selectedStudentID = event.row.cells['studentID']!.value;
                 selectedStudentName =

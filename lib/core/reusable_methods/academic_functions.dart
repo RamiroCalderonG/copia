@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/data/Models/AcademicEvaluationsComment.dart';
@@ -81,7 +82,7 @@ Future<dynamic> loadStartGradingAsAdminOrAcademicCoord(
             oneTeacherGrades = originalList.toSet().toList();
 
             Map<int, String> currentMapValue = {
-              jsonList[i]['sequence']: jsonList[i]['grade']
+              jsonList[i]['sequence']: jsonList[i]['grade'].toString().trim()
             };
 
             teacherGradesMap.addEntries(currentMapValue.entries);
@@ -632,6 +633,23 @@ Future<dynamic> isDateToEvaluateStudents() async {
     return response;
   } catch (e) {
     insertErrorLog(e.toString(), 'FETCH DATE FOR STUDENT EVALUATION');
+    return Future.error(e);
+  }
+}
+
+Future<dynamic> fetchEvalMonthFromBackend(bool byName) async {
+  try {
+    var response =
+        await getCurrentEvalMonthFromBackendCall(byName).catchError((error) {
+      return Future.error('Error: ${error.toString()}');
+    });
+    if (byName) {
+      return response['NOMBRE'];
+    } else {
+      return response['SECUENCIA'];
+    }
+  } catch (e) {
+    insertErrorLog(e.toString(), 'FETCH EVAL MONTH FROM BACKEND');
     return Future.error(e);
   }
 }

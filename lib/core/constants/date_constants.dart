@@ -13,31 +13,31 @@ List<String> academicMonthsList = [
 ];
 
 Map<int, String> spanishMonthsMap = {
-  1: 'Enero',
-  2: 'Febrero',
-  3: 'Marzo',
-  4: 'Abril',
-  5: 'Mayo',
-  6: 'Junio',
-  7: 'Julio',
-  8: 'Agosto',
-  9: 'Septiembre',
-  10: 'Octubre',
-  11: 'Noviembre',
-  12: 'Diciembre'
+  5: 'Enero',
+  6: 'Febrero',
+  7: 'Marzo',
+  8: 'Abril',
+  9: 'Mayo',
+  10: 'Junio',
+  99: 'Julio',
+  0: 'Agosto',
+  1: 'Septiembre',
+  2: 'Octubre',
+  3: 'Noviembre',
+  4: 'Diciembre'
 };
 
 Map<int, String> englishMonthsMap = {
-  1: 'January',
-  2: 'February',
-  3: 'March',
-  4: 'April',
-  5: 'May',
-  6: 'June',
-  7: 'July',
-  8: 'August',
-  9: 'September',
-  10: 'October',
-  11: 'November',
-  12: 'December'
+  5: 'January',
+  6: 'February',
+  7: 'March',
+  8: 'April',
+  9: 'May',
+  10: 'June',
+  99: 'July',
+  0: 'August',
+  1: 'September',
+  2: 'October',
+  3: 'November',
+  4: 'December'
 };

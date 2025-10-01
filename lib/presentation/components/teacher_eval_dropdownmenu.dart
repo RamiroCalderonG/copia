@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:oxschool/core/reusable_methods/reusable_functions.dart';
+import 'package:oxschool/core/utils/temp_data.dart';
 import 'package:oxschool/presentation/Modules/academic/school%20grades/grades_main_screen.dart';
 import '../../core/constants/date_constants.dart';
 import '../../core/constants/user_consts.dart';
@@ -282,6 +283,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                       ? getKeyFromValue(teacherGradesMap, value)
                       : null;
                   // Reset global temp variables for dependent dropdowns
+                  selectedTempGradeStr = value;
                   selectedTempGroup = null;
                   selectedTempSubject = null;
                   selectedTempSubjectId = null;
@@ -371,7 +373,7 @@ class _TeacherEvalDropDownMenuState extends State<TeacherEvalDropDownMenu> {
                   Padding(
                       padding: const EdgeInsets.all(10),
                       child: Text(
-                        currentMonth,
+                        'Mes: $evalMonthNameFromBackend',
                         style: const TextStyle(
                             fontFamily: 'Sora', fontWeight: FontWeight.bold),
                       )),

@@ -1,5 +1,6 @@
 String? selectedTempStudent;
 int? selectedTempGrade;
+String? selectedTempGradeStr;
 String? selectedTempGroup;
 String? selectedTempCampus;
 String? selectedTempMonth;

@@ -7,6 +7,7 @@ import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/core/reusable_methods/reusable_functions.dart';
 import 'package:oxschool/core/utils/loader_indicator.dart';
 import 'package:oxschool/core/reusable_methods/translate_messages.dart';
+import 'package:oxschool/core/utils/temp_data.dart';
 import 'package:oxschool/data/Models/AcademicEvaluationsComment.dart';
 import 'package:trina_grid/trina_grid.dart';
 import 'package:intl/intl.dart';
@@ -438,7 +439,13 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
       } else {
         teacherNumber = currentUser!.employeeNumber;
       }
-      if (monthNumber != 8) {
+      if (monthNumber != 99) {
+        // if (!currentUser!.isCurrentUserAdmin() ||
+        //     !currentUser!.isCurrentUserAcademicCoord()) {
+        //   monthNumber = evalMonthFromBackend;
+        //   selectedTempGradeStr = evalMonthNameFromBackend;
+        // }
+
         studentList = await getStudentsByAssinature(groupSelected, gradeInt,
             assignatureID, month, campus, teacherNumber);
 
@@ -955,8 +962,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
             //Get month number
             monthNumber = getKeyFromValue(spanishMonthsMap, selectedTempMonth!);
           } else {
-            monthNumber =
-                getKeyFromValue(spanishMonthsMap, selectedCurrentTempMonth!);
+            monthNumber = evalMonthFromBackend;
           }
           // get assignature id number
           var assignatureID = selectedTempSubjectId;

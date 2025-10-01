@@ -1,4 +1,3 @@
-
 import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list_dio.dart';
@@ -36,7 +35,7 @@ Future<dynamic> getWorkDepartmentList() async {
   }
 }
 
-int? getKeyFromValue(Map<int, String> map, String value) {
+int? getKeyFromValue(Map<int, String> map, var value) {
   return map.entries
       .firstWhere((entry) => entry.value == value,
           orElse: () => const MapEntry(-1, ''))
@@ -45,7 +44,7 @@ int? getKeyFromValue(Map<int, String> map, String value) {
 
 dynamic getValueFromKey(Map<int, String> map, dynamic key) {
   return map.entries
-      .firstWhere((element) => element.key == key,
+      .firstWhere((element) => element.value == key,
           orElse: () => const MapEntry(-1, ''))
       .value;
 }
