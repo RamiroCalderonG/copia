@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
 import 'package:oxschool/core/extensions/capitalize_strings.dart';
@@ -45,7 +44,7 @@ class _CafeteriaUserConsumptionState extends State<CafeteriaUserConsumption> {
         for (var item in response) {
           CafeteriaconsumptionDto cafe = CafeteriaconsumptionDto(
             item['name'],
-            DateTime.parse(item['date']),
+            DateTime.parse(item['date']).toLocal(),
             item['total'],
           );
           total = total + item['total'];
@@ -55,7 +54,7 @@ class _CafeteriaUserConsumptionState extends State<CafeteriaUserConsumption> {
         //CREATE DATA ROWS
         for (var item in _cafeteriaConsumptionList) {
           String formattedDate =
-              "${item.date.year}-${item.date.month.toString().padLeft(2, '0')}-${item.date.day.toString().padLeft(2, '0')}";
+              "${item.date.year}-${item.date.month.toString().padLeft(2, '0')}-${item.date.day.toString().padLeft(2, '0')} ${item.date.hour.toString().padLeft(2, '0')}:${item.date.minute.toString().padLeft(2, '0')}:${item.date.second.toString().padLeft(2, '0')}";
 
           DataCell article = DataCell(Text(item.article.toTitleCase));
           DataCell date = DataCell(Text(formattedDate));
@@ -189,37 +188,98 @@ class _CafeteriaUserConsumptionState extends State<CafeteriaUserConsumption> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          // Header with title and total
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          // Header with title, buttons and total
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              Expanded(
-                                child: Text(
-                                  'Historial de consumo',
-                                  style:
-                                      theme.textTheme.headlineSmall?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: colorScheme.onSurface,
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      'Historial de consumo',
+                                      style: theme.textTheme.headlineSmall
+                                          ?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                        color: colorScheme.onSurface,
+                                      ),
+                                    ),
                                   ),
-                                ),
+                                  const SizedBox(width: 16),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 8,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: colorScheme.primaryContainer,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Text(
+                                      'Total: \$${total.toStringAsFixed(2)}',
+                                      style:
+                                          theme.textTheme.titleMedium?.copyWith(
+                                        color: colorScheme.onPrimaryContainer,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(width: 16),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 8,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: colorScheme.primaryContainer,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  'Total: \$${total.toStringAsFixed(2)}',
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    color: colorScheme.onPrimaryContainer,
-                                    fontWeight: FontWeight.w600,
+                              const SizedBox(height: 16),
+                              // Action buttons
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  FilledButton.tonalIcon(
+                                    onPressed: () {
+                                      setState(() {
+                                        // Clear existing data
+                                        _cafeteriaConsumptionList.clear();
+                                        dataRows.clear();
+                                        total = 0;
+                                        // Reload data
+                                        cafeteriaConsumption = obtainUserData();
+                                      });
+                                    },
+                                    icon: const Icon(Icons.refresh_rounded),
+                                    label: const Text('Actualizar'),
+                                    style: FilledButton.styleFrom(
+                                      backgroundColor:
+                                          colorScheme.secondaryContainer,
+                                      foregroundColor:
+                                          colorScheme.onSecondaryContainer,
+                                    ),
                                   ),
-                                ),
+                                  const SizedBox(width: 12),
+                                  FilledButton.icon(
+                                    onPressed: _cafeteriaConsumptionList
+                                            .isNotEmpty
+                                        ? () {
+                                            // TODO: Implement export functionality
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              SnackBar(
+                                                content: const Text(
+                                                    'Función de exportar en desarrollo'),
+                                                backgroundColor:
+                                                    colorScheme.primary,
+                                                behavior:
+                                                    SnackBarBehavior.floating,
+                                              ),
+                                            );
+                                          }
+                                        : null,
+                                    icon: const Icon(
+                                        Icons.file_download_outlined),
+                                    label: const Text('Exportar'),
+                                    style: FilledButton.styleFrom(
+                                      backgroundColor: colorScheme.primary,
+                                      foregroundColor: colorScheme.onPrimary,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -314,7 +374,7 @@ class _CafeteriaUserConsumptionState extends State<CafeteriaUserConsumption> {
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
-                                  'Nota: Valores solo con estatus 0 (pendientes de cobrar)',
+                                  'Nota: Solo se muestran consumos pendientes de cobrar.',
                                   style: theme.textTheme.bodySmall?.copyWith(
                                     color: colorScheme.onSurfaceVariant,
                                   ),
