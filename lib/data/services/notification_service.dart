@@ -125,7 +125,7 @@ class NotificationService {
   /// Start auto-fetching notifications every 5 minutes
   void _startAutoFetch() {
     _fetchTimer?.cancel();
-    _fetchTimer = Timer.periodic(const Duration(minutes: 35), (timer) {
+    _fetchTimer = Timer.periodic(const Duration(minutes: 120), (timer) {
       fetchNotifications();
     });
   }

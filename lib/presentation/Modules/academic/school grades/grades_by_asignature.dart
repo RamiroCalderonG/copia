@@ -82,6 +82,10 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
   bool _disposed = false;
   Timer? _validationDebounce;
 
+  // Evaluation status
+  bool hasUnevaluatedStudents = false;
+  List<String> unevaluatedStudentNames = [];
+
   bool hideCommentsColumn = false;
   bool hideAbsencesColumn = false;
   bool hideHomeworksColumn = false;
@@ -103,6 +107,155 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
     isUserAcademicCoord = currentUser!.isCurrentUserAcademicCoord();
     _fetchData();
     super.initState();
+  }
+
+  /// Checks for unevaluated students (those with grade 0) and updates status
+  void _checkForUnevaluatedStudents() {
+    if (studentList.isEmpty) {
+      hasUnevaluatedStudents = false;
+      unevaluatedStudentNames.clear();
+      return;
+    }
+
+    List<String> unevaluatedStudents = [];
+
+    for (var student in studentList) {
+      if (student.evaluation == 0) {
+        String studentName =
+            '${student.studentName} ${student.student1LastName}';
+        unevaluatedStudents.add(studentName.trim());
+      }
+    }
+
+    setState(() {
+      hasUnevaluatedStudents = unevaluatedStudents.isNotEmpty;
+      unevaluatedStudentNames = unevaluatedStudents;
+    });
+
+    if (hasUnevaluatedStudents) {
+      _showUnevaluatedStudentsSnackbar();
+    }
+  }
+
+  /// Shows snackbar with unevaluated students information
+  void _showUnevaluatedStudentsSnackbar() {
+    if (!context.mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(
+              Icons.warning_amber_rounded,
+              color: Colors.orange,
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Se encontraron ${unevaluatedStudentNames.length} estudiante(s) sin calificar',
+                style: const TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.orange.shade700,
+        duration: const Duration(seconds: 4),
+        action: SnackBarAction(
+          label: 'Ver',
+          textColor: Colors.white,
+          onPressed: () {
+            _showUnevaluatedStudentsBottomSheet();
+          },
+        ),
+      ),
+    );
+  }
+
+  /// Shows bottom sheet with detailed list of unevaluated students
+  void _showUnevaluatedStudentsBottomSheet() {
+    if (!context.mounted) return;
+
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        return Container(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.warning_amber_rounded,
+                    color: Colors.orange,
+                    size: 24,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Estudiantes Sin Calificar',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Text(
+                '${unevaluatedStudentNames.length} estudiante(s) pendiente(s):',
+                style: theme.textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 12),
+              Flexible(
+                child: Container(
+                  constraints: const BoxConstraints(maxHeight: 200),
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: unevaluatedStudentNames.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.person,
+                              size: 16,
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                unevaluatedStudentNames[index],
+                                style: theme.textTheme.bodySmall,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Cerrar'),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -543,6 +696,13 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
 
           isLoading = false;
         });
+
+        // Check for unevaluated students after data is loaded
+        Future.microtask(() {
+          if (mounted) {
+            _checkForUnevaluatedStudents();
+          }
+        });
       } else {
         setState(() {
           isLoading = false;
@@ -836,6 +996,28 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                   color: colorScheme.onSurface,
                 ),
               ),
+              const Spacer(),
+              // Status dot indicator
+              if (studentList.isNotEmpty) ...[
+                Container(
+                  width: 12,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    color:
+                        hasUnevaluatedStudents ? Colors.orange : Colors.green,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  hasUnevaluatedStudents ? 'Pendientes' : 'Completo',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color:
+                        hasUnevaluatedStudents ? Colors.orange : Colors.green,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ],
           ),
           // const SizedBox(height: 3),
