@@ -1229,9 +1229,22 @@ class _GradesByStudentState extends State<GradesByStudent> {
                               });
                             }
                           } else {
+                            String? subjectName;
+                            if (selectedTempSubject?.trim().toUpperCase() ==
+                                    'SALIDAS TEMPRANO' ||
+                                selectedTempSubject?.trim().toUpperCase() ==
+                                    'BOOKS READ' ||
+                                selectedTempSubject?.trim().toUpperCase() ==
+                                    'CUIDADO DEL MEDIO AMBIENTE' ||
+                                selectedTempSubject?.trim().toUpperCase() ==
+                                    'P.E.T') {
+                              subjectName =
+                                  selectedTempSubject?.trim().toUpperCase();
+                            }
+
                             // Use existing validation for grade fields
                             newValue = validateNewGradeValue(
-                                event.value, event.column.title);
+                                event.value, event.column.title, subjectName);
                           }
                         }
                         // Show validation message if value was adjusted for evaluation field

@@ -90,6 +90,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
   bool hideOutfitColumn = false;
   String? homeWorkColumnTitle;
   String? disciplineColumnTitle;
+  var validationResult;
 
   /// Whether the teacher teaches multiple campuses.
   bool teacherTeachMultipleCampuses = false;
@@ -411,6 +412,40 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
         'value': 32767,
         'message':
             '$fieldName excede el límite máximo (32767). Se ajustó automáticamente.'
+      };
+    }
+
+    return {'value': intValue, 'message': null};
+  }
+
+  /// Validates values that must be multiples of 2
+  /// Returns the original value and a validation message if not valid
+  Map<String, dynamic> validateMultipleOfTwoValue(
+      dynamic value, String fieldName) {
+    if (value == null || value == '') {
+      return {'value': 0, 'message': null};
+    }
+
+    int? intValue;
+    if (value is String) {
+      intValue = int.tryParse(value);
+    } else if (value is num) {
+      intValue = value.toInt();
+    }
+
+    if (intValue == null) {
+      return {
+        'value': 0,
+        'message': 'Valor inválido en $fieldName. Debe ser un número válido.'
+      };
+    }
+
+    // Validate that the value is a multiple of 2
+    if (intValue % 2 != 0) {
+      return {
+        'value': intValue,
+        'message':
+            '$fieldName debe ser múltiplo de 2. Por favor, ingrese un número par.'
       };
     }
 
@@ -1173,10 +1208,20 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                           event.column.field == 'Tareas' ||
                           event.column.field == 'Conducta' ||
                           event.column.field == 'habit_eval') {
-                        // Validate smallint fields
-                        var validationResult = validateSmallintValue(
-                            event.value, event.column.title);
-                        newValue = validationResult['value'];
+                        if ((event.column.field == 'habit_eval' &&
+                                selectedTempGrade! < 12) ||
+                            (event.column.field == 'Conducta' &&
+                                selectedTempGrade! < 12)) {
+                          // Validates habit_eval value, only can be multiple of 2
+                          validationResult = validateMultipleOfTwoValue(
+                              event.value, event.column.title);
+                          newValue = validationResult['value'];
+                        } else {
+                          // Validate smallint fields
+                          validationResult = validateSmallintValue(
+                              event.value, event.column.title);
+                          newValue = validationResult['value'];
+                        }
 
                         // Show validation message if value was adjusted
                         if (validationResult['message'] != null &&
@@ -1210,11 +1255,49 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                           });
                         }
                       } else {
-                        // Use existing validation for grade fields
-                        newValue = validateNewGradeValue(
-                            //* Validate values cant be less than 50
-                            event.value,
-                            event.column.field);
+                        String? subjectName;
+                        if (selectedTempSubject?.trim().toUpperCase() ==
+                                'SALIDAS TEMPRANO' ||
+                            selectedTempSubject?.trim().toUpperCase() ==
+                                'BOOKS READ' ||
+                            selectedTempSubject?.trim().toUpperCase() ==
+                                'CUIDADO DEL MEDIO AMBIENTE' ||
+                            selectedTempSubject?.trim().toUpperCase() ==
+                                'P.E.T') {
+                          subjectName =
+                              selectedTempSubject?.trim().toUpperCase();
+                        }
+
+                        try {
+                          newValue = validateNewGradeValue(
+                              //* Validate values cant be less than 50
+                              event.value,
+                              event.column.field,
+                              subjectName);
+                        } catch (e) {
+                          insertAlertLog(
+                              '${e}validateNewGradeValue | ${event.value} | ${event.column.field} | $subjectName');
+                          newValue = originalValue;
+                          _validationDebounce?.cancel();
+                          _validationDebounce =
+                              Timer(const Duration(milliseconds: 300), () {
+                            if (context.mounted && !_disposed) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    '❌ ${e.toString()} ❌',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  backgroundColor:
+                                      Theme.of(context).colorScheme.error,
+                                  duration: const Duration(seconds: 3),
+                                ),
+                              );
+                            }
+                          });
+                          return;
+                        }
                       }
                     }
 
@@ -1236,7 +1319,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
 
                         // Show validation message using Timer to avoid setState during build
                         _validationDebounce =
-                            Timer(const Duration(milliseconds: 100), () {
+                            Timer(const Duration(milliseconds: 300), () {
                           if (context.mounted && !_disposed) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
@@ -1263,6 +1346,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                         });
                       }
                     }
+
                     // Prepare body for backend update
                     composeUpdateStudentGradesBody(
                         event.column.title, newValue, idEval);

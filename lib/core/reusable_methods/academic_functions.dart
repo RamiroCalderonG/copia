@@ -559,14 +559,15 @@ Future<Map<String, dynamic>> populateSubjectsDropDownSelector(
 }
 
 //Function that validate that value can´t be less than 50 and more than 100
-int validateNewGradeValue(dynamic newValue, String columnNameToFind) {
+int validateNewGradeValue(
+    dynamic newValue, String columnNameToFind, String? subjectName) {
   //If value < 50 -> returns 50, if value > 100 -> returns 100
   List<String> columnName = [
     'Calif',
-    //'Conducta',
-    //'Uniforme',
+    'Conducta',
+    'Habitos',
     //'Ausencia',
-    //'Tareas'
+    'Tareas'
     // 'Comentarios'
   ];
 
@@ -594,8 +595,33 @@ int validateNewGradeValue(dynamic newValue, String columnNameToFind) {
       return 50;
     }
 
+    // Validate specific subjects for 'Calif' column
+    if (columnNameToFind == 'Calif' && subjectName != null) {
+      if ((subjectName.toUpperCase() == 'SALIDAS TEMPRANO') &&
+          ((newValue < 0) || (newValue > 50))) {
+        throw FormatException(
+            'El valor para SALIDAS TEMPRANO debe estar entre 0 y 50.');
+      } else if ((subjectName.toUpperCase() == 'BOOKS READ') &&
+          ((newValue < 0) || (newValue > 200))) {
+        throw FormatException(
+            'El valor para BOOKS READ debe estar entre 0 y 200.');
+      } else if ((subjectName.toUpperCase() == 'CUIDADO DEL MEDIO AMBIENTE') &&
+          ((newValue < 0) || (newValue > 99999))) {
+        throw FormatException(
+            'El valor para CUIDADO DEL MEDIO AMBIENTE debe estar entre 0 y 99999.');
+      } else if ((subjectName.toUpperCase() == 'P.E.T') &&
+          ((newValue < 0) || (newValue > 99999))) {
+        throw FormatException(
+            'El valor para P.E.T debe estar entre 0 y 99999.');
+      }
+      return newValue;
+    }
+
     // For 'Calif' column, enforce stricter validation (50-100)
-    if (columnNameToFind == 'Calif') {
+    if (((subjectName == null && columnNameToFind == 'Calif')) ||
+        (subjectName == null && columnNameToFind == 'Tareas') ||
+        (subjectName == null && columnNameToFind == 'Conducta') ||
+        (subjectName == null && columnNameToFind == 'habit_eval')) {
       if (newValue < 50) {
         //Validate that value can´t be less than 50
         return 50;
