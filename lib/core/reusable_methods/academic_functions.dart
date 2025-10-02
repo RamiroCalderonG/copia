@@ -471,10 +471,10 @@ void composeUpdateStudentGradesBody(
   if (key == 'Calificación') {
     key = 'eval';
   }
-  if (key == 'Hab') {
+  if (key == 'T' || key == 'Tareas') {
     key = 'homework';
   }
-  if (key == 'Con') {
+  if (key == 'Con' || key == 'Conducta') {
     key = 'behavior';
   }
   if (key == 'R') {
@@ -483,8 +483,11 @@ void composeUpdateStudentGradesBody(
   if (key == 'Comentarios') {
     key = 'Comment';
   }
-  if (key == 'Faltas') {
+  if ((key == 'Faltas') || (key == 'F')) {
     key = 'absences';
+  }
+  if ((key == 'Habits') || (key == 'H')) {
+    key = 'habits';
   }
 
   if (studentGradesBodyToUpgrade.isEmpty) {
@@ -567,7 +570,8 @@ int validateNewGradeValue(
     'Conducta',
     'Habitos',
     //'Ausencia',
-    'Tareas'
+    'Tareas',
+    'H'
     // 'Comentarios'
   ];
 
@@ -620,6 +624,7 @@ int validateNewGradeValue(
     // For 'Calif' column, enforce stricter validation (50-100)
     if (((subjectName == null && columnNameToFind == 'Calif')) ||
         (subjectName == null && columnNameToFind == 'Tareas') ||
+        (subjectName == null && columnNameToFind == 'H') ||
         (subjectName == null && columnNameToFind == 'Conducta') ||
         (subjectName == null && columnNameToFind == 'habit_eval')) {
       if (newValue < 50) {

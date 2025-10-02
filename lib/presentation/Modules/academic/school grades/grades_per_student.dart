@@ -65,8 +65,10 @@ class _GradesByStudentState extends State<GradesByStudent> {
   bool hideHabitsColumn = true;
   bool hideOutfitColumn = true;
 
-  String? homeWorkColumnTitle;
+  String? habitsWorkColumnTitle;
+  String? homeworkColumnTitle;
   String? disciplineColumnTitle;
+  String? absencesColumnTitle;
   int? monthNumber;
   String dropDownValue = ''; //oneTeacherAssignatures.first;
   int? assignatureID;
@@ -328,12 +330,12 @@ class _GradesByStudentState extends State<GradesByStudent> {
           },
         ),
         TrinaColumn(
-          title: 'Calificación',
-          field: 'evaluation',
-          type: TrinaColumnType.number(
-            negative: false,
-          ),
-        ),
+            title: 'Calificación',
+            field: 'evaluation',
+            type: TrinaColumnType.number(
+              negative: false,
+            ),
+            width: 100),
         TrinaColumn(
           title: 'idCalif',
           field: 'idCicloEscolar',
@@ -345,19 +347,28 @@ class _GradesByStudentState extends State<GradesByStudent> {
           },
         ),
         TrinaColumn(
-            title: 'Faltas',
+            title: absencesColumnTitle ?? 'Faltas',
             hide: hideAbsencesColumn,
             field: 'absence_eval',
+            width: 60,
             type: TrinaColumnType.number(negative: false)),
         TrinaColumn(
-            title: homeWorkColumnTitle ?? 'Tareas',
+            title: homeworkColumnTitle ?? 'Tareas',
             hide: hideHomeworksColumn,
+            width: 60,
             field: 'homework_eval',
             type: TrinaColumnType.number(negative: false)),
         TrinaColumn(
-            title: disciplineColumnTitle ?? 'Disciplina',
+            title: habitsWorkColumnTitle ?? 'Habitos',
+            hide: hideHabitsColumn,
+            field: 'habit_eval',
+            width: 60,
+            type: TrinaColumnType.number(negative: false)),
+        TrinaColumn(
+            title: disciplineColumnTitle ?? 'Conducta',
             hide: hideDisciplineColumn,
             field: 'discipline_eval',
+            width: 80,
             type: TrinaColumnType.number(negative: false)),
         TrinaColumn(
             hide: hideCommentsColumn,
@@ -367,11 +378,7 @@ class _GradesByStudentState extends State<GradesByStudent> {
                 enableColumnFilter: true),
             readOnly: false,
             width: 200),
-        TrinaColumn(
-            title: 'Habitos',
-            hide: hideHabitsColumn,
-            field: 'habit_eval',
-            type: TrinaColumnType.number(negative: false)),
+
         // TrinaColumn(
         //     title: 'Uniforme',
         //     hide: hideOutfitColumn,
@@ -1630,31 +1637,43 @@ class _GradesByStudentState extends State<GradesByStudent> {
   }
 
   void displayColumnsByGrade(int grade) {
+    hideHomeworksColumn = false;
+    hideDisciplineColumn = false;
+
     bool hasComments = commentStringEval.isNotEmpty;
-    if ((grade < 12) && (grade > 6)) {
-      hideCommentsColumn = !hasComments; // Comentarios
+    if (grade < 12) {
+      // Elementaty 1 to 6
+      hideCommentsColumn = !hasComments; // Show comments only if available
       hideAbsencesColumn = true; // Faltas
-      hideHomeworksColumn = false; // Tareas
+      hideHomeworksColumn = true; // Tareas
       hideDisciplineColumn = false; //Disciplina
-      hideHabitsColumn = true;
+      hideHabitsColumn = false;
       hideOutfitColumn = true;
-      homeWorkColumnTitle = 'Hab';
+      habitsWorkColumnTitle = 'H';
       disciplineColumnTitle = 'Con';
-    } else if ((grade < 6 && grade > 0)) {
-      hideCommentsColumn = !hasComments;
+    }
+    if (grade < 6) {
+      // Kinder to 3k
+      hideCommentsColumn = true; //-!hasComments;
       hideAbsencesColumn = true; // Faltas
       hideHomeworksColumn = true; // Tareas
       hideDisciplineColumn = true; //Disciplina
       hideHabitsColumn = true; //Habits
+      habitsWorkColumnTitle = 'H';
       hideOutfitColumn = true;
-    } else if (grade > 11) {
+    }
+    if (grade > 11) {
+      // Middle School 7 to 9
       hideCommentsColumn = !hasComments;
       hideAbsencesColumn = false; // Faltas
       hideHomeworksColumn = false; // Tareas
-      hideDisciplineColumn = true; //Disciplina
-      hideHabitsColumn = true;
+      hideDisciplineColumn = false; //Disciplina
+      hideHabitsColumn = false; //Habitos
       hideOutfitColumn = true;
-      homeWorkColumnTitle = 'R';
+      homeworkColumnTitle = 'R';
+      absencesColumnTitle = 'F';
+      habitsWorkColumnTitle = 'H';
+      disciplineColumnTitle = 'Con';
     }
   }
 }
