@@ -85,6 +85,18 @@ class _GradesByStudentState extends State<GradesByStudent> {
     super.initState();
   }
 
+  /// Checks for unevaluated students - simplified for per-student view
+  void _checkForUnevaluatedStudents() {
+    // For grades_per_student, we don't show notifications
+    // The zero values will be highlighted in red in the grid
+    if (!mounted) return;
+
+    // Force rebuild to update cell colors
+    setState(() {
+      // This triggers a rebuild which will apply the cell styling
+    });
+  }
+
   @override
   void dispose() {
     _disposed = true;
@@ -268,6 +280,13 @@ class _GradesByStudentState extends State<GradesByStudent> {
               'studentName':
                   TrinaCell(value: item['studentName']!.trim().toTitleCase),
             }));
+          }
+        });
+
+        // Check for unevaluated students after data is loaded
+        Future.microtask(() {
+          if (mounted) {
+            _checkForUnevaluatedStudents();
           }
         });
       } else {
@@ -842,12 +861,38 @@ class _GradesByStudentState extends State<GradesByStudent> {
           const SizedBox(width: 8),
           Expanded(
             child: selectedStudentName.isNotEmpty
-                ? Text(
-                    'Evaluando a: ${selectedStudentName.trim()}',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: colorScheme.primary,
-                    ),
+                ? Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Evaluando a: ${selectedStudentName.trim()}',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        _hasZeroValuesInEvaluableSubjects()
+                            ? 'Tiene calificaciones pendientes'
+                            : 'Evaluación completa',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: FlutterFlowTheme.of(context).primaryText,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      Container(
+                          width: 15,
+                          height: 15,
+                          decoration: BoxDecoration(
+                            color: _hasZeroValuesInEvaluableSubjects()
+                                ? Colors.red
+                                : Colors.green,
+                            shape: BoxShape.circle,
+                          )),
+                    ],
                   )
                 : Text(
                     'Seleccione un alumno para evaluar',
@@ -1154,68 +1199,148 @@ class _GradesByStudentState extends State<GradesByStudent> {
           ),
           Expanded(
             child: selectedStudentRows.isNotEmpty
-                ? TrinaGrid(
-                    key: ValueKey('grades_grid_$selectedStudentID'),
-                    columns: gradesByStudentColumns,
-                    rows: selectedStudentRows,
-                    onChanged: (event) {
-                      //* Ensure we have a valid state before processing changes
-                      if (_disposed || !mounted || selectedStudentID == null) {
-                        return;
-                      }
-                      var newValue;
-                      var commentiD = 0;
-                      var originalValue = event.value;
+                ? Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Colors.grey.shade300,
+                        width: 1,
+                      ),
+                    ),
+                    child: TrinaGrid(
+                      key: ValueKey('grades_grid_$selectedStudentID'),
+                      columns: gradesByStudentColumns,
+                      rows: selectedStudentRows,
+                      onChanged: (event) {
+                        //* Ensure we have a valid state before processing changes
+                        if (_disposed ||
+                            !mounted ||
+                            selectedStudentID == null) {
+                          return;
+                        }
+                        var newValue;
+                        var commentiD = 0;
+                        var originalValue = event.value;
 
-                      //* Only process changes for editable columns
-                      if (_isEditableField(event.column.title)) {
-                        //* Process changes for editable columns
+                        //* Only process changes for editable columns
+                        if (_isEditableField(event.column.title)) {
+                          //* Process changes for editable columns
 
-                        if (event.value is String) {
-                          //* Obtain the id of the comment
-                          if (event.column.field == 'Comentarios') {
-                            if (event.value != null && event.value != '') {
-                              //* Find comment ID based on selected comment text
-                              var matchingComment =
-                                  studentsGradesCommentsRows.firstWhere(
-                                      (comment) =>
-                                          comment.commentName == event.value,
-                                      orElse: () => Academicevaluationscomment(
-                                          0, '', false, 0, 0));
-                              commentiD = matchingComment.commentId ?? 0;
-                              newValue = commentiD;
+                          if (event.value is String) {
+                            //* Obtain the id of the comment
+                            if (event.column.field == 'Comentarios') {
+                              if (event.value != null && event.value != '') {
+                                //* Find comment ID based on selected comment text
+                                var matchingComment =
+                                    studentsGradesCommentsRows.firstWhere(
+                                        (comment) =>
+                                            comment.commentName == event.value,
+                                        orElse: () =>
+                                            Academicevaluationscomment(
+                                                0, '', false, 0, 0));
+                                commentiD = matchingComment.commentId ?? 0;
+                                newValue = commentiD;
+                              } else {
+                                commentiD = 0; //! No comment selected
+                              }
+                            }
+                          } else {
+                            // Handle numeric fields with appropriate validation
+                            if (event.column.field == 'absence_eval' ||
+                                event.column.field == 'homework_eval' ||
+                                event.column.field == 'discipline_eval' ||
+                                event.column.field == 'habit_eval') {
+                              // Validate smallint fields
+                              var validationResult = validateSmallintValue(
+                                  event.value, event.column.title);
+                              newValue = validationResult['value'];
+
+                              // Show validation message if value was adjusted
+                              if (validationResult['message'] != null &&
+                                  context.mounted) {
+                                _validationDebounce?.cancel();
+                                _validationDebounce = Timer(
+                                    const Duration(milliseconds: 100), () {
+                                  if (context.mounted && !_disposed) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          '⚠️ ${validationResult['message']} ⚠️',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                        backgroundColor: Theme.of(context)
+                                            .colorScheme
+                                            .tertiary,
+                                        duration: const Duration(seconds: 3),
+                                      ),
+                                    );
+                                  }
+                                });
+
+                                // Update the cell value to the validated value
+                                Future.microtask(() {
+                                  if (!_disposed && mounted) {
+                                    try {
+                                      event.row.cells[event.column.field]
+                                          ?.value = newValue;
+                                    } catch (e) {
+                                      insertErrorLog(e.toString(),
+                                          'SMALLINT_VALIDATION_CELL_UPDATE_ERROR');
+                                    }
+                                  }
+                                });
+                              }
                             } else {
-                              commentiD = 0; //! No comment selected
+                              String? subjectName;
+                              if (selectedTempSubject?.trim().toUpperCase() ==
+                                      'SALIDAS TEMPRANO' ||
+                                  selectedTempSubject?.trim().toUpperCase() ==
+                                      'BOOKS READ' ||
+                                  selectedTempSubject?.trim().toUpperCase() ==
+                                      'CUIDADO DEL MEDIO AMBIENTE' ||
+                                  selectedTempSubject?.trim().toUpperCase() ==
+                                      'P.E.T') {
+                                subjectName =
+                                    selectedTempSubject?.trim().toUpperCase();
+                              }
+
+                              // Use existing validation for grade fields
+                              newValue = validateNewGradeValue(
+                                  event.value, event.column.title, subjectName);
                             }
                           }
-                        } else {
-                          // Handle numeric fields with appropriate validation
-                          if (event.column.field == 'absence_eval' ||
-                              event.column.field == 'homework_eval' ||
-                              event.column.field == 'discipline_eval' ||
-                              event.column.field == 'habit_eval') {
-                            // Validate smallint fields
-                            var validationResult = validateSmallintValue(
-                                event.value, event.column.title);
-                            newValue = validationResult['value'];
+                          // Show validation message if value was adjusted for evaluation field
+                          if (event.column.field == 'evaluation' &&
+                              originalValue != newValue) {
+                            String message = '';
+                            if (originalValue is num && originalValue < 50) {
+                              message =
+                                  'La calificación no puede ser menor a 50. Se ajustó automáticamente a 50.';
+                            } else if (originalValue is num &&
+                                originalValue > 100) {
+                              message =
+                                  'La calificación no puede ser mayor a 100. Se ajustó automáticamente a 100.';
+                            }
 
-                            // Show validation message if value was adjusted
-                            if (validationResult['message'] != null &&
-                                context.mounted) {
+                            if (message.isNotEmpty && context.mounted) {
+                              // Cancel any existing validation debounce to prevent duplicate messages
                               _validationDebounce?.cancel();
+
+                              // Show validation message using Future.microtask to avoid setState during build
                               _validationDebounce =
                                   Timer(const Duration(milliseconds: 100), () {
                                 if (context.mounted && !_disposed) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content: Text(
-                                        '⚠️ ${validationResult['message']} ⚠️',
+                                        '❌ $message ❌',
                                         style: TextStyle(
                                             fontWeight: FontWeight.bold),
                                       ),
                                       backgroundColor: Theme.of(context)
                                           .colorScheme
-                                          .tertiary,
+                                          .primary, // Amber background for warnings
                                       duration: const Duration(seconds: 3),
                                     ),
                                   );
@@ -1229,122 +1354,55 @@ class _GradesByStudentState extends State<GradesByStudent> {
                                     event.row.cells[event.column.field]?.value =
                                         newValue;
                                   } catch (e) {
-                                    insertErrorLog(e.toString(),
-                                        'SMALLINT_VALIDATION_CELL_UPDATE_ERROR');
+                                    // Handle any cell update errors gracefully
+                                    insertErrorLog(
+                                        e.toString(), 'CELL_UPDATE_ERROR');
                                   }
                                 }
                               });
                             }
+                          }
+
+                          final evalId =
+                              event.row.cells['idCicloEscolar']?.value;
+                          int? monthNumber;
+                          if (isUserAdmin || isUserAcademicCoord) {
+                            monthNumber = getKeyFromValue(spanishMonthsMap,
+                                selectedTempMonth!.toCapitalized);
                           } else {
-                            String? subjectName;
-                            if (selectedTempSubject?.trim().toUpperCase() ==
-                                    'SALIDAS TEMPRANO' ||
-                                selectedTempSubject?.trim().toUpperCase() ==
-                                    'BOOKS READ' ||
-                                selectedTempSubject?.trim().toUpperCase() ==
-                                    'CUIDADO DEL MEDIO AMBIENTE' ||
-                                selectedTempSubject?.trim().toUpperCase() ==
-                                    'P.E.T') {
-                              subjectName =
-                                  selectedTempSubject?.trim().toUpperCase();
-                            }
-
-                            // Use existing validation for grade fields
-                            newValue = validateNewGradeValue(
-                                event.value, event.column.title, subjectName);
-                          }
-                        }
-                        // Show validation message if value was adjusted for evaluation field
-                        if (event.column.field == 'evaluation' &&
-                            originalValue != newValue) {
-                          String message = '';
-                          if (originalValue is num && originalValue < 50) {
-                            message =
-                                'La calificación no puede ser menor a 50. Se ajustó automáticamente a 50.';
-                          } else if (originalValue is num &&
-                              originalValue > 100) {
-                            message =
-                                'La calificación no puede ser mayor a 100. Se ajustó automáticamente a 100.';
+                            monthNumber = getKeyFromValue(
+                                spanishMonthsMap, currentMonth.toCapitalized);
                           }
 
-                          if (message.isNotEmpty && context.mounted) {
-                            // Cancel any existing validation debounce to prevent duplicate messages
-                            _validationDebounce?.cancel();
+                          // composeBodyToUpdateGradeBySTudent(
+                          //   event.column.title,
+                          //   selectedStudentID!,
+                          //   newValue,
+                          //   evalId,
+                          //   monthNumber,
+                          // );
 
-                            // Show validation message using Future.microtask to avoid setState during build
-                            _validationDebounce =
-                                Timer(const Duration(milliseconds: 100), () {
-                              if (context.mounted && !_disposed) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      '❌ $message ❌',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    backgroundColor: Theme.of(context)
-                                        .colorScheme
-                                        .primary, // Amber background for warnings
-                                    duration: const Duration(seconds: 3),
-                                  ),
-                                );
-                              }
-                            });
-
-                            // Update the cell value to the validated value
-                            Future.microtask(() {
-                              if (!_disposed && mounted) {
-                                try {
-                                  event.row.cells[event.column.field]?.value =
-                                      newValue;
-                                } catch (e) {
-                                  // Handle any cell update errors gracefully
-                                  insertErrorLog(
-                                      e.toString(), 'CELL_UPDATE_ERROR');
-                                }
-                              }
-                            });
-                          }
-                        }
-
-                        final evalId = event.row.cells['idCicloEscolar']?.value;
-                        int? monthNumber;
-                        if (isUserAdmin || isUserAcademicCoord) {
-                          monthNumber = getKeyFromValue(spanishMonthsMap,
-                              selectedTempMonth!.toCapitalized);
+                          composeUpdateStudentGradesBody(
+                              event.column.title, newValue, evalId);
                         } else {
-                          monthNumber = getKeyFromValue(
-                              spanishMonthsMap, currentMonth.toCapitalized);
+                          //revertSelectedCell();
+                          return;
                         }
-
-                        // composeBodyToUpdateGradeBySTudent(
-                        //   event.column.title,
-                        //   selectedStudentID!,
-                        //   newValue,
-                        //   evalId,
-                        //   monthNumber,
-                        // );
-
-                        composeUpdateStudentGradesBody(
-                            event.column.title, newValue, evalId);
-                      } else {
-                        //revertSelectedCell();
-                        return;
-                      }
-                    },
-                    onLoaded: (TrinaGridOnLoadedEvent event) {
-                      gridAStateManager = event.stateManager;
-                    },
-                    configuration: TrinaGridConfiguration(
-                      style: TrinaGridStyleConfig(
-                        enableColumnBorderVertical: false,
-                        enableCellBorderVertical: false,
-                        // Make rows shorter
-                        rowHeight: 35,
-                      ),
-                      columnSize: TrinaGridColumnSizeConfig(
-                        autoSizeMode: TrinaAutoSizeMode.scale,
-                        resizeMode: TrinaResizeMode.pushAndPull,
+                      },
+                      onLoaded: (TrinaGridOnLoadedEvent event) {
+                        gridAStateManager = event.stateManager;
+                      },
+                      configuration: TrinaGridConfiguration(
+                        style: TrinaGridStyleConfig(
+                          enableColumnBorderVertical: false,
+                          enableCellBorderVertical: false,
+                          // Make rows shorter
+                          rowHeight: 35,
+                        ),
+                        columnSize: TrinaGridColumnSizeConfig(
+                          autoSizeMode: TrinaAutoSizeMode.scale,
+                          resizeMode: TrinaResizeMode.pushAndPull,
+                        ),
                       ),
                     ),
                   )
@@ -1383,6 +1441,38 @@ class _GradesByStudentState extends State<GradesByStudent> {
         ],
       ),
     );
+  }
+
+  /// Checks if there are any zero values in the selected student's grades for evaluable subjects
+  /// Excludes: "Uniforme y Presentacion", "Conducta", "Faltas", "Retardos", "Salidas Temprano", "puntualidad y asistencia"
+  bool _hasZeroValuesInEvaluableSubjects() {
+    // List of subjects to exclude from zero validation
+    const excludedSubjects = {
+      'uniforme y presentación',
+      'conducta',
+      'faltas',
+      'retardos',
+      'salidas temprano',
+      'puntualidad y asistencia'
+    };
+
+    for (var row in selectedStudentRows) {
+      String subjectName = (row.cells['subject_name']?.value ?? '')
+          .toString()
+          .trim()
+          .toLowerCase();
+
+      // Skip excluded subjects
+      if (excludedSubjects.contains(subjectName)) {
+        continue;
+      }
+
+      // Check if evaluation is zero for non-excluded subjects
+      if (row.cells['evaluation']?.value == 0) {
+        return true;
+      }
+    }
+    return false;
   }
 
   dynamic validator() {
