@@ -7,6 +7,7 @@ import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/core/reusable_methods/reusable_functions.dart';
 import 'package:oxschool/core/utils/loader_indicator.dart';
 import 'package:oxschool/core/reusable_methods/translate_messages.dart';
+import 'package:oxschool/core/utils/temp_data.dart';
 import 'package:oxschool/data/Models/AcademicEvaluationsComment.dart';
 import 'package:trina_grid/trina_grid.dart';
 import 'package:intl/intl.dart';
@@ -81,14 +82,21 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
   bool _disposed = false;
   Timer? _validationDebounce;
 
+  // Evaluation status
+  bool hasUnevaluatedStudents = false;
+  List<String> unevaluatedStudentNames = [];
+
   bool hideCommentsColumn = false;
   bool hideAbsencesColumn = false;
   bool hideHomeworksColumn = false;
   bool hideDisciplineColumn = false;
   bool hideHabitsColumn = false;
   bool hideOutfitColumn = false;
-  String? homeWorkColumnTitle;
+  String? habitsWorkColumnTitle;
+  String? homeworkColumnTitle;
   String? disciplineColumnTitle;
+  String? absencesColumnTitle;
+  var validationResult;
 
   /// Whether the teacher teaches multiple campuses.
   bool teacherTeachMultipleCampuses = false;
@@ -99,6 +107,155 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
     isUserAcademicCoord = currentUser!.isCurrentUserAcademicCoord();
     _fetchData();
     super.initState();
+  }
+
+  /// Checks for unevaluated students (those with grade 0) and updates status
+  void _checkForUnevaluatedStudents() {
+    if (studentList.isEmpty) {
+      hasUnevaluatedStudents = false;
+      unevaluatedStudentNames.clear();
+      return;
+    }
+
+    List<String> unevaluatedStudents = [];
+
+    for (var student in studentList) {
+      if (student.evaluation == 0) {
+        String studentName =
+            '${student.studentName} ${student.student1LastName}';
+        unevaluatedStudents.add(studentName.trim());
+      }
+    }
+
+    setState(() {
+      hasUnevaluatedStudents = unevaluatedStudents.isNotEmpty;
+      unevaluatedStudentNames = unevaluatedStudents;
+    });
+
+    if (hasUnevaluatedStudents) {
+      _showUnevaluatedStudentsSnackbar();
+    }
+  }
+
+  /// Shows snackbar with unevaluated students information
+  void _showUnevaluatedStudentsSnackbar() {
+    if (!context.mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(
+              Icons.warning_amber_rounded,
+              color: Colors.orange,
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Se encontraron ${unevaluatedStudentNames.length} estudiante(s) sin calificar',
+                style: const TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.orange.shade700,
+        duration: const Duration(seconds: 4),
+        action: SnackBarAction(
+          label: 'Ver',
+          textColor: Colors.white,
+          onPressed: () {
+            _showUnevaluatedStudentsBottomSheet();
+          },
+        ),
+      ),
+    );
+  }
+
+  /// Shows bottom sheet with detailed list of unevaluated students
+  void _showUnevaluatedStudentsBottomSheet() {
+    if (!context.mounted) return;
+
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        return Container(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.warning_amber_rounded,
+                    color: Colors.orange,
+                    size: 24,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Estudiantes Sin Calificar',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Text(
+                '${unevaluatedStudentNames.length} estudiante(s) pendiente(s):',
+                style: theme.textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 12),
+              Flexible(
+                child: Container(
+                  constraints: const BoxConstraints(maxHeight: 200),
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: unevaluatedStudentNames.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.person,
+                              size: 16,
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                unevaluatedStudentNames[index],
+                                style: theme.textTheme.bodySmall,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Cerrar'),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -165,7 +322,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
             field: 'Calif',
             type: TrinaColumnType.number(negative: false, format: '##'),
             readOnly: false,
-            width: 140),
+            width: 100),
         TrinaColumn(
           title: 'idCalif',
           field: 'idCalif',
@@ -178,27 +335,27 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
         ),
         TrinaColumn(
             hide: hideAbsencesColumn,
-            title: 'Faltas',
+            title: absencesColumnTitle ?? 'Faltas',
             field: 'Ausencia',
             type: TrinaColumnType.number(negative: false, format: '#'),
             readOnly: false,
-            width: 100),
+            width: 90),
         TrinaColumn(
             hide: hideHomeworksColumn,
-            title: homeWorkColumnTitle ?? 'Tareas',
+            title: homeworkColumnTitle ?? 'Tareas',
             field: 'Tareas',
             type: TrinaColumnType.number(negative: false),
             readOnly: false,
-            width: 100),
+            width: 60),
         TrinaColumn(
             hide: hideDisciplineColumn,
             title: disciplineColumnTitle ?? 'Conducta',
             field: 'Conducta',
             type: TrinaColumnType.number(negative: false),
             readOnly: false,
-            width: 100),
+            width: 60),
         TrinaColumn(
-            title: 'Hábitos',
+            title: habitsWorkColumnTitle ?? 'Habitos',
             hide: hideHabitsColumn,
             field: 'habit_eval',
             readOnly: false,
@@ -416,6 +573,40 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
     return {'value': intValue, 'message': null};
   }
 
+  /// Validates values that must be multiples of 2
+  /// Returns the original value and a validation message if not valid
+  Map<String, dynamic> validateMultipleOfTwoValue(
+      dynamic value, String fieldName) {
+    if (value == null || value == '') {
+      return {'value': 0, 'message': null};
+    }
+
+    int? intValue;
+    if (value is String) {
+      intValue = int.tryParse(value);
+    } else if (value is num) {
+      intValue = value.toInt();
+    }
+
+    if (intValue == null) {
+      return {
+        'value': 0,
+        'message': 'Valor inválido en $fieldName. Debe ser un número válido.'
+      };
+    }
+
+    // Validate that the value is a multiple of 2
+    if (intValue % 2 != 0) {
+      return {
+        'value': intValue,
+        'message':
+            '$fieldName debe ser múltiplo de 2. Por favor, ingrese un número par.'
+      };
+    }
+
+    return {'value': intValue, 'message': null};
+  }
+
   Future<void> searchBUttonAction(
     String groupSelected,
     String gradeInt,
@@ -438,7 +629,13 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
       } else {
         teacherNumber = currentUser!.employeeNumber;
       }
-      if (monthNumber != 8) {
+      if (monthNumber != 99) {
+        // if (!currentUser!.isCurrentUserAdmin() ||
+        //     !currentUser!.isCurrentUserAcademicCoord()) {
+        //   monthNumber = evalMonthFromBackend;
+        //   selectedTempGradeStr = evalMonthNameFromBackend;
+        // }
+
         studentList = await getStudentsByAssinature(groupSelected, gradeInt,
             assignatureID, month, campus, teacherNumber);
 
@@ -498,6 +695,13 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
           trinaGridKey = UniqueKey();
 
           isLoading = false;
+        });
+
+        // Check for unevaluated students after data is loaded
+        Future.microtask(() {
+          if (mounted) {
+            _checkForUnevaluatedStudents();
+          }
         });
       } else {
         setState(() {
@@ -792,6 +996,28 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                   color: colorScheme.onSurface,
                 ),
               ),
+              const Spacer(),
+              // Status dot indicator
+              if (studentList.isNotEmpty) ...[
+                Container(
+                  width: 12,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    color:
+                        hasUnevaluatedStudents ? Colors.orange : Colors.green,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  hasUnevaluatedStudents ? 'Pendientes' : 'Completo',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color:
+                        hasUnevaluatedStudents ? Colors.orange : Colors.green,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ],
           ),
           // const SizedBox(height: 3),
@@ -955,8 +1181,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
             //Get month number
             monthNumber = getKeyFromValue(spanishMonthsMap, selectedTempMonth!);
           } else {
-            monthNumber =
-                getKeyFromValue(spanishMonthsMap, selectedCurrentTempMonth!);
+            monthNumber = evalMonthFromBackend;
           }
           // get assignature id number
           var assignatureID = selectedTempSubjectId;
@@ -1167,10 +1392,20 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                           event.column.field == 'Tareas' ||
                           event.column.field == 'Conducta' ||
                           event.column.field == 'habit_eval') {
-                        // Validate smallint fields
-                        var validationResult = validateSmallintValue(
-                            event.value, event.column.title);
-                        newValue = validationResult['value'];
+                        if ((event.column.field == 'habit_eval' &&
+                                selectedTempGrade! < 12) ||
+                            (event.column.field == 'Conducta' &&
+                                selectedTempGrade! < 12)) {
+                          // Validates habit_eval value, only can be multiple of 2
+                          validationResult = validateMultipleOfTwoValue(
+                              event.value, event.column.title);
+                          newValue = validationResult['value'];
+                        } else {
+                          // Validate smallint fields
+                          validationResult = validateSmallintValue(
+                              event.value, event.column.title);
+                          newValue = validationResult['value'];
+                        }
 
                         // Show validation message if value was adjusted
                         if (validationResult['message'] != null &&
@@ -1204,11 +1439,49 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                           });
                         }
                       } else {
-                        // Use existing validation for grade fields
-                        newValue = validateNewGradeValue(
-                            //* Validate values cant be less than 50
-                            event.value,
-                            event.column.field);
+                        String? subjectName;
+                        if (selectedTempSubject?.trim().toUpperCase() ==
+                                'SALIDAS TEMPRANO' ||
+                            selectedTempSubject?.trim().toUpperCase() ==
+                                'BOOKS READ' ||
+                            selectedTempSubject?.trim().toUpperCase() ==
+                                'CUIDADO DEL MEDIO AMBIENTE' ||
+                            selectedTempSubject?.trim().toUpperCase() ==
+                                'P.E.T') {
+                          subjectName =
+                              selectedTempSubject?.trim().toUpperCase();
+                        }
+
+                        try {
+                          newValue = validateNewGradeValue(
+                              //* Validate values cant be less than 50
+                              event.value,
+                              event.column.field,
+                              subjectName);
+                        } catch (e) {
+                          insertAlertLog(
+                              '${e}validateNewGradeValue | ${event.value} | ${event.column.field} | $subjectName');
+                          newValue = originalValue;
+                          _validationDebounce?.cancel();
+                          _validationDebounce =
+                              Timer(const Duration(milliseconds: 300), () {
+                            if (context.mounted && !_disposed) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    '❌ ${e.toString()} ❌',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  backgroundColor:
+                                      Theme.of(context).colorScheme.error,
+                                  duration: const Duration(seconds: 3),
+                                ),
+                              );
+                            }
+                          });
+                          return;
+                        }
                       }
                     }
 
@@ -1230,7 +1503,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
 
                         // Show validation message using Timer to avoid setState during build
                         _validationDebounce =
-                            Timer(const Duration(milliseconds: 100), () {
+                            Timer(const Duration(milliseconds: 300), () {
                           if (context.mounted && !_disposed) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
@@ -1257,6 +1530,7 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
                         });
                       }
                     }
+
                     // Prepare body for backend update
                     composeUpdateStudentGradesBody(
                         event.column.title, newValue, idEval);
@@ -1502,36 +1776,43 @@ class _GradesByAsignatureState extends State<GradesByAsignature> {
   }
 
   void displayColumnsByGrade(int grade) {
-    // Check if comments are available and should be displayed
-    bool hasComments = commentStringEval.isNotEmpty;
+    hideHomeworksColumn = false;
+    hideDisciplineColumn = false;
 
-    // setState(() {
-    if ((grade < 12) && (grade > 6)) {
+    bool hasComments = commentStringEval.isNotEmpty;
+    if (grade < 12) {
+      // Elementaty 1 to 6
       hideCommentsColumn = !hasComments; // Show comments only if available
       hideAbsencesColumn = true; // Faltas
-      hideHomeworksColumn = false; // Tareas
+      hideHomeworksColumn = true; // Tareas
       hideDisciplineColumn = false; //Disciplina
-      hideHabitsColumn = true;
+      hideHabitsColumn = false;
       hideOutfitColumn = true;
-      homeWorkColumnTitle = 'Hab';
+      habitsWorkColumnTitle = 'H';
       disciplineColumnTitle = 'Con';
-    } else if ((grade < 6 && grade > 0)) {
-      hideCommentsColumn = !hasComments; // Show comments only if available
+    }
+    if (grade < 6) {
+      // Kinder to 3k
+      hideCommentsColumn = true; //-!hasComments;
       hideAbsencesColumn = true; // Faltas
       hideHomeworksColumn = true; // Tareas
       hideDisciplineColumn = true; //Disciplina
       hideHabitsColumn = true; //Habits
+      habitsWorkColumnTitle = 'H';
       hideOutfitColumn = true;
-    } else if (grade > 11) {
-      hideCommentsColumn = !hasComments; // Show comments only if available
+    }
+    if (grade > 11) {
+      // Middle School 7 to 9
+      hideCommentsColumn = !hasComments;
       hideAbsencesColumn = false; // Faltas
       hideHomeworksColumn = false; // Tareas
-      hideDisciplineColumn = true; //Disciplina
-      hideHabitsColumn = true;
+      hideDisciplineColumn = false; //Disciplina
+      hideHabitsColumn = false; //Habitos
       hideOutfitColumn = true;
-      homeWorkColumnTitle = 'R';
+      homeworkColumnTitle = 'R';
+      absencesColumnTitle = 'F';
+      habitsWorkColumnTitle = 'H';
+      disciplineColumnTitle = 'Con';
     }
-    trinaGridKey = UniqueKey();
-    // });
   }
 }

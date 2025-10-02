@@ -1654,3 +1654,29 @@ Future<dynamic> createNotification(
     return ApiCallsDio._handleDioError(e);
   }
 }
+
+//*Fetches current eval month from backend
+Future<dynamic> getCurrentEvalMonthFromBackendCall(bool byName) async {
+  try {
+    SharedPreferences devicePrefs = await SharedPreferences.getInstance();
+    final response = await ApiCallsDio._dio.get(
+      '${ApiCallsDio._baseUrl}/academic/evaluation/month/current/active/',
+      queryParameters: {"evalName": byName},
+      options: Options(
+        headers: {'Authorization': devicePrefs.getString('token')!},
+        sendTimeout: const Duration(seconds: 20),
+        receiveTimeout: const Duration(seconds: 20),
+      ),
+    );
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return response.data;
+    } else {
+      insertErrorLog(
+          response.data.toString(), 'getCurrentEvalMonthFromBackendCall()');
+      return Future.error(response.data);
+    }
+  } on DioException catch (e) {
+    insertErrorLog(e.toString(), 'getCurrentEvalMonthFromBackendCall()');
+    return ApiCallsDio._handleDioError(e);
+  }
+}

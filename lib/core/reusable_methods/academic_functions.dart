@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/data/Models/AcademicEvaluationsComment.dart';
@@ -81,7 +82,7 @@ Future<dynamic> loadStartGradingAsAdminOrAcademicCoord(
             oneTeacherGrades = originalList.toSet().toList();
 
             Map<int, String> currentMapValue = {
-              jsonList[i]['sequence']: jsonList[i]['grade']
+              jsonList[i]['sequence']: jsonList[i]['grade'].toString().trim()
             };
 
             teacherGradesMap.addEntries(currentMapValue.entries);
@@ -470,10 +471,10 @@ void composeUpdateStudentGradesBody(
   if (key == 'Calificación') {
     key = 'eval';
   }
-  if (key == 'Hab') {
+  if (key == 'T' || key == 'Tareas') {
     key = 'homework';
   }
-  if (key == 'Con') {
+  if (key == 'Con' || key == 'Conducta') {
     key = 'behavior';
   }
   if (key == 'R') {
@@ -482,8 +483,11 @@ void composeUpdateStudentGradesBody(
   if (key == 'Comentarios') {
     key = 'Comment';
   }
-  if (key == 'Faltas') {
+  if ((key == 'Faltas') || (key == 'F')) {
     key = 'absences';
+  }
+  if ((key == 'Habits') || (key == 'H')) {
+    key = 'habits';
   }
 
   if (studentGradesBodyToUpgrade.isEmpty) {
@@ -558,14 +562,16 @@ Future<Map<String, dynamic>> populateSubjectsDropDownSelector(
 }
 
 //Function that validate that value can´t be less than 50 and more than 100
-int validateNewGradeValue(dynamic newValue, String columnNameToFind) {
+int validateNewGradeValue(
+    dynamic newValue, String columnNameToFind, String? subjectName) {
   //If value < 50 -> returns 50, if value > 100 -> returns 100
   List<String> columnName = [
     'Calif',
-    //'Conducta',
-    //'Uniforme',
+    'Conducta',
+    'Habitos',
     //'Ausencia',
-    //'Tareas'
+    'Tareas',
+    'H'
     // 'Comentarios'
   ];
 
@@ -593,8 +599,34 @@ int validateNewGradeValue(dynamic newValue, String columnNameToFind) {
       return 50;
     }
 
+    // Validate specific subjects for 'Calif' column
+    if (columnNameToFind == 'Calif' && subjectName != null) {
+      if ((subjectName.toUpperCase() == 'SALIDAS TEMPRANO') &&
+          ((newValue < 0) || (newValue > 50))) {
+        throw FormatException(
+            'El valor para SALIDAS TEMPRANO debe estar entre 0 y 50.');
+      } else if ((subjectName.toUpperCase() == 'BOOKS READ') &&
+          ((newValue < 0) || (newValue > 200))) {
+        throw FormatException(
+            'El valor para BOOKS READ debe estar entre 0 y 200.');
+      } else if ((subjectName.toUpperCase() == 'CUIDADO DEL MEDIO AMBIENTE') &&
+          ((newValue < 0) || (newValue > 99999))) {
+        throw FormatException(
+            'El valor para CUIDADO DEL MEDIO AMBIENTE debe estar entre 0 y 99999.');
+      } else if ((subjectName.toUpperCase() == 'P.E.T') &&
+          ((newValue < 0) || (newValue > 99999))) {
+        throw FormatException(
+            'El valor para P.E.T debe estar entre 0 y 99999.');
+      }
+      return newValue;
+    }
+
     // For 'Calif' column, enforce stricter validation (50-100)
-    if (columnNameToFind == 'Calif') {
+    if (((subjectName == null && columnNameToFind == 'Calif')) ||
+        (subjectName == null && columnNameToFind == 'Tareas') ||
+        (subjectName == null && columnNameToFind == 'H') ||
+        (subjectName == null && columnNameToFind == 'Conducta') ||
+        (subjectName == null && columnNameToFind == 'habit_eval')) {
       if (newValue < 50) {
         //Validate that value can´t be less than 50
         return 50;
@@ -632,6 +664,23 @@ Future<dynamic> isDateToEvaluateStudents() async {
     return response;
   } catch (e) {
     insertErrorLog(e.toString(), 'FETCH DATE FOR STUDENT EVALUATION');
+    return Future.error(e);
+  }
+}
+
+Future<dynamic> fetchEvalMonthFromBackend(bool byName) async {
+  try {
+    var response =
+        await getCurrentEvalMonthFromBackendCall(byName).catchError((error) {
+      return Future.error('Error: ${error.toString()}');
+    });
+    if (byName) {
+      return response['NOMBRE'];
+    } else {
+      return response['SECUENCIA'];
+    }
+  } catch (e) {
+    insertErrorLog(e.toString(), 'FETCH EVAL MONTH FROM BACKEND');
     return Future.error(e);
   }
 }

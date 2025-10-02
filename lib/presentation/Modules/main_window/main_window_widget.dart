@@ -374,9 +374,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Image.asset(
-              Theme.of(context).brightness == Brightness.light
-                  ? 'assets/images/1_OS_color.png'
-                  : 'assets/images/logoBlancoOx.png',
+              getLogoAssetPath(context),
               height: 32,
               filterQuality: FilterQuality.high,
             ),
@@ -438,9 +436,7 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Image.asset(
-                  Theme.of(context).brightness == Brightness.light
-                      ? 'assets/images/1_OS_color.png'
-                      : 'assets/images/logoBlancoOx.png',
+                  getLogoAssetPath(context),
                   height: 40,
                   filterQuality: FilterQuality.high,
                 ),
@@ -654,73 +650,86 @@ class _MainWindowWidgetState extends State<MainWindowWidget> {
         child: Column(
           children: <Widget>[
             // Modern Header
-            Container(
-              padding: const EdgeInsets.all(24),
-              margin: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    colorScheme.primaryContainer,
-                    colorScheme.secondaryContainer.withOpacity(0.7),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: colorScheme.primary,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(
-                          Icons.account_circle,
-                          color: colorScheme.onPrimary,
-                          size: 32,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              currentUser!.employeeName!.toTitleCase,
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: colorScheme.onSurface,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: colorScheme.surface,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                'ID: ${currentUser!.employeeNumber}',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: colorScheme.onSurfaceVariant,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+            GestureDetector(
+              onTap: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => const UserWindow(),
+                ));
+              },
+              onDoubleTap: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => const UserWindow(),
+                ));
+              },
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                margin: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      colorScheme.primaryContainer,
+                      colorScheme.secondaryContainer.withOpacity(0.7),
                     ],
                   ),
-                ],
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: colorScheme.primary,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            Icons.account_circle,
+
+                            color: colorScheme.onPrimary,
+                            //size: 52,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                currentUser!.employeeName!.toTitleCase,
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: colorScheme.onSurface,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: colorScheme.surface,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  'ID: ${currentUser!.employeeNumber}',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: colorScheme.onSurfaceVariant,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
 

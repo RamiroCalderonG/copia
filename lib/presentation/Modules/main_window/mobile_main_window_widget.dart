@@ -68,9 +68,7 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
               children: [
                 const Padding(padding: EdgeInsets.only(left: 10.5)),
                 Image.asset(
-                  Theme.of(context).brightness == Brightness.light
-                      ? 'assets/images/1_OS_color.png' //igth theme image
-                      : 'assets/images/logoBlancoOx.png', //Dark theme image
+                  getLogoAssetPath(context),
                   fit: BoxFit.fill,
                   height: 40,
                   filterQuality: FilterQuality.high,
@@ -88,9 +86,7 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
                 const Padding(padding: EdgeInsets.only(left: 5.5)),
                 Center(
                   child: Image.asset(
-                    Theme.of(context).brightness == Brightness.light
-                        ? 'assets/images/1_OS_color.png' //igth theme image
-                        : 'assets/images/logoBlancoOx.png', //Dark theme image
+                    getLogoAssetPath(context),
                     fit: BoxFit.fill,
                     height: 40,
                     filterQuality: FilterQuality.high,
@@ -217,8 +213,10 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
                 ),
                 currentAccountPicture: CircleAvatar(
                   backgroundColor: FlutterFlowTheme.of(context).accent4,
-                  child: const Image(
-                    image: AssetImage('assets/images/logoRedondoOx.png'),
+                  child: Image(
+                    image: AssetImage(
+                      getLogoAssetPath(context, useRoundLogo: true),
+                    ),
                   ),
                 ),
                 decoration: BoxDecoration(

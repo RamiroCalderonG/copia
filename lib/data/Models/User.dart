@@ -188,7 +188,7 @@ class User {
         creationDate = json['creationDate'],
         birthdate = json['birthdate'],
         isTeacher = json['isTeacher'],
-        isAdmin = json['admin'],
+        isAdmin = json['admin'] ?? false,
         roleID = 0,
         canUpdatePassword = json['can_update_password'],
         idLogin = json['idLogin'];

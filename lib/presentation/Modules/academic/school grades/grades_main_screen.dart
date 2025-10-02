@@ -6,6 +6,7 @@ import 'package:oxschool/core/reusable_methods/device_functions.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/core/reusable_methods/translate_messages.dart';
 import 'package:oxschool/core/utils/loader_indicator.dart';
+import 'package:oxschool/core/utils/temp_data.dart';
 import 'package:oxschool/data/datasources/temp/studens_temp.dart';
 import 'package:oxschool/presentation/Modules/academic/school%20grades/fo_dac_27.dart';
 import 'package:oxschool/presentation/Modules/academic/school%20grades/grades_by_asignature.dart';
@@ -37,6 +38,7 @@ class _GradesMainScreenState extends State<GradesMainScreen>
   bool isSearching = true;
   bool canEvaluateNow =
       false; //Evaluate if current dates are available for evaluations
+
   bool canUserEvaluate = false; //Evaluate if current user have any data
   bool displayEvaluateGrids = false;
   bool isUserAdmin = currentUser!.isCurrentUserAdmin();
@@ -110,6 +112,10 @@ class _GradesMainScreenState extends State<GradesMainScreen>
       setState(() {
         isSearching = true;
       });
+      evalMonthFromBackend = await fetchEvalMonthFromBackend(false)
+          .catchError((onError) => Future.error(onError));
+      evalMonthNameFromBackend = await fetchEvalMonthFromBackend(true)
+          .catchError((onError) => Future.error(onError));
       if (isUserAdmin || isUserAcdemicCoord) {
         setState(() {
           canEvaluateNow = true;

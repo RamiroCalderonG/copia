@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:oxschool/core/config/flutter_flow/flutter_flow_util.dart';
 import 'package:oxschool/core/utils/device_information.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list_dio.dart';
 import 'package:oxschool/presentation/components/confirm_dialogs.dart';
@@ -166,7 +167,7 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: Image.asset(
-          'assets/images/logoRedondoOx.png',
+          getLogoAssetPath(context, useRoundLogo: true),
           width: 80,
           height: 80,
           fit: BoxFit.contain,

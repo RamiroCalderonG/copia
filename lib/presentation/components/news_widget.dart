@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:oxschool/core/config/flutter_flow/flutter_flow_util.dart';
 import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/data/Models/Notification.dart' as NotificationModel;
 import 'package:oxschool/data/services/notification_service.dart';
@@ -395,7 +396,7 @@ class _NewsWidgetState extends State<NewsWidget> {
             ),
             const SizedBox(width: 8),
             Image.asset(
-              'assets/images/1_OS_color.png',
+              getLogoAssetPath(context),
               height: 24,
               fit: BoxFit.contain,
             ),

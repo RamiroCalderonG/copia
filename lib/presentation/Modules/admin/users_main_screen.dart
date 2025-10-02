@@ -1,6 +1,5 @@
 // ignore_for_file: prefer_typing_uninitialized_variables
 
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
@@ -255,24 +254,12 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
           sliver: SliverToBoxAdapter(
             child: Card(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(5),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        Icon(
-                          Icons.people_rounded,
-                          color: colorScheme.primary,
-                          size: 24,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Lista de Usuarios',
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
                         // const Spacer(),
                         if (isDeviceMobile) ...[
                           IconButton.filledTonal(
@@ -300,7 +287,7 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
                     // const SizedBox(height: 16),
                     SizedBox(
                       width: double.infinity,
-                      height: MediaQuery.of(context).size.height - 240,
+                      height: MediaQuery.of(context).size.height - 200,
                       child: const UsersTableView(),
                     ),
                   ],
