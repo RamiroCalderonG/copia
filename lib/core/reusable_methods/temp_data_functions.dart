@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 import 'package:oxschool/core/constants/screens.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
@@ -10,11 +9,11 @@ import 'package:oxschool/data/Models/Module.dart';
 import 'package:oxschool/data/Models/Role.dart';
 import 'package:oxschool/data/datasources/temp/users_temp_data.dart';
 
-import '../../data/services/backend/api_requests/api_calls_list.dart';
+import '../../data/services/backend/api_requests/api_calls_list_dio.dart';
 
 void clearTempData() {
   listOfUsersForGrid.clear();
-  //usersPlutoRowList.clear();
+  //usersTrinaRowList.clear();
   selectedUser = null;
   tempUserId = null;
   tempSelectedUsr = null;
@@ -22,12 +21,19 @@ void clearTempData() {
   tmpRolesList.clear();
   userRoles.clear();
   uniqueItems.clear();
+  // SharedPreferences.getInstance().then((prefs) {
+  //   prefs.remove('isUserAdmin');
+  //   prefs.remove('idSession');
+  //   prefs.remove('ip');
+  //   prefs.remove('device');
+  //   prefs.remove('token');
+  //   prefs.remove('currentUserEmail');
+  // });
 }
 
 List<Map<String, List<String>>> getUniqueItems(
-    List<Map<String, dynamic>> moduleScreenList, 
+    List<Map<String, dynamic>> moduleScreenList,
     List<Map<String, dynamic>> screenEventList) {
-
   // Initialize the uniqueItemsList
   List<Map<String, List<String>>> uniqueItemsList = [];
 
@@ -65,59 +71,59 @@ List<Map<String, List<String>>> getUniqueItems(
   return uniqueItemsList;
 }
 
-
 //Function that retrieves user permissions and add them into currentUser.userRole
 Future<void> getRoleListOfPermissions(Map<String, dynamic> jsonuserInfo) async {
   try {
-    getRolePermissions().then((onValue){
-      Map<String, dynamic> jsonResponse = json.decode(utf8.decode(onValue.bodyBytes));
-      
+    getRolePermissions().then((onValue) {
+      Map<String, dynamic> jsonResponse = onValue.data;
+      //json.decode(utf8.decode(onValue.bodyBytes));
+
       //Create Role object to then insert it into currentUser.userRole
       Role userRole = Role(
-        roleID: jsonuserInfo['userRole']['id'],
-        roleName: jsonuserInfo['userRole']['softName'],
-        roleDescription: jsonuserInfo['userRole']['description'],
-        isActive: jsonuserInfo['userRole']['isActive']
-      );
+          roleID: jsonuserInfo['userRole']['id'],
+          roleName: jsonuserInfo['userRole']['softName'],
+          roleDescription: jsonuserInfo['userRole']['description'],
+          isActive: jsonuserInfo['userRole']['isActive']);
 
       List<dynamic> moduleScreenListMap = jsonResponse['moduleScreen'];
       List<dynamic> eventScreenListMap = jsonResponse['screenEvents'];
 
       // Get unique moduleScreen relations and screenEvents relations
-       uniqueItems = getUniqueItems(
-        moduleScreenListMap.map((item) => Map<String, dynamic>.from(item)).toList(),
-        eventScreenListMap.map((item) => Map<String, dynamic>.from(item)).toList()
-      );
+      uniqueItems = getUniqueItems(
+          moduleScreenListMap
+              .map((item) => Map<String, dynamic>.from(item))
+              .toList(),
+          eventScreenListMap
+              .map((item) => Map<String, dynamic>.from(item))
+              .toList());
 
       // Assign the unique items to the userRole
       userRole.moduleScreenList = uniqueItems;
 
       currentUser!.userRole = userRole; // Insert Role into currentUser.userRole
       return;
-    }).onError((error, stackTrace){
+    }).onError((error, stackTrace) {
       insertErrorLog(error.toString(), 'getRolePermissions');
       throw Future.error(error.toString());
-      
     });
   } catch (e) {
     insertErrorLog(e.toString(), 'getRoleListOfPermissions() | ');
     throw Future.error(e.toString());
   }
-  
 }
 
-  Future<void> getUserAccessRoutes() async {
-    var response = await getScreenAccessRoutes();
-    var tmpResponse = json.decode(response);
-    for (var item in tmpResponse ) {
-      accessRoutes.add(item);
-    }
-
-    //accessRoutes = json.decode(response);
-    
-    //accessRoutes = tempResponse.;
-    return;
+Future<void> getUserAccessRoutes() async {
+  var response = await getScreenAccessRoutes();
+  var tmpResponse = response.data;
+  for (var item in tmpResponse) {
+    accessRoutes.add(item);
   }
+
+  //accessRoutes = json.decode(response);
+
+  //accessRoutes = tempResponse.;
+  return;
+}
 
 int getEventIDbyName(String eventName) {
   var idValue;
@@ -132,7 +138,7 @@ int getEventIDbyName(String eventName) {
 Future<dynamic> getRolesTempList() async {
   try {
     var response = await getRolesList();
-    tmpRolesList = json.decode(response.body);
+    tmpRolesList = response.data;
     return tmpRolesList;
   } catch (e) {
     insertErrorLog(e.toString(), 'getRolesList()');
@@ -143,7 +149,7 @@ Future<dynamic> getRolesTempList() async {
 Future<void> getEventsTempList() async {
   try {
     var response = await getEventsListRequest();
-    tmpeventsList = json.decode(response.body);
+    tmpeventsList = response.data;
   } catch (e) {
     insertErrorLog(e.toString(), 'getEventsList()');
     throw Future.error(e.toString());
@@ -153,14 +159,15 @@ Future<void> getEventsTempList() async {
 Future<dynamic> fetchEventsByRole(int roleId) async {
   try {
     var eventsByRole = await getEventsByRole(roleId);
-    if (eventsByRole != null && eventsByRole.body != '[]') {
+    if (eventsByRole != null && eventsByRole.data != '[]') {
       // var evenntsList = eventsByRole.body;
-      var jsonList = json.decode(utf8.decode(eventsByRole.bodyBytes));
-       List<RoleModuleRelationshipDto> roleDetailedList = [];
-         for (var item in jsonList) {
-          RoleModuleRelationshipDto roleDetails = RoleModuleRelationshipDto.fromJSON(item);
-           roleDetailedList.add(roleDetails);
-         }
+      var jsonList = eventsByRole.data;
+      List<RoleModuleRelationshipDto> roleDetailedList = [];
+      for (var item in jsonList) {
+        RoleModuleRelationshipDto roleDetails =
+            RoleModuleRelationshipDto.fromJSON(item);
+        roleDetailedList.add(roleDetails);
+      }
       return roleDetailedList;
     } else {
       return Future.error('Value is null');
@@ -175,7 +182,7 @@ Future<List<RoleModuleRelationshipDto>> fetchScreensByRoleId(int roleId) async {
   List<RoleModuleRelationshipDto> screensList = [];
   try {
     await getScreenListByRoleId(roleId).then((response) {
-      var jsonList = json.decode(utf8.decode(response.bodyBytes));
+      var jsonList = response.data;
       for (var item in jsonList) {
         RoleModuleRelationshipDto newItem =
             RoleModuleRelationshipDto.fromJSON(item);
@@ -200,7 +207,7 @@ Future<List<Module>> fetchModulesAndEventsDetailed() async {
   List<Module> preSortedModuleList = [];
   try {
     await getEventsAndModulesCall().then((apiResponse) {
-      var eventsModule = json.decode(apiResponse);
+      var eventsModule = apiResponse.data;
       for (var item in eventsModule) {
         Event event = Event(
             item["event_id"],
@@ -213,7 +220,7 @@ Future<List<Module>> fetchModulesAndEventsDetailed() async {
       }
 
       return getModulesListDetailed().then((apiResponse) {
-        var jsonList = json.decode(apiResponse);
+        var jsonList = apiResponse;
         for (var item in jsonList) {
           Module module = Module.fromJsonWithoutEvents(item);
           moduleList.add(module);

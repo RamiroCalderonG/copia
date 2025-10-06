@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 // ignore: depend_on_referenced_packages
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:oxschool/core/utils/device_information.dart';
-import 'package:oxschool/core/utils/global_options.dart';
-import 'package:oxschool/core/utils/version_updater.dart';
 import 'package:oxschool/data/Models/Logger.dart';
+import 'package:oxschool/data/services/backend/api_requests/api_calls_list_dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import "package:window_size/window_size.dart";
 import 'core/config/flutter_flow/flutter_flow_theme.dart';
@@ -23,6 +23,7 @@ void main() async {
   await FileLogger.init();
   insertActionIntoLog('APP STARTED, ', Platform.operatingSystem);
   revealLoggerFileLocation();
+  ApiCallsDio.initialize();
 
   usePathUrlStrategy();
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
@@ -32,10 +33,6 @@ void main() async {
 
   await FlutterFlowTheme.initialize();
   await dotenv.load(fileName: "lib/core/config/oxschool.env");
-
-  UpdatGlobalOptions.downloadReleaseHeaders = {
-  "Authorization": "Bearer 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",
-};
 
   runApp(const MyApp());
 }
@@ -89,12 +86,13 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'Oxschool',
+      title: 'OX School',
       localizationsDelegates: const [
         // FFLocalizationsDelegate(),
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
+        FlutterQuillLocalizations.delegate,
       ],
       // locale: _locale,
       supportedLocales: const [Locale('en'), Locale('es')],

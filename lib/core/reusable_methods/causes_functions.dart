@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls.dart';
@@ -13,10 +12,10 @@ Future<List<String>> getCauses(int causeCla) async {
 
   if (apiResultxgr.succeeded) {
     // Parse the JSON response
-    jsonList = json.decode(apiResultxgr.response!.body);
+    //jsonList =  json.decode(apiResultxgr.response!.body);
 
     // Extract nomCausa into causesLst
-    causesLst = List<String>.from(jsonList.map((json) => json['NomCausa']));
+    //causesLst = List<String>.from(jsonList.map((json) => json['NomCausa']));
 
     return causesLst;
   } else {

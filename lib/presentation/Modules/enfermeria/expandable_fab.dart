@@ -3,11 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:oxschool/presentation/components/pdf_viewer_screen.dart';
 import 'package:oxschool/core/constants/Student.dart';
-import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/presentation/Modules/enfermeria/new_student_visit.dart';
 import 'package:oxschool/core/reusable_methods/causes_functions.dart';
-import 'package:oxschool/core/reusable_methods/employees_methods.dart';
-import 'package:oxschool/core/reusable_methods/nursery_methods.dart';
 import 'package:oxschool/core/utils/loader_indicator.dart';
 
 import 'package:pdf/pdf.dart';
@@ -217,16 +214,16 @@ class ExpandableFABNurseryState extends State<ExpandableFABNursery> {
 
 Future fetchData() async {
   causesLst = await getCauses(15);
-  painsList = await getPainList('none');
-  woundsList = await getWoundsList('none');
+  // painsList = await getPainList('none');
+  //woundsList = await getWoundsList('none');
   accidentType = await getCauses(14);
-  teachersList = await getTeacherByGradeAndGroup(
+  /* teachersList = await getTeacherByGradeAndGroup(
       selectedStudent.gradoSecuencia,
       selectedStudent.grupo,
       selectedStudent.claUn,
       currentCycle!.claCiclo!,
       currentUser!.employeeNumber!.toString(),
-      deviceIp!);
+      deviceIp!); */
 }
 
 void showFormDialog(BuildContext context) {

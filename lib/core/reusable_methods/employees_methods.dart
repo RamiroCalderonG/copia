@@ -1,7 +1,4 @@
-import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
-import 'package:oxschool/core/utils/temp_data.dart';
 import 'package:oxschool/data/Models/Employee.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
@@ -25,11 +22,11 @@ getEmployee(
 
   if (apiResultxgr.succeeded) {
     // Parse the JSON response
-    jsonList = json.decode(apiResultxgr.response!.body);
-    numberOfRecords = jsonList.length;
+    // jsonList = json.decode(apiResultxgr.response!.body);
+    //  numberOfRecords = jsonList.length;
 
     // Extract fetched data into a List<Employee>
-    if (numberOfRecords >= 1) {
+    /* if (numberOfRecords >= 1) {
       for (var jsonItem in jsonList) {
         Employee employee = Employee(
             jsonItem['employeeID'],
@@ -47,11 +44,11 @@ getEmployee(
       }
     } else {
       debugPrint('No se ecuentran registros');
-    }
+    } */
   }
 }
 
-getTeacherByGradeAndGroup(int grade, String group, String campus, String cycle,
+/* getTeacherByGradeAndGroup(int grade, String group, String campus, String cycle,
     String employeID, String deviceIP) async {
   List<dynamic> jsonList;
   List<dynamic> teacherList;
@@ -80,7 +77,7 @@ getTeacherByGradeAndGroup(int grade, String group, String campus, String cycle,
       }
     }
   }
-}
+} */
 
 //ONLY GET THE DATA FROM  getTeacherByGradeAndGroup() RESPONSE
 String? obtainEmployeeNumberbyName(List<dynamic> dataList, String targetData1) {

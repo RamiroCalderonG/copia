@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 // ignore: depend_on_referenced_packages
-import 'package:http/http.dart' as http;
 import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/core/reusable_methods/temp_data_functions.dart';
 import 'package:oxschool/core/reusable_methods/user_functions.dart';
+import 'package:oxschool/presentation/Modules/main_window/main_window_model.dart';
 import 'package:oxschool/presentation/Modules/services_ticket/processes/create_service_ticket.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
 
@@ -31,13 +31,13 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
 
   @override
   void dispose() {
-    _model.dispose();
+    // _model.dispose();
     super.dispose();
   }
 
   @override
   void initState() {
-    _model = createModel(context, () => MainWindowModel());
+    //_model = createModel(context, () => MainWindowModel());
 
     super.initState();
 
@@ -68,9 +68,7 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
               children: [
                 const Padding(padding: EdgeInsets.only(left: 10.5)),
                 Image.asset(
-                  Theme.of(context).brightness == Brightness.light
-                      ? 'assets/images/1_OS_color.png' //igth theme image
-                      : 'assets/images/logoBlancoOx.png', //Dark theme image
+                  getLogoAssetPath(context),
                   fit: BoxFit.fill,
                   height: 40,
                   filterQuality: FilterQuality.high,
@@ -88,9 +86,7 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
                 const Padding(padding: EdgeInsets.only(left: 5.5)),
                 Center(
                   child: Image.asset(
-                    Theme.of(context).brightness == Brightness.light
-                        ? 'assets/images/1_OS_color.png' //igth theme image
-                        : 'assets/images/logoBlancoOx.png', //Dark theme image
+                    getLogoAssetPath(context),
                     fit: BoxFit.fill,
                     height: 40,
                     filterQuality: FilterQuality.high,
@@ -175,14 +171,14 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
                   Uri url = Uri.parse(oxlinks[index]);
                   launchUrlDirection(url);
                 },
-                child: HoverCard(
+                child: Material3HoverCard(
+                  onTap: () {
+                    Uri url = Uri.parse(oxlinks[index]);
+                    launchUrlDirection(url);
+                  },
                   imagePath: gridMainWindowIcons[index],
-                  backgroundColor:
-                      Theme.of(context).brightness == Brightness.light
-                          ? gridMainWindowColors[index] //igth theme image
-                          : gridDarkColorsMainWindow[index], //Dark theme image
-
                   title: mainWindowGridTitles[index],
+                  index: index,
                 ),
               );
             }),
@@ -217,8 +213,10 @@ class _MobileMainWindowState extends State<MobileMainWindow> {
                 ),
                 currentAccountPicture: CircleAvatar(
                   backgroundColor: FlutterFlowTheme.of(context).accent4,
-                  child: const Image(
-                    image: AssetImage('assets/images/logoRedondoOx.png'),
+                  child: Image(
+                    image: AssetImage(
+                      getLogoAssetPath(context, useRoundLogo: true),
+                    ),
                   ),
                 ),
                 decoration: BoxDecoration(
@@ -396,13 +394,14 @@ final menuListItems = Center(
               Uri url = Uri.parse(oxlinks[index]);
               launchUrlDirection(url);
             },
-            child: HoverCard(
+            child: Material3HoverCard(
+              onTap: () {
+                Uri url = Uri.parse(oxlinks[index]);
+                launchUrlDirection(url);
+              },
               imagePath: gridMainWindowIcons[index],
-              backgroundColor: Theme.of(context).brightness == Brightness.light
-                  ? gridMainWindowColors[index] //igth theme image
-                  : gridDarkColorsMainWindow[index], //Dark theme image
-
               title: mainWindowGridTitles[index],
+              index: index,
             ),
           );
         }),

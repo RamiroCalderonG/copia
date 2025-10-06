@@ -1,16 +1,16 @@
 import 'dart:async';
-import 'dart:convert';
-
-import 'package:flutter/material.dart';
+import 'dart:math';
 
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
+import 'package:oxschool/data/Models/AcademicEvaluationsComment.dart';
+import 'package:oxschool/data/Models/Student.dart';
 
 import 'package:oxschool/data/Models/Student_eval.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/datasources/temp/studens_temp.dart';
-import '../../data/services/backend/api_requests/api_calls_list.dart';
+import '../../data/services/backend/api_requests/api_calls_list_dio.dart';
 
 import '../../data/datasources/temp/teacher_grades_temp.dart';
 
@@ -26,7 +26,7 @@ dynamic loadStartGrading(int employeeNumber, String schoolYear, bool isAdmin,
     await getTeacherGradeAndCourses(currentUser!.employeeNumber, currentCycle,
             month, isAdmin, isAcademicCoordinator, campus)
         .then((onValue) {
-      jsonList = json.decode(onValue);
+      jsonList = onValue.data;
       jsonDataForDropDownMenuClass = jsonList;
       fetchedDataFromloadStartGrading = jsonList;
       try {
@@ -49,8 +49,14 @@ dynamic loadStartGrading(int employeeNumber, String schoolYear, bool isAdmin,
   }
 }
 
-Future<dynamic> loadStartGradingAsAdminOrAcademicCoord(String schoolYear, String? campus,
-    bool initialFetch, int? subject, int? group, bool isAcademicCoord, bool isAdmin ) async {
+Future<dynamic> loadStartGradingAsAdminOrAcademicCoord(
+    String schoolYear,
+    String? campus,
+    bool initialFetch,
+    int? subject,
+    int? group,
+    bool isAcademicCoord,
+    bool isAdmin) async {
   try {
     DateTime now = DateTime.now();
     int month = now.month;
@@ -58,10 +64,10 @@ Future<dynamic> loadStartGradingAsAdminOrAcademicCoord(String schoolYear, String
     List<String> originalList = [];
     if (initialFetch) {
       //First time loading screen, to display all grades, groups, campus and assignatures to dispaly at DropdownSelector
-      await getTeacherGradeAndCoursesAsAdmin(month,
-              isAdmin, isAdmin ? null : campus, currentCycle!.claCiclo, isAcademicCoord)
+      await getTeacherGradeAndCoursesAsAdmin(month, isAdmin,
+              isAdmin ? null : campus, currentCycle!.claCiclo, isAcademicCoord)
           .then((response) {
-        jsonList = json.decode(utf8.decode(response.bodyBytes));
+        jsonList = response.data;
         jsonDataForDropDownMenuClass = jsonList;
         try {
           for (var item in jsonList) {
@@ -76,7 +82,7 @@ Future<dynamic> loadStartGradingAsAdminOrAcademicCoord(String schoolYear, String
             oneTeacherGrades = originalList.toSet().toList();
 
             Map<int, String> currentMapValue = {
-              jsonList[i]['sequence']: jsonList[i]['grade']
+              jsonList[i]['sequence']: jsonList[i]['grade'].toString().trim()
             };
 
             teacherGradesMap.addEntries(currentMapValue.entries);
@@ -134,11 +140,11 @@ Future<void> getSingleTeacherGrades(List<dynamic> apiResponse) async {
     for (var i = 0; i < apiResponse.length; i++) {
       // String grade = apiResponse[i]['Grade'];
       // int gradeSequence = apiResponse[i]['Sequence'];
-      originalList.add(apiResponse[i]['grade']);
+      originalList.add(apiResponse[i]['Grade']);
       oneTeacherGrades = originalList.toSet().toList();
 
       Map<int, String> currentMapValue = {
-        apiResponse[i]['sequence']: apiResponse[i]['grade']
+        apiResponse[i]['Sequence']: apiResponse[i]['Grade']
       };
 
       teacherGradesMap.addEntries(currentMapValue.entries);
@@ -155,7 +161,7 @@ Future<void> getSingleTeacherGroups(List<dynamic> apiResponse) async {
     for (var i = 0; i < apiResponse.length; i++) {
       // String group = apiResponse[i]['School_group'];
 
-      originalList.add(apiResponse[i]['school_group']);
+      originalList.add(apiResponse[i]['School_group']);
       oneTeacherGroups = originalList.toSet().toList();
     }
   }
@@ -170,12 +176,12 @@ Future<void> getSingleTeacherAssignatures(List<dynamic> apiResponse) async {
     for (var i = 0; i < apiResponse.length; i++) {
       // String assignature = apiResponse[i]['Subject'];
       // int assignatureID = apiResponse[i]['Subject_id'];
-      originalList.add(apiResponse[i]['subject']);
+      originalList.add(apiResponse[i]['Subject']);
 
       oneTeacherAssignatures = originalList.toSet().toList();
 
       Map<int, String> currentMapValue = {
-        apiResponse[i]['subject_id']: apiResponse[i]['subject']
+        apiResponse[i]['Subject_id']: apiResponse[i]['Subject']
       };
       assignaturesMap.addEntries(currentMapValue.entries);
     }
@@ -184,7 +190,7 @@ Future<void> getSingleTeacherAssignatures(List<dynamic> apiResponse) async {
 
 Future<List<dynamic>> getStudentsByTeacher(String selectedCycle) async {
   var response = await getStudentsByRole(selectedCycle);
-  List<dynamic> jsonList = json.decode(response);
+  dynamic jsonList = response.data;
 
   for (var item in jsonList) {
     String campus = item['Claun'];
@@ -240,11 +246,20 @@ Future<List<StudentEval>> getStudentsByAssinature(
     String gradeSelected,
     String assignature,
     String month,
-    String campus) async {
+    String campus,
+    int? teacher) async {
   try {
-    var studentsList = await getStudentsToGrade(assignature, group,
-        gradeSelected, currentCycle!.claCiclo, campus, month);
-    var jsonList = json.decode(utf8.decode(studentsList.bodyBytes));
+    var studentsList = await getStudentsToGrade(
+        assignature,
+        group,
+        gradeSelected,
+        currentCycle!.claCiclo,
+        campus,
+        month,
+        currentUser!.isCurrentUserAdmin(),
+        currentUser!.isCurrentUserAcademicCoord(),
+        teacher);
+    var jsonList = studentsList.data;
     List<StudentEval> evaluations = getEvalFromJSON(jsonList, false);
 
     return evaluations;
@@ -257,33 +272,42 @@ Future<List<StudentEval>> getStudentsByAssinature(
 }
 
 Future<List<StudentEval>> getSubjectsAndGradesByStudent(
-    int grade, String group, String cycle, String campus, int month) async {
+    int grade,
+    String group,
+    String cycle,
+    String campus,
+    int month,
+    bool isAdmin,
+    bool isAcademicCoord,
+    int? teacher) async {
   try {
-    var subjectsGradesList =
-        await getSubjectsAndGradeByStuent(group, grade, cycle, campus, month);
+    var subjectsGradesList = await getSubjectsAndGradeByStuent(
+        group, grade, cycle, campus, month, isAdmin, isAcademicCoord, teacher);
+    if (subjectsGradesList != null) {
+      List<dynamic> jsonList = subjectsGradesList.data;
+      List<StudentEval> evaluations = getEvalFromJSON(jsonList, true);
+      uniqueStudentsList.clear();
+      uniqueStudents.clear();
 
-    List<dynamic> jsonList = json.decode(utf8.decode(subjectsGradesList.bodyBytes) );
-    List<StudentEval> evaluations = getEvalFromJSON(jsonList, true);
-    uniqueStudentsList.clear();
-    uniqueStudents.clear();
+      for (var student in jsonList) {
+        uniqueStudents[student['studentID']] = student['firstlastName'] +
+            ' ' +
+            student['secondlastName'] +
+            ' ' +
+            student['student'];
+      }
 
-    for (var student in jsonList) {
-      uniqueStudents[student['studentID']] = student['student'] +
-          ' ' +
-          student['1lastName'] +
-          ' ' +
-          student['2lastName'];
-      // uniqueStudents[student['studentName']] = student['studentName'];
+      // Convert the map to a list of maps
+      uniqueStudentsList = uniqueStudents.entries
+          .map((entry) => {'studentID': entry.key, 'studentName': entry.value})
+          .toList();
+
+      // print(uniqueStudentsList);
+
+      return evaluations;
+    } else {
+      throw Exception('No data found for the given parameters.');
     }
-
-    // Convert the map to a list of maps
-    uniqueStudentsList = uniqueStudents.entries
-        .map((entry) => {'studentID': entry.key, 'studentName': entry.value})
-        .toList();
-
-    // print(uniqueStudentsList);
-
-    return evaluations;
   } catch (e) {
     if (e is TimeoutException) {
       return throw TimeoutException(e.toString());
@@ -292,64 +316,64 @@ Future<List<StudentEval>> getSubjectsAndGradesByStudent(
   }
 }
 
-Future<void> getCommentsForEvals(int grade) async {
-  List<dynamic> commentsList;
+// Future<void> getCommentsForEvals(int grade) async {
+//   List<dynamic> commentsList;
 
-  Map<String, String> currentValue = {};
+//   Map<String, String> currentValue = {};
 
-  try {
-    var response = await getStudentsGradesComments(grade, false, null, null);
-    commentsList = json.decode(response.body);
-    if (studentsGradesCommentsRows.isNotEmpty && commentStringEval.isNotEmpty) {
-      studentsGradesCommentsRows.clear();
-      commentStringEval.clear();
-    }
+//   try {
+//     var response = await getStudentsGradesComments(grade, false, null, null);
+//     commentsList = json.decode(response.body);
+//     if (studentsGradesCommentsRows.isNotEmpty && commentStringEval.isNotEmpty) {
+//       studentsGradesCommentsRows.clear();
+//       commentStringEval.clear();
+//     }
 
-    for (var item in commentsList) {
-      String id = item['Comment'].toString();
-      String comment = item['Name'];
-      commentStringEval.add(comment);
+//     for (var item in commentsList) {
+//       String id = item['Comment'].toString();
+//       String comment = item['Name'];
+//       commentStringEval.add(comment);
 
-      currentValue = {'idcomment': id.toString(), 'comentname': comment};
+//       currentValue = {'idcomment': id.toString(), 'comentname': comment};
 
-      studentsGradesCommentsRows.add(currentValue);
-    }
-  } catch (e) {
-    throw ErrorDescription(e.toString());
-  }
-}
+//       studentsGradesCommentsRows.add(currentValue);
+//     }
+//   } catch (e) {
+//     throw ErrorDescription(e.toString());
+//   }
+// }
 
-Future<List<Map<String, dynamic>>> getCommentsAsignatedToStudent(
-    int grade, bool byStudent, String? studentid, int? month) async {
-  List<Map<String, dynamic>> assignatedComments = [];
-  Map<String, dynamic> currentValue = {};
-  try {
-    var response = await getStudentsGradesComments(
-        grade, byStudent, studentid!.trim(), month);
-    var commentsResponse = json.decode(response.body);
+// Future<List<Map<String, dynamic>>> getCommentsAsignatedToStudent(
+//     int grade, bool byStudent, String? studentid, int? month) async {
+//   List<Map<String, dynamic>> assignatedComments = [];
+//   Map<String, dynamic> currentValue = {};
+//   try {
+//     var response = await getStudentsGradesComments(
+//         grade, byStudent, studentid!.trim(), month);
+//     var commentsResponse = json.decode(response.body);
 
-    for (var item in commentsResponse) {
-      int evalId = item['student_rate'];
-      int commentid = item['comment'];
-      // var month = item['month'];
-      bool active = item['active'];
-      String subject = item['subject'];
-      String commentName = item['commentName'];
-      currentValue = {
-        'student_rate': evalId,
-        'comment': commentid,
-        'active': active,
-        'subject': subject,
-        'commentName': commentName
-      };
-      assignatedComments.add(currentValue);
-    }
+//     for (var item in commentsResponse) {
+//       int evalId = item['student_rate'];
+//       int commentid = item['comment'];
+//       // var month = item['month'];
+//       bool active = item['active'];
+//       String subject = item['subject'];
+//       String commentName = item['commentName'];
+//       currentValue = {
+//         'student_rate': evalId,
+//         'comment': commentid,
+//         'active': active,
+//         'subject': subject,
+//         'commentName': commentName
+//       };
+//       assignatedComments.add(currentValue);
+//     }
 
-    return assignatedComments;
-  } catch (e) {
-    throw ErrorDescription(e.toString());
-  }
-}
+//     return assignatedComments;
+//   } catch (e) {
+//     throw ErrorDescription(e.toString());
+//   }
+// }
 
 List<Map<String, dynamic>> mergeCommentsData(
     List<Map<String, dynamic>> allItemAvailables,
@@ -389,10 +413,10 @@ void composeBodyToUpdateGradeBySTudent(
   } else {
     for (var obj in studentGradesBodyToUpgrade) {
       if (obj['student'] == studentID && obj['idEval'] == evalId) {
-        //If already exist data for selected student
+        //*If already exist data for selected student
         idExists = true;
         if (key == 'Comentarios') {
-          //Comentarios are stores diferent
+          //*Comentarios are stores diferent
           var oldValue = obj[key];
           if (oldValue == null) {
             obj[key] = value;
@@ -438,18 +462,37 @@ void composeBodyToUpdateGradeBySTudent(
   }
 }
 
-void composeUpdateStudentGradesBody(String key, dynamic value, int idEval) async {
+void composeUpdateStudentGradesBody(
+    String key, dynamic value, int idEval) async {
   bool idExists = false;
-   SharedPreferences devicePrefs = await SharedPreferences.getInstance();
-      int? idSesion = devicePrefs.getInt("idSession");
+  SharedPreferences devicePrefs = await SharedPreferences.getInstance();
+  int? idSesion = devicePrefs.getInt("idSession");
 
-
-  if (key == 'Calif') {
+  if (key == 'Calificación') {
     key = 'eval';
+  }
+  if (key == 'T' || key == 'Tareas') {
+    key = 'homework';
+  }
+  if (key == 'Con' || key == 'Conducta') {
+    key = 'behavior';
+  }
+  if (key == 'R') {
+    key = 'homework';
+  }
+  if (key == 'Comentarios') {
+    key = 'Comment';
+  }
+  if ((key == 'Faltas') || (key == 'F')) {
+    key = 'absences';
+  }
+  if ((key == 'Habits') || (key == 'H')) {
+    key = 'habits';
   }
 
   if (studentGradesBodyToUpgrade.isEmpty) {
-    studentGradesBodyToUpgrade.add({'idEval': idEval, key: value, 'idSesion' : idSesion});
+    studentGradesBodyToUpgrade
+        .add({'idEval': idEval, key: value, 'idSesion': idSesion});
   } else {
     for (var obj in studentGradesBodyToUpgrade) {
       if (obj['idEval'] == idEval) {
@@ -462,7 +505,8 @@ void composeUpdateStudentGradesBody(String key, dynamic value, int idEval) async
       }
     }
     if (!idExists) {
-      studentGradesBodyToUpgrade.add({'idEval': idEval, key: value, 'idSesion' : idSesion});
+      studentGradesBodyToUpgrade
+          .add({'idEval': idEval, key: value, 'idSesion': idSesion});
     }
   }
 }
@@ -504,7 +548,7 @@ Future<Map<String, dynamic>> populateSubjectsDropDownSelector(
     // if (subjects.statusCode != 200) {
     //   return {'error': 'Error fetching subjects'};
     // }
-    var subjectsList = json.decode(utf8.decode(subjects.body.codeUnits));
+    var subjectsList = subjects.data;
     Map<String, dynamic> result = {};
 
     for (var item in subjectsList) {
@@ -518,29 +562,88 @@ Future<Map<String, dynamic>> populateSubjectsDropDownSelector(
 }
 
 //Function that validate that value can´t be less than 50 and more than 100
-int validateNewGradeValue(int newValue, String columnNameToFind) {
-  //If value < 50 -> returns 50
+int validateNewGradeValue(
+    dynamic newValue, String columnNameToFind, String? subjectName) {
+  //If value < 50 -> returns 50, if value > 100 -> returns 100
   List<String> columnName = [
     'Calif',
     'Conducta',
-    'Uniforme',
-    'Ausencia',
+    'Habitos',
+    //'Ausencia',
     'Tareas',
+    'H'
     // 'Comentarios'
   ];
 
   bool isContained = columnName.contains(columnNameToFind);
 
+  //! If column name is one of the above, validate the value
   if (isContained) {
-    if (newValue <= 50) {
-      //Validate that value can´t be less than 50
-      newValue = 50;
+    // Convert to integer if it's a double
+    if (newValue is double) {
+      newValue = newValue.toInt();
+    }
+
+    // Convert to int if it's a string number
+    if (newValue is String) {
+      try {
+        newValue = int.parse(newValue);
+      } catch (e) {
+        // If parsing fails, return 50 as default
+        return 50;
+      }
+    }
+
+    // Ensure newValue is an integer
+    if (newValue is! int) {
+      return 50;
+    }
+
+    // Validate specific subjects for 'Calif' column
+    if (columnNameToFind == 'Calif' && subjectName != null) {
+      if ((subjectName.toUpperCase() == 'SALIDAS TEMPRANO') &&
+          ((newValue < 0) || (newValue > 50))) {
+        throw FormatException(
+            'El valor para SALIDAS TEMPRANO debe estar entre 0 y 50.');
+      } else if ((subjectName.toUpperCase() == 'BOOKS READ') &&
+          ((newValue < 0) || (newValue > 200))) {
+        throw FormatException(
+            'El valor para BOOKS READ debe estar entre 0 y 200.');
+      } else if ((subjectName.toUpperCase() == 'CUIDADO DEL MEDIO AMBIENTE') &&
+          ((newValue < 0) || (newValue > 99999))) {
+        throw FormatException(
+            'El valor para CUIDADO DEL MEDIO AMBIENTE debe estar entre 0 y 99999.');
+      } else if ((subjectName.toUpperCase() == 'P.E.T') &&
+          ((newValue < 0) || (newValue > 99999))) {
+        throw FormatException(
+            'El valor para P.E.T debe estar entre 0 y 99999.');
+      }
       return newValue;
-    } else if (newValue > 100) {
-      newValue = 100;
-      return newValue;
+    }
+
+    // For 'Calif' column, enforce stricter validation (50-100)
+    if (((subjectName == null && columnNameToFind == 'Calif')) ||
+        (subjectName == null && columnNameToFind == 'Tareas') ||
+        (subjectName == null && columnNameToFind == 'H') ||
+        (subjectName == null && columnNameToFind == 'Conducta') ||
+        (subjectName == null && columnNameToFind == 'habit_eval')) {
+      if (newValue < 50) {
+        //Validate that value can´t be less than 50
+        return 50;
+      } else if (newValue > 100) {
+        return 100;
+      } else {
+        return newValue;
+      }
     } else {
-      return newValue;
+      // For other columns, use the original logic
+      if (newValue <= 50) {
+        return 50;
+      } else if (newValue > 100) {
+        return 100;
+      } else {
+        return newValue;
+      }
     }
   } else {
     return newValue;
@@ -550,14 +653,35 @@ int validateNewGradeValue(int newValue, String columnNameToFind) {
 Future<dynamic> isDateToEvaluateStudents() async {
   try {
     var originDate = await getActualDate().catchError((error) {
-      return error;
+      return Future.error(error);
     });
-    var originResponse = jsonDecode(originDate);
+    var originResponse = originDate; //jsonDecode(originDate);
     var response = originResponse['Value'];
+    if (!response) {
+      return Future.error(
+          'No se puede acceder en este momento, intente más tarde.');
+    }
     return response;
   } catch (e) {
     insertErrorLog(e.toString(), 'FETCH DATE FOR STUDENT EVALUATION');
-    return throw Future.error(e);
+    return Future.error(e);
+  }
+}
+
+Future<dynamic> fetchEvalMonthFromBackend(bool byName) async {
+  try {
+    var response =
+        await getCurrentEvalMonthFromBackendCall(byName).catchError((error) {
+      return Future.error('Error: ${error.toString()}');
+    });
+    if (byName) {
+      return response['NOMBRE'];
+    } else {
+      return response['SECUENCIA'];
+    }
+  } catch (e) {
+    insertErrorLog(e.toString(), 'FETCH EVAL MONTH FROM BACKEND');
+    return Future.error(e);
   }
 }
 
@@ -572,21 +696,21 @@ void getTeacherEvalCampuses(List<dynamic> jsonData) {
   }
 }
 
-void searchGradesBySubjectButton(
-  String grade,
-  String group,
-  String subject,
-  String month,
-  String? campus,
-) async {
-  try {
-    studentList =
-        await getStudentsByAssinature(group, grade, subject, month, campus!);
-    await getCommentsForEvals(int.parse(grade));
-  } catch (e) {
-    throw FormatException(e.toString());
-  }
-}
+// void searchGradesBySubjectButton(
+//   String grade,
+//   String group,
+//   String subject,
+//   String month,
+//   String? campus,
+// ) async {
+//   try {
+//     studentList =
+//         await getStudentsByAssinature(group, grade, subject, month, campus!);
+//     await getCommentsForEvals(int.parse(grade));
+//   } catch (e) {
+//     throw FormatException(e.toString());
+//   }
+// }
 
 List<Map<String, dynamic>> filterCommentsBySubject(
   List<Map<String, dynamic>> comments,
@@ -602,7 +726,7 @@ List<Map<String, dynamic>> filterCommentsBySubject(
 Future<List<Map<String, dynamic>>> getGradesAndGroupsByCampus(
     String cycle) async {
   var response = await getGlobalGradesAndGroups(cycle);
-  List<dynamic> data = jsonDecode(response);
+  List<dynamic> data = response.data; //jsonDecode(response);
   List<Map<String, dynamic>> items = List<Map<String, dynamic>>.from(data);
 
   return items;
@@ -611,7 +735,7 @@ Future<List<Map<String, dynamic>>> getGradesAndGroupsByCampus(
 Future<List<String>> getStudentsListForFodac27(
     String campus, String cycle, String grade, String group) async {
   var response = await getStudentsForFodac27(grade, group, campus, cycle);
-  var data = jsonDecode(response);
+  var data = response.data; //jsonDecode(response);
 
   List<String> resultData = [];
 
@@ -623,4 +747,90 @@ Future<List<String>> getStudentsListForFodac27(
     tempStudentMap.add(itemMap);
   }
   return resultData;
+}
+
+Future<dynamic> getStudentsDisciplinaryReportsByDates(
+    String cycle, String initialDate, String finalDate) async {
+  try {
+    var response =
+        await getDisciplinaryReportsByDate(cycle, initialDate, finalDate);
+    return response;
+  } catch (e) {
+    rethrow;
+  }
+}
+
+Future<dynamic> getDisciplinaryCausesToPopulateScreen(
+    int kindOfReport, int gradeSequence) async {
+  try {
+    return await getDisciplinaryCauses(gradeSequence, kindOfReport);
+  } catch (e) {
+    rethrow;
+  }
+}
+
+Future<dynamic> createDisciplinaryReportF(Map<String, dynamic> body) async {
+  try {
+    return await createDisciplinaryReport(body);
+  } catch (e) {
+    rethrow;
+  }
+}
+
+Future<List<Student>> getSimpleStudentsByCycle(String cycle) async {
+  try {
+    var response = await getStudentsByDynamicParam("cycle", cycle);
+    List<Student> resultData = [];
+    for (var item in response) {
+      resultData.add(Student.fromJson(item));
+    }
+
+    return resultData;
+  } catch (e) {
+    insertErrorLog(e.toString(), 'getSimpleStudentsByCycle($cycle)');
+    rethrow;
+  }
+}
+
+Future<dynamic> getTeachersListByCycle(String cycle) async {
+  try {
+    var response = await getTeachersGradeGroupSubjectsByCycle(cycle);
+
+    // List<Map<String, dynamic>> data = response;
+    return response;
+  } catch (e) {
+    insertErrorLog(e.toString(), 'getTeachersListByCycle($cycle)');
+    rethrow;
+  }
+}
+
+Future<List<Academicevaluationscomment>> getEvaluationsCommentsByGradeSequence(
+    int gradeSequence) async {
+  try {
+    var response = await getStudentsGradesComments(gradeSequence);
+    List<Academicevaluationscomment> commentsList = [];
+    if ((response.isNotEmpty) || (response.length > 0)) {
+      for (var element in response) {
+        Academicevaluationscomment comment =
+            Academicevaluationscomment.fromJson(element);
+        if (commentsList.isEmpty) {
+          commentsList.add(comment);
+        } else {
+          // Check if the comment already exists in the list
+          bool exists =
+              commentsList.any((c) => c.commentId == comment.commentId);
+          if (!exists) {
+            commentsList.add(comment);
+          }
+        }
+      }
+      return commentsList;
+    } else {
+      return [];
+    }
+  } catch (e) {
+    insertErrorLog(
+        e.toString(), 'getEvaluationsCommentsByGradeSequence($gradeSequence)');
+    rethrow;
+  }
 }

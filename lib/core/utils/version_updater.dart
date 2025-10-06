@@ -1,17 +1,21 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_util.dart';
-import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
+import 'package:oxschool/data/services/backend/api_requests/api_calls_list_dio.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import 'dart:io';
 
+/*
+ * Widget that verify for latest version
+ * if a new version is found, display an update option dialog 
+ * so the user can update now or dismiss 
+ */
 class UpdateChecker {
   static Future<void> checkForUpdate(BuildContext context) async {
     try {
       final response = await getLatestAppVersion();
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        final data = response.data;
         PackageInfo packageInfo = await PackageInfo.fromPlatform();
         String currentVersion = packageInfo.version;
         String latestVersion = data["version"];
@@ -22,6 +26,29 @@ class UpdateChecker {
       }
     } catch (e) {
       print("Update check failed: $e");
+    }
+  }
+
+  static Future<void> manuallyUpdate(BuildContext context) async {
+    try {
+      final response = await getLatestAppVersion();
+      if (response.statusCode == 200) {
+        final data = response.data;
+        PackageInfo packageInfo = await PackageInfo.fromPlatform();
+        String currentVersion = packageInfo.version;
+        String latestVersion = data["version"];
+        context.goNamed(
+          'UpdaterScreen',
+          extra: <String, dynamic>{
+            kTransitionInfoKey: const TransitionInfo(
+              hasTransition: true,
+              transitionType: PageTransitionType.fade,
+            ),
+          },
+        );
+      }
+    } catch (e) {
+      print("Manual update check failed: $e");
     }
   }
 
@@ -38,31 +65,34 @@ class UpdateChecker {
         context: context,
         barrierDismissible: false,
         builder: (context) => AlertDialog(
-                title: Text("Actualización disponible! 🚀"),
-                content:  
-                    Text("Una nueva versión se encuentra disponible, desea actualizar ahora?"),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text("Posponer"),
-                  ),
-                  TextButton(
-                    onPressed: () async {
-                      context.goNamed('UpdaterScreen', extra: <String, dynamic>{
-                      kTransitionInfoKey: const TransitionInfo(
-                        hasTransition: true,
-                        transitionType: PageTransitionType.fade,
-                      ),
-                    },); 
-                    },
-                    child: Text("Actualizar"),
-                  ),
-                ],
-              ));
+              title: Text("Actualización disponible! 🚀"),
+              content: Text(
+                  "Una nueva versión se encuentra disponible, desea actualizar ahora?"),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text("Posponer"),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    context.goNamed(
+                      'UpdaterScreen',
+                      extra: <String, dynamic>{
+                        kTransitionInfoKey: const TransitionInfo(
+                          hasTransition: true,
+                          transitionType: PageTransitionType.fade,
+                        ),
+                      },
+                    );
+                  },
+                  child: Text("Actualizar"),
+                ),
+              ],
+            ));
   }
 }
 
-    String get platformExt {
+String get platformExt {
   switch (Platform.operatingSystem) {
     case 'windows':
       {

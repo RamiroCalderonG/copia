@@ -1,5 +1,6 @@
+import 'package:oxschool/data/Models/AcademicEvaluationsComment.dart';
 import 'package:oxschool/data/Models/Student_eval.dart';
-import 'package:pluto_grid/pluto_grid.dart';
+import 'package:trina_grid/trina_grid.dart';
 
 List<String> oneTeacherGrades = [];
 List<String> oneTeacherGroups = [];
@@ -13,17 +14,17 @@ Map<int, String> teacherGradesMap =
     {}; //Stores teacher employeeNo, cycle, campus, grade, group, subject_id, subject_name, gradeseq
 
 List<StudentEval> studentList = [];
-List<PlutoRow> assignatureRows = [];
-List<PlutoRow> studentEvaluationRows = []; //used at grades_per_student.dart
-List<PlutoRow> selectedStudentRows = []; //used at grades_per_student.dart
+List<TrinaRow> assignatureRows = [];
+List<TrinaRow> studentEvaluationRows = []; //used at grades_per_student.dart
+List<TrinaRow> selectedStudentRows = []; //used at grades_per_student.dart
 
 List<Map<String, dynamic>> studentGradesBodyToUpgrade =
     []; //user at grades_by_assignature.dart
 List<Map<String, dynamic>> gradesByStudentBodyToUpgrade =
     []; //used at grades_per_student.dart
-List<Map<String, String>> studentsGradesCommentsRows = [];
+List<Academicevaluationscomment> studentsGradesCommentsRows = [];
 List<Map<String, dynamic>> commentsAsignated = [];
-List<PlutoRow> evaluationComments = [];
+List<TrinaRow> evaluationComments = [];
 
 // Set<Map<String, String>> uniqueStudents = {};
 Map<String, String> uniqueStudents = {};
@@ -38,7 +39,7 @@ String? selectedUnity;
 List<String> commentStringEval = [];
 List<dynamic> commentsIntEval = [];
 List<Map<String, dynamic>> mergedData = [];
-List<PlutoRow> commentsAsignatedList = [];
+List<TrinaRow> commentsAsignatedList = [];
 List<dynamic> simplifiedStudentsList = []; //used at fo_dac_27.dart
 List<dynamic> fetchedDataFromloadStartGrading = [];
 List<String> teacherCampusListFODAC27 = [];
@@ -46,4 +47,4 @@ List<String> teacherGradesListFODAC27 = [];
 List<String> teacherGroupsListFODAC27 = [];
 List<String> teacherGradeNamesListFODAC27 = [];
 Map<String, int> gradesMapFODAC27 =
-    {}; //Stores gradeName : gradeSequence from teacher 
+    {}; //Stores gradeName : gradeSequence from teacher

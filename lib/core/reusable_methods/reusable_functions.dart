@@ -1,19 +1,17 @@
-import 'dart:convert';
-
 import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
-import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
+import 'package:oxschool/data/services/backend/api_requests/api_calls_list_dio.dart';
 import 'package:oxschool/data/datasources/temp/users_temp_data.dart';
 
 Future<dynamic> getAllCampuse() async {
-  await getCampuseList().then((response){
-    var campusList = jsonDecode(response);
-     for (var item in campusList) {
-    String name = item['campusName'].toString().trim().toCapitalized;
-    campuseList.add(name); //.add(name);
-  }
-  return campuseList;
-  }).onError((error, stackTrace){ 
+  await getCampuseList().then((response) {
+    var campusList = response.data; //jsonDecode(response);
+    for (var item in campusList) {
+      String name = item['campusName'].toString().trim().toCapitalized;
+      campuseList.add(name); //.add(name);
+    }
+    return campuseList;
+  }).onError((error, stackTrace) {
     insertErrorLog(error.toString(), 'getAllCampuse() | ');
     return Future.error(error.toString());
   });
@@ -23,7 +21,7 @@ Future<dynamic> getWorkDepartmentList() async {
   try {
     areaList.clear();
     await getWorkDepartments().then((response) {
-      var jsonList = jsonDecode(response);
+      var jsonList = response.data; //jsonDecode(response.body);
       for (var item in jsonList) {
         areaList.add(item['bureauName'].toString().trim().toTitleCase);
       }
@@ -37,7 +35,7 @@ Future<dynamic> getWorkDepartmentList() async {
   }
 }
 
-int? getKeyFromValue(Map<int, String> map, String value) {
+int? getKeyFromValue(Map<int, String> map, var value) {
   return map.entries
       .firstWhere((entry) => entry.value == value,
           orElse: () => const MapEntry(-1, ''))
@@ -46,7 +44,7 @@ int? getKeyFromValue(Map<int, String> map, String value) {
 
 dynamic getValueFromKey(Map<int, String> map, dynamic key) {
   return map.entries
-      .firstWhere((element) => element.key == key,
+      .firstWhere((element) => element.value == key,
           orElse: () => const MapEntry(-1, ''))
       .value;
 }

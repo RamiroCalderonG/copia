@@ -2,13 +2,19 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:oxschool/core/utils/update_installer.dart';
-import 'package:oxschool/presentation/Modules/academic/fo_dac_27.dart';
-import 'package:oxschool/presentation/Modules/academic/grades_main_screen.dart';
-import 'package:oxschool/presentation/Modules/academic/grades_modules_configuration.dart';
+import 'package:oxschool/presentation/Modules/academic/academic_awards/academic_awards_main.dart';
+import 'package:oxschool/presentation/Modules/academic/academic_reports/fodac_59_screen.dart';
+import 'package:oxschool/presentation/Modules/academic/academic_reports/poor_performance.dart';
+import 'package:oxschool/presentation/Modules/academic/academic_reports/reports_screen.dart';
+import 'package:oxschool/presentation/Modules/academic/discipline/discipline_screen.dart';
+import 'package:oxschool/presentation/Modules/academic/school%20grades/fo_dac_27.dart';
+import 'package:oxschool/presentation/Modules/academic/school%20grades/grades_main_screen.dart';
+import 'package:oxschool/presentation/Modules/academic/school%20grades/grades_modules_configuration.dart';
+import 'package:oxschool/presentation/Modules/admin/create_notification.dart';
 import 'package:oxschool/presentation/Modules/enfermeria/nursery_main_screen.dart';
 import 'package:oxschool/presentation/Modules/services_ticket/processes/services_main_screen.dart';
-import 'package:oxschool/presentation/components/pdf_viewer_screen.dart';
 import 'package:oxschool/presentation/Modules/main_window/mobile_main_window_widget.dart';
+import 'package:oxschool/presentation/Modules/user/user_attendance_screen.dart';
 import 'package:oxschool/presentation/Modules/user/user_view_screen.dart';
 
 import '../../../../presentation/Modules/admin/users_main_screen.dart';
@@ -45,11 +51,11 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           path: '/',
           builder: (context, _) => const LoginViewWidget(),
         ),
-        FFRoute(
-          name: 'LoginView',
-          path: '/loginView',
-          builder: (context, params) => const LoginViewWidget(),
-        ),
+        // FFRoute(
+        //   name: 'LoginView',
+        //   path: '/loginView',
+        //   builder: (context, params) => const LoginViewWidget(),
+        // ),
         FFRoute(
           name: 'MainWindow',
           path: '/mainWindow',
@@ -80,18 +86,53 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
             name: 'GradesViewScreen()',
             path: '/academic',
             builder: (context, params) => const GradesMainScreen()),
-            FFRoute(
+        FFRoute(
             name: 'ServicesTicketHistory()',
             path: '/services',
             builder: (context, params) => const ServicesTicketHistory()),
-            FFRoute(
+        FFRoute(
             name: 'GradesModuleConfiguration()',
             path: '/academicConfig',
             builder: (context, params) => const GradesModuleConfiguration()),
-            FFRoute(
-            name: 'UpdaterScreen', 
-            path: '/updater', 
+        FFRoute(
+            name: 'DisciplineScreen()',
+            path: '/discipline',
+            builder: (context, params) => const DisciplineScreen()),
+        FFRoute(
+            name: 'AcademicReportMainScreen()',
+            path: '/academicReports',
+            builder: (context, params) => ReportSelectionScreen()),
+        FFRoute(
+            name: 'PoorPerformance()',
+            path: '/poorAcademicPerformance',
+            builder: (context, params) => const PoorPerformance()),
+        FFRoute(
+            name: 'AcademicAwards()',
+            path: '/academicAwards',
+            builder: (context, params) => const AcademicAwards()),
+        FFRoute(
+            name: 'UpdaterScreen',
+            path: '/updater',
             builder: (context, params) => const UpdateInstaller()),
+        FFRoute(
+            name: 'Fodac59',
+            path: '/fodac59',
+            builder: (context, params) => const Fodac59Screen()),
+        FFRoute(
+          name: 'UserAttendanceHistoryScreen',
+          path: '/userAttendanceHistory',
+          builder: (context, params) => const UserAttendanceHistoryScreen(),
+        ),
+        FFRoute(
+          name: 'EmployeePerformanceEvaluationDashboard()',
+          path: '/performanceEvaluation',
+          builder: (context, params) =>
+              const EmployeePerformanceEvaluationDashboard(),
+        ),
+        FFRoute(
+            name: 'CreateNotificationScreen()',
+            path: '/createNotification',
+            builder: (context, params) => const CreateNotificationScreen())
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
     );
 

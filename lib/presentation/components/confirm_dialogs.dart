@@ -2,27 +2,56 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
 import 'package:oxschool/core/utils/loader_indicator.dart';
 
 void showEmptyFieldAlertDialog(BuildContext context, String contentText) {
+  final theme = Theme.of(context);
+  final colorScheme = theme.colorScheme;
+
   showDialog(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: const Text('Campo vacio'),
-        icon: const Icon(
-          Icons.warning,
-          color: Colors.amber,
+        icon: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: colorScheme.errorContainer,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Icon(
+            Icons.warning_rounded,
+            color: colorScheme.onErrorContainer,
+            size: 24,
+          ),
         ),
-        content: Text(contentText
-            // 'Por favor ingrese un valor que sea válido.'
-            ),
+        title: Text(
+          'Campo vacío',
+          style: theme.textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: colorScheme.onSurface,
+          ),
+        ),
+        content: Text(
+          contentText,
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+          ),
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
         actions: [
-          TextButton(
+          FilledButton(
             onPressed: () {
               Navigator.of(context).pop();
             },
+            style: FilledButton.styleFrom(
+              backgroundColor: colorScheme.primary,
+              foregroundColor: colorScheme.onPrimary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
             child: const Text('OK'),
           ),
         ],
@@ -36,52 +65,137 @@ Future<int> showConfirmationDialog(
     BuildContext context,
     String titleText,
     String contentText) async {
+  final theme = Theme.of(context);
+  final colorScheme = theme.colorScheme;
+
   Completer<int> completer = Completer<int>();
   showDialog(
     barrierDismissible: false,
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        icon: const Icon(
-          Icons.warning,
-          color: Colors.amber,
+        icon: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: colorScheme.secondaryContainer,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Icon(
+            Icons.help_outline_rounded,
+            color: colorScheme.onSecondaryContainer,
+            size: 24,
+          ),
         ),
-        title: Text(titleText, style: const TextStyle(fontFamily: 'Sora')),
-        content: Text(contentText),
+        title: Text(
+          titleText,
+          style: theme.textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: colorScheme.onSurface,
+          ),
+        ),
+        content: Text(
+          contentText,
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+          ),
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
         actions: [
-          TextButton(
-            style: ButtonStyle(
-                backgroundColor: WidgetStatePropertyAll(
-                    FlutterFlowTheme.of(context)
-                        .tertiary //Color.fromARGB(255, 203, 242, 173)
-                    )),
+          OutlinedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              completer.complete(0); // User selected 'No'
+            },
+            style: OutlinedButton.styleFrom(
+              foregroundColor: colorScheme.onSurface,
+              side: BorderSide(color: colorScheme.outline),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: const Text('Cancelar'),
+          ),
+          const SizedBox(width: 8),
+          FilledButton(
             onPressed: () {
               Navigator.of(context).pop();
               completer.complete(1); // User selected 'Yes'
             },
-            child: Text('Confirmar',
-                style: FlutterFlowTheme.of(context).labelLarge.override(
-                      fontFamily: 'Roboto',
-                      color: FlutterFlowTheme.of(context).primaryText,
-                      fontWeight: FontWeight.w500,
-                    )),
+            style: FilledButton.styleFrom(
+              backgroundColor: colorScheme.primary,
+              foregroundColor: colorScheme.onPrimary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: const Text('Confirmar'),
           ),
-          TextButton(
-              style: ButtonStyle(
-                  backgroundColor: WidgetStatePropertyAll(
-                      FlutterFlowTheme.of(context)
-                          .accent1 //Color.fromARGB(216, 250, 157, 157)
-                      )),
-              onPressed: () {
-                Navigator.of(context).pop();
-                completer.complete(0); // User selected 'No'
-              },
-              child: Text('Cancelar',
-                  style: FlutterFlowTheme.of(context).labelLarge.override(
-                        fontFamily: 'Roboto',
-                        color: FlutterFlowTheme.of(context).primaryText,
-                        fontWeight: FontWeight.w500,
-                      )))
+        ],
+      );
+    },
+  );
+  return completer.future;
+}
+
+Future<int> showSuccessWithConfirmationDialog(
+    //Display a confirmation dialog that will wait for the user to click ok to close and continue with the app
+    BuildContext context,
+    String titleText,
+    String contentText) async {
+  final theme = Theme.of(context);
+  final colorScheme = theme.colorScheme;
+
+  Completer<int> completer = Completer<int>();
+  showDialog(
+    barrierDismissible: false,
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        icon: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: colorScheme.primaryContainer,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Icon(
+            Icons.check_circle_outline_rounded,
+            color: colorScheme.onPrimaryContainer,
+            size: 24,
+          ),
+        ),
+        title: Text(
+          titleText,
+          style: theme.textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: colorScheme.onSurface,
+          ),
+        ),
+        content: Text(
+          contentText,
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+          ),
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        actions: [
+          FilledButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              completer.complete(1); // User selected 'Yes'
+            },
+            style: FilledButton.styleFrom(
+              backgroundColor: colorScheme.primary,
+              foregroundColor: colorScheme.onPrimary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: const Text('Confirmar'),
+          ),
         ],
       );
     },
@@ -91,47 +205,111 @@ Future<int> showConfirmationDialog(
 
 //To display error from backend
 void showErrorFromBackend(BuildContext context, String errorMessage) {
+  final theme = Theme.of(context);
+  final colorScheme = theme.colorScheme;
+
   showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Error'),
-          icon: const Icon(Icons.error, color: Colors.red),
-          content: Text(errorMessage),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Ok'),
-            )
-          ],
-        );
-      });
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        icon: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: colorScheme.errorContainer,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Icon(
+            Icons.error_outline_rounded,
+            color: colorScheme.onErrorContainer,
+            size: 24,
+          ),
+        ),
+        title: Text(
+          'Error',
+          style: theme.textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: colorScheme.onSurface,
+          ),
+        ),
+        content: Text(
+          errorMessage,
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+          ),
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        actions: [
+          FilledButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            style: FilledButton.styleFrom(
+              backgroundColor: colorScheme.error,
+              foregroundColor: colorScheme.onError,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: const Text('Ok'),
+          ),
+        ],
+      );
+    },
+  );
 }
 
 void showSuccessDialog(
     BuildContext context, String header, String bodyMessage) {
+  final theme = Theme.of(context);
+  final colorScheme = theme.colorScheme;
+
   showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(header),
-          content: Text(bodyMessage),
-          icon: const Icon(
-            Icons.check,
-            color: Colors.green,
+          icon: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: colorScheme.primaryContainer,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(
+              Icons.check_circle_outline_rounded,
+              color: colorScheme.onPrimaryContainer,
+              size: 24,
+            ),
+          ),
+          title: Text(
+            header,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: colorScheme.onSurface,
+            ),
+          ),
+          content: Text(
+            bodyMessage,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
           ),
           actions: [
-            TextButton(
+            FilledButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Cerrar',
-                  style: TextStyle(
-                    fontFamily: 'Sora',
-                    // backgroundColor: Colors.blue[50],
-                  )),
+              style: FilledButton.styleFrom(
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text('Cerrar'),
             )
           ],
         );
@@ -141,76 +319,175 @@ void showSuccessDialog(
 //To display information
 void showInformationDialog(
     BuildContext context, String header, String bodyMessage) {
+  final theme = Theme.of(context);
+  final colorScheme = theme.colorScheme;
+
   showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(header),
-          content: Text(bodyMessage),
-          icon: const Icon(
-            Icons.info_rounded,
-            color: Colors.amber,
+          icon: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(
+              Icons.info_outline_rounded,
+              color: colorScheme.primary,
+              size: 24,
+            ),
+          ),
+          title: Text(
+            header,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: colorScheme.onSurface,
+            ),
+          ),
+          content: Text(
+            bodyMessage,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
           ),
           actions: [
-            TextButton(
+            FilledButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Cerrar',
-                  style: TextStyle(
-                    fontFamily: 'Sora',
-                    // backgroundColor: Colors.blue[50],
-                  )),
+              style: FilledButton.styleFrom(
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text('Cerrar'),
             )
           ],
         );
       });
 }
 
+//To display loading indicator
+void showIsLoadingAlertDialog(BuildContext context) {
+  final theme = Theme.of(context);
+  final colorScheme = theme.colorScheme;
+
+  showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          icon: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(
+              Icons.hourglass_empty_rounded,
+              color: colorScheme.primary,
+              size: 24,
+            ),
+          ),
+          title: Text(
+            'Por favor espere',
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: colorScheme.onSurface,
+            ),
+          ),
+          content: Center(
+            child: CustomLoadingIndicator(),
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          actions: [
+            // TextButton(
+            //   onPressed: () {
+            //     Navigator.of(context).pop();
+            //   },
+            //   child: Text('Cerrar',
+            //       style: TextStyle(
+            //         fontFamily: 'Sora',
+            //         // backgroundColor: Colors.blue[50],
+            //       )),
+            // )
+          ],
+        );
+      });
+}
+
 Future<int> showDeleteConfirmationAlertDialog(BuildContext context) async {
+  final theme = Theme.of(context);
+  final colorScheme = theme.colorScheme;
+
   Completer<int> completer = Completer<int>();
   showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text(
-            "Eliminar",
-            style: TextStyle(fontFamily: 'Sora'),
+          icon: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: colorScheme.errorContainer,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(
+              Icons.delete_outline_rounded,
+              color: colorScheme.onErrorContainer,
+              size: 24,
+            ),
           ),
-          content: const Text("¿Está seguro de eliminar este elemento?",
-              style: TextStyle(fontFamily: 'Sora')),
+          title: Text(
+            "Eliminar",
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: colorScheme.onSurface,
+            ),
+          ),
+          content: Text(
+            "¿Está seguro de eliminar este elemento?",
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           actions: [
-            TextButton(
+            OutlinedButton(
               onPressed: () {
                 Navigator.of(context).pop();
                 completer.complete(0); // User selected 'No'
               },
-              style: ButtonStyle(
-                  backgroundColor: WidgetStateProperty.all<Color>(Colors.red)),
-              child: Text(
-                'No',
-                style: FlutterFlowTheme.of(context).labelLarge.override(
-                      fontFamily: 'Roboto',
-                      color: const Color(0xFF130C0D),
-                      fontWeight: FontWeight.w500,
-                    ),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: colorScheme.onSurface,
+                side: BorderSide(color: colorScheme.outline),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
+              child: const Text('No'),
             ),
-            TextButton(
+            FilledButton(
               onPressed: () {
                 Navigator.of(context).pop();
                 completer.complete(1); // User selected 'Yes'
               },
-              style: ButtonStyle(
-                backgroundColor:
-                    WidgetStateProperty.all<Color>(Colors.greenAccent),
+              style: FilledButton.styleFrom(
+                backgroundColor: colorScheme.error,
+                foregroundColor: colorScheme.onError,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
-              child: Text('Si',
-                  style: FlutterFlowTheme.of(context).labelLarge.override(
-                        fontFamily: 'Roboto',
-                        color: const Color(0xFF130C0D),
-                        fontWeight: FontWeight.w500,
-                      )),
+              child: const Text('Sí'),
             ),
           ],
         );

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:oxschool/presentation/Modules/academic/grades_modules_configuration.dart';
+import 'package:oxschool/presentation/Modules/academic/school%20grades/grades_modules_configuration.dart';
+import 'package:oxschool/presentation/Modules/admin/create_notification.dart';
+import 'package:oxschool/presentation/Modules/admin/employee_performance_eval.dart';
 import 'package:oxschool/presentation/Modules/admin/users_main_screen.dart';
 
 import '../../presentation/Modules/enfermeria/nursery_main_screen.dart';
 import '../../presentation/Modules/enfermeria/students_with_illness.dart';
-import '../../presentation/Modules/academic/grades_main_screen.dart';
+import '../../presentation/Modules/academic/school grades/grades_main_screen.dart';
 import '../../presentation/Modules/services_ticket/processes/services_main_screen.dart';
 import '../../presentation/Modules/login_view/login_view_widget.dart';
 import '../../presentation/Modules/main_window/main_window_widget.dart';
@@ -18,38 +20,40 @@ const Map<String, dynamic> pageRoutes = {
   'Procesos': ServicesTicketHistory(),
   'Dashboard': UsersMainScreen(),
   'Alumnos con padecimientos': StudentsIlness(),
-  'Configuracion Academica': GradesModuleConfiguration()
+  'Configuracion Academica': GradesModuleConfiguration(),
+  'Evaluación de desempeño': EmployeePerformanceEvaluationDashboard(),
+  'Notificaciones': CreateNotificationScreen()
 };
 
 const mobilePages = [
   //Main
   MobileMainWindow(),
 ];
- List<Map<String, dynamic>> accessRoutes = [];
-
+List<Map<String, dynamic>> accessRoutes = [];
 
 const Map<String, String> modulesMapped = {
   '': "FichaDeSalud()",
   "Procesos": "ServicesTicketHistory()",
   "Calificaciones": "GradesViewScreen()",
-  "Administracion": "UsersDashboard()"
+  "Administración": "UsersDashboard()"
 };
 
 const Map<String, Icon> moduleIcons = {
-  'Enfermeria': Icon(
+  'Enfermería': Icon(
     Icons.local_hospital,
   ),
-  'Academico': Icon(Icons.school_rounded),
+  'Académico': Icon(Icons.school_rounded),
   'Servicios': Icon(Icons.density_small),
-  'Nominas': Icon(Icons.groups),
-  'Contraloria': Icon(Icons.payments),
+  'Nóminas': Icon(Icons.groups),
+  'Contraloría': Icon(Icons.payments),
   'Archivo Escolar': Icon(Icons.folder),
-  'Administracion': Icon(Icons.admin_panel_settings)
+  'Administración': Icon(Icons.admin_panel_settings),
+  'Cafetería': Icon(Icons.fastfood_sharp)
 };
 
-const Map<String, Icon> eventsIcons = {
-  'Ficha Medica de alumnos': Icon(Icons.medical_services_rounded),
-  'Alumnos con padecimiento': Icon(Icons.accessible_outlined),
-  'Calificaciones': Icon(Icons.grade),
-  'Dashboard': Icon(Icons.dashboard)
-};
+// const Map<String, Icon> eventsIcons = {
+//   'Ficha Medica de alumnos': Icon(Icons.medical_services_rounded),
+//   'Alumnos con padecimiento': Icon(Icons.accessible_outlined),
+//   'Calificaciones': Icon(Icons.grade),
+//   'Dashboard': Icon(Icons.dashboard)
+// };

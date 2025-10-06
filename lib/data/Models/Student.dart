@@ -21,6 +21,16 @@ class Student {
         'grado': grado,
         'gradoSecuencia': gradoSecuencia
       };
+
+  Student.fromJson(Map<dynamic, dynamic> json)
+      : matricula = json['studentId'] ?? '',
+        claFamilia = json['claFamilia'],
+        nombre = json['name'],
+        claUn = json['campus'],
+        grupo = json['group'],
+        grado = json['gradeName'],
+        gradoSecuencia = json['gradeSequence'];
+
   void clear() {
     matricula = null;
     claFamilia = null;

@@ -1,20 +1,18 @@
-import 'dart:convert';
 
-import 'package:oxschool/core/extensions/capitalize_strings.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/data/Models/ServiceTicketRequest.dart';
 import 'package:oxschool/data/datasources/temp/services_temp.dart';
-import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
-import 'package:pluto_grid/pluto_grid.dart';
+import 'package:oxschool/data/services/backend/api_requests/api_calls_list_dio.dart';
+import 'package:trina_grid/trina_grid.dart';
 
-Future<List<PlutoRow>> getServiceTicketsByDate(
+Future<List<TrinaRow>> getServiceTicketsByDate(
     String fromDate, int statusValue, int byWho) async {
-  List<PlutoRow> newRows = [];
+  List<TrinaRow> newRows = [];
   try {
     final response = await getAllServiceTickets(fromDate, statusValue, byWho);
     if (response.statusCode == 200) {
-      servicesTicketsDecodedResponse =
-          json.decode(utf8.decode(response.bodyBytes));
+      servicesTicketsDecodedResponse = response.data;
+      //json.decode(utf8.decode(response.bodyBytes));
 
       /* newRows = servicesTicketsDecodedResponse.map((item) {
         // Calculate if the service is still on time or overdue
@@ -35,31 +33,31 @@ Future<List<PlutoRow>> getServiceTicketsByDate(
           isRequesttedDateOnTime = false;
         }
 
-        return PlutoRow(cells: {
-          'id': PlutoCell(value: item['idReqServ']),
-          'reportedBy': PlutoCell(
+        return TrinaRow(cells: {
+          'id': TrinaCell(value: item['idReqServ']),
+          'reportedBy': TrinaCell(
               value: item['reportedBy'].toString().trim().toTitleCase),
-          'departmentWhoRequest': PlutoCell(
+          'departmentWhoRequest': TrinaCell(
               value: item['requestFromDept'].toString().trim().toTitleCase),
-          'capturedBy': PlutoCell(
+          'capturedBy': TrinaCell(
               value: item['capturedBy'].toString().trim().toTitleCase),
-          'depRequestIsMadeTo': PlutoCell(
+          'depRequestIsMadeTo': TrinaCell(
               value: item['requestToDept'].toString().trim().toTitleCase),
-          'assignedTo': PlutoCell(
+          'assignedTo': TrinaCell(
               value: item['assignedTo'].toString().trim().toTitleCase),
           'campus':
-              PlutoCell(value: item['campus'].toString().trim().toTitleCase),
-          'requestCreationDate': PlutoCell(value: item['serviceCreationDate']),
-          'requesDate': PlutoCell(value: item['serviceRequestDate']),
-          'deadline': PlutoCell(value: item['deadLine']),
-          'closureDate': PlutoCell(value: item['closureDate']),
+              TrinaCell(value: item['campus'].toString().trim().toTitleCase),
+          'requestCreationDate': TrinaCell(value: item['serviceCreationDate']),
+          'requesDate': TrinaCell(value: item['serviceRequestDate']),
+          'deadline': TrinaCell(value: item['deadLine']),
+          'closureDate': TrinaCell(value: item['closureDate']),
           'description':
-              PlutoCell(value: item['description'].toString().trim()),
+              TrinaCell(value: item['description'].toString().trim()),
           'observations':
-              PlutoCell(value: item['observations'].toString().trim()),
-          'status': PlutoCell(value: item['status']),
-          'deadLineOnTime': PlutoCell(value: isDeadLineOnTime),
-          'requesttedDateOnTime': PlutoCell(value: isRequesttedDateOnTime),
+              TrinaCell(value: item['observations'].toString().trim()),
+          'status': TrinaCell(value: item['status']),
+          'deadLineOnTime': TrinaCell(value: isDeadLineOnTime),
+          'requesttedDateOnTime': TrinaCell(value: isRequesttedDateOnTime),
         });
       }).toList(); */
 
@@ -122,14 +120,12 @@ void refreshTicketsCuantity() {
       }
     }
 
-    if (item.serviceRequestDate != null) {
-      DateTime requesttedDate = item.serviceRequestDate!;
-      if (today.isAfter(requesttedDate) && item.status != 3) {
-        //If the service is overdue
-        overdue++;
-        overdueTickets.add(item);
-      }
-    } else {}
+    DateTime requesttedDate = item.serviceRequestDate;
+    if (today.isAfter(requesttedDate) && item.status != 3) {
+      //If the service is overdue
+      overdue++;
+      overdueTickets.add(item);
+    }
     //Count items by status
     if (item.status == 0) {
       unassigned++;
@@ -152,7 +148,8 @@ Future<List<Map<String, dynamic>>> getRequestTicketHistory(int ticketId) async {
     var response = await getRequestticketHistory(ticketId);
     if (response.statusCode == 200) {
       List<Map<String, dynamic>> history = [];
-      var decodedResponse = json.decode(utf8.decode(response.bodyBytes));
+      var decodedResponse =
+          response.data; //json.decode(utf8.decode(response.bodyBytes));
       for (var item in decodedResponse) {
         history.add(item);
       }
@@ -171,7 +168,7 @@ Future<dynamic> getUsersList(int filter, String dept) async {
     var response = await getUsersForTicket(filter, dept);
     if (response.statusCode == 200) {
       List<Map<String, dynamic>> usersList = [];
-      var decodedResponse = json.decode(utf8.decode(response.bodyBytes));
+      var decodedResponse = response.data;
       for (var item in decodedResponse) {
         usersList.add(item);
       }
@@ -190,7 +187,7 @@ Future<dynamic> getDepartments() async {
     var response = await getWorkDepartments();
     if (response.statusCode == 200) {
       Map<int, dynamic> deptsMap = {};
-      var decoded = json.decode(utf8.decode(response.bodyBytes));
+      var decoded = response.data;
       for (var element in decoded) {
         deptsMap.addAll({element['id']: element['bureauName']});
       }
@@ -207,7 +204,7 @@ Future<dynamic> getDepartments() async {
 Future<dynamic> createRequestTicket(Map<String, dynamic> body) async {
   try {
     var response = await createNewTicketServices(body);
-    return json.decode(utf8.decode(response.bodyBytes));
+    return response.data;
   } catch (e) {
     insertErrorLog(e.toString(), 'createRequestTicket');
     throw e.toString();
@@ -218,7 +215,7 @@ Future<dynamic> updateRequestTicket(
     Map<String, dynamic> contents, int flag) async {
   try {
     var response = await updateSupportTicket(contents, flag);
-    return json.decode(utf8.decode(response.bodybytes));
+    return response.data;
   } catch (e) {
     insertErrorLog(e.toString(), 'updateRequestTicket');
     return e;

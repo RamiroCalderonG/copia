@@ -1,29 +1,22 @@
 // ignore_for_file: prefer_typing_uninitialized_variables
 
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
 
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:oxschool/core/reusable_methods/device_functions.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/data/Models/Role.dart';
 import 'package:oxschool/data/Models/User.dart';
-import 'package:oxschool/presentation/Modules/enfermeria/no_data_avalibre.dart';
 import 'package:oxschool/presentation/Modules/user/create_user.dart';
 import 'package:oxschool/presentation/Modules/user/roles_screen.dart';
 import 'package:oxschool/presentation/Modules/admin/users_table_view.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/reusable_methods/reusable_functions.dart';
 import 'package:oxschool/data/datasources/temp/users_temp_data.dart';
-import 'package:oxschool/core/utils/loader_indicator.dart';
 import 'package:oxschool/presentation/components/confirm_dialogs.dart';
-import 'package:oxschool/presentation/components/custom_icon_button.dart';
-import 'package:oxschool/presentation/components/mobile_FloatingActionButton.dart';
 
-import '../../../data/services/backend/api_requests/api_calls_list.dart';
-import '../../../core/config/flutter_flow/flutter_flow_theme.dart';
+import '../../../data/services/backend/api_requests/api_calls_list_dio.dart';
 import '../../../core/reusable_methods/temp_data_functions.dart';
 import '../../../core/reusable_methods/user_functions.dart';
 
@@ -61,9 +54,9 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
     try {
       await getUsers().then((response) {
         if (response != null) {
-          List<dynamic> jsonList = json.decode(response);
+          List<dynamic> jsonList = response.data; //json.decode(response);
           setState(() {
-            usersPlutoRowList = userRows;
+            usersTrinaRowList = userRows;
             for (var item in jsonList) {
               User newUser = User.usersSimplifiedList(item);
               listOfUsersForGrid.add(newUser);
@@ -114,254 +107,308 @@ class _UsersMainScreenState extends State<UsersMainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    AppBar mobileAppBar = AppBar(
-        automaticallyImplyLeading: false,
-        flexibleSpace: Expanded(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Flexible(
-                child: Column(
-                  children: [
-                    IconButton(
-                        tooltip: 'Administrar roles de usuarios',
-                        padding: const EdgeInsets.all(3),
-                        color: const Color.fromARGB(255, 255, 255, 255),
-                        style: ButtonStyle(
-                            backgroundColor:
-                                WidgetStatePropertyAll(Colors.lightBlue)),
-                        onPressed: () {
-                          try {
-                            getEventsTempList().whenComplete(() async {
-                              await getRolesTempList().whenComplete(() {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            const RolesAndProfilesScreen()));
-                              });
-                            });
-                          } catch (e) {
-                            setState(() {
-                              isLoading = false;
-                            });
-                            insertErrorLog(e.toString(), 'UsersMainScreen()');
-                            showErrorFromBackend(context, e.toString());
-                          }
-                        },
-                        icon: const Icon(Icons.verified_user)),
-                    Text('Administrar roles')
-                  ],
-                ),
-              ),
-              // const SizedBox(width: 10),
-              Flexible(
-                child: Column(
-                  children: [
-                    IconButton(
-                        padding: const EdgeInsets.all(3),
-                        color: const Color.fromARGB(255, 255, 255, 255),
-                        style: ButtonStyle(
-                            backgroundColor:
-                                const WidgetStatePropertyAll(Colors.lightBlue)),
-                        tooltip: 'Nuevo usuario',
-                        onPressed: () async {
-                          try {
-                            campuseList.clear();
-                            areaList.clear();
-                            await getAllCampuse().then((response) async {
-                              await getWorkDepartmentList();
-                              await getRolesList().then((onValue) async {
-                                tmpRolesList = jsonDecode(onValue.body);
-                                for (var item in tmpRolesList) {
-                                  Role newRole = Role.fromJson(item);
-                                  tmpRoleObjectslist.add(newRole);
-                                }
-                                setState(() {
-                                    buildNewUserScreen(context);
-                                  });
-
-                                //TODO: IMPLEMENT A FETCH FOR EVENTS
-                                /* await getEventsList().then((onValue) {
-                                  setState(() {
-                                    buildNewUserScreen(context);
-                                  });
-                                }); */
-                              });
-                            }).onError((error, stacktrace) {
-                              insertErrorLog(
-                                  error.toString(), stacktrace.toString());
-                            });
-                          } catch (e) {
-                            insertErrorLog(
-                                e.toString(), 'users_main_screen 159');
-                            setState(() {
-                              isLoading = false;
-                              showErrorFromBackend(context, e.toString());
-                            });
-                          }
-                        },
-                        icon: const Icon(Icons.add)),
-                    Text('Nuevo Usuario')
-                  ],
-                ),
-              ),
-              // const SizedBox(width: 10),
-              Flexible(
-                  child: Column(
-                children: [
-                  IconButton(
-                    padding: const EdgeInsets.all(3),
-                    color: const Color.fromARGB(255, 255, 255, 255),
-                    style: ButtonStyle(
-                        backgroundColor:
-                            const WidgetStatePropertyAll(Colors.lightBlue)),
-                    tooltip: 'Refrescar',
-                    icon: const Icon(Icons.refresh),
-                    onPressed: _restartScreen,
-                  ),
-                  Text('Refrescar')
-                ],
-              )),
-            ],
-          ),
-        ));
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Scaffold(
       key: _key,
-      appBar: AppBar(
-          bottom: isDeviceMobile
-              ? mobileAppBar
-              : AppBar(automaticallyImplyLeading: false, actions: [
-                  TextButton.icon(
-                      onPressed: () {
-                        try {
-                          //?WHY DOES IT NEED TO BE IN TWO SEPARATE CALLS?
-                          getEventsTempList().whenComplete(() async {
-                            await getRolesTempList().whenComplete(() {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const RolesAndProfilesScreen()));
-                            });
-                          });
-                        } catch (e) {
-                          setState(() {
-                            isLoading = false;
-                          });
-                          insertErrorLog(e.toString(), 'UsersMainScreen()');
-                          showErrorFromBackend(context, e.toString());
-                        }
-                      },
-                      icon: const Icon(Icons.verified_user),
-                      label: Text('Administrar roles de usuarios')),
-                  TextButton.icon(
-                      onPressed: () async {
-                        try {
-                          campuseList.clear();
-                          areaList.clear();
-                          await getAllCampuse().then((response) async {
-                            await getWorkDepartmentList();
-                            await getRolesList().then((onValue) async {
-                              tmpRolesList = jsonDecode(onValue.body);
-                              for (var item in tmpRolesList) {
-                                Role newRole = Role.fromJson(item);
-                                tmpRoleObjectslist.add(newRole);
-                              }
-                              setState(() {
-                                buildNewUserScreen(context);
-                              });
-                            });
-                          }).onError((error, stacktrace) {
-                            insertErrorLog(
-                                error.toString(), stacktrace.toString());
-                          });
-                        } catch (e) {
-                          insertErrorLog(e.toString(), 'users_main_screen 159');
-                          setState(() {
-                            isLoading = false;
-                            showErrorFromBackend(context, e.toString());
-                          });
-                        }
-                      },
-                      icon: const FaIcon(FontAwesomeIcons.addressCard),
-                      label: const Text('Nuevo usuario')),
-                  RefreshButton(
-                    onPressed: _restartScreen,
-                  ),
-                  // const SizedBox(width: 20),
-                ]),
-          backgroundColor: FlutterFlowTheme.of(context).primary,
-          title: const Text('Administración de usuarios',
-              style: TextStyle(color: Colors.white))),
-      body: FutureBuilder(
+      backgroundColor: colorScheme.surface,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              colorScheme.primaryContainer.withOpacity(0.1),
+              colorScheme.surface,
+              colorScheme.surfaceContainerLow,
+            ],
+          ),
+        ),
+        child: FutureBuilder(
           future: loadingCOntroller,
           builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.done) {
-              return SizedBox(
-                  width: MediaQuery.of(context).size.width,
-                  child: const UsersTableView());
+            if (snapshot.hasError) {
+              return _buildErrorState(theme, snapshot.error.toString());
             } else if (snapshot.connectionState == ConnectionState.waiting) {
-              return CustomLoadingIndicator();
-            } else if (snapshot.hasError) {
-              return Placeholder(
-                  child: Center(
-                child: Text(
-                  'Error: ${snapshot.error}',
-                ),
-              ));
+              return _buildLoadingState(theme);
             } else {
-              return const NoDataAvailble();
+              return _buildMainContent(theme, colorScheme);
             }
-          }),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton:
-          isDeviceMobile ? mobileFloatingActionButton(context) : null,
-
-      // Stack(
-      //   children: [
-      //     LayoutBuilder(
-      //         builder: (BuildContext context, BoxConstraints constraints) {
-      //       if (listOfUsersForGrid != null) {
-      //         return SizedBox(
-      //             width: MediaQuery.of(context).size.width,
-      //             child: const UsersTableView());
-      //       } else {
-      //         return const NoDataAvailble();
-      //       }
-      //     }),
-      //     if (isLoading) CustomLoadingIndicator()
-      //   ],
-      // )
+          },
+        ),
+      ),
     );
+  }
+
+  Widget _buildErrorState(ThemeData theme, String error) {
+    return Center(
+      child: Card(
+        margin: const EdgeInsets.all(16),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.error_outline_rounded,
+                size: 64,
+                color: theme.colorScheme.error,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Error al cargar usuarios',
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  color: theme.colorScheme.error,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                error,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              FilledButton.icon(
+                onPressed: _restartScreen,
+                icon: const Icon(Icons.refresh_rounded),
+                label: const Text('Reintentar'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingState(ThemeData theme) {
+    return Center(
+      child: Card(
+        margin: const EdgeInsets.all(16),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(
+                color: theme.colorScheme.primary,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Cargando usuarios...',
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMainContent(ThemeData theme, ColorScheme colorScheme) {
+    return CustomScrollView(
+      slivers: [
+        SliverAppBar.large(
+          backgroundColor:
+              FlutterFlowTheme.of(context).primary, //Colors.transparent,
+          surfaceTintColor: Colors.transparent,
+          title: Text(
+            'Administración de Usuarios',
+            style: theme.textTheme.headlineMedium
+                ?.copyWith(fontWeight: FontWeight.bold, color: Colors.white),
+          ),
+          actions: [
+            if (!isDeviceMobile) ...[
+              _buildActionButton(
+                theme,
+                icon: Icons.verified_user_rounded,
+                label: 'Roles',
+                onPressed: _navigateToRoles,
+              ),
+              const SizedBox(width: 8),
+              _buildActionButton(
+                theme,
+                icon: Icons.person_add_rounded,
+                label: 'Nuevo Usuario',
+                onPressed: _createNewUser,
+              ),
+              const SizedBox(width: 8),
+              _buildActionButton(
+                theme,
+                icon: Icons.refresh_rounded,
+                label: 'Actualizar',
+                onPressed: _restartScreen,
+              ),
+              const SizedBox(width: 8),
+            ],
+          ],
+          floating: true,
+          snap: true,
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.all(8),
+          sliver: SliverToBoxAdapter(
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(5),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        // const Spacer(),
+                        if (isDeviceMobile) ...[
+                          IconButton.filledTonal(
+                            onPressed: _navigateToRoles,
+                            icon: const Icon(Icons.verified_user_rounded),
+                            tooltip: 'Administrar Roles',
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton.filled(
+                            onPressed: _createNewUser,
+                            icon: const Icon(Icons.person_add_rounded),
+                            tooltip: 'Nuevo Usuario',
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton.outlined(
+                            onPressed: _restartScreen,
+                            icon: const Icon(Icons.refresh_rounded),
+                            tooltip: 'Actualizar',
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 5),
+                    // const Divider(),
+                    // const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      height: MediaQuery.of(context).size.height - 200,
+                      child: const UsersTableView(),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionButton(
+    ThemeData theme, {
+    required IconData icon,
+    required String label,
+    required VoidCallback onPressed,
+  }) {
+    return FilledButton.tonalIcon(
+      onPressed: onPressed,
+      icon: Icon(icon),
+      label: Text(label),
+    );
+  }
+
+  void _navigateToRoles() {
+    try {
+      getEventsTempList().whenComplete(() async {
+        await getRolesTempList().whenComplete(() {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const RolesAndProfilesScreen(),
+            ),
+          );
+        });
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      insertErrorLog(e.toString(), 'UsersMainScreen()');
+      showErrorFromBackend(context, e.toString());
+    }
+  }
+
+  void _createNewUser() async {
+    try {
+      campuseList.clear();
+      areaList.clear();
+      await getAllCampuse().then((response) async {
+        await getWorkDepartmentList();
+        await getRolesList().then((onValue) async {
+          tmpRolesList = onValue.data; //jsonDecode(onValue.body);
+          for (var item in tmpRolesList) {
+            Role newRole = Role.fromJson(item);
+            tmpRoleObjectslist.add(newRole);
+          }
+          setState(() {
+            buildNewUserScreen(context);
+          });
+        });
+      }).onError((error, stacktrace) {
+        insertErrorLog(error.toString(), stacktrace.toString());
+      });
+    } catch (e) {
+      insertErrorLog(e.toString(), 'users_main_screen createNewUser');
+      setState(() {
+        isLoading = false;
+        showErrorFromBackend(context, e.toString());
+      });
+    }
   }
 }
 
 void buildNewUserScreen(BuildContext context) {
+  final theme = Theme.of(context);
+
   showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          contentPadding: const EdgeInsets.all(50),
-          title: const Text(
-            ' Crear nuevo usuario',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontFamily: 'Sora'),
-          ),
-          content: const NewUserScreen(),
-          actions: <Widget>[
-            TextButton(
-              style: TextButton.styleFrom(
-                textStyle: Theme.of(context).textTheme.labelLarge,
+    context: context,
+    builder: (BuildContext context) {
+      return Dialog.fullscreen(
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text(
+              'Crear Nuevo Usuario',
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
               ),
-              child: const Text('Cancelar'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
             ),
-          ],
-        );
-      });
+            backgroundColor: Colors.transparent,
+            surfaceTintColor: Colors.transparent,
+            leading: IconButton(
+              onPressed: () => Navigator.of(context).pop(),
+              icon: const Icon(Icons.close_rounded),
+            ),
+          ),
+          body: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  theme.colorScheme.primaryContainer.withOpacity(0.1),
+                  theme.colorScheme.surface,
+                  theme.colorScheme.surfaceContainerLow,
+                ],
+              ),
+            ),
+            child: const SingleChildScrollView(
+              padding: EdgeInsets.all(16),
+              child: Card(
+                child: Padding(
+                  padding: EdgeInsets.all(24),
+                  child: NewUserScreen(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    },
+  );
 }

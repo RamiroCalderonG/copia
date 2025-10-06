@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:oxschool/core/constants/user_consts.dart';
 import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/data/DataTransferObjects/Role_module_relationship_dto.dart';
 
 import 'package:oxschool/data/Models/Event.dart';
 import 'package:oxschool/data/Models/Role.dart';
-import 'package:oxschool/data/services/backend/api_requests/api_calls_list.dart';
+import 'package:oxschool/data/services/backend/api_requests/api_calls_list_dio.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
 import 'package:oxschool/presentation/Modules/admin/roles_events_admin.dart';
 
@@ -53,9 +52,7 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Permisos asignados al rol: ${widget.roleName}'),
-        actions: [
-          
-        ],
+        actions: [],
         backgroundColor: FlutterFlowTheme.of(context).primary,
       ),
       body: FutureBuilder<void>(
@@ -67,112 +64,122 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
             );
           } else {
             if (groupedEvents.isNotEmpty) {
-             return ListView.builder(
-  itemCount: groupedEvents.keys.length,
-  itemBuilder: (context, index) {
-    String moduleName = groupedEvents.keys.elementAt(index);
-    List<RoleModuleRelationshipDto> moduleEvents = groupedEvents[moduleName]!;
+              return ListView.builder(
+                itemCount: groupedEvents.keys.length,
+                itemBuilder: (context, index) {
+                  String moduleName = groupedEvents.keys.elementAt(index);
+                  List<RoleModuleRelationshipDto> moduleEvents =
+                      groupedEvents[moduleName]!;
 
-    // Group events by screenName
-    Map<String, List<RoleModuleRelationshipDto>> groupedByScreenName = {};
-    for (var event in moduleEvents) {
-      if (!groupedByScreenName.containsKey(event.screenName)) {
-        groupedByScreenName[event.screenName!] = [];
-      }
-      groupedByScreenName[event.screenName]!.add(event);
-    }
+                  // Group events by screenName
+                  Map<String, List<RoleModuleRelationshipDto>>
+                      groupedByScreenName = {};
+                  for (var event in moduleEvents) {
+                    if (!groupedByScreenName.containsKey(event.screenName)) {
+                      groupedByScreenName[event.screenName!] = [];
+                    }
+                    groupedByScreenName[event.screenName]!.add(event);
+                  }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(
-              top: 15, bottom: 10, left: 12, right: 12),
-          child: Wrap(
-            spacing: 8.0,
-            children: [
-              Divider(
-                thickness: 3,
-              ),
-              SwitchListTile(
-                title: Text(
-                  'Modulo: $moduleName',
-                  style: const TextStyle(
-                      fontSize: 20, fontFamily: 'Sora'),
-                ),
-                activeColor: Colors.green,
-                value: moduleEvents.first.canAccessModule ?? false,
-                onChanged: (value) {
-                  var moduleId;
-                  setState(() {
-                    moduleEvents.forEach((event) {
-                      event.canAccessModule = value;
-                      moduleId = event.moduleId;
-                    });
-                  });
-                  updateStatusAccess(widget.roleID, 0, value, moduleId );
-                },
-              ),
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(
+                            top: 15, bottom: 10, left: 12, right: 12),
+                        child: Wrap(
+                          spacing: 8.0,
+                          children: [
+                            Divider(
+                              thickness: 3,
+                            ),
+                            SwitchListTile(
+                              title: Text(
+                                'Modulo: $moduleName',
+                                style: const TextStyle(
+                                    fontSize: 20, fontFamily: 'Sora'),
+                              ),
+                              activeColor: Colors.green,
+                              value:
+                                  moduleEvents.first.canAccessModule ?? false,
+                              onChanged: (value) {
+                                var moduleId;
+                                setState(() {
+                                  for (var event in moduleEvents) {
+                                    event.canAccessModule = value;
+                                    moduleId = event.moduleId;
+                                  }
+                                });
+                                updateStatusAccess(
+                                    widget.roleID, 0, value, moduleId);
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      ...groupedByScreenName.entries.map((entry) {
+                        String screenName = entry.key;
+                        List<RoleModuleRelationshipDto> screenEvents =
+                            entry.value;
+                        bool hasScreenAccess =
+                            screenEvents.first.canAccessScreen!;
 
-            ],
-          ),
-        ),
-        ...groupedByScreenName.entries.map((entry) {
-          String screenName = entry.key;
-          List<RoleModuleRelationshipDto> screenEvents = entry.value;
-          bool hasScreenAccess = screenEvents.first.canAccessScreen!;
-
-          return Padding(
-            padding: const EdgeInsets.only(left: 20, right: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-               
-                SwitchListTile(
-                  secondary: Icon(Icons.star),
-                  title: Text('Ventana: $screenName',),
-                  activeColor: Colors.green,
-                  
-                  value: hasScreenAccess,
-                  onChanged: (value) {
-                    var screenId;
-                    setState(() {
-                      screenEvents.forEach((event) {
-                        event.canAccessScreen = value;
-                        screenId = event.screenId;
-                      });
-                    });
-                    updateStatusAccess(widget.roleID, 1, value, screenId );
-                  },
-                ),
-                ...screenEvents.map((event) {
-                  return Padding(
-                    padding: EdgeInsets.only(left: 50, right: 20),
-                    child: SwitchListTile(
-                      secondary: Icon(Icons.circle, size: 12,),
-                      title: Text('Evento: ${event.eventName!}'),
-                      
-                      activeColor: Colors.green,
-                      value: event.canAccessEvent!,
-                      onChanged: (value) {
-                        var eventId;
-                        setState(() {
-                          event.canAccessEvent = value;
-                          eventId = event.eventId;
-                        });
-                        updateStatusAccess(widget.roleID, 2, value, eventId );
-                      },
-                    ),
+                        return Padding(
+                          padding: const EdgeInsets.only(left: 20, right: 20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SwitchListTile(
+                                secondary: Icon(Icons.star),
+                                title: Text(
+                                  'Ventana: $screenName',
+                                ),
+                                activeColor: Colors.green,
+                                value: hasScreenAccess,
+                                onChanged: (value) {
+                                  var screenId;
+                                  setState(() {
+                                    for (var event in screenEvents) {
+                                      event.canAccessScreen = value;
+                                      screenId = event.screenId;
+                                    }
+                                  });
+                                  updateStatusAccess(
+                                      widget.roleID, 1, value, screenId);
+                                },
+                              ),
+                              ...screenEvents.map((event) {
+                                return Padding(
+                                  padding: EdgeInsets.only(left: 50, right: 20),
+                                  child: SwitchListTile(
+                                    secondary: Icon(
+                                      Icons.circle,
+                                      size: 12,
+                                    ),
+                                    title: Text('Evento: ${event.eventName!}'),
+                                    activeColor: Colors.green,
+                                    value: event.canAccessEvent!,
+                                    onChanged: (value) {
+                                      var eventId;
+                                      setState(() {
+                                        event.canAccessEvent = value;
+                                        eventId = event.eventId;
+                                      });
+                                      updateStatusAccess(
+                                          widget.roleID, 2, value, eventId);
+                                    },
+                                  ),
+                                );
+                              }).toList(),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ],
                   );
-                }).toList(),
-              ],
-            ),
-          );
-        }).toList(),
-      ],
-    );
-  },
-); } else {
+                },
+              );
+            } else {
               return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -254,14 +261,16 @@ class _PoliciesScreenState extends State<PoliciesScreen> {
   }
 }
 
-
 class PolicyCard extends StatelessWidget {
   final Event policy;
   final int roleID;
   final Function(Event) onToggle;
 
   const PolicyCard(
-      {super.key, required this.policy, required this.roleID, required this.onToggle});
+      {super.key,
+      required this.policy,
+      required this.roleID,
+      required this.onToggle});
 
   @override
   Widget build(BuildContext context) {

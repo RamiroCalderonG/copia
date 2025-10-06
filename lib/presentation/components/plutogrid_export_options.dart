@@ -3,23 +3,23 @@
 // import 'package:file_picker/file_picker.dart';
 // import 'package:file_saver/file_saver.dart'; // Ensure you have the correct import for FileSaver
 // import 'package:flutter/material.dart';
-// import 'package:pluto_grid/pluto_grid.dart';
+// import 'package:trina_grid/trina_grid.dart';
 // import 'package:pluto_grid_export/pluto_grid_export.dart' as pluto_grid_export;
 // import 'package:flutter/services.dart';
 
-// class PlutoGridHeader extends StatefulWidget {
-//   const PlutoGridHeader({
+// class TrinaGridHeader extends StatefulWidget {
+//   const TrinaGridHeader({
 //     required this.stateManager,
 //     super.key,
 //   });
 
-//   final PlutoGridStateManager stateManager;
+//   final TrinaGridStateManager stateManager;
 
 //   @override
-//   State<PlutoGridHeader> createState() => _PlutoGridHeaderState();
+//   State<TrinaGridHeader> createState() => _TrinaGridHeaderState();
 // }
 
-// class _PlutoGridHeaderState extends State<PlutoGridHeader> {
+// class _TrinaGridHeaderState extends State<TrinaGridHeader> {
 //   void _printToPdfAndShareOrSave() async {
 //     if (widget.stateManager.rows.isEmpty) return;
 
@@ -32,7 +32,7 @@
 //       ),
 //     );
 
-//     var plutoGridPdfExport = pluto_grid_export.PlutoGridDefaultPdfExport(
+//     var plutoGridPdfExport = pluto_grid_export.TrinaGridDefaultPdfExport(
 //       title: "PDF",
 //       creator: "Ox School",
 //       format: pluto_grid_export.PdfPageFormat.a4.portrait,
@@ -62,7 +62,7 @@
 
 //     String title = "pluto_grid_export";
 //     var exportCSV =
-//         pluto_grid_export.PlutoGridExport.exportCSV(widget.stateManager);
+//         pluto_grid_export.TrinaGridExport.exportCSV(widget.stateManager);
 //     var exported =
 //         Uint8List.fromList(const Utf8Encoder().convert('\u{FEFF}$exportCSV'));
 
@@ -79,7 +79,7 @@
 
 //     String title = "pluto_grid_export";
 //     var exportCSV =
-//         pluto_grid_export.PlutoGridExport.exportCSV(widget.stateManager);
+//         pluto_grid_export.TrinaGridExport.exportCSV(widget.stateManager);
 //     var exported =
 //         Uint8List.fromList(const Utf8Encoder().convert('\u{FEFF}$exportCSV'));
 
@@ -96,7 +96,7 @@
 
 //     String title = "pluto_grid_export";
 //     var exported = Uint8List.fromList(const Utf8Encoder().convert(
-//       pluto_grid_export.PlutoGridExport.exportCSV(widget.stateManager,
+//       pluto_grid_export.TrinaGridExport.exportCSV(widget.stateManager,
 //           fieldDelimiter: ";"),
 //     ));
 
@@ -148,7 +148,7 @@
 // }
 
 // class ExportDialog extends StatefulWidget {
-//   final PlutoGridStateManager stateManager;
+//   final TrinaGridStateManager stateManager;
 
 //   const ExportDialog({required this.stateManager});
 
@@ -170,7 +170,7 @@
 //       String title = "grid_export";
 //       var exported = Uint8List.fromList(
 //         const Utf8Encoder().convert(
-//           pluto_grid_export.PlutoGridExport.exportCSV(widget.stateManager),
+//           pluto_grid_export.TrinaGridExport.exportCSV(widget.stateManager),
 //         ),
 //       );
 
@@ -232,21 +232,21 @@ import 'package:pluto_grid_export/pluto_grid_export.dart' as pluto_grid_export;
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:pluto_grid/pluto_grid.dart';
+import 'package:trina_grid/trina_grid.dart';
 
-class PlutoGridHeader extends StatefulWidget {
-  const PlutoGridHeader({
+class TrinaGridHeader extends StatefulWidget {
+  const TrinaGridHeader({
     required this.stateManager,
     super.key,
   });
 
-  final PlutoGridStateManager stateManager;
+  final TrinaGridStateManager stateManager;
 
   @override
-  State<PlutoGridHeader> createState() => _PlutoGridHeaderState();
+  State<TrinaGridHeader> createState() => _TrinaGridHeaderState();
 }
 
-class _PlutoGridHeaderState extends State<PlutoGridHeader> {
+class _TrinaGridHeaderState extends State<TrinaGridHeader> {
   void _printToPdfAndShareOrSave() async {
     // var excel_grid_export;
     final themeData = pluto_grid_export.ThemeData.withFont(
@@ -258,7 +258,7 @@ class _PlutoGridHeaderState extends State<PlutoGridHeader> {
       ),
     );
 
-    var plutoGridPdfExport = pluto_grid_export.PlutoGridDefaultPdfExport(
+    var plutoGridPdfExport = pluto_grid_export.TrinaGridDefaultPdfExport(
       title: "PDF",
       creator: "Ox School",
       format: pluto_grid_export.PdfPageFormat.a4.portrait,
@@ -275,7 +275,7 @@ class _PlutoGridHeaderState extends State<PlutoGridHeader> {
   // void _printToPdfWithDialog() async {
   //   var originalFormat = PdfPageFormat.a4.landscape;
   //
-  //   var plutoGridDefaultPdfExport = PlutoGridDefaultPdfExport(
+  //   var plutoGridDefaultPdfExport = TrinaGridDefaultPdfExport(
   //       title: "Pluto Grid Sample pdf print",
   //       creator: "Pluto Grid Rocks!",
   //       format: originalFormat);
@@ -324,7 +324,7 @@ class _PlutoGridHeaderState extends State<PlutoGridHeader> {
   //     String title = "grid_export";
   //     // var pluto_grid_export;
   //     var exported = const Utf8Encoder().convert(
-  //         pluto_grid_export.PlutoGridExport.exportCSV(widget.stateManager));
+  //         pluto_grid_export.TrinaGridExport.exportCSV(widget.stateManager));
   //     await FileSaver.instance.saveFile(
   //       name: title,
   //       bytes: exported,
@@ -337,7 +337,7 @@ class _PlutoGridHeaderState extends State<PlutoGridHeader> {
   //   // String title = "pluto_grid_export";
   //   // // var pluto_grid_export;
   //   // var exported = const Utf8Encoder().convert(
-  //   //     pluto_grid_export.PlutoGridExport.exportCSV(widget.stateManager));
+  //   //     pluto_grid_export.TrinaGridExport.exportCSV(widget.stateManager));
   //   // await FileSaver.instance.saveFile(
   //   //   name: "$title.csv",
   //   //   bytes: exported,
@@ -348,7 +348,7 @@ class _PlutoGridHeaderState extends State<PlutoGridHeader> {
   void _defaultExportGridAsCSVCompatibleWithExcel() async {
     // String title = "pluto_grid_export";
     // var exportCSV =
-    //     pluto_grid_export.PlutoGridExport.exportCSV(widget.stateManager);
+    //     pluto_grid_export.TrinaGridExport.exportCSV(widget.stateManager);
     // var exported = const Utf8Encoder().convert(
     //     // FIX Add starting \u{FEFF} / 0xEF, 0xBB, 0xBF
     //     // This allows open the file in Excel with proper character interpretation
@@ -360,7 +360,7 @@ class _PlutoGridHeaderState extends State<PlutoGridHeader> {
   void _defaultExportGridAsCSVFakeExcel() async {
     // String title = "pluto_grid_export";
     // var exportCSV =
-    //     pluto_grid_export.PlutoGridExport.exportCSV(widget.stateManager);
+    //     pluto_grid_export.TrinaGridExport.exportCSV(widget.stateManager);
     // var exported = const Utf8Encoder().convert(
     //     // FIX Add starting \u{FEFF} / 0xEF, 0xBB, 0xBF
     //     // This allows open the file in Excel with proper character interpretation
@@ -371,7 +371,7 @@ class _PlutoGridHeaderState extends State<PlutoGridHeader> {
 
   // void _exportGridAsTSV() async {
   //   String title = "pluto_grid_export";
-  //   var exported = const Utf8Encoder().convert(PlutoGridExport.exportCSV(
+  //   var exported = const Utf8Encoder().convert(TrinaGridExport.exportCSV(
   //     widget.stateManager,
   //     fieldDelimiter: "\t",
   //   ));
@@ -381,7 +381,7 @@ class _PlutoGridHeaderState extends State<PlutoGridHeader> {
   void _defaultExportGridAsCSVWithSemicolon() async {
     // String title = "pluto_grid_export";
     // var exported =
-    //     const Utf8Encoder().convert(pluto_grid_export.PlutoGridExport.exportCSV(
+    //     const Utf8Encoder().convert(pluto_grid_export.TrinaGridExport.exportCSV(
     //   widget.stateManager,
     //   fieldDelimiter: ";",
     // ));
@@ -431,7 +431,7 @@ class _PlutoGridHeaderState extends State<PlutoGridHeader> {
 }
 
 class ExportDialog extends StatefulWidget {
-  final PlutoGridStateManager stateManager;
+  final TrinaGridStateManager stateManager;
 
   const ExportDialog({required this.stateManager});
 
@@ -452,7 +452,7 @@ class _ExportDialogState extends State<ExportDialog> {
     try {
       String title = "grid_export";
       var exported = const Utf8Encoder().convert(
-          pluto_grid_export.PlutoGridExport.exportCSV(widget.stateManager));
+          pluto_grid_export.TrinaGridExport.exportCSV(widget.stateManager));
       await FileSaver.instance.saveFile(
         name: title,
         bytes: exported,
