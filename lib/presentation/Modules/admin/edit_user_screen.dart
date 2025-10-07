@@ -115,7 +115,8 @@ class _EditUserScreenState extends State<EditUserScreen> {
 
   void _updateUser() async {
     if (_formKey.currentState!.validate()) {
-      await showConfirmationDialog(context, 'Confirmación', '¿Realiar cambios?')
+      await showConfirmationDialog(
+              context, 'Confirmación', '¿Realizar cambios?')
           .then((response) async {
         if (response == 1) {
           //User selected YES
