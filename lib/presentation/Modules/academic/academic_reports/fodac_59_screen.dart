@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:csv/csv.dart';
+import 'package:oxschool/core/constants/date_constants.dart';
+import 'package:oxschool/core/reusable_methods/reusable_functions.dart';
+import 'package:oxschool/data/Models/Fodac60Item.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
@@ -42,7 +45,8 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
   Map<String, String> _filteredStudentNameToIdMap =
       {}; // Map for filtered students
   List<dynamic> _reportData = []; // Store the report response data
-  Future<dynamic>? _reportFuture; // Future for report data loading
+  // Removed _reportFuture as we now use direct state management
+  List<Fodac60Item> reportItems = [];
 
   Future<dynamic>? future;
 
@@ -50,7 +54,7 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
   String exportStatus = '';
   // PDF specific options
   String pdfTitle = 'FO-DAC-59';
-  String pdfCreator = '${currentUser!.userEmail}';
+  String pdfCreator = '';
   bool pdfLandscape = false;
   Color headerColor = Colors.blue;
   Color textColor = Colors.black;
@@ -75,10 +79,15 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
   void initState() {
     // Don't fetch initial data, just initialize the controller
     future = null; // Initialize as null
+
+    // Initialize pdfCreator safely
+    pdfCreator = currentUser?.userEmail ?? 'Unknown User';
+
     _controller = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
+    _toggleFilterPanel(); // Start with panel open
     super.initState();
   }
 
@@ -86,8 +95,8 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
   void dispose() {
     _controller.dispose();
     future = null;
-    _reportFuture = null;
     _reportData.clear();
+    reportItems.clear();
     super.dispose();
   }
 
@@ -185,22 +194,7 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
                 return _buildMainContent(isSmallScreen, theme);
               },
             )
-          : _reportFuture != null
-              ? FutureBuilder(
-                  future: _reportFuture,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return _buildMainContentWithLoading(isSmallScreen, theme);
-                    }
-
-                    if (snapshot.hasError) {
-                      return _buildMainContentWithError(isSmallScreen, theme);
-                    }
-
-                    return _buildMainContent(isSmallScreen, theme);
-                  },
-                )
-              : _buildMainContent(isSmallScreen, theme),
+          : _buildMainContent(isSmallScreen, theme),
       // floatingActionButton: _reportData.isNotEmpty
       //     ? FloatingActionButton(
       //         onPressed: () => _showExportOptionsDialog(),
@@ -589,14 +583,31 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
                                     ),
                               onPressed: _canGenerateReport() && !_isRefreshing
                                   ? () async {
+                                      print(
+                                          '=== GENERATE REPORT BUTTON PRESSED ===');
+
                                       setState(() {
                                         _isRefreshing = true;
+                                        reportItems.clear();
                                       });
+
                                       try {
-                                        setState(() {
-                                          _reportFuture = fetchReportData();
-                                        });
-                                        await _reportFuture;
+                                        // Use the simplified fetchReportData
+                                        await fetchReportData();
+
+                                        // Check results and show appropriate message
+                                        if (reportItems.isNotEmpty) {
+                                          print(
+                                              'Report generated successfully: ${reportItems.length} items');
+                                        } else {
+                                          print(
+                                              'No data found for current filters');
+                                        }
+                                      } catch (e) {
+                                        print(
+                                            'Error during report generation: $e');
+                                        _showErrorNotification(
+                                            'Error al generar reporte: ${e.toString()}');
                                       } finally {
                                         if (mounted) {
                                           setState(() {
@@ -672,287 +683,6 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
             ),
           ),
         ),
-      ],
-    );
-  }
-
-  Widget _buildMainContentWithLoading(bool isSmallScreen, ThemeData theme) {
-    return Column(
-      children: [
-        // Filter Panel
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          height: _isFilterExpanded ? (isSmallScreen ? 280 : 210) : 0,
-          child: SingleChildScrollView(
-            physics: const NeverScrollableScrollPhysics(),
-            child: _buildFilterPanel(isSmallScreen, theme),
-          ),
-        ),
-
-        // Content Area with Loading
-        Expanded(
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(28),
-                topRight: Radius.circular(28),
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Section Title and Actions
-                _buildSectionHeader(theme),
-                const SizedBox(height: 16),
-                // Current Filter Summary
-                _buildFilterSummary(theme),
-                const SizedBox(height: 16),
-                // Loading indicator for report data
-                Expanded(
-                  child: Card(
-                    elevation: 0,
-                    color: theme.colorScheme.surface,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      side: BorderSide(
-                        color: theme.colorScheme.outline.withOpacity(0.2),
-                      ),
-                    ),
-                    child: const Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          CustomLoadingIndicator(),
-                          SizedBox(height: 16),
-                          Text('Generando reporte...'),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMainContentWithError(bool isSmallScreen, ThemeData theme) {
-    return Column(
-      children: [
-        // Filter Panel
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          height: _isFilterExpanded ? (isSmallScreen ? 280 : 210) : 0,
-          child: SingleChildScrollView(
-            physics: const NeverScrollableScrollPhysics(),
-            child: _buildFilterPanel(isSmallScreen, theme),
-          ),
-        ),
-
-        // Content Area with Error
-        Expanded(
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(28),
-                topRight: Radius.circular(28),
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Section Title and Actions
-                _buildSectionHeader(theme),
-                const SizedBox(height: 16),
-                // Current Filter Summary
-                _buildFilterSummary(theme),
-                const SizedBox(height: 16),
-                // Error message
-                Expanded(
-                  child: Card(
-                    elevation: 0,
-                    color: theme.colorScheme.surface,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      side: BorderSide(
-                        color: theme.colorScheme.outline.withOpacity(0.2),
-                      ),
-                    ),
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.error_outline_rounded,
-                            size: 64,
-                            color: theme.colorScheme.error,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Error al generar el reporte',
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Intente de nuevo más tarde',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant
-                                  .withOpacity(0.7),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSectionHeader(ThemeData theme) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Reporte FO-DAC-59',
-              style: theme.textTheme.titleLarge?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Card(
-              elevation: 0,
-              color: theme.colorScheme.secondaryContainer,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // IconButton(
-                    //   icon: Icon(
-                    //     Icons.refresh,
-                    //     color: theme.colorScheme.onSecondaryContainer,
-                    //   ),
-                    //   onPressed: selectedCampus != null
-                    //       ? () {
-                    //           setState(() {
-                    //             // future = fetchFiltersData(
-                    //             //     selectedCampus!, currentCycle!.claCiclo!);
-                    //           });
-                    //         }
-                    //       : null,
-                    //   tooltip: selectedCampus == null
-                    //       ? 'Seleccione un campus primero'
-                    //       : 'Refrescar filtros',
-                    // ),
-                    const SizedBox(width: 4),
-                    IconButton(
-                      icon: _isRefreshing
-                          ? SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: theme.colorScheme.onSecondaryContainer,
-                              ),
-                            )
-                          : Icon(
-                              Icons.refresh,
-                              color: theme.colorScheme.onSecondaryContainer,
-                            ),
-                      onPressed: _canGenerateReport() && !_isRefreshing
-                          ? () async {
-                              setState(() {
-                                _isRefreshing = true;
-                              });
-                              try {
-                                setState(() {
-                                  _reportFuture = fetchReportData();
-                                });
-                                await _reportFuture;
-                              } finally {
-                                if (mounted) {
-                                  setState(() {
-                                    _isRefreshing = false;
-                                  });
-                                }
-                              }
-                            }
-                          : null,
-                      tooltip: _canGenerateReport()
-                          ? (_isRefreshing ? 'Generando...' : 'Generar reporte')
-                          : 'Seleccione Grado y Grupo primero',
-                    ),
-                    const SizedBox(width: 4),
-                    IconButton(
-                      icon: Icon(
-                        Icons.file_download,
-                        color: theme.colorScheme.onSecondaryContainer,
-                      ),
-                      onPressed: _reportData.isNotEmpty
-                          ? () => _showExportOptionsDialog()
-                          : null,
-                      tooltip: 'Exportar a Excel',
-                    ),
-                    const SizedBox(width: 4),
-                    IconButton(
-                      icon: Icon(
-                        Icons.print,
-                        color: theme.colorScheme.onSecondaryContainer,
-                      ),
-                      onPressed:
-                          _reportData.isNotEmpty ? () => _printReport() : null,
-                      tooltip: 'Imprimir',
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-
-        // Export status indicator
-        if (isExporting || exportStatus.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: 8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (isExporting)
-                  const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                if (isExporting) const SizedBox(width: 8),
-                Text(
-                  exportStatus,
-                  style: TextStyle(
-                    color: exportStatus.contains('Error')
-                        ? Colors.red
-                        : exportStatus.contains('exitosamente')
-                            ? Colors.green
-                            : theme.colorScheme.onSurfaceVariant,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          ),
       ],
     );
   }
@@ -1374,260 +1104,497 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
   }
 
   Widget _buildDataTable(ThemeData theme) {
-    // If we have report data, display it with TrinaGrid
-    if (_reportData.isNotEmpty) {
-      // Define columns for TrinaGrid
-      final List<TrinaColumn> columns = [
-        TrinaColumn(
-          title: 'Clamateria',
-          field: 'Clamateria',
-          type: TrinaColumnType.text(),
-          readOnly: false,
-          checkReadOnly: (row, cell) {
-            return false;
-          },
-          width: 100,
-        ),
-        TrinaColumn(
-          title: 'Mes',
-          field: 'Mes',
-          type: TrinaColumnType.text(),
-          readOnly: false,
-          checkReadOnly: (row, cell) {
-            return false;
-          },
-          width: 80,
-        ),
-        TrinaColumn(
-          title: 'Orden',
-          field: 'Orden',
-          type: TrinaColumnType.number(),
-          readOnly: false,
-          checkReadOnly: (row, cell) {
-            return false;
-          },
-          width: 80,
-        ),
-        TrinaColumn(
-          title: 'NomGrado',
-          field: 'NomGrado',
-          type: TrinaColumnType.text(),
-          readOnly: false,
-          checkReadOnly: (row, cell) {
-            return false;
-          },
-          width: 120,
-        ),
-        TrinaColumn(
-          title: 'Valor',
-          field: 'Valor',
-          type: TrinaColumnType.text(),
-          readOnly: false,
-          checkReadOnly: (row, cell) {
-            return false;
-          },
-          width: 80,
-        ),
-        TrinaColumn(
-          title: 'Tipo',
-          field: 'Tipo',
-          type: TrinaColumnType.text(),
-          readOnly: false,
-          checkReadOnly: (row, cell) {
-            return false;
-          },
-          width: 80,
-        ),
-        TrinaColumn(
-          title: 'Gp',
-          field: 'Gp',
-          type: TrinaColumnType.text(),
-          readOnly: false,
-          checkReadOnly: (row, cell) {
-            return false;
-          },
-          width: 60,
-        ),
-        TrinaColumn(
-          title: 'PromedioSiNo',
-          field: 'PromedioSiNo',
-          type: TrinaColumnType.text(),
-          readOnly: false,
-          checkReadOnly: (row, cell) {
-            return false;
-          },
-          width: 120,
-        ),
-        TrinaColumn(
-          title: 'Nombre',
-          field: 'Nombre',
-          type: TrinaColumnType.text(),
-          readOnly: false,
-          checkReadOnly: (row, cell) {
-            return false;
-          },
-          width: 200,
-        ),
-        TrinaColumn(
-          title: 'Matricula',
-          field: 'Matricula',
-          type: TrinaColumnType.text(),
-          readOnly: false,
-          checkReadOnly: (row, cell) {
-            return false;
-          },
-          width: 120,
-        ),
-        TrinaColumn(
-          title: 'Grupo',
-          field: 'Grupo',
-          type: TrinaColumnType.text(),
-          readOnly: false,
-          checkReadOnly: (row, cell) {
-            return false;
-          },
-          width: 80,
-        ),
-        TrinaColumn(
-          title: 'ClaCiclo',
-          field: 'ClaCiclo',
-          type: TrinaColumnType.text(),
-          readOnly: false,
-          checkReadOnly: (row, cell) {
-            return false;
-          },
-          width: 100,
-        ),
-        TrinaColumn(
-          title: 'GradoSecuencia',
-          field: 'GradoSecuencia',
-          type: TrinaColumnType.number(),
-          readOnly: false,
-          checkReadOnly: (row, cell) {
-            return false;
-          },
-          width: 120,
-        ),
-        TrinaColumn(
-          title: 'ClaUN',
-          field: 'ClaUN',
-          type: TrinaColumnType.text(),
-          readOnly: false,
-          checkReadOnly: (row, cell) {
-            return false;
-          },
-          width: 80,
-        ),
-        TrinaColumn(
-          title: 'NomMateria',
-          field: 'NomMateria',
-          type: TrinaColumnType.text(),
-          readOnly: false,
-          checkReadOnly: (row, cell) {
-            return false;
-          },
-          width: 200,
-        ),
-      ];
+    try {
+      print('=== Building Data Table ===');
+      print('reportItems length: ${reportItems.length}');
 
-      // Convert data to TrinaRows
-      final List<TrinaRow> rows = _reportData.map((item) {
-        return TrinaRow(
-          cells: {
-            'Clamateria':
-                TrinaCell(value: item['Clamateria']?.toString() ?? ''),
-            'Mes': TrinaCell(value: item['Mes']?.toString() ?? ''),
-            'Orden': TrinaCell(value: item['Orden'] ?? 0),
-            'NomGrado': TrinaCell(value: item['NomGrado']?.toString() ?? ''),
-            'Valor': TrinaCell(value: item['Valor']?.toString() ?? ''),
-            'Tipo': TrinaCell(value: item['Tipo']?.toString() ?? ''),
-            'Gp': TrinaCell(value: item['Gp']?.toString() ?? ''),
-            'PromedioSiNo':
-                TrinaCell(value: item['PromedioSiNo']?.toString() ?? ''),
-            'Nombre': TrinaCell(value: item['Nombre']?.toString() ?? ''),
-            'Matricula': TrinaCell(value: item['Matricula']?.toString() ?? ''),
-            'Grupo': TrinaCell(value: item['Grupo']?.toString() ?? ''),
-            'ClaCiclo': TrinaCell(value: item['ClaCiclo']?.toString() ?? ''),
-            'GradoSecuencia': TrinaCell(value: item['GradoSecuencia'] ?? 0),
-            'ClaUN': TrinaCell(value: item['ClaUN']?.toString() ?? ''),
-            'NomMateria':
-                TrinaCell(value: item['NomMateria']?.toString() ?? ''),
-          },
-        );
-      }).toList();
+      // If we have report data, display it with TrinaGrid
+      if (reportItems.isNotEmpty) {
+        print('Building TrinaGrid with ${reportItems.length} items');
 
-      return TrinaGrid(
-        columns: columns,
-        rows: rows,
-        mode: TrinaGridMode.readOnly,
-        onLoaded: (TrinaGridOnLoadedEvent event) {
-          _gridStateManager = event.stateManager;
-          _gridStateManager.setShowColumnFilter(true);
-        },
-        configuration: TrinaGridConfiguration(
-          style: TrinaGridStyleConfig(
-            borderColor: theme.colorScheme.outlineVariant,
-            gridBorderColor: theme.colorScheme.outlineVariant,
-            enableColumnBorderVertical: false,
-            enableCellBorderVertical: false,
-            cellColorInReadOnlyState: theme.colorScheme.surface,
+        // Define columns for TrinaGrid
+        final List<TrinaColumn> columns = [
+          TrinaColumn(
+            title: 'Mes',
+            field: 'Mes',
+            type: TrinaColumnType.text(),
+            readOnly: false,
+            hide: true,
+            checkReadOnly: (row, cell) {
+              return false;
+            },
+            width: 80,
           ),
-          columnSize: const TrinaGridColumnSizeConfig(
-            autoSizeMode: TrinaAutoSizeMode.scale,
+          TrinaColumn(
+            title: 'Orden',
+            field: 'Orden',
+            type: TrinaColumnType.number(),
+            hide: true,
+            readOnly: false,
+            checkReadOnly: (row, cell) {
+              return false;
+            },
+            width: 80,
           ),
-          scrollbar: const TrinaGridScrollbarConfig(
-            isAlwaysShown: true,
+          TrinaColumn(
+            title: 'ClaCiclo',
+            field: 'ClaCiclo',
+            type: TrinaColumnType.text(),
+            readOnly: false,
+            checkReadOnly: (row, cell) {
+              return false;
+            },
+            width: 150,
           ),
-        ),
-        createFooter: (stateManager) {
-          stateManager.setPageSize(25, notify: false);
-          return Container(
-            decoration: BoxDecoration(
-              // color: theme.colorScheme.surfaceContainerHigh,
-              border: Border(
-                top: BorderSide(
-                  color: theme.colorScheme.outlineVariant,
-                  width: 1,
+          TrinaColumn(
+            title: 'ClaUN',
+            field: 'ClaUN',
+            type: TrinaColumnType.text(),
+            readOnly: false,
+            checkReadOnly: (row, cell) {
+              return false;
+            },
+            width: 100,
+          ),
+          TrinaColumn(
+            title: 'NomGrado',
+            field: 'NomGrado',
+            type: TrinaColumnType.text(),
+            readOnly: false,
+            checkReadOnly: (row, cell) {
+              return false;
+            },
+            width: 135,
+          ),
+          TrinaColumn(
+            title: 'Grupo',
+            field: 'Grupo',
+            type: TrinaColumnType.text(),
+            readOnly: false,
+            checkReadOnly: (row, cell) {
+              return false;
+            },
+            width: 80,
+          ),
+          TrinaColumn(
+            title: 'Gp',
+            field: 'Gp',
+            type: TrinaColumnType.text(),
+            readOnly: false,
+            checkReadOnly: (row, cell) {
+              return false;
+            },
+            width: 60,
+          ),
+          TrinaColumn(
+            title: 'Matricula',
+            field: 'Matricula',
+            type: TrinaColumnType.text(),
+            readOnly: false,
+            checkReadOnly: (row, cell) {
+              return false;
+            },
+            width: 120,
+          ),
+          TrinaColumn(
+            title: 'Nombre',
+            field: 'Nombre',
+            type: TrinaColumnType.text(),
+            readOnly: false,
+            checkReadOnly: (row, cell) {
+              return false;
+            },
+            width: 200,
+          ),
+          TrinaColumn(
+            title: 'Clamateria',
+            field: 'Clamateria',
+            type: TrinaColumnType.text(),
+            readOnly: false,
+            hide: true,
+            checkReadOnly: (row, cell) {
+              return false;
+            },
+            width: 100,
+          ),
+          TrinaColumn(
+            title: 'NomMateria',
+            field: 'NomMateria',
+            type: TrinaColumnType.text(),
+            readOnly: false,
+            checkReadOnly: (row, cell) {
+              return false;
+            },
+            width: 200,
+          ),
+          TrinaColumn(
+            title: 'Maestro',
+            field: 'Maestro',
+            type: TrinaColumnType.text(),
+            hide: true,
+            readOnly: false,
+            checkReadOnly: (row, cell) {
+              return false;
+            },
+            width: 100,
+          ),
+          TrinaColumn(
+            title: 'Calif1C',
+            field: 'Calif1C',
+            type: TrinaColumnType.text(),
+            readOnly: false,
+            checkReadOnly: (row, cell) {
+              return false;
+            },
+            width: 50,
+          ),
+          TrinaColumn(
+            title: 'Calif2C',
+            field: 'Calif2C',
+            type: TrinaColumnType.text(),
+            readOnly: false,
+            checkReadOnly: (row, cell) {
+              return false;
+            },
+            width: 50,
+          ),
+          TrinaColumn(
+            title: 'Calif3C',
+            field: 'Calif3C',
+            type: TrinaColumnType.text(),
+            readOnly: false,
+            checkReadOnly: (row, cell) {
+              return false;
+            },
+            width: 50,
+          ),
+          TrinaColumn(
+            title: 'Calif4C',
+            field: 'Calif4C',
+            type: TrinaColumnType.text(),
+            readOnly: false,
+            checkReadOnly: (row, cell) {
+              return false;
+            },
+            width: 50,
+          ),
+          TrinaColumn(
+            title: 'Calif5C',
+            field: 'Calif5C',
+            type: TrinaColumnType.text(),
+            readOnly: false,
+            checkReadOnly: (row, cell) {
+              return false;
+            },
+            width: 50,
+          ),
+          TrinaColumn(
+            title: 'Calif6C',
+            field: 'Calif6C',
+            type: TrinaColumnType.text(),
+            readOnly: false,
+            checkReadOnly: (row, cell) {
+              return false;
+            },
+            width: 50,
+          ),
+          TrinaColumn(
+            title: 'Calif7C',
+            field: 'Calif7C',
+            type: TrinaColumnType.text(),
+            readOnly: false,
+            checkReadOnly: (row, cell) {
+              return false;
+            },
+            width: 50,
+          ),
+          TrinaColumn(
+            title: 'Calif8C',
+            field: 'Calif8C',
+            type: TrinaColumnType.text(),
+            readOnly: false,
+            checkReadOnly: (row, cell) {
+              return false;
+            },
+            width: 50,
+          ),
+          TrinaColumn(
+            title: 'Calif9C',
+            field: 'Calif9C',
+            type: TrinaColumnType.text(),
+            readOnly: false,
+            checkReadOnly: (row, cell) {
+              return false;
+            },
+            width: 50,
+          ),
+          TrinaColumn(
+            title: 'Calif10C',
+            field: 'Calif10C',
+            type: TrinaColumnType.text(),
+            readOnly: false,
+            checkReadOnly: (row, cell) {
+              return false;
+            },
+            width: 50,
+          ),
+          TrinaColumn(
+            title: 'Promedio',
+            field: 'Promedio',
+            type: TrinaColumnType.text(),
+            readOnly: false,
+            checkReadOnly: (row, cell) {
+              return false;
+            },
+            width: 50,
+          ),
+        ];
+
+        final List<TrinaRow> rows = reportItems.map((item) {
+          try {
+            // Validate that all required fields are not null
+            if (item.matricula.isEmpty) {
+              print(
+                  'Warning: Found item with empty matricula: ${item.toString()}');
+            }
+
+            return TrinaRow(
+              cells: {
+                'Mes': TrinaCell(value: ''), // Add missing Mes column
+                'Orden': TrinaCell(value: item.orden),
+                'ClaCiclo': TrinaCell(value: item.claCiclo),
+                'ClaUN': TrinaCell(value: item.claUN),
+                'NomGrado': TrinaCell(value: item.nomGrado),
+                'Grupo': TrinaCell(value: item.grupo),
+                'Gp': TrinaCell(value: item.gp),
+                'Matricula': TrinaCell(value: item.matricula),
+                'Nombre': TrinaCell(value: item.nombre),
+                'Clamateria': TrinaCell(value: item.clamateria.toString()),
+                'NomMateria': TrinaCell(value: item.nommateria),
+                'Calif1C': TrinaCell(value: item.calif1C),
+                'Calif2C': TrinaCell(value: item.calif2C),
+                'Calif3C': TrinaCell(value: item.calif3C),
+                'Calif4C': TrinaCell(value: item.calif4C),
+                'Calif5C': TrinaCell(value: item.calif5C),
+                'Calif6C': TrinaCell(value: item.calif6C),
+                'Calif7C': TrinaCell(value: item.calif7C),
+                'Calif8C': TrinaCell(value: item.calif8C),
+                'Calif9C': TrinaCell(value: item.calif9C),
+                'Calif10C': TrinaCell(value: item.calif10C),
+                'GradoSecuencia': TrinaCell(value: item.gradoSecuencia),
+                'Promedio': TrinaCell(value: item.promedioCalC),
+                'Maestro': TrinaCell(value: item.maestro),
+              },
+            );
+          } catch (e) {
+            print('Error creating TrinaRow for item: $e');
+            print('Item data: ${item.toString()}');
+
+            // Return a safe row with default values to prevent crashes
+            return TrinaRow(
+              cells: {
+                'Mes': TrinaCell(value: ''), // Add missing Mes column
+                'Orden': TrinaCell(value: 0),
+                'ClaCiclo': TrinaCell(value: ''),
+                'ClaUN': TrinaCell(value: ''),
+                'NomGrado': TrinaCell(value: ''),
+                'Grupo': TrinaCell(value: ''),
+                'Gp': TrinaCell(value: ''),
+                'Matricula': TrinaCell(value: 'ERROR'),
+                'Nombre': TrinaCell(value: 'Error loading data'),
+                'Clamateria': TrinaCell(value: '0'),
+                'NomMateria': TrinaCell(value: ''),
+                'Calif1C': TrinaCell(value: ''),
+                'Calif2C': TrinaCell(value: ''),
+                'Calif3C': TrinaCell(value: ''),
+                'Calif4C': TrinaCell(value: ''),
+                'Calif5C': TrinaCell(value: ''),
+                'Calif6C': TrinaCell(value: ''),
+                'Calif7C': TrinaCell(value: ''),
+                'Calif8C': TrinaCell(value: ''),
+                'Calif9C': TrinaCell(value: ''),
+                'Calif10C': TrinaCell(value: ''),
+                'GradoSecuencia': TrinaCell(value: 0),
+                'Promedio': TrinaCell(value: ''),
+                'Maestro': TrinaCell(value: ''),
+              },
+            );
+          }
+        }).toList();
+
+        print('Successfully created ${rows.length} TrinaRows');
+
+        // Additional safety check - ensure we have both columns and rows
+        if (columns.isEmpty) {
+          throw Exception('No columns defined for TrinaGrid');
+        }
+
+        if (rows.isEmpty) {
+          throw Exception('No rows created for TrinaGrid');
+        }
+
+        // Convert data to TrinaRows
+        // final List<TrinaRow> rows = _reportData.map((item) {
+        //   return TrinaRow(
+        //     cells: {
+        //       'Clamateria':
+        //           TrinaCell(value: item['Clamateria']?.toString() ?? ''),
+        //       'Mes': TrinaCell(value: item['Mes']?.toString() ?? ''),
+        //       'Orden': TrinaCell(value: item['Orden'] ?? 0),
+        //       'NomGrado': TrinaCell(value: item['NomGrado']?.toString() ?? ''),
+        //       'Valor': TrinaCell(value: item['Valor']?.toString() ?? ''),
+        //       'Tipo': TrinaCell(value: item['Tipo']?.toString() ?? ''),
+        //       'Gp': TrinaCell(value: item['Gp']?.toString() ?? ''),
+        //       'PromedioSiNo':
+        //           TrinaCell(value: item['PromedioSiNo']?.toString() ?? ''),
+        //       'Nombre': TrinaCell(value: item['Nombre']?.toString() ?? ''),
+        //       'Matricula': TrinaCell(value: item['Matricula']?.toString() ?? ''),
+        //       'Grupo': TrinaCell(value: item['Grupo']?.toString() ?? ''),
+        //       'ClaCiclo': TrinaCell(value: item['ClaCiclo']?.toString() ?? ''),
+        //       'GradoSecuencia': TrinaCell(value: item['GradoSecuencia'] ?? 0),
+        //       'ClaUN': TrinaCell(value: item['ClaUN']?.toString() ?? ''),
+        //       'NomMateria':
+        //           TrinaCell(value: item['NomMateria']?.toString() ?? ''),
+        //           'Calif1C': TrinaCell(value: item['Calif1C']?.toString() ?? ''),
+        //     },
+        //   );
+        // }).toList();
+
+        return TrinaGrid(
+          columns: columns,
+          rows: rows,
+          mode: TrinaGridMode.readOnly,
+          onLoaded: (TrinaGridOnLoadedEvent event) {
+            try {
+              _gridStateManager = event.stateManager;
+              _gridStateManager.setShowColumnFilter(true);
+              print('TrinaGrid loaded successfully');
+            } catch (e) {
+              print('Error initializing TrinaGrid state manager: $e');
+            }
+          },
+          configuration: TrinaGridConfiguration(
+            style: TrinaGridStyleConfig(
+              borderColor: theme.colorScheme.outlineVariant,
+              gridBorderColor: theme.colorScheme.outlineVariant,
+              enableColumnBorderVertical: false,
+              enableCellBorderVertical: false,
+              cellColorInReadOnlyState: theme.colorScheme.surface,
+            ),
+            columnSize: const TrinaGridColumnSizeConfig(
+              autoSizeMode: TrinaAutoSizeMode.scale,
+            ),
+            scrollbar: const TrinaGridScrollbarConfig(
+              isAlwaysShown: true,
+            ),
+          ),
+          createFooter: (stateManager) {
+            stateManager.setPageSize(25, notify: false);
+            return Container(
+              decoration: BoxDecoration(
+                // color: theme.colorScheme.surfaceContainerHigh,
+                border: Border(
+                  top: BorderSide(
+                    color: theme.colorScheme.outlineVariant,
+                    width: 1,
+                  ),
                 ),
               ),
-            ),
-            child: TrinaPagination(stateManager),
-          );
-        },
-      );
-    }
+              child: TrinaPagination(stateManager),
+            );
+          },
+        );
+      }
 
-    // Show different messages based on state
-    if (selectedCampus == null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.holiday_village_sharp,
-              size: 64,
-              color: theme.colorScheme.primary.withOpacity(0.5),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Seleccione un campus',
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+      // Show different messages based on state
+      if (selectedCampus == null) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.holiday_village_sharp,
+                size: 64,
+                color: theme.colorScheme.primary.withOpacity(0.5),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Debe seleccionar un campus antes de continuar',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
+              const SizedBox(height: 16),
+              Text(
+                'Seleccione un campus',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
               ),
-            ),
-          ],
-        ),
-      );
-    }
+              const SizedBox(height: 8),
+              Text(
+                'Debe seleccionar un campus antes de continuar',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
+                ),
+              ),
+            ],
+          ),
+        );
+      }
 
-    if (gradesList.isEmpty) {
+      if (gradesList.isEmpty) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.refresh,
+                size: 64,
+                color: theme.colorScheme.primary.withOpacity(0.5),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Presione el botón refrescar',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Para cargar los datos y habilitar los filtros',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+
+      if (selectedGrade == null || selectedGroup == null) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.refresh,
+                size: 64,
+                color: theme.colorScheme.primary.withOpacity(0.5),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Seleccione Grado y Grupo',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Luego presione "Generar reporte" para ver los datos',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+
+      // Show message to generate report
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -1639,14 +1606,14 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
             ),
             const SizedBox(height: 16),
             Text(
-              'Presione el botón refrescar',
+              'Presione "Generar reporte"',
               style: theme.textTheme.titleMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Para cargar los datos y habilitar los filtros',
+              'Para obtener los datos del reporte con los filtros seleccionados',
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
               ),
@@ -1654,29 +1621,29 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
           ],
         ),
       );
-    }
-
-    if (selectedGrade == null || selectedGroup == null) {
+    } catch (e, stackTrace) {
+      print('Error in _buildDataTable: $e');
+      print('Stack trace: $stackTrace');
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.refresh,
+              Icons.error_outline,
               size: 64,
-              color: theme.colorScheme.primary.withOpacity(0.5),
+              color: theme.colorScheme.error,
             ),
             const SizedBox(height: 16),
             Text(
-              'Seleccione Grado y Grupo',
+              'Error al mostrar los datos',
               style: theme.textTheme.titleMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Luego presione "Generar reporte" para ver los datos',
-              style: theme.textTheme.bodyMedium?.copyWith(
+              'Error: $e',
+              style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
               ),
             ),
@@ -1684,34 +1651,6 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
         ),
       );
     }
-
-    // Show message to generate report
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.refresh,
-            size: 64,
-            color: theme.colorScheme.primary.withOpacity(0.5),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Presione "Generar reporte"',
-            style: theme.textTheme.titleMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Para obtener los datos del reporte con los filtros seleccionados',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   Future<dynamic> fetchFiltersData(String campus, String cycle) async {
@@ -1723,6 +1662,7 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
     setState(() {
       _isLoadingFilters = true;
       _reportData.clear();
+      reportItems.clear();
     });
 
     try {
@@ -2024,64 +1964,158 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
   }
 
   Future<dynamic> fetchReportData() async {
+    print('=== Starting fetchReportData ===');
+
+    // Validate required selections
     if (selectedCampus == null ||
         selectedGrade == null ||
         selectedGroup == null) {
+      _showErrorNotification('Por favor seleccione Campus, Grado y Grupo');
       return null;
     }
 
     // Validate currentCycle
     if (currentCycle == null || currentCycle!.claCiclo == null) {
-      _showErrorNotification('Error: Ciclo escolar no disponible.');
+      _showErrorNotification('No se detectó ciclo escolar, vuelva a intentar.');
       return null;
     }
 
     try {
+      // Set default values
       includeDeactivatedStudent ??= false;
       includeValidation ??= false;
 
-      // Call the getFodac59Response function with correct parameters
-      // Get the gradeSeq for the selected grade
+      // Get parameters for API call
       int gradeSeq = _getGradeSeq(selectedGrade!);
-      int monthIndex = _getMonthIndex(selectedMonth);
+      int? monthIndex = getKeyFromValue(spanishMonthsMap, selectedMonth);
+      String studentIdToSend = selectedStudentId?.trim() ?? 'ND';
 
-      String studentIdToSend;
-      if (selectedStudent == null || selectedStudentId == null) {
-        studentIdToSend = 'ND'; // Default value if no student is selected
-        print('No student selected, sending: ND');
-      } else {
-        studentIdToSend = selectedStudentId!.trim();
-        print(
-            'Sending student ID: $studentIdToSend for student: $selectedStudent');
+      print('API Call Parameters:');
+      print('- Campus: $selectedCampus');
+      print('- Grade: $selectedGrade (seq: $gradeSeq)');
+      print('- Group: $selectedGroup');
+      print('- Month: $selectedMonth (index: $monthIndex)');
+      print('- Student: $studentIdToSend');
+
+      // Make API call
+      final apiResponse = await getFodac59Response(
+        currentCycle!.claCiclo!,
+        selectedCampus!,
+        gradeSeq,
+        selectedGroup!,
+        monthIndex ?? 99,
+        0,
+        'NONAME',
+        includeDeactivatedStudent ?? false,
+        studentIdToSend,
+      );
+
+      print('API Response Type: ${apiResponse.runtimeType}');
+
+      // Process API response
+      if (apiResponse == null) {
+        _showWarningNotification('No se recibieron datos del servidor');
+        return null;
       }
 
-      await getFodac59Response(
-              currentCycle!.claCiclo!,
-              selectedCampus!,
-              gradeSeq,
-              selectedGroup!,
-              monthIndex,
-              0,
-              'NONAME', // computerName
-              includeDeactivatedStudent ?? false,
-              studentIdToSend) // Send studentId instead of student name
-          .then((value) {
-        if (value != null) {
-          setState(() {
-            _reportData = List<dynamic>.from(value);
-          });
-        }
-        return value;
-      }).onError((error, stackTrace) {
-        print('Error fetching report data: $error');
-        _showErrorNotification(
-            'No se pudo obtener los datos del reporte. Inténtalo de nuevo más tarde.');
-      });
-    } catch (e) {
+      // Handle different response types
+      if (apiResponse is List) {
+        await _processListResponse(apiResponse);
+      } else if (apiResponse is Map) {
+        _handleMapResponse(apiResponse);
+      } else {
+        _showErrorNotification('Formato de respuesta no reconocido');
+      }
+
+      return apiResponse;
+    } catch (e, stackTrace) {
       print('Error in fetchReportData: $e');
-      _showErrorNotification(
-          'No se pudo obtener los datos del reporte. Inténtalo de nuevo más tarde.');
+      print('Stack trace: $stackTrace');
+      _showErrorNotification('Error al obtener los datos: ${e.toString()}');
+      return null;
     }
+  }
+
+  Future<void> _processListResponse(List apiResponse) async {
+    print('Processing List response with ${apiResponse.length} items');
+
+    if (apiResponse.isEmpty) {
+      _showWarningNotification(
+          'No se encontraron datos para los filtros seleccionados');
+      setState(() {
+        reportItems.clear();
+        _reportData.clear();
+      });
+      return;
+    }
+
+    // Log first item structure for debugging
+    if (apiResponse.isNotEmpty) {
+      print(
+          'First item keys: ${apiResponse[0] is Map ? (apiResponse[0] as Map).keys.toList() : 'Not a Map'}');
+    }
+
+    List<Fodac60Item> newReportItems = [];
+    List<String> errors = [];
+
+    // Process each item
+    for (int i = 0; i < apiResponse.length; i++) {
+      try {
+        var item = apiResponse[i];
+
+        if (item is Map<String, dynamic>) {
+          newReportItems.add(Fodac60Item.fromJson(item));
+        } else if (item is Map) {
+          // Convert Map to Map<String, dynamic>
+          Map<String, dynamic> convertedItem = {};
+          item.forEach((key, value) => convertedItem[key.toString()] = value);
+          newReportItems.add(Fodac60Item.fromJson(convertedItem));
+        } else {
+          errors.add('Item $i no es un mapa válido');
+        }
+      } catch (e) {
+        errors.add('Error procesando item $i: $e');
+        print('Error processing item $i: $e');
+      }
+    }
+
+    // Update state with processed data
+    setState(() {
+      reportItems.clear();
+      reportItems.addAll(newReportItems);
+      _reportData = List<dynamic>.from(apiResponse);
+    });
+
+    // Show results
+    if (newReportItems.isNotEmpty) {
+      _showSuccessNotification(
+          'Reporte generado: ${newReportItems.length} registros cargados');
+    }
+
+    if (errors.isNotEmpty) {
+      print('Processing errors: $errors');
+    }
+
+    print('Successfully processed ${newReportItems.length} items');
+  }
+
+  void _handleMapResponse(Map apiResponse) {
+    print('Handling Map response: $apiResponse');
+
+    if (apiResponse.containsKey('error') ||
+        apiResponse.containsKey('message')) {
+      String errorMsg = apiResponse['error']?.toString() ??
+          apiResponse['message']?.toString() ??
+          'Error desconocido del servidor';
+      _showErrorNotification('Error del servidor: $errorMsg');
+    } else {
+      _showErrorNotification('Respuesta inesperada del servidor');
+    }
+
+    setState(() {
+      reportItems.clear();
+      _reportData.clear();
+    });
   }
 
   bool _canGenerateReport() {
@@ -2101,28 +2135,6 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
       }
     }
     return 0; // Default fallback
-  }
-
-  int _getMonthIndex(String? month) {
-    if (month == null) return DateTime.now().month;
-
-    final months = [
-      'Enero',
-      'Febrero',
-      'Marzo',
-      'Abril',
-      'Mayo',
-      'Junio',
-      'Julio',
-      'Agosto',
-      'Septiembre',
-      'Octubre',
-      'Noviembre',
-      'Diciembre'
-    ];
-
-    int index = months.indexOf(month);
-    return index >= 0 ? index + 1 : DateTime.now().month;
   }
 
   List<String> _getAvailableColumns() {

@@ -298,57 +298,67 @@ class _CafeteriaUserConsumptionState extends State<CafeteriaUserConsumption> {
                               ),
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(16),
-                                child: SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  child: DataTable(
-                                    headingRowColor: WidgetStateProperty.all(
-                                      colorScheme.primaryContainer,
-                                    ),
-                                    dataRowColor:
-                                        WidgetStateProperty.resolveWith<Color?>(
-                                      (states) {
-                                        if (states
-                                            .contains(WidgetState.selected)) {
-                                          return colorScheme.primary
-                                              .withOpacity(0.12);
-                                        }
-                                        if (states
-                                            .contains(WidgetState.hovered)) {
-                                          return colorScheme.onSurface
-                                              .withOpacity(0.08);
-                                        }
-                                        return null;
-                                      },
-                                    ),
-                                    border: TableBorder.all(
-                                      color:
-                                          colorScheme.outline.withOpacity(0.2),
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                    showBottomBorder: true,
-                                    dividerThickness: 1,
-                                    headingTextStyle:
-                                        theme.textTheme.titleSmall?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                      color: colorScheme.onPrimaryContainer,
-                                    ),
-                                    dataTextStyle:
-                                        theme.textTheme.bodyMedium?.copyWith(
-                                      color: colorScheme.onSurface,
-                                    ),
-                                    columns: const <DataColumn>[
-                                      DataColumn(
-                                        label: Text('Artículo'),
+                                child: Scrollbar(
+                                  thumbVisibility: true,
+                                  child: SingleChildScrollView(
+                                    scrollDirection: Axis.vertical,
+                                    child: SingleChildScrollView(
+                                      scrollDirection: Axis.horizontal,
+                                      child: DataTable(
+                                        headingRowColor:
+                                            WidgetStateProperty.all(
+                                          colorScheme.primaryContainer,
+                                        ),
+                                        dataRowColor: WidgetStateProperty
+                                            .resolveWith<Color?>(
+                                          (states) {
+                                            if (states.contains(
+                                                WidgetState.selected)) {
+                                              return colorScheme.primary
+                                                  .withOpacity(0.12);
+                                            }
+                                            if (states.contains(
+                                                WidgetState.hovered)) {
+                                              return colorScheme.onSurface
+                                                  .withOpacity(0.08);
+                                            }
+                                            return null;
+                                          },
+                                        ),
+                                        border: TableBorder.all(
+                                          color: colorScheme.outline
+                                              .withOpacity(0.2),
+                                          borderRadius:
+                                              BorderRadius.circular(16),
+                                        ),
+                                        showBottomBorder: true,
+                                        dividerThickness: 1,
+                                        headingTextStyle: theme
+                                            .textTheme.titleSmall
+                                            ?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          color: colorScheme.onPrimaryContainer,
+                                        ),
+                                        dataTextStyle: theme
+                                            .textTheme.bodyMedium
+                                            ?.copyWith(
+                                          color: colorScheme.onSurface,
+                                        ),
+                                        columns: const <DataColumn>[
+                                          DataColumn(
+                                            label: Text('Artículo'),
+                                          ),
+                                          DataColumn(
+                                            label: Text('Fecha'),
+                                          ),
+                                          DataColumn(
+                                            numeric: true,
+                                            label: Text('Costo'),
+                                          ),
+                                        ],
+                                        rows: dataRows,
                                       ),
-                                      DataColumn(
-                                        label: Text('Fecha'),
-                                      ),
-                                      DataColumn(
-                                        numeric: true,
-                                        label: Text('Costo'),
-                                      ),
-                                    ],
-                                    rows: dataRows,
+                                    ),
                                   ),
                                 ),
                               ),
