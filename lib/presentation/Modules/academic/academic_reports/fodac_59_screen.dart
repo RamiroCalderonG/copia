@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:file_saver/file_saver.dart';
 import 'package:csv/csv.dart';
 import 'package:oxschool/core/constants/date_constants.dart';
+import 'package:oxschool/core/reusable_methods/logger_actions.dart';
 import 'package:oxschool/core/reusable_methods/reusable_functions.dart';
 import 'package:oxschool/data/Models/Fodac60Item.dart';
 import 'package:pdf/pdf.dart';
@@ -15,10 +15,11 @@ import 'package:oxschool/core/utils/loader_indicator.dart';
 import 'package:oxschool/core/utils/searchable_drop_down.dart';
 import 'package:oxschool/data/services/backend/api_requests/api_calls_list_dio.dart';
 import 'package:trina_grid/trina_grid.dart';
+import 'package:file_saver/file_saver.dart';
+import '../../../components/pdf/fodac59_report.dart';
 
 class Fodac59Screen extends StatefulWidget {
   const Fodac59Screen({super.key});
-
   @override
   State<Fodac59Screen> createState() => _Fodac59ScreenState();
 }
@@ -75,6 +76,13 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
   bool _isLoadingFilters = false; // Add loading state for filter fetching
   late TrinaGridStateManager _gridStateManager; // Add TrinaGrid state manager
 
+  // Performance optimization variables
+  int _currentPage = 0;
+  int _pageSize = 50; // Smaller page size for better performance
+  int _totalItems = 0;
+  List<Fodac60Item> _allReportItems = []; // Store all items
+  List<Fodac60Item> _currentPageItems = []; // Current page items
+
   @override
   void initState() {
     // Don't fetch initial data, just initialize the controller
@@ -97,6 +105,8 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
     future = null;
     _reportData.clear();
     reportItems.clear();
+    _allReportItems.clear();
+    _currentPageItems.clear();
     super.dispose();
   }
 
@@ -589,6 +599,7 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
                                       setState(() {
                                         _isRefreshing = true;
                                         reportItems.clear();
+                                        _resetPagination();
                                       });
 
                                       try {
@@ -832,7 +843,6 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
       'Abril',
       'Mayo',
       'Junio',
-      'Julio',
       'Agosto',
       'Septiembre',
       'Octubre',
@@ -873,7 +883,7 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
               ),
             ),
             child: DropdownButtonFormField<String>(
-              value: selectedMonth,
+              initialValue: selectedMonth,
               decoration: InputDecoration(
                 contentPadding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -1019,20 +1029,51 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Icon(
-                Icons.filter_list,
-                size: 18,
-                color: theme.colorScheme.primary,
+              Row(
+                children: [
+                  Icon(
+                    Icons.filter_list,
+                    size: 18,
+                    color: theme.colorScheme.primary,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Filtros aplicados',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 8),
-              Text(
-                'Filtros aplicados',
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.primary,
+              // Performance info for large datasets
+              if (_totalItems > 0)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: _totalItems > 500
+                        ? theme.colorScheme.errorContainer
+                        : (_totalItems > 200
+                            ? theme.colorScheme.tertiaryContainer
+                            : theme.colorScheme.secondaryContainer),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '$_totalItems registros',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: _totalItems > 500
+                          ? theme.colorScheme.onErrorContainer
+                          : (_totalItems > 200
+                              ? theme.colorScheme.onTertiaryContainer
+                              : theme.colorScheme.onSecondaryContainer),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 11,
+                    ),
+                  ),
                 ),
-              ),
             ],
           ),
           const SizedBox(height: 8),
@@ -1070,6 +1111,40 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
                 ),
             ],
           ),
+          // Performance tip for large datasets
+          if (_totalItems > 500)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceVariant.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: theme.colorScheme.outline.withOpacity(0.3),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      size: 16,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Dataset grande detectado. Se está usando paginación para mejorar el rendimiento.',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -1204,7 +1279,7 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
             checkReadOnly: (row, cell) {
               return false;
             },
-            width: 200,
+            width: 550,
           ),
           TrinaColumn(
             title: 'Clamateria',
@@ -1489,7 +1564,11 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
             ),
           ),
           createFooter: (stateManager) {
-            stateManager.setPageSize(25, notify: false);
+            // Use smaller page size for large datasets, larger for small ones
+            final pageSize =
+                _totalItems > 1000 ? 25 : (_totalItems > 500 ? 50 : 100);
+            stateManager.setPageSize(pageSize, notify: false);
+
             return Container(
               decoration: BoxDecoration(
                 // color: theme.colorScheme.surfaceContainerHigh,
@@ -1500,7 +1579,46 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
                   ),
                 ),
               ),
-              child: TrinaPagination(stateManager),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Custom pagination info for large datasets
+                  if (_totalItems > 200)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Total de registros: $_totalItems',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          if (_totalItems > 200)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.primaryContainer,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                'Modo paginado para mejor rendimiento',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onPrimaryContainer,
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  TrinaPagination(stateManager),
+                ],
+              ),
             );
           },
         );
@@ -1964,8 +2082,6 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
   }
 
   Future<dynamic> fetchReportData() async {
-    print('=== Starting fetchReportData ===');
-
     // Validate required selections
     if (selectedCampus == null ||
         selectedGrade == null ||
@@ -1990,13 +2106,6 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
       int? monthIndex = getKeyFromValue(spanishMonthsMap, selectedMonth);
       String studentIdToSend = selectedStudentId?.trim() ?? 'ND';
 
-      print('API Call Parameters:');
-      print('- Campus: $selectedCampus');
-      print('- Grade: $selectedGrade (seq: $gradeSeq)');
-      print('- Group: $selectedGroup');
-      print('- Month: $selectedMonth (index: $monthIndex)');
-      print('- Student: $studentIdToSend');
-
       // Make API call
       final apiResponse = await getFodac59Response(
         currentCycle!.claCiclo!,
@@ -2004,13 +2113,11 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
         gradeSeq,
         selectedGroup!,
         monthIndex ?? 99,
-        0,
-        'NONAME',
+        0, // Is obtained at api request call
+        'NONAME', // Is obtained at api request call
         includeDeactivatedStudent ?? false,
         studentIdToSend,
       );
-
-      print('API Response Type: ${apiResponse.runtimeType}');
 
       // Process API response
       if (apiResponse == null) {
@@ -2029,8 +2136,8 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
 
       return apiResponse;
     } catch (e, stackTrace) {
-      print('Error in fetchReportData: $e');
-      print('Stack trace: $stackTrace');
+      insertErrorLog('Fodac60',
+          'fetchReportData, ${e.toString()}, ${stackTrace.toString()}');
       _showErrorNotification('Error al obtener los datos: ${e.toString()}');
       return null;
     }
@@ -2044,7 +2151,10 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
           'No se encontraron datos para los filtros seleccionados');
       setState(() {
         reportItems.clear();
+        _allReportItems.clear();
+        _currentPageItems.clear();
         _reportData.clear();
+        _resetPagination();
       });
       return;
     }
@@ -2055,41 +2165,81 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
           'First item keys: ${apiResponse[0] is Map ? (apiResponse[0] as Map).keys.toList() : 'Not a Map'}');
     }
 
+    // Clear existing data
+    setState(() {
+      reportItems.clear();
+      _allReportItems.clear();
+      _currentPageItems.clear();
+      _resetPagination();
+    });
+
+    // Process data in chunks for better performance
+    const int chunkSize = 100; // Process 100 items at a time
     List<Fodac60Item> newReportItems = [];
     List<String> errors = [];
 
-    // Process each item
-    for (int i = 0; i < apiResponse.length; i++) {
-      try {
-        var item = apiResponse[i];
+    // Process items in chunks to prevent UI blocking
+    for (int chunkStart = 0;
+        chunkStart < apiResponse.length;
+        chunkStart += chunkSize) {
+      final chunkEnd = (chunkStart + chunkSize).clamp(0, apiResponse.length);
+      final chunk = apiResponse.sublist(chunkStart, chunkEnd);
 
-        if (item is Map<String, dynamic>) {
-          newReportItems.add(Fodac60Item.fromJson(item));
-        } else if (item is Map) {
-          // Convert Map to Map<String, dynamic>
-          Map<String, dynamic> convertedItem = {};
-          item.forEach((key, value) => convertedItem[key.toString()] = value);
-          newReportItems.add(Fodac60Item.fromJson(convertedItem));
-        } else {
-          errors.add('Item $i no es un mapa válido');
+      // Process current chunk
+      for (int i = 0; i < chunk.length; i++) {
+        try {
+          var item = chunk[i];
+
+          if (item is Map<String, dynamic>) {
+            newReportItems.add(Fodac60Item.fromJson(item));
+          } else if (item is Map) {
+            // Convert Map to Map<String, dynamic>
+            Map<String, dynamic> convertedItem = {};
+            item.forEach((key, value) => convertedItem[key.toString()] = value);
+            newReportItems.add(Fodac60Item.fromJson(convertedItem));
+          } else {
+            errors.add('Item ${chunkStart + i} no es un mapa válido');
+          }
+        } catch (e) {
+          errors.add('Error procesando item ${chunkStart + i}: $e');
+          print('Error processing item ${chunkStart + i}: $e');
         }
-      } catch (e) {
-        errors.add('Error procesando item $i: $e');
-        print('Error processing item $i: $e');
+      }
+
+      // Give the UI a chance to breathe between chunks
+      if (chunkStart + chunkSize < apiResponse.length) {
+        await Future.delayed(const Duration(milliseconds: 50));
       }
     }
 
     // Update state with processed data
     setState(() {
-      reportItems.clear();
-      reportItems.addAll(newReportItems);
+      _allReportItems = newReportItems;
+      _totalItems = newReportItems.length;
       _reportData = List<dynamic>.from(apiResponse);
+
+      // Update current page items
+      _updateCurrentPageItems();
+
+      // For display, use pagination for large datasets
+      if (_totalItems <= 200) {
+        // Small dataset, show all items
+        reportItems = List.from(_allReportItems);
+      } else {
+        // Large dataset, show only current page
+        reportItems = List.from(_currentPageItems);
+      }
     });
 
     // Show results
     if (newReportItems.isNotEmpty) {
-      _showSuccessNotification(
-          'Reporte generado: ${newReportItems.length} registros cargados');
+      if (newReportItems.length > 500) {
+        _showSuccessNotification(
+            'Reporte generado: ${newReportItems.length} registros. Usando paginación para mejor rendimiento.');
+      } else {
+        _showSuccessNotification(
+            'Reporte generado: ${newReportItems.length} registros cargados');
+      }
     }
 
     if (errors.isNotEmpty) {
@@ -2097,6 +2247,12 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
     }
 
     print('Successfully processed ${newReportItems.length} items');
+
+    // Perform memory cleanup for large datasets
+    _performMemoryCleanup();
+
+    // Handle memory pressure if needed
+    _handleMemoryPressure();
   }
 
   void _handleMapResponse(Map apiResponse) {
@@ -2127,6 +2283,58 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
         gradesList.isNotEmpty;
   }
 
+  // Pagination methods for performance optimization
+  void _updateCurrentPageItems() {
+    if (_allReportItems.isEmpty) {
+      _currentPageItems.clear();
+      return;
+    }
+
+    final startIndex = _currentPage * _pageSize;
+    final endIndex = (startIndex + _pageSize).clamp(0, _allReportItems.length);
+
+    if (startIndex >= _allReportItems.length) {
+      _currentPageItems.clear();
+      return;
+    }
+
+    _currentPageItems = _allReportItems.sublist(startIndex, endIndex);
+    _totalItems = _allReportItems.length;
+  }
+
+  void _resetPagination() {
+    _currentPage = 0;
+    _totalItems = 0;
+    _currentPageItems.clear();
+  }
+
+  // Memory management for large datasets
+  void _performMemoryCleanup() {
+    // Force garbage collection for large datasets
+    if (_totalItems > 1000) {
+      // Clear any temporary variables
+      _rawData.clear();
+
+      // Suggest garbage collection
+      print('Performing memory cleanup for large dataset ($_totalItems items)');
+    }
+  }
+
+  // Handle memory pressure by clearing non-essential data
+  void _handleMemoryPressure() {
+    if (_totalItems > 500) {
+      // Clear raw data as it's no longer needed after processing
+      _rawData.clear();
+
+      // Clear filtered lists that can be regenerated
+      _filteredGroups.clear();
+      _filteredStudents.clear();
+      _filteredStudentNameToIdMap.clear();
+
+      print('Cleared temporary data due to memory pressure');
+    }
+  }
+
   int _getGradeSeq(String grade) {
     // Find the corresponding gradeSeq for the selected grade
     for (var item in _rawData) {
@@ -2143,21 +2351,25 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
     // Initialize column selection map if empty
     if (selectedColumns.isEmpty && _reportData.isNotEmpty) {
       final columns = [
-        'Clamateria',
-        'Mes',
-        'Orden',
-        'NomGrado',
-        'Valor',
-        'Tipo',
-        'Gp',
-        'PromedioSiNo',
-        'Nombre',
-        'Matricula',
-        'Grupo',
         'ClaCiclo',
-        'GradoSecuencia',
         'ClaUN',
-        'NomMateria'
+        'NomGrado',
+        'Grado',
+        'GP',
+        'Matricula',
+        'Nombre',
+        'NomMateria',
+        'Calif1C',
+        'Calif2C',
+        'Calif3C',
+        'Calif4C',
+        'Calif5C',
+        'Calif6C',
+        'Calif7C',
+        'Calif8C',
+        'Calif9C',
+        'Calif10C',
+        'Promedio'
       ];
       for (var column in columns) {
         selectedColumns[column] = true;
@@ -2165,21 +2377,25 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
     }
 
     return [
-      'Clamateria',
-      'Mes',
-      'Orden',
-      'NomGrado',
-      'Valor',
-      'Tipo',
-      'Gp',
-      'PromedioSiNo',
-      'Nombre',
-      'Matricula',
-      'Grupo',
       'ClaCiclo',
-      'GradoSecuencia',
       'ClaUN',
-      'NomMateria'
+      'NomGrado',
+      'Grado',
+      'GP',
+      'Matricula',
+      'Nombre',
+      'NomMateria',
+      'Calif1C',
+      'Calif2C',
+      'Calif3C',
+      'Calif4C',
+      'Calif5C',
+      'Calif6C',
+      'Calif7C',
+      'Calif8C',
+      'Calif9C',
+      'Calif10C',
+      'Promedio'
     ];
   }
 
@@ -2651,112 +2867,19 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
   }
 
   Future<Uint8List> _exportToPdf(List<String>? selectedColumns) async {
+    // Get the currently displayed data
+    final List<Fodac60Item> dataToExport = _allReportItems;
+
+    // Get available columns if none selected
     final List<String> columns = selectedColumns ?? _getAvailableColumns();
 
-    // Create page format based on orientation
-    final format = pdfLandscape ? PdfPageFormat.a4.landscape : PdfPageFormat.a4;
-
-    // Function to convert Flutter Color to PdfColor
-    PdfColor flutterToPdfColor(Color color) {
-      return PdfColor.fromInt(color.value);
-    }
-
-    final pdf = pw.Document();
-
-    final themeData = pw.ThemeData(
-      tableHeader: pw.TextStyle(
-        color: PdfColors.white,
-        font: pw.Font.ttf(await rootBundle
-            .load("assets/fonts/SoraFont/static/Sora-Bold.ttf")),
-        fontSize: 12,
-      ),
-      defaultTextStyle: pw.TextStyle(
-        color: flutterToPdfColor(textColor),
-        font: pw.Font.ttf(await rootBundle
-            .load("assets/fonts/SoraFont/static/Sora-Regular.ttf")),
-        fontSize: 10,
-      ),
+    // Use the new report class
+    return await Fodac59Report.exportToPdf(
+      dataToExport,
+      columns,
+      pdfLandscape,
+      true, // Always use student report cards for now
     );
-
-    // Prepare table data
-    final List<List<String>> tableData = [];
-
-    // Add headers if requested
-    if (includeHeaders) {
-      tableData.add(columns);
-    }
-
-    // Add data rows
-    for (var item in _reportData) {
-      final List<String> rowData = [];
-      for (var column in columns) {
-        rowData.add(item[column]?.toString() ?? '');
-      }
-      tableData.add(rowData);
-    }
-
-    pdf.addPage(
-      pw.MultiPage(
-        pageTheme: pw.PageTheme(
-          pageFormat: format,
-          theme: themeData,
-        ),
-        build: (pw.Context context) {
-          return [
-            pw.Header(
-              level: 0,
-              child: pw.Text(
-                pdfTitle,
-                style: pw.TextStyle(
-                  fontSize: 20,
-                  font: pw.Font.timesBold(),
-                  color: flutterToPdfColor(headerColor),
-                ),
-              ),
-            ),
-            pw.SizedBox(height: 20),
-            pw.Table(
-              border: pw.TableBorder.all(
-                color: PdfColors.grey500,
-                width: 0.5,
-              ),
-              columnWidths: {
-                for (int i = 0; i < columns.length; i++)
-                  i: const pw.FlexColumnWidth(),
-              },
-              children: tableData.map((row) {
-                final isHeader = includeHeaders && tableData.indexOf(row) == 0;
-                return pw.TableRow(
-                  decoration: isHeader
-                      ? pw.BoxDecoration(
-                          color: flutterToPdfColor(headerColor),
-                        )
-                      : null,
-                  children: row.map((cell) {
-                    return pw.Padding(
-                      padding: const pw.EdgeInsets.all(4),
-                      child: pw.Text(
-                        cell,
-                        style: pw.TextStyle(
-                          color: isHeader
-                              ? PdfColors.white
-                              : flutterToPdfColor(textColor),
-                          fontSize: isHeader ? 12 : 10,
-                          font:
-                              isHeader ? pw.Font.timesBold() : pw.Font.times(),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                );
-              }).toList(),
-            ),
-          ];
-        },
-      ),
-    );
-
-    return pdf.save();
   }
 
   Future<String> _downloadFile(
