@@ -103,9 +103,9 @@ class _MyAppState extends State<MyApp> {
           scrollbarTheme: const ScrollbarThemeData(),
           colorSchemeSeed: Colors.blue),
       darkTheme: ThemeData(
-        brightness: Brightness.dark,
-        scrollbarTheme: const ScrollbarThemeData(),
-      ),
+          brightness: Brightness.dark,
+          scrollbarTheme: const ScrollbarThemeData(),
+          colorSchemeSeed: Colors.blue.shade800),
       themeMode: _themeMode,
       routerConfig: _router,
     );

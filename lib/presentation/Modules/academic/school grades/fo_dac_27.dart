@@ -42,7 +42,7 @@ class _FoDac27State extends State<FoDac27> {
   String selectedStudentIdToEdit = '';
 
   bool isLoading = true;
-  bool isUserAdmin = false;
+  bool canUserDelete = false;
   bool displayLoading = false;
 
   int selectedEvalID = 0;
@@ -51,7 +51,12 @@ class _FoDac27State extends State<FoDac27> {
 
   @override
   void initState() {
-    isUserAdmin = currentUser!.isCurrentUserAdmin();
+    if (currentUser!.isCurrentUserAdmin() ||
+        currentUser!.isCurrentUserAcademicCoord()) {
+      canUserDelete = true;
+    } else {
+      canUserDelete = false;
+    }
     _studentsFuture = populateStudentsDropDownMenu();
     super.initState();
   }
@@ -366,7 +371,7 @@ class _FoDac27State extends State<FoDac27> {
         const SizedBox(height: 8),
         _buildExportButton(theme, colorScheme),
         const SizedBox(height: 8),
-        if (isUserAdmin) _buildDeleteButton(theme, colorScheme),
+        if (canUserDelete) _buildDeleteButton(theme, colorScheme),
       ],
     );
   }

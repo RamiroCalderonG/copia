@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_theme.dart';
 import 'package:oxschool/core/config/flutter_flow/flutter_flow_util.dart';
 import 'package:oxschool/core/constants/user_consts.dart';
+import 'package:oxschool/presentation/components/confirm_dialogs.dart';
 
 class ReportType {
   final String title; //Title to display on the card
@@ -103,7 +104,6 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
     'Abril',
     'Mayo',
     'Junio',
-    'Julio',
     'Agosto',
     'Septiembre',
     'Octubre',
@@ -457,10 +457,25 @@ class _ReportSelectionScreenState extends State<ReportSelectionScreen>
                           return Transform.scale(
                             scale: _cardAnimations[index].value,
                             child: ReportCard(
-                              reportType: reportTypes[index],
-                              isSelected: selectedIndex == index,
-                              onTap: () => _selectReport(index),
-                            ),
+                                reportType: reportTypes[index],
+                                isSelected: selectedIndex == index,
+                                onTap: () {
+                                  currentUser!
+                                          .userRole!.roleModuleRelationships!
+                                          .any((element) {
+                                    if (element.eventId ==
+                                        reportTypes[index].idKey) {
+                                      return element.canAccessEvent!;
+                                    } else {
+                                      return false;
+                                    }
+                                  })
+                                      ? _selectReport(index)
+                                      : showInformationDialog(
+                                          context,
+                                          '¡Acceso denegado!',
+                                          'No tienes permiso para acceder a este reporte, contacta al departamento de sistemas.');
+                                }),
                           );
                         },
                       );
