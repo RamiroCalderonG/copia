@@ -42,7 +42,7 @@ bool isLoading = false;
 class _LoginViewWidgetState extends State<LoginViewWidget> {
   late LoginViewModel _model;
   String currentDeviceData = '';
-  static const int tapLimit = 4;
+  static const int tapLimit = 10;
   static const int timeLimit = 3 * 60; // 3 minutes in seconds
 
   List<int> tapTimestamps = [];

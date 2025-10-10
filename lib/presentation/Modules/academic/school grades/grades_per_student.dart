@@ -100,18 +100,9 @@ class _GradesByStudentState extends State<GradesByStudent> {
   @override
   void dispose() {
     _disposed = true;
-    //studentsGradesCommentsRows.clear();
-    //evaluationComments.clear();
-    //commentStringEval.clear();
     _debounce?.cancel();
     _validationDebounce?.cancel();
     commentsController.dispose();
-    //selectedTempGrade = null;
-    //selectedTempGroup = null;
-    //selectedTempStudent = null;
-    //selectedTempCampus = null;
-    //selectedTempMonth = null;
-    //selectedCurrentTempMonth = null;
     fetchedData = null;
     rows.clear();
     super.dispose();
