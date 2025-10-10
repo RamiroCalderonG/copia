@@ -1951,10 +1951,14 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
   }
 
   void _showErrorNotification(String message) {
+    insertErrorLog(
+      message,
+      'Export PDF at fodac_59_screen.dart',
+    );
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         backgroundColor: Colors.red,
-        duration: const Duration(seconds: 5),
+        duration: const Duration(seconds: 8),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
@@ -2658,61 +2662,61 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
                         contentPadding: EdgeInsets.zero,
                       ),
                       const SizedBox(height: 16),
-                      const Text('Colores del tema:'),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          const Text('Color del encabezado: '),
-                          const SizedBox(width: 8),
-                          InkWell(
-                            onTap: () async {
-                              final selectedColor =
-                                  await _showColorPicker(context, headerColor);
-                              if (selectedColor != null) {
-                                setDialogState(() {
-                                  headerColor = selectedColor;
-                                });
-                              }
-                            },
-                            child: Container(
-                              width: 40,
-                              height: 24,
-                              decoration: BoxDecoration(
-                                color: headerColor,
-                                border: Border.all(color: Colors.grey),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          const Text('Color del texto: '),
-                          const SizedBox(width: 16),
-                          InkWell(
-                            onTap: () async {
-                              final selectedColor =
-                                  await _showColorPicker(context, textColor);
-                              if (selectedColor != null) {
-                                setDialogState(() {
-                                  textColor = selectedColor;
-                                });
-                              }
-                            },
-                            child: Container(
-                              width: 40,
-                              height: 24,
-                              decoration: BoxDecoration(
-                                color: textColor,
-                                border: Border.all(color: Colors.grey),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                      // const Text('Colores del tema:'),
+                      // const SizedBox(height: 8),
+                      // Row(
+                      //   children: [
+                      //     const Text('Color del encabezado: '),
+                      //     const SizedBox(width: 8),
+                      //     InkWell(
+                      //       onTap: () async {
+                      //         final selectedColor =
+                      //             await _showColorPicker(context, headerColor);
+                      //         if (selectedColor != null) {
+                      //           setDialogState(() {
+                      //             headerColor = selectedColor;
+                      //           });
+                      //         }
+                      //       },
+                      //       child: Container(
+                      //         width: 40,
+                      //         height: 24,
+                      //         decoration: BoxDecoration(
+                      //           color: headerColor,
+                      //           border: Border.all(color: Colors.grey),
+                      //           borderRadius: BorderRadius.circular(4),
+                      //         ),
+                      //       ),
+                      //     ),
+                      //   ],
+                      // ),
+                      // const SizedBox(height: 8),
+                      // Row(
+                      //   children: [
+                      //     const Text('Color del texto: '),
+                      //     const SizedBox(width: 16),
+                      //     InkWell(
+                      //       onTap: () async {
+                      //         final selectedColor =
+                      //             await _showColorPicker(context, textColor);
+                      //         if (selectedColor != null) {
+                      //           setDialogState(() {
+                      //             textColor = selectedColor;
+                      //           });
+                      //         }
+                      //       },
+                      //       child: Container(
+                      //         width: 40,
+                      //         height: 24,
+                      //         decoration: BoxDecoration(
+                      //           color: textColor,
+                      //           border: Border.all(color: Colors.grey),
+                      //           borderRadius: BorderRadius.circular(4),
+                      //         ),
+                      //       ),
+                      //     ),
+                      //   ],
+                      // ),
                     ],
                   ),
                 ),
@@ -2798,16 +2802,25 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
 
       if (formatName == formatCsv) {
         content = await _exportToCsv(selectedColumns);
+        insertActionIntoLog(
+            'Exported CSV file by ${currentUser!.employeeNumber} | ',
+            'FILE : Fodac59Report');
         final path = await _downloadFile(content, 'fodac_59_report', 'csv',
             isText: true);
         _showFileLocationDialog(path, 'CSV');
       } else if (formatName == formatJson) {
         content = await _exportToJson(selectedColumns);
+        insertActionIntoLog(
+            'Exported JSON file by ${currentUser!.employeeNumber} |',
+            ' FILE : Fodac59Report');
         final path = await _downloadFile(content, 'fodac_59_report', 'json',
             isText: true);
         _showFileLocationDialog(path, 'JSON');
       } else if (formatName == formatPdf) {
         pdfBytes = await _exportToPdf(selectedColumns);
+        insertActionIntoLog(
+            'Exported PDF file by ${currentUser!.employeeNumber} |',
+            ' FILE : Fodac59Report');
         final path =
             await _downloadFileBytes(pdfBytes, 'fodac_59_report', 'pdf');
         _showFileLocationDialog(path, 'PDF');
@@ -2816,11 +2829,14 @@ class _Fodac59ScreenState extends State<Fodac59Screen>
       setState(() {
         exportStatus = 'Exportado exitosamente como $formatName';
         isExporting = false;
+        insertActionIntoLog('Success ✅ exporting data from fodac59 |',
+            ' status: $exportStatus');
       });
     } catch (e) {
       setState(() {
         exportStatus = 'Error en la exportación: $e';
         isExporting = false;
+        insertErrorLog('Error ❌ exporting data: $e', 'Fodac59Report');
       });
 
       _showErrorNotification('Error al exportar: $e');

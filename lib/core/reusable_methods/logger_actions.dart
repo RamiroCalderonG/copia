@@ -11,15 +11,15 @@ void insertActionIntoLog(
   // var message = body.split(" ").elementAt(0);
   var message = getMessageToDisplay(body);
 
-  await FileLogger.log(tittle + message.toString());
+  await FileLogger.log('>>ACTION ℹ️ℹ️:   $tittle + ${message.toString()}');
 }
 
 void insertErrorLog(String message, String? action) async {
-  await FileLogger.log('>>ERROR: $message, $action');
+  await FileLogger.log('>>ERROR ❌❌: $message, $action');
 }
 
 void insertAlertLog(String message) async {
-  await FileLogger.log('>>ALERT: $message');
+  await FileLogger.log('>>ALERT ⚠️⚠️: $message');
 }
 
 void revealLoggerFileLocation() async {
